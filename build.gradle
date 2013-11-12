@@ -42,7 +42,7 @@ def customVersionCode = '1024';
 
 if (project.hasProperty('buildIndex')) {
     project.version = basicVersion + '.' + project.buildIndex
-    customVersionCode = ''+project.buildIndex
+    customVersionCode = '' + project.buildIndex
 } else {
     project.version = 'debug'
 }
@@ -50,6 +50,22 @@ if (project.hasProperty('buildIndex')) {
 android {
     compileSdkVersion 17
     buildToolsVersion "19.0.0"
+
+    if (project.hasProperty("signStorage")) {
+        signingConfigs {
+            release {
+                storeFile file(project.signStorage)
+                storePassword project.signStPass
+                keyAlias project.signAlias
+                keyPassword project.signKePass
+            }
+        }
+        buildTypes {
+            release {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
 
     defaultConfig {
         versionCode Integer.valueOf(customVersionCode)
