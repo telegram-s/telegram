@@ -1,30 +1,21 @@
 buildscript {
     repositories {
-        maven {
-            url "http://192.168.1.12:8080/archiva/repository/internal/"
-        }
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.3'
+        classpath 'com.android.tools.build:gradle:0.6.3+'
     }
 }
 
 repositories {
+    mavenCentral()
     maven {
         url "http://192.168.1.12:8080/archiva/repository/internal/"
     }
-    mavenCentral()
 }
 
-def basicVersion = '1.0'
-
-if (project.hasProperty('buildIndex')) {
-     project.version = basicVersion + '.' + project.buildIndex
-} else {
-     project.version = basicVersion + '-SNAPSHOT'
-}
+project.group = "org.telegram"
 
 apply plugin: 'android'
 
