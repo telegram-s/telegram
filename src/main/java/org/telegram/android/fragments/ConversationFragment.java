@@ -606,13 +606,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     } else {
                                         DownloadState state = application.getDownloadManager().getState(key);
                                         if (state == DownloadState.COMPLETED) {
-                                            MessageMediaView mediaView = (MessageMediaView) view;
-                                            Bitmap thumb = mediaView.getThumb();
-                                            if (thumb != null) {
-                                                getRootController().openImageAnimated(object.getMid(), peerType, peerId, view, thumb, mediaView.getThumbX(), mediaView.getThumbY());
-                                            } else {
-                                                getRootController().openImage(object.getMid(), peerType, peerId);
-                                            }
+                                            getRootController().openImage(object.getMid(), peerType, peerId);
                                         } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
                                             // CANCEL
                                             application.getDownloadManager().abortDownload(key);
