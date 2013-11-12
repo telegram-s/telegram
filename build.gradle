@@ -38,11 +38,11 @@ dependencies {
 }
 
 def basicVersion = '1.2'
-def customVersionCode = 1024;
+def customVersionCode = '1024';
 
 if (project.hasProperty('buildIndex')) {
     project.version = basicVersion + '.' + project.buildIndex
-    customVersionCode = project.buildIndex
+    customVersionCode = ''+project.buildIndex
 } else {
     project.version = 'debug'
 }
@@ -52,7 +52,7 @@ android {
     buildToolsVersion "19.0.0"
 
     defaultConfig {
-        versionCode customVersionCode
+        versionCode Integer.valueOf(customVersionCode)
         versionName project.version
     }
 }
