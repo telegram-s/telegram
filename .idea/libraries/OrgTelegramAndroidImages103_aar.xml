@@ -2,8 +2,6 @@
   <library name="OrgTelegramAndroidImages103.aar">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/build/exploded-bundles/OrgTelegramAndroidImages103.aar/classes.jar!/" />
-      <root url="jar://$PROJECT_DIR$/build/exploded-bundles/OrgTelegramAndroidImages103.aar/classes.jar!/" />
-      <root url="jar://$PROJECT_DIR$/build/exploded-bundles/OrgTelegramAndroidImages103.aar/classes.jar!/" />
       <root url="file://$PROJECT_DIR$/build/exploded-bundles/OrgTelegramAndroidImages103.aar/res" />
     </CLASSES>
     <JAVADOC />

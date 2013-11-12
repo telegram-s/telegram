@@ -37,7 +37,22 @@ dependencies {
     compile files('libs/gcm.jar')
 }
 
+def basicVersion = '1.2'
+def customVersionCode = 1024;
+
+if (project.hasProperty('buildIndex')) {
+    project.version = basicVersion + '.' + project.buildIndex
+    customVersionCode = project.buildIndex
+} else {
+    project.version = 'debug'
+}
+
 android {
     compileSdkVersion 17
     buildToolsVersion "19.0.0"
+
+    defaultConfig {
+        versionCode customVersionCode
+        versionName project.version
+    }
 }
