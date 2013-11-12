@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="@android:color/black">
+    <org.telegram.android.ui.PhotoViewPager android:layout_width="fill_parent"
+                                            android:layout_height="fill_parent"
+                                            android:id="@+id/imagesPager"/>
+    <LinearLayout android:layout_width="fill_parent"
+                  android:layout_height="48dp"
+                  android:layout_gravity="bottom"
+                  android:background="@color/st_photo_panel"
+                  android:id="@+id/bottomPanel">
+        <ImageButton android:layout_height="48dp"
+                     android:layout_width="60dp"
+                     android:src="@drawable/st_ic_social_share"
+                     android:background="@drawable/st_list_selector"
+                     android:id="@+id/shareButton"/>
+        <LinearLayout android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="fill_parent"
+                      android:gravity="center_vertical"
+                      android:orientation="vertical">
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:gravity="center_horizontal"
+                      android:lines="1"
+                      android:singleLine="true"
+                      android:ellipsize="end"
+                      android:textSize="17sp"
+                      android:textColor="#ffffff"
+                      android:id="@+id/senderName"/>
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="-4dp"
+                      android:gravity="center_horizontal"
+                      android:lines="1"
+                      android:singleLine="true"
+                      android:ellipsize="end"
+                      android:textSize="15sp"
+                      android:textColor="#B8BDBE"
+                      android:id="@+id/date"/>
+        </LinearLayout>
+        <ImageButton android:layout_height="48dp"
+                     android:layout_width="60dp"
+                     android:src="@drawable/st_ic_content_discard"
+                     android:background="@drawable/st_list_selector"
+                     android:id="@+id/deleteButton"/>
+    </LinearLayout>
+</FrameLayout>

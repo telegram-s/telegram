@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="lang_seconds">
+        <item quantity="zero">ولا ثانية</item>
+        <item quantity="one">ثانية واحدة</item>
+        <item quantity="two">ثانيتين</item>
+        <item quantity="few">{d} ثوانٍ</item>
+        <item quantity="many">{d} ثانية</item>
+        <item quantity="other">{d} ثانية</item>
+    </plurals>
+    <plurals name="lang_minutes">
+        <item quantity="zero">ولا دقيقة</item>
+        <item quantity="one">دقيقة</item>
+        <item quantity="two">دقيقتين</item>
+        <item quantity="few">{d} دقائق</item>
+        <item quantity="many">{d} دقيقة</item>
+        <item quantity="other">{d} دقيقة</item>
+    </plurals>
+    <plurals name="lang_hours">
+        <item quantity="zero">ولا ساعة</item>
+        <item quantity="one">ساعة واحدة</item>
+        <item quantity="two">ساعتين</item>
+        <item quantity="few">{d} ساعات</item>
+        <item quantity="many">{d} ساعة</item>
+        <item quantity="other">{d} ساعة</item>
+    </plurals>
+    <plurals name="lang_days">
+        <item quantity="zero">ولا يوم</item>
+        <item quantity="one">يوم واحد</item>
+        <item quantity="two">يومين</item>
+        <item quantity="few">{d} أيام</item>
+        <item quantity="many">{d} يوم</item>
+        <item quantity="other">{d} يوم</item>
+    </plurals>
+    <plurals name="lang_week">
+        <item quantity="zero">أسبوع</item>
+        <item quantity="one">أسبوع واحد</item>
+        <item quantity="two">أسبوعين</item>
+        <item quantity="few">{d} أسابيع</item>
+        <item quantity="many">{d} أسبوع</item>
+        <item quantity="other">{d} أسبوع</item>
+    </plurals>
+    <plurals name="lang_month">
+        <item quantity="zero">ولا شهر</item>
+        <item quantity="one">شهر واحد</item>
+        <item quantity="two">شهرين</item>
+        <item quantity="few">{d} أشهر</item>
+        <item quantity="many">{d} شهر</item>
+        <item quantity="other">{d} شهر</item>
+    </plurals>
+    <plurals name="lang_year">
+        <item quantity="zero">ولا سنة</item>
+        <item quantity="one">سنة واحدة</item>
+        <item quantity="two">سنتين</item>
+        <item quantity="few">{d} سنوات</item>
+        <item quantity="many">{d} سنة</item>
+        <item quantity="other">{d} سنة</item>
+    </plurals>
+    <plurals name="lang_more">
+        <item quantity="one">شخص آخر</item>
+        <item quantity="two">شخصين</item>
+        <item quantity="few">{d} أشخاص</item>
+        <item quantity="many">{d} شخص</item>
+        <item quantity="other">{d} شخص</item>
+    </plurals>
+</resources>

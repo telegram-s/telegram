@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <LinearLayout android:layout_height="wrap_content"
+                  android:layout_width="fill_parent" android:baselineAligned="false">
+        <LinearLayout android:layout_height="wrap_content"
+                      android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:orientation="vertical"
+                      android:background="@drawable/smileys_bg_top">
+            <LinearLayout android:layout_height="46dp"
+                          android:layout_width="fill_parent"
+                          android:layoutDirection="ltr">
+                <ImageButton android:layout_width="0dp"
+                             android:layout_weight="1"
+                             android:layout_height="fill_parent"
+                             android:src="@drawable/msg_smile_section1_normal"
+                             android:background="@android:color/transparent"
+                             android:id="@+id/smileyTab1"/>
+                <ImageButton android:layout_width="0dp"
+                             android:layout_weight="1"
+                             android:layout_height="fill_parent"
+                             android:src="@drawable/msg_smile_section2_normal"
+                             android:background="@android:color/transparent"
+                             android:id="@+id/smileyTab2"/>
+                <ImageButton android:layout_width="0dp"
+                             android:layout_weight="1"
+                             android:layout_height="fill_parent"
+                             android:src="@drawable/msg_smile_section3_normal"
+                             android:background="@android:color/transparent"
+                             android:id="@+id/smileyTab3"/>
+                <ImageButton android:layout_width="0dp"
+                             android:layout_weight="1"
+                             android:layout_height="fill_parent"
+                             android:src="@drawable/msg_smile_section5_normal"
+                             android:background="@android:color/transparent"
+                             android:id="@+id/smileyTab4"/>
+                <ImageButton android:layout_width="0dp"
+                             android:layout_weight="1"
+                             android:layout_height="fill_parent"
+                             android:src="@drawable/msg_smile_section4_normal"
+                             android:background="@android:color/transparent"
+                             android:id="@+id/smileyTab5"/>
+            </LinearLayout>
+            <com.viewpagerindicator.UnderlinePageIndicator android:layout_height="2dp"
+                                                           android:layout_width="fill_parent"
+                                                           android:background="@color/st_smileys_div"
+                                                           android:id="@+id/pageIndicator"/>
+        </LinearLayout>
+        <LinearLayout android:layout_height="48dp"
+                      android:layout_width="48dp"
+                      android:orientation="vertical">
+            <ImageButton android:layout_height="46dp"
+                         android:layout_width="48dp"
+                         android:paddingTop="2dp"
+                         android:background="@drawable/smileys_bg_back"
+                         android:id="@+id/backspaceButton"
+                         android:src="@drawable/holo_dark_content_backspace"/>
+            <View android:layout_width="fill_parent"
+                  android:layout_height="2dp"
+                  android:background="@color/st_smileys_div"/>
+        </LinearLayout>
+    </LinearLayout>
+    <android.support.v4.view.ViewPager
+            android:layout_height="fill_parent"
+            android:layout_width="fill_parent"
+            android:background="@drawable/smileys_bg"
+            android:id="@+id/smileysPages"/>
+</LinearLayout>

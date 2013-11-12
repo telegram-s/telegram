@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="@android:color/white">
+    <FrameLayout android:layout_height="200dp"
+                 android:layout_width="fill_parent"
+                 android:paddingTop="16dp"
+                 android:id="@+id/iconContainer">
+        <ImageView android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:id="@+id/intro0"
+                   android:layout_gravity="center"
+                   android:src="@drawable/st_intro_icon0"/>
+        <ImageView android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center"
+                   android:id="@+id/intro1"
+                   android:src="@drawable/st_intro_icon1"/>
+        <ImageView android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center"
+                   android:id="@+id/intro2"
+                   android:src="@drawable/st_intro_icon2"/>
+        <ImageView android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center"
+                   android:id="@+id/intro3"
+                   android:src="@drawable/st_intro_icon3"/>
+        <ImageView android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center"
+                   android:id="@+id/intro4"
+                   android:src="@drawable/st_intro_icon4"/>
+        <ImageView android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center"
+                   android:id="@+id/intro5"
+                   android:src="@drawable/st_intro_icon5"/>
+    </FrameLayout>
+
+    <android.support.v4.view.ViewPager android:layout_width="fill_parent"
+                                       android:layout_height="fill_parent"
+                                       android:paddingBottom="200dp"
+                                       android:layoutDirection="ltr"
+                                       android:id="@+id/tourText"/>
+
+    <LinearLayout android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:layout_gravity="bottom">
+        <com.viewpagerindicator.UnderlinePageIndicator
+                android:layout_width="fill_parent"
+                android:layout_height="3dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:background="@color/st_intro_progress_bg"
+                android:id="@+id/pageIndicator"/>
+        <Button android:layout_width="fill_parent"
+                android:layout_height="80dp"
+                android:layout_marginTop="-4dp"
+                android:background="@android:color/transparent"
+                android:text="@string/st_tour_start_messaging"
+                android:textSize="21sp"
+                android:textColor="@color/st_intro_button"
+                android:id="@+id/openAppButton"/>
+    </LinearLayout>
+</FrameLayout>

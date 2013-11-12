@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@android:color/white"
+              android:id="@+id/mainContainer"
+              android:paddingTop="45dp">
+    <FrameLayout android:layout_width="fill_parent"
+                 android:layout_height="wrap_content">
+        <EditText android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:minHeight="52dp"
+                  android:maxLines="3"
+                  android:layout_marginLeft="5dp"
+                  android:layout_marginRight="5dp"
+                  android:textSize="16sp"
+                  android:hint="@string/st_new_group_hint"
+                  android:textColorHint="#A6A6A6"
+                  android:paddingBottom="8dp"
+                  android:paddingRight="54dp"
+                  android:imeOptions="flagNoExtractUi"
+                  android:id="@+id/inputEdit"/>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="52dp"
+                  android:layout_gravity="right|top"
+                  android:layout_marginRight="16dp"
+                  android:gravity="center_vertical"
+                  android:textColor="#A6A6A6"
+                  android:textSize="16sp"
+                  android:id="@+id/counter"
+                  android:text="0/100"/>
+    </FrameLayout>
+    <FrameLayout android:layout_width="fill_parent"
+                 android:layout_height="0dp"
+                 android:layout_weight="1">
+
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="top|center_horizontal"
+                  android:layout_marginTop="32dp"
+                  android:textColor="@color/st_empty_text"
+                  android:textSize="19sp"
+                  android:id="@+id/empty"
+                  android:text="@string/st_no_contacts"/>
+
+        <com.extradea.framework.images.ui.ImagingListView android:layout_height="fill_parent"
+                                                          android:layout_width="fill_parent"
+                                                          android:paddingTop="4dp"
+                                                          android:paddingLeft="@dimen/fast_scroll_padding_left"
+                                                          android:paddingRight="@dimen/fast_scroll_padding_right"
+                                                          android:scrollbarStyle="insideOverlay"
+                                                          android:scrollbars="none"
+                                                          android:clipToPadding="false"
+                                                          android:fastScrollEnabled="true"
+                                                          android:fastScrollAlwaysVisible="true"
+                                                          android:id="@+id/contacts"/>
+    </FrameLayout>
+</LinearLayout>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+             android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:minHeight="90dp">
+    <View android:layout_width="fill_parent"
+          android:layout_height="1px"
+          android:layout_gravity="top"
+          android:background="@color/st_divider"/>
+
+    <TextView android:layout_height="wrap_content"
+              android:layout_width="wrap_content"
+              android:layout_marginTop="16dp"
+              android:layout_gravity="top|center_horizontal"
+              android:textColor="@color/st_grey_text"
+              android:id="@+id/loadingMore"
+              android:text="@string/st_loading_more"
+              android:textSize="16sp"
+              ext:customFont="light"/>
+
+    <TextView android:layout_height="wrap_content"
+              android:layout_width="wrap_content"
+              android:layout_marginTop="16dp"
+              android:layout_gravity="top|center_horizontal"
+              android:textColor="@color/st_grey_text"
+              android:id="@+id/dialogsCount"
+              android:text="74 dialogs"
+              android:textSize="16sp"
+              ext:customFont="light"/>
+
+    <Button android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/st_grey_text"
+            android:text="@string/st_try_again"
+            android:id="@+id/tryAgain"/>
+</FrameLayout>

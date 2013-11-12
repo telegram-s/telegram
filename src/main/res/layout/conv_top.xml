@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:minHeight="48dp">
+    <TextView android:layout_height="wrap_content"
+              android:layout_width="wrap_content"
+              android:layout_marginTop="10dp"
+              android:layout_marginBottom="10dp"
+              android:layout_marginLeft="18dp"
+              android:layout_marginRight="18dp"
+              android:layout_gravity="center_horizontal"
+              android:id="@+id/loadingMore"
+              android:textColor="#FFFFFF"
+              android:textSize="15sp"
+              android:text="@string/st_loading_more"
+              android:background="@drawable/st_bubble_service"/>
+
+    <TextView android:layout_height="wrap_content"
+              android:layout_width="wrap_content"
+              android:layout_gravity="bottom|center_horizontal"
+              android:layout_marginTop="10dp"
+              android:layout_marginBottom="10dp"
+              android:layout_marginLeft="18dp"
+              android:layout_marginRight="18dp"
+              android:id="@+id/messagesCount"
+              android:textColor="#FFFFFF"
+              android:textSize="15sp"
+              android:text="74 messages"
+              android:background="@drawable/st_bubble_service"/>
+
+    <Button android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/st_try_again"
+            android:textColor="#7C90A2"
+            android:id="@+id/tryAgain"/>
+</FrameLayout>

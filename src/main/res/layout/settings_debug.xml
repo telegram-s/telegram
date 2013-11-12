@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="60dp"
+            android:background="@android:color/white">
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:paddingLeft="16dp"
+                  android:paddingRight="16dp">
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Do Crash"
+                android:id="@+id/crashApp"/>
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Export PhoneBook"
+                android:id="@+id/phoneBook"/>
+
+        <CheckBox android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Force page animations"
+                  android:id="@+id/pageAnimations"/>
+
+        <CheckBox android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Enable logging"
+                  android:id="@+id/enableLogging"/>
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Export Logs"
+                android:id="@+id/exportLogs"/>
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Clear Logs"
+                android:id="@+id/clearLogs"/>
+
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Dialogs: list layer type"/>
+
+        <Spinner android:layout_width="fill_parent"
+                 android:layout_height="wrap_content"
+                 android:id="@+id/dialogListLayer"/>
+
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Dialogs: item layer type"/>
+
+        <Spinner android:layout_width="fill_parent"
+                 android:layout_height="wrap_content"
+                 android:id="@+id/dialogListItemLayer"/>
+
+
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Conv: list layer type"/>
+
+        <Spinner android:layout_width="fill_parent"
+                 android:layout_height="wrap_content"
+                 android:id="@+id/convListLayer"/>
+
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Conv: item layer type"/>
+
+        <Spinner android:layout_width="fill_parent"
+                 android:layout_height="wrap_content"
+                 android:id="@+id/convListItemLayer"/>
+    </LinearLayout>
+</ScrollView>

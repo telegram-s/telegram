@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<org.telegram.android.ui.RtlLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                         xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+                                         android:layout_width="match_parent"
+                                         android:layout_height="match_parent"
+                                         android:paddingTop="4dp"
+                                         android:paddingBottom="4dp"
+                                         android:background="@drawable/st_list_selector">
+
+    <ImageView android:layout_height="50dp"
+               android:layout_width="50dp"
+               android:scaleType="center"
+               android:src="@drawable/st_contacts_share"
+               android:layout_marginLeft="4dp"
+               android:layout_marginRight="4dp"/>
+
+    <LinearLayout android:layout_height="fill_parent"
+                  android:layout_width="0dp"
+                  android:layout_marginLeft="4dp"
+                  android:layout_marginRight="4dp"
+                  ext:layout_weight="1"
+                  android:orientation="vertical"
+                  android:gravity="center_vertical">
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="fill_parent"
+                  android:textSize="19sp"
+                  android:textColor="@color/st_blue_bright"
+                  android:singleLine="true"
+                  android:lines="1"
+                  android:text="@string/st_contacts_invite"
+                  android:ellipsize="end"/>
+    </LinearLayout>
+</org.telegram.android.ui.RtlLinearLayout>

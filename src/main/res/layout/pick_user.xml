@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout android:layout_width="fill_parent"
+             android:background="@android:color/white"
+             android:paddingTop="45dp"
+             android:layout_height="fill_parent"
+             xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/mainContainer">
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="top|center_horizontal"
+              android:layout_marginTop="32dp"
+              android:textColor="@color/st_empty_text"
+              android:textSize="19sp"
+              android:id="@+id/empty"
+              android:text="@string/st_no_contacts"/>
+
+    <com.extradea.framework.images.ui.ImagingListView android:layout_height="fill_parent"
+                                                      android:layout_width="fill_parent"
+                                                      android:paddingTop="4dp"
+                                                      android:paddingLeft="@dimen/fast_scroll_padding_left"
+                                                      android:paddingRight="@dimen/fast_scroll_padding_right"
+                                                      android:scrollbarStyle="insideOverlay"
+                                                      android:scrollbars="none"
+                                                      android:clipToPadding="false"
+                                                      android:fastScrollEnabled="true"
+                                                      android:fastScrollAlwaysVisible="true"
+                                                      android:id="@+id/contacts"/>
+
+    <ProgressBar android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_gravity="center"
+                 android:layout_marginTop="24dp"
+                 android:id="@+id/loading"
+                 style="@style/Widget.Sherlock.Light.ProgressBar"/>
+</FrameLayout>

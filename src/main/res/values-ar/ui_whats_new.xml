@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whats_new_secret_title">تم إضافة المحادثات السرية</string>
+    <string name="whats_new_secret_hint">يمكنك إنشاء محادثة سرية من خلال القائمة الرئيسية أو عن طريق صفحة معلومات جهة الاتصال.</string>
+    <string name="whats_new_secret_0">يستخدم التشفير من البداية للنهاية</string>
+    <string name="whats_new_secret_1">لا تترك أثرًا في خوادمنا</string>
+    <string name="whats_new_secret_2">تمتلك عداد للتدمير الذاتي</string>
+    <string name="whats_new_secret_3">تمتلك عداد للتدمير الذاتي</string>
+    <string name="whats_new_secret_4">لا تسمح بتحويل الرسائل</string>
+
+    <string name="whats_new_arabic_title">دعم الواجهة العربية بشكل كامل</string>
+    <string name="whats_new_arabic_hint">إذا كان لديك مشاكل مع الواجهة العربية، يمكنك كتابة آرائك ومقترحاتك لفريق الدعم الفني عن طريق صفحة الإعدادات في البرنامج.</string>
+    <string name="whats_new_arabic_0">دعم الواجهة من اليمين لليسار لأنظمة الأندرويد ٤.٠ وما بعد.</string>
+    <string name="whats_new_arabic_1">دعم الواجهة الانعكاسية لأنظمة الأندرويد ٤.٢ وما بعد.</string>
+    <string name="whats_new_arabic_2">دعم الأرقام الهندية بشكل كامل.</string>
+</resources>

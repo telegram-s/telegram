@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@android:color/white"
+              android:paddingTop="48dp"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp"
+              android:id="@+id/mainContainer">
+
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="16dp"
+              android:layout_marginLeft="8dp"
+              android:layout_marginRight="8dp"
+              android:layout_marginBottom="2dp"
+              android:textColor="@color/st_blue_normal"
+              android:textSize="@dimen/section_header_text"
+              android:textStyle="bold"
+              android:text="@string/st_new_group_complete_title"/>
+    <View android:layout_width="fill_parent"
+          android:layout_height="1dp"
+          android:background="@color/st_blue_normal"/>
+
+    <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
+                                             android:layout_height="wrap_content"
+                                             android:layout_marginTop="10dp">
+        <FrameLayout android:layout_height="108dp"
+                     android:layout_width="108dp"
+                     android:layout_marginRight="10dp"
+                     android:layout_marginLeft="10dp"
+                     ext:layout_gravity="center_vertical">
+            <com.extradea.framework.images.ui.FastWebImageView android:layout_height="fill_parent"
+                                                               android:layout_width="fill_parent"
+                                                               android:id="@+id/avatar"/>
+            <ImageButton android:layout_width="fill_parent"
+                         android:layout_height="fill_parent"
+                         android:id="@+id/changeAvatar"
+                         android:background="@drawable/st_photo_spinner"/>
+        </FrameLayout>
+
+        <EditText android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  ext:layout_gravity="center_vertical"
+                  android:hint="@string/st_title"
+                  android:textColorHint="#A3A3A3"
+                  android:paddingLeft="15dp"
+                  android:paddingRight="15dp"
+                  android:paddingBottom="15dp"
+                  android:textSize="19sp"
+                  android:maxLines="3"
+                  android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+                  android:imeOptions="actionDone"
+                  android:id="@+id/title"/>
+
+    </org.telegram.android.ui.RtlLinearLayout>
+</LinearLayout>

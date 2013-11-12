@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content">
+    <org.telegram.android.ui.RtlLinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:id="@+id/mainContainer">
+
+        <com.extradea.framework.images.ui.FastWebImageView android:layout_width="48dp"
+                                                           android:layout_height="48dp"
+                                                           android:layout_marginRight="8dp"
+                                                           android:layout_marginLeft="8dp"
+                                                           android:id="@+id/avatar"/>
+
+        <LinearLayout android:layout_height="wrap_content"
+                      android:layout_width="0dp"
+                      ext:layout_weight="1"
+                      ext:layout_gravity="center_vertical"
+                      android:orientation="vertical"
+                      android:id="@+id/container">
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:drawablePadding="4dp"
+                      android:textSize="17sp"
+                      android:singleLine="true"
+                      android:lines="1"
+                      android:id="@+id/name"/>
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="-2dp"
+                      android:textSize="15sp"
+                      android:textColor="#000000"
+                      android:singleLine="true"
+                      android:lines="1"
+                      android:id="@+id/title"/>
+        </LinearLayout>
+
+
+        <ImageView android:layout_height="48dp"
+                   android:layout_width="48dp"
+                   android:scaleType="center"
+                   android:layout_marginLeft="6dp"
+                   android:src="@drawable/holo_light_cancel"
+                   android:id="@+id/closeButton"/>
+    </org.telegram.android.ui.RtlLinearLayout>
+</FrameLayout>

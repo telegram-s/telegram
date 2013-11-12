@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingTop="48dp"
+              android:background="@android:color/white"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp">
+
+    <LinearLayout android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="14dp"
+                  android:layout_marginLeft="8dp">
+        <com.extradea.framework.images.ui.FastWebImageView android:layout_width="64dp"
+                                                           android:layout_height="64dp"
+                                                           android:layout_marginRight="10dp"
+                                                           android:id="@+id/avatar"/>
+
+        <TextView android:layout_width="0dp"
+                  android:layout_height="wrap_content"
+                  android:layout_weight="1"
+                  android:textSize="19sp"
+                  android:singleLine="true"
+                  android:lines="1"
+                  android:ellipsize="end"
+                  android:layout_gravity="center_vertical"
+                  android:textColor="@color/st_black_text"
+                  android:id="@+id/phone"/>
+    </LinearLayout>
+
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="14dp"
+              android:layout_marginLeft="8dp"
+              android:layout_marginRight="8dp"
+              android:layout_marginBottom="2dp"
+              android:textColor="@color/st_blue_normal"
+              android:textSize="@dimen/section_header_text"
+              android:textStyle="bold"
+              android:text="@string/st_contacts_add_name_title"/>
+    <View android:layout_width="fill_parent"
+          android:layout_height="1dp"
+          android:background="@color/st_blue_normal"/>
+
+    <EditText android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="-4dp"
+              android:layout_marginRight="-4dp"
+              android:layout_gravity="center_vertical"
+              android:hint="@string/st_first_name"
+              android:textColorHint="#A3A3A3"
+              android:paddingLeft="15dp"
+              android:paddingRight="15dp"
+              android:paddingBottom="15dp"
+              android:layout_marginTop="15dp"
+              android:textSize="19sp"
+              android:lines="1"
+              android:singleLine="true"
+              android:inputType="textCapSentences|textAutoCorrect"
+              android:imeOptions="actionNext|flagNoExtractUi"
+              android:id="@+id/firstName"/>
+
+    <EditText android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center_vertical"
+              android:layout_marginLeft="-4dp"
+              android:layout_marginRight="-4dp"
+              android:layout_marginTop="10dp"
+              android:hint="@string/st_last_name"
+              android:textColorHint="#A3A3A3"
+              android:paddingLeft="15dp"
+              android:paddingRight="15dp"
+              android:paddingBottom="15dp"
+              android:textSize="19sp"
+              android:lines="1"
+              android:singleLine="true"
+              android:inputType="textCapSentences|textAutoCorrect"
+              android:imeOptions="actionDone|flagNoExtractUi"
+              android:id="@+id/lastName"/>
+</LinearLayout>

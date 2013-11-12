@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/done"
+          android:icon="@drawable/st_bar_ic_done"
+          android:title="Done"
+          android:showAsAction="always"/>
+</menu>

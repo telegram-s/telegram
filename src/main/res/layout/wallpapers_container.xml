@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="@android:color/white">
+    <com.extradea.framework.images.ui.FastWebImageView android:layout_width="fill_parent"
+                                                       android:layout_height="fill_parent"
+                                                       android:id="@+id/preview"/>
+    <Gallery android:layout_width="fill_parent"
+             android:layout_height="100dp"
+             android:layout_marginBottom="48dp"
+             android:layout_gravity="bottom"
+             android:spacing="0dp"
+             android:unselectedAlpha="255"
+             android:id="@+id/previewGallery"/>
+    <LinearLayout android:layout_width="fill_parent"
+                  android:layout_height="48dp"
+                  android:layout_gravity="bottom"
+                  android:background="@android:color/white">
+        <Button android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center"
+                android:text="@string/st_cancel_caps"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                android:id="@+id/cancel"
+                android:background="@drawable/st_list_selector"/>
+        <View android:layout_height="28dp"
+              android:layout_width="1px"
+              android:layout_gravity="center_vertical"
+              android:background="@color/st_div"/>
+        <LinearLayout android:layout_width="0dp"
+                      android:layout_weight="1"
+                      android:layout_height="fill_parent"
+                      android:layout_gravity="center_vertical"
+                      android:gravity="center_horizontal"
+                      android:id="@+id/setWallpaper"
+                      android:background="@drawable/st_list_selector"
+                      android:layoutDirection="ltr">
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_gravity="center_vertical"
+                       android:src="@drawable/st_bar_ic_done_gray"/>
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_vertical"
+                      android:textColor="#000000"
+                      android:textSize="18sp"
+                      android:text="@string/st_set_caps"/>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

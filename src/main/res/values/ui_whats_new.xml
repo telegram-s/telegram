@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whats_new_secret_title">Added secret chats</string>
+    <string name="whats_new_secret_hint">Start a secret chat from the "Write to" menu or from a contact\'s profile.</string>
+    <string name="whats_new_secret_0">Use end-to-end encryption</string>
+    <string name="whats_new_secret_1">Leave no trace on our servers</string>
+    <string name="whats_new_secret_2">Have a self-destruct timer</string>
+    <string name="whats_new_secret_3">Do not allow forwarding</string>
+
+    <string name="whats_new_arabic_title">Added arabic localization</string>
+    <string name="whats_new_arabic_hint">If you have any problems with the arabic localization, please tell our support
+        team in Settings — Ask a question.
+    </string>
+    <string name="whats_new_arabic_0">Full RTL support on android 4.0+</string>
+    <string name="whats_new_arabic_1">Mirrored interface on android 4.2+</string>
+    <string name="whats_new_arabic_2">Full support for eastern arabic numberals</string>
+</resources>

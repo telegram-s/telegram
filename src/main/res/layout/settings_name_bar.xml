@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <Button android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="fill_parent"
+            android:paddingLeft="3dp"
+            android:text="@string/st_cancel_caps"
+            android:textColor="#111111"
+            android:textSize="12sp"
+            android:background="@drawable/st_list_selector"
+            android:id="@+id/dialogCancel"/>
+    <View android:layout_height="28dp"
+          android:layout_width="1px"
+          android:layout_gravity="center_vertical"
+          android:background="@color/st_div"/>
+    <FrameLayout android:layout_width="0dp"
+                 android:layout_weight="1"
+                 android:layout_height="fill_parent"
+                 android:paddingRight="3dp"
+                 android:clickable="true"
+                 android:background="@drawable/st_list_selector"
+                 android:id="@+id/dialogDone">
+        <TextView android:layout_width="wrap_content"
+                  android:layout_gravity="center"
+                  android:layout_height="wrap_content"
+                  android:drawableLeft="@drawable/st_bar_ic_done_gray"
+                  android:drawablePadding="8dp"
+                  android:gravity="center"
+                  android:text="@string/st_edit_title_done"
+                  android:textColor="#111111"
+                  android:textSize="12sp"/>
+    </FrameLayout>
+</LinearLayout>

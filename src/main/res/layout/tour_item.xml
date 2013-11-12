@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp"
+              android:gravity="top">
+
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:text="Telegram"
+              android:textSize="40sp"
+              ext:customFont="light"
+              android:textColor="#000000"
+              android:id="@+id/title"/>
+
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="10dp"
+              android:gravity="center_horizontal|top"
+              android:text="Telegram asd asd asd asd asd asd as dasd asd"
+              android:textSize="18sp"
+              ext:customFont="light"
+              android:textColor="#000000"
+              android:id="@+id/message"/>
+</LinearLayout>

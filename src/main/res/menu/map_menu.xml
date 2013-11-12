@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="My location"
+          android:icon="@drawable/st_bar_ic_location"
+          android:showAsAction="always"
+          android:id="@+id/moveToMyLocation"/>
+    <item android:title="Menu"
+          android:showAsAction="always"
+          android:icon="@drawable/st_bar_ic_other">
+        <menu>
+            <item android:title="General"
+                  android:id="@+id/generalMap"/>
+            <item android:title="Hybrid"
+                  android:id="@+id/hybridMap"/>
+            <item android:title="Satellite"
+                  android:id="@+id/satelliteMap"/>
+        </menu>
+    </item>
+</menu>

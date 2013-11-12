@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp"
+              android:paddingBottom="18dp">
+    <View android:layout_width="fill_parent"
+          android:layout_height="1px"
+          android:background="@color/st_div"/>
+    <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
+                                             android:layout_height="60dp"
+                                             android:background="@drawable/st_list_selector"
+                                             android:clickable="true"
+                                             android:id="@+id/addMember"
+                                             ext:gravity="center_vertical">
+        <ImageView android:layout_width="50dp"
+                   android:layout_height="50dp"
+                   android:layout_marginRight="10dp"
+                   android:src="@drawable/st_ic_add_member"/>
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="fill_parent"
+                  android:textSize="19sp"
+                  android:textColor="@color/st_black_text"
+                  android:singleLine="true"
+                  android:lines="1"
+                  android:ellipsize="end"
+                  android:text="@string/st_edit_dialog_add_member"/>
+    </org.telegram.android.ui.RtlLinearLayout>
+    <View android:layout_width="fill_parent"
+          android:layout_height="1px"
+          android:background="@color/st_div"/>
+    <Button android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/st_btn"
+            android:textColor="@color/st_black_text"
+            android:textSize="19sp"
+            android:text="@string/st_edit_dialog_delete"
+            android:id="@+id/leaveChat"/>
+</LinearLayout>

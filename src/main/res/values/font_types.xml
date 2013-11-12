@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomFonts">
+        <attr name="customFont">
+            <enum name="regular" value=" 0"/>
+            <enum name="thin" value=" 1"/>
+            <enum name="thin_italic" value=" 2"/>
+            <enum name="medium" value=" 3"/>
+            <enum name="medium_italic" value=" 4"/>
+            <enum name="light" value=" 5"/>
+            <enum name="light_italic" value=" 6"/>
+            <enum name="italic" value=" 7"/>
+            <enum name="condensed" value=" 8"/>
+            <enum name="condensed_italic" value=" 9"/>
+            <enum name="bold" value=" 10"/>
+            <enum name="bold_condensed" value=" 11"/>
+            <enum name="bold_condensed_italic" value=" 12"/>
+            <enum name="bold_italic" value=" 13"/>
+            <enum name="black" value=" 14"/>
+            <enum name="black_italic" value=" 15"/>
+        </attr>
+    </declare-styleable>
+</resources>

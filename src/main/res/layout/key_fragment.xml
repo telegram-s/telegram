@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingTop="48dp">
+    <ScrollView android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+        <LinearLayout android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical">
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_gravity="center_horizontal"
+                       android:layout_marginTop="32dp"
+                       android:layout_marginBottom="26dp"
+                       android:scaleType="fitCenter"
+                       android:id="@+id/keyImage"/>
+
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginLeft="16dp"
+                      android:layout_marginRight="16dp"
+                      android:text="This image is a visualisation of encryption keys for secret chat with Alexander."
+                      android:lineSpacingMultiplier="0.99"
+                      android:gravity="center"
+                      android:textColor="#919191"
+                      android:textSize="16sp"
+                      ext:customFont="light"
+                      android:id="@+id/infoMessage1"/>
+
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="4dp"
+                      android:layout_marginLeft="16dp"
+                      android:layout_marginRight="16dp"
+                      android:text="If this image looks same on Alexander's phone your chat is 200% secure."
+                      android:lineSpacingMultiplier="0.99"
+                      android:gravity="center"
+                      android:textColor="#919191"
+                      android:textSize="16sp"
+                      ext:customFont="light"
+                      android:id="@+id/infoMessage2"/>
+
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="4dp"
+                      android:layout_marginLeft="16dp"
+                      android:layout_marginRight="16dp"
+                      android:layout_marginBottom="8dp"
+                      android:gravity="center"
+                      android:textColor="#919191"
+                      android:textSize="16sp"
+                      ext:customFont="light"
+                      android:text="Learn more at telegram.org"
+                      android:linksClickable="true"
+                      android:id="@+id/infoMessage3"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

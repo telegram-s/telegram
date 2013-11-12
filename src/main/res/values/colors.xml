@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="st_chat_bg">#D6E4EF</color>
+    <color name="st_blue_bright">#006FC8</color>
+    <color name="st_blue_normal">#3D8CD4</color>
+    <color name="st_blue_dark">#006DCB</color>
+    <color name="st_black_text">#010101</color>
+    <color name="st_empty_conv">#ffffff</color>
+    <color name="st_grey_text">#808080</color>
+    <color name="st_msg_tex_color">#000000</color>
+    <color name="st_msg_out_time_color">#70B15C</color>
+    <color name="st_msg_in_time_color">#A1AAB3</color>
+    <color name="st_msg_image_time_color">#CECECE</color>
+    <color name="st_msg_image_time_bg_color">#99000000</color>
+    <color name="st_smileys_div">#151515</color>
+    <color name="st_smileys_bg">#29313C</color>
+    <color name="st_smileys_bg_top">#232932</color>
+    <color name="st_divider">#EBEBEB</color>
+    <color name="st_login_line">#CCCCCC</color>
+    <color name="st_empty_text">#787878</color>
+    <color name="st_div">#DADADA</color>
+    <color name="st_vert_div">#E8E8E8</color>
+    <color name="st_photo_panel">#B2000000</color>
+    <color name="st_contact_panel">#54385166</color>
+
+    <color name="st_intro_def_bg">#f2f2f2</color>
+    <color name="st_intro_progress_bg">#ebebeb</color>
+</resources>

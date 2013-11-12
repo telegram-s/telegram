@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:keepScreenOn="true">
+
+    <FrameLayout android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+                 android:id="@+id/mainContainer"/>
+
+    <org.telegram.android.views.VideoTimerView android:layout_width="fill_parent"
+                                               android:layout_height="fill_parent"
+                                               android:id="@+id/videoTimer"/>
+
+
+    <ImageView android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:src="@drawable/video_shutter"
+               android:layout_gravity="right|center_vertical"
+               android:id="@+id/recordButton"/>
+</FrameLayout>

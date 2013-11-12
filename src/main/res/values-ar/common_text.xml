@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lang_common_typing">جاري الكتابة...</string>
+    <string name="lang_common_typing_single">{content} يكتب...</string>
+    <string name="lang_common_typing_multiple">{content} يكتبون...</string>
+    <string name="lang_common_and">{content1}و{content2}</string>
+    <string name="lang_common_and_short">{content1}و{content2}</string>
+    <string name="lang_common_online_templates">آخر ظهور {time}</string>
+    <string name="lang_common_online_now">قبل قليل</string>
+    <string name="lang_common_online_ago">{time} مسبقًا</string>
+</resources>

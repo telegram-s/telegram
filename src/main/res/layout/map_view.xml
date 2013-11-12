@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+             android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+    <com.google.android.gms.maps.MapView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
+                                             android:layout_height="wrap_content"
+                                             android:paddingLeft="12dp"
+                                             android:paddingRight="12dp"
+                                             android:orientation="horizontal"
+                                             android:layout_gravity="bottom"
+                                             android:background="@drawable/st_location_panel"
+                                             android:paddingTop="4dp"
+                                             android:gravity="center_vertical"
+                                             android:id="@+id/bottomPanel">
+        <com.extradea.framework.images.ui.FastWebImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:id="@+id/avatar"/>
+
+        <LinearLayout android:layout_width="0dp"
+                      ext:layout_weight="1"
+                      android:layout_height="wrap_content"
+                      android:paddingLeft="12dp"
+                      android:paddingRight="12dp"
+                      android:orientation="vertical"
+                      android:gravity="center_vertical">
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="1dp"
+                      android:lines="1"
+                      android:singleLine="true"
+                      android:textSize="20sp"
+                      android:textColor="#222222"
+                      android:id="@+id/name"/>
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:lines="1"
+                      android:singleLine="true"
+                      android:textSize="16sp"
+                      android:textColor="#999999"
+                      android:id="@+id/location"/>
+        </LinearLayout>
+    </org.telegram.android.ui.RtlLinearLayout>
+</FrameLayout>

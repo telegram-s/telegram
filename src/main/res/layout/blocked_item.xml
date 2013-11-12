@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<org.telegram.android.ui.RtlLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                         xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+                                         android:orientation="horizontal"
+                                         android:layout_width="match_parent"
+                                         android:layout_height="match_parent"
+                                         android:paddingTop="8dp"
+                                         android:paddingBottom="8dp">
+
+    <com.extradea.framework.images.ui.FastWebImageView android:layout_height="50dp"
+                                                       android:layout_width="50dp"
+                                                       android:id="@+id/avatar"
+                                                       android:layout_marginRight="8dp"
+                                                       android:layout_marginLeft="8dp"/>
+
+    <LinearLayout android:layout_height="fill_parent"
+                  android:layout_width="0dp"
+                  ext:layout_weight="1"
+                  android:orientation="vertical"
+                  android:gravity="center_vertical">
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="fill_parent"
+                  android:textSize="19sp"
+                  android:textColor="@color/st_black_text"
+                  android:singleLine="true"
+                  android:lines="1"
+                  android:id="@+id/name"/>
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="fill_parent"
+                  android:layout_marginTop="-1dp"
+                  android:textSize="16sp"
+                  android:textColor="@color/st_grey_text"
+                  android:maxLines="1"
+                  android:singleLine="true"
+                  ext:customFont="light"
+                  android:id="@+id/phone"/>
+    </LinearLayout>
+</org.telegram.android.ui.RtlLinearLayout>

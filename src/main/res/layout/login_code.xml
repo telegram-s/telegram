@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@android:color/white">
+    <LinearLayout android:focusable="true" android:focusableInTouchMode="true"
+                  android:layout_width="0px" android:layout_height="0px"
+                  android:id="@+id/focuser"/>
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:fadingEdge="none"
+            android:id="@+id/containerScroll">
+        <LinearLayout android:orientation="vertical"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:paddingTop="22dp"
+                      android:paddingLeft="19dp"
+                      android:paddingRight="19dp">
+            <TextView android:layout_height="wrap_content"
+                      android:layout_width="fill_parent"
+                      android:textSize="24sp"
+                      android:text="@string/st_login_code_title"
+                      ext:customFont="light"
+                      android:paddingBottom="6dp"
+                      android:textColor="@color/st_black_text"/>
+            <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
+                                                     android:layout_height="wrap_content">
+                <View android:layout_width="0dp"
+                      android:layout_height="3dp"
+                      ext:layout_weight="1"
+                      android:background="@color/st_blue_bright"/>
+                <View android:layout_width="0dp"
+                      android:layout_height="3dp"
+                      ext:layout_weight="2"
+                      android:background="@color/st_login_line"/>
+            </org.telegram.android.ui.RtlLinearLayout>
+
+            <FrameLayout android:layout_width="fill_parent"
+                         android:layout_height="0dp"
+                         android:layout_weight="1">
+                <LinearLayout android:layout_width="fill_parent"
+                              android:layout_height="fill_parent"
+                              android:orientation="vertical"
+                              android:id="@+id/content">
+                    <TextView android:layout_height="wrap_content"
+                              android:layout_width="wrap_content"
+                              android:textSize="18sp"
+                              ext:customFont="light"
+                              android:paddingTop="8dp"
+                              android:paddingBottom="42dp"
+                              android:textColor="@color/st_black_text"
+                              android:id="@+id/message"/>
+
+                    <EditText android:layout_width="228dp"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center_horizontal"
+                              android:hint="@string/st_login_code_hint_code"
+                              android:textColorHint="#A3A3A3"
+                              android:paddingLeft="15dp"
+                              android:paddingRight="15dp"
+                              android:paddingBottom="15dp"
+                              android:textSize="19sp"
+                              android:gravity="center"
+                              android:inputType="number"
+                              android:id="@+id/code"/>
+
+                    <TextView android:layout_height="wrap_content"
+                              android:layout_width="wrap_content"
+                              android:layout_gravity="center_horizontal"
+                              android:textSize="18sp"
+                              ext:customFont="light"
+                              android:paddingTop="26dp"
+                              android:paddingBottom="8dp"
+                              android:textColor="@color/st_black_text"
+                              android:id="@+id/counter"/>
+                </LinearLayout>
+
+                <ProgressBar android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:layout_gravity="center"
+                             android:clickable="true"
+                             android:id="@+id/progress"
+                             android:visibility="gone"
+                             style="@style/Widget.Sherlock.Light.ProgressBar"/>
+            </FrameLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
+                                             android:layout_height="wrap_content"
+                                             ext:orientation="horizontal"
+                                             android:paddingLeft="19dp"
+                                             android:paddingRight="19dp">
+
+        <Button android:layout_height="48dp"
+                android:layout_width="82dp"
+                android:layout_marginBottom="6dp"
+                ext:layout_gravity="left"
+                android:text="@string/st_login_back"
+                android:textSize="19sp"
+                android:background="@android:color/transparent"
+                android:textColor="@color/st_grey_text"
+                android:onClick="onBack"
+                android:id="@+id/doBack"/>
+
+        <View android:layout_width="0dp"
+              android:layout_height="0dp"
+              ext:layout_weight="1"/>
+
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginBottom="6dp"
+                ext:layout_gravity="right|center_vertical"
+                android:text="@string/st_login_next"
+                android:textSize="19sp"
+                android:background="@android:color/transparent"
+                android:textColor="@color/st_blue_bright"
+                android:drawablePadding="6dp"
+                android:drawableRight="@drawable/st_auth_next"
+                android:id="@+id/doNext"/>
+    </org.telegram.android.ui.RtlLinearLayout>
+
+</LinearLayout>

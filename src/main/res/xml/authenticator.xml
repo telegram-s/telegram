@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
+                       android:accountType="org.telegram.android.account"
+                       android:icon="@drawable/app_icon"
+                       android:smallIcon="@drawable/app_icon"
+                       android:label="@string/st_app_name"
+                       android:accountPreferences="@xml/account_prefs"/>

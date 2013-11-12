@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:ext="http://schemas.android.com/apk/res/org.telegram.android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="none">
+        <LinearLayout android:orientation="vertical"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginBottom="8dp"
+                      android:gravity="center_vertical">
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_marginTop="32dp"
+                       android:layout_marginBottom="24dp"
+                       android:id="@+id/intro0"
+                       android:layout_gravity="center"
+                       android:src="@drawable/st_intro_icon0"/>
+
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginBottom="24dp"
+                      android:textColor="@color/st_black_text"
+                      android:gravity="center"
+                      android:paddingLeft="24dp"
+                      android:paddingRight="24dp"
+                      android:textSize="40sp"
+                      ext:customFont="light"
+                      android:text="@string/st_whats_new_title"/>
+
+            <LinearLayout android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:paddingLeft="24dp"
+                          android:paddingRight="24dp"
+                          android:id="@+id/updatesContainer"
+                          android:orientation="vertical">
+
+                <!--<TextView android:layout_width="fill_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:textColor="@color/st_black_text"-->
+                <!--android:layout_marginBottom="8dp"-->
+                <!--android:textSize="16sp"-->
+                <!--android:gravity="left"-->
+                <!--android:text="@string/whats_new_secret"/>-->
+
+                <!--<TextView android:layout_width="fill_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:textColor="@color/st_black_text"-->
+                <!--android:layout_marginBottom="8dp"-->
+                <!--android:textSize="16sp"-->
+                <!--android:gravity="left"-->
+                <!--android:text="@string/whats_new_arabic"/>-->
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <Button android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="6dp"
+            android:layout_marginLeft="6dp"
+            android:background="@drawable/st_btn"
+            android:textColor="@color/st_black_text"
+            android:textSize="19sp"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="center"
+            android:text="@string/st_whats_new_continue"
+            android:id="@+id/continueMessaging"/>
+</LinearLayout>

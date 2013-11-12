@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/searchMenu"
+          android:actionViewClass="com.actionbarsherlock.widget.SearchView"
+          android:icon="@drawable/st_bar_ic_search"
+          android:title="Search"
+          android:showAsAction="always|collapseActionView"/>
+    <item android:title="Compose"
+          android:showAsAction="always"
+          android:icon="@drawable/st_bar_ic_compose">
+        <menu>
+            <item android:id="@+id/newGroupMenu"
+                  android:title="Create group"
+                  android:showAsAction="never"/>
+            <item android:id="@+id/newSecretMenu"
+                  android:title="Create secret chat"
+                  android:showAsAction="never"/>
+            <item android:id="@+id/writeToContact"
+                  android:title="Write to contact"
+                  android:showAsAction="never"/>
+        </menu>
+    </item>
+    <item android:title="Menu"
+          android:showAsAction="always"
+          android:icon="@drawable/st_bar_ic_other">
+        <menu>
+            <item android:id="@+id/contactsMenu"
+                  android:title="My contacts"
+                  android:showAsAction="never"/>
+            <item android:id="@+id/settingsMenu"
+                  android:title="Settings"
+                  android:showAsAction="never"/>
+        </menu>
+    </item>
+</menu>

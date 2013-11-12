@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Add member"
+          android:showAsAction="always"
+          android:icon="@drawable/st_bar_ic_add_member"
+          android:id="@+id/addUser"/>
+</menu>

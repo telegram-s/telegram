@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme.ScrollViewStyle"
+           parent="@android:style/Widget.Holo.Light.ScrollView">
+        <item name="android:verticalScrollbarPosition">left</item>
+    </style>
+
+    <style name="AppListView" parent="@android:style/Widget.ListView">
+        <item name="android:fadingEdge">none</item>
+        <item name="android:listSelector">@drawable/st_list_selector</item>
+        <item name="android:divider">@color/st_divider</item>
+        <item name="android:dividerHeight">1dp</item>
+        <item name="android:verticalScrollbarPosition">left</item>
+    </style>
+
+    <style name="AppTextView" parent="android:Widget.TextView">
+        <item name="android:gravity">right</item>
+    </style>
+</resources>

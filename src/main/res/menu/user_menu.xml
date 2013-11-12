@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Menu"
+          android:showAsAction="always"
+          android:icon="@drawable/st_bar_ic_other">
+        <menu>
+            <item android:id="@+id/viewBook"
+                  android:title="View in Contacts App"
+                  android:showAsAction="never"/>
+            <item android:id="@+id/editName"
+                  android:title="Edit name"
+                  android:showAsAction="never"/>
+            <item android:id="@+id/addContact"
+                  android:title="Add to contacts"
+                  android:showAsAction="never"/>
+            <item android:id="@+id/shareContact"
+                  android:title="Share contact"
+                  android:showAsAction="never"/>
+            <item android:id="@+id/blockUserMenu"
+                  android:title="Block user"
+                  android:showAsAction="never"/>
+        </menu>
+    </item>
+</menu>

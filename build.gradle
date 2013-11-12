@@ -1,0 +1,52 @@
+buildscript {
+    repositories {
+        maven {
+            url "http://192.168.1.12:8080/archiva/repository/internal/"
+        }
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.3'
+    }
+}
+
+repositories {
+    maven {
+        url "http://192.168.1.12:8080/archiva/repository/internal/"
+    }
+    mavenCentral()
+}
+
+def basicVersion = '1.0'
+
+if (project.hasProperty('buildIndex')) {
+     project.version = basicVersion + '.' + project.buildIndex
+} else {
+     project.version = basicVersion + '-SNAPSHOT'
+}
+
+apply plugin: 'android'
+
+dependencies {
+    compile "org.telegram:tl-core:1.0.13"
+    compile "org.telegram:mtproto:1.0.10"
+    compile "org.telegram:tl-api-9:1.0.9"
+    compile "org.telegram:telegram-api:1.0.6"
+    compile "org.telegram:android-images:1.0.3+"
+    compile "org.telegram:viewpageindicator:1.2.2"
+    compile "com.j256.ormlite:ormlite-core:4.47"
+    compile "com.j256.ormlite:ormlite-android:4.47"
+    compile "com.nineoldandroids:library:2.4.0"
+    compile 'com.android.support:support-v4:19.0.+'
+    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    compile 'com.google.android.gms:play-services:4.0.+'
+    compile 'com.crittercism:library:4.3+'
+    compile 'org.telegram:photoview:1.2.2'
+    compile files('libs/gcm.jar')
+}
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "19.0.0"
+}

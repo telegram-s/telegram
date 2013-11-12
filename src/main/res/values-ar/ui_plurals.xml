@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="st_members">
+        <item quantity="zero">ولا عضو</item>
+        <item quantity="one">عضو واحد</item>
+        <item quantity="two">عضوين</item>
+        <item quantity="few">{d} أعضاء</item>
+        <item quantity="many">{d} عضو</item>
+        <item quantity="other">{d} عضو</item>
+    </plurals>
+    <plurals name="st_members_caps">
+        <item quantity="zero">ولا عضو</item>
+        <item quantity="one">عضو واحد</item>
+        <item quantity="two">عضوين</item>
+        <item quantity="few">{d} أعضاء</item>
+        <item quantity="many">{d} عضو</item>
+        <item quantity="other">{d} عضو</item>
+    </plurals>
+    <plurals name="st_dialogs">
+        <item quantity="zero"></item>
+        <item quantity="one">{d} محادثة واحدة</item>
+        <item quantity="two">{d} محادثتين</item>
+        <item quantity="few">{d} محادثات</item>
+        <item quantity="many">{d} محادثة</item>
+        <item quantity="other">{d} محادثة</item>
+    </plurals>
+</resources>
