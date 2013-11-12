@@ -20,11 +20,11 @@ project.group = "org.telegram"
 apply plugin: 'android'
 
 dependencies {
-    compile "org.telegram:tl-core:1.0.13"
-    compile "org.telegram:mtproto:1.0.12+"
-    compile "org.telegram:tl-api-9:1.0.9"
-    compile "org.telegram:telegram-api:1.0.6+"
-    compile "org.telegram:android-images:1.0.3+"
+    compile "org.telegram:tl-core:1.0.+"
+    compile "org.telegram:mtproto:1.0.+"
+    compile "org.telegram:tl-api-9:1.0.+"
+    compile "org.telegram:telegram-api:1.0.+"
+    compile "org.telegram:android-images:1.0.+"
     compile "org.telegram:viewpageindicator:1.2.2"
     compile "com.j256.ormlite:ormlite-core:4.47"
     compile "com.j256.ormlite:ormlite-android:4.47"
@@ -32,7 +32,7 @@ dependencies {
     compile 'com.android.support:support-v4:19.0.+'
     compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
     compile 'com.google.android.gms:play-services:4.0.+'
-    compile 'com.crittercism:library:4.3+'
+    compile 'com.crittercism:library:4.+'
     compile 'org.telegram:photoview:1.2.2'
     compile files('libs/gcm.jar')
 }

@@ -71,9 +71,7 @@
     <orderEntry type="library" exported="" name="library-4.3" level="project" />
     <orderEntry type="library" exported="" name="gcm" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.0.0" level="project" />
-    <orderEntry type="library" exported="" name="tl-core-1.0.13" level="project" />
     <orderEntry type="library" exported="" name="OrgTelegramAndroidImages103.aar" level="project" />
-    <orderEntry type="library" exported="" name="telegram-api-1.0.6" level="project" />
     <orderEntry type="library" exported="" name="OrgTelegramPhotoview122.aar" level="project" />
     <orderEntry type="library" exported="" name="tl-api-9-1.0.9" level="project" />
     <orderEntry type="library" exported="" name="ormlite-core-4.47" level="project" />
@@ -81,7 +79,9 @@
     <orderEntry type="library" exported="" name="ComGoogleAndroidGmsPlayServices4030.aar" level="project" />
     <orderEntry type="library" exported="" name="ComActionbarsherlockActionbarsherlock440.aar" level="project" />
     <orderEntry type="library" exported="" name="library-2.4.0" level="project" />
-    <orderEntry type="library" exported="" name="mtproto-1.0.12" level="project" />
+    <orderEntry type="library" exported="" name="tl-core-1.0.14" level="project" />
+    <orderEntry type="library" exported="" name="telegram-api-1.0.7" level="project" />
+    <orderEntry type="library" exported="" name="mtproto-1.0.16" level="project" />
   </component>
 </module>
 
