@@ -63,6 +63,11 @@ android {
         buildTypes {
             release {
                 signingConfig signingConfigs.release
+
+                applicationVariants.all { variant ->
+                    def file = variant.outputFile
+                    variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+                }
             }
         }
     }
