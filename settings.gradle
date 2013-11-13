@@ -1,1 +1,5 @@
-rootProject.name = "TelegramS"
+include ':app', ':telegram-api', ':mtproto', ':tl-core'
+
+project(':tl-core').projectDir = new File( 'libraries/tl-core' )
+project(':mtproto').projectDir = new File( 'libraries/mtproto' )
+project(':telegram-api').projectDir = new File( 'libraries/telegram-api' )

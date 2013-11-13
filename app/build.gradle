@@ -1,0 +1,78 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.3+'
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://192.168.1.12:8080/archiva/repository/internal/"
+    }
+}
+
+project.group = "org.telegram"
+
+apply plugin: 'android'
+
+dependencies {
+    compile project(':tl-core')
+    compile project(':telegram-api')
+    compile project(':mtproto')
+    compile "org.telegram:android-images:1.0.+"
+    compile "org.telegram:viewpageindicator:1.2.2"
+    compile "com.j256.ormlite:ormlite-core:4.47"
+    compile "com.j256.ormlite:ormlite-android:4.47"
+    compile "com.nineoldandroids:library:2.4.0"
+    compile 'com.android.support:support-v4:19.0.+'
+    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    compile 'com.google.android.gms:play-services:4.0.+'
+    compile 'com.crittercism:library:4.+'
+    compile 'org.telegram:photoview:1.2.2'
+    compile files('libs/gcm.jar')
+}
+
+def basicVersion = '1.2'
+def customVersionCode = '1024';
+
+if (project.hasProperty('buildIndex')) {
+    project.version = basicVersion + '.' + project.buildIndex
+    customVersionCode = '' + project.buildIndex
+} else {
+    project.version = 'debug'
+}
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "19.0.0"
+
+    if (project.hasProperty("signStorage")) {
+        signingConfigs {
+            release {
+                storeFile file(project.signStorage)
+                storePassword project.signStPass
+                keyAlias project.signAlias
+                keyPassword project.signKePass
+            }
+        }
+        buildTypes {
+            release {
+                signingConfig signingConfigs.release
+
+                applicationVariants.all { variant ->
+                    def file = variant.outputFile
+                    variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+                }
+            }
+        }
+    }
+
+    defaultConfig {
+        versionCode Integer.valueOf(customVersionCode)
+        versionName project.version
+    }
+}
