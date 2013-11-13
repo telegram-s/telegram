@@ -309,7 +309,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
                 if (msg.getRawContentType() == ContentType.MESSAGE_PHOTO ||
                         msg.getRawContentType() == ContentType.MESSAGE_VIDEO ||
-                        msg.getRawContentType() == ContentType.MESSAGE_GEO) {
+                        msg.getRawContentType() == ContentType.MESSAGE_GEO ||
+                        msg.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                     return 1;
                 }
 
@@ -333,7 +334,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
                 if (object.getRawContentType() == ContentType.MESSAGE_PHOTO ||
                         object.getRawContentType() == ContentType.MESSAGE_VIDEO ||
-                        object.getRawContentType() == ContentType.MESSAGE_GEO) {
+                        object.getRawContentType() == ContentType.MESSAGE_GEO ||
+                        object.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                     return new MessageMediaView(context);
                 } else if (object.getRawContentType() == ContentType.MESSAGE_CONTACT) {
                     return new MessageContactView(context);
@@ -539,7 +541,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             getRootController().openUser(object.getSenderId());
                         }
                     });
-                } else if (object.getRawContentType() == ContentType.MESSAGE_PHOTO || object.getRawContentType() == ContentType.MESSAGE_VIDEO || object.getRawContentType() == ContentType.MESSAGE_GEO) {
+                } else if (object.getRawContentType() == ContentType.MESSAGE_PHOTO || object.getRawContentType() == ContentType.MESSAGE_VIDEO || object.getRawContentType() == ContentType.MESSAGE_GEO
+                        || object.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                     MessageMediaView messageView = (MessageMediaView) view;
                     messageView.bind(object, showTime);
                     messageView.setOnAvatarClickListener(new View.OnClickListener() {
