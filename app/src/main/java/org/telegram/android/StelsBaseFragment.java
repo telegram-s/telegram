@@ -567,4 +567,10 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
     public void onEmojiUpdated(boolean completed) {
 
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        defaultProgressInterface.hideProgress();
+    }
 }

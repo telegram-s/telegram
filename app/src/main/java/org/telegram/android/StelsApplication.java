@@ -641,6 +641,7 @@ public class StelsApplication extends Application implements ImageSupport {
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction("org.telegram.android.ACTION_LOGOUT");
             sendBroadcast(broadcastIntent);
+            // startActivity(new Intent().setClass(this, StartActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         } else {
             NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
             notification.setTicker("Required login in Telegram");

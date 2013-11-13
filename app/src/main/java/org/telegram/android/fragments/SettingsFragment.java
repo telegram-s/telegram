@@ -133,13 +133,6 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                     @Override
                     public void execute() throws AsyncException {
                         rpc(new TLRequestAuthLogOut());
-//                        if (application.getSessionStorage().getMainSession() != null) {
-//                            rpc(new TLRequestAuthLogOut());
-//                            int[] keys = application.getKeyStorage().getKeys();
-//                            for (int dcId : keys) {
-//                                application.getKeyStorage().markUnauthorized(dcId);
-//                            }
-//                        }
                         application.clearLoginState();
                     }
 
