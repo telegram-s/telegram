@@ -20,20 +20,28 @@ project.group = "org.telegram"
 apply plugin: 'android'
 
 dependencies {
-    compile project(':tl-core')
-    compile project(':telegram-api')
+    // Android basic dependencies
+    compile "com.nineoldandroids:library:2.4.0"
+    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    compile 'com.android.support:support-v4:19.0.+'
+    compile 'com.google.android.gms:play-services:4.0.+'
+
+    // Telegram api
+    compile project(':tl-core')    
     compile project(':mtproto')
+    compile files('../libraries/telegram-api/libs/tl-api-v9.jar')
+    compile project(':telegram-api') 
+
+    // Ui dependencies
     compile "org.telegram:android-images:1.0.+"
     compile "org.telegram:viewpageindicator:1.2.2"
-    compile "com.j256.ormlite:ormlite-core:4.47"
-    compile "com.j256.ormlite:ormlite-android:4.47"
-    compile "com.nineoldandroids:library:2.4.0"
-    compile 'com.android.support:support-v4:19.0.+'
-    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
-    compile 'com.google.android.gms:play-services:4.0.+'
-    compile 'com.crittercism:library:4.+'
     compile 'org.telegram:photoview:1.2.2'
+
+    // Jars
     compile files('libs/gcm.jar')
+    compile files('libs/crittercism-sdkonly-4.3.0.jar')
+    compile files('libs/ormlite-core-4.47.jar')
+    compile files('libs/ormlite-android-4.47.jar')
 }
 
 def basicVersion = '1.2'
