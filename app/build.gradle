@@ -11,7 +11,7 @@ buildscript {
 repositories {
     mavenCentral()
     maven {
-        url "http://192.168.1.12:8080/archiva/repository/internal/"
+        url "http://maven.81port.com/archiva/repository/internal/"
     }
 }
 
