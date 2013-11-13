@@ -631,9 +631,11 @@ public class StelsApplication extends Application implements ImageSupport {
         if (!isLoggedIn())
             return;
 
-        apiStorage.reset();
+        apiStorage.resetAuth();
 
         clearLoginState();
+
+        updateApi();
 
         if (isAppVisible) {
             Intent broadcastIntent = new Intent();

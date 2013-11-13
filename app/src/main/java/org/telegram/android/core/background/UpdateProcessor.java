@@ -966,7 +966,7 @@ public class UpdateProcessor implements UpdateCatcher {
             return;
         }
         isDestroyed = true;
-        if (application.getApi().getUpdateCatcher() == this) {
+        if (application.getApi() != null && application.getApi().getUpdateCatcher() == this) {
             application.getApi().setUpdateCatcher(null);
         }
         correctorHandler.removeMessages(0);

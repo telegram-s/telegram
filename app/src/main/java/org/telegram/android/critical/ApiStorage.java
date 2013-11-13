@@ -178,9 +178,12 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
     @Override
     public synchronized void reset() {
         getObj().getDcInfos().clear();
+        getObj().getDcInfos().add(new TLDcInfo(1, "173.240.5.1", 443));
+
         getObj().getKeys().clear();
         getObj().setAuthorized(false);
         getObj().setPrimaryDc(1);
         getObj().setUid(0);
+        write();
     }
 }
