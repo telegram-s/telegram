@@ -131,7 +131,7 @@ public class Logger {
     }
 
     private static synchronized void dropCache() {
-        if (ENABLED && isInitied) {
+        if (ENABLED && isInitied && writer != null) {
             synchronized (locker) {
                 LogRecord[] records = null;
                 synchronized (cachedRecords) {
