@@ -99,10 +99,20 @@ android {
 
     sourceSets {
         main.res.srcDirs = ['src/main/res']
+        
+        common.assets.srcDirs = ['src/res-common/res']
         common.res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
+
+        mdpi.assets.srcDirs = ['src/res-mdpi/res']
         mdpi.res.srcDirs = ['src/res-mdpi/res']
+
+        hdpi.assets.srcDirs = ['src/res-hdpi/res']
         hdpi.res.srcDirs = ['src/res-hdpi/res']
+
+        xhdpi.assets.srcDirs = ['src/res-xhdpi/res']
         xhdpi.res.srcDirs = ['src/res-xhdpi/res']
+
+        xxhdpi.assets.srcDirs = ['src/res-xxhdpi/res']
         xxhdpi.res.srcDirs = ['src/res-xxhdpi/res']
     }
 }
