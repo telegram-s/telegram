@@ -10,12 +10,12 @@
                  android:layout_width="fill_parent"
                  android:paddingTop="48dp"
                  android:id="@+id/mainContainer">
-        <org.telegram.android.views.ObservableListView android:layout_width="fill_parent"
-                                                       android:layout_height="fill_parent"
-                                                       android:stackFromBottom="true"
-                                                       android:dividerHeight="0dp"
-                                                       android:divider="@android:color/transparent"
-                                                       android:id="@+id/listView"/>
+        <org.telegram.android.views.dialog.ConversationListView android:layout_width="fill_parent"
+                                                         android:layout_height="fill_parent"
+                                                         android:stackFromBottom="true"
+                                                         android:dividerHeight="0dp"
+                                                         android:divider="@android:color/transparent"
+                                                         android:id="@+id/listView"/>
 
         <FrameLayout android:layout_width="fill_parent"
                      android:layout_height="48dp"

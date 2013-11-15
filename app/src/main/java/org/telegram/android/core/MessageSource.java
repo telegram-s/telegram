@@ -136,7 +136,7 @@ public class MessageSource {
                         }
                     }
                 }
-                if (loaded) {
+                if (!loaded) {
                     if (offset < PAGE_OVERLAP) {
                         offset = 0;
                     } else {

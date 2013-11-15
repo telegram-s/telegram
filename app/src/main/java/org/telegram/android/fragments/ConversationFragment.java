@@ -30,8 +30,6 @@ import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.ui.FastWebImageView;
-import com.google.android.gms.common.data.e;
-import com.google.android.gms.internal.fa;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.config.DebugSettings;
@@ -49,10 +47,8 @@ import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
-import org.telegram.android.views.BaseMsgView;
-import org.telegram.android.views.MessageContactView;
-import org.telegram.android.views.MessageMediaView;
-import org.telegram.android.views.MessageView;
+import org.telegram.android.views.*;
+import org.telegram.android.views.dialog.ConversationListView;
 import org.telegram.api.TLAbsInputPeer;
 import org.telegram.api.TLInputPeerChat;
 import org.telegram.api.TLInputPeerForeign;
@@ -82,7 +78,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     private ArrayList<ChatMessage> workingSet;
     private BaseAdapter dialogAdapter;
     private View mainContainer;
-    private ListView listView;
+    private ConversationListView listView;
 
     private MessageSource source;
 
@@ -174,7 +170,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             ((TextView) res.findViewById(R.id.emptyLabel)).setText(R.string.st_conv_empty_support);
         }
 
-        listView = (ListView) res.findViewById(R.id.listView);
+        listView = (ConversationListView) res.findViewById(R.id.listView);
 
         // ((ImagingListView) listView).setEnabledDynamicPause(true);
 
