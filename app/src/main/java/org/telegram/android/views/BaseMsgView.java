@@ -44,6 +44,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private int AVATAR_SIZE;
     private int AVATAR_LEFT;
     private int AVATAR_BOTTOM;
+    private int UNREAD_HEIGHT;
 
     private TextPaint timeDivPaint;
     private Paint avatarPaint;
@@ -81,6 +82,9 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private int touchedElement = TOUCHED_NONE;
 
     private boolean showTimeSeparator;
+
+    private boolean showUnreadMessagesNotify;
+    private int unreadMessagesCount;
 
     private ChatMessage message;
 
@@ -124,6 +128,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         AVATAR_LEFT = getPx(6);
         AVATAR_BOTTOM = getPx(4);
         BUBBLE_PADDING = getPx(39);
+        UNREAD_HEIGHT = getPx(24);
 
         timeDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
         timeDivPaint.setTextSize(getSp(15));
@@ -194,14 +199,21 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     }
 
     public final void rebind() {
-        bind(message, showTimeSeparator);
+        bind(message, showTimeSeparator, showUnreadMessagesNotify, unreadMessagesCount);
     }
 
-    public final void bind(ChatMessage message, boolean showTime) {
+    public final void bind(ChatMessage message, boolean showTime, boolean showUnread, int unreadMessagesCount) {
         this.message = message;
         if (showTimeSeparator != showTime) {
             requestLayout();
         }
+        if (showUnreadMessagesNotify != showUnread) {
+            requestLayout();
+        }
+
+        this.showUnreadMessagesNotify = showUnread;
+        this.unreadMessagesCount = unreadMessagesCount;
+
         showTimeSeparator = showTime;
         if (showTimeSeparator) {
             timeDivText = org.telegram.android.ui.TextUtil.formatDateLong(message.getDate());
@@ -333,12 +345,17 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
             height = AVATAR_BOTTOM + AVATAR_SIZE;
         }
 
+        int realHeight = height;
         if (showTimeSeparator) {
             timeDivMeasure = (int) timeDivPaint.measureText(timeDivText);
-            setMeasuredDimension(width, height + getPx(44));
-        } else {
-            setMeasuredDimension(width, height);
+            realHeight += getPx(44);
         }
+
+        if (showUnreadMessagesNotify) {
+            realHeight += UNREAD_HEIGHT;
+        }
+
+        setMeasuredDimension(width, realHeight);
 
         if (showAvatar) {
             avatarRect.set(AVATAR_LEFT, height - AVATAR_BOTTOM - AVATAR_SIZE, AVATAR_LEFT + AVATAR_SIZE, height - AVATAR_BOTTOM);
@@ -481,14 +498,26 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         canvas.save();
 
         if (isBubbleChecked) {
+            int topOffset = 1;
+
             if (showTimeSeparator) {
-                rect.set(0, getPx(44), getWidth(), getHeight());
-            } else {
-                rect.set(0, 1, getWidth(), getHeight());
+                topOffset += getPx(44);
             }
+            if (showUnreadMessagesNotify) {
+                topOffset += UNREAD_HEIGHT;
+            }
+            rect.set(0, topOffset, getWidth(), getHeight());
             Paint selectorPaint = new Paint();
             selectorPaint.setColor(0x6633b5e5);
             canvas.drawRect(rect, selectorPaint);
+        }
+
+        if (showUnreadMessagesNotify) {
+            rect.set(0, 0, getWidth(), UNREAD_HEIGHT);
+            Paint selectorPaint = new Paint();
+            selectorPaint.setColor(0x66000000);
+            canvas.drawRect(rect, selectorPaint);
+            canvas.translate(0, UNREAD_HEIGHT);
         }
 
         if (showTimeSeparator) {

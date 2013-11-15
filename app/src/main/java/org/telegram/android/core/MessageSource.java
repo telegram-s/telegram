@@ -3,6 +3,8 @@ package org.telegram.android.core;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
+import com.google.android.gms.common.data.e;
+import com.google.android.gms.internal.fa;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.Configuration;
@@ -21,6 +23,7 @@ import org.telegram.api.messages.TLMessagesSlice;
 import org.telegram.api.requests.TLRequestMessagesGetHistory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -95,26 +98,65 @@ public class MessageSource {
 
             @Override
             protected ChatMessage[] loadItems(int offset) {
-                if (offset < PAGE_OVERLAP) {
-                    offset = 0;
-                } else {
-                    offset -= PAGE_OVERLAP;
+                ArrayList<ChatMessage> resultMessages = new ArrayList<ChatMessage>();
+                boolean loaded = false;
+                if (offset == 0) {
+                    DialogDescription description = application.getEngine().getDescriptionForPeer(peerType, peerId);
+                    int unreadMid = description.getFirstUnreadMessage();
+                    if (unreadMid != 0) {
+                        ChatMessage message = application.getEngine().getMessageById(unreadMid);
+                        if (message != null) {
+                            PreparedQuery<ChatMessage> query;
+                            try {
+                                QueryBuilder<ChatMessage, Long> queryBuilder = application.getEngine().getMessagesDao().queryBuilder();
+                                queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
+                                queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
+                                        .and().raw("(date * 1000000 + abs(mid)) >= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
+                                query = queryBuilder.prepare();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                return new ChatMessage[0];
+                            }
+                            resultMessages.addAll(application.getEngine().getMessagesDao().query(query));
+
+                            try {
+                                QueryBuilder<ChatMessage, Long> queryBuilder = application.getEngine().getMessagesDao().queryBuilder();
+                                queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
+                                queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
+                                        .and().raw("(date * 1000000 + abs(mid)) <= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
+                                queryBuilder.limit(PAGE_SIZE);
+                                query = queryBuilder.prepare();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                return new ChatMessage[0];
+                            }
+                            resultMessages.addAll(application.getEngine().getMessagesDao().query(query));
+
+                            loaded = true;
+                        }
+                    }
                 }
-                PreparedQuery<ChatMessage> query;
-                try {
-                    QueryBuilder<ChatMessage, Long> queryBuilder = application.getEngine().getMessagesDao().queryBuilder();
-                    queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
-                    queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false);
-                    queryBuilder.offset(offset);
-                    queryBuilder.limit(PAGE_SIZE);
-                    // queryBuilder.selectColumns("_id", "mid", "isOut", "state", "date", "contentType", "senderId", "message");
-                    query = queryBuilder.prepare();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return new ChatMessage[0];
+                if (loaded) {
+                    if (offset < PAGE_OVERLAP) {
+                        offset = 0;
+                    } else {
+                        offset -= PAGE_OVERLAP;
+                    }
+                    PreparedQuery<ChatMessage> query;
+                    try {
+                        QueryBuilder<ChatMessage, Long> queryBuilder = application.getEngine().getMessagesDao().queryBuilder();
+                        queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
+                        queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false);
+                        queryBuilder.offset(offset);
+                        queryBuilder.limit(PAGE_SIZE);
+                        query = queryBuilder.prepare();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return new ChatMessage[0];
+                    }
+                    resultMessages.addAll(application.getEngine().getMessagesDao().query(query));
                 }
-                application.getResponsibility().waitForResume();
-                ChatMessage[] res = application.getEngine().getMessagesDao().query(query).toArray(new ChatMessage[0]);
+                ChatMessage[] res = resultMessages.toArray(new ChatMessage[resultMessages.size()]);
                 for (int i = 0; i < res.length; i++) {
                     res[i].getExtras();
                     application.getEngine().getUser(res[i].getSenderId());

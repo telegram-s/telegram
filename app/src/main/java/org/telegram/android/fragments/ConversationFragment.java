@@ -30,6 +30,8 @@ import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.ui.FastWebImageView;
+import com.google.android.gms.common.data.e;
+import com.google.android.gms.internal.fa;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.config.DebugSettings;
@@ -71,6 +73,9 @@ import java.util.HashSet;
  * Created: 29.07.13 0:31
  */
 public class ConversationFragment extends MediaReceiverFragment implements ViewSourceListener, ChatSourceListener, TypingStates.TypingListener, UserSourceListener, EncryptedChatSourceListener {
+
+    private static final String TAG = "ConversaionFragment";
+
     private int peerId;
     private int peerType;
 
@@ -108,6 +113,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     private int selectedTop = 0;
 
     private boolean isEnabledInput = false;
+
+    private boolean isFreshUpdate = true;
+
+    private int firstUnreadMessage = 0;
+    private int unreadCount = 0;
 
     public ConversationFragment(int peerType, int peerId) {
         this.peerId = peerId;
@@ -278,6 +288,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     ChatMessage prev = getItem(i - 1);
                     showTime = !TextUtil.areSameDays(prev.getDate(), message.getDate());
                 }
+
                 bindView(view, context, message, showTime);
 
                 source.getMessagesSource().onItemsShown(getCount() - i - 1);
@@ -485,7 +496,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
                 if (object.getRawContentType() == ContentType.MESSAGE_CONTACT) {
                     MessageContactView messageView = (MessageContactView) view;
-                    messageView.bind(object, showTime);
+                    boolean showDiv = false;
+                    if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                        showDiv = true;
+                    }
+                    messageView.bind(object, showTime, showDiv, unreadCount);
 
                     messageView.setOnBubbleClickListener(new View.OnClickListener() {
                         @Override
@@ -517,7 +532,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     });
                 } else if (object.getRawContentType() == ContentType.MESSAGE_TEXT) {
                     MessageView messageView = (MessageView) view;
-                    messageView.bind(object, showTime);
+                    boolean showDiv = false;
+                    if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                        showDiv = true;
+                    }
+                    messageView.bind(object, showTime, showDiv, unreadCount);
 
                     messageView.setOnBubbleClickListener(new View.OnClickListener() {
                         @Override
@@ -544,7 +563,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 } else if (object.getRawContentType() == ContentType.MESSAGE_PHOTO || object.getRawContentType() == ContentType.MESSAGE_VIDEO || object.getRawContentType() == ContentType.MESSAGE_GEO
                         || object.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                     MessageMediaView messageView = (MessageMediaView) view;
-                    messageView.bind(object, showTime);
+                    boolean showDiv = false;
+                    if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                        showDiv = true;
+                    }
+                    messageView.bind(object, showTime, showDiv, unreadCount);
                     messageView.setOnAvatarClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -1256,9 +1279,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
         });
 
-        if (workingSet != source.getMessagesSource().getCurrentWorkingSet()) {
-            onSourceDataChanged();
-        }
+//        if (workingSet != source.getMessagesSource().getCurrentWorkingSet()) {
+//            onSourceDataChanged();
+//        }
+        onSourceDataChanged();
 
         if (getSmileysController().areSmileysVisible()) {
             smileButton.setImageResource(R.drawable.st_conv_panel_kb);
@@ -1701,6 +1725,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         hideKeyboard(editText);
 
+        isFreshUpdate = true;
 
         saveListPosition();
     }
@@ -1789,7 +1814,46 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     @Override
     public void onSourceDataChanged() {
+
         ArrayList<ChatMessage> nWorkingSet = source.getMessagesSource().getCurrentWorkingSet();
+        Logger.d(TAG, "onSourceDataChanged: " + firstUnreadMessage + ", " + isFreshUpdate);
+        if (isFreshUpdate) {
+            if (nWorkingSet.size() == 0) {
+                workingSet = nWorkingSet;
+                dialogAdapter.notifyDataSetChanged();
+                onDataChanged();
+//                if (source.getState() == MessagesSourceState.COMPLETED) {
+//                    isFreshUpdate = false;
+//                }
+                return;
+            }
+
+            DialogDescription description = application.getEngine().getDescriptionForPeer(peerType, peerId);
+            if (description != null && description.getFirstUnreadMessage() != 0 && nWorkingSet.size() > 0) {
+                firstUnreadMessage = description.getFirstUnreadMessage();
+                application.getEngine().clearFirstUnreadMessage(peerType, peerId);
+                Logger.d(TAG, "Founded first unread message: " + firstUnreadMessage);
+                int index = -1;
+                for (int i = 0; i < nWorkingSet.size(); i++) {
+                    ChatMessage message = nWorkingSet.get(i);
+                    if (!message.isOut() && firstUnreadMessage == message.getMid()) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index != -1) {
+                    Logger.d(TAG, "Scrolling to first unread message: " + index);
+                    workingSet = nWorkingSet;
+                    dialogAdapter.notifyDataSetChanged();
+                    onDataChanged();
+                    listView.setSelectionFromTop(workingSet.size() - index, 0);
+                    isFreshUpdate = false;
+                    return;
+                } else {
+                    Logger.d(TAG, "Unable to find unread message inf working set");
+                }
+            }
+        }
 
         View v = listView.getChildAt(listView.getChildCount() - 2);
         int index = listView.getLastVisiblePosition() - 1;

@@ -24,7 +24,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private static final String TAG = "Database";
 
     private static final String DATABASE_NAME = "stels.db";
-    private static final int DATABASE_VERSION = 48;
+    private static final int DATABASE_VERSION = 52;
 
     private RuntimeExceptionDao<DialogDescription, Long> dialogsDao;
     private RuntimeExceptionDao<FullChatInfo, Long> fullChatInfoDao;
@@ -64,38 +64,59 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase database, ConnectionSource connectionSource, int oldVersion, int newVersion) {
         wasUpgraded = true;
+        try {
+            TableUtils.dropTable(connectionSource, DialogDescription.class, true);
+            TableUtils.dropTable(connectionSource, ChatMessage.class, true);
+            TableUtils.dropTable(connectionSource, User.class, true);
+            TableUtils.dropTable(connectionSource, Contact.class, true);
+            TableUtils.dropTable(connectionSource, FullChatInfo.class, true);
+            TableUtils.dropTable(connectionSource, MediaRecord.class, true);
+            TableUtils.dropTable(connectionSource, EncryptedChat.class, true);
 
-        if (oldVersion < 47) {
-            try {
-                TableUtils.dropTable(connectionSource, DialogDescription.class, true);
-                TableUtils.dropTable(connectionSource, ChatMessage.class, true);
-                TableUtils.dropTable(connectionSource, User.class, true);
-                TableUtils.dropTable(connectionSource, Contact.class, true);
-                TableUtils.dropTable(connectionSource, FullChatInfo.class, true);
-                TableUtils.dropTable(connectionSource, MediaRecord.class, true);
-                TableUtils.dropTable(connectionSource, EncryptedChat.class, true);
-
-                TableUtils.createTable(connectionSource, DialogDescription.class);
-                TableUtils.createTable(connectionSource, ChatMessage.class);
-                TableUtils.createTable(connectionSource, User.class);
-                TableUtils.createTable(connectionSource, Contact.class);
-                TableUtils.createTable(connectionSource, FullChatInfo.class);
-                TableUtils.createTable(connectionSource, MediaRecord.class);
-                TableUtils.createTable(connectionSource, EncryptedChat.class);
-                database.execSQL("CREATE UNIQUE INDEX mytest_id_idx ON ChatMessage(mid);\n");
-            } catch (SQLException e) {
-                Logger.e(TAG, "Can't upgrade databases", e);
-                throw new RuntimeException(e);
-            }
-        } else if (oldVersion == 47) {
-            try {
-                List<String> strings = TableUtils.getCreateTableStatements(connectionSource, EncryptedChat.class);
-                strings.toArray();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            database.execSQL("ALTER TABLE encryptedchat ADD COLUMN isOut SMALLINT");
+            TableUtils.createTable(connectionSource, DialogDescription.class);
+            TableUtils.createTable(connectionSource, ChatMessage.class);
+            TableUtils.createTable(connectionSource, User.class);
+            TableUtils.createTable(connectionSource, Contact.class);
+            TableUtils.createTable(connectionSource, FullChatInfo.class);
+            TableUtils.createTable(connectionSource, MediaRecord.class);
+            TableUtils.createTable(connectionSource, EncryptedChat.class);
+            database.execSQL("CREATE UNIQUE INDEX mytest_id_idx ON ChatMessage(mid);\n");
+        } catch (SQLException e) {
+            Logger.e(TAG, "Can't upgrade databases", e);
+            throw new RuntimeException(e);
         }
+
+//        if (oldVersion < 47) {
+//            try {
+//                TableUtils.dropTable(connectionSource, DialogDescription.class, true);
+//                TableUtils.dropTable(connectionSource, ChatMessage.class, true);
+//                TableUtils.dropTable(connectionSource, User.class, true);
+//                TableUtils.dropTable(connectionSource, Contact.class, true);
+//                TableUtils.dropTable(connectionSource, FullChatInfo.class, true);
+//                TableUtils.dropTable(connectionSource, MediaRecord.class, true);
+//                TableUtils.dropTable(connectionSource, EncryptedChat.class, true);
+//
+//                TableUtils.createTable(connectionSource, DialogDescription.class);
+//                TableUtils.createTable(connectionSource, ChatMessage.class);
+//                TableUtils.createTable(connectionSource, User.class);
+//                TableUtils.createTable(connectionSource, Contact.class);
+//                TableUtils.createTable(connectionSource, FullChatInfo.class);
+//                TableUtils.createTable(connectionSource, MediaRecord.class);
+//                TableUtils.createTable(connectionSource, EncryptedChat.class);
+//                database.execSQL("CREATE UNIQUE INDEX mytest_id_idx ON ChatMessage(mid);\n");
+//            } catch (SQLException e) {
+//                Logger.e(TAG, "Can't upgrade databases", e);
+//                throw new RuntimeException(e);
+//            }
+//        } else if (oldVersion == 47) {
+//            try {
+//                List<String> strings = TableUtils.getCreateTableStatements(connectionSource, EncryptedChat.class);
+//                strings.toArray();
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//            database.execSQL("ALTER TABLE encryptedchat ADD COLUMN isOut SMALLINT");
+//        }
     }
 
     public void clearData() {

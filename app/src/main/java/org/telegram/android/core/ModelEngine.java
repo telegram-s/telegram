@@ -517,6 +517,10 @@ public class ModelEngine {
         DialogDescription description = getDescriptionForPeer(peerType, peerId);
         if (description != null) {
             if (description.getLastLocalViewedMessage() < mid) {
+                if (description.getFirstUnreadMessage() == 0 || (mid < description.getFirstUnreadMessage())) {
+                    description.setFirstUnreadMessage(mid);
+                    Logger.d(TAG, "Setting first unread message: " + mid + " (" + peerType + ":" + peerId + ")");
+                }
                 description.setUnreadCount(description.getUnreadCount() + 1);
                 getDialogsDao().update(description);
                 application.getDialogSource().getViewSource().updateItem(description);
@@ -539,6 +543,16 @@ public class ModelEngine {
         DialogDescription description = getDescriptionForPeer(peerType, peerId);
         if (description != null) {
             description.setLastLocalViewedMessage(maxId);
+            description.setUnreadCount(0);
+            getDialogsDao().update(description);
+            application.getDialogSource().getViewSource().updateItem(description);
+        }
+    }
+
+    public void clearFirstUnreadMessage(int peerType, int peerId) {
+        DialogDescription description = getDescriptionForPeer(peerType, peerId);
+        if (description != null) {
+            description.setFirstUnreadMessage(0);
             description.setUnreadCount(0);
             getDialogsDao().update(description);
             application.getDialogSource().getViewSource().updateItem(description);
