@@ -47,10 +47,11 @@ public class EmojiProcessor {
         Collections.addAll(EMOJI_SET, EMOJI_MAP);
     }
 
-    private static final int LAYOUT_2X = 0;
     private static final int LAYOUT_1X = 1;
-    private static final int LAYOUT_15X = 2;
-    private static final int LAYOUT_07X = 3;
+    private static final int LAYOUT_15X_1 = 2;
+    private static final int LAYOUT_15X_2 = 3;
+    private static final int LAYOUT_2X_1 = 4;
+    private static final int LAYOUT_2X_2 = 5;
 
     // protected Bitmap emojiImages;
     protected HashMap<Integer, Bitmap> emojiMap;
@@ -64,7 +65,7 @@ public class EmojiProcessor {
     private HashMap<Long, Integer> indexes;
     private HashMap<Integer, Paint.FontMetricsInt> originalMetrics;
 
-    private int layoutType = LAYOUT_2X;
+    private int layoutType = LAYOUT_1X;
 
     private boolean isLoading = false;
     private boolean isLoaded = false;
@@ -76,6 +77,21 @@ public class EmojiProcessor {
 
     private int rectSize = 0;
 
+    private boolean hasSmileyPack(String id) {
+        try {
+            String[] files = application.getAssets().list("/");
+            for (String s : files) {
+                if (s.equals("emoji_c_" + id + ".jpg")) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     public EmojiProcessor(StelsApplication application) {
 
         this.application = application;
@@ -86,31 +102,70 @@ public class EmojiProcessor {
 
         if (density >= 2 || density == 1) {
             if (density >= 2) {
-                layoutType = LAYOUT_2X;
+                // XHDPI and more
+                if (hasSmileyPack("2")) {
+                    layoutType = LAYOUT_2X_1;
+                } else if (hasSmileyPack("15")) {
+                    layoutType = LAYOUT_15X_1;
+                } else if (hasSmileyPack("1")) {
+                    layoutType = LAYOUT_1X;
+                } else {
+                    throw new RuntimeException("Unable to find smileys pack");
+                }
             } else {
-                layoutType = LAYOUT_1X;
+                // MDPI
+                if (hasSmileyPack("1")) {
+                    layoutType = LAYOUT_1X;
+                } else if (hasSmileyPack("15")) {
+                    layoutType = LAYOUT_15X_1;
+                } else if (hasSmileyPack("2")) {
+                    layoutType = LAYOUT_2X_2;
+                } else {
+                    throw new RuntimeException("Unable to find smileys pack");
+                }
             }
         } else {
             if (density > 1) { // 1.3333 and 1.5
-                layoutType = LAYOUT_15X;
+                // HDPI & TVDPI
+                if (hasSmileyPack("15")) {
+                    layoutType = LAYOUT_15X_1;
+                } else if (hasSmileyPack("2")) {
+                    layoutType = LAYOUT_2X_1;
+                } else if (hasSmileyPack("1")) {
+                    layoutType = LAYOUT_1X;
+                } else {
+                    throw new RuntimeException("Unable to find smileys pack");
+                }
             } else { // 0.75
-                layoutType = LAYOUT_07X;
+                // LDPI
+                if (hasSmileyPack("15")) {
+                    layoutType = LAYOUT_15X_2;
+                } else if (hasSmileyPack("1")) {
+                    layoutType = LAYOUT_1X;
+                } else if (hasSmileyPack("2")) {
+                    layoutType = LAYOUT_2X_2;
+                } else {
+                    throw new RuntimeException("Unable to find smileys pack");
+                }
             }
         }
 
         switch (layoutType) {
             default:
-            case LAYOUT_2X:
-                rectSize = 56;
-                break;
             case LAYOUT_1X:
                 rectSize = 28;
                 break;
-            case LAYOUT_15X:
+            case LAYOUT_15X_1:
                 rectSize = 36;
                 break;
-            case LAYOUT_07X:
+            case LAYOUT_15X_2:
                 rectSize = 18;
+                break;
+            case LAYOUT_2X_1:
+                rectSize = 56;
+                break;
+            case LAYOUT_2X_2:
+                rectSize = 28;
                 break;
         }
 
@@ -183,22 +238,28 @@ public class EmojiProcessor {
 
                     switch (layoutType) {
                         default:
-                        case LAYOUT_2X:
-                            fileName = "emoji_c_2.jpg";
-                            fileNameAlpha = "emoji_a_2.jpg";
-                            break;
                         case LAYOUT_1X:
-                            fileName = "emoji_c_2.jpg";
-                            fileNameAlpha = "emoji_a_2.jpg";
+                            fileName = "emoji_c_1.jpg";
+                            fileNameAlpha = "emoji_a_1.jpg";
+                            break;
+                        case LAYOUT_15X_1:
+                            fileName = "emoji_c_15.jpg";
+                            fileNameAlpha = "emoji_a_15.jpg";
+                            options.inSampleSize = 1;
+                            break;
+                        case LAYOUT_15X_2:
+                            fileName = "emoji_c_15.jpg";
+                            fileNameAlpha = "emoji_a_15.jpg";
                             options.inSampleSize = 2;
                             break;
-                        case LAYOUT_15X:
-                            fileName = "emoji_c_15.jpg";
-                            fileNameAlpha = "emoji_a_15.jpg";
+                        case LAYOUT_2X_1:
+                            fileName = "emoji_c_2.jpg";
+                            fileNameAlpha = "emoji_a_2.jpg";
+                            options.inSampleSize = 1;
                             break;
-                        case LAYOUT_07X:
-                            fileName = "emoji_c_15.jpg";
-                            fileNameAlpha = "emoji_a_15.jpg";
+                        case LAYOUT_2X_2:
+                            fileName = "emoji_c_2.jpg";
+                            fileNameAlpha = "emoji_a_2.jpg";
                             options.inSampleSize = 2;
                             break;
                     }

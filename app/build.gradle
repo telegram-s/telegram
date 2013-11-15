@@ -98,21 +98,34 @@ android {
     }
 
     sourceSets {
-        main.res.srcDirs = ['src/main/res']
+        main {
+            res.srcDirs = ['src/main/res']
+            assets.srcDirs = ['src/main/assets']
+        }
         
-        common.assets.srcDirs = ['src/res-common/res']
-        common.res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
+        common {
+            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
+            assets.srcDirs = ['src/res-common/assets']
+        }
 
-        mdpi.assets.srcDirs = ['src/res-mdpi/res']
-        mdpi.res.srcDirs = ['src/res-mdpi/res']
+        mdpi {
+            res.srcDirs = ['src/res-mdpi/res']
+            assets.srcDirs = ['src/res-mdpi/assets']
+        }
 
-        hdpi.assets.srcDirs = ['src/res-hdpi/res']
-        hdpi.res.srcDirs = ['src/res-hdpi/res']
+        hdpi {
+            res.srcDirs = ['src/res-hdpi/res']
+            assets.srcDirs = ['src/res-hdpi/assets']
+        }
 
-        xhdpi.assets.srcDirs = ['src/res-xhdpi/res']
-        xhdpi.res.srcDirs = ['src/res-xhdpi/res']
+        xhdpi {
+            res.srcDirs = ['src/res-xhdpi/res']
+            assets.srcDirs = ['src/res-xhdpi/assets']
+        }
 
-        xxhdpi.assets.srcDirs = ['src/res-xxhdpi/res']
-        xxhdpi.res.srcDirs = ['src/res-xxhdpi/res']
+        xxhdpi {
+            res.srcDirs = ['src/res-xxhdpi/res']
+            assets.srcDirs = ['src/res-xxhdpi/assets']
+        }
     }
 }
