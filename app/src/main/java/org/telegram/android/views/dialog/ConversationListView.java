@@ -12,6 +12,10 @@ import com.extradea.framework.images.ui.ImagingListView;
  * Created by ex3ndr on 15.11.13.
  */
 public class ConversationListView extends ImagingListView {
+
+    private int visibleDate = 0;
+    private int currentVisibleItem = -1;
+
     public ConversationListView(Context context) {
         super(context);
     }
@@ -32,11 +36,11 @@ public class ConversationListView extends ImagingListView {
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-        Rect rect = new Rect();
-        rect.set(0, getPaddingTop(), getWidth(), getPaddingTop() + 80);
-        Paint selectorPaint = new Paint();
-        selectorPaint.setColor(0x66000000);
-        canvas.drawRect(rect, selectorPaint);
+//        Rect rect = new Rect();
+//        rect.set(0, getPaddingTop(), getWidth(), getPaddingTop() + 80);
+//        Paint selectorPaint = new Paint();
+//        selectorPaint.setColor(0x66000000);
+//        canvas.drawRect(rect, selectorPaint);
     }
 
     private class ScrollListener implements OnScrollListener {
@@ -47,7 +51,7 @@ public class ConversationListView extends ImagingListView {
         }
 
         @Override
-        public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+        public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 
         }
     }
