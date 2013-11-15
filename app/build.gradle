@@ -85,7 +85,7 @@ android {
     }
 
     productFlavors {
-        all {
+        common {
         }
         mdpi {
         }
@@ -99,10 +99,10 @@ android {
 
     sourceSets {
         main.res.srcDirs = ['src/main/res']
+        common.res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
         mdpi.res.srcDirs = ['src/res-mdpi/res']
         hdpi.res.srcDirs = ['src/res-hdpi/res']
         xhdpi.res.srcDirs = ['src/res-xhdpi/res']
         xxhdpi.res.srcDirs = ['src/res-xxhdpi/res']
-        all.res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
     }
 }
