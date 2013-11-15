@@ -48,6 +48,7 @@ import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
 import org.telegram.android.views.*;
+import org.telegram.android.views.dialog.ConversationAdapter;
 import org.telegram.android.views.dialog.ConversationListView;
 import org.telegram.api.TLAbsInputPeer;
 import org.telegram.api.TLInputPeerChat;
@@ -254,458 +255,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         source.getMessagesSource().onConnected();
         workingSet = source.getMessagesSource().getCurrentWorkingSet();
 
-        final Context context = getActivity();
-        dialogAdapter = new BaseAdapter() {
-
-            @Override
-            public int getCount() {
-                return workingSet.size();
-            }
-
-            @Override
-            public ChatMessage getItem(int i) {
-                return workingSet.get(getCount() - i - 1);
-            }
-
-            @Override
-            public long getItemId(int i) {
-                return getItem(i).getDatabaseId();
-            }
-
-            @Override
-            public View getView(int i, View view, ViewGroup viewGroup) {
-                ChatMessage message = getItem(i);
-                if (view == null) {
-                    view = newView(context, message, viewGroup);
-                }
-
-                boolean showTime = i == 0;
-                if (i > 0) {
-                    ChatMessage prev = getItem(i - 1);
-                    showTime = !TextUtil.areSameDays(prev.getDate(), message.getDate());
-                }
-
-                bindView(view, context, message, showTime);
-
-                source.getMessagesSource().onItemsShown(getCount() - i - 1);
-
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    switch (application.getDebugSettings().getConversationListItemLayerType()) {
-                        default:
-                        case DebugSettings.LAYER_NONE:
-                            view.setLayerType(View.LAYER_TYPE_NONE, null);
-                            break;
-                        case DebugSettings.LAYER_HARDWARE:
-                            view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-                            break;
-                        case DebugSettings.LAYER_SOFTWARE:
-                            view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-                            break;
-                    }
-                }
-
-                return view;
-            }
-
-            @Override
-            public int getItemViewType(int position) {
-                ChatMessage msg = getItem(position);
-                if (msg.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
-                    return 2;
-                }
-                if (msg.getRawContentType() == ContentType.MESSAGE_PHOTO ||
-                        msg.getRawContentType() == ContentType.MESSAGE_VIDEO ||
-                        msg.getRawContentType() == ContentType.MESSAGE_GEO ||
-                        msg.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
-                    return 1;
-                }
-
-                if (msg.getRawContentType() == ContentType.MESSAGE_CONTACT) {
-                    return 3;
-                }
-
-                return 0;
-            }
-
-            @Override
-            public int getViewTypeCount() {
-                return 6;
-            }
-
-
-            public View newView(Context context, ChatMessage object, ViewGroup parent) {
-                if (object.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
-                    return View.inflate(context, R.layout.conv_item_system, null);
-                }
-
-                if (object.getRawContentType() == ContentType.MESSAGE_PHOTO ||
-                        object.getRawContentType() == ContentType.MESSAGE_VIDEO ||
-                        object.getRawContentType() == ContentType.MESSAGE_GEO ||
-                        object.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
-                    return new MessageMediaView(context);
-                } else if (object.getRawContentType() == ContentType.MESSAGE_CONTACT) {
-                    return new MessageContactView(context);
-                } else {
-                    return new MessageView(context, peerType == PeerType.PEER_CHAT);
-                }
-            }
-
-            public void bindView(View view, Context context, final ChatMessage object, boolean showTime) {
-                if (object.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
-                    TextView timeView = (TextView) view.findViewById(R.id.time);
-                    if (showTime) {
-                        timeView.setText(TextUtil.formatDateLong(object.getDate()));
-                        timeView.setVisibility(View.VISIBLE);
-                    } else {
-                        timeView.setVisibility(View.GONE);
-                    }
-
-                    TextView messageView = (TextView) view.findViewById(R.id.message);
-                    messageView.setMovementMethod(LinkMovementMethod.getInstance());
-                    FastWebImageView imageView = (FastWebImageView) view.findViewById(R.id.image);
-
-                    TLAbsLocalAction action = (TLAbsLocalAction) object.getExtras();
-                    User sender = getEngine().getUser(object.getSenderId());
-                    boolean byMyself = sender.getUid() == application.getCurrentUid();
-                    String senderName = byMyself ? getStringSafe(R.string.st_message_by_you) : sender.getDisplayName();
-                    String senderHtml = "<b><a href='#" + sender.getUid() + "'>" + unicodeWrap(senderName) + "</a></b>";
-                    if (action instanceof TLLocalActionUserEditPhoto) {
-                        final TLLocalActionUserEditPhoto chatEditPhoto = (TLLocalActionUserEditPhoto) action;
-                        messageView.setText(fixedHtml(getStringSafe(R.string.st_message_user_photo_change).replace("{0}", senderHtml)));
-                        imageView.setVisibility(View.VISIBLE);
-                        if (chatEditPhoto.getPhoto().getPreviewLocation() instanceof TLLocalFileLocation) {
-                            imageView.requestTask(new StelsImageTask((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation()));
-                        } else {
-                            imageView.requestTask(null);
-                        }
-                        if (chatEditPhoto.getPhoto().getFullLocation() instanceof TLLocalFileLocation) {
-                            imageView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getFullLocation());
-                                }
-                            });
-                        } else {
-                            imageView.setOnClickListener(null);
-                        }
-                    } else if (action instanceof TLLocalActionChatEditPhoto) {
-                        final TLLocalActionChatEditPhoto chatEditPhoto = (TLLocalActionChatEditPhoto) action;
-                        messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_photo_change_you : R.string.st_message_photo_change).replace("{0}", senderHtml)));
-                        imageView.setVisibility(View.VISIBLE);
-                        if (chatEditPhoto.getPhoto().getPreviewLocation() instanceof TLLocalFileLocation) {
-                            imageView.requestTask(new StelsImageTask((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation()));
-                        } else {
-                            imageView.requestTask(null);
-                        }
-                        if (chatEditPhoto.getPhoto().getFullLocation() instanceof TLLocalFileLocation) {
-                            imageView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getFullLocation());
-                                }
-                            });
-                        } else {
-                            imageView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation());
-                                }
-                            });
-                        }
-                    } else if (action instanceof TLLocalActionChatCreate) {
-                        messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_create_group_you : R.string.st_message_create_group).replace("{0}", senderHtml)));
-                        imageView.setVisibility(View.GONE);
-                    } else if (action instanceof TLLocalActionChatAddUser) {
-                        TLLocalActionChatAddUser addUser = (TLLocalActionChatAddUser) action;
-                        User added = getEngine().getUser(addUser.getUserId());
-                        String addedName = added.getUid() == application.getCurrentUid() ? getStringSafe(R.string.st_message_you) : added.getDisplayName();
-                        String addedHtml = "<b><a href='#" + added.getUid() + "'>" + unicodeWrap(addedName) + "</a></b>";
-                        messageView.setText(fixedHtml(getStringSafe(addUser.getUserId() == application.getCurrentUid() ? R.string.st_message_added_user_of_you : (byMyself ? R.string.st_message_added_user_you : R.string.st_message_added_user))
-                                .replace("{0}", senderHtml)
-                                .replace("{1}", addedHtml)));
-                        imageView.setVisibility(View.GONE);
-                    } else if (action instanceof TLLocalActionChatDeletePhoto) {
-                        messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_photo_remove_you : R.string.st_message_photo_remove)
-                                .replace("{0}", senderHtml)));
-                        imageView.setVisibility(View.GONE);
-                    } else if (action instanceof TLLocalActionChatEditTitle) {
-                        TLLocalActionChatEditTitle editTitle = (TLLocalActionChatEditTitle) action;
-                        messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_name_change_you : R.string.st_message_name_change)
-                                .replace("{0}", senderHtml)
-                                .replace("{1}", "<b>" + unicodeWrap(editTitle.getTitle()) + "</b>")));
-                        imageView.setVisibility(View.GONE);
-                    } else if (action instanceof TLLocalActionChatDeleteUser) {
-                        TLLocalActionChatDeleteUser deleteUser = (TLLocalActionChatDeleteUser) action;
-                        if (object.getSenderId() == deleteUser.getUserId()) {
-                            messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_left_user_you : R.string.st_message_left_user).replace("{0}", senderHtml)));
-                        } else {
-                            User removed = getEngine().getUser(deleteUser.getUserId());
-                            String removedName = removed.getUid() == application.getCurrentUid() ? getStringSafe(R.string.st_message_you) : removed.getDisplayName();
-                            String removedHtml = "<b><a href='#" + removed.getUid() + "'>" + unicodeWrap(removedName) + "</a></b>";
-                            messageView.setText(fixedHtml(getStringSafe(deleteUser.getUserId() == application.getCurrentUid() ? R.string.st_message_kicked_user_of_you : (byMyself ? R.string.st_message_kicked_user_you : R.string.st_message_kicked_user))
-                                    .replace("{0}", senderHtml)
-                                    .replace("{1}", removedHtml)));
-                        }
-                        imageView.setVisibility(View.GONE);
-                    } else if (action instanceof TLLocalActionEncryptedTtl) {
-                        TLLocalActionEncryptedTtl ttl = (TLLocalActionEncryptedTtl) action;
-                        if (ttl.getTtlSeconds() > 0) {
-                            messageView.setText(fixedHtml(getStringSafe(R.string.st_message_enc_self_destruct)
-                                    .replace("{0}", senderHtml)
-                                    .replace("{1}", "<b>" + unicodeWrap(TextUtil.formatHumanReadableDuration(((TLLocalActionEncryptedTtl) action).getTtlSeconds())) + "</b>")));
-                        } else {
-                            messageView.setText(fixedHtml(getStringSafe(R.string.st_message_enc_self_destruct_off)
-                                    .replace("{0}", senderHtml)));
-                        }
-
-                        imageView.setVisibility(View.GONE);
-                    } else if (action instanceof TLLocalActionUserRegistered) {
-                        messageView.setText(fixedHtml(getStringSafe(R.string.st_message_user_joined_app)
-                                .replace("{0}", senderHtml)));
-                        imageView.setVisibility(View.GONE);
-                    } else {
-                        messageView.setText(R.string.st_message_service);
-                        imageView.setVisibility(View.GONE);
-                    }
-                } else {
-                    bindChatView((BaseMsgView) view, context, object, showTime);
-                }
-            }
-
-            public void bindChatView(final BaseMsgView view, final Context context, final ChatMessage object, boolean showTime) {
-                view.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        if (selected.contains(object.getDatabaseId())) {
-                            selected.remove(object.getDatabaseId());
-                        } else {
-                            selected.add(object.getDatabaseId());
-                        }
-                        ((BaseMsgView) v).setChecked(selected.contains(object.getDatabaseId()));
-                        updateActionMode();
-                        return true;
-                    }
-                });
-
-                view.setChecked(selected.contains(object.getDatabaseId()));
-
-                if (object.getRawContentType() == ContentType.MESSAGE_CONTACT) {
-                    MessageContactView messageView = (MessageContactView) view;
-                    boolean showDiv = false;
-                    if (!object.isOut() && object.getMid() == firstUnreadMessage) {
-                        showDiv = true;
-                    }
-                    messageView.bind(object, showTime, showDiv, unreadCount);
-
-                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.getDatabaseId())) {
-                                    selected.remove(object.getDatabaseId());
-                                } else {
-                                    selected.add(object.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
-                                updateActionMode();
-                            } else {
-                                onMessageClick(object);
-                            }
-                        }
-                    });
-                    messageView.setOnAvatarClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            getRootController().openUser(object.getSenderId());
-                        }
-                    });
-                    messageView.setOnAddContactClick(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            getRootController().addContact(((TLLocalContact) object.getExtras()).getUserId());
-                        }
-                    });
-                } else if (object.getRawContentType() == ContentType.MESSAGE_TEXT) {
-                    MessageView messageView = (MessageView) view;
-                    boolean showDiv = false;
-                    if (!object.isOut() && object.getMid() == firstUnreadMessage) {
-                        showDiv = true;
-                    }
-                    messageView.bind(object, showTime, showDiv, unreadCount);
-
-                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.getDatabaseId())) {
-                                    selected.remove(object.getDatabaseId());
-                                } else {
-                                    selected.add(object.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
-                                updateActionMode();
-                            } else {
-                                onMessageClick(object);
-                            }
-                        }
-                    });
-                    messageView.setOnAvatarClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            getRootController().openUser(object.getSenderId());
-                        }
-                    });
-                } else if (object.getRawContentType() == ContentType.MESSAGE_PHOTO || object.getRawContentType() == ContentType.MESSAGE_VIDEO || object.getRawContentType() == ContentType.MESSAGE_GEO
-                        || object.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
-                    MessageMediaView messageView = (MessageMediaView) view;
-                    boolean showDiv = false;
-                    if (!object.isOut() && object.getMid() == firstUnreadMessage) {
-                        showDiv = true;
-                    }
-                    messageView.bind(object, showTime, showDiv, unreadCount);
-                    messageView.setOnAvatarClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            getRootController().openUser(object.getSenderId());
-                        }
-                    });
-
-                    if (object.getExtras() instanceof TLUploadingPhoto || object.getExtras() instanceof TLUploadingVideo) {
-                        messageView.setOnBubbleClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if (selected.size() > 0) {
-                                    if (selected.contains(object.getDatabaseId())) {
-                                        selected.remove(object.getDatabaseId());
-                                    } else {
-                                        selected.add(object.getDatabaseId());
-                                    }
-                                    ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
-                                    updateActionMode();
-                                } else {
-                                    if (object.getState() == MessageState.FAILURE) {
-                                        onMessageClick(object);
-                                    } else {
-                                        new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_cancel_title).setMessage(R.string.st_conv_cancel_message)
-                                                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                                        application.getMessageSender().cancelUpload(object.getDatabaseId());
-                                                        application.notifyUIUpdate();
-                                                    }
-                                                }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                                            }
-                                        }).show();
-                                    }
-                                }
-                            }
-                        });
-                    } else if (object.getExtras() instanceof TLLocalPhoto) {
-
-                        TLLocalPhoto photo = (TLLocalPhoto) object.getExtras();
-                        if (!(photo.getFullLocation() instanceof TLLocalFileEmpty)) {
-                            final String key = DownloadManager.getPhotoKey(photo);
-                            DownloadState state = application.getDownloadManager().getState(key);
-                            if (state == DownloadState.FAILURE || state == DownloadState.NONE) {
-                                application.getDownloadManager().requestDownload(photo);
-                            }
-
-                            messageView.setOnBubbleClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    if (selected.size() > 0) {
-                                        if (selected.contains(object.getDatabaseId())) {
-                                            selected.remove(object.getDatabaseId());
-                                        } else {
-                                            selected.add(object.getDatabaseId());
-                                        }
-                                        ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
-                                        updateActionMode();
-                                    } else {
-                                        DownloadState state = application.getDownloadManager().getState(key);
-                                        if (state == DownloadState.COMPLETED) {
-                                            getRootController().openImage(object.getMid(), peerType, peerId);
-                                        } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
-                                            // CANCEL
-                                            application.getDownloadManager().abortDownload(key);
-                                        } else {
-                                            // Check
-                                            application.getDownloadManager().requestDownload((TLLocalPhoto) object.getExtras());
-                                        }
-                                    }
-                                }
-                            });
-                        } else {
-                            messageView.setOnBubbleClickListener(null);
-                        }
-                    } else if (object.getExtras() instanceof TLLocalVideo) {
-                        final String key = DownloadManager.getVideoKey((TLLocalVideo) object.getExtras());
-                        messageView.setOnBubbleClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if (selected.size() > 0) {
-                                    if (selected.contains(object.getDatabaseId())) {
-                                        selected.remove(object.getDatabaseId());
-                                    } else {
-                                        selected.add(object.getDatabaseId());
-                                    }
-                                    ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
-                                    updateActionMode();
-                                } else {
-                                    DownloadState state = application.getDownloadManager().getState(key);
-                                    if (state == DownloadState.COMPLETED) {
-                                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                                        intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getVideoFileName(key))), "video/*");
-                                        startActivity(intent);
-                                    } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
-                                        // CANCEL
-                                        application.getDownloadManager().abortDownload(key);
-                                    } else {
-                                        TLLocalVideo video = (TLLocalVideo) object.getExtras();
-                                        // Check
-                                        application.getDownloadManager().requestDownload(video);
-                                    }
-                                }
-                            }
-                        });
-                    } else if (object.getExtras() instanceof TLLocalGeo) {
-                        messageView.setOnBubbleClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if (selected.size() > 0) {
-                                    if (selected.contains(object.getDatabaseId())) {
-                                        selected.remove(object.getDatabaseId());
-                                    } else {
-                                        selected.add(object.getDatabaseId());
-                                    }
-                                    ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
-                                    updateActionMode();
-                                } else {
-                                    TLLocalGeo geo = (TLLocalGeo) object.getExtras();
-                                    getRootController().viewLocation(geo.getLatitude(), geo.getLongitude(), object.getSenderId());
-                                }
-                            }
-                        });
-                    } else {
-                        messageView.setOnBubbleClickListener(null);
-                    }
-                }
-            }
-
-            @Override
-            public boolean areAllItemsEnabled() {
-                return false;
-            }
-
-            @Override
-            public boolean isEnabled(int position) {
-                return false;
-            }
-        };
+        dialogAdapter = new MessagesAdapter();
 
         editText = (EditText) res.findViewById(R.id.text);
 
@@ -774,10 +324,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         listView.addHeaderView(topView, null, false);
         listView.addFooterView(bottomPadding, null, false);
-        listView.setAdapter(new
-                HeaderViewListAdapter(
-                new ArrayList<ListView.FixedViewInfo>(1),
-                new ArrayList<ListView.FixedViewInfo>(1), dialogAdapter));
+        listView.setAdapter(dialogAdapter);
 
         workingSet = source.getMessagesSource().getCurrentWorkingSet();
 
@@ -1842,7 +1389,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     workingSet = nWorkingSet;
                     dialogAdapter.notifyDataSetChanged();
                     onDataChanged();
-                    listView.setSelectionFromTop(workingSet.size() - index, 0);
+                    listView.setSelectionFromTop(workingSet.size() - index, getPx(64));
                     isFreshUpdate = false;
                     return;
                 } else {
@@ -1901,6 +1448,463 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 selectedTop = 0;
                 selectedIndex = -1;
             }
+        }
+    }
+
+    private class MessagesAdapter extends BaseAdapter implements ConversationAdapter {
+
+        @Override
+        public int getCount() {
+            return workingSet.size();
+        }
+
+        @Override
+        public ChatMessage getItem(int i) {
+            return workingSet.get(getCount() - i - 1);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return getItem(i).getDatabaseId();
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            ChatMessage message = getItem(i);
+            if (view == null) {
+                view = newView(application, message, viewGroup);
+            }
+
+            boolean showTime = i == 0;
+            if (i > 0) {
+                ChatMessage prev = getItem(i - 1);
+                showTime = !TextUtil.areSameDays(prev.getDate(), message.getDate());
+            }
+
+            bindView(view, application, message, showTime);
+
+            source.getMessagesSource().onItemsShown(getCount() - i - 1);
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                switch (application.getDebugSettings().getConversationListItemLayerType()) {
+                    default:
+                    case DebugSettings.LAYER_NONE:
+                        view.setLayerType(View.LAYER_TYPE_NONE, null);
+                        break;
+                    case DebugSettings.LAYER_HARDWARE:
+                        view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                        break;
+                    case DebugSettings.LAYER_SOFTWARE:
+                        view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+                        break;
+                }
+            }
+
+            return view;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            ChatMessage msg = getItem(position);
+            if (msg.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
+                return 2;
+            }
+            if (msg.getRawContentType() == ContentType.MESSAGE_PHOTO ||
+                    msg.getRawContentType() == ContentType.MESSAGE_VIDEO ||
+                    msg.getRawContentType() == ContentType.MESSAGE_GEO ||
+                    msg.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
+                return 1;
+            }
+
+            if (msg.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+                return 3;
+            }
+
+            return 0;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 6;
+        }
+
+
+        public View newView(Context context, ChatMessage object, ViewGroup parent) {
+            if (object.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
+                return View.inflate(context, R.layout.conv_item_system, null);
+            }
+
+            if (object.getRawContentType() == ContentType.MESSAGE_PHOTO ||
+                    object.getRawContentType() == ContentType.MESSAGE_VIDEO ||
+                    object.getRawContentType() == ContentType.MESSAGE_GEO ||
+                    object.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
+                return new MessageMediaView(context);
+            } else if (object.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+                return new MessageContactView(context);
+            } else {
+                return new MessageView(context, peerType == PeerType.PEER_CHAT);
+            }
+        }
+
+        public void bindView(View view, Context context, final ChatMessage object, boolean showTime) {
+            if (object.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
+                TextView timeView = (TextView) view.findViewById(R.id.time);
+                if (showTime) {
+                    timeView.setText(TextUtil.formatDateLong(object.getDate()));
+                    timeView.setVisibility(View.VISIBLE);
+                } else {
+                    timeView.setVisibility(View.GONE);
+                }
+
+                TextView messageView = (TextView) view.findViewById(R.id.message);
+                messageView.setMovementMethod(LinkMovementMethod.getInstance());
+                FastWebImageView imageView = (FastWebImageView) view.findViewById(R.id.image);
+
+                TLAbsLocalAction action = (TLAbsLocalAction) object.getExtras();
+                User sender = getEngine().getUser(object.getSenderId());
+                boolean byMyself = sender.getUid() == application.getCurrentUid();
+                String senderName = byMyself ? getStringSafe(R.string.st_message_by_you) : sender.getDisplayName();
+                String senderHtml = "<b><a href='#" + sender.getUid() + "'>" + unicodeWrap(senderName) + "</a></b>";
+                if (action instanceof TLLocalActionUserEditPhoto) {
+                    final TLLocalActionUserEditPhoto chatEditPhoto = (TLLocalActionUserEditPhoto) action;
+                    messageView.setText(fixedHtml(getStringSafe(R.string.st_message_user_photo_change).replace("{0}", senderHtml)));
+                    imageView.setVisibility(View.VISIBLE);
+                    if (chatEditPhoto.getPhoto().getPreviewLocation() instanceof TLLocalFileLocation) {
+                        imageView.requestTask(new StelsImageTask((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation()));
+                    } else {
+                        imageView.requestTask(null);
+                    }
+                    if (chatEditPhoto.getPhoto().getFullLocation() instanceof TLLocalFileLocation) {
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getFullLocation());
+                            }
+                        });
+                    } else {
+                        imageView.setOnClickListener(null);
+                    }
+                } else if (action instanceof TLLocalActionChatEditPhoto) {
+                    final TLLocalActionChatEditPhoto chatEditPhoto = (TLLocalActionChatEditPhoto) action;
+                    messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_photo_change_you : R.string.st_message_photo_change).replace("{0}", senderHtml)));
+                    imageView.setVisibility(View.VISIBLE);
+                    if (chatEditPhoto.getPhoto().getPreviewLocation() instanceof TLLocalFileLocation) {
+                        imageView.requestTask(new StelsImageTask((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation()));
+                    } else {
+                        imageView.requestTask(null);
+                    }
+                    if (chatEditPhoto.getPhoto().getFullLocation() instanceof TLLocalFileLocation) {
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getFullLocation());
+                            }
+                        });
+                    } else {
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation());
+                            }
+                        });
+                    }
+                } else if (action instanceof TLLocalActionChatCreate) {
+                    messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_create_group_you : R.string.st_message_create_group).replace("{0}", senderHtml)));
+                    imageView.setVisibility(View.GONE);
+                } else if (action instanceof TLLocalActionChatAddUser) {
+                    TLLocalActionChatAddUser addUser = (TLLocalActionChatAddUser) action;
+                    User added = getEngine().getUser(addUser.getUserId());
+                    String addedName = added.getUid() == application.getCurrentUid() ? getStringSafe(R.string.st_message_you) : added.getDisplayName();
+                    String addedHtml = "<b><a href='#" + added.getUid() + "'>" + unicodeWrap(addedName) + "</a></b>";
+                    messageView.setText(fixedHtml(getStringSafe(addUser.getUserId() == application.getCurrentUid() ? R.string.st_message_added_user_of_you : (byMyself ? R.string.st_message_added_user_you : R.string.st_message_added_user))
+                            .replace("{0}", senderHtml)
+                            .replace("{1}", addedHtml)));
+                    imageView.setVisibility(View.GONE);
+                } else if (action instanceof TLLocalActionChatDeletePhoto) {
+                    messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_photo_remove_you : R.string.st_message_photo_remove)
+                            .replace("{0}", senderHtml)));
+                    imageView.setVisibility(View.GONE);
+                } else if (action instanceof TLLocalActionChatEditTitle) {
+                    TLLocalActionChatEditTitle editTitle = (TLLocalActionChatEditTitle) action;
+                    messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_name_change_you : R.string.st_message_name_change)
+                            .replace("{0}", senderHtml)
+                            .replace("{1}", "<b>" + unicodeWrap(editTitle.getTitle()) + "</b>")));
+                    imageView.setVisibility(View.GONE);
+                } else if (action instanceof TLLocalActionChatDeleteUser) {
+                    TLLocalActionChatDeleteUser deleteUser = (TLLocalActionChatDeleteUser) action;
+                    if (object.getSenderId() == deleteUser.getUserId()) {
+                        messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_left_user_you : R.string.st_message_left_user).replace("{0}", senderHtml)));
+                    } else {
+                        User removed = getEngine().getUser(deleteUser.getUserId());
+                        String removedName = removed.getUid() == application.getCurrentUid() ? getStringSafe(R.string.st_message_you) : removed.getDisplayName();
+                        String removedHtml = "<b><a href='#" + removed.getUid() + "'>" + unicodeWrap(removedName) + "</a></b>";
+                        messageView.setText(fixedHtml(getStringSafe(deleteUser.getUserId() == application.getCurrentUid() ? R.string.st_message_kicked_user_of_you : (byMyself ? R.string.st_message_kicked_user_you : R.string.st_message_kicked_user))
+                                .replace("{0}", senderHtml)
+                                .replace("{1}", removedHtml)));
+                    }
+                    imageView.setVisibility(View.GONE);
+                } else if (action instanceof TLLocalActionEncryptedTtl) {
+                    TLLocalActionEncryptedTtl ttl = (TLLocalActionEncryptedTtl) action;
+                    if (ttl.getTtlSeconds() > 0) {
+                        messageView.setText(fixedHtml(getStringSafe(R.string.st_message_enc_self_destruct)
+                                .replace("{0}", senderHtml)
+                                .replace("{1}", "<b>" + unicodeWrap(TextUtil.formatHumanReadableDuration(((TLLocalActionEncryptedTtl) action).getTtlSeconds())) + "</b>")));
+                    } else {
+                        messageView.setText(fixedHtml(getStringSafe(R.string.st_message_enc_self_destruct_off)
+                                .replace("{0}", senderHtml)));
+                    }
+
+                    imageView.setVisibility(View.GONE);
+                } else if (action instanceof TLLocalActionUserRegistered) {
+                    messageView.setText(fixedHtml(getStringSafe(R.string.st_message_user_joined_app)
+                            .replace("{0}", senderHtml)));
+                    imageView.setVisibility(View.GONE);
+                } else {
+                    messageView.setText(R.string.st_message_service);
+                    imageView.setVisibility(View.GONE);
+                }
+            } else {
+                bindChatView((BaseMsgView) view, context, object, showTime);
+            }
+        }
+
+        public void bindChatView(final BaseMsgView view, final Context context, final ChatMessage object, boolean showTime) {
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (selected.contains(object.getDatabaseId())) {
+                        selected.remove(object.getDatabaseId());
+                    } else {
+                        selected.add(object.getDatabaseId());
+                    }
+                    ((BaseMsgView) v).setChecked(selected.contains(object.getDatabaseId()));
+                    updateActionMode();
+                    return true;
+                }
+            });
+
+            view.setChecked(selected.contains(object.getDatabaseId()));
+
+            if (object.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+                MessageContactView messageView = (MessageContactView) view;
+                boolean showDiv = false;
+                if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                    showDiv = true;
+                }
+                messageView.bind(object, showTime, showDiv, unreadCount);
+
+                messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (selected.size() > 0) {
+                            if (selected.contains(object.getDatabaseId())) {
+                                selected.remove(object.getDatabaseId());
+                            } else {
+                                selected.add(object.getDatabaseId());
+                            }
+                            ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                            updateActionMode();
+                        } else {
+                            onMessageClick(object);
+                        }
+                    }
+                });
+                messageView.setOnAvatarClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        getRootController().openUser(object.getSenderId());
+                    }
+                });
+                messageView.setOnAddContactClick(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        getRootController().addContact(((TLLocalContact) object.getExtras()).getUserId());
+                    }
+                });
+            } else if (object.getRawContentType() == ContentType.MESSAGE_TEXT) {
+                MessageView messageView = (MessageView) view;
+                boolean showDiv = false;
+                if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                    showDiv = true;
+                }
+                messageView.bind(object, showTime, showDiv, unreadCount);
+
+                messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (selected.size() > 0) {
+                            if (selected.contains(object.getDatabaseId())) {
+                                selected.remove(object.getDatabaseId());
+                            } else {
+                                selected.add(object.getDatabaseId());
+                            }
+                            ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                            updateActionMode();
+                        } else {
+                            onMessageClick(object);
+                        }
+                    }
+                });
+                messageView.setOnAvatarClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        getRootController().openUser(object.getSenderId());
+                    }
+                });
+            } else if (object.getRawContentType() == ContentType.MESSAGE_PHOTO || object.getRawContentType() == ContentType.MESSAGE_VIDEO || object.getRawContentType() == ContentType.MESSAGE_GEO
+                    || object.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
+                MessageMediaView messageView = (MessageMediaView) view;
+                boolean showDiv = false;
+                if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                    showDiv = true;
+                }
+                messageView.bind(object, showTime, showDiv, unreadCount);
+                messageView.setOnAvatarClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        getRootController().openUser(object.getSenderId());
+                    }
+                });
+
+                if (object.getExtras() instanceof TLUploadingPhoto || object.getExtras() instanceof TLUploadingVideo) {
+                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (selected.size() > 0) {
+                                if (selected.contains(object.getDatabaseId())) {
+                                    selected.remove(object.getDatabaseId());
+                                } else {
+                                    selected.add(object.getDatabaseId());
+                                }
+                                ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                                updateActionMode();
+                            } else {
+                                if (object.getState() == MessageState.FAILURE) {
+                                    onMessageClick(object);
+                                } else {
+                                    new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_cancel_title).setMessage(R.string.st_conv_cancel_message)
+                                            .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    application.getMessageSender().cancelUpload(object.getDatabaseId());
+                                                    application.notifyUIUpdate();
+                                                }
+                                            }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                                        }
+                                    }).show();
+                                }
+                            }
+                        }
+                    });
+                } else if (object.getExtras() instanceof TLLocalPhoto) {
+
+                    TLLocalPhoto photo = (TLLocalPhoto) object.getExtras();
+                    if (!(photo.getFullLocation() instanceof TLLocalFileEmpty)) {
+                        final String key = DownloadManager.getPhotoKey(photo);
+                        DownloadState state = application.getDownloadManager().getState(key);
+                        if (state == DownloadState.FAILURE || state == DownloadState.NONE) {
+                            application.getDownloadManager().requestDownload(photo);
+                        }
+
+                        messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (selected.size() > 0) {
+                                    if (selected.contains(object.getDatabaseId())) {
+                                        selected.remove(object.getDatabaseId());
+                                    } else {
+                                        selected.add(object.getDatabaseId());
+                                    }
+                                    ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                                    updateActionMode();
+                                } else {
+                                    DownloadState state = application.getDownloadManager().getState(key);
+                                    if (state == DownloadState.COMPLETED) {
+                                        getRootController().openImage(object.getMid(), peerType, peerId);
+                                    } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
+                                        // CANCEL
+                                        application.getDownloadManager().abortDownload(key);
+                                    } else {
+                                        // Check
+                                        application.getDownloadManager().requestDownload((TLLocalPhoto) object.getExtras());
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        messageView.setOnBubbleClickListener(null);
+                    }
+                } else if (object.getExtras() instanceof TLLocalVideo) {
+                    final String key = DownloadManager.getVideoKey((TLLocalVideo) object.getExtras());
+                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (selected.size() > 0) {
+                                if (selected.contains(object.getDatabaseId())) {
+                                    selected.remove(object.getDatabaseId());
+                                } else {
+                                    selected.add(object.getDatabaseId());
+                                }
+                                ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                                updateActionMode();
+                            } else {
+                                DownloadState state = application.getDownloadManager().getState(key);
+                                if (state == DownloadState.COMPLETED) {
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getVideoFileName(key))), "video/*");
+                                    startActivity(intent);
+                                } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
+                                    // CANCEL
+                                    application.getDownloadManager().abortDownload(key);
+                                } else {
+                                    TLLocalVideo video = (TLLocalVideo) object.getExtras();
+                                    // Check
+                                    application.getDownloadManager().requestDownload(video);
+                                }
+                            }
+                        }
+                    });
+                } else if (object.getExtras() instanceof TLLocalGeo) {
+                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (selected.size() > 0) {
+                                if (selected.contains(object.getDatabaseId())) {
+                                    selected.remove(object.getDatabaseId());
+                                } else {
+                                    selected.add(object.getDatabaseId());
+                                }
+                                ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                                updateActionMode();
+                            } else {
+                                TLLocalGeo geo = (TLLocalGeo) object.getExtras();
+                                getRootController().viewLocation(geo.getLatitude(), geo.getLongitude(), object.getSenderId());
+                            }
+                        }
+                    });
+                } else {
+                    messageView.setOnBubbleClickListener(null);
+                }
+            }
+        }
+
+        @Override
+        public boolean areAllItemsEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return false;
+        }
+
+        @Override
+        public int getItemDate(int id) {
+            return getItem(id).getDate();
         }
     }
 }

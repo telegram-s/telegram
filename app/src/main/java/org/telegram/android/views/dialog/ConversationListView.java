@@ -4,43 +4,83 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.widget.AbsListView;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListAdapter;
 import com.extradea.framework.images.ui.ImagingListView;
+import com.google.android.gms.internal.ca;
+import com.google.android.gms.internal.da;
+import org.telegram.android.R;
+import org.telegram.android.ui.FontController;
+import org.telegram.android.ui.TextUtil;
 
 /**
  * Created by ex3ndr on 15.11.13.
  */
 public class ConversationListView extends ImagingListView {
 
-    private int visibleDate = 0;
+    private String visibleDate = null;
+
+    private int timeDivMeasure;
     private int currentVisibleItem = -1;
+
+
+    private TextPaint timeDivPaint;
+    private Drawable serviceDrawable;
+    private Rect servicePadding;
 
     public ConversationListView(Context context) {
         super(context);
+        init();
     }
 
     public ConversationListView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init();
     }
 
     public ConversationListView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        init();
     }
 
     private void init() {
         setOnScrollListener(new ScrollListener());
+        serviceDrawable = getResources().getDrawable(R.drawable.st_bubble_service);
+        servicePadding = new Rect();
+        serviceDrawable.getPadding(servicePadding);
+
+        timeDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        timeDivPaint.setTextSize(getSp(15));
+        timeDivPaint.setColor(0xffFFFFFF);
+        timeDivPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
     }
 
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-//        Rect rect = new Rect();
-//        rect.set(0, getPaddingTop(), getWidth(), getPaddingTop() + 80);
-//        Paint selectorPaint = new Paint();
-//        selectorPaint.setColor(0x66000000);
-//        canvas.drawRect(rect, selectorPaint);
+        if (visibleDate != null) {
+            serviceDrawable.setBounds(
+                    getWidth() / 2 - timeDivMeasure / 2 - servicePadding.left,
+                    getPx(44 - 8) - serviceDrawable.getIntrinsicHeight(),
+                    getWidth() / 2 + timeDivMeasure / 2 + servicePadding.right,
+                    getPx(44 - 8));
+            serviceDrawable.draw(canvas);
+            canvas.drawText(visibleDate, getWidth() / 2 - timeDivMeasure / 2, getPx(44 - 17), timeDivPaint);
+        }
+    }
+
+    protected int getPx(float dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
+    protected int getSp(float sp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, getResources().getDisplayMetrics());
     }
 
     private class ScrollListener implements OnScrollListener {
@@ -52,7 +92,18 @@ public class ConversationListView extends ImagingListView {
 
         @Override
         public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
+            ListAdapter adapter = getAdapter();
+            if (adapter instanceof HeaderViewListAdapter) {
+                adapter = ((HeaderViewListAdapter) adapter).getWrappedAdapter();
+            }
+            if (adapter instanceof ConversationAdapter) {
+                int realFirstVisibleItem = firstVisibleItem - getHeaderViewsCount();
+                if (realFirstVisibleItem >= 0 && realFirstVisibleItem < adapter.getCount()) {
+                    int date = ((ConversationAdapter) adapter).getItemDate(realFirstVisibleItem);
+                    visibleDate = TextUtil.formatDateLong(date);
+                    timeDivMeasure = (int) timeDivPaint.measureText(visibleDate);
+                }
+            }
         }
     }
 }
