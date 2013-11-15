@@ -79,7 +79,7 @@ public class EmojiProcessor {
 
     private boolean hasSmileyPack(String id) {
         try {
-            String[] files = application.getAssets().list("/");
+            String[] files = application.getAssets().list("");
             for (String s : files) {
                 if (s.equals("emoji_c_" + id + ".jpg")) {
                     return true;
