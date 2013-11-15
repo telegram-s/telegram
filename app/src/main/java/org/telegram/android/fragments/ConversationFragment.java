@@ -177,40 +177,31 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         mainContainer = res.findViewById(R.id.mainContainer);
 
-        if (!isSlow()) {
-            if (application.getUserSettings().isWallpaperSet()) {
-                if (application.getUserSettings().isWallpaperSolid()) {
-                    ColorDrawable drawable = new ColorDrawable(application.getUserSettings().getCurrentWallpaperSolidColor());
+        if (application.getUserSettings().isWallpaperSet()) {
+            if (application.getUserSettings().isWallpaperSolid()) {
+                ColorDrawable drawable = new ColorDrawable(application.getUserSettings().getCurrentWallpaperSolidColor());
+                if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                    res.setBackgroundDrawable(drawable);
+                } else {
+                    res.setBackground(drawable);
+                }
+            } else {
+                Bitmap bitmap = application.getWallpaperHolder().getBitmap();
+                if (bitmap != null) {
+                    FastBackgroundDrawable drawable = new FastBackgroundDrawable(bitmap);
                     if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                         res.setBackgroundDrawable(drawable);
                     } else {
                         res.setBackground(drawable);
                     }
-                } else {
-                    Bitmap bitmap = application.getWallpaperHolder().getBitmap();
-                    if (bitmap != null) {
-                        FastBackgroundDrawable drawable = new FastBackgroundDrawable(bitmap);
-                        if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                            res.setBackgroundDrawable(drawable);
-                        } else {
-                            res.setBackground(drawable);
-                        }
-                    }
                 }
-            } else {
-                Bitmap bitmap = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_chat_bg_default)).getBitmap();
-                FastBackgroundDrawable drawable = new FastBackgroundDrawable(bitmap);
-                mainContainer.setBackgroundDrawable(drawable);
             }
-            listView.setCacheColorHint(0);
         } else {
-//            mainContainer.setBackgroundDrawable(getResources().getDrawable(R.drawable.st_chat_bg_container));
-//            listView.setCacheColorHint(0);
-
-            int color = getResources().getColor(R.color.st_chat_bg);
-            mainContainer.setBackgroundDrawable(new ColorDrawable(color));
-            listView.setCacheColorHint(0xffD6E4EF);
+            Bitmap bitmap = application.getWallpaperHolder().getBitmap();
+            FastBackgroundDrawable drawable = new FastBackgroundDrawable(bitmap);
+            mainContainer.setBackgroundDrawable(drawable);
         }
+        listView.setCacheColorHint(0);
 
         updateHeaderPadding();
 
