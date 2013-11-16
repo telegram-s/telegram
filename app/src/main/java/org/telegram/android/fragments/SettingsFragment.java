@@ -75,7 +75,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         updateHeaderPadding();
         galleryCheck = (ImageView) res.findViewById(R.id.saveToGalleryCheck);
 
-        if (application.isSaveToGalleryEnabled()) {
+        if (application.getUserSettings().isSaveToGalleryEnabled()) {
             galleryCheck.setImageResource(R.drawable.holo_btn_check_on);
         } else {
             galleryCheck.setImageResource(R.drawable.holo_btn_check_off);
@@ -102,8 +102,8 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                     if (debugClickCount > 6) {
                         debugClickCount = 0;
 
-                        application.getDebugSettings().setDeveloperMode(true);
-                        application.getDebugSettings().setSaveLogs(true);
+                        application.getTechKernel().getDebugSettings().setDeveloperMode(true);
+                        application.getTechKernel().getDebugSettings().setSaveLogs(true);
                         Logger.enableDiskLog();
                         Toast.makeText(application, "Enabling developer settings", Toast.LENGTH_SHORT).show();
                         getView().findViewById(R.id.developmentButton).setVisibility(View.VISIBLE);
@@ -116,11 +116,11 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         res.findViewById(R.id.savePhotos).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (application.isSaveToGalleryEnabled()) {
-                    application.setSaveToGalleryEnabled(false);
+                if (application.getUserSettings().isSaveToGalleryEnabled()) {
+                    application.getUserSettings().setSaveToGalleryEnabled(false);
                     galleryCheck.setImageResource(R.drawable.holo_btn_check_off);
                 } else {
-                    application.setSaveToGalleryEnabled(true);
+                    application.getUserSettings().setSaveToGalleryEnabled(true);
                     galleryCheck.setImageResource(R.drawable.holo_btn_check_on);
                 }
             }
@@ -192,7 +192,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
             }
         });
 
-        if (application.getDebugSettings().isDeveloperMode()) {
+        if (application.getTechKernel().getDebugSettings().isDeveloperMode()) {
             res.findViewById(R.id.developmentButton).setVisibility(View.VISIBLE);
             res.findViewById(R.id.developmentDiv).setVisibility(View.VISIBLE);
         } else {

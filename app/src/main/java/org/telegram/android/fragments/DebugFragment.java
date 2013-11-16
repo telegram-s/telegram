@@ -80,20 +80,20 @@ public class DebugFragment extends StelsFragment {
         });
 
         CheckBox forceAnim = (CheckBox) res.findViewById(R.id.pageAnimations);
-        forceAnim.setChecked(application.getDebugSettings().isForceAnimations());
+        forceAnim.setChecked(application.getTechKernel().getDebugSettings().isForceAnimations());
         forceAnim.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                application.getDebugSettings().setForceAnimations(b);
+                application.getTechKernel().getDebugSettings().setForceAnimations(b);
             }
         });
 
         CheckBox saveLogs = (CheckBox) res.findViewById(R.id.enableLogging);
-        saveLogs.setChecked(application.getDebugSettings().isSaveLogs());
+        saveLogs.setChecked(application.getTechKernel().getDebugSettings().isSaveLogs());
         saveLogs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                application.getDebugSettings().setSaveLogs(b);
+                application.getTechKernel().getDebugSettings().setSaveLogs(b);
                 if (b) {
                     Logger.enableDiskLog();
                 } else {
@@ -125,11 +125,11 @@ public class DebugFragment extends StelsFragment {
                 {
                         "Default", "None", "Hardware", "Software"
                 }));
-        spinner.setSelection(application.getDebugSettings().getDialogListLayerType());
+        spinner.setSelection(application.getTechKernel().getDebugSettings().getDialogListLayerType());
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                application.getDebugSettings().setDialogListLayerType(i);
+                application.getTechKernel().getDebugSettings().setDialogListLayerType(i);
             }
 
             @Override
@@ -144,11 +144,11 @@ public class DebugFragment extends StelsFragment {
                 {
                         "Default", "None", "Hardware", "Software"
                 }));
-        spinner.setSelection(application.getDebugSettings().getDialogListItemLayerType());
+        spinner.setSelection(application.getTechKernel().getDebugSettings().getDialogListItemLayerType());
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                application.getDebugSettings().setDialogListItemLayerType(i);
+                application.getTechKernel().getDebugSettings().setDialogListItemLayerType(i);
             }
 
             @Override
@@ -162,11 +162,11 @@ public class DebugFragment extends StelsFragment {
                 {
                         "Default", "None", "Hardware", "Software"
                 }));
-        spinner.setSelection(application.getDebugSettings().getConversationListLayerType());
+        spinner.setSelection(application.getTechKernel().getDebugSettings().getConversationListLayerType());
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                application.getDebugSettings().setConversationListLayerType(i);
+                application.getTechKernel().getDebugSettings().setConversationListLayerType(i);
             }
 
             @Override
@@ -180,11 +180,11 @@ public class DebugFragment extends StelsFragment {
                 {
                         "Default", "None", "Hardware", "Software"
                 }));
-        spinner.setSelection(application.getDebugSettings().getConversationListItemLayerType());
+        spinner.setSelection(application.getTechKernel().getDebugSettings().getConversationListItemLayerType());
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                application.getDebugSettings().setConversationListItemLayerType(i);
+                application.getTechKernel().getDebugSettings().setConversationListItemLayerType(i);
             }
 
             @Override

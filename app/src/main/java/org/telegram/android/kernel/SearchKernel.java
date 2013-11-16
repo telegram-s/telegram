@@ -1,4 +1,4 @@
-package org.telegram.android.core;
+package org.telegram.android.kernel;
 
 import android.text.SpannableString;
 import org.telegram.android.StelsApplication;
@@ -15,11 +15,11 @@ import java.util.HashSet;
  * Author: Korshakov Stepan
  * Created: 24.08.13 22:35
  */
-public class GlobalSearcher {
+public class SearchKernel {
     private StelsApplication application;
     private DialogDescription[] descriptions;
 
-    public GlobalSearcher(StelsApplication application) {
+    public SearchKernel(StelsApplication application) {
         this.application = application;
     }
 

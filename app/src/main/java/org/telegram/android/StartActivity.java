@@ -181,7 +181,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        application.onConfigurationChanged();
+        application.getUiKernel().onConfigurationChanged();
         updateHeaderHeight();
     }
 
@@ -222,7 +222,8 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                application.dropLogin();
+                                // TODO: Fix drop login
+                                // application.dropLogin();
                             }
                         })
                         .setNegativeButton("No", null).show();
@@ -439,7 +440,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     @Override
     protected void onResume() {
         super.onResume();
-        application.onAppResume(this);
+        application.getUiKernel().onAppResume(this);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("org.telegram.android.ACTION_LOGOUT");
         logoutReceiver = new BroadcastReceiver() {
@@ -456,7 +457,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     @Override
     protected void onPause() {
         super.onPause();
-        application.onAppPause();
+        application.getUiKernel().onAppPause();
         unregisterReceiver(logoutReceiver);
         // getWindow().setBackgroundDrawableResource(R.drawable.smileys_bg);
     }

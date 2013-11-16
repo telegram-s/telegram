@@ -15,7 +15,6 @@ import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
 import org.telegram.api.TLMessage;
 import org.telegram.api.engine.RpcException;
-import org.telegram.api.engine.UpdateCatcher;
 import org.telegram.api.messages.*;
 import org.telegram.api.requests.TLRequestUpdatesGetDifference;
 import org.telegram.api.requests.TLRequestUpdatesGetState;
@@ -29,7 +28,7 @@ import java.util.*;
  * Author: Korshakov Stepan
  * Created: 29.07.13 2:27
  */
-public class UpdateProcessor implements UpdateCatcher {
+public class UpdateProcessor {
 
     private static final String TAG = "Updater";
 
@@ -148,11 +147,11 @@ public class UpdateProcessor implements UpdateCatcher {
             }
         };
         corrector.setName("CorrectorThread#" + corrector.hashCode());
-        corrector.start();
-
-        application.getApi().setUpdateCatcher(this);
-
         Logger.d(TAG, "Initied");
+    }
+
+    public void runUpdateProcessor() {
+        corrector.start();
     }
 
     private Handler getHandler() {
@@ -948,7 +947,7 @@ public class UpdateProcessor implements UpdateCatcher {
     }
 
     private void onInMessageArrived(int peerType, int peerId, int mid) {
-        if (application.getOpenedChatPeerType() == peerType && application.getOpenedChatPeerId() == peerId) {
+        if (application.getUiKernel().getOpenedChatPeerType() == peerType && application.getUiKernel().getOpenedChatPeerId() == peerId) {
             int maxMid = application.getEngine().getMaxMsgInId(peerType, peerId);
             application.getEngine().onMaxLocalViewed(peerType, peerId, Math.max(maxMid, mid));
             application.getActions().readHistory(peerType, peerId);
@@ -966,9 +965,6 @@ public class UpdateProcessor implements UpdateCatcher {
             return;
         }
         isDestroyed = true;
-        if (application.getApi() != null && application.getApi().getUpdateCatcher() == this) {
-            application.getApi().setUpdateCatcher(null);
-        }
         correctorHandler.removeMessages(0);
         correctorHandler.removeMessages(1);
         corrector.interrupt();
@@ -984,10 +980,5 @@ public class UpdateProcessor implements UpdateCatcher {
             return;
 
         invalidateUpdates();
-    }
-
-    @Override
-    public void onUpdate(TLAbsUpdates updates) {
-        onMessage(updates);
     }
 }

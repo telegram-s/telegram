@@ -242,7 +242,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
         });
 
-        source = application.getMessageSource(peerType, peerId);
+        source = application.getDataSourceKernel().getMessageSource(peerType, peerId);
         source.getMessagesSource().onConnected();
         workingSet = source.getMessagesSource().getCurrentWorkingSet();
 
@@ -516,8 +516,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     protected void doSend() {
         long start = System.currentTimeMillis();
         String message = editText.getText().toString().trim();
-//        application.getLastEmoji().applyLastSmileys(
-//                EmojiProcessor.findFirstUniqEmoji(message, LastEmojiProcessor.LAST_EMOJI_COUNT));
         application.getMessageSender().postTextMessage(peerType, peerId, message);
         // application.getEngine().sendMessage(peerType, peerId, message);
         application.getActions().resetTypingDelay();
@@ -798,7 +796,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         application.getUserSource().registerListener(this);
         application.getEncryptedChatSource().registerListener(this);
 
-        application.onOpenedChat(peerType, peerId);
+        application.getUiKernel().onOpenedChat(peerType, peerId);
 
         if (selectedIndex >= 0) {
             listView.setSelectionFromTop(selectedIndex, selectedTop - listView.getPaddingTop());
@@ -825,7 +823,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            switch (application.getDebugSettings().getConversationListLayerType()) {
+            switch (application.getTechKernel().getDebugSettings().getConversationListLayerType()) {
                 default:
                 case DebugSettings.LAYER_NONE:
                     listView.setLayerType(View.LAYER_TYPE_NONE, null);
@@ -1245,7 +1243,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         application.getUserSource().unregisterListener(this);
         application.getEncryptedChatSource().unregisterListener(this);
 
-        application.onClosedChat(peerType, peerId);
+        application.getUiKernel().onClosedChat(peerType, peerId);
 
         if (editText != null && editText.getText().toString().trim().length() > 0) {
             application.getTextSaver().saveText(editText.getText().toString().trim(), peerType, peerId);
@@ -1478,7 +1476,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                switch (application.getDebugSettings().getConversationListItemLayerType()) {
+                switch (application.getTechKernel().getDebugSettings().getConversationListItemLayerType()) {
                     default:
                     case DebugSettings.LAYER_NONE:
                         view.setLayerType(View.LAYER_TYPE_NONE, null);

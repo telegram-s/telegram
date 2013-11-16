@@ -16,6 +16,7 @@ public class UserSettings {
     private boolean isWallpaperSet = false;
     private boolean isWallpaperSolid = false;
     private int currentWallpaperSolidColor = 0;
+    private boolean isSaveToGalleryEnabled = true;
 
     public UserSettings(Context context) {
         preferences = context.getSharedPreferences("org.telegram.android.UserSettings.pref", Context.MODE_PRIVATE);
@@ -23,6 +24,7 @@ public class UserSettings {
         isWallpaperSet = preferences.getBoolean("isWallpaperSet", false);
         currentWallpaperSolidColor = preferences.getInt("wallpaperColor", 0);
         isWallpaperSolid = preferences.getBoolean("isWallpaperSolid", false);
+        isSaveToGalleryEnabled = preferences.getBoolean("save_to_gallery", true);
     }
 
     public int getCurrentWallpaperId() {
@@ -59,5 +61,14 @@ public class UserSettings {
     public void setCurrentWallpaperSolidColor(int currentWallpaperSolidColor) {
         this.currentWallpaperSolidColor = currentWallpaperSolidColor;
         preferences.edit().putInt("wallpaperColor", currentWallpaperSolidColor).commit();
+    }
+
+    public boolean isSaveToGalleryEnabled() {
+        return isSaveToGalleryEnabled;
+    }
+
+    public void setSaveToGalleryEnabled(boolean value) {
+        isSaveToGalleryEnabled = value;
+        preferences.edit().putBoolean("save_to_gallery", value).commit();
     }
 }

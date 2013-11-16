@@ -271,4 +271,10 @@ public class TypingStates {
         }
         notifyChatChange(chatId);
     }
+
+    public synchronized void clearState() {
+        chatTypes.clear();
+        encryptedTypes.clear();
+        userTypes.clear();
+    }
 }

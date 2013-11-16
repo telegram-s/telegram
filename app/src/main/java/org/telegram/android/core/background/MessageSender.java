@@ -14,6 +14,8 @@ import org.telegram.android.media.Optimizer;
 import org.telegram.android.core.model.*;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.tasks.AsyncException;
+import org.telegram.android.ui.EmojiProcessor;
+import org.telegram.android.ui.LastEmojiProcessor;
 import org.telegram.api.*;
 import org.telegram.api.TLMessage;
 import org.telegram.api.engine.RpcCallback;
@@ -144,7 +146,7 @@ public class MessageSender {
                 if (!state.isUploaded) {
                     state.isCanceled = true;
                     application.getEngine().cancelMediaSend(databaseId);
-                    application.notifyUIUpdate();
+                    application.getKernel().getDataSourceKernel().notifyUIUpdate();
                     return true;
                 }
             }
@@ -319,7 +321,7 @@ public class MessageSender {
                                     try {
                                         String downloadKey = DownloadManager.getPhotoKey(photo);
                                         application.getDownloadManager().saveDownloadImage(downloadKey, originalFile);
-                                        if (application.isSaveToGalleryEnabled()) {
+                                        if (application.getSettingsKernel().getUserSettings().isSaveToGalleryEnabled()) {
                                             application.getDownloadManager().writeToGallery(destFile, downloadKey + ".jpg");
                                         }
                                     } catch (IOException e) {
@@ -354,7 +356,7 @@ public class MessageSender {
                                     if (!(mediaPhoto.getFullLocation() instanceof TLLocalFileEmpty)) {
                                         String downloadKey = DownloadManager.getPhotoKey(mediaPhoto);
                                         application.getDownloadManager().saveDownloadImage(downloadKey, destFile);
-                                        if (application.isSaveToGalleryEnabled()) {
+                                        if (application.getSettingsKernel().getUserSettings().isSaveToGalleryEnabled()) {
                                             application.getDownloadManager().writeToGallery(destFile, downloadKey + ".jpg");
                                         }
                                     }
@@ -514,7 +516,7 @@ public class MessageSender {
                                     try {
                                         String downloadKey = DownloadManager.getVideoKey(localVideo);
                                         application.getDownloadManager().saveDownloadVideo(downloadKey, uploadingVideo.getFileName());
-                                        if (application.isSaveToGalleryEnabled()) {
+                                        if (application.getSettingsKernel().getUserSettings().isSaveToGalleryEnabled()) {
                                             application.getDownloadManager().writeToGallery(uploadingVideo.getFileName(), downloadKey + ".mp4");
                                         }
                                     } catch (IOException e) {
@@ -582,7 +584,7 @@ public class MessageSender {
                                     TLLocalVideo mediaVideo = EngineUtils.convertVideo((TLMessageMediaVideo) msgRes.getMedia());
                                     String downloadKey = DownloadManager.getVideoKey(mediaVideo);
                                     application.getDownloadManager().saveDownloadVideo(downloadKey, uploadingVideo.getFileName());
-                                    if (application.isSaveToGalleryEnabled()) {
+                                    if (application.getSettingsKernel().getUserSettings().isSaveToGalleryEnabled()) {
                                         application.getDownloadManager().writeToGallery(uploadingVideo.getFileName(), key + ".mp4");
                                     }
                                 } catch (Exception e) {
@@ -619,7 +621,7 @@ public class MessageSender {
 
             message.setMessageTimeout(chat.getSelfDestructTime());
             application.getEngine().getMessagesDao().update(message);
-            application.onSourceUpdateMessage(message);
+            application.getDataSourceKernel().onSourceUpdateMessage(message);
 
             TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
             decryptedMessage.setRandomId(message.getRandomId());
@@ -735,15 +737,21 @@ public class MessageSender {
         }
     }
 
-    public void postTextMessage(int peerType, int peerId, String message) {
+    public void postTextMessage(int peerType, int peerId, final String message) {
         final ChatMessage msg = application.getEngine().prepareAsyncSendMessage(peerType, peerId, message);
         senderExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                application.getUiKernel().getLastEmoji().applyLastSmileys(
+                        EmojiProcessor.findFirstUniqEmoji(message, LastEmojiProcessor.LAST_EMOJI_COUNT));
                 application.getEngine().offThreadSendMessage(msg);
                 sendMessage(msg);
                 application.notifyUIUpdate();
             }
         });
+    }
+
+    public void reset() {
+
     }
 }

@@ -365,7 +365,7 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
         menu.findItem(R.id.addContact).setTitle(highlightMenuText(R.string.st_profile_menu_add));
         if (application.getEngine().getUidContact(userId) != null) {
             menu.findItem(R.id.addContact).setVisible(false);
-            if (!application.isOnSdCard()) {
+            if (!application.getTechKernel().getTechReflection().isOnSdCard()) {
                 menu.findItem(R.id.viewBook).setVisible(true);
                 menu.findItem(R.id.viewBook).setTitle(highlightMenuText(R.string.st_profile_menu_view));
             } else {

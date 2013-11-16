@@ -338,14 +338,14 @@ public class ContactsSource {
         application.getEngine().onUserLinkChanged(uid, LinkType.CONTACT);
         application.getUserSource().notifyUserChanged(uid);
 
-        if (!application.getTechReflection().isOnSdCard()) {
+        if (!application.getTechKernel().getTechReflection().isOnSdCard()) {
             if (application.getEngine().getUidContact(uid) != null) {
                 User user = application.getEngine().getUser(uid);
-                long nid = addContact(true, application.getAccount(), user, firstName + " " + lastName, user.getPhone());
+                long nid = addContact(true, application.getKernel().getAuthKernel().getAccount(), user, firstName + " " + lastName, user.getPhone());
                 application.getEngine().updateContact(uid, nid);
             } else {
                 User user = application.getEngine().getUser(uid);
-                long id = addContact(false, application.getAccount(), user, firstName + " " + lastName, user.getPhone());
+                long id = addContact(false, application.getKernel().getAuthKernel().getAccount(), user, firstName + " " + lastName, user.getPhone());
                 application.getEngine().addContact(uid, id);
             }
         }
@@ -510,15 +510,15 @@ public class ContactsSource {
     }
 
     private void applyDiff() {
-        if (application.getTechReflection().isOnSdCard()) {
+        if (application.getTechKernel().getTechReflection().isOnSdCard()) {
             return;
         }
 
         Logger.d(TAG, "Contacts: applying changes to phonebook");
         User[] users = getUsers();
 
-        Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, application.getAccount().name).appendQueryParameter(
-                ContactsContract.RawContacts.ACCOUNT_TYPE, application.getAccount().type).build();
+        Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, application.getKernel().getAuthKernel().getAccount().name).appendQueryParameter(
+                ContactsContract.RawContacts.ACCOUNT_TYPE, application.getKernel().getAuthKernel().getAccount().type).build();
         Cursor c1 = application.getContentResolver().query(rawContactUri, new String[]{BaseColumns._ID, ContactsContract.RawContacts.SYNC2}, null, null, null);
         HashMap<Integer, Long> localContacts = new HashMap<Integer, Long>();
         if (c1 != null) {
@@ -534,7 +534,7 @@ public class ContactsSource {
         for (User u : users) {
             founded.add(u.getUid());
             if (!localContacts.containsKey(u.getUid())) {
-                addContact(false, application.getAccount(), u, u.getDisplayName(), u.getPhone());
+                addContact(false, application.getKernel().getAuthKernel().getAccount(), u, u.getDisplayName(), u.getPhone());
             }
         }
         Logger.d(TAG, "applying changes ends");

@@ -268,7 +268,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                 DialogView dialogView = (DialogView) view;
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    switch (application.getDebugSettings().getDialogListItemLayerType()) {
+                    switch (application.getTechKernel().getDebugSettings().getDialogListItemLayerType()) {
                         default:
                         case DebugSettings.LAYER_NONE:
                             view.setLayerType(View.LAYER_TYPE_NONE, null);
@@ -713,7 +713,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN |
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        application.onDialogsResume();
+        application.getUiKernel().onDialogsResume();
         application.getDialogSource().getViewSource().addListener(this);
         application.getNotifications().hideAllNotifications();
 
@@ -723,7 +723,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
         updateHeaderPadding();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            switch (application.getDebugSettings().getDialogListLayerType()) {
+            switch (application.getTechKernel().getDebugSettings().getDialogListLayerType()) {
                 default:
                 case DebugSettings.LAYER_NONE:
                     listView.setLayerType(View.LAYER_TYPE_NONE, null);
@@ -884,7 +884,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             goneView(searchEmpty);
             goneView(searchListView);
         } else {
-            searchWireframes = application.getSearcher().doSearch(matcher);
+            searchWireframes = application.getSearchKernel().doSearch(matcher);
             searchResultAdapter.notifyDataSetChanged();
             goneView(searchHint);
             if (searchWireframes.length == 0) {
@@ -1085,7 +1085,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
         super.onPause();
 
         application.getDialogSource().getViewSource().removeListener(this);
-        application.onDialogPaused();
+        application.getUiKernel().onDialogPaused();
 
         saveListPosition();
     }

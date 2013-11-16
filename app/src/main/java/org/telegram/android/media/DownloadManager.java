@@ -281,7 +281,7 @@ public class DownloadManager {
 
                         try {
                             Logger.d(TAG, "@" + key + " = writing to gallery");
-                            if (application.isSaveToGalleryEnabled()) {
+                            if (application.getUserSettings().isSaveToGalleryEnabled()) {
                                 writeToGallery(fileName, key + ".jpg");
                             }
                         } catch (Exception e) {
@@ -289,7 +289,7 @@ public class DownloadManager {
                         }
                     } else {
                         Logger.d(TAG, "@" + key + " = writing to gallery");
-                        if (application.isSaveToGalleryEnabled()) {
+                        if (application.getUserSettings().isSaveToGalleryEnabled()) {
                             try {
                                 writeToGallery(fileName, key + ".mp4");
                             } catch (Exception e) {

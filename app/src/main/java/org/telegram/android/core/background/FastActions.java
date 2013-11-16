@@ -49,7 +49,7 @@ public class FastActions {
                                 return;
                             }
                             if (msg.what == 0) {
-                                if (application.isAppActive()) {
+                                if (application.getUiKernel().isAppActive()) {
                                     application.getApi().doRpcCall(new TLRequestAccountUpdateStatus(false), null);
                                     handler.sendEmptyMessageDelayed(0, 60 * 1000);
                                 } else {
@@ -109,7 +109,7 @@ public class FastActions {
                                         message.setMessageDieTime((int) (System.currentTimeMillis() / 1000 + message.getMessageTimeout()));
                                         application.getSelfDestructProcessor().performSelfDestruct(message.getDatabaseId(), message.getMessageDieTime());
                                         application.getEngine().getMessagesDao().update(message);
-                                        application.onSourceUpdateMessage(message);
+                                        application.getDataSourceKernel().onSourceUpdateMessage(message);
                                         application.notifyUIUpdate();
                                     }
                                     try {

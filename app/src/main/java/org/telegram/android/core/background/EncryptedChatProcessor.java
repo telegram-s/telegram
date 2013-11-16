@@ -48,14 +48,14 @@ public class EncryptedChatProcessor {
     }
 
     public void checkChats() {
-        if (application.isAppActive()) {
+        if (application.getUiKernel().isAppActive()) {
             handler.removeMessages(0);
             handler.sendEmptyMessage(0);
         }
     }
 
     public void onUserGoesOnline() {
-        if (application.isAppActive()) {
+        if (application.getUiKernel().isAppActive()) {
             handler.removeMessages(0);
             handler.sendEmptyMessage(0);
         }

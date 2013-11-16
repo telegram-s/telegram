@@ -231,7 +231,7 @@ public class EncryptionController {
                         application.getNotifications().onNewSecretMessage(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     }
 
-                    if (application.getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getOpenedChatPeerId() == chat.getId()) {
+                    if (application.getUiKernel().getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getUiKernel().getOpenedChatPeerId() == chat.getId()) {
                         int date = application.getEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
                         application.getEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, encMsg.getDate()));
                         application.getActions().readHistory(PeerType.PEER_USER_ENCRYPTED, chat.getId());
@@ -275,7 +275,7 @@ public class EncryptionController {
                                 new TLLocalActionEncryptedTtl(ttlAction.getTtlSeconds()));
                     }
 
-                    if (application.getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getOpenedChatPeerId() == chat.getId()) {
+                    if (application.getUiKernel().getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getUiKernel().getOpenedChatPeerId() == chat.getId()) {
                         int date = application.getEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
                         application.getEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, service.getDate()));
                         application.getActions().readHistory(PeerType.PEER_USER_ENCRYPTED, chat.getId());

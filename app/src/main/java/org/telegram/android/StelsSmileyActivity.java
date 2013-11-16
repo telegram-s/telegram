@@ -210,7 +210,7 @@ public class StelsSmileyActivity extends StelsActivity implements SmileysControl
                 switch (pos) {
                     default:
                     case 0:
-                        return application.getLastEmoji().getLastSmileys();
+                        return application.getUiKernel().getLastEmoji().getLastSmileys();
                     case 1:
                         return Smileys.STANDART;
                     case 2:
@@ -302,7 +302,7 @@ public class StelsSmileyActivity extends StelsActivity implements SmileysControl
             }
         });
 
-        if (application.getLastEmoji().getLastSmileys().length == 0) {
+        if (application.getUiKernel().getLastEmoji().getLastSmileys().length == 0) {
             pager.setCurrentItem(1);
         }
 

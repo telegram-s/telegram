@@ -67,7 +67,7 @@ public class AuthenticatorService extends Service {
                 final boolean removalAllowed = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
 
                 if (removalAllowed) {
-                    mContext.sendBroadcast(new Intent("org.telegram.android.LOGOUT"));
+                    // mContext.sendBroadcast(new Intent("org.telegram.android.LOGOUT"));
                     //((StelsApplication) mContext.getApplicationContext()).dropLogin();
                 }
             }

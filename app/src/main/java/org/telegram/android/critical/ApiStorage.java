@@ -22,8 +22,10 @@ import org.telegram.mtproto.state.KnownSalt;
  * Time: 0:41
  */
 public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState {
+    public static final String STORAGE_FILE_NAME = "api.bin";
+
     public ApiStorage(Context context) {
-        super(context, "api.bin", TLStorage.class, TLLocalContext.getInstance());
+        super(context, STORAGE_FILE_NAME, TLStorage.class, TLLocalContext.getInstance());
 
         if (getObj().getDcInfos().size() == 0) {
             getObj().getDcInfos().add(new TLDcInfo(1, "173.240.5.1", 443));

@@ -347,7 +347,7 @@ public class Notifications {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        final Activity activity = application.getVisibleActivity();
+                        final Activity activity = application.getUiKernel().getVisibleActivity();
                         if (activity == null) {
                             return;
                         }
@@ -521,10 +521,10 @@ public class Notifications {
 
         boolean isConversationVisible = false;
 
-        if (application.isAppVisible()) {
+        if (application.getUiKernel().isAppVisible()) {
             config.useSound = config.useSound & settings.isInAppSoundsEnabled();
             config.useVibration = config.useVibration & settings.isInAppVibrateEnabled();
-            if (application.getOpenedChatPeerType() == peerType && application.getOpenedChatPeerId() == peerId || application.isDialogsVisible()) {
+            if (application.getUiKernel().getOpenedChatPeerType() == peerType && application.getUiKernel().getOpenedChatPeerId() == peerId || application.getUiKernel().isDialogsVisible()) {
                 config.useNotification = false;
                 config.useInAppNotification = false;
                 isConversationVisible = true;

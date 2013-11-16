@@ -129,7 +129,8 @@ public class DialogSource {
                             }
                         }
                         if (!founded) {
-                            application.dropLogin();
+                            // TODO: fix drop login
+                            // application.dropLogin();
                             Logger.d(TAG, "Missed user: " + uid);
                             Crittercism.logHandledException(new RuntimeException("Reset by missed user: " + uid));
                             return new DialogDescription[0];
