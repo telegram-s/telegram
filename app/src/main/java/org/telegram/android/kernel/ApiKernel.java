@@ -2,6 +2,7 @@ package org.telegram.android.kernel;
 
 import android.os.Build;
 import org.telegram.android.R;
+import org.telegram.android.core.background.UpdateProcessor;
 import org.telegram.android.kernel.api.AuthController;
 import org.telegram.api.TLAbsUpdates;
 import org.telegram.api.engine.ApiCallback;
@@ -37,6 +38,7 @@ public class ApiKernel {
 
     public void switchToDc(int dcId) {
         kernel.getAuthKernel().getApiStorage().switchToPrimaryDc(dcId);
+        updateTelegramApi();
         authController.check();
     }
 
@@ -57,6 +59,9 @@ public class ApiKernel {
                     if (api != ApiKernel.this.api) {
                         return;
                     }
+                    if (!kernel.getAuthKernel().isLoggedIn()) {
+                        return;
+                    }
                     kernel.getSyncKernel().getUpdateProcessor().invalidateUpdates();
                 }
 
@@ -65,12 +70,19 @@ public class ApiKernel {
                     if (api != ApiKernel.this.api) {
                         return;
                     }
-                    kernel.getSyncKernel().getUpdateProcessor().onMessage(updates);
+                    if (!kernel.getAuthKernel().isLoggedIn()) {
+                        return;
+                    }
+                    UpdateProcessor updateProcessor = kernel.getSyncKernel().getUpdateProcessor();
+                    if (updateProcessor != null) {
+                        updateProcessor.onMessage(updates);
+                    }
                 }
             });
         } else {
             api = null;
         }
+        authController.check();
     }
 
     public TelegramApi getApi() {

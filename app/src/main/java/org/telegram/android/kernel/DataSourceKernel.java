@@ -25,11 +25,35 @@ public class DataSourceKernel {
 
     public DataSourceKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
-        dialogSource = new DialogSource(kernel.getApplication());
-        userSource = new UserSource(kernel.getApplication());
-        contactsSource = new ContactsSource(kernel.getApplication());
-        chatSource = new ChatSource(kernel.getApplication());
-        encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
+        init();
+    }
+
+    private void init() {
+        if (kernel.getAuthKernel().isLoggedIn()) {
+            dialogSource = new DialogSource(kernel.getApplication());
+            dialogSource.startSyncIfRequired();
+            userSource = new UserSource(kernel.getApplication());
+            contactsSource = new ContactsSource(kernel.getApplication());
+            chatSource = new ChatSource(kernel.getApplication());
+            encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
+
+            if (kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
+                dialogSource.resetSync();
+                dialogSource.startSync();
+            } else {
+                dialogSource.startSyncIfRequired();
+            }
+
+            if (kernel.getTechKernel().getTechReflection().isAppUpgraded() || kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
+                contactsSource.resetState();
+            }
+
+            if (kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
+                MessageSource.clearData(kernel.getApplication());
+            }
+
+            contactsSource.startSync();
+        }
     }
 
     public DialogSource getDialogSource() {
@@ -124,5 +148,33 @@ public class DataSourceKernel {
             }
         }
         Logger.w(TAG, "notifyUIUpdate: " + (System.currentTimeMillis() - start) + " ms");
+    }
+
+    public void logIn() {
+        dialogSource = new DialogSource(kernel.getApplication());
+        dialogSource.startSyncIfRequired();
+        userSource = new UserSource(kernel.getApplication());
+        contactsSource = new ContactsSource(kernel.getApplication());
+        chatSource = new ChatSource(kernel.getApplication());
+        encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
+    }
+
+    public void logOut() {
+        // Clearing all messages states
+        for (MessageSource source : messageSources.values()) {
+            source.destroy();
+        }
+        messageSources.clear();
+        MessageSource.clearData(kernel.getApplication());
+
+        // Clearing dialogs states
+        dialogSource.destroy();
+        DialogSource.clearData(kernel.getApplication());
+
+        // Clearing contacts states
+        contactsSource.destroy();
+        ContactsSource.clearData(kernel.getApplication());
+
+        chatSource.clear();
     }
 }

@@ -56,30 +56,7 @@ public class StelsApplication extends Application implements ImageSupport {
 
         kernel.runKernels();
 
-        // updateApi();
-        // kernel.getAuthKernel().getAuthController().check();
-
-        // if (isLoggedIn()) {
-
-//            if (kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
-//                dialogSource.resetSync();
-//                dialogSource.startSync();
-//            } else {
-//                dialogSource.startSyncIfRequired();
-//            }
-//
-//            if (kernel.getTechKernel().getTechReflection().isAppUpgraded() || kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
-//                contactsSource.resetState();
-//            }
-//
-//            if (kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
-//                MessageSource.clearData(this);
-//            }
-//
-//            contactsSource.startSync();
-        //}
-
-        getUiKernel().onAppPause();
+        kernel.getUiKernel().onAppPause();
     }
 
     public boolean isRTL() {
@@ -100,60 +77,6 @@ public class StelsApplication extends Application implements ImageSupport {
 
     public int getCurrentUid() {
         return kernel.getAuthKernel().getApiStorage().getObj().getUid();
-    }
-
-    private void dropData() {
-        getEngine().getDatabase().clearData();
-        getEngine().clearCache();
-        getChatSource().clear();
-    }
-
-    public void prelogin() {
-        dropData();
-    }
-
-    public void onSuccessAuth(TLAuthorization auth) {
-        kernel.logIn(auth);
-
-
-//        dialogSource = new DialogSource(this);
-//        dialogSource.startSync();
-//        contactsSource = new ContactsSource(this);
-//        contactsSource.startSync();
-//        updateProcessor = new UpdateProcessor(this);
-//        updateProcessor.invalidateUpdates();
-
-//        techSyncer.onLogin();
-    }
-
-    public void clearLoginState() {
-        kernel.logOut();
-
-//        // Clearing all messages states
-//        for (MessageSource source : messageSources.values()) {
-//            source.destroy();
-//        }
-//        messageSources.clear();
-//        MessageSource.clearData(this);
-//
-//        // Clearing dialogs states
-//        dialogSource.destroy();
-//        DialogSource.clearData(this);
-//
-//        // Clearing contacts states
-//        contactsSource.destroy();
-//        ContactsSource.clearData(this);
-
-//        updateProcessor.destroy();
-//        updateProcessor.clearData();
-//
-//        techSyncer.onLogout();
-//
-//        getUiKernel().getNotifications().reset();
-//
-//        dropData();
-//
-//        kernel.getAuthKernel().getApiStorage().resetAuth();
     }
 
 //    public void dropLogin() {

@@ -20,11 +20,11 @@ public class UserSettings {
 
     public UserSettings(Context context) {
         preferences = context.getSharedPreferences("org.telegram.android.UserSettings.pref", Context.MODE_PRIVATE);
-        currentWallpaperId = preferences.getInt("wallpaperId", -1);
-        isWallpaperSet = preferences.getBoolean("isWallpaperSet", false);
-        currentWallpaperSolidColor = preferences.getInt("wallpaperColor", 0);
-        isWallpaperSolid = preferences.getBoolean("isWallpaperSolid", false);
-        isSaveToGalleryEnabled = preferences.getBoolean("save_to_gallery", true);
+        currentWallpaperId = preferences.getInt("wallpaperId", currentWallpaperId);
+        isWallpaperSet = preferences.getBoolean("isWallpaperSet", isWallpaperSet);
+        currentWallpaperSolidColor = preferences.getInt("wallpaperColor", currentWallpaperSolidColor);
+        isWallpaperSolid = preferences.getBoolean("isWallpaperSolid", isWallpaperSolid);
+        isSaveToGalleryEnabled = preferences.getBoolean("save_to_gallery", isSaveToGalleryEnabled);
     }
 
     public int getCurrentWallpaperId() {
@@ -70,5 +70,20 @@ public class UserSettings {
     public void setSaveToGalleryEnabled(boolean value) {
         isSaveToGalleryEnabled = value;
         preferences.edit().putBoolean("save_to_gallery", value).commit();
+    }
+
+    public void clearSettings() {
+        String[] keys = preferences.getAll().keySet().toArray(new String[0]);
+        SharedPreferences.Editor editor = preferences.edit();
+        for (String k : keys) {
+            editor.remove(k);
+        }
+        editor.commit();
+
+        currentWallpaperId = -1;
+        isWallpaperSet = false;
+        isWallpaperSolid = false;
+        currentWallpaperSolidColor = 0;
+        isSaveToGalleryEnabled = true;
     }
 }

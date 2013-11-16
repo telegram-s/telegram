@@ -248,4 +248,18 @@ public class UiKernel {
             application.getEncryptedChatProcessor().onUserGoesOffline();
         }
     }
+
+    public void logIn() {
+        clearState();
+    }
+
+    public void logOut() {
+        clearState();
+    }
+
+    private void clearState() {
+        lastEmoji.clearLastSmileys();
+        notifications.reset();
+        textSaver.reset();
+    }
 }

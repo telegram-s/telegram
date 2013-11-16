@@ -54,6 +54,7 @@ public class UpdateProcessor {
     private HashMap<Integer, TLObject> further = new HashMap<Integer, TLObject>();
 
     private boolean isDestroyed = false;
+    private boolean isStarted = false;
 
     public UpdateProcessor(StelsApplication _application) {
         this.application = _application;
@@ -151,7 +152,18 @@ public class UpdateProcessor {
     }
 
     public void runUpdateProcessor() {
+        if (isStarted) {
+            return;
+        }
+        isStarted = true;
         corrector.start();
+        if (isInvalidated) {
+            while (correctorHandler == null) {
+                Thread.yield();
+            }
+            correctorHandler.removeMessages(0);
+            correctorHandler.sendEmptyMessage(0);
+        }
     }
 
     private Handler getHandler() {
@@ -162,13 +174,17 @@ public class UpdateProcessor {
     }
 
     public synchronized void invalidateUpdates() {
-        if (isInvalidated) {
-            Logger.w(TAG, "Trying to invalidate already invialidated: " + updateState.getSeq());
-        } else {
-            Logger.w(TAG, "Invialidated: " + updateState.getSeq());
+        if (!isStarted) {
             isInvalidated = true;
-            getHandler().removeMessages(0);
-            getHandler().sendEmptyMessage(0);
+        } else {
+            if (isInvalidated) {
+                Logger.w(TAG, "Trying to invalidate already invialidated: " + updateState.getSeq());
+            } else {
+                Logger.w(TAG, "Invialidated: " + updateState.getSeq());
+                isInvalidated = true;
+                getHandler().removeMessages(0);
+                getHandler().sendEmptyMessage(0);
+            }
         }
     }
 
@@ -271,6 +287,8 @@ public class UpdateProcessor {
     }
 
     public synchronized void checkBrokenSequence() {
+        if (!isStarted)
+            return;
         if (!isBrokenSequence)
             return;
         getHandler().removeMessages(1);
@@ -280,11 +298,15 @@ public class UpdateProcessor {
     }
 
     private void requestSequenceCheck() {
+        if (!isStarted)
+            return;
         getHandler().removeMessages(1);
         getHandler().sendEmptyMessageDelayed(1, CHECK_TIMEOUT);
     }
 
     private void cancelSequenceCheck() {
+        if (!isStarted)
+            return;
         getHandler().removeMessages(1);
     }
 
@@ -356,6 +378,9 @@ public class UpdateProcessor {
 
     public synchronized void onMessage(TLObject object) {
         if (isDestroyed) {
+            return;
+        }
+        if (!isStarted) {
             return;
         }
 
@@ -968,17 +993,15 @@ public class UpdateProcessor {
         correctorHandler.removeMessages(0);
         correctorHandler.removeMessages(1);
         corrector.interrupt();
+        try {
+            corrector.join(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         further.clear();
     }
 
     public synchronized void clearData() {
         updateState.resetState();
-    }
-
-    public synchronized void checkState() {
-        if (!application.isLoggedIn())
-            return;
-
-        invalidateUpdates();
     }
 }

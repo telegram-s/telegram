@@ -380,8 +380,6 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     }
 
     public void onSuccessAuth(TLAuthorization authorization) {
-        application.onSuccessAuth(authorization);
-
         if (ACTION_LOGIN.equals(getIntent().getAction())) {
             AccountAuthenticatorResponse response = getIntent().getExtras().getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
             Bundle result = new Bundle();

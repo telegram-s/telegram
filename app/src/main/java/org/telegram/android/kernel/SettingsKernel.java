@@ -22,4 +22,18 @@ public class SettingsKernel {
     public UserSettings getUserSettings() {
         return userSettings;
     }
+
+    public void logIn() {
+        clearSettings();
+    }
+
+    public void logOut() {
+        clearSettings();
+    }
+
+    public void clearSettings() {
+        notificationSettings.clearSettings();
+        userSettings.clearSettings();
+    }
 }
+

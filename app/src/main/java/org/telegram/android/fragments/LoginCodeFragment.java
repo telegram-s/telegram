@@ -321,8 +321,8 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
             @Override
             public void execute() throws AsyncException {
                 try {
-                    application.prelogin();
                     authorization = rpcRaw(new TLRequestAuthSignIn(phoneNumber, phoneHash, code));
+                    application.getKernel().logIn(authorization);
                 } catch (RpcException e) {
                     if (e.getErrorCode() == 400) {
                         if ("PHONE_CODE_EXPIRED".equals(e.getErrorTag())) {
@@ -352,9 +352,6 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
                 codeSending = false;
                 if (authorization != null) {
                     contentView.setVisibility(View.GONE);
-                    ArrayList<TLAbsUser> users = new ArrayList<TLAbsUser>();
-                    users.add(authorization.getUser());
-                    application.getEngine().onUsers(users);
                     ((StartActivity) getActivity()).onSuccessAuth(authorization);
                 } else {
                     if (expired) {

@@ -54,30 +54,35 @@ public class SyncKernel {
         messageSender = new MessageSender(kernel.getApplication());
         actions = new FastActions(kernel.getApplication());
         typingStates = new TypingStates(kernel.getApplication());
-        updateProcessor = new UpdateProcessor(kernel.getApplication());
+        // updateProcessor = new UpdateProcessor(kernel.getApplication());
         techSyncer = new TechSyncer(kernel.getApplication());
         dynamicConfig = new DynamicConfig(kernel.getApplication());
     }
 
     public void runKernel() {
         if (kernel.getAuthKernel().isLoggedIn()) {
+            updateProcessor = new UpdateProcessor(kernel.getApplication());
+            updateProcessor.invalidateUpdates();
             updateProcessor.runUpdateProcessor();
-            updateProcessor.checkState();
             actions.checkForDeletions();
             actions.checkHistory();
-            techSyncer.checkPush();
             techSyncer.onLogin();
         }
         techSyncer.checkDC();
     }
 
     public void logIn() {
+        typingStates.clearState();
         updateProcessor = new UpdateProcessor(kernel.getApplication());
+        updateProcessor.clearData();
         updateProcessor.invalidateUpdates();
         updateProcessor.runUpdateProcessor();
     }
 
     public void logOut() {
         typingStates.clearState();
+        updateProcessor.clearData();
+        updateProcessor.destroy();
+        updateProcessor = null;
     }
 }

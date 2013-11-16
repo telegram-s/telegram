@@ -949,7 +949,9 @@ public class ModelEngine {
                         getUsersDao().create(changed);
                         userCache.putIfAbsent(changed.getUid(), changed);
                         if (changed.getUid() == application.getCurrentUid()) {
-                            application.getUserSource().notifyUserChanged(application.getCurrentUid());
+                            if (application.getUserSource() != null) {
+                                application.getUserSource().notifyUserChanged(application.getCurrentUid());
+                            }
                         }
                     } else {
                         orig.setFirstName(changed.getFirstName());

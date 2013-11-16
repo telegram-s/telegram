@@ -2,13 +2,15 @@ package org.telegram.android.kernel;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import org.telegram.android.kernel.api.AuthController;
 import org.telegram.android.core.model.storage.TLDcInfo;
 import org.telegram.android.core.model.storage.TLKey;
 import org.telegram.android.critical.ApiStorage;
 import org.telegram.android.log.Logger;
+import org.telegram.api.TLAbsUser;
+import org.telegram.api.auth.TLAuthorization;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Created by ex3ndr on 16.11.13.
@@ -68,51 +70,38 @@ public class AuthKernel {
             Logger.d(TAG, "Key: " + dc.getDcId() + " " + dc.getAddress() + ":" + dc.getPort());
         }
 
-        // Get existing or recreate system Account
-        AccountManager am = AccountManager.get(kernel.getApplication());
-        Account[] accounts = am.getAccountsByType(ACCOUNT_TYPE);
-        if (accounts.length == 0) {
-            Account account = new Account(kernel.getAuthKernel().getApiStorage().getObj().getPhone(), ACCOUNT_TYPE);
-            am.addAccountExplicitly(account, "", null);
-            this.account = account;
+        if (storage.isAuthenticated()) {
+            // Get existing or recreate system Account
+            AccountManager am = AccountManager.get(kernel.getApplication());
+            Account[] accounts = am.getAccountsByType(ACCOUNT_TYPE);
+            if (accounts.length == 0) {
+                Account account = new Account(storage.getObj().getPhone(), ACCOUNT_TYPE);
+                am.addAccountExplicitly(account, "", null);
+                this.account = account;
+            } else {
+                account = accounts[0];
+            }
         } else {
-            account = accounts[0];
+            this.account = null;
+            AccountManager am = AccountManager.get(kernel.getApplication());
+            Account[] accounts = am.getAccountsByType(ACCOUNT_TYPE);
+            for (Account c : accounts) {
+                am.removeAccount(c, null, null);
+            }
         }
+    }
+
+    public void logIn(TLAuthorization authorization) {
+        storage.doAuth(authorization);
+        ArrayList<TLAbsUser> users = new ArrayList<TLAbsUser>();
+        users.add(authorization.getUser());
+        kernel.getStorageKernel().getModel().onUsers(users);
+        checkState();
     }
 
     public void logOut() {
         storage.resetAuth();
-
-        this.account = null;
-        AccountManager am = AccountManager.get(kernel.getApplication());
-        Account[] accounts = am.getAccountsByType(ACCOUNT_TYPE);
-        for (Account c : accounts) {
-            am.removeAccount(c, null, null);
-        }
-
-//        // Clearing all messages states
-//        for (MessageSource source : messageSources.values()) {
-//            source.destroy();
-//        }
-//        messageSources.clear();
-//        MessageSource.clearData(this);
-//
-//        // Clearing dialogs states
-//        dialogSource.destroy();
-//        DialogSource.clearData(this);
-//
-//        // Clearing contacts states
-//        contactsSource.destroy();
-//        ContactsSource.clearData(this);
-
-//        updateProcessor.destroy();
-//        updateProcessor.clearData();
-//
-//        techSyncer.onLogout();
-//
-//        getUiKernel().getNotifications().reset();
-
-//        dropData();
+        checkState();
     }
 
     public boolean isLoggedIn() {

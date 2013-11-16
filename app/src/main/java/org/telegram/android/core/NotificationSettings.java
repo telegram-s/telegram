@@ -187,4 +187,13 @@ public class NotificationSettings {
         }
         editor.commit();
     }
+
+    public void clearSettings() {
+        String[] keys = preferences.getAll().keySet().toArray(new String[0]);
+        SharedPreferences.Editor editor = preferences.edit();
+        for (String k : keys) {
+            editor.remove(k);
+        }
+        editor.commit();
+    }
 }

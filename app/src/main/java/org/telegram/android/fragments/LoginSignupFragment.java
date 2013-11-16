@@ -237,12 +237,8 @@ public class LoginSignupFragment extends MediaReceiverFragment {
             public void execute() throws AsyncException {
                 try {
                     if (authorization == null) {
-                        application.prelogin();
                         authorization = rpcRaw(new TLRequestAuthSignUp(phoneNumber, phoneHash, code, firstName2, lastName2));
-
-                        ArrayList<TLAbsUser> user = new ArrayList<TLAbsUser>();
-                        user.add(authorization.getUser());
-                        application.getEngine().onUsers(user);
+                        application.getKernel().logIn(authorization);
                     }
                     if (photoUri != null || photoFile != null) {
                         String destFile = getUploadTempFile();
@@ -266,6 +262,7 @@ public class LoginSignupFragment extends MediaReceiverFragment {
                     if ("PHONE_NUMBER_OCCUPIED".equals(e.getErrorTag())) {
                         try {
                             authorization = rpcRaw(new TLRequestAuthSignIn(phoneNumber, phoneHash, code));
+                            application.getKernel().logIn(authorization);
                         } catch (RpcException e1) {
                             if ("PHONE_CODE_EXPIRED".equals(e.getErrorTag())) {
                                 expired = true;

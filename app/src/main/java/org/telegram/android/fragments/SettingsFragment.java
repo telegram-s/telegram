@@ -133,7 +133,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                     @Override
                     public void execute() throws AsyncException {
                         rpc(new TLRequestAuthLogOut());
-                        application.clearLoginState();
+                        application.getKernel().logOut();
                     }
 
                     @Override

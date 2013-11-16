@@ -28,4 +28,17 @@ public class StorageKernel {
     public ModelEngine getModel() {
         return model;
     }
+
+    public void logIn() {
+        clearData();
+    }
+
+    public void logOut() {
+        clearData();
+    }
+
+    public void clearData() {
+        database.clearData();
+        model.clearCache();
+    }
 }

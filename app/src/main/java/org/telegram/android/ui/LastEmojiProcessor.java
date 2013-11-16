@@ -61,4 +61,8 @@ public class LastEmojiProcessor extends ContextPersistence {
         }
         setLastSmileys(nSmileys);
     }
+
+    public void clearLastSmileys() {
+        setLastSmileys(new long[0]);
+    }
 }

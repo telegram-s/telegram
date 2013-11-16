@@ -176,37 +176,22 @@ public class ApplicationKernel {
     }
 
     public void logIn(TLAuthorization authorization) {
-        authKernel.getApiStorage().doAuth(authorization);
+        storageKernel.clearData();
+        authKernel.logIn(authorization);
+        settingsKernel.logIn();
+        syncKernel.logIn();
+        dataSourceKernel.logIn();
+        uiKernel.logIn();
     }
 
     // Executing may take time
     public void logOut() {
-        getAuthKernel().logOut();
-
-//        // Clearing all messages states
-//        for (MessageSource source : messageSources.values()) {
-//            source.destroy();
-//        }
-//        messageSources.clear();
-//        MessageSource.clearData(this);
-//
-//        // Clearing dialogs states
-//        dialogSource.destroy();
-//        DialogSource.clearData(this);
-//
-//        // Clearing contacts states
-//        contactsSource.destroy();
-//        ContactsSource.clearData(this);
-
-//        updateProcessor.destroy();
-//        updateProcessor.clearData();
-//
-//        techSyncer.onLogout();
-//
-//        getUiKernel().getNotifications().reset();
-//
-//        dropData();
-//
-//        kernel.getAuthKernel().getApiStorage().resetAuth();
+        authKernel.logOut();
+        storageKernel.clearData();
+        settingsKernel.logOut();
+        apiKernel.updateTelegramApi();
+        syncKernel.logOut();
+        dataSourceKernel.logOut();
+        uiKernel.logOut();
     }
 }
