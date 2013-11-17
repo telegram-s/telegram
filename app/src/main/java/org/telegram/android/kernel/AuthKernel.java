@@ -28,15 +28,15 @@ public class AuthKernel {
 
     public AuthKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
-        tryLoadGeneral();
+        if (!tryLoadGeneral()) {
+            tryLoadObsolete();
+        }
 
         if (storage == null) {
             storage = new ApiStorage(kernel.getApplication());
         }
         checkState();
         storage.write();
-
-        tryLoadObsolete();
     }
 
     public ApiStorage getApiStorage() {
@@ -54,14 +54,32 @@ public class AuthKernel {
     }
 
     private void tryLoadObsolete() {
-        File dcStorage = new File(kernel.getApplication().getFilesDir().getPath() + "/" + "org.telegram.android.engine.messaging.centers.DataCenters.sav");
+//        HashMap<String, String> compatInfo = new HashMap<String, String>();
+//        compatInfo.put("com.extradea.framework.persistence.PersistenceObject", CompatPersistence.class.getCanonicalName());
+//        compatInfo.put("com.extradea.framework.persistence.ContextPersistence", CompatContextPersistence.class.getCanonicalName());
+//        compatInfo.put("org.telegram.android.engine.messaging.centers.DataCenters", DcCompat.class.getCanonicalName());
+//        compatInfo.put("org.telegram.android.engine.messaging.centers.DataCenterConfig", DcCompatConfig.class.getCanonicalName());
+//
+//        try {
+//            CompatObjectInputStream inputStream = new CompatObjectInputStream(new FileInputStream("/sdcard/obsolete_dc.bin"), compatInfo);
+//            DcCompat o = (DcCompat) inputStream.readObject();
+//
+//            for (Integer key : o.getConfiguration().keySet()) {
+//                DcCompatConfig compatConfig = o.getConfiguration().get(key).get(0);
+//                storage.updateDCInfo(key, compatConfig.getIpAddress(), compatConfig.getPort());
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        File dcStorage = new File(kernel.getApplication().getFilesDir().getPath() + "/" + "keys.bin");
         if (dcStorage.exists()) {
             try {
                 FileInputStream inputStream = new FileInputStream(dcStorage);
                 byte[] data = new byte[(int) dcStorage.length()];
                 inputStream.read(data);
                 inputStream.close();
-                FileOutputStream outputStream = new FileOutputStream("/sdcard/obsolete_dc.bin");
+                FileOutputStream outputStream = new FileOutputStream("/sdcard/obsolete_keys.bin");
                 outputStream.write(data);
                 outputStream.close();
             } catch (FileNotFoundException e) {

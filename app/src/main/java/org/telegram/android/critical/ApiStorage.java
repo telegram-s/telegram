@@ -99,6 +99,11 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
         write();
     }
 
+    public synchronized void updateDCInfo(int dcId, String ip, int port) {
+        getObj().getDcInfos().add(new TLDcInfo(dcId, ip, port));
+        write();
+    }
+
     @Override
     public synchronized byte[] getAuthKey(int dcId) {
         TLKey key = findKey(dcId);
