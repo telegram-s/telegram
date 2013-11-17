@@ -5,12 +5,15 @@ import android.accounts.AccountManager;
 import org.telegram.android.core.model.storage.TLDcInfo;
 import org.telegram.android.core.model.storage.TLKey;
 import org.telegram.android.critical.ApiStorage;
+import org.telegram.android.kernel.auth.CompatObjectInputStream;
+import org.telegram.android.kernel.auth.compat.*;
 import org.telegram.android.log.Logger;
 import org.telegram.api.TLAbsUser;
 import org.telegram.api.auth.TLAuthorization;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by ex3ndr on 16.11.13.
@@ -54,32 +57,52 @@ public class AuthKernel {
     }
 
     private void tryLoadObsolete() {
-//        HashMap<String, String> compatInfo = new HashMap<String, String>();
-//        compatInfo.put("com.extradea.framework.persistence.PersistenceObject", CompatPersistence.class.getCanonicalName());
-//        compatInfo.put("com.extradea.framework.persistence.ContextPersistence", CompatContextPersistence.class.getCanonicalName());
-//        compatInfo.put("org.telegram.android.engine.messaging.centers.DataCenters", DcCompat.class.getCanonicalName());
-//        compatInfo.put("org.telegram.android.engine.messaging.centers.DataCenterConfig", DcCompatConfig.class.getCanonicalName());
+        HashMap<String, String> compatInfo = new HashMap<String, String>();
+        compatInfo.put("com.extradea.framework.persistence.PersistenceObject", CompatPersistence.class.getCanonicalName());
+        compatInfo.put("com.extradea.framework.persistence.ContextPersistence", CompatContextPersistence.class.getCanonicalName());
+        compatInfo.put("org.telegram.android.engine.messaging.centers.DataCenters", CompatDc.class.getCanonicalName());
+        compatInfo.put("org.telegram.android.engine.messaging.centers.DataCenterConfig", CompatDcConfig.class.getCanonicalName());
+        compatInfo.put("org.telegram.android.engine.storage.DcKey", CompatDcKey.class.getCanonicalName());
+        compatInfo.put("org.telegram.android.engine.storage.SessionKey", CompatSessionKey.class.getCanonicalName());
+
+//        try {
+//            CompatObjectInputStream inputStream = new CompatObjectInputStream(new FileInputStream("/sdcard/obsolete_keys.bin"), compatInfo);
+//            HashMap<Integer, CompatDcKey> result = (HashMap<Integer, CompatDcKey>) inputStream.readObject();
+//            for (Integer key : result.keySet()) {
+//                CompatDcKey dcKey = result.get(key);
+//                storage.putAuthKey(key, dcKey.getAuthKey());
+//                storage.setAuthenticated(key, dcKey.isAuthorized());
+//            }
+//
+//            // storage.putAuthKey();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
 //
 //        try {
 //            CompatObjectInputStream inputStream = new CompatObjectInputStream(new FileInputStream("/sdcard/obsolete_dc.bin"), compatInfo);
-//            DcCompat o = (DcCompat) inputStream.readObject();
+//            CompatDc o = (CompatDc) inputStream.readObject();
 //
 //            for (Integer key : o.getConfiguration().keySet()) {
-//                DcCompatConfig compatConfig = o.getConfiguration().get(key).get(0);
+//                CompatDcConfig compatConfig = o.getConfiguration().get(key).get(0);
 //                storage.updateDCInfo(key, compatConfig.getIpAddress(), compatConfig.getPort());
 //            }
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
 
-        File dcStorage = new File(kernel.getApplication().getFilesDir().getPath() + "/" + "keys.bin");
+        File dcStorage = new File(kernel.getApplication().getFilesDir().getPath() + "/" + "sessions.bin");
         if (dcStorage.exists()) {
             try {
                 FileInputStream inputStream = new FileInputStream(dcStorage);
                 byte[] data = new byte[(int) dcStorage.length()];
                 inputStream.read(data);
                 inputStream.close();
-                FileOutputStream outputStream = new FileOutputStream("/sdcard/obsolete_keys.bin");
+                FileOutputStream outputStream = new FileOutputStream("/sdcard/obsolete_session.bin");
                 outputStream.write(data);
                 outputStream.close();
             } catch (FileNotFoundException e) {
