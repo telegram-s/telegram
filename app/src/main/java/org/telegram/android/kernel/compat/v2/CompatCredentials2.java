@@ -1,6 +1,6 @@
 package org.telegram.android.kernel.compat.v2;
 
-import org.telegram.android.kernel.compat.v1.CompatContextPersistence;
+import org.telegram.android.kernel.compat.CompatContextPersistence;
 
 import java.io.Serializable;
 
@@ -9,7 +9,6 @@ import java.io.Serializable;
  * User: ex3ndr
  * Date: 18.09.13
  * Time: 2:02
- * To change this template use File | Settings | File Templates.
  */
 public class CompatCredentials2 extends CompatContextPersistence implements Serializable {
     private TLUserCompat2 user;
