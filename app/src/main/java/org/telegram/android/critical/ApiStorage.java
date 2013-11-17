@@ -72,6 +72,14 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
         write();
     }
 
+    public synchronized void doAuth(int uid, String phone) {
+        TLKey key = findKey(getPrimaryDc());
+        key.setAuthorised(true);
+        getObj().setUid(uid);
+        getObj().setPhone(phone);
+        write();
+    }
+
     @Override
     public synchronized int getPrimaryDc() {
         return getObj().getPrimaryDc();

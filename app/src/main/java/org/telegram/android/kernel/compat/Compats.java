@@ -6,6 +6,7 @@ import org.telegram.android.kernel.compat.state.CompatDcKey;
 import org.telegram.android.kernel.compat.state.CompatSessionKey;
 import org.telegram.android.kernel.compat.v1.*;
 import org.telegram.android.kernel.compat.v2.*;
+import org.telegram.android.kernel.compat.v3.CompatAuthCredentials3;
 
 import java.util.HashMap;
 
@@ -18,6 +19,7 @@ import java.util.HashMap;
 public class Compats {
     public static HashMap<String, String> VER1 = new HashMap<String, String>();
     public static HashMap<String, String> VER2 = new HashMap<String, String>();
+    public static HashMap<String, String> VER3 = new HashMap<String, String>();
 
     public static HashMap<String, String> KEYS_V1 = new HashMap<String, String>();
 
@@ -65,6 +67,12 @@ public class Compats {
         VER2.put("org.telegram.android.api.TLUserSelf", TLUserSelfCompat2.class.getCanonicalName());
         VER2.put("org.telegram.android.api.TLUserSelf", TLUserSelfCompat2.class.getCanonicalName());
         VER2.put("org.telegram.android.auth.AuthCredentials", CompatCredentials2.class.getCanonicalName());
+
+        //////////////////////////////////////////////////////////
+
+        VER3.put("com.extradea.framework.persistence.PersistenceObject", CompatPersistence.class.getCanonicalName());
+        VER3.put("com.extradea.framework.persistence.ContextPersistence", CompatContextPersistence.class.getCanonicalName());
+        VER3.put("org.telegram.android.auth.AuthCredentials", CompatAuthCredentials3.class.getCanonicalName());
 
         //////////////////////////////////////////////////////////
 
