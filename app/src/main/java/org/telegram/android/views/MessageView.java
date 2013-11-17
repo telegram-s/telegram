@@ -329,7 +329,7 @@ public class MessageView extends BaseMsgView {
                 canvas.save();
                 canvas.translate(layoutRealWidth - getPx(12), layoutHeight - getPx(12) - getPx(3));
                 canvas.drawCircle(getPx(6), getPx(6), getPx(6), clockIconPaint);
-                double time = (System.currentTimeMillis() / 30.0) % (12 * 60);
+                double time = (System.currentTimeMillis() / 15.0) % (12 * 60);
                 double angle = (time / (6 * 60)) * Math.PI;
 
                 int x = (int) (Math.sin(-angle) * getPx(4));

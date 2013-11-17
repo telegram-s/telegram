@@ -73,6 +73,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     private Layout senderLayout;
     private Layout titleLayout;
 
+    private Drawable emptyDrawable;
     private Bitmap empty;
     private Bitmap avatar;
 
@@ -230,13 +231,17 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
         if (description.getPeerType() == PeerType.PEER_USER) {
             if (description.getPeerId() == 333000) {
-                empty = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_support_avatar)).getBitmap();
+                emptyDrawable = getResources().getDrawable(R.drawable.st_support_avatar);
+                // empty = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_support_avatar)).getBitmap();
             } else {
-                empty = ((BitmapDrawable) getResources().getDrawable(Placeholders.getUserPlaceholder(description.getPeerId()))).getBitmap();
+                emptyDrawable = getResources().getDrawable(Placeholders.getUserPlaceholder(description.getPeerId()));
+                // empty = ((BitmapDrawable) getResources().getDrawable(Placeholders.getUserPlaceholder(description.getPeerId()))).getBitmap();
             }
         } else {
-            empty = ((BitmapDrawable) getResources().getDrawable(Placeholders.getGroupPlaceholder(description.getPeerId()))).getBitmap();
+            emptyDrawable = getResources().getDrawable(Placeholders.getGroupPlaceholder(description.getPeerId()));
+            // empty = ((BitmapDrawable) getResources().getDrawable(Placeholders.getGroupPlaceholder(description.getPeerId()))).getBitmap();
         }
+        emptyDrawable.setBounds(0, 0, getPx(64), getPx(64));
 
         if (description.getPhoto() instanceof TLLocalAvatarPhoto) {
             TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) description.getPhoto();
@@ -744,7 +749,11 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         if (avatar != null) {
             canvas.drawBitmap(avatar, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
         } else {
-            canvas.drawBitmap(empty, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
+            canvas.save();
+            canvas.translate(layoutAvatarLeft, layoutAvatarTop);
+            emptyDrawable.draw(canvas);
+            canvas.restore();
+            // canvas.drawBitmap(empty, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
         }
 
         if (description.isFailure() ||
