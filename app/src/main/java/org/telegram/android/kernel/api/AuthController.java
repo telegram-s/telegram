@@ -1,17 +1,12 @@
 package org.telegram.android.kernel.api;
 
 import android.os.SystemClock;
-import org.telegram.android.StelsApplication;
-import org.telegram.android.auth.AuthState;
 import org.telegram.android.critical.ApiStorage;
 import org.telegram.android.kernel.ApiKernel;
 import org.telegram.android.tasks.AsyncException;
-import org.telegram.api.engine.TelegramApi;
 import org.telegram.mtproto.pq.Authorizer;
 import org.telegram.mtproto.pq.PqAuth;
 import org.telegram.mtproto.state.ConnectionInfo;
-
-import java.io.IOException;
 
 /**
  * Author: Korshakov Stepan

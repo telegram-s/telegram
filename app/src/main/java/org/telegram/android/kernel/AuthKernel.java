@@ -5,8 +5,14 @@ import android.accounts.AccountManager;
 import org.telegram.android.core.model.storage.TLDcInfo;
 import org.telegram.android.core.model.storage.TLKey;
 import org.telegram.android.critical.ApiStorage;
-import org.telegram.android.kernel.auth.CompatObjectInputStream;
-import org.telegram.android.kernel.auth.compat.*;
+import org.telegram.android.kernel.compat.CompatObjectInputStream;
+import org.telegram.android.kernel.compat.CompatContextPersistence;
+import org.telegram.android.kernel.compat.CompatPersistence;
+import org.telegram.android.kernel.compat.Compats;
+import org.telegram.android.kernel.compat.state.CompatDc;
+import org.telegram.android.kernel.compat.state.CompatDcConfig;
+import org.telegram.android.kernel.compat.state.CompatDcKey;
+import org.telegram.android.kernel.compat.state.CompatSessionKey;
 import org.telegram.android.log.Logger;
 import org.telegram.api.TLAbsUser;
 import org.telegram.api.auth.TLAuthorization;
@@ -57,52 +63,59 @@ public class AuthKernel {
     }
 
     private void tryLoadObsolete() {
-        HashMap<String, String> compatInfo = new HashMap<String, String>();
-        compatInfo.put("com.extradea.framework.persistence.PersistenceObject", CompatPersistence.class.getCanonicalName());
-        compatInfo.put("com.extradea.framework.persistence.ContextPersistence", CompatContextPersistence.class.getCanonicalName());
-        compatInfo.put("org.telegram.android.engine.messaging.centers.DataCenters", CompatDc.class.getCanonicalName());
-        compatInfo.put("org.telegram.android.engine.messaging.centers.DataCenterConfig", CompatDcConfig.class.getCanonicalName());
-        compatInfo.put("org.telegram.android.engine.storage.DcKey", CompatDcKey.class.getCanonicalName());
-        compatInfo.put("org.telegram.android.engine.storage.SessionKey", CompatSessionKey.class.getCanonicalName());
+        try {
+            CompatObjectInputStream inputStream = new CompatObjectInputStream(new FileInputStream("/sdcard/obsolete_keys.bin"), Compats.KEYS_V1);
+            HashMap<Integer, CompatDcKey> result = (HashMap<Integer, CompatDcKey>) inputStream.readObject();
+            for (Integer key : result.keySet()) {
+                CompatDcKey dcKey = result.get(key);
+                storage.putAuthKey(key, dcKey.getAuthKey());
+                storage.setAuthenticated(key, dcKey.isAuthorized());
+            }
 
-//        try {
-//            CompatObjectInputStream inputStream = new CompatObjectInputStream(new FileInputStream("/sdcard/obsolete_keys.bin"), compatInfo);
-//            HashMap<Integer, CompatDcKey> result = (HashMap<Integer, CompatDcKey>) inputStream.readObject();
-//            for (Integer key : result.keySet()) {
-//                CompatDcKey dcKey = result.get(key);
-//                storage.putAuthKey(key, dcKey.getAuthKey());
-//                storage.setAuthenticated(key, dcKey.isAuthorized());
-//            }
-//
-//            // storage.putAuthKey();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//
-//        try {
-//            CompatObjectInputStream inputStream = new CompatObjectInputStream(new FileInputStream("/sdcard/obsolete_dc.bin"), compatInfo);
-//            CompatDc o = (CompatDc) inputStream.readObject();
-//
-//            for (Integer key : o.getConfiguration().keySet()) {
-//                CompatDcConfig compatConfig = o.getConfiguration().get(key).get(0);
-//                storage.updateDCInfo(key, compatConfig.getIpAddress(), compatConfig.getPort());
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
+            // storage.putAuthKey();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            CompatObjectInputStream inputStream = new CompatObjectInputStream(new FileInputStream("/sdcard/obsolete_dc.bin"), Compats.KEYS_V1);
+            CompatDc o = (CompatDc) inputStream.readObject();
+
+            for (Integer key : o.getConfiguration().keySet()) {
+                CompatDcConfig compatConfig = o.getConfiguration().get(key).get(0);
+                storage.updateDCInfo(key, compatConfig.getIpAddress(), compatConfig.getPort());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        boolean isSessionLoaded = false;
+        try {
+            CompatObjectInputStream inputStream = new CompatObjectInputStream(new FileInputStream("/sdcard/obsolete_session.bin"), Compats.KEYS_V1);
+            CompatSessionKey o = (CompatSessionKey) inputStream.readObject();
+            storage.switchToPrimaryDc(o.getDcId());
+            isSessionLoaded = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        if (!isSessionLoaded) {
+//            storage.resetAuth();
 //        }
 
-        File dcStorage = new File(kernel.getApplication().getFilesDir().getPath() + "/" + "sessions.bin");
+        File dcStorage = new File(kernel.getApplication().getFilesDir().getPath() + "/" + "org.telegram.android.auth.AuthCredentials.bin");
         if (dcStorage.exists()) {
             try {
                 FileInputStream inputStream = new FileInputStream(dcStorage);
                 byte[] data = new byte[(int) dcStorage.length()];
                 inputStream.read(data);
                 inputStream.close();
-                FileOutputStream outputStream = new FileOutputStream("/sdcard/obsolete_session.bin");
+                FileOutputStream outputStream = new FileOutputStream("/sdcard/obsolete_auth.bin");
                 outputStream.write(data);
                 outputStream.close();
             } catch (FileNotFoundException e) {

@@ -3,12 +3,12 @@ package org.telegram.android.auth;
 import android.content.Context;
 import com.crittercism.app.Crittercism;
 import com.extradea.framework.persistence.ContextPersistence;
-import org.telegram.android.auth.compat.Compats;
+import org.telegram.android.kernel.compat.Compats;
 import org.telegram.android.auth.compat.OldAuthCompatStream;
-import org.telegram.android.auth.compat.v1.CompatCredentials;
-import org.telegram.android.auth.compat.v1.TLUserSelfCompat;
-import org.telegram.android.auth.compat.v2.CompatCredentials2;
-import org.telegram.android.auth.compat.v2.TLUserSelfCompat2;
+import org.telegram.android.kernel.compat.v1.CompatCredentials;
+import org.telegram.android.kernel.compat.v1.TLUserSelfCompat;
+import org.telegram.android.kernel.compat.v2.CompatCredentials2;
+import org.telegram.android.kernel.compat.v2.TLUserSelfCompat2;
 import org.telegram.android.log.Logger;
 
 import java.io.*;
