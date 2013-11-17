@@ -6,8 +6,6 @@ import org.telegram.android.core.model.storage.TLDcInfo;
 import org.telegram.android.core.model.storage.TLKey;
 import org.telegram.android.critical.ApiStorage;
 import org.telegram.android.kernel.compat.CompatObjectInputStream;
-import org.telegram.android.kernel.compat.CompatContextPersistence;
-import org.telegram.android.kernel.compat.CompatPersistence;
 import org.telegram.android.kernel.compat.Compats;
 import org.telegram.android.kernel.compat.state.CompatDc;
 import org.telegram.android.kernel.compat.state.CompatDcConfig;
@@ -108,7 +106,7 @@ public class AuthKernel {
 //            storage.resetAuth();
 //        }
 
-        File dcStorage = new File(kernel.getApplication().getFilesDir().getPath() + "/" + "org.telegram.android.auth.AuthCredentials.bin");
+        File dcStorage = new File(kernel.getApplication().getFilesDir().getPath() + "/" + "org.telegram.android.auth.AuthCredentials.sav");
         if (dcStorage.exists()) {
             try {
                 FileInputStream inputStream = new FileInputStream(dcStorage);
