@@ -9,7 +9,7 @@ import org.telegram.android.log.Logger;
 import org.telegram.api.TLAbsUser;
 import org.telegram.api.auth.TLAuthorization;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -28,16 +28,15 @@ public class AuthKernel {
 
     public AuthKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
-        if (!tryLoadGeneral()) {
-            tryLoadObsolete();
-            storage.write();
-        }
+        tryLoadGeneral();
 
         if (storage == null) {
             storage = new ApiStorage(kernel.getApplication());
         }
         checkState();
         storage.write();
+
+        tryLoadObsolete();
     }
 
     public ApiStorage getApiStorage() {
@@ -55,7 +54,22 @@ public class AuthKernel {
     }
 
     private void tryLoadObsolete() {
-
+        File dcStorage = new File(kernel.getApplication().getFilesDir().getPath() + "/" + "org.telegram.android.engine.messaging.centers.DataCenters.sav");
+        if (dcStorage.exists()) {
+            try {
+                FileInputStream inputStream = new FileInputStream(dcStorage);
+                byte[] data = new byte[(int) dcStorage.length()];
+                inputStream.read(data);
+                inputStream.close();
+                FileOutputStream outputStream = new FileOutputStream("/sdcard/obsolete_dc.bin");
+                outputStream.write(data);
+                outputStream.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void checkState() {

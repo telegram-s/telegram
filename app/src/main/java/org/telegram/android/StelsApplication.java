@@ -1,11 +1,6 @@
 package org.telegram.android;
 
 import android.app.Application;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.*;
-import android.support.v4.app.NotificationCompat;
 import com.extradea.framework.images.ImageController;
 import com.extradea.framework.images.ImageSupport;
 import org.telegram.android.kernel.api.AuthController;
@@ -21,7 +16,6 @@ import org.telegram.android.media.DownloadManager;
 import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.android.ui.*;
-import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.engine.TelegramApi;
 
 /**
@@ -29,7 +23,6 @@ import org.telegram.api.engine.TelegramApi;
  * Created: 22.07.13 0:55
  */
 public class StelsApplication extends Application implements ImageSupport {
-
     private ApplicationKernel kernel;
 
     @Override
@@ -37,6 +30,7 @@ public class StelsApplication extends Application implements ImageSupport {
         CrashHandler.init(this);
         kernel = new ApplicationKernel(this);
         super.onCreate();
+
         // None of this objects starts doing something in background until someone ack them about this
         kernel.initTechKernel(); // Technical information about environment. Might be loaded first.
         kernel.initBasicUiKernel(); // UI state objects, eg opened page, app state

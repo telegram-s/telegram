@@ -108,6 +108,10 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         }
     }
 
+    private void doInitApp() {
+
+    }
+
     private void onInitUpdated() {
         ArrayList<WhatsNewFragment.Definition> definitions = new ArrayList<WhatsNewFragment.Definition>();
 
