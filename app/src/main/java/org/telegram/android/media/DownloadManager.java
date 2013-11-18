@@ -9,6 +9,12 @@ import org.telegram.android.core.files.DownloadController;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.UiNotifier;
+import org.telegram.api.TLAbsInputFileLocation;
+import org.telegram.api.TLInputEncryptedFileLocation;
+import org.telegram.api.TLInputFileLocation;
+import org.telegram.api.TLInputVideoFileLocation;
+import org.telegram.api.engine.file.Downloader;
+import org.telegram.mtproto.secure.Entropy;
 
 import java.io.*;
 import java.lang.ref.WeakReference;
@@ -45,19 +51,6 @@ public class DownloadManager {
 
     private static int SMALL_THUMB_SIDE;
 
-    private static final int ATTEMPTS_COUNT = 3;
-
-    private static final int THREADS_COUNT = 2;
-
-    private static final int TIMEOUT = 5 * 60 * 1000;
-
-    private static final int OVERLORD_TIMEOUT = 60 * 1000;
-
-    private static final int PAGE_SIZE = 128 * 1024;
-    private static final int PAGE_SIZE_SLOW = 8 * 1024;
-
-    private static final int NOTIFY_DELAY = 500;
-
     private DownloadPersistence downloadPersistence;
 
     private HashSet<String> enqueued = new HashSet<String>();
@@ -68,9 +61,8 @@ public class DownloadManager {
         public int downloaded;
         public int downloadedPercent;
         public DownloadState state;
+        public int downloadTask;
     }
-
-    private ExecutorService downloadService = Executors.newFixedThreadPool(THREADS_COUNT);
 
     private ExecutorService service;
 
@@ -78,8 +70,6 @@ public class DownloadManager {
     private StelsApplication application;
 
     private HashMap<String, DownloadRecord> records = new HashMap<String, DownloadRecord>();
-
-    private long lastDownloadEvent;
 
     private CopyOnWriteArrayList<WeakReference<DownloadListener>> listeners = new CopyOnWriteArrayList<WeakReference<DownloadListener>>();
 
@@ -206,17 +196,21 @@ public class DownloadManager {
         }
         enqueued.add(key);
 
+        final TLAbsInputFileLocation location;
         final int dcId;
         final int size;
         if (fileLocation instanceof TLLocalFileVideoLocation) {
             dcId = ((TLLocalFileVideoLocation) fileLocation).getDcId();
             size = ((TLLocalFileVideoLocation) fileLocation).getSize();
+            location = new TLInputVideoFileLocation(((TLLocalFileVideoLocation) fileLocation).getVideoId(), ((TLLocalFileVideoLocation) fileLocation).getAccessHash());
         } else if (fileLocation instanceof TLLocalFileLocation) {
             dcId = ((TLLocalFileLocation) fileLocation).getDcId();
             size = ((TLLocalFileLocation) fileLocation).getSize();
+            location = new TLInputFileLocation(((TLLocalFileLocation) fileLocation).getVolumeId(), ((TLLocalFileLocation) fileLocation).getLocalId(), ((TLLocalFileLocation) fileLocation).getSecret());
         } else if (fileLocation instanceof TLLocalEncryptedFileLocation) {
             dcId = ((TLLocalEncryptedFileLocation) fileLocation).getDcId();
             size = ((TLLocalEncryptedFileLocation) fileLocation).getSize();
+            location = new TLInputEncryptedFileLocation(((TLLocalEncryptedFileLocation) fileLocation).getId(), ((TLLocalEncryptedFileLocation) fileLocation).getAccessHash());
         } else {
             return;
         }
@@ -228,25 +222,47 @@ public class DownloadManager {
                     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
                     updateState(key, DownloadState.IN_PROGRESS, 0, 0);
 
-                    String destFile = application.getDownloadController().downloadFile(fileLocation, new DownloadController.DownloadListener() {
+                    String destFileName = getDownloadTempFile();
+
+                    record.downloadTask = application.getApi().getDownloader().requestTask(dcId, location, size, destFileName, new org.telegram.api.engine.file.DownloadListener() {
                         @Override
-                        public boolean onPieceDownloaded(int percent, int downloadedSize) {
-                            if (record.state == DownloadState.CANCELLED) {
-                                return false;
-                            } else {
+                        public void onPartDownloaded(int percent, int downloadedSize) {
+                            if (record.state != DownloadState.CANCELLED) {
                                 updateState(key, DownloadState.IN_PROGRESS, percent, downloadedSize);
-                                return true;
                             }
+                        }
+
+                        @Override
+                        public void onDownloaded() {
+
+                        }
+
+                        @Override
+                        public void onFailed() {
+
                         }
                     });
 
-                    if (destFile == null) {
+                    Logger.d(TAG, "Waiting for task #" + record.downloadTask);
+
+                    while (application.getApi().getDownloader().getTaskState(record.downloadTask) == Downloader.FILE_QUEUED ||
+                            application.getApi().getDownloader().getTaskState(record.downloadTask) == Downloader.FILE_DOWNLOADING) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    Logger.d(TAG, "Waiting for task ended #" + record.downloadTask);
+
+                    if (application.getApi().getDownloader().getTaskState(record.downloadTask) != Downloader.FILE_COMPLETED) {
                         updateState(key, DownloadState.FAILURE, 0, 0);
                         return;
                     }
 
                     try {
-                        copy(new File(destFile), new File(fileName));
+                        copy(new File(destFileName), new File(fileName));
                     } catch (IOException e) {
                         Logger.t(TAG, e);
                         updateState(key, DownloadState.FAILURE, 0, 0);
@@ -315,21 +331,16 @@ public class DownloadManager {
     }
 
     public synchronized void saveDownloadImage(String key, String fileName) throws IOException {
-        Logger.d(TAG, "@" + key + " = saving downloaded image");
         copy(new File(fileName), new File(getDownloadImageFile(key)));
-        Logger.d(TAG, "@" + key + " = mark as downloaded image");
         downloadPersistence.markDownloaded(key);
     }
 
     public synchronized void saveDownloadVideo(String key, String fileName) throws IOException {
-        Logger.d(TAG, "@" + key + " = saving downloaded video");
         copy(new File(fileName), new File(getDownloadVideoFile(key)));
-        Logger.d(TAG, "@" + key + " = mark as downloaded video");
         downloadPersistence.markDownloaded(key);
     }
 
     public void writeToGallery(String fileName, String destName) throws IOException {
-        Logger.d(TAG, "Writing file to gallery: " + fileName + " -> " + destName);
         String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()
                 + "/Telegram/";
         new File(directory).mkdirs();
@@ -369,40 +380,21 @@ public class DownloadManager {
     }
 
     private String getDownloadVideoFile(String key) {
-        if (Build.VERSION.SDK_INT >= 8) {
-            try {
-                return ((File) StelsApplication.class.getMethod("getExternalCacheDir").invoke(application)).getAbsolutePath() + "/video_" + key + ".mp4";
-            } catch (Exception e) {
-                // Log.e(TAG, e);
-            }
-        }
-
-        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/cache/" + application.getPackageName() + "/video_" + key + ".mp4";
+        return application.getExternalCacheDir().getAbsolutePath() + "/video_" + key + ".mp4";
     }
 
     private String getDownloadImageFile(String key) {
-        if (Build.VERSION.SDK_INT >= 8) {
-            try {
-                return ((File) StelsApplication.class.getMethod("getExternalCacheDir").invoke(application)).getAbsolutePath() + "/image_" + key + ".jpg";
-            } catch (Exception e) {
-                // Log.e(TAG, e);
-            }
-        }
-
-        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/cache/" + application.getPackageName() + "/image_" + key + ".jpg";
+        return application.getExternalCacheDir().getAbsolutePath() + "/image_" + key + ".jpg";
     }
 
     private String getDownloadImageThumbFile(String key) {
-        if (Build.VERSION.SDK_INT >= 8) {
-            try {
-                return ((File) StelsApplication.class.getMethod("getExternalCacheDir").invoke(application)).getAbsolutePath() + "/image_thumb_" + key + ".jpg";
-            } catch (Exception e) {
-                // Log.e(TAG, e);
-            }
-        }
-
-        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/cache/" + application.getPackageName() + "/image_thumb_" + key + ".jpg";
+        return application.getExternalCacheDir().getAbsolutePath() + "/image_thumb_" + key + ".jpg";
     }
+
+    private String getDownloadTempFile() {
+        return application.getExternalCacheDir().getAbsolutePath() + "/download_" + Entropy.generateRandomId() + ".bin";
+    }
+
 
     private synchronized void updateState(final String key, final DownloadState state, final int percent, int bytes) {
         Logger.d(TAG, "State: " + key + " = " + state + " " + percent + "%");
