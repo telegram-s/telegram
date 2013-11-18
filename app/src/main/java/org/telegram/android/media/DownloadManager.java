@@ -9,6 +9,7 @@ import org.telegram.android.core.files.DownloadController;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.UiNotifier;
+import org.telegram.android.util.IOUtils;
 import org.telegram.api.TLAbsInputFileLocation;
 import org.telegram.api.TLInputEncryptedFileLocation;
 import org.telegram.api.TLInputFileLocation;
@@ -262,7 +263,7 @@ public class DownloadManager {
                     }
 
                     try {
-                        copy(new File(destFileName), new File(fileName));
+                        IOUtils.copy(new File(destFileName), new File(fileName));
                     } catch (IOException e) {
                         Logger.t(TAG, e);
                         updateState(key, DownloadState.FAILURE, 0, 0);
@@ -327,16 +328,17 @@ public class DownloadManager {
         DownloadRecord record = records.get(key);
         if (record != null) {
             updateState(key, DownloadState.CANCELLED, record.downloadedPercent, record.downloaded);
+            application.getApi().getDownloader().cancelTask(record.downloadTask);
         }
     }
 
     public synchronized void saveDownloadImage(String key, String fileName) throws IOException {
-        copy(new File(fileName), new File(getDownloadImageFile(key)));
+        IOUtils.copy(new File(fileName), new File(getDownloadImageFile(key)));
         downloadPersistence.markDownloaded(key);
     }
 
     public synchronized void saveDownloadVideo(String key, String fileName) throws IOException {
-        copy(new File(fileName), new File(getDownloadVideoFile(key)));
+        IOUtils.copy(new File(fileName), new File(getDownloadVideoFile(key)));
         downloadPersistence.markDownloaded(key);
     }
 
@@ -349,22 +351,8 @@ public class DownloadManager {
         if (dest.exists()) {
             return;
         }
-        copy(new File(fileName), dest);
+        IOUtils.copy(new File(fileName), dest);
         MediaScannerConnection.scanFile(application, new String[]{file}, null, null);
-    }
-
-    private void copy(File src, File dst) throws IOException {
-        InputStream in = new FileInputStream(src);
-        OutputStream out = new FileOutputStream(dst);
-
-        // Transfer bytes from in to out
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = in.read(buf)) > 0) {
-            out.write(buf, 0, len);
-        }
-        in.close();
-        out.close();
     }
 
     public String getVideoFileName(String key) {
