@@ -1053,6 +1053,22 @@ public class ModelEngine {
                 Logger.w(TAG, "Mark unknown");
             }
         }
+        HashSet<Long> ids = new HashSet<Long>();
+        for (ChatMessage msg : saved) {
+            if (!msg.isOut()) {
+                ids.add(msg.getPeerType() + msg.getPeerId() * 10L);
+            }
+        }
+        for (Long id : ids) {
+            int peerType = (int) (id % 10);
+            int peerId = (int) (id / 10);
+            DialogDescription description = getDescriptionForPeer(peerType, peerId);
+            if (description != null) {
+                description.setFirstUnreadMessage(0);
+                getDialogsDao().update(description);
+                application.getDataSourceKernel().getDialogSource().getViewSource().updateItem(description);
+            }
+        }
     }
 
     private void markReaded(ChatMessage msg) {
