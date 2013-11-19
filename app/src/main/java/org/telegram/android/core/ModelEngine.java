@@ -1779,7 +1779,9 @@ public class ModelEngine {
     public synchronized void onMessageFailure(ChatMessage msg) {
         msg.setState(MessageState.FAILURE);
         getMessagesDao().update(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        if (application.getDataSourceKernel() != null) {
+            application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        }
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
             description.setFailure(true);
@@ -1787,8 +1789,10 @@ public class ModelEngine {
                 description.setMessageState(MessageState.FAILURE);
             }
             getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
-            application.getDialogSource().getViewSource().invalidateData();
+            if (application.getDataSourceKernel() != null) {
+                application.getDialogSource().getViewSource().updateItem(description);
+                application.getDialogSource().getViewSource().invalidateData();
+            }
         }
     }
 

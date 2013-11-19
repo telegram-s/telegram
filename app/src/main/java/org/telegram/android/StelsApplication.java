@@ -7,7 +7,6 @@ import org.telegram.android.kernel.api.AuthController;
 import org.telegram.android.config.WallpaperHolder;
 import org.telegram.android.core.*;
 import org.telegram.android.core.background.*;
-import org.telegram.android.core.files.DownloadController;
 import org.telegram.android.core.files.UploadController;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.critical.ApiStorage;
@@ -205,10 +204,6 @@ public class StelsApplication extends Application implements ImageSupport {
 
     public EncryptedChatSource getEncryptedChatSource() {
         return kernel.getDataSourceKernel().getEncryptedChatSource();
-    }
-
-    public DownloadController getDownloadController() {
-        return kernel.getFileKernel().getDownloadController();
     }
 
     public TextSaver getTextSaver() {

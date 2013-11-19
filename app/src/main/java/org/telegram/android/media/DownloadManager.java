@@ -5,7 +5,6 @@ import android.media.MediaScannerConnection;
 import android.os.*;
 import com.extradea.framework.images.utils.ImageUtils;
 import org.telegram.android.StelsApplication;
-import org.telegram.android.core.files.DownloadController;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.UiNotifier;

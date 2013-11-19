@@ -15,10 +15,6 @@ public class StorageKernel {
         this.kernel = kernel;
         this.database = new StelsDatabase(kernel.getApplication());
         this.model = new ModelEngine(database, kernel.getApplication());
-
-        if (kernel.getAuthKernel().isLoggedIn()) {
-            model.markUnsentAsFailured();
-        }
     }
 
     public StelsDatabase getDatabase() {
@@ -27,6 +23,12 @@ public class StorageKernel {
 
     public ModelEngine getModel() {
         return model;
+    }
+
+    public void runKernel() {
+        if (kernel.getAuthKernel().isLoggedIn()) {
+            model.markUnsentAsFailured();
+        }
     }
 
     public void logIn() {

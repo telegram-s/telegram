@@ -171,12 +171,13 @@ public class ApplicationKernel {
     }
 
     public void runKernels() {
+        storageKernel.runKernel();
         apiKernel.runKernel();
         syncKernel.runKernel();
     }
 
     public void logIn(TLAuthorization authorization) {
-        storageKernel.clearData();
+        storageKernel.logIn();
         authKernel.logIn(authorization);
         settingsKernel.logIn();
         syncKernel.logIn();
@@ -187,7 +188,7 @@ public class ApplicationKernel {
     // Executing may take time
     public void logOut() {
         authKernel.logOut();
-        storageKernel.clearData();
+        storageKernel.logOut();
         settingsKernel.logOut();
         apiKernel.updateTelegramApi();
         syncKernel.logOut();

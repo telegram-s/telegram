@@ -21,6 +21,8 @@ import org.telegram.api.TLMessage;
 import org.telegram.api.engine.RpcCallback;
 import org.telegram.api.engine.RpcCallbackEx;
 import org.telegram.api.engine.RpcException;
+import org.telegram.api.engine.file.UploadListener;
+import org.telegram.api.engine.file.Uploader;
 import org.telegram.api.messages.*;
 import org.telegram.api.requests.*;
 import org.telegram.mtproto.secure.CryptoUtils;
@@ -206,7 +208,7 @@ public class MessageSender {
 
                     if (message.getExtras() instanceof TLUploadingPhoto) {
                         long fileId = Entropy.generateRandomId();
-                        UploadResult result;
+                        Uploader.UploadResult result;
                         TLUploadingPhoto uploadingPhoto = (TLUploadingPhoto) message.getExtras();
                         FileInputStream fileInputStream = null;
                         String destFile = null;
@@ -235,21 +237,18 @@ public class MessageSender {
                                 Logger.d(TAG, "encryption time: " + (SystemClock.uptimeMillis() - start) + " ms");
                                 file = destEncryptedFile;
                             }
-                            fileInputStream = new FileInputStream(file);
-                            result = application.getUploadController()
-                                    .uploadFile(fileInputStream, (int) file.length(), fileId,
-                                            new UploadController.UploadListener() {
-                                                @Override
-                                                public void onProgressChanged(int percent) {
-                                                    SendState state = states.get(message.getDatabaseId());
-                                                    if (state.isCanceled) {
-                                                        throw new RuntimeException();
-                                                    }
-                                                    state.uploadProgress = percent;
-                                                    Logger.d(TAG, "percent: " + percent);
-                                                    updateState(message.getDatabaseId(), state);
-                                                }
-                                            });
+
+                            int taskId = application.getApi().getUploader().requestTask(fileId, file.getAbsolutePath(), new UploadListener() {
+                                @Override
+                                public void onPartUploaded(int percent, int downloadedSize) {
+                                    SendState state = states.get(message.getDatabaseId());
+                                    state.uploadProgress = percent;
+                                    updateState(message.getDatabaseId(), state);
+                                }
+                            });
+                            application.getApi().getUploader().waitForTask(taskId);
+                            result = application.getApi().getUploader().getUploadResult(taskId);
+
                             if (result == null)
                                 break;
                         } catch (Exception e) {
@@ -384,7 +383,7 @@ public class MessageSender {
                     } else if (message.getExtras() instanceof TLUploadingVideo) {
                         TLUploadingVideo uploadingVideo = (TLUploadingVideo) message.getExtras();
                         long fileId = Entropy.generateRandomId();
-                        UploadResult result;
+                        Uploader.UploadResult result;
                         FileInputStream fileInputStream = null;
                         byte[] key = null;
                         byte[] iv = null;
@@ -401,20 +400,32 @@ public class MessageSender {
                                 file = new File(uploadingVideo.getFileName());
                             }
                             fileInputStream = new FileInputStream(file);
-                            result = application.getUploadController()
-                                    .uploadFile(fileInputStream, (int) file.length(), fileId,
-                                            new UploadController.UploadListener() {
-                                                @Override
-                                                public void onProgressChanged(int percent) {
-                                                    SendState state = states.get(message.getDatabaseId());
-                                                    if (state.isCanceled) {
-                                                        throw new RuntimeException();
-                                                    }
-                                                    state.uploadProgress = percent;
-                                                    Logger.d(TAG, "percent: " + percent);
-                                                    updateState(message.getDatabaseId(), state);
-                                                }
-                                            });
+
+                            int taskId = application.getApi().getUploader().requestTask(fileId, file.getAbsolutePath(), new UploadListener() {
+                                @Override
+                                public void onPartUploaded(int percent, int downloadedSize) {
+                                    SendState state = states.get(message.getDatabaseId());
+                                    state.uploadProgress = percent;
+                                    updateState(message.getDatabaseId(), state);
+                                }
+                            });
+                            application.getApi().getUploader().waitForTask(taskId);
+                            result = application.getApi().getUploader().getUploadResult(taskId);
+
+//                            result = application.getUploadController()
+//                                    .uploadFile(fileInputStream, (int) file.length(), fileId,
+//                                            new UploadController.UploadListener() {
+//                                                @Override
+//                                                public void onProgressChanged(int percent) {
+//                                                    SendState state = states.get(message.getDatabaseId());
+//                                                    if (state.isCanceled) {
+//                                                        throw new RuntimeException();
+//                                                    }
+//                                                    state.uploadProgress = percent;
+//                                                    Logger.d(TAG, "percent: " + percent);
+//                                                    updateState(message.getDatabaseId(), state);
+//                                                }
+//                                            });
                             if (result == null)
                                 continue;
                         } catch (Exception e) {
@@ -545,20 +556,42 @@ public class MessageSender {
                             }
                         } else {
                             long thumbFileId = Entropy.generateRandomId();
-                            UploadResult thumbResult;
+                            Uploader.UploadResult thumbResult;
+                            String previewFile = getUploadTempFile();
                             try {
-                                thumbResult = application.getUploadController()
-                                        .uploadFile(new ByteArrayInputStream(previewResult.getData()), previewResult.getData().length, thumbFileId,
-                                                new UploadController.UploadListener() {
-                                                    @Override
-                                                    public void onProgressChanged(int percent) {
-                                                    }
-                                                });
-                                if (thumbResult == null)
-                                    continue;
-                            } catch (Exception e) {
-                                continue;
+                                RandomAccessFile thumbFile = new RandomAccessFile(previewFile, "rw");
+                                thumbFile.write(previewResult.getData());
+                                thumbFile.close();
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
+                            int taskId = application.getApi().getUploader().requestTask(thumbFileId, previewFile, new UploadListener() {
+                                @Override
+                                public void onPartUploaded(int percent, int downloadedSize) {
+                                    SendState state = states.get(message.getDatabaseId());
+                                    state.uploadProgress = percent;
+                                    updateState(message.getDatabaseId(), state);
+                                }
+                            });
+                            application.getApi().getUploader().waitForTask(taskId);
+                            thumbResult = application.getApi().getUploader().getUploadResult(taskId);
+
+//                            UploadResult thumbResult;
+//                            try {
+//                                thumbResult = application.getUploadController()
+//                                        .uploadFile(new ByteArrayInputStream(previewResult.getData()), previewResult.getData().length, thumbFileId,
+//                                                new UploadController.UploadListener() {
+//                                                    @Override
+//                                                    public void onProgressChanged(int percent) {
+//                                                    }
+//                                                });
+//                                if (thumbResult == null)
+//                                    continue;
+//                            } catch (Exception e) {
+//                                continue;
+//                            }
 
                             synchronized (states) {
                                 SendState state = states.get(message.getDatabaseId());
