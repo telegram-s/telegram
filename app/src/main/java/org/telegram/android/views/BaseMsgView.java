@@ -1,6 +1,5 @@
 package org.telegram.android.views;
 
-import android.R;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -16,6 +15,7 @@ import android.util.AttributeSet;
 import android.view.*;
 import android.widget.Checkable;
 import com.extradea.framework.images.ImageReceiver;
+import org.telegram.android.R;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
@@ -24,6 +24,7 @@ import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.Placeholders;
+import org.telegram.i18n.I18nUtil;
 
 /**
  * Author: Korshakov Stepan
@@ -45,8 +46,10 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private int AVATAR_LEFT;
     private int AVATAR_BOTTOM;
     private int UNREAD_HEIGHT;
+    private int UNREAD_OFFSET;
 
     private TextPaint timeDivPaint;
+    private TextPaint newDivPaint;
     private Paint avatarPaint;
     private Drawable placeholder;
     private Bitmap avatar;
@@ -54,10 +57,16 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private long avatarImageTime;
     private boolean placeholderDrawn;
 
+    private Paint selectorPaint;
+    private Paint newMessagesPaint;
+
     private boolean showAvatar;
     private boolean isOut;
     private String timeDivText;
     private int timeDivMeasure;
+
+    private String newDivText;
+    private int newDivMeasure;
 
     private int bubbleContentWidth;
     private int bubbleContentHeight;
@@ -129,11 +138,17 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         AVATAR_BOTTOM = getPx(4);
         BUBBLE_PADDING = getPx(39);
         UNREAD_HEIGHT = getPx(24);
+        UNREAD_OFFSET = getPx(18);
 
         timeDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
         timeDivPaint.setTextSize(getSp(15));
         timeDivPaint.setColor(0xffFFFFFF);
         timeDivPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
+
+        newDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        newDivPaint.setTextSize(getSp(16));
+        newDivPaint.setColor(0xffFFFFFF);
+        newDivPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
 
         avatarPaint = new Paint();
        /* avatarPaint.setAntiAlias(true);
@@ -188,6 +203,12 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         serviceDrawable.getPadding(servicePadding);
 
         avatarRect = new Rect();
+
+        selectorPaint = new Paint();
+        selectorPaint.setColor(0x6633b5e5);
+
+        newMessagesPaint = new Paint();
+        newMessagesPaint.setColor(0x66435266);
     }
 
     protected float fadeEasing(float src) {
@@ -213,6 +234,10 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
         this.showUnreadMessagesNotify = showUnread;
         this.unreadMessagesCount = unreadMessagesCount;
+
+        if (showUnreadMessagesNotify) {
+            newDivText = I18nUtil.getInstance().getPluralFormatted(R.plurals.st_new_messages, unreadMessagesCount);
+        }
 
         showTimeSeparator = showTime;
         if (showTimeSeparator) {
@@ -352,6 +377,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         }
 
         if (showUnreadMessagesNotify) {
+            newDivMeasure = (int) newDivPaint.measureText(newDivText);
             realHeight += UNREAD_HEIGHT;
         }
 
@@ -468,7 +494,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
     private void applyDrawingState() {
         if (isChecked()) {
-            int[] drawableState = new int[]{R.attr.state_checked};
+            int[] drawableState = new int[]{android.R.attr.state_checked};
             bubbleOutDrawable.setState(drawableState);
             bubbleInDrawable.setState(drawableState);
             if (touchedElement == TOUCHED_BUBBLE) {
@@ -477,7 +503,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                 isBubblePressed = false;
             }
         } else if (touchedElement == TOUCHED_BUBBLE) {
-            int[] drawableState = new int[]{R.attr.state_pressed};
+            int[] drawableState = new int[]{android.R.attr.state_pressed};
             bubbleOutDrawable.setState(drawableState);
             bubbleInDrawable.setState(drawableState);
             isBubblePressed = true;
@@ -507,16 +533,13 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                 topOffset += UNREAD_HEIGHT;
             }
             rect.set(0, topOffset, getWidth(), getHeight());
-            Paint selectorPaint = new Paint();
-            selectorPaint.setColor(0x6633b5e5);
             canvas.drawRect(rect, selectorPaint);
         }
 
         if (showUnreadMessagesNotify) {
             rect.set(0, 0, getWidth(), UNREAD_HEIGHT);
-            Paint selectorPaint = new Paint();
-            selectorPaint.setColor(0x66000000);
-            canvas.drawRect(rect, selectorPaint);
+            canvas.drawRect(rect, newMessagesPaint);
+            canvas.drawText(newDivText, (getWidth() - newDivMeasure) / 2, UNREAD_OFFSET, newDivPaint);
             canvas.translate(0, UNREAD_HEIGHT);
         }
 

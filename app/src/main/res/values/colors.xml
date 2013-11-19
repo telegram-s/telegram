@@ -25,4 +25,6 @@
 
     <color name="st_intro_def_bg">#f2f2f2</color>
     <color name="st_intro_progress_bg">#ebebeb</color>
+
+    <color name="st_conv_new_bg">#66435266</color>
 </resources>

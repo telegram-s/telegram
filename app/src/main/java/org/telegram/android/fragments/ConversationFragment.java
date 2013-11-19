@@ -1362,23 +1362,41 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
             DialogDescription description = application.getEngine().getDescriptionForPeer(peerType, peerId);
             if (description != null && description.getFirstUnreadMessage() != 0 && nWorkingSet.size() > 0) {
-                firstUnreadMessage = description.getFirstUnreadMessage();
+                int unreadMessage = description.getFirstUnreadMessage();
                 application.getEngine().clearFirstUnreadMessage(peerType, peerId);
-                Logger.d(TAG, "Founded first unread message: " + firstUnreadMessage);
+                Logger.d(TAG, "Founded first unread message: " + unreadMessage);
                 int index = -1;
                 for (int i = 0; i < nWorkingSet.size(); i++) {
                     ChatMessage message = nWorkingSet.get(i);
-                    if (!message.isOut() && firstUnreadMessage == message.getMid()) {
+                    if (!message.isOut() && unreadMessage == message.getMid()) {
                         index = i;
                         break;
                     }
                 }
                 if (index != -1) {
-                    Logger.d(TAG, "Scrolling to first unread message: " + index);
+                    firstUnreadMessage = unreadMessage;
+                    unreadCount = 0;
+                    for (int i = 0; i <= index; i++) {
+                        ChatMessage message = nWorkingSet.get(i);
+                        if (!message.isOut()) {
+                            unreadCount++;
+                        }
+                    }
+
+                    Logger.d(TAG, "Scrolling to first unread message: " + index + ", count: " + unreadCount);
+
                     workingSet = nWorkingSet;
                     dialogAdapter.notifyDataSetChanged();
                     onDataChanged();
-                    listView.setSelectionFromTop(workingSet.size() - index, getPx(64));
+
+                    final int finalIndex = index;
+                    listView.setSelectionFromTop(workingSet.size() - finalIndex, getPx(64));
+                    listView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listView.setSelectionFromTop(workingSet.size() - finalIndex, getPx(64));
+                        }
+                    });
                     isFreshUpdate = false;
                     return;
                 } else {
@@ -1544,6 +1562,20 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     timeView.setVisibility(View.VISIBLE);
                 } else {
                     timeView.setVisibility(View.GONE);
+                }
+
+                boolean showDiv = false;
+                if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                    showDiv = true;
+                }
+
+                TextView unreadView = (TextView) view.findViewById(R.id.unreadDivider);
+
+                if (showDiv) {
+                    unreadView.setText(I18nUtil.getInstance().getPluralFormatted(R.plurals.st_new_messages, unreadCount));
+                    unreadView.setVisibility(View.VISIBLE);
+                } else {
+                    unreadView.setVisibility(View.GONE);
                 }
 
                 TextView messageView = (TextView) view.findViewById(R.id.message);

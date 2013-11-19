@@ -6,6 +6,12 @@
         <item quantity="other">{d} members</item>
     </plurals>
 
+    <plurals name="st_new_messages">
+        <item quantity="zero">no new message</item>
+        <item quantity="one">one new message</item>
+        <item quantity="other">{d} new messages</item>
+    </plurals>
+
     <plurals name="st_members_caps">
         <item quantity="zero">UNKNOWN</item>
         <item quantity="one">ONE MEMBER</item>
