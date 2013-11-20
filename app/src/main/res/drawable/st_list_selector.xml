@@ -3,17 +3,17 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="#9933B5E5"/>
+            <solid android:color="#1с000000"/>
         </shape>
     </item>
     <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <solid android:color="#9933B5E5"/>
+            <solid android:color="#1с000000"/>
         </shape>
     </item>
     <item android:state_selected="true">
         <shape android:shape="rectangle">
-            <solid android:color="#9933B5E5"/>
+            <solid android:color="#1с000000"/>
         </shape>
     </item>
     <item android:drawable="@drawable/transparent"/>
