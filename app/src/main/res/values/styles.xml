@@ -35,12 +35,12 @@
 
     <style name="AppTheme.Theme.ActionBar.TitleTextStyle"
            parent="TextAppearance.Sherlock.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/st_black_text</item>
+        <item name="android:textColor">@color/st_bar_title_color</item>
     </style>
 
     <style name="AppTheme.Theme.ActionBar.Subtitle"
            parent="TextAppearance.Sherlock.Widget.ActionBar.Subtitle">
-        <item name="android:textColor">@color/st_black_text</item>
+        <item name="android:textColor">@color/st_bar_subtitle_color</item>
     </style>
 
     <style name="AppTheme.Photo.ActionBarStyle" parent="Widget.Sherlock.Light.ActionBar">
@@ -94,6 +94,11 @@
         <item name="windowContentOverlay">@null</item>
 
         <item name="android:scrollViewStyle">@style/AppTheme.ScrollViewStyle</item>
+
+        <!-- for ActionBarSherlock -->
+        <item name="actionBarItemBackground">@drawable/st_bar_bg_item</item>
+        <!-- for native ActionBar -->
+        <item name="android:actionBarItemBackground">@drawable/st_bar_bg_item</item>
     </style>
     <style name="AppTheme.Photo" parent="Theme.Sherlock">
         <item name="android:windowBackground">@android:color/black</item>

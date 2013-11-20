@@ -74,7 +74,7 @@ public class DialogDescription implements Serializable {
     private TLObject extras;
 
     @DatabaseField(version = false)
-    private int firstUnreadMessage;
+    private long firstUnreadMessage;
 
     public int getDatabaseId() {
         return _id;
@@ -237,11 +237,11 @@ public class DialogDescription implements Serializable {
         this.extras = extras;
     }
 
-    public int getFirstUnreadMessage() {
+    public long getFirstUnreadMessage() {
         return firstUnreadMessage;
     }
 
-    public void setFirstUnreadMessage(int firstUnreadMessage) {
+    public void setFirstUnreadMessage(long firstUnreadMessage) {
         this.firstUnreadMessage = firstUnreadMessage;
     }
 }

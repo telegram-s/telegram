@@ -24,7 +24,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private static final String TAG = "Database";
 
     private static final String DATABASE_NAME = "stels.db";
-    private static final int DATABASE_VERSION = 52;
+    private static final int DATABASE_VERSION = 53;
 
     private RuntimeExceptionDao<DialogDescription, Long> dialogsDao;
     private RuntimeExceptionDao<FullChatInfo, Long> fullChatInfoDao;

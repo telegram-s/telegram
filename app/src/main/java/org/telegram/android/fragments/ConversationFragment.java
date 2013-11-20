@@ -113,7 +113,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private boolean isFreshUpdate = true;
 
-    private int firstUnreadMessage = 0;
+    private long firstUnreadMessage = 0;
     private int unreadCount = 0;
 
     public ConversationFragment(int peerType, int peerId) {
@@ -1362,15 +1362,22 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
             DialogDescription description = application.getEngine().getDescriptionForPeer(peerType, peerId);
             if (description != null && description.getFirstUnreadMessage() != 0 && nWorkingSet.size() > 0) {
-                int unreadMessage = description.getFirstUnreadMessage();
+                long unreadMessage = description.getFirstUnreadMessage();
                 application.getEngine().clearFirstUnreadMessage(peerType, peerId);
                 Logger.d(TAG, "Founded first unread message: " + unreadMessage);
                 int index = -1;
                 for (int i = 0; i < nWorkingSet.size(); i++) {
                     ChatMessage message = nWorkingSet.get(i);
-                    if (!message.isOut() && unreadMessage == message.getMid()) {
-                        index = i;
-                        break;
+                    if (peerType != PeerType.PEER_USER_ENCRYPTED) {
+                        if (!message.isOut() && unreadMessage == message.getMid()) {
+                            index = i;
+                            break;
+                        }
+                    } else {
+                        if (!message.isOut() && unreadMessage == message.getRandomId()) {
+                            index = i;
+                            break;
+                        }
                     }
                 }
                 if (index != -1) {

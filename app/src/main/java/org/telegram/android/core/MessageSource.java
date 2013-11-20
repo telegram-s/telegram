@@ -103,37 +103,39 @@ public class MessageSource {
                 if (offset == 0) {
                     DialogDescription description = application.getEngine().getDescriptionForPeer(peerType, peerId);
                     if (description != null) {
-                        int unreadMid = description.getFirstUnreadMessage();
+                        long unreadMid = description.getFirstUnreadMessage();
                         if (unreadMid != 0) {
-                            ChatMessage message = application.getEngine().getMessageById(unreadMid);
-                            if (message != null) {
-                                PreparedQuery<ChatMessage> query;
-                                try {
-                                    QueryBuilder<ChatMessage, Long> queryBuilder = application.getEngine().getMessagesDao().queryBuilder();
-                                    queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
-                                    queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
-                                            .and().raw("(date * 1000000 + abs(mid)) >= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
-                                    query = queryBuilder.prepare();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    return new ChatMessage[0];
-                                }
-                                resultMessages.addAll(application.getEngine().getMessagesDao().query(query));
+                            if (peerType != PeerType.PEER_USER_ENCRYPTED) {
+                                ChatMessage message = application.getEngine().getMessageById((int) unreadMid);
+                                if (message != null) {
+                                    PreparedQuery<ChatMessage> query;
+                                    try {
+                                        QueryBuilder<ChatMessage, Long> queryBuilder = application.getEngine().getMessagesDao().queryBuilder();
+                                        queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
+                                        queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
+                                                .and().raw("(date * 1000000 + abs(mid)) >= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
+                                        query = queryBuilder.prepare();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        return new ChatMessage[0];
+                                    }
+                                    resultMessages.addAll(application.getEngine().getMessagesDao().query(query));
 
-                                try {
-                                    QueryBuilder<ChatMessage, Long> queryBuilder = application.getEngine().getMessagesDao().queryBuilder();
-                                    queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
-                                    queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
-                                            .and().raw("(date * 1000000 + abs(mid)) <= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
-                                    queryBuilder.limit(PAGE_SIZE);
-                                    query = queryBuilder.prepare();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    return new ChatMessage[0];
-                                }
-                                resultMessages.addAll(application.getEngine().getMessagesDao().query(query));
+                                    try {
+                                        QueryBuilder<ChatMessage, Long> queryBuilder = application.getEngine().getMessagesDao().queryBuilder();
+                                        queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
+                                        queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
+                                                .and().raw("(date * 1000000 + abs(mid)) <= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
+                                        queryBuilder.limit(PAGE_SIZE);
+                                        query = queryBuilder.prepare();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        return new ChatMessage[0];
+                                    }
+                                    resultMessages.addAll(application.getEngine().getMessagesDao().query(query));
 
-                                loaded = true;
+                                    loaded = true;
+                                }
                             }
                         }
                     }

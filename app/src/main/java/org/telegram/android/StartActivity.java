@@ -78,7 +78,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
 
         getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.st_bar_bg));
         getSupportActionBar().setLogo(R.drawable.st_bar_logo);
-        getSupportActionBar().setIcon(R.drawable.st_bar_ic_search);
+        getSupportActionBar().setIcon(R.drawable.st_bar_logo);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         setContentView(R.layout.dialogs_container);
         updateHeaderHeight();

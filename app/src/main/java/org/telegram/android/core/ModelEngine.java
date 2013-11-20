@@ -398,6 +398,15 @@ public class ModelEngine {
         }
     }
 
+    public ChatMessage getMessageByRandomId(long rid) {
+        List<ChatMessage> res = getMessagesDao().queryForEq("randomId", rid);
+        if (res.size() == 0) {
+            return null;
+        } else {
+            return res.get(0);
+        }
+    }
+
     /**
      * Doesn't save order
      *
@@ -1114,7 +1123,7 @@ public class ModelEngine {
         nmsg.setSenderId(senderId);
         getMessagesDao().create(nmsg);
         application.getDataSourceKernel().onSourceAddMessage(nmsg);
-        updateDescriptorShort(nmsg);
+        updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
         return true;
     }
@@ -1137,7 +1146,7 @@ public class ModelEngine {
         nmsg.setMessageTimeout(timeout);
         getMessagesDao().create(nmsg);
         application.getDataSourceKernel().onSourceAddMessage(nmsg);
-        updateDescriptorShort(nmsg);
+        updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
         return true;
     }
@@ -1161,7 +1170,7 @@ public class ModelEngine {
         nmsg.setMessageTimeout(timeout);
         getMessagesDao().create(nmsg);
         application.getDataSourceKernel().onSourceAddMessage(nmsg);
-        updateDescriptorShort(nmsg);
+        updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
         return true;
     }
@@ -1186,7 +1195,7 @@ public class ModelEngine {
         getMessagesDao().create(nmsg);
         application.getDataSourceKernel().onSourceAddMessage(nmsg);
         saveMedia(nmsg.getMid(), nmsg);
-        updateDescriptorShort(nmsg);
+        updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
         return true;
     }
@@ -1211,7 +1220,7 @@ public class ModelEngine {
         getMessagesDao().create(nmsg);
         application.getDataSourceKernel().onSourceAddMessage(nmsg);
         saveMedia(nmsg.getMid(), nmsg);
-        updateDescriptorShort(nmsg);
+        updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
         return true;
     }
@@ -1539,6 +1548,22 @@ public class ModelEngine {
                 applyDescriptor(description, msg);
                 getDialogsDao().create(description);
                 application.getDialogSource().getViewSource().addItem(description);
+            }
+        }
+    }
+
+    private void updateDescriptorShortEnc(ChatMessage msg) {
+        DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
+        if (description != null) {
+            if (description.getDate() <= msg.getDate()) {
+                if (description.getFirstUnreadMessage() == 0) {
+                    description.setFirstUnreadMessage(msg.getRandomId());
+                    Logger.d(TAG, "Setting first unread message enc: " + msg.getRandomId());
+                }
+
+                applyDescriptor(description, msg);
+                getDialogsDao().update(description);
+                application.getDialogSource().getViewSource().updateItem(description);
             }
         }
     }

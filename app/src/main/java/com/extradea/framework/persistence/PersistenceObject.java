@@ -43,13 +43,13 @@ public abstract class PersistenceObject implements Serializable {
             save();
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             return false;
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             return false;
         }
     }
@@ -59,13 +59,13 @@ public abstract class PersistenceObject implements Serializable {
             load();
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             return false;
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             return false;
         }
     }

@@ -6,9 +6,13 @@
           android:icon="@drawable/st_bar_ic_search"
           android:title="Search"
           android:showAsAction="always|collapseActionView"/>
-    <item android:title="Compose"
+    <item android:showAsAction="always"
+          android:id="@+id/writeToContact"
+          android:title="Write to contact"
+          android:icon="@drawable/st_bar_ic_compose"/>
+    <item android:title="Menu"
           android:showAsAction="always"
-          android:icon="@drawable/st_bar_ic_compose">
+          android:icon="@drawable/st_bar_ic_other">
         <menu>
             <item android:id="@+id/newGroupMenu"
                   android:title="Create group"
@@ -16,15 +20,6 @@
             <item android:id="@+id/newSecretMenu"
                   android:title="Create secret chat"
                   android:showAsAction="never"/>
-            <item android:id="@+id/writeToContact"
-                  android:title="Write to contact"
-                  android:showAsAction="never"/>
-        </menu>
-    </item>
-    <item android:title="Menu"
-          android:showAsAction="always"
-          android:icon="@drawable/st_bar_ic_other">
-        <menu>
             <item android:id="@+id/contactsMenu"
                   android:title="My contacts"
                   android:showAsAction="never"/>
