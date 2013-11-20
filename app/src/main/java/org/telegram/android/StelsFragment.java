@@ -81,13 +81,11 @@ public class StelsFragment extends StelsBaseFragment {
     }
 
     protected CharSequence highlightMenuText(int resId) {
-        return highlightText(resId);
-        // return getStringSafe(resId);
+        return html("<font color='#010101'>" + getStringSafe(resId) + "</font>");
     }
 
     protected CharSequence highlightMenuText(String src) {
-        return highlightText(src);
-        // return src;
+        return html("<font color='#010101'>" + src + "</font>");
     }
 
     protected CharSequence highlightTitleDisabledText(int resId) {

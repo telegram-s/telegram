@@ -21,13 +21,13 @@
                   android:layout_marginLeft="8dp"
                   android:layout_marginBottom="2dp"
                   android:layout_marginRight="8dp"
-                  android:textColor="@color/st_blue_normal"
+                  android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
                   android:textStyle="bold"
                   android:text="@string/st_notifications_header_common"/>
         <View android:layout_width="fill_parent"
-              android:layout_height="1dp"
-              android:background="@color/st_blue_normal"/>
+              android:layout_height="@dimen/st_section_h"
+              android:background="@color/st_section_line"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -56,8 +56,8 @@
                        android:duplicateParentState="true"/>
         </org.telegram.android.ui.RtlLinearLayout>
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
-              android:background="@color/st_div"/>
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -89,8 +89,8 @@
                        android:duplicateParentState="true"/>
         </org.telegram.android.ui.RtlLinearLayout>
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
-              android:background="@color/st_div"/>
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -120,8 +120,8 @@
                        android:duplicateParentState="true"/>
         </org.telegram.android.ui.RtlLinearLayout>
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
-              android:background="@color/st_div"/>
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:id="@+id/allCustomSoundContainer"
@@ -149,8 +149,7 @@
                       android:layout_marginRight="8dp"
                       android:layout_marginLeft="8dp"
                       android:textSize="18sp"
-                      android:textColor="@color/st_blue_bright"
-                      ext:customFont="light"
+                      android:textColor="@color/st_section_value"
                       android:id="@+id/allSoundTitle"
                       android:lines="1"
                       android:singleLine="true"
@@ -162,13 +161,13 @@
                   android:layout_marginLeft="8dp"
                   android:layout_marginBottom="2dp"
                   android:layout_marginRight="8dp"
-                  android:textColor="@color/st_blue_normal"
+                  android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
                   android:textStyle="bold"
                   android:text="@string/st_notifications_header_group"/>
         <View android:layout_width="fill_parent"
-              android:layout_height="1dp"
-              android:background="@color/st_blue_normal"/>
+              android:layout_height="@dimen/st_section_h"
+              android:background="@color/st_section_line"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -198,8 +197,8 @@
                        android:duplicateParentState="true"/>
         </org.telegram.android.ui.RtlLinearLayout>
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
-              android:background="@color/st_div"/>
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -229,8 +228,8 @@
                        android:duplicateParentState="true"/>
         </org.telegram.android.ui.RtlLinearLayout>
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
-              android:background="@color/st_div"/>
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -260,8 +259,8 @@
                        android:duplicateParentState="true"/>
         </org.telegram.android.ui.RtlLinearLayout>
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
-              android:background="@color/st_div"/>
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -291,8 +290,7 @@
                       android:lines="1"
                       android:singleLine="true"
                       android:textSize="18sp"
-                      android:textColor="@color/st_blue_bright"
-                      ext:customFont="light"
+                      android:textColor="@color/st_section_value"
                       android:id="@+id/groupCustomSoundTitle"
                       android:text="Default"/>
         </org.telegram.android.ui.RtlLinearLayout>
@@ -302,13 +300,13 @@
                   android:layout_marginBottom="2dp"
                   android:layout_marginLeft="8dp"
                   android:layout_marginRight="8dp"
-                  android:textColor="@color/st_blue_normal"
+                  android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
                   android:textStyle="bold"
                   android:text="@string/st_notifications_header_in_app"/>
         <View android:layout_width="fill_parent"
-              android:layout_height="1dp"
-              android:background="@color/st_blue_normal"/>
+              android:layout_height="@dimen/st_section_h"
+              android:background="@color/st_section_line"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -338,8 +336,8 @@
                        android:id="@+id/inAppSoundsCheck"/>
         </org.telegram.android.ui.RtlLinearLayout>
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
-              android:background="@color/st_div"/>
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -369,8 +367,8 @@
                        android:id="@+id/inAppVibrateCheck"/>
         </org.telegram.android.ui.RtlLinearLayout>
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
-              android:background="@color/st_div"/>
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
@@ -405,13 +403,13 @@
                   android:layout_marginLeft="8dp"
                   android:layout_marginBottom="2dp"
                   android:layout_marginRight="8dp"
-                  android:textColor="@color/st_blue_normal"
+                  android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
                   android:textStyle="bold"
                   android:text="@string/st_notifications_header_reset"/>
         <View android:layout_width="fill_parent"
-              android:layout_height="1dp"
-              android:background="@color/st_blue_normal"/>
+              android:layout_height="@dimen/st_section_h"
+              android:background="@color/st_section_line"/>
         <LinearLayout android:layout_width="fill_parent"
                       android:layout_height="wrap_content"
                       android:clickable="true"

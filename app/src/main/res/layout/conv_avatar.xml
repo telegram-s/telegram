@@ -2,11 +2,15 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_height="wrap_content"
-             android:layout_width="wrap_content">
+             android:layout_width="wrap_content"
+             android:background="@drawable/st_list_selector">
     <com.extradea.framework.images.ui.FastWebImageView
             android:layout_height="48dp"
             android:layout_width="48dp"
             android:id="@+id/image"/>
+    <ImageView android:layout_width="fill_parent" android:layout_height="fill_parent"
+               android:id="@+id/avatarTouchLayer"
+               android:src="@drawable/st_selector_avatar"/>
     <ImageView android:layout_width="47dp"
                android:layout_height="47dp"
                android:scaleType="fitXY"

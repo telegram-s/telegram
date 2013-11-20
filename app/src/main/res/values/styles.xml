@@ -90,6 +90,8 @@
         <item name="android:dropDownListViewStyle">@style/DropDown.Stels</item>
         <item name="dropDownListViewStyle">@style/DropDown.Stels</item>
 
+        <item name="android:dropDownSelector">@drawable/st_list_selector</item>
+
         <item name="android:windowContentOverlay">@null</item>
         <item name="windowContentOverlay">@null</item>
 
@@ -99,6 +101,8 @@
         <item name="actionBarItemBackground">@drawable/st_bar_bg_item</item>
         <!-- for native ActionBar -->
         <item name="android:actionBarItemBackground">@drawable/st_bar_bg_item</item>
+
+        <item name="searchViewSearchIcon">@drawable/st_bar_ic_search</item>
     </style>
     <style name="AppTheme.Photo" parent="Theme.Sherlock">
         <item name="android:windowBackground">@android:color/black</item>
@@ -115,6 +119,7 @@
 
     <style name="DropDown.Stels" parent="Widget.Sherlock.Light.ListView.DropDown">
         <item name="android:divider">@drawable/st_bar_menu_div</item>
+        <item name="android:listSelector">@drawable/st_list_selector</item>
     </style>
 
     <style name="PopupMenu.Stels" parent="Widget.Sherlock.Light.ListPopupWindow">

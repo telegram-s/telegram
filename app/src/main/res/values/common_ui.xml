@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Selectors -->
+    <color name="st_selector">#1с000000</color>
+    <color name="st_selector_avatar">#30000000</color>
+
+    <!-- Menu -->
+    <color name="st_menu_text">#010101</color>
+
+    <!-- Settings -->
+    <color name="st_section_text">#353535</color>
+    <color name="st_section_line">#bfbfbf</color>
+    <color name="st_section_div">#dbdbdb</color>
+    <dimen name="st_section_h">2dp</dimen>
+    <dimen name="st_section_div_h">1px</dimen>
+
+    <!--<color name="st_section_value">#006FC8</color>-->
+    <!--<color name="st_section_value_disabled">#883D3D3D</color>-->
+
+    <color name="st_section_title">#010101</color>
+    <color name="st_section_title_disabled">#883D3D3D</color>
+    <color name="st_section_value">#010101</color>
+    <color name="st_section_value_disabled">#883D3D3D</color>
+</resources>

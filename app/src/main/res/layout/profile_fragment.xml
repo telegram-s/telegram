@@ -57,13 +57,13 @@
                       android:layout_marginLeft="8dp"
                       android:layout_marginRight="8dp"
                       android:layout_marginBottom="3dp"
-                      android:textColor="@color/st_blue_normal"
+                      android:textColor="@color/st_section_text"
                       android:textSize="@dimen/section_header_text"
                       android:textStyle="bold"
                       android:text="@string/st_profile_header_phone"/>
             <View android:layout_width="fill_parent"
-                  android:layout_height="1dp"
-                  android:background="@color/st_blue_normal"/>
+                  android:layout_height="@dimen/st_section_h"
+                  android:background="@color/st_section_line"/>
 
             <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                      android:layout_height="wrap_content"
@@ -107,9 +107,9 @@
             </org.telegram.android.ui.RtlLinearLayout>
 
             <View android:layout_width="fill_parent"
-                  android:layout_height="1px"
+                  android:layout_height="@dimen/st_section_div_h"
                   android:layout_marginTop="6dp"
-                  android:background="@color/st_div"
+                  android:background="@color/st_section_div"
                   android:visibility="gone"
                   android:id="@+id/secureChatDiv"/>
 
@@ -145,13 +145,13 @@
                           android:layout_marginLeft="8dp"
                           android:layout_marginRight="8dp"
                           android:layout_marginBottom="3dp"
-                          android:textColor="@color/st_blue_normal"
+                          android:textColor="@color/st_section_text"
                           android:textSize="@dimen/section_header_text"
                           android:textStyle="bold"
                           android:text="@string/st_profile_header_media"/>
                 <View android:layout_width="fill_parent"
-                      android:layout_height="1dp"
-                      android:background="@color/st_blue_normal"/>
+                      android:layout_height="@dimen/st_section_h"
+                      android:background="@color/st_section_line"/>
                 <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                          android:layout_height="wrap_content"
                                                          android:clickable="true"
@@ -189,13 +189,13 @@
                       android:layout_marginLeft="8dp"
                       android:layout_marginRight="8dp"
                       android:layout_marginBottom="3dp"
-                      android:textColor="@color/st_blue_normal"
+                      android:textColor="@color/st_section_text"
                       android:textSize="@dimen/section_header_text"
                       android:textStyle="bold"
                       android:text="@string/st_profile_header_settings"/>
             <View android:layout_width="fill_parent"
-                  android:layout_height="1dp"
-                  android:background="@color/st_blue_normal"/>
+                  android:layout_height="@dimen/st_section_h"
+                  android:background="@color/st_section_line"/>
 
             <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                      android:layout_height="wrap_content"
@@ -225,8 +225,8 @@
                            android:duplicateParentState="true"/>
             </org.telegram.android.ui.RtlLinearLayout>
             <View android:layout_width="fill_parent"
-                  android:layout_height="1px"
-                  android:background="@color/st_div"/>
+                  android:layout_height="@dimen/st_section_div_h"
+                  android:background="@color/st_section_div"/>
             <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                      android:layout_height="wrap_content"
                                                      android:id="@+id/notificationSound"

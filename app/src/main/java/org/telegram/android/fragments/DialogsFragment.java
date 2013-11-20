@@ -753,7 +753,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             menu.findItem(R.id.settingsMenu).setTitle(highlightMenuText(R.string.st_dialogs_menu_settings));
             menu.findItem(R.id.newSecretMenu).setTitle(highlightMenuText(R.string.st_dialogs_menu_secret));
             menu.findItem(R.id.newGroupMenu).setTitle(highlightMenuText(R.string.st_dialogs_menu_group));
-            menu.findItem(R.id.writeToContact).setTitle(highlightMenuText(R.string.st_dialogs_menu_write_contact));
+            menu.findItem(R.id.writeToContact).setTitle(R.string.st_dialogs_menu_write_contact);
             getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSherlockActivity().getSupportActionBar().setHomeButtonEnabled(false);

@@ -859,10 +859,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         FastWebImageView imageView = (FastWebImageView) menu.findItem(R.id.userAvatar)
                 .getActionView().findViewById(R.id.image);
+        View touchLayer = menu.findItem(R.id.userAvatar).getActionView().findViewById(R.id.avatarTouchLayer);
         int padding = 0;//(int) (getPx(1) * (getBarHeight() / ((float) getPx(48))) + 0.5f);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(getBarHeight() - padding, getBarHeight() - padding, Gravity.TOP | Gravity.RIGHT);
         params.bottomMargin = padding;
         imageView.setLayoutParams(params);
+        touchLayer.setLayoutParams(params);
 
         menu.findItem(R.id.userAvatar)
                 .getActionView().findViewById(R.id.imageOverlay).setLayoutParams(params);
@@ -870,7 +872,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (peerType == PeerType.PEER_USER) {
             if (peerId == 333000) {
                 imageView.setLoadingDrawable(R.drawable.st_support_avatar);
-                imageView.setOnClickListener(null);
+                touchLayer.setOnClickListener(null);
             } else {
                 imageView.setLoadingDrawable(Placeholders.USER_PLACEHOLDERS[peerId % Placeholders.USER_PLACEHOLDERS.length]);
                 User usr = application.getEngine().getUser(peerId);
@@ -889,7 +891,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 } else {
                     imageView.requestTask(null);
                 }
-                imageView.setOnClickListener(new View.OnClickListener() {
+                touchLayer.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         getRootController().openUser(peerId);
@@ -913,7 +915,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             } else {
                 imageView.requestTask(null);
             }
-            imageView.setOnClickListener(new View.OnClickListener() {
+            touchLayer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     getRootController().openChatEdit(peerId);
@@ -923,7 +925,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             final EncryptedChat chat = application.getEngine().getEncryptedChat(peerId);
             if (chat.getUserId() == 333000) {
                 imageView.setLoadingDrawable(R.drawable.st_support_avatar);
-                imageView.setOnClickListener(null);
+                touchLayer.setOnClickListener(null);
             } else {
                 imageView.setLoadingDrawable(Placeholders.USER_PLACEHOLDERS[chat.getUserId() % Placeholders.USER_PLACEHOLDERS.length]);
                 User usr = application.getEngine().getUser(chat.getUserId());
@@ -942,7 +944,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 } else {
                     imageView.requestTask(null);
                 }
-                imageView.setOnClickListener(new View.OnClickListener() {
+                touchLayer.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         getRootController().openSecretChatInfo(chat.getId());

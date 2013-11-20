@@ -108,7 +108,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         if (listView == null) {
             return;
         }
-        listView.setPadding(0, getBarHeight(), 0, 0);
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) listView.getLayoutParams();
+        params.topMargin = getBarHeight();
+        listView.setLayoutParams(params);
     }
 
     @Override

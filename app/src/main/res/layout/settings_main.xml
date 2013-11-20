@@ -75,15 +75,15 @@
                   android:layout_marginLeft="16dp"
                   android:layout_marginBottom="2dp"
                   android:layout_marginRight="16dp"
-                  android:textColor="@color/st_blue_normal"
+                  android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
                   android:textStyle="bold"
                   android:text="@string/st_settings_header_phone"/>
         <View android:layout_width="fill_parent"
-              android:layout_height="1dp"
+              android:layout_height="@dimen/st_section_h"
               android:layout_marginLeft="8dp"
               android:layout_marginRight="8dp"
-              android:background="@color/st_blue_normal"/>
+              android:background="@color/st_section_line"/>
 
         <TextView android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
@@ -101,15 +101,15 @@
                   android:layout_marginLeft="16dp"
                   android:layout_marginRight="16dp"
                   android:layout_marginBottom="2dp"
-                  android:textColor="@color/st_blue_normal"
+                  android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
                   android:textStyle="bold"
                   android:text="@string/st_settings_header_settings"/>
         <View android:layout_width="fill_parent"
-              android:layout_height="1dp"
+              android:layout_height="@dimen/st_section_h"
               android:layout_marginRight="8dp"
               android:layout_marginLeft="8dp"
-              android:background="@color/st_blue_normal"/>
+              android:background="@color/st_section_line"/>
 
 
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
@@ -141,10 +141,10 @@
         </org.telegram.android.ui.RtlLinearLayout>
 
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
+              android:layout_height="@dimen/st_section_div_h"
               android:layout_marginLeft="8dp"
               android:layout_marginRight="8dp"
-              android:background="@color/st_div"/>
+              android:background="@color/st_section_div"/>
 
         <FrameLayout android:layout_width="fill_parent"
                      android:layout_height="48dp"
@@ -164,10 +164,10 @@
         </FrameLayout>
 
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
+              android:layout_height="@dimen/st_section_div_h"
               android:layout_marginLeft="8dp"
               android:layout_marginRight="8dp"
-              android:background="@color/st_div"/>
+              android:background="@color/st_section_div"/>
 
         <FrameLayout android:layout_width="fill_parent"
                      android:layout_height="48dp"
@@ -187,10 +187,10 @@
         </FrameLayout>
 
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
+              android:layout_height="@dimen/st_section_div_h"
               android:layout_marginLeft="8dp"
               android:layout_marginRight="8dp"
-              android:background="@color/st_div"
+              android:background="@color/st_section_div"
               android:id="@+id/wallpapersDiv"/>
 
         <FrameLayout android:layout_width="fill_parent"
@@ -216,16 +216,16 @@
                   android:layout_marginLeft="16dp"
                   android:layout_marginRight="16dp"
                   android:layout_marginBottom="2dp"
-                  android:textColor="@color/st_blue_normal"
+                  android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
                   android:textStyle="bold"
                   android:text="@string/st_settings_header_support"/>
 
         <View android:layout_width="fill_parent"
-              android:layout_height="1dp"
+              android:layout_height="@dimen/st_section_h"
               android:layout_marginLeft="8dp"
               android:layout_marginRight="8dp"
-              android:background="@color/st_blue_normal"/>
+              android:background="@color/st_section_line"/>
 
         <FrameLayout android:layout_width="fill_parent"
                      android:layout_height="48dp"
@@ -250,16 +250,16 @@
                   android:layout_marginLeft="16dp"
                   android:layout_marginRight="16dp"
                   android:layout_marginBottom="2dp"
-                  android:textColor="@color/st_blue_normal"
+                  android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
                   android:textStyle="bold"
                   android:text="@string/st_settings_header_about"/>
 
         <View android:layout_width="fill_parent"
-              android:layout_height="1dp"
+              android:layout_height="@dimen/st_section_h"
               android:layout_marginLeft="8dp"
               android:layout_marginRight="8dp"
-              android:background="@color/st_blue_normal"/>
+              android:background="@color/st_section_line"/>
 
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="48dp">
@@ -295,10 +295,10 @@
         </org.telegram.android.ui.RtlLinearLayout>
 
         <View android:layout_width="fill_parent"
-              android:layout_height="1px"
+              android:layout_height="@dimen/st_section_div_h"
               android:layout_marginLeft="8dp"
               android:layout_marginRight="8dp"
-              android:background="@color/st_div"
+              android:background="@color/st_section_div"
               android:id="@+id/developmentDiv"/>
 
         <FrameLayout android:layout_width="fill_parent"

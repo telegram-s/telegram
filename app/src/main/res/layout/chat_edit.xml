@@ -7,9 +7,11 @@
              android:background="@android:color/white">
     <com.extradea.framework.images.ui.ImagingListView android:layout_width="fill_parent"
                                                       android:layout_height="fill_parent"
-                                                      android:paddingTop="48dp"
+                                                      android:layout_marginTop="48dp"
+                                                      android:paddingLeft="8dp"
+                                                      android:paddingRight="8dp"
                                                       android:clipToPadding="false"
-                                                      android:scrollbarStyle="insideOverlay"
+                                                      android:scrollbarStyle="outsideOverlay"
                                                       android:id="@+id/mainListView"/>
 
     <FrameLayout android:layout_height="fill_parent"

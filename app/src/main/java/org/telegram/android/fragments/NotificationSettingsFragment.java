@@ -270,21 +270,21 @@ public class NotificationSettingsFragment extends StelsFragment {
 
         if (isAllEnabled) {
             allAlertCheck.setImageResource(R.drawable.holo_btn_check_on);
-            allVibrationLabel.setTextColor(0xFF010101);
+            allVibrationLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             allVibrationContainer.setEnabled(true);
-            allSoundLabel.setTextColor(0xFF010101);
+            allSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             allSoundContainer.setEnabled(true);
-            allCustomSoundLabel.setTextColor(0xFF010101);
-            allCustomSoundTitle.setTextColor(0xff006FC8);
+            allCustomSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title));
+            allCustomSoundTitle.setTextColor(getResources().getColor(R.color.st_section_value));
             allCustomSoundContainer.setEnabled(true);
         } else {
             allAlertCheck.setImageResource(R.drawable.holo_btn_check_off);
-            allVibrationLabel.setTextColor(0x883D3D3D);
+            allVibrationLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             allVibrationContainer.setEnabled(false);
-            allSoundLabel.setTextColor(0x883D3D3D);
+            allSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             allSoundContainer.setEnabled(false);
-            allCustomSoundLabel.setTextColor(0x883D3D3D);
-            allCustomSoundTitle.setTextColor(0x883D3D3D);
+            allCustomSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
+            allCustomSoundTitle.setTextColor(getResources().getColor(R.color.st_section_value_disabled));
             allCustomSoundContainer.setEnabled(false);
         }
 
@@ -341,28 +341,28 @@ public class NotificationSettingsFragment extends StelsFragment {
         }
 
         if (application.getNotificationSettings().isEnabled()) {
-            groupAlertLabel.setTextColor(0xFF010101);
+            groupAlertLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             groupAlertContainer.setEnabled(true);
         } else {
-            groupAlertLabel.setTextColor(0x883D3D3D);
+            groupAlertLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             groupAlertContainer.setEnabled(false);
         }
 
         if (isEnabled) {
-            groupVibrationLabel.setTextColor(0xFF010101);
+            groupVibrationLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             groupVibrationContainer.setEnabled(true);
-            groupSoundLabel.setTextColor(0xFF010101);
+            groupSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             groupSoundContainer.setEnabled(true);
-            groupCustomSoundLabel.setTextColor(0xFF010101);
-            groupCustomSoundTitle.setTextColor(0xff006FC8);
+            groupCustomSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title));
+            groupCustomSoundTitle.setTextColor(getResources().getColor(R.color.st_section_value));
             groupCustomSoundContainer.setEnabled(true);
         } else {
-            groupVibrationLabel.setTextColor(0x883D3D3D);
+            groupVibrationLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             groupVibrationContainer.setEnabled(false);
-            groupSoundLabel.setTextColor(0x883D3D3D);
+            groupSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             groupSoundContainer.setEnabled(false);
-            groupCustomSoundLabel.setTextColor(0x883D3D3D);
-            groupCustomSoundTitle.setTextColor(0x883D3D3D);
+            groupCustomSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
+            groupCustomSoundTitle.setTextColor(getResources().getColor(R.color.st_section_value_disabled));
             groupCustomSoundContainer.setEnabled(false);
         }
 
@@ -405,18 +405,18 @@ public class NotificationSettingsFragment extends StelsFragment {
 
         boolean isEnabled = application.getNotificationSettings().isEnabled();
         if (isEnabled) {
-            inAppSoundLabel.setTextColor(0xFF010101);
+            inAppSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             inAppSoundContainer.setEnabled(true);
-            inAppVibrateLabel.setTextColor(0xFF010101);
+            inAppVibrateLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             inAppVibrateContainer.setEnabled(true);
-            inAppPreviewLabel.setTextColor(0xFF010101);
+            inAppPreviewLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             inAppPreviewContainer.setEnabled(true);
         } else {
-            inAppSoundLabel.setTextColor(0x883D3D3D);
+            inAppSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             inAppSoundContainer.setEnabled(false);
-            inAppVibrateLabel.setTextColor(0x883D3D3D);
+            inAppVibrateLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             inAppVibrateContainer.setEnabled(false);
-            inAppPreviewLabel.setTextColor(0x883D3D3D);
+            inAppPreviewLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             inAppPreviewContainer.setEnabled(false);
         }
 
