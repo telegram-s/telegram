@@ -687,29 +687,31 @@ public class ModelEngine {
                 getFullChatInfoDao().update(chatInfo);
                 application.getChatSource().notifyChatChanged(chatId);
             } else {
-                ArrayList<Pair<Integer, Integer>> uids = new ArrayList<Pair<Integer, Integer>>();
-                for (int i = 0; i < chatInfo.getUids().length; i++) {
-                    if (chatInfo.getUids()[i] != uid) {
-                        uids.add(new Pair<Integer, Integer>(
-                                chatInfo.getUids()[i],
-                                chatInfo.getInviters()[i]));
+                if (chatInfo.getUids() != null) {
+                    ArrayList<Pair<Integer, Integer>> uids = new ArrayList<Pair<Integer, Integer>>();
+                    for (int i = 0; i < chatInfo.getUids().length; i++) {
+                        if (chatInfo.getUids()[i] != uid) {
+                            uids.add(new Pair<Integer, Integer>(
+                                    chatInfo.getUids()[i],
+                                    chatInfo.getInviters()[i]));
+                        }
                     }
+
+                    int[] newUids = new int[uids.size()];
+                    int[] newInviters = new int[uids.size()];
+
+                    int index = 0;
+                    for (Pair<Integer, Integer> u : uids) {
+                        newUids[index] = u.first;
+                        newInviters[index] = u.second;
+                        index++;
+                    }
+
+                    chatInfo.setUids(newUids);
+                    chatInfo.setInviters(newInviters);
+                    getFullChatInfoDao().update(chatInfo);
+                    application.getChatSource().notifyChatChanged(chatId);
                 }
-
-                int[] newUids = new int[uids.size()];
-                int[] newInviters = new int[uids.size()];
-
-                int index = 0;
-                for (Pair<Integer, Integer> u : uids) {
-                    newUids[index] = u.first;
-                    newInviters[index] = u.second;
-                    index++;
-                }
-
-                chatInfo.setUids(newUids);
-                chatInfo.setInviters(newInviters);
-                getFullChatInfoDao().update(chatInfo);
-                application.getChatSource().notifyChatChanged(chatId);
             }
         }
 
