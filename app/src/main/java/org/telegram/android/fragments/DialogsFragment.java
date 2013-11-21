@@ -763,13 +763,14 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
 
             MenuItem searchItem = menu.findItem(R.id.searchMenu);
             com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) searchItem.getActionView();
-            searchView.setQueryHint(getStringSafe(R.string.st_dialogs_search_hint));
+            //searchView.setQueryHint(getStringSafe(R.string.st_dialogs_search_hint));
+            searchView.setQueryHint("");
 
             ((ImageView) searchView.findViewById(R.id.abs__search_button)).setImageResource(R.drawable.st_bar_logo);
 
-            AutoCompleteTextView searchText = (AutoCompleteTextView) searchView.findViewById(R.id.abs__search_src_text);
-            searchText.setHintTextColor(0xccB8B8B8);
-            searchText.setTextColor(0xff010101);
+//            AutoCompleteTextView searchText = (AutoCompleteTextView) searchView.findViewById(R.id.abs__search_src_text);
+//            searchText.setHintTextColor(0xccB8B8B8);
+//            searchText.setTextColor(0xff010101);
 
             searchView.setOnSuggestionListener(new com.actionbarsherlock.widget.SearchView.OnSuggestionListener() {
                 @Override

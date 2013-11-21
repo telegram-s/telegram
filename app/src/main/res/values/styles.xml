@@ -62,6 +62,15 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
+    <style name="AppOverFlow" parent="Widget.Sherlock.ActionButton.Overflow">
+        <item name="android:src">@drawable/st_bar_ic_other</item>
+    </style>
+
+    <style name="AppSearchTextView" parent="Widget.Sherlock.SearchAutoCompleteTextView">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColorHint">@android:color/white</item>
+    </style>
+
     <style name="AppTheme.Theme" parent="Theme.Sherlock.Light">
 
         <item name="android:listViewStyle">@style/AppListView</item>
@@ -103,6 +112,11 @@
         <item name="android:actionBarItemBackground">@drawable/st_bar_bg_item</item>
 
         <item name="searchViewSearchIcon">@drawable/st_bar_ic_search</item>
+        <item name="searchViewCloseIcon">@drawable/st_bar_ic_search_clear</item>
+        <item name="searchAutoCompleteTextView">@style/AppSearchTextView</item>
+
+        <item name="actionOverflowButtonStyle">@style/AppOverFlow</item>
+        <item name="android:actionOverflowButtonStyle">@style/AppOverFlow</item>
     </style>
     <style name="AppTheme.Photo" parent="Theme.Sherlock">
         <item name="android:windowBackground">@android:color/black</item>
