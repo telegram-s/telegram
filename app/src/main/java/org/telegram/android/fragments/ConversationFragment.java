@@ -73,6 +73,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private static final String TAG = "ConversaionFragment";
 
+    private static final int MINIMAL_NEWDIV_COUNT = 10;
+
     private int peerId;
     private int peerType;
 
@@ -1394,20 +1396,26 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
                     Logger.d(TAG, "Scrolling to first unread message: " + index + ", count: " + unreadCount);
 
-                    workingSet = nWorkingSet;
-                    dialogAdapter.notifyDataSetChanged();
-                    onDataChanged();
+                    if (unreadCount < MINIMAL_NEWDIV_COUNT) {
+                        Logger.d(TAG, "Scrolling to first unread message: " + index + ", count: " + unreadCount);
+                        firstUnreadMessage = 0;
+                        unreadCount = 0;
+                    } else {
+                        workingSet = nWorkingSet;
+                        dialogAdapter.notifyDataSetChanged();
+                        onDataChanged();
 
-                    final int finalIndex = index;
-                    listView.setSelectionFromTop(workingSet.size() - finalIndex, getPx(64));
-                    listView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listView.setSelectionFromTop(workingSet.size() - finalIndex, getPx(64));
-                        }
-                    });
-                    isFreshUpdate = false;
-                    return;
+                        final int finalIndex = index;
+                        listView.setSelectionFromTop(workingSet.size() - finalIndex, getPx(64));
+                        listView.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listView.setSelectionFromTop(workingSet.size() - finalIndex, getPx(64));
+                            }
+                        });
+                        isFreshUpdate = false;
+                        return;
+                    }
                 } else {
                     Logger.d(TAG, "Unable to find unread message inf working set");
                 }
