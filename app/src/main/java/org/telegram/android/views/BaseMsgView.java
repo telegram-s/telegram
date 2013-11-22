@@ -140,12 +140,20 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         UNREAD_HEIGHT = getPx(24);
         UNREAD_OFFSET = getPx(18);
 
-        timeDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        if (FontController.USE_SUBPIXEL) {
+            timeDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            timeDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
         timeDivPaint.setTextSize(getSp(15));
         timeDivPaint.setColor(0xffFFFFFF);
         timeDivPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
 
-        newDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        if (FontController.USE_SUBPIXEL) {
+            newDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            newDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
         newDivPaint.setTextSize(getSp(16));
         newDivPaint.setColor(0xffFFFFFF);
         newDivPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));

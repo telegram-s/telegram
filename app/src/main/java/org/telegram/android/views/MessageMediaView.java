@@ -109,17 +109,29 @@ public class MessageMediaView extends BaseMsgView {
         videoIcon = getResources().getDrawable(R.drawable.st_bubble_ic_video);
         mapPoint = getResources().getDrawable(R.drawable.st_map_pin);
 
-        videoDurationPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        if (FontController.USE_SUBPIXEL) {
+            videoDurationPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            videoDurationPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
         videoDurationPaint.setTextSize(getSp(15));
         videoDurationPaint.setTypeface(FontController.loadTypeface(getContext(), "light"));
         videoDurationPaint.setColor(0xE6FFFFFF);
 
-        downloadPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        if (FontController.USE_SUBPIXEL) {
+            downloadPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            downloadPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
         downloadPaint.setTextSize(getSp(15));
         downloadPaint.setTypeface(FontController.loadTypeface(getContext(), "light"));
         downloadPaint.setColor(0xE6FFFFFF);
 
-        timePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        if (FontController.USE_SUBPIXEL) {
+            timePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            timePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
         timePaint.setTextSize(getSp(13));
         timePaint.setTypeface(FontController.loadTypeface(getContext(), "italic"));
         timePaint.setColor(0xB6FFFFFF);
@@ -761,7 +773,7 @@ public class MessageMediaView extends BaseMsgView {
                 canvas.save();
                 canvas.translate(desiredWidth - getPx(12 + 8), desiredHeight - getPx(19));
                 canvas.drawCircle(getPx(6), getPx(6), getPx(6), clockIconPaint);
-                double time = (System.currentTimeMillis() / 10.0) % (12 * 60);
+                double time = (System.currentTimeMillis() / 15.0) % (12 * 60);
                 double angle = (time / (6 * 60)) * Math.PI;
 
                 int x = (int) (Math.sin(-angle) * getPx(4));

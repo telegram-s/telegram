@@ -64,21 +64,23 @@ public class MessageView extends BaseMsgView {
     }
 
     private TextPaint initTextPaint() {
-        return new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-        // return new TextPaint();
-        // return new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        if (FontController.USE_SUBPIXEL) {
+            return new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            return new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
     }
 
     protected void init() {
         super.init();
 
         bodyPaint = initTextPaint();
-        bodyPaint.setTypeface(FontController.loadTypeface(getContext(), "normal"));
+        bodyPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         bodyPaint.setTextSize(getSp(16));
         bodyPaint.setColor(0xff000000);
 
         senderPaint = initTextPaint();
-        senderPaint.setTypeface(FontController.loadTypeface(getContext(), "normal"));
+        senderPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         senderPaint.setTextSize(getSp(16));
         senderPaint.setColor(0xff000000);
 

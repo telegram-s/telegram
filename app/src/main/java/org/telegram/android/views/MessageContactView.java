@@ -82,17 +82,29 @@ public class MessageContactView extends BaseMsgView {
     protected void init() {
         super.init();
 
-        senderPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-        senderPaint.setTypeface(FontController.loadTypeface(getContext(), "normal"));
+        if (FontController.USE_SUBPIXEL) {
+            senderPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            senderPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
+        senderPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         senderPaint.setTextSize(getSp(16));
         senderPaint.setColor(0xff000000);
 
-        bodyPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-        bodyPaint.setTypeface(FontController.loadTypeface(getContext(), "normal"));
+        if (FontController.USE_SUBPIXEL) {
+            bodyPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            bodyPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
+        bodyPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         bodyPaint.setTextSize(getSp(16));
         bodyPaint.setColor(0xff273e57);
 
-        clockOutPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        if (FontController.USE_SUBPIXEL) {
+            clockOutPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            clockOutPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
         clockOutPaint.setTypeface(FontController.loadTypeface(getContext(), "italic"));
         clockOutPaint.setTextSize(getSp(12f));
         clockOutPaint.setColor(0xff70B15C);

@@ -22,7 +22,7 @@ import java.util.HashMap;
  */
 public class FontController {
 
-    private static final boolean USE_SUBPIXEL = true;
+    public static final boolean USE_SUBPIXEL = false;
 
     private static final HashMap<String, Typeface> typefaces = new HashMap<String, Typeface>();
     public static HashMap<String, String> fontsMap = new HashMap<String, String>();

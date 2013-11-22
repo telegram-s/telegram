@@ -174,47 +174,95 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         if (!isLoaded) {
             avatarPaint = new Paint();
 
-            titlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                titlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                titlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             titlePaint.setColor(0xff010101);
             titlePaint.setTextSize(getSp(17.5f));
+            titlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
-            titleHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                titleHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                titleHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             titleHighlightPaint.setColor(0xff006FC8);
             titleHighlightPaint.setTextSize(getSp(17.5f));
+            titleHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
-            titleEncryptedPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                titleEncryptedPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                titleEncryptedPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             titleEncryptedPaint.setColor(0xff68b741);
             titleEncryptedPaint.setTextSize(getSp(17.5f));
+            titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
-            clockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                clockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                clockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             clockPaint.setColor(0xff006FC8);
             clockPaint.setTextSize(getSp(14));
+            clockPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
-            bodyPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                bodyPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                bodyPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             bodyPaint.setColor(0xff808080);
             bodyPaint.setTextSize(getSp(15.5f));
             bodyPaint.setTypeface(FontController.loadTypeface(context, "light"));
 
-            bodyHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                bodyHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                bodyHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             bodyHighlightPaint.setColor(0xff006FC8);
             bodyHighlightPaint.setTextSize(getSp(15.5f));
             bodyHighlightPaint.setTypeface(FontController.loadTypeface(context, "light"));
 
-            senderPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                senderPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                senderPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             senderPaint.setColor(0xff808080);
             senderPaint.setTextSize(getSp(16f));
+            senderPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
-            senderHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                senderHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                senderHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             senderHighlightPaint.setColor(0xff006FC8);
             senderHighlightPaint.setTextSize(getSp(16f));
+            senderHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
-            typingPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                typingPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                typingPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             typingPaint.setColor(0xff006FC8);
             typingPaint.setTextSize(getSp(16f));
+            typingPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
-            counterTitlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            if (FontController.USE_SUBPIXEL) {
+                counterTitlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                counterTitlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
             counterTitlePaint.setColor(0xffffffff);
             counterTitlePaint.setTextSize(getSp(15.5f));
+            counterTitlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             counterPaint = new Paint();
             counterPaint.setColor(0xff4595D6);
