@@ -13,7 +13,7 @@
               android:paddingRight="16dp"
               android:paddingLeft="16dp"
               android:clickable="true"
-              android:textColor="@color/st_blue_bright"
+              android:textColor="#ffffff"
               android:textSize="13sp"
               android:id="@+id/doneButton"
               android:text="@string/st_new_group_next"/>

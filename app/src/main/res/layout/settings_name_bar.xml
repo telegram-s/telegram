@@ -9,7 +9,7 @@
             android:layout_height="fill_parent"
             android:paddingLeft="3dp"
             android:text="@string/st_cancel_caps"
-            android:textColor="#111111"
+            android:textColor="#ffffff"
             android:textSize="12sp"
             android:background="@drawable/st_list_selector"
             android:id="@+id/dialogCancel"/>
@@ -31,7 +31,7 @@
                   android:drawablePadding="8dp"
                   android:gravity="center"
                   android:text="@string/st_edit_title_done"
-                  android:textColor="#111111"
+                  android:textColor="#ffffff"
                   android:textSize="12sp"/>
     </FrameLayout>
 </LinearLayout>
