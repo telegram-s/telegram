@@ -14,6 +14,7 @@ import org.telegram.api.TLInputEncryptedFileLocation;
 import org.telegram.api.TLInputFileLocation;
 import org.telegram.api.TLInputVideoFileLocation;
 import org.telegram.api.engine.file.Downloader;
+import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
 
 import java.io.*;
@@ -245,14 +246,7 @@ public class DownloadManager {
 
                     Logger.d(TAG, "Waiting for task #" + record.downloadTask);
 
-                    while (application.getApi().getDownloader().getTaskState(record.downloadTask) == Downloader.FILE_QUEUED ||
-                            application.getApi().getDownloader().getTaskState(record.downloadTask) == Downloader.FILE_DOWNLOADING) {
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    application.getApi().getDownloader().waitForTask(record.downloadTask);
 
                     Logger.d(TAG, "Waiting for task ended #" + record.downloadTask);
 
@@ -262,7 +256,13 @@ public class DownloadManager {
                     }
 
                     try {
-                        IOUtils.copy(new File(destFileName), new File(fileName));
+                        if (fileLocation instanceof TLLocalEncryptedFileLocation) {
+                            byte[] iv = ((TLLocalEncryptedFileLocation) fileLocation).getIv();
+                            byte[] key = ((TLLocalEncryptedFileLocation) fileLocation).getKey();
+                            CryptoUtils.AES256IGEDecrypt(new File(destFileName), new File(fileName), iv, key);
+                        } else {
+                            IOUtils.copy(new File(destFileName), new File(fileName));
+                        }
                     } catch (IOException e) {
                         Logger.t(TAG, e);
                         updateState(key, DownloadState.FAILURE, 0, 0);
