@@ -677,8 +677,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (message.getState() == MessageState.FAILURE && (
                 message.getRawContentType() == ContentType.MESSAGE_TEXT ||
                         message.getRawContentType() == ContentType.MESSAGE_GEO ||
-                        message.getRawContentType() == ContentType.MESSAGE_CONTACT) ||
-                message.isForwarded()) {
+                        message.getRawContentType() == ContentType.MESSAGE_CONTACT ||
+                        message.isForwarded())) {
             items.add(getStringSafe(R.string.st_conv_action_try_again));
             actions.add(new Runnable() {
                 @Override
@@ -1595,7 +1595,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 User sender = getEngine().getUser(object.getSenderId());
                 boolean byMyself = sender.getUid() == application.getCurrentUid();
                 String senderName = byMyself ? getStringSafe(R.string.st_message_by_you) : sender.getDisplayName();
-                String senderHtml = "<b><a href='#" + sender.getUid() + "'>" + unicodeWrap(senderName) + "</a></b>";
+                String senderHtml = "<b><a href='#" + sender.getUid() + "'>" + unicodeWrap(TextUtils.htmlEncode(senderName)) + "</a></b>";
                 if (action instanceof TLLocalActionUserEditPhoto) {
                     final TLLocalActionUserEditPhoto chatEditPhoto = (TLLocalActionUserEditPhoto) action;
                     messageView.setText(fixedHtml(getStringSafe(R.string.st_message_user_photo_change).replace("{0}", senderHtml)));
@@ -1646,7 +1646,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     TLLocalActionChatAddUser addUser = (TLLocalActionChatAddUser) action;
                     User added = getEngine().getUser(addUser.getUserId());
                     String addedName = added.getUid() == application.getCurrentUid() ? getStringSafe(R.string.st_message_you) : added.getDisplayName();
-                    String addedHtml = "<b><a href='#" + added.getUid() + "'>" + unicodeWrap(addedName) + "</a></b>";
+                    String addedHtml = "<b><a href='#" + added.getUid() + "'>" + unicodeWrap(TextUtils.htmlEncode(addedName)) + "</a></b>";
                     messageView.setText(fixedHtml(getStringSafe(addUser.getUserId() == application.getCurrentUid() ? R.string.st_message_added_user_of_you : (byMyself ? R.string.st_message_added_user_you : R.string.st_message_added_user))
                             .replace("{0}", senderHtml)
                             .replace("{1}", addedHtml)));
@@ -1659,7 +1659,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     TLLocalActionChatEditTitle editTitle = (TLLocalActionChatEditTitle) action;
                     messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_name_change_you : R.string.st_message_name_change)
                             .replace("{0}", senderHtml)
-                            .replace("{1}", "<b>" + unicodeWrap(editTitle.getTitle()) + "</b>")));
+                            .replace("{1}", "<b>" + unicodeWrap(TextUtils.htmlEncode(editTitle.getTitle())) + "</b>")));
                     imageView.setVisibility(View.GONE);
                 } else if (action instanceof TLLocalActionChatDeleteUser) {
                     TLLocalActionChatDeleteUser deleteUser = (TLLocalActionChatDeleteUser) action;
@@ -1668,7 +1668,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     } else {
                         User removed = getEngine().getUser(deleteUser.getUserId());
                         String removedName = removed.getUid() == application.getCurrentUid() ? getStringSafe(R.string.st_message_you) : removed.getDisplayName();
-                        String removedHtml = "<b><a href='#" + removed.getUid() + "'>" + unicodeWrap(removedName) + "</a></b>";
+                        String removedHtml = "<b><a href='#" + removed.getUid() + "'>" + unicodeWrap(TextUtils.htmlEncode(removedName)) + "</a></b>";
                         messageView.setText(fixedHtml(getStringSafe(deleteUser.getUserId() == application.getCurrentUid() ? R.string.st_message_kicked_user_of_you : (byMyself ? R.string.st_message_kicked_user_you : R.string.st_message_kicked_user))
                                 .replace("{0}", senderHtml)
                                 .replace("{1}", removedHtml)));
