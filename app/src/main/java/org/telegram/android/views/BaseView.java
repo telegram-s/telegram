@@ -13,9 +13,9 @@ import org.telegram.android.StelsApplication;
  * Created: 06.08.13 18:37
  */
 public class BaseView extends View {
-    private final float density;
-    private final float dDensity;
-    private final DisplayMetrics metrics;
+    protected final float density;
+    protected final float dDensity;
+    protected final DisplayMetrics metrics;
     protected final StelsApplication application;
 
     public BaseView(Context context) {

@@ -5,6 +5,7 @@ import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.field.types.BaseDataType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.DatabaseResults;
+import org.telegram.android.kernel.compat.CompatDeserializer;
 import org.telegram.tl.TLObject;
 
 import java.lang.reflect.Field;
@@ -45,7 +46,7 @@ public class TlDataType extends BaseDataType {
             return null;
         }
         try {
-            return TLLocalContext.getInstance().deserializeMessage(bytes);
+            return CompatDeserializer.deserialize(bytes);
         } catch (Exception e) {
             throw SqlExceptionUtil.create("Could not read serialized tl-object from byte array", e);
         }

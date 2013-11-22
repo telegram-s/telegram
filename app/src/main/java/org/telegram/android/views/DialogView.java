@@ -10,8 +10,10 @@ import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.TypingStates;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.EmojiProcessor;
@@ -42,6 +44,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     private static TextPaint clockPaint;
     private static TextPaint counterTitlePaint;
 
+    private static Bitmap userPlaceholder;
+    private static Bitmap groupPlaceholder;
+
     private Drawable statePending;
     private Drawable stateSent;
     private Drawable stateHalfCheck;
@@ -66,6 +71,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     private String time;
     private String unreadCountText;
 
+    private TLAbsLocalAvatarPhoto photo;
+
     private int state;
     private int unreadCount;
 
@@ -73,9 +80,11 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     private Layout senderLayout;
     private Layout titleLayout;
 
-    private Drawable emptyDrawable;
+    //    private Drawable emptyDrawable;
     private Bitmap empty;
+    private Rect avatarRect;
     private Bitmap avatar;
+    private Paint avatarBgPaint;
 
     private boolean isGroup;
     private boolean isEncrypted;
@@ -133,6 +142,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         super(context);
 
         this.application = (StelsApplication) context.getApplicationContext();
+
         this.currentUserUid = application.getCurrentUid();
         this.isRtl = application.isRTL();
         this.avatarReceiver = new ImageReceiver() {
@@ -157,6 +167,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         this.avatarReceiver.register(application.getImageController());
 
         application.getTypingStates().registerListener(this);
+
+        avatarBgPaint = new Paint();
+        avatarBgPaint.setStyle(Paint.Style.FILL);
 
         if (!isLoaded) {
             avatarPaint = new Paint();
@@ -206,6 +219,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             counterPaint = new Paint();
             counterPaint.setColor(0xff4595D6);
             isLoaded = true;
+
+            userPlaceholder = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
+            groupPlaceholder = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
         }
 
         statePending = getResources().getDrawable(R.drawable.st_bubble_ic_clock);
@@ -213,6 +229,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         stateHalfCheck = getResources().getDrawable(R.drawable.st_dialogs_halfcheck);
         stateFailure = getResources().getDrawable(R.drawable.st_dialogs_warning);
         secureIcon = getResources().getDrawable(R.drawable.st_ic_lock_green);
+
+        avatarRect = new Rect();
     }
 
     public void setDescription(DialogDescription description) {
@@ -229,22 +247,34 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
         prepareData();
 
-        if (description.getPeerType() == PeerType.PEER_USER) {
-            if (description.getPeerId() == 333000) {
-                emptyDrawable = getResources().getDrawable(R.drawable.st_support_avatar);
-                // empty = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_support_avatar)).getBitmap();
-            } else {
-                emptyDrawable = getResources().getDrawable(Placeholders.getUserPlaceholder(description.getPeerId()));
-                // empty = ((BitmapDrawable) getResources().getDrawable(Placeholders.getUserPlaceholder(description.getPeerId()))).getBitmap();
-            }
+        if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+            EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(description.getPeerId());
+            avatarBgPaint.setColor(Placeholders.getUserBgColor(encryptedChat.getUserId()));
+            empty = userPlaceholder;
+        } else if (description.getPeerType() == PeerType.PEER_USER) {
+            avatarBgPaint.setColor(Placeholders.getUserBgColor(description.getPeerId()));
+            empty = userPlaceholder;
         } else {
-            emptyDrawable = getResources().getDrawable(Placeholders.getGroupPlaceholder(description.getPeerId()));
-            // empty = ((BitmapDrawable) getResources().getDrawable(Placeholders.getGroupPlaceholder(description.getPeerId()))).getBitmap();
+            avatarBgPaint.setColor(Placeholders.getGroupBgColor(description.getPeerId()));
+            empty = groupPlaceholder;
         }
-        emptyDrawable.setBounds(0, 0, getPx(64), getPx(64));
 
-        if (description.getPhoto() instanceof TLLocalAvatarPhoto) {
-            TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) description.getPhoto();
+//        if (description.getPeerType() == PeerType.PEER_USER) {
+//            if (description.getPeerId() == 333000) {
+//                emptyDrawable = getResources().getDrawable(R.drawable.st_support_avatar);
+//                // empty = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_support_avatar)).getBitmap();
+//            } else {
+//                emptyDrawable = getResources().getDrawable(Placeholders.getUserPlaceholder(description.getPeerId()));
+//                // empty = ((BitmapDrawable) getResources().getDrawable(Placeholders.getUserPlaceholder(description.getPeerId()))).getBitmap();
+//            }
+//        } else {
+//            emptyDrawable = getResources().getDrawable(Placeholders.getGroupPlaceholder(description.getPeerId()));
+//            // empty = ((BitmapDrawable) getResources().getDrawable(Placeholders.getGroupPlaceholder(description.getPeerId()))).getBitmap();
+//        }
+//        emptyDrawable.setBounds(0, 0, getPx(64), getPx(64));
+
+        if (photo instanceof TLLocalAvatarPhoto) {
+            TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) photo;
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
                 StelsImageTask task = new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
                 task.setMaxHeight(getPx(64));
@@ -295,8 +325,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             if (description.getPeerId() == 333000) {
                 this.title = "Telegram";
                 this.isHighlighted = false;
+                this.photo = null;
             } else {
                 User user = application.getEngine().getUserRuntime(description.getPeerId());
+                this.photo = user.getPhoto();
                 this.isHighlighted = user.getLinkType() == LinkType.FOREIGN;
                 if (user.getLinkType() == LinkType.REQUEST) {
                     this.title = TextUtil.formatPhone(user.getPhone());
@@ -308,12 +340,14 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             this.isEncrypted = false;
         } else if (description.getPeerType() == PeerType.PEER_CHAT) {
             this.title = description.getTitle();
+            this.photo = description.getPhoto();
             this.isHighlighted = false;
             this.isGroup = true;
             this.isEncrypted = false;
         } else if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
             EncryptedChat chat = application.getEngine().getEncryptedChat(description.getPeerId());
             User user = application.getEngine().getUserRuntime(chat.getUserId());
+            this.photo = user.getPhoto();
             if (user.getLinkType() == LinkType.REQUEST) {
                 this.title = TextUtil.formatPhone(user.getPhone());
             } else {
@@ -653,6 +687,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             CharSequence ssequence = TextUtils.ellipsize(wName, spaint, layoutMainWidth, TextUtils.TruncateAt.END);
             senderLayout = new StaticLayout(ssequence, spaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         }
+
+        avatarRect.set(layoutAvatarLeft, layoutAvatarTop, layoutAvatarLeft + getPx(64), layoutAvatarTop + getPx(64));
     }
 
     private void bound(Drawable src, int x, int y) {
@@ -749,11 +785,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         if (avatar != null) {
             canvas.drawBitmap(avatar, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
         } else {
-            canvas.save();
-            canvas.translate(layoutAvatarLeft, layoutAvatarTop);
-            emptyDrawable.draw(canvas);
-            canvas.restore();
-            // canvas.drawBitmap(empty, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
+            canvas.drawRect(avatarRect, avatarBgPaint);
+            canvas.drawBitmap(empty, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
         }
 
         if (description.isFailure() ||

@@ -371,11 +371,11 @@ public class Notifications {
                         FastWebImageView avatarImage = (FastWebImageView) notificationView.findViewById(R.id.avatar);
                         if (peerType == PeerType.PEER_USER) {
                             avatarImage.setLoadingDrawable(Placeholders.getUserPlaceholder(peerId));
-                            ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getUserPlaceholderColor(peerId));
+                            ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getUserTitleColor(peerId));
                             ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawables(null, null, null, null);
                         } else if (peerType == PeerType.PEER_CHAT) {
                             avatarImage.setLoadingDrawable(Placeholders.getGroupPlaceholder(peerId));
-                            ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getGroupPlaceholderColor(peerId));
+                            ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getGroupTitleColor(peerId));
                             ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawables(null, null, null, null);
                         } else {
                             avatarImage.setLoadingDrawable(Placeholders.getUserPlaceholder(senderId));

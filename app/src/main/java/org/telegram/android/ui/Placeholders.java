@@ -8,11 +8,19 @@ import org.telegram.android.R;
  */
 public class Placeholders {
 
-    public static int getUserPlaceholderColor(int index) {
+    public static int getUserBgColor(int index) {
+        return USER_BG_COLOR[Math.abs(index) % USER_BG_COLOR.length];
+    }
+
+    public static int getGroupBgColor(int index) {
+        return GROUP_BG_COLOR[Math.abs(index) % GROUP_BG_COLOR.length];
+    }
+
+    public static int getUserTitleColor(int index) {
         return USER_PLACEHOLDERS_COLOR[Math.abs(index) % USER_PLACEHOLDERS_COLOR.length];
     }
 
-    public static int getGroupPlaceholderColor(int index) {
+    public static int getGroupTitleColor(int index) {
         return GROUP_PLACEHOLDERS_COLOR[Math.abs(index) % GROUP_PLACEHOLDERS_COLOR.length];
     }
 
@@ -27,6 +35,16 @@ public class Placeholders {
     public static int getGroupPlaceholder(int index) {
         return GROUP_PLACEHOLDERS[Math.abs(index) % GROUP_PLACEHOLDERS.length];
     }
+
+    public static final int[] USER_BG_COLOR = new int[]
+            {
+                    0xff4495d6, 0xff4BB4D7, 0xff6CCB2F, 0xffD8914B, 0xffDB629E, 0xffAB6BCB, 0xffD8764B, 0xffF0C61D
+            };
+
+    public static final int[] GROUP_BG_COLOR = new int[]
+            {
+                    0xff4495d6, 0xff4BB4D7, 0xff6CCB2F, 0xffD8914B, 0xffDB629E, 0xffAB6BCB, 0xffD8764B, 0xffF0C61D
+            };
 
     public static final int[] USER_PLACEHOLDERS_COLOR = new int[]
             {
