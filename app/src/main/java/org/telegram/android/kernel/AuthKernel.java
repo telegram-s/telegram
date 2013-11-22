@@ -2,6 +2,7 @@ package org.telegram.android.kernel;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import org.telegram.android.R;
 import org.telegram.android.core.model.storage.TLDcInfo;
 import org.telegram.android.core.model.storage.TLKey;
 import org.telegram.android.critical.ApiStorage;
@@ -31,7 +32,7 @@ public class AuthKernel {
 
     private static final String TAG = "AuthKernel";
 
-    private static final String ACCOUNT_TYPE = "org.telegram.android.account";
+    private final String ACCOUNT_TYPE;
 
     private Account account;
 
@@ -40,6 +41,7 @@ public class AuthKernel {
 
     public AuthKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
+        ACCOUNT_TYPE = kernel.getApplication().getString(R.string.config_account_type);
 
         Logger.d(TAG, "Loading auth kernel");
 
