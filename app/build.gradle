@@ -11,7 +11,7 @@ buildscript {
 repositories {
     mavenCentral()
     maven {
-        url "http://maven.81port.com/archiva/repository/internal/"
+        url "http://maven.telegram-s.org/archiva/repository/internal/"
     }
 }
 
