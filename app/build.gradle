@@ -67,14 +67,26 @@ android {
                 keyPassword project.signKePass
             }
         }
-        buildTypes {
-            release {
-                signingConfig signingConfigs.release
+    }
 
-                applicationVariants.all { variant ->
-                    def file = variant.outputFile
-                    variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
-                }
+    buildTypes {
+        debuggable.initWith(buildTypes.release)
+        debuggable {
+            signingConfig signingConfigs.release
+            debuggable true
+
+            applicationVariants.all { variant ->
+                def file = variant.outputFile
+                variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+            }
+        }
+
+        release {
+            signingConfig signingConfigs.release
+
+            applicationVariants.all { variant ->
+                def file = variant.outputFile
+                variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
             }
         }
     }
@@ -114,7 +126,7 @@ android {
         }
 
         dctest {
-            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res','src/dc-test/res']
+            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/dc-test/res']
             assets.srcDirs = ['src/res-common/assets']
             java.srcDirs = ['src/dc-test/java']
         }
