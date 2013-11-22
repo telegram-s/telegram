@@ -29,18 +29,22 @@ public class LifeKernel {
     public void onAppVisible() {
         forceUiLife = true;
         lastVisibleTime = getCurrentTime();
+        startService();
     }
 
     public void onAppHidden() {
         forceUiLife = false;
+        startService();
     }
 
     public void onUpdateRequired() {
         forceWaitForUpdate = true;
+        startService();
     }
 
     public void onUpdateReceived() {
         forceWaitForUpdate = false;
+        startService();
     }
 
     public boolean isForcedKeepAlive() {
@@ -56,6 +60,10 @@ public class LifeKernel {
     }
 
     public void runKernel() {
+        startService();
+    }
+
+    private void startService() {
         kernel.getApplication().startService(new Intent(kernel.getApplication(), BackgroundService.class));
     }
 }
