@@ -152,11 +152,22 @@ public class DataSourceKernel {
 
     public void logIn() {
         dialogSource = new DialogSource(kernel.getApplication());
-        dialogSource.startSyncIfRequired();
         userSource = new UserSource(kernel.getApplication());
         contactsSource = new ContactsSource(kernel.getApplication());
         chatSource = new ChatSource(kernel.getApplication());
         encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
+
+        dialogSource.resetSync();
+        dialogSource.startSync();
+
+        contactsSource.resetState();
+        contactsSource.startSync();
+
+        for (MessageSource source : messageSources.values()) {
+            source.destroy();
+        }
+        messageSources.clear();
+        MessageSource.clearData(kernel.getApplication());
     }
 
     public void logOut() {
