@@ -152,5 +152,8 @@ android {
     }
 }
 
+task lightDist(dependsOn: ['assembleCommonRelease','assembleCommonDebuggable', 'assembleDctestDebuggable']) << {
+}
+
 task dist(dependsOn: ['assembleCommonRelease','assembleCommonDebuggable', 'assembleDctestDebuggable','assembleHdpiRelease','assembleMdpiRelease','assembleXhdpiRelease','assembleXxhdpiRelease']) << {
 }

@@ -27,7 +27,7 @@
         <TextView android:layout_width="wrap_content"
                   android:layout_gravity="center"
                   android:layout_height="wrap_content"
-                  android:drawableLeft="@drawable/st_bar_ic_done_gray"
+                  android:drawableLeft="@drawable/st_bar_ic_done"
                   android:drawablePadding="8dp"
                   android:gravity="center"
                   android:text="@string/st_edit_title_done"
