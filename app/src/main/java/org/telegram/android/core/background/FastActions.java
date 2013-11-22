@@ -24,6 +24,10 @@ import java.util.List;
  * Created: 29.07.13 23:53
  */
 public class FastActions {
+
+    private static final int TYPING_TIMEOUT = 8000;
+    private static final int ONLINE_TIMEOUT = 70000;
+
     private static final String TAG = "FastActions";
     private Thread actionsThread;
     private Handler handler;
@@ -50,25 +54,25 @@ public class FastActions {
                             }
                             if (msg.what == 0) {
                                 if (application.getUiKernel().isAppActive()) {
-                                    application.getApi().doRpcCall(new TLRequestAccountUpdateStatus(false), null);
+                                    application.getApi().doRpcCallWeak(new TLRequestAccountUpdateStatus(false), ONLINE_TIMEOUT);
                                     handler.sendEmptyMessageDelayed(0, 60 * 1000);
                                 } else {
-                                    application.getApi().doRpcCall(new TLRequestAccountUpdateStatus(true), null);
+                                    application.getApi().doRpcCallWeak(new TLRequestAccountUpdateStatus(true), ONLINE_TIMEOUT);
                                 }
                             } else if (msg.what == 1) {
                                 int peerType = msg.arg1;
                                 int peerId = msg.arg2;
                                 if (peerType == PeerType.PEER_USER) {
-                                    application.getApi().doRpcCall(new TLRequestMessagesSetTyping(new TLInputPeerContact(peerId), true), null);
+                                    application.getApi().doRpcCallWeak(new TLRequestMessagesSetTyping(new TLInputPeerContact(peerId), true), TYPING_TIMEOUT);
                                 } else if (peerType == PeerType.PEER_CHAT) {
-                                    application.getApi().doRpcCall(new TLRequestMessagesSetTyping(new TLInputPeerChat(peerId), true), null);
+                                    application.getApi().doRpcCallWeak(new TLRequestMessagesSetTyping(new TLInputPeerChat(peerId), true), TYPING_TIMEOUT);
                                 } else if (peerType == PeerType.PEER_USER_ENCRYPTED) {
                                     EncryptedChat chat = application.getEngine().getEncryptedChat(peerId);
                                     if (chat == null) {
                                         return;
                                     }
 
-                                    application.getApi().doRpcCall(new TLRequestMessagesSetEncryptedTyping(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), true), null);
+                                    application.getApi().doRpcCallWeak(new TLRequestMessagesSetEncryptedTyping(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), true), TYPING_TIMEOUT);
                                 }
 
                             } else if (msg.what == 2) {
