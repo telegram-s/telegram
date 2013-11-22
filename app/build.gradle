@@ -152,6 +152,5 @@ android {
     }
 }
 
-task dist(dependsOn: ['assembleCommonRelease','assembleDebuggableRelease', 'assembleDctestDebuggable','assembleHdpiRelease','assembleMdpiRelease','assembleXhdpiRelease','assembleXxhdpiRelease']) << {
-    println 'dist'
+task dist(dependsOn: ['assembleCommonRelease','assembleCommonDebuggable', 'assembleDctestDebuggable','assembleHdpiRelease','assembleMdpiRelease','assembleXhdpiRelease','assembleXxhdpiRelease']) << {
 }
