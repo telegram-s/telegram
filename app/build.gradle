@@ -67,26 +67,26 @@ android {
                 keyPassword project.signKePass
             }
         }
-    }
 
-    buildTypes {
-        debuggable.initWith(buildTypes.release)
-        debuggable {
-            signingConfig signingConfigs.release
-            debuggable true
+        buildTypes {
+            debuggable.initWith(buildTypes.release)
+            debuggable {
+                signingConfig signingConfigs.release
+                debuggable true
 
-            applicationVariants.all { variant ->
-                def file = variant.outputFile
-                variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+                applicationVariants.all { variant ->
+                    def file = variant.outputFile
+                    variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+                }
             }
-        }
 
-        release {
-            signingConfig signingConfigs.release
+            release {
+                signingConfig signingConfigs.release
 
-            applicationVariants.all { variant ->
-                def file = variant.outputFile
-                variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+                applicationVariants.all { variant ->
+                    def file = variant.outputFile
+                    variant.outputFile = new File(file.parent, file.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+                }
             }
         }
     }
@@ -155,4 +155,8 @@ android {
             java.srcDirs = ['src/dc-production/java']
         }
     }
+}
+
+task dist(dependsOn: ['assembleCommonRelease','assembleDebuggableRelease', 'assembleDctestDebuggable','assembleHdpiRelease','assembleMdpiRelease','assembleXhdpiRelease','assembleXxhdpiRelease']) << {
+    println 'dist'
 }
