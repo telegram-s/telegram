@@ -27,10 +27,10 @@ dependencies {
     compile 'com.google.android.gms:play-services:4.0.+'
 
     // Telegram api
-    compile project(':tl-core')    
+    compile project(':tl-core')
     compile project(':mtproto')
     compile files('../libraries/telegram-api/libs/tl-api-v9.jar')
-    compile project(':telegram-api') 
+    compile project(':telegram-api')
 
     // Ui dependencies
     compile "org.telegram:android-images:1.0.+"
@@ -95,37 +95,52 @@ android {
         }
         xxhdpi {
         }
+        dctest {
+        }
     }
 
     sourceSets {
         main {
             res.srcDirs = ['src/main/res']
             assets.srcDirs = ['src/main/assets']
+            java.srcDirs = ['src/main/java']
         }
-        
+
         common {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
             assets.srcDirs = ['src/res-common/assets']
+            java.srcDirs = ['src/dc-production/java']
+        }
+
+        dctest {
+            packageName "org.telegram.android.debug"
+            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res','src/dc-test/res']
+            assets.srcDirs = ['src/res-common/assets']
+            java.srcDirs = ['src/dc-test/java']
         }
 
         mdpi {
             res.srcDirs = ['src/res-mdpi/res']
             assets.srcDirs = ['src/res-mdpi/assets']
+            java.srcDirs = ['src/dc-production/java']
         }
 
         hdpi {
             res.srcDirs = ['src/res-hdpi/res']
             assets.srcDirs = ['src/res-hdpi/assets']
+            java.srcDirs = ['src/dc-production/java']
         }
 
         xhdpi {
             res.srcDirs = ['src/res-xhdpi/res']
             assets.srcDirs = ['src/res-xhdpi/assets']
+            java.srcDirs = ['src/dc-production/java']
         }
 
         xxhdpi {
             res.srcDirs = ['src/res-xxhdpi/res']
             assets.srcDirs = ['src/res-xxhdpi/assets']
+            java.srcDirs = ['src/dc-production/java']
         }
     }
 }

@@ -11,6 +11,7 @@ import org.telegram.api.TLDcOption;
 import org.telegram.api.TLUserSelf;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.engine.storage.AbsApiState;
+import org.telegram.bootstrap.DcInitialConfig;
 import org.telegram.mtproto.state.AbsMTProtoState;
 import org.telegram.mtproto.state.ConnectionInfo;
 import org.telegram.mtproto.state.KnownSalt;
@@ -28,7 +29,7 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
         super(context, STORAGE_FILE_NAME, TLStorage.class, TLLocalContext.getInstance());
 
         if (getObj().getDcInfos().size() == 0) {
-            getObj().getDcInfos().add(new TLDcInfo(1, "173.240.5.1", 443));
+            getObj().getDcInfos().add(new TLDcInfo(1, DcInitialConfig.ADDRESS, DcInitialConfig.PORT));
         }
     }
 
@@ -193,7 +194,7 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
     @Override
     public synchronized void reset() {
         getObj().getDcInfos().clear();
-        getObj().getDcInfos().add(new TLDcInfo(1, "173.240.5.1", 443));
+        getObj().getDcInfos().add(new TLDcInfo(1, DcInitialConfig.ADDRESS, DcInitialConfig.PORT));
 
         getObj().getKeys().clear();
         getObj().setAuthorized(false);
