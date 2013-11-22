@@ -154,6 +154,11 @@
     <string name="st_settings_notifications">Notifications and sounds</string>
     <string name="st_settings_log_out">Log Out</string>
 
+    <string name="st_settings_advanced_title">Advanced</string>
+    <string name="st_settings_advanced_background">BACKGROUND</string>
+    <string name="st_settings_advanced_send_time">Message send time</string>
+    <string name="st_settings_advanced_life_time">Keep app active</string>
+
     <string name="st_settings_name_title">YOUR FIRST AND LAST NAME</string>
     <string name="st_settings_name_changed">Name changed</string>
     <string name="st_settings_name_not_changed">Name not changed</string>

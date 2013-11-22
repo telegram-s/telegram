@@ -44,6 +44,8 @@ public class UiKernel {
         }
     };
 
+    private ApplicationKernel kernel;
+
     private StelsApplication application;
 
     private ImageController imageController;
@@ -74,6 +76,7 @@ public class UiKernel {
     public long lastStartTime;
 
     public UiKernel(ApplicationKernel kernel) {
+        this.kernel = kernel;
         this.application = kernel.getApplication();
         Logger.d(TAG, "Creating ui kernel");
         this.responsibility = new UiResponsibility();
@@ -238,6 +241,7 @@ public class UiKernel {
         if (application.getEncryptedChatProcessor() != null) {
             application.getEncryptedChatProcessor().onUserGoesOnline();
         }
+        kernel.getLifeKernel().onAppVisible();
     }
 
     private void onAppGoesBackground() {
@@ -247,6 +251,7 @@ public class UiKernel {
         if (application.getEncryptedChatProcessor() != null) {
             application.getEncryptedChatProcessor().onUserGoesOffline();
         }
+        kernel.getLifeKernel().onAppHidden();
     }
 
     public void logIn() {

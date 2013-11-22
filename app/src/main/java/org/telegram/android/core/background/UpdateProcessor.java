@@ -174,6 +174,7 @@ public class UpdateProcessor {
     }
 
     public synchronized void invalidateUpdates() {
+        application.getKernel().getLifeKernel().onUpdateRequired();
         if (!isStarted) {
             isInvalidated = true;
         } else {
@@ -374,6 +375,7 @@ public class UpdateProcessor {
                 onMessage(object);
             }
         }
+        application.getKernel().getLifeKernel().onUpdateReceived();
     }
 
     public synchronized void onMessage(TLObject object) {

@@ -32,6 +32,7 @@ public class StelsApplication extends Application implements ImageSupport {
 
         // None of this objects starts doing something in background until someone ack them about this
         kernel.initTechKernel(); // Technical information about environment. Might be loaded first.
+        kernel.initLifeKernel(); // Keeping application alive
         kernel.initBasicUiKernel(); // UI state objects, eg opened page, app state
 
         kernel.initAuthKernel(); // Authentication kernel. Might be loaded before other kernels.

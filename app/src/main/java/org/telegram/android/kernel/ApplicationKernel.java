@@ -14,6 +14,8 @@ public class ApplicationKernel {
 
     private StelsApplication application;
 
+    private LifeKernel lifeKernel;
+
     private UiKernel uiKernel;
 
     private SearchKernel searchKernel;
@@ -44,6 +46,10 @@ public class ApplicationKernel {
 
     public StelsApplication getApplication() {
         return application;
+    }
+
+    public LifeKernel getLifeKernel() {
+        return lifeKernel;
     }
 
     public UiKernel getUiKernel() {
@@ -130,6 +136,10 @@ public class ApplicationKernel {
         techKernel = new TechKernel(application);
     }
 
+    public void initLifeKernel() {
+        lifeKernel = new LifeKernel(this);
+    }
+
     public void initBasicUiKernel() {
         uiKernel = new UiKernel(this);
     }
@@ -174,6 +184,7 @@ public class ApplicationKernel {
         storageKernel.runKernel();
         apiKernel.runKernel();
         syncKernel.runKernel();
+        lifeKernel.runKernel();
     }
 
     public void logIn(TLAuthorization authorization) {
