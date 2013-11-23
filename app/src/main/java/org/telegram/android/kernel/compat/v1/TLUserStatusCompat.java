@@ -9,5 +9,5 @@ import java.io.Serializable;
  * Time: 2:16
  * To change this template use File | Settings | File Templates.
  */
-public class TLUserStatusCompat implements Serializable {
+public class TLUserStatusCompat extends TLObjectCompat implements Serializable {
 }

@@ -7,6 +7,7 @@ import org.telegram.android.kernel.compat.state.CompatSessionKey;
 import org.telegram.android.kernel.compat.v1.*;
 import org.telegram.android.kernel.compat.v2.*;
 import org.telegram.android.kernel.compat.v3.CompatAuthCredentials3;
+import org.telegram.android.kernel.compat.v4.*;
 
 import java.util.HashMap;
 
@@ -17,6 +18,9 @@ import java.util.HashMap;
  * Time: 1:56
  */
 public class Compats {
+
+    public static HashMap<String, String> MIGRATE_DB_1 = new HashMap<String, String>();
+
     public static HashMap<String, String> VER1 = new HashMap<String, String>();
     public static HashMap<String, String> VER2 = new HashMap<String, String>();
     public static HashMap<String, String> VER3 = new HashMap<String, String>();
@@ -82,5 +86,34 @@ public class Compats {
         KEYS_V1.put("org.telegram.android.engine.messaging.centers.DataCenterConfig", CompatDcConfig.class.getCanonicalName());
         KEYS_V1.put("org.telegram.android.engine.storage.DcKey", CompatDcKey.class.getCanonicalName());
         KEYS_V1.put("org.telegram.android.engine.storage.SessionKey", CompatSessionKey.class.getCanonicalName());
+
+        //////////////////////////////////////////////////////////
+
+        MIGRATE_DB_1.put("org.telegram.android.engine.api.TLObject", TLObjectCompat.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.tl.TLObject", TLObjectCompat.class.getCanonicalName());
+
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalEmpty", CompatTLLocalEmpty.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalGeo", CompatTLLocalGeo.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalPhoto", CompatTLLocalPhoto.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalUnknown", CompatTLLocalUnknown.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalVideo", CompatTLLocalVideo.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalContact", CompatTLLocalContact.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLUploadingPhoto", CompatTLUploadingPhoto.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLUploadingVideo", CompatTLUploadingVideo.class.getCanonicalName());
+
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto", CompatTLAbsLocalAvatarPhoto.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalAvatarEmpty", CompatTLLocalAvatarEmpty.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalAvatarPhoto", CompatTLLocalAvatarPhoto.class.getCanonicalName());
+
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLAbsLocalFileLocation", CompatTLAbsLocalFileLocation.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalFileEmpty", CompatTLLocalFileEmpty.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalFileLocation", CompatTLLocalFileLocation.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalFileVideoLocation", CompatTLLocalFileVideoLocation.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.core.model.media.TLLocalEncryptedFileLocation", CompatTLLocalEncryptedFileLocation.class.getCanonicalName());
+
+        MIGRATE_DB_1.put("org.telegram.android.api.TLUserStatus", TLUserStatusCompat.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.api.TLUserStatusOffline", TLUserStatusOfflineCompat.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.api.TLUserStatusOnline", TLUserStatusOnlineCompat.class.getCanonicalName());
+        MIGRATE_DB_1.put("org.telegram.android.api.TLUserStatusEmpty", TLUserStatusEmptyCompat.class.getCanonicalName());
     }
 }
