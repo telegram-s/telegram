@@ -41,7 +41,7 @@ public class PickLocationFragment extends MapStelsFragment {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setResult(Activity.RESULT_OK, new TLLocalGeo(longitude, latitude));
+                setResult(Activity.RESULT_OK, new TLLocalGeo(latitude, longitude));
                 getActivity().onBackPressed();
             }
         });
