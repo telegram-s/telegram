@@ -398,6 +398,24 @@ public class ModelEngine {
         }
     }
 
+    public void onUpdateMessageId(long rid, int mid) {
+        ChatMessage message = getMessageByRandomId(rid);
+        if (message == null) {
+            return;
+        }
+        if (message.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+            return;
+        }
+
+        if (message.getMid() == mid) {
+            return;
+        }
+
+        getMessagesDao().delete(message);
+        application.getDataSourceKernel().onSourceRemoveMessage(message);
+        updateDescriptorDeleteUnsent(message.getPeerType(), message.getPeerId(), message.getDatabaseId());
+    }
+
     public ChatMessage getMessageByRandomId(long rid) {
         List<ChatMessage> res = getMessagesDao().queryForEq("randomId", rid);
         if (res.size() == 0) {

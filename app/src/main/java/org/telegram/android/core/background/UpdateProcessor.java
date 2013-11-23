@@ -641,6 +641,15 @@ public class UpdateProcessor {
     }
 
     private synchronized void onDifference(TLDifference difference) {
+
+        for (TLAbsUpdate update : difference.getOtherUpdates()) {
+            if (update instanceof TLUpdateMessageID) {
+                application.getEngine().onUpdateMessageId(
+                        ((TLUpdateMessageID) update).getRandomId(), ((TLUpdateMessageID) update).getId());
+            }
+        }
+
+
         applyMessages(difference.getNewMessages(),
                 difference.getUsers(),
                 difference.getChats());
@@ -651,6 +660,9 @@ public class UpdateProcessor {
         }
 
         for (TLAbsUpdate update : difference.getOtherUpdates()) {
+            if (update instanceof TLUpdateMessageID) {
+                continue;
+            }
             onUpdate(difference.getState().getDate(), update,
                     difference.getUsers(), difference.getChats(), null);
         }
@@ -669,6 +681,12 @@ public class UpdateProcessor {
     }
 
     private synchronized void onSliceDifference(TLDifferenceSlice slice) {
+        for (TLAbsUpdate update : slice.getOtherUpdates()) {
+            if (update instanceof TLUpdateMessageID) {
+                application.getEngine().onUpdateMessageId(
+                        ((TLUpdateMessageID) update).getRandomId(), ((TLUpdateMessageID) update).getId());
+            }
+        }
 
         applyMessages(slice.getNewMessages(), slice.getUsers(), slice.getChats());
 
@@ -678,6 +696,9 @@ public class UpdateProcessor {
         }
 
         for (TLAbsUpdate update : slice.getOtherUpdates()) {
+            if (update instanceof TLUpdateMessageID) {
+                continue;
+            }
             onUpdate(slice.getIntermediateState().getDate(), update,
                     slice.getUsers(), slice.getChats(), null);
         }
