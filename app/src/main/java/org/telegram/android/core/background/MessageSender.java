@@ -83,7 +83,7 @@ public class MessageSender {
 
     private static final int TIMEOUT = 5 * 60 * 1000;
 
-    private Executor mediaExecutor = Executors.newCachedThreadPool(new ThreadFactory() {
+    private Executor mediaExecutor = Executors.newFixedThreadPool(2, new ThreadFactory() {
         @Override
         public Thread newThread(Runnable runnable) {
             Thread res = new Thread(runnable);
