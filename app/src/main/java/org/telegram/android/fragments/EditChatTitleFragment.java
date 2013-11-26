@@ -94,13 +94,13 @@ public class EditChatTitleFragment extends StelsFragment {
                 public void execute() throws AsyncException {
                     try {
                         TLAbsStatedMessage message = rpcRaw(new TLRequestMessagesEditChatTitle(chatId, title));
-                        application.getUpdateProcessor().onMessage(new TLLocalEditChatTitle(message));
                         TLMessageService service = (TLMessageService) message.getMessage();
                         TLMessageActionChatEditTitle editTitle = (TLMessageActionChatEditTitle) service.getAction();
                         ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                         messages.add(message.getMessage());
                         application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
                         application.getEngine().onChatTitleChanges(chatId, editTitle.getTitle());
+                        application.getUpdateProcessor().onMessage(new TLLocalEditChatTitle(message));
                         application.notifyUIUpdate();
                     } catch (RpcException e) {
                         if (!"CHAT_TITLE_NOT_MODIFIED".equals(e.getErrorTag())) {

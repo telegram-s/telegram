@@ -499,12 +499,13 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                                 }
 
                                 getEngine().deleteHistory(PeerType.PEER_CHAT, chatId);
+
+                                application.notifyUIUpdate();
                             }
 
                             @Override
                             public void afterExecute() {
                                 Toast.makeText(getActivity(), R.string.st_edit_dialog_left, Toast.LENGTH_SHORT).show();
-                                application.notifyUIUpdate();
                                 getRootController().popFragment(2);
                             }
                         });
@@ -529,11 +530,11 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 TLAbsStatedMessage message = rpc(new TLRequestMessagesDeleteChatUser(chatId, new TLInputUserContact(uid)));
                 TLMessageService service = (TLMessageService) message.getMessage();
                 TLMessageActionChatDeleteUser removeUser = (TLMessageActionChatDeleteUser) service.getAction();
-                application.getUpdateProcessor().onMessage(new TLLocalRemoveChatUser(message));
                 ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                 messages.add(message.getMessage());
                 application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
                 application.getEngine().onChatUserRemoved(chatId, removeUser.getUserId());
+                application.getUpdateProcessor().onMessage(new TLLocalRemoveChatUser(message));
             }
 
             @Override
@@ -596,7 +597,6 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                                 new TLInputChatUploadedPhoto(
                                         new TLInputFile(fileId, res.getPartsCount(), "photo.jpg", res.getHash()),
                                         new TLInputPhotoCropAuto())));
-                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                         TLMessageService service = (TLMessageService) message.getMessage();
                         TLMessageActionChatEditPhoto editPhoto = (TLMessageActionChatEditPhoto) service.getAction();
 
@@ -604,16 +604,18 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                         messages.add(message.getMessage());
                         application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
                         application.getEngine().onChatAvatarChanges(chatId, editPhoto.getPhoto());
+                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                     } else {
                         TLAbsStatedMessage message = rpc(new TLRequestMessagesEditChatPhoto(chatId, new TLInputChatPhotoEmpty()));
-                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                         ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                         messages.add(message.getMessage());
                         application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
                         application.getEngine().onChatAvatarChanges(chatId, null);
+                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                     }
                     application.getChatSource().notifyChatChanged(chatId);
                     application.getDialogSource().getViewSource().invalidateData();
+                    application.notifyUIUpdate();
                 } catch (RpcException e) {
                     e.printStackTrace();
                     throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
@@ -674,11 +676,11 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     TLAbsStatedMessage message = rpc(new TLRequestMessagesAddChatUser(chatId, new TLInputUserContact(user.getUid()), 10));
                     TLMessageService service = (TLMessageService) message.getMessage();
                     TLMessageActionChatAddUser addUser = (TLMessageActionChatAddUser) service.getAction();
-                    application.getUpdateProcessor().onMessage(new TLLocalAddChatUser(message));
                     ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                     messages.add(message.getMessage());
                     application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
                     application.getEngine().onChatUserAdded(chatId, service.getFromId(), addUser.getUserId());
+                    application.getUpdateProcessor().onMessage(new TLLocalAddChatUser(message));
                 }
 
                 @Override

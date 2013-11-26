@@ -226,16 +226,17 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
                                 new TLInputChatUploadedPhoto(
                                         new TLInputFile(fileId, res.getPartsCount(), "photo.jpg", res.getHash()),
                                         new TLInputPhotoCropAuto())));
-                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
+
                         TLMessageService service = (TLMessageService) message.getMessage();
                         TLMessageActionChatEditPhoto editPhoto = (TLMessageActionChatEditPhoto) service.getAction();
 
                         ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                         messages.add(message.getMessage());
 
-
                         application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
                         application.getEngine().onChatAvatarChanges(chatId, editPhoto.getPhoto());
+
+                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                     } catch (Exception e) {
                         e.printStackTrace();
                         throw new AsyncException(getStringSafe(R.string.st_new_group_complete_avatar));

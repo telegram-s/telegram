@@ -366,13 +366,14 @@ public class MessageSender {
                                 } catch (Exception e) {
                                     Logger.t(TAG, e);
                                 }
-                                application.getUpdateProcessor().onMessage(new TLLocalMessageSentStated(sent, message));
 
                                 synchronized (states) {
                                     SendState state = states.get(message.getDatabaseId());
                                     state.isSent = true;
                                     updateState(message.getDatabaseId(), state);
                                 }
+
+                                application.getUpdateProcessor().onMessage(new TLLocalMessageSentStated(sent, message));
 
                                 return;
                             } catch (RpcException e) {

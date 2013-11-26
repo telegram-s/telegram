@@ -136,7 +136,6 @@ public class DataSourceKernel {
 
     public synchronized void notifyUIUpdate() {
         Logger.w(TAG, "notifyUIUpdate");
-        long start = System.currentTimeMillis();
         if (dialogSource != null && dialogSource.getViewSource() != null) {
             dialogSource.getViewSource().invalidateDataIfRequired();
         }
@@ -147,7 +146,6 @@ public class DataSourceKernel {
                 }
             }
         }
-        Logger.w(TAG, "notifyUIUpdate: " + (System.currentTimeMillis() - start) + " ms");
     }
 
     public void logIn() {

@@ -1702,7 +1702,7 @@ public class ModelEngine {
     }
 
     public synchronized void onMessageSent(ChatMessage msg, TLAbsStatedMessage statedMessage) {
-        int mid = ((TLMessage) statedMessage.getMessage()).getId();
+        int mid = statedMessage.getMessage().getId();
         List<ChatMessage> msgs = getMessagesDao().queryForEq("mid", mid);
         if (msgs.size() != 0) {
             getMessagesDao().delete(msg);
@@ -1733,7 +1733,6 @@ public class ModelEngine {
     }
 
     public synchronized void onMessageSent(ChatMessage msg, TLAbsSentMessage tl) {
-
         List<ChatMessage> msgs = getMessagesDao().queryForEq("mid", tl.getId());
         if (msgs.size() != 0) {
             getMessagesDao().delete(msg);
