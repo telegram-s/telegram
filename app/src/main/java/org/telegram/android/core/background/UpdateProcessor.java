@@ -10,6 +10,10 @@ import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.service.TLLocalActionUserRegistered;
+import org.telegram.android.core.model.update.TLLocalMessageSent;
+import org.telegram.android.core.model.update.TLLocalMessageSentStated;
+import org.telegram.android.core.model.update.TLLocalMessagesSentStated;
+import org.telegram.android.core.model.update.TLLocalUpdate;
 import org.telegram.android.log.Logger;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
@@ -51,7 +55,7 @@ public class UpdateProcessor {
 
     private UpdateState updateState;
 
-    private HashMap<Integer, TLObject> further = new HashMap<Integer, TLObject>();
+    private HashMap<Integer, Object> further = new HashMap<Integer, Object>();
 
     private boolean isDestroyed = false;
     private boolean isStarted = false;
@@ -193,8 +197,32 @@ public class UpdateProcessor {
         return updateState.getPts() > 0;
     }
 
-    private PackageIdentity getPackageIdentity(TLObject object) {
-        if (object instanceof TLAbsSentEncryptedMessage) {
+    private PackageIdentity getPackageIdentity(Object object) {
+        if (object instanceof TLLocalMessageSent) {
+            TLAbsSentMessage absSentMessage = ((TLLocalMessageSent) object).getAbsSentMessage();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = absSentMessage.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = absSentMessage.getPts();
+            identity.date = absSentMessage.getDate();
+            return identity;
+        } else if (object instanceof TLLocalMessageSentStated) {
+            TLAbsStatedMessage statedMessage = ((TLLocalMessageSentStated) object).getAbsStatedMessage();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = statedMessage.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = statedMessage.getPts();
+            identity.date = 0;
+            return identity;
+        } else if (object instanceof TLLocalMessagesSentStated) {
+            TLAbsStatedMessages statedMessages = ((TLLocalMessagesSentStated) object).getAbsStatedMessages();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = statedMessages.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = statedMessages.getPts();
+            identity.date = 0;
+            return identity;
+        } else if (object instanceof TLAbsSentEncryptedMessage) {
             PackageIdentity identity = new PackageIdentity();
             identity.date = ((TLAbsSentEncryptedMessage) object).getDate();
             return identity;
@@ -341,7 +369,7 @@ public class UpdateProcessor {
         return false;
     }
 
-    public synchronized boolean causeInvalidation(TLObject object) {
+    public synchronized boolean causeInvalidation(Object object) {
         if (object instanceof TLUpdateShortChatMessage) {
             TLUpdateShortChatMessage chatMessage = (TLUpdateShortChatMessage) object;
             if (application.getEngine().getUser(chatMessage.getFromId()) == null)
@@ -365,20 +393,20 @@ public class UpdateProcessor {
                 keys2[i] = keys[i];
             }
             Arrays.sort(keys2);
-            TLObject[] messages = new TLObject[keys2.length];
+            Object[] messages = new Object[keys2.length];
             for (int i = 0; i < keys2.length; i++) {
                 messages[i] = further.get(keys2[i]);
             }
 
             further.clear();
-            for (TLObject object : messages) {
+            for (Object object : messages) {
                 onMessage(object);
             }
         }
         application.getKernel().getLifeKernel().onUpdateReceived();
     }
 
-    public synchronized void onMessage(TLObject object) {
+    public synchronized void onMessage(Object object) {
         if (isDestroyed) {
             return;
         }
@@ -438,6 +466,8 @@ public class UpdateProcessor {
             onCombined((TLUpdatesCombined) object, identity);
         } else if (object instanceof TLUpdatesTooLong) {
             invalidateUpdates();
+        } else if (object instanceof TLLocalUpdate) {
+            onLocalUpdate((TLLocalUpdate) object);
         }
 
         if (identity != null && identity.seq != 0) {
@@ -471,6 +501,22 @@ public class UpdateProcessor {
         if (updateState.getSeq() < seq) {
             Logger.d(TAG, "Push sync causes invalidation");
             invalidateUpdates();
+        }
+    }
+
+    private void onLocalUpdate(TLLocalUpdate update) {
+        if (update instanceof TLLocalMessageSent) {
+            application.getEngine().onMessageSent(
+                    ((TLLocalMessageSent) update).getMessage(),
+                    ((TLLocalMessageSent) update).getAbsSentMessage());
+        } else if (update instanceof TLLocalMessageSentStated) {
+            application.getEngine().onMessageSent(
+                    ((TLLocalMessageSentStated) update).getMessage(),
+                    ((TLLocalMessageSentStated) update).getAbsStatedMessage());
+        } else if (update instanceof TLLocalMessagesSentStated) {
+            application.getEngine().onForwarded(
+                    ((TLLocalMessagesSentStated) update).getMessage(),
+                    ((TLLocalMessagesSentStated) update).getAbsStatedMessages());
         }
     }
 

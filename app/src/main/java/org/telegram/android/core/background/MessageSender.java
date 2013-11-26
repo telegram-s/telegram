@@ -9,6 +9,9 @@ import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.files.UploadController;
 import org.telegram.android.core.files.UploadResult;
 import org.telegram.android.core.model.media.*;
+import org.telegram.android.core.model.update.TLLocalMessageSent;
+import org.telegram.android.core.model.update.TLLocalMessageSentStated;
+import org.telegram.android.core.model.update.TLLocalMessagesSentStated;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.core.model.*;
@@ -348,7 +351,7 @@ public class MessageSender {
                             try {
                                 TLAbsStatedMessage sent = application.getApi().doRpcCall(new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedPhoto(new TLInputFile(
                                         fileId, result.getPartsCount(), "file.jpg", result.getHash())), id));
-                                application.getUpdateProcessor().onMessage(sent);
+                                // application.getUpdateProcessor().onMessage(sent);
                                 try {
                                     TLMessage msgRes = (TLMessage) sent.getMessage();
                                     TLLocalPhoto mediaPhoto = EngineUtils.convertPhoto((TLMessageMediaPhoto) msgRes.getMedia());
@@ -362,8 +365,7 @@ public class MessageSender {
                                 } catch (Exception e) {
                                     Logger.t(TAG, e);
                                 }
-                                application.getEngine().onMessageSent(message, sent);
-                                application.notifyUIUpdate();
+                                application.getUpdateProcessor().onMessage(new TLLocalMessageSentStated(sent, message));
 
                                 synchronized (states) {
                                     SendState state = states.get(message.getDatabaseId());
@@ -623,8 +625,7 @@ public class MessageSender {
                                 } catch (Exception e) {
                                     Logger.t(TAG, e);
                                 }
-                                application.getEngine().onMessageSent(message, sent);
-                                application.notifyUIUpdate();
+                                application.getUpdateProcessor().onMessage(new TLLocalMessageSentStated(sent, message));
                                 return;
                             } catch (RpcException e) {
                                 Logger.t(TAG, e);
@@ -736,20 +737,14 @@ public class MessageSender {
                 public void onResult(TLObject object) {
                     if (object instanceof TLAbsSentMessage) {
                         TLAbsSentMessage sent = (TLAbsSentMessage) object;
-                        application.getEngine().onMessageSent(message, sent);
-                        application.getUpdateProcessor().onMessage(sent);
+                        application.getUpdateProcessor().onMessage(new TLLocalMessageSent(sent, message));
                     } else if (object instanceof TLAbsStatedMessage) {
                         TLAbsStatedMessage sent = (TLAbsStatedMessage) object;
-                        application.getEngine().onMessageSent(message, sent);
-                        application.getUpdateProcessor().onMessage(sent);
+                        application.getUpdateProcessor().onMessage(new TLLocalMessageSentStated(sent, message));
                     } else {
                         TLAbsStatedMessages sent = (TLAbsStatedMessages) object;
-                        application.getEngine().onForwarded(message, sent);
-                        application.getUpdateProcessor().onMessage(sent);
+                        application.getUpdateProcessor().onMessage(new TLLocalMessagesSentStated(sent, message));
                     }
-
-                    application.notifyUIUpdate();
-
                 }
 
                 @Override
