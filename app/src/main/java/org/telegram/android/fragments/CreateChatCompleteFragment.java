@@ -17,6 +17,8 @@ import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.files.UploadResult;
+import org.telegram.android.core.model.update.TLLocalCreateChat;
+import org.telegram.android.core.model.update.TLLocalUpdateChatPhoto;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
@@ -193,22 +195,14 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
                         user.add(new TLInputUserContact(i));
                     }
                     message = rpc(new TLRequestMessagesCreateChat(user, chatTitle));
-                    application.getUpdateProcessor().onMessage(message);
-                    if (message instanceof TLStatedMessageLink) {
-                        TLStatedMessageLink link = (TLStatedMessageLink) message;
-                        List<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-                        messages.add(link.getMessage());
-                        getEngine().onNewMessages(messages, link.getUsers(),
-                                link.getChats(), new ArrayList<TLDialog>());
-                        chatId = ((TLPeerChat) ((TLMessageService) link.getMessage()).getToId()).getChatId();
-                    } else {
-                        TLStatedMessage msg = (TLStatedMessage) message;
-                        List<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-                        messages.add(msg.getMessage());
-                        getEngine().onNewMessages(messages, msg.getUsers(),
-                                msg.getChats(), new ArrayList<TLDialog>());
-                        chatId = ((TLPeerChat) ((TLMessageService) msg.getMessage()).getToId()).getChatId();
-                    }
+                    application.getUpdateProcessor().onMessage(new TLLocalCreateChat(message));
+
+                    TLStatedMessage msg = (TLStatedMessage) message;
+                    List<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
+                    messages.add(msg.getMessage());
+                    getEngine().onNewMessages(messages, msg.getUsers(),
+                            msg.getChats(), new ArrayList<TLDialog>());
+                    chatId = ((TLPeerChat) ((TLMessageService) msg.getMessage()).getToId()).getChatId();
                 }
 
                 if (imageFileName != null || imageUri != null) {
@@ -232,7 +226,7 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
                                 new TLInputChatUploadedPhoto(
                                         new TLInputFile(fileId, res.getPartsCount(), "photo.jpg", res.getHash()),
                                         new TLInputPhotoCropAuto())));
-                        application.getUpdateProcessor().onMessage(message);
+                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                         TLMessageService service = (TLMessageService) message.getMessage();
                         TLMessageActionChatEditPhoto editPhoto = (TLMessageActionChatEditPhoto) service.getAction();
 

@@ -6,6 +6,7 @@ import android.os.Message;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.log.Logger;
 import org.telegram.api.TLInputEncryptedChat;
 import org.telegram.api.TLInputPeerChat;
@@ -90,7 +91,7 @@ public class FastActions {
                                         TLInputPeerForeign peer = new TLInputPeerForeign(user.getUid(), user.getAccessHash());
                                         TLAffectedHistory history = application.getApi().doRpcCall(new TLRequestMessagesReadHistory(peer, mid, 0));
                                         application.getEngine().onMaxRemoteViewed(peerType, peerId, mid);
-                                        application.getUpdateProcessor().onMessage(history);
+                                        application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(history));
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
@@ -99,7 +100,7 @@ public class FastActions {
                                         int mid = description.getLastLocalViewedMessage();
                                         TLAffectedHistory history = application.getApi().doRpcCall(new TLRequestMessagesReadHistory(new TLInputPeerChat(peerId), mid, 0));
                                         application.getEngine().onMaxRemoteViewed(peerType, peerId, mid);
-                                        application.getUpdateProcessor().onMessage(history);
+                                        application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(history));
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }

@@ -10,6 +10,7 @@ import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.PeerType;
+import org.telegram.android.core.model.update.TLLocalEditChatTitle;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.api.TLAbsMessage;
@@ -93,7 +94,7 @@ public class EditChatTitleFragment extends StelsFragment {
                 public void execute() throws AsyncException {
                     try {
                         TLAbsStatedMessage message = rpcRaw(new TLRequestMessagesEditChatTitle(chatId, title));
-                        application.getUpdateProcessor().onMessage(message);
+                        application.getUpdateProcessor().onMessage(new TLLocalEditChatTitle(message));
                         TLMessageService service = (TLMessageService) message.getMessage();
                         TLMessageActionChatEditTitle editTitle = (TLMessageActionChatEditTitle) service.getAction();
                         ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();

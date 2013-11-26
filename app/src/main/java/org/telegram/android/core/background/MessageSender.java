@@ -9,6 +9,7 @@ import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.files.UploadController;
 import org.telegram.android.core.files.UploadResult;
 import org.telegram.android.core.model.media.*;
+import org.telegram.android.core.model.update.TLLocalMessageEncryptedSent;
 import org.telegram.android.core.model.update.TLLocalMessageSent;
 import org.telegram.android.core.model.update.TLLocalMessageSentStated;
 import org.telegram.android.core.model.update.TLLocalMessagesSentStated;
@@ -613,7 +614,6 @@ public class MessageSender {
                                 video.setH(height);
 
                                 TLAbsStatedMessage sent = application.getApi().doRpcCall(new TLRequestMessagesSendMedia(peer, video, id));
-                                application.getUpdateProcessor().onMessage(sent);
                                 try {
                                     TLMessage msgRes = (TLMessage) sent.getMessage();
                                     TLLocalVideo mediaVideo = EngineUtils.convertVideo((TLMessageMediaVideo) msgRes.getMedia());
@@ -685,10 +685,7 @@ public class MessageSender {
             application.getApi().doRpcCall(request, TIMEOUT, new RpcCallbackEx<TLAbsSentEncryptedMessage>() {
                 @Override
                 public void onResult(TLAbsSentEncryptedMessage result) {
-                    application.getEngine().onMessageSent(message, result.getDate());
-                    application.getUpdateProcessor().onMessage(result);
-
-                    application.notifyUIUpdate();
+                    application.getUpdateProcessor().onMessage(new TLLocalMessageEncryptedSent(result, message));
                     Logger.d(TAG, "Chat message sent in time: " + (SystemClock.uptimeMillis() - start) + " ms");
                 }
 

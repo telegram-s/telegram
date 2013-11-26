@@ -10,10 +10,7 @@ import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.service.TLLocalActionUserRegistered;
-import org.telegram.android.core.model.update.TLLocalMessageSent;
-import org.telegram.android.core.model.update.TLLocalMessageSentStated;
-import org.telegram.android.core.model.update.TLLocalMessagesSentStated;
-import org.telegram.android.core.model.update.TLLocalUpdate;
+import org.telegram.android.core.model.update.*;
 import org.telegram.android.log.Logger;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
@@ -198,7 +195,61 @@ public class UpdateProcessor {
     }
 
     private PackageIdentity getPackageIdentity(Object object) {
-        if (object instanceof TLLocalMessageSent) {
+        if (object instanceof TLLocalCreateChat) {
+            TLAbsStatedMessage statedMessage = ((TLLocalCreateChat) object).getMessage();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = statedMessage.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = statedMessage.getPts();
+            identity.date = 0;
+            return identity;
+        }
+        if (object instanceof TLLocalUpdateChatPhoto) {
+            TLAbsStatedMessage statedMessage = ((TLLocalUpdateChatPhoto) object).getMessage();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = statedMessage.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = statedMessage.getPts();
+            identity.date = 0;
+            return identity;
+        }
+        if (object instanceof TLLocalEditChatTitle) {
+            TLAbsStatedMessage statedMessage = ((TLLocalEditChatTitle) object).getMessage();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = statedMessage.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = statedMessage.getPts();
+            identity.date = 0;
+            return identity;
+        }
+        if (object instanceof TLLocalRemoveChatUser) {
+            TLAbsStatedMessage statedMessage = ((TLLocalRemoveChatUser) object).getMessage();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = statedMessage.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = statedMessage.getPts();
+            identity.date = 0;
+            return identity;
+        }
+        if (object instanceof TLLocalAddChatUser) {
+            TLAbsStatedMessage statedMessage = ((TLLocalAddChatUser) object).getMessage();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = statedMessage.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = statedMessage.getPts();
+            identity.date = 0;
+            return identity;
+        }
+
+        if (object instanceof TLLocalMessageEncryptedSent) {
+            TLLocalMessageEncryptedSent encryptedSent = (TLLocalMessageEncryptedSent) object;
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = 0;
+            identity.seqEnd = 0;
+            identity.pts = 0;
+            identity.date = encryptedSent.getEncryptedMessage().getDate();
+            return identity;
+        } else if (object instanceof TLLocalMessageSent) {
             TLAbsSentMessage absSentMessage = ((TLLocalMessageSent) object).getAbsSentMessage();
             PackageIdentity identity = new PackageIdentity();
             identity.seq = absSentMessage.getSeq();
@@ -222,36 +273,11 @@ public class UpdateProcessor {
             identity.pts = statedMessages.getPts();
             identity.date = 0;
             return identity;
-        } else if (object instanceof TLAbsSentEncryptedMessage) {
+        } else if (object instanceof TLLocalAffectedHistory) {
             PackageIdentity identity = new PackageIdentity();
-            identity.date = ((TLAbsSentEncryptedMessage) object).getDate();
-            return identity;
-        } else if (object instanceof TLAbsSentMessage) {
-            PackageIdentity identity = new PackageIdentity();
-            identity.seq = ((TLAbsSentMessage) object).getSeq();
+            identity.seq = ((TLLocalAffectedHistory) object).getAffectedHistory().getSeq();
             identity.seqEnd = 0;
-            identity.pts = ((TLAbsSentMessage) object).getPts();
-            identity.date = ((TLAbsSentMessage) object).getDate();
-            return identity;
-        } else if (object instanceof TLAffectedHistory) {
-            PackageIdentity identity = new PackageIdentity();
-            identity.seq = ((TLAffectedHistory) object).getSeq();
-            identity.seqEnd = 0;
-            identity.pts = ((TLAffectedHistory) object).getPts();
-            identity.date = 0;
-            return identity;
-        } else if (object instanceof TLAbsStatedMessage) {
-            PackageIdentity identity = new PackageIdentity();
-            identity.seq = ((TLAbsStatedMessage) object).getSeq();
-            identity.seqEnd = 0;
-            identity.pts = ((TLAbsStatedMessage) object).getPts();
-            identity.date = 0;
-            return identity;
-        } else if (object instanceof TLAbsStatedMessages) {
-            PackageIdentity identity = new PackageIdentity();
-            identity.seq = ((TLAbsStatedMessages) object).getSeq();
-            identity.seqEnd = 0;
-            identity.pts = ((TLStatedMessages) object).getPts();
+            identity.pts = ((TLLocalAffectedHistory) object).getAffectedHistory().getPts();
             identity.date = 0;
             return identity;
         } else if (object instanceof TLUpdateShortChatMessage) {
@@ -406,7 +432,15 @@ public class UpdateProcessor {
         application.getKernel().getLifeKernel().onUpdateReceived();
     }
 
-    public synchronized void onMessage(Object object) {
+    public synchronized void onMessage(TLAbsUpdates updates) {
+        onMessage((Object) updates);
+    }
+
+    public synchronized void onMessage(TLLocalUpdate localUpdate) {
+        onMessage((Object) localUpdate);
+    }
+
+    private synchronized void onMessage(Object object) {
         if (isDestroyed) {
             return;
         }
@@ -517,6 +551,10 @@ public class UpdateProcessor {
             application.getEngine().onForwarded(
                     ((TLLocalMessagesSentStated) update).getMessage(),
                     ((TLLocalMessagesSentStated) update).getAbsStatedMessages());
+        } else if (update instanceof TLLocalMessageEncryptedSent) {
+            application.getEngine().onMessageSent(
+                    ((TLLocalMessageEncryptedSent) update).getMessage(),
+                    ((TLLocalMessageEncryptedSent) update).getEncryptedMessage().getDate());
         }
     }
 

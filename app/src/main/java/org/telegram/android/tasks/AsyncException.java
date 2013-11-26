@@ -113,8 +113,12 @@ public class AsyncException extends Exception {
     public AsyncException(RpcException ex) {
         this(getErrorMessage(ex));
         this.repeatable = true;
-        if (getMessage() == null) {
-            this.type = ExceptionType.UNKNOWN_ERROR;
+        if (ex.getErrorCode() == 0) {
+            this.type = ExceptionType.CONNECTION_ERROR;
+        } else {
+            if (getMessage() == null) {
+                this.type = ExceptionType.UNKNOWN_ERROR;
+            }
         }
     }
 

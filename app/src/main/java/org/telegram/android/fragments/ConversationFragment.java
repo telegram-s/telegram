@@ -37,6 +37,7 @@ import org.telegram.android.core.*;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
+import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.cursors.ViewSourceListener;
 import org.telegram.android.cursors.ViewSourceState;
 import org.telegram.android.log.Logger;
@@ -380,7 +381,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     int offset = 0;
                                     do {
                                         TLAffectedHistory affectedHistory = rpc(new TLRequestMessagesDeleteHistory(peer, offset));
-                                        application.getUpdateProcessor().onMessage(affectedHistory);
+                                        application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(affectedHistory));
                                         offset = affectedHistory.getOffset();
                                     } while (offset != 0);
 
