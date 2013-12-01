@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lang_common_typing">печатает...</string>
+    <string name="lang_common_typing_single">{content} печатает...</string>
+    <string name="lang_common_typing_multiple">{content} печатают...</string>
+    <string name="lang_common_and">{content1} и {content2}</string>
+    <string name="lang_common_and_short">{content1}, {content2}</string>
+
+    <string name="lang_common_online_templates">был(а) в сети {time}</string>
+    <string name="lang_common_online_now">только что</string>
+    <string name="lang_common_online_ago">{time} назад</string>
+</resources>

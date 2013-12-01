@@ -105,6 +105,11 @@ android {
         dctest {
             packageName 'org.telegram.android.debug'
         }
+        beta {
+            packageName 'org.telegram.android.beta'
+        }
+        dev {
+        }
     }
 
     sourceSets {
@@ -117,13 +122,25 @@ android {
         common {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
             assets.srcDirs = ['src/res-common/assets']
-            java.srcDirs = ['src/dc-production/java']
+            java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java']
+        }
+
+        dev {
+            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
+            assets.srcDirs = ['src/res-common/assets']
+            java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java']
+        }
+
+        beta {
+            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
+            assets.srcDirs = ['src/res-common/assets']
+            java.srcDirs = ['src/dc-production/java', 'src/keys-beta/java']
         }
 
         dctest {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/dc-test/res']
             assets.srcDirs = ['src/res-common/assets']
-            java.srcDirs = ['src/dc-test/java']
+            java.srcDirs = ['src/dc-test/java', 'src/keys-prime/java']
         }
 
         mdpi {
@@ -152,8 +169,8 @@ android {
     }
 }
 
-task lightDist(dependsOn: ['assembleCommonRelease','assembleCommonDebuggable', 'assembleDctestDebuggable']) << {
+task lightDist(dependsOn: ['assembleCommonRelease','assembleCommonDebuggable', 'assembleDctestDebuggable', 'assembleBetaRelease']) << {
 }
 
-task dist(dependsOn: ['assembleCommonRelease','assembleCommonDebuggable', 'assembleDctestDebuggable','assembleHdpiRelease','assembleMdpiRelease','assembleXhdpiRelease','assembleXxhdpiRelease']) << {
+task dist(dependsOn: ['assembleCommonRelease','assembleCommonDebuggable', 'assembleDctestDebuggable', 'assembleBetaRelease', 'assembleHdpiRelease','assembleMdpiRelease','assembleXhdpiRelease','assembleXxhdpiRelease']) << {
 }

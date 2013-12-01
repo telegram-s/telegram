@@ -24,6 +24,7 @@ import org.telegram.api.auth.TLSentCode;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.requests.TLRequestAuthSendCode;
 import org.telegram.api.requests.TLRequestHelpGetConfig;
+import org.telegram.config.ApiConfig;
 
 /**
  * Author: Korshakov Stepan
@@ -310,7 +311,7 @@ public class LoginFragment extends StelsFragment {
                 application.getAuthController().waitAuth(10000);
                 try {
                     code = rpcRaw(
-                            new TLRequestAuthSendCode(phone, 0, 5, "1c5c96d5edd401b1ed40db3fb5633e2d", getStringSafe(R.string.st_lang)));
+                            new TLRequestAuthSendCode(phone, 0, ApiConfig.API_ID, ApiConfig.API_HASH, getStringSafe(R.string.st_lang)));
                 } catch (RpcException e) {
                     if (e.getErrorCode() == 303) {
                         int destDC;
