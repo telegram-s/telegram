@@ -43,7 +43,7 @@ public class FilterMatcher {
     }
 
     public void highlight(Context context, SpannableString string) {
-        if (query.length() == 0)
+        if (queryLo.length() == 0)
             return;
         String src = string.toString().toLowerCase();
         int offset = 0;
@@ -51,8 +51,10 @@ public class FilterMatcher {
             int index = src.indexOf(queryLo, offset);
             int len = queryLo.length();
             if (index < 0) {
-                index = src.indexOf(queryLoTranslit, offset);
-                len = queryLoTranslit.length();
+                if (queryLoTranslit.length() > 0) {
+                    index = src.indexOf(queryLoTranslit, offset);
+                    len = queryLoTranslit.length();
+                }
                 if (index < 0) {
                     return;
                 }

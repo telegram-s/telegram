@@ -81,6 +81,7 @@ public class UpdateProcessor {
                             application.getMonitor().waitForConnection();
 
                             if (!hasState()) {
+                                Logger.d(TAG, "Retreiving fresh state");
                                 try {
                                     TLState state = application.getApi().doRpcCall(new TLRequestUpdatesGetState());
                                     if (isDestroyed) {
@@ -104,6 +105,7 @@ public class UpdateProcessor {
                                     Logger.t(TAG, e);
                                 }
                             } else {
+                                Logger.d(TAG, "Getting difference");
                                 try {
                                     TLAbsDifference diff = application.getApi().doRpcCall(new TLRequestUpdatesGetDifference(updateState.getPts(), updateState.getDate(), updateState.getQts()));
                                     if (isDestroyed) {
