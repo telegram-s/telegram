@@ -253,7 +253,7 @@
     <string name="st_pick_user_title">Выбрать контакт</string>
     <string name="st_pick_user_filter">Фильтр людей</string>
 
-    <string name="st_edit_dialog_title">Игформация</string>
+    <string name="st_edit_dialog_title">Информация</string>
     <string name="st_edit_dialog_no_access">Вы больше не участник этой группы.</string>
     <string name="st_edit_dialog_added">Пользователь добавил Вас в группу</string>
     <string name="st_edit_dialog_removed">Пользователь удален из группы</string>
