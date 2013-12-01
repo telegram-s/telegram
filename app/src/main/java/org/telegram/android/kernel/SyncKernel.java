@@ -2,10 +2,9 @@ package org.telegram.android.kernel;
 
 import org.telegram.android.core.DynamicConfig;
 import org.telegram.android.core.TypingStates;
-import org.telegram.android.core.background.FastActions;
 import org.telegram.android.core.background.MessageSender;
-import org.telegram.android.core.background.TechSyncer;
 import org.telegram.android.core.background.UpdateProcessor;
+import org.telegram.android.core.background.sync.BackgroundSync;
 
 /**
  * Created by ex3ndr on 16.11.13.
@@ -13,12 +12,11 @@ import org.telegram.android.core.background.UpdateProcessor;
 public class SyncKernel {
     private ApplicationKernel kernel;
 
+    private BackgroundSync backgroundSync;
     private UpdateProcessor updateProcessor;
     private MessageSender messageSender;
-    private FastActions actions;
     private TypingStates typingStates;
 
-    private TechSyncer techSyncer;
     private DynamicConfig dynamicConfig;
 
     public SyncKernel(ApplicationKernel kernel) {
@@ -34,29 +32,24 @@ public class SyncKernel {
         return messageSender;
     }
 
-    public FastActions getActions() {
-        return actions;
-    }
-
     public TypingStates getTypingStates() {
         return typingStates;
-    }
-
-    public TechSyncer getTechSyncer() {
-        return techSyncer;
     }
 
     public DynamicConfig getDynamicConfig() {
         return dynamicConfig;
     }
 
+    public BackgroundSync getBackgroundSync() {
+        return backgroundSync;
+    }
+
     private void init() {
         messageSender = new MessageSender(kernel.getApplication());
-        actions = new FastActions(kernel.getApplication());
         typingStates = new TypingStates(kernel.getApplication());
         // updateProcessor = new UpdateProcessor(kernel.getApplication());
-        techSyncer = new TechSyncer(kernel.getApplication());
         dynamicConfig = new DynamicConfig(kernel.getApplication());
+        backgroundSync = new BackgroundSync(kernel.getApplication());
     }
 
     public void runKernel() {
@@ -64,11 +57,9 @@ public class SyncKernel {
             updateProcessor = new UpdateProcessor(kernel.getApplication());
             updateProcessor.invalidateUpdates();
             updateProcessor.runUpdateProcessor();
-            actions.checkForDeletions();
-            actions.checkHistory();
-            techSyncer.onLogin();
+            // actions.checkHistory();
         }
-        techSyncer.checkDC();
+        backgroundSync.run();
     }
 
     public void logIn() {

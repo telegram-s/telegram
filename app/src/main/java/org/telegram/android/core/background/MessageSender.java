@@ -52,7 +52,7 @@ import static org.telegram.mtproto.secure.CryptoUtils.*;
  */
 public class MessageSender {
 
-    private static final String TAG = "Uploader";
+    private static final String TAG = "MessageSender";
 
     public class SendState {
         private boolean isSent;

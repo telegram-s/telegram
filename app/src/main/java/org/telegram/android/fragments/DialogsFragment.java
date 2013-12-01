@@ -523,7 +523,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 application.getEngine().shareContact(description.getPeerType(), description.getPeerId(), actionUid);
-                                application.getActions().resetTypingDelay();
+                                application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                                 application.notifyUIUpdate();
                                 action = null;
                                 getRootController().openDialog(description.getPeerType(), description.getPeerId());
@@ -542,7 +542,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             application.getEngine().sendMessage(description.getPeerType(), description.getPeerId(), actionText);
-                            application.getActions().resetTypingDelay();
+                            application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                             application.notifyUIUpdate();
                             action = null;
                             getRootController().openDialog(description.getPeerType(), description.getPeerId());
@@ -566,7 +566,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                 for (Integer mid : actionMids) {
                                     application.getEngine().forwardMessage(description.getPeerType(), description.getPeerId(), mid);
                                 }
-                                application.getActions().resetTypingDelay();
+                                application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                                 application.notifyUIUpdate();
                                 action = null;
                                 getRootController().openDialog(description.getPeerType(), description.getPeerId());
@@ -588,7 +588,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 application.getEngine().forwardMessage(description.getPeerType(), description.getPeerId(), actionMid);
-                                application.getActions().resetTypingDelay();
+                                application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                                 application.notifyUIUpdate();
                                 action = null;
                                 getRootController().openDialog(description.getPeerType(), description.getPeerId());

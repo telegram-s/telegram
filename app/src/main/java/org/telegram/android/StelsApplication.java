@@ -110,10 +110,6 @@ public class StelsApplication extends Application implements ImageSupport {
         return kernel.getDataSourceKernel().getUserSource();
     }
 
-    public FastActions getActions() {
-        return kernel.getSyncKernel().getActions();
-    }
-
     public TypingStates getTypingStates() {
         return kernel.getSyncKernel().getTypingStates();
     }
@@ -173,10 +169,6 @@ public class StelsApplication extends Application implements ImageSupport {
 
     public DownloadManager getDownloadManager() {
         return kernel.getFileKernel().getDownloadManager();
-    }
-
-    public TechSyncer getTechSyncer() {
-        return kernel.getSyncKernel().getTechSyncer();
     }
 
     public DynamicConfig getDynamicConfig() {
@@ -246,6 +238,11 @@ public class StelsApplication extends Application implements ImageSupport {
     public SettingsKernel getSettingsKernel() {
         return kernel.getSettingsKernel();
     }
+
+    public SyncKernel getSyncKernel() {
+        return kernel.getSyncKernel();
+    }
+
 
     @Override
     public ImageController getImageController() {

@@ -1084,7 +1084,7 @@ public class UpdateProcessor {
         if (application.getUiKernel().getOpenedChatPeerType() == peerType && application.getUiKernel().getOpenedChatPeerId() == peerId) {
             int maxMid = application.getEngine().getMaxMsgInId(peerType, peerId);
             application.getEngine().onMaxLocalViewed(peerType, peerId, Math.max(maxMid, mid));
-            application.getActions().readHistory(peerType, peerId);
+            application.getSyncKernel().getBackgroundSync().resetHistorySync();
         } else {
             application.getEngine().onNewUnreadMessageId(peerType, peerId, mid);
         }

@@ -1885,7 +1885,7 @@ public class ModelEngine {
         updateDescriptorDeleteSent(msg.getPeerType(), msg.getPeerId(), msg.getMid());
     }
 
-    public void seldfDestructMessage(int databaseId) {
+    public void selfDestructMessage(int databaseId) {
         ChatMessage msg = getMessageByDbId(databaseId);
         if (msg == null)
             return;

@@ -161,7 +161,7 @@ public class UiKernel {
             application.getEngine().onMaxLocalViewed(peerType, peerId, maxDate);
         }
 
-        application.getActions().readHistory(peerType, peerId);
+        application.getSyncKernel().getBackgroundSync().resetHistorySync();
         application.getDialogSource().getViewSource().invalidateData();
         getNotifications().hideChatNotifications(peerType, peerId);
     }
@@ -235,9 +235,7 @@ public class UiKernel {
 
     private void onAppGoesForeground() {
         emojiProcessor.loadEmoji();
-        if (application.getActions() != null) {
-            application.getActions().onAppGoesForeground();
-        }
+        application.getKernel().getSyncKernel().getBackgroundSync().onAppVisibilityChanged();
         if (application.getEncryptedChatProcessor() != null) {
             application.getEncryptedChatProcessor().onUserGoesOnline();
         }
@@ -245,9 +243,7 @@ public class UiKernel {
     }
 
     private void onAppGoesBackground() {
-        if (application.getActions() != null) {
-            application.getActions().onAppGoesBackground();
-        }
+        application.getKernel().getSyncKernel().getBackgroundSync().onAppVisibilityChanged();
         if (application.getEncryptedChatProcessor() != null) {
             application.getEncryptedChatProcessor().onUserGoesOffline();
         }

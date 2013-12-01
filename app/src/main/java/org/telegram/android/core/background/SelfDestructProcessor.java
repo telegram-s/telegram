@@ -29,7 +29,7 @@ public class SelfDestructProcessor {
             public void handleMessage(Message msg) {
                 ChatMessage message = application.getEngine().getMessageByDbId(msg.what);
                 if (message != null) {
-                    application.getEngine().seldfDestructMessage(message.getDatabaseId());
+                    application.getEngine().selfDestructMessage(message.getDatabaseId());
                     application.notifyUIUpdate();
                 }
             }
@@ -45,7 +45,7 @@ public class SelfDestructProcessor {
         int currentTime = (int) (System.currentTimeMillis() / 1000);
         ChatMessage[] messages = application.getEngine().findDiedMessages(currentTime);
         for (ChatMessage msg : messages) {
-            application.getEngine().seldfDestructMessage(msg.getDatabaseId());
+            application.getEngine().selfDestructMessage(msg.getDatabaseId());
         }
         ChatMessage[] pending = application.getEngine().findPendingSelfDestructMessages(currentTime);
         for (ChatMessage msg : pending) {

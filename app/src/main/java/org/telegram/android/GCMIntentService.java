@@ -24,7 +24,7 @@ public class GCMIntentService extends GCMBaseIntentService {
      */
     @Override
     protected void onRegistered(Context context, final String regId) {
-        ((StelsApplication) getApplication()).getTechSyncer().registerPush(regId);
+        ((StelsApplication) getApplication()).getKernel().getSyncKernel().getBackgroundSync().onPushRegistered(regId);
     }
 
     /**
@@ -32,7 +32,7 @@ public class GCMIntentService extends GCMBaseIntentService {
      */
     @Override
     protected void onUnregistered(Context context, String regId) {
-        ((StelsApplication) getApplication()).getTechSyncer().unregisterPush(regId);
+
     }
 
     /**

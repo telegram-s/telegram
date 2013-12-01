@@ -308,7 +308,6 @@ public class LoginFragment extends StelsFragment {
 
             private void performAttempt() throws AsyncException {
                 application.getAuthController().waitAuth(10000);
-                application.getTechSyncer().foregroundCheckDc();
                 try {
                     code = rpcRaw(
                             new TLRequestAuthSendCode(phone, 0, 5, "1c5c96d5edd401b1ed40db3fb5633e2d", getStringSafe(R.string.st_lang)));

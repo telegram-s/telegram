@@ -262,7 +262,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
                 if (charSequence.toString().trim().length() > 0) {
-                    application.getActions().onTyping(peerType, peerId);
+                    application.getSyncKernel().getBackgroundSync().onTyping(peerType, peerId);
                 }
             }
 
@@ -452,7 +452,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 }
                             }
                         }
-                        application.getActions().checkForDeletions();
+                        application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
                         application.notifyUIUpdate();
                         mode.finish();
                         return true;
@@ -500,7 +500,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             @Override
                             public void onClick(View v) {
                                 application.getEngine().shareContact(peerType, peerId, application.getCurrentUid());
-                                application.getActions().resetTypingDelay();
+                                application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                                 application.notifyUIUpdate();
                             }
                         });
@@ -521,7 +521,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         String message = editText.getText().toString().trim();
         application.getMessageSender().postTextMessage(peerType, peerId, message);
         // application.getEngine().sendMessage(peerType, peerId, message);
-        application.getActions().resetTypingDelay();
+        application.getSyncKernel().getBackgroundSync().resetTypingDelay();
         onSourceDataChanged();
         editText.setText("");
         application.getTextSaver().clearText(peerType, peerId);
@@ -649,7 +649,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 @Override
                 public void run() {
                     application.getEngine().deleteSentMessage(message.getDatabaseId());
-                    application.getActions().checkForDeletions();
+                    application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
                     application.notifyUIUpdate();
                 }
             });
@@ -1003,7 +1003,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (resultCode == Activity.RESULT_OK) {
             TLLocalGeo point = (TLLocalGeo) data;
             application.getEngine().sendLocation(peerType, peerId, point);
-            application.getActions().resetTypingDelay();
+            application.getSyncKernel().getBackgroundSync().resetTypingDelay();
             application.notifyUIUpdate();
             editText.setText("");
         }

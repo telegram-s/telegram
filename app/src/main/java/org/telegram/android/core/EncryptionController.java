@@ -234,7 +234,7 @@ public class EncryptionController {
                     if (application.getUiKernel().getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getUiKernel().getOpenedChatPeerId() == chat.getId()) {
                         int date = application.getEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
                         application.getEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, encMsg.getDate()));
-                        application.getActions().readHistory(PeerType.PEER_USER_ENCRYPTED, chat.getId());
+                        application.getSyncKernel().getBackgroundSync().resetHistorySync();
                     } else {
                         application.getEngine().onNewUnreadEncMessage(chat.getId(), encMsg.getDate());
                     }
@@ -243,7 +243,7 @@ public class EncryptionController {
                 Logger.t(TAG, e);
             }
 
-            application.getActions().readHistory(PeerType.PEER_USER_ENCRYPTED, chat.getId());
+            application.getSyncKernel().getBackgroundSync().resetHistorySync();
             application.getTypingStates().resetEncryptedTyping(chat.getId());
         } else if (message instanceof TLEncryptedMessageService) {
             TLEncryptedMessageService service = (TLEncryptedMessageService) message;
@@ -278,7 +278,7 @@ public class EncryptionController {
                     if (application.getUiKernel().getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getUiKernel().getOpenedChatPeerId() == chat.getId()) {
                         int date = application.getEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
                         application.getEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, service.getDate()));
-                        application.getActions().readHistory(PeerType.PEER_USER_ENCRYPTED, chat.getId());
+                        application.getSyncKernel().getBackgroundSync().resetHistorySync();
                     } else {
                         application.getEngine().onNewUnreadEncMessage(chat.getId(), service.getDate());
                     }

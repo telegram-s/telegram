@@ -32,6 +32,7 @@ public class TechReflection {
     private boolean isAppUpgraded = false;
     private boolean isDebug = false;
     private int screenSize;
+    private String appLocale;
 
     public boolean isSlow() {
         return isSlow;
@@ -59,6 +60,10 @@ public class TechReflection {
 
     public int getScreenSize() {
         return screenSize;
+    }
+
+    public String getAppLocale() {
+        return appLocale;
     }
 
     public TechReflection(Context context) {
@@ -94,6 +99,8 @@ public class TechReflection {
         isDebug = "debug".equals(version);
 
         screenSize = Math.min(context.getResources().getDisplayMetrics().widthPixels, context.getResources().getDisplayMetrics().heightPixels);
+
+        appLocale = context.getResources().getString(R.string.st_lang);
     }
 
     /**
