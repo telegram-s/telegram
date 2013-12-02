@@ -116,7 +116,7 @@ public class ConversationListView extends ImagingListView {
                     drawTime(canvas, drawOffset, 1.0f, true);
                 }
             } else {
-                float ratio = Math.max(0.0f, Math.abs(offset / (float) getPx(DELTA)));
+                float ratio = Math.min(1.0f, Math.abs(offset / (float) getPx(DELTA)));
                 if (visibleDateNext != null) {
                     drawTime(canvas, drawOffset + getPx(DELTA), ratio, false);
                 }
