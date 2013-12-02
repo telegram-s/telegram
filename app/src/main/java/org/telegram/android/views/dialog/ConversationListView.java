@@ -28,9 +28,10 @@ public class ConversationListView extends ImagingListView {
 
 
     private String visibleDate = null;
-
     private int timeDivMeasure;
-    private int currentVisibleItem = -1;
+
+    private String visibleDateNext = null;
+    private int timeDivMeasureNext;
 
 
     private TextPaint timeDivPaint;
@@ -66,6 +67,19 @@ public class ConversationListView extends ImagingListView {
         timeDivPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
     }
 
+    private void drawTime(Canvas canvas, int drawOffset, float alpha, boolean first) {
+        int w = first ? timeDivMeasure : timeDivMeasureNext;
+        serviceDrawable.setAlpha((int) (alpha * 255));
+        timeDivPaint.setAlpha((int) (alpha * 255));
+        serviceDrawable.setBounds(
+                getWidth() / 2 - w / 2 - servicePadding.left,
+                getPx(44 - 8) - serviceDrawable.getIntrinsicHeight() + drawOffset,
+                getWidth() / 2 + w / 2 + servicePadding.right,
+                getPx(44 - 8) + drawOffset);
+        serviceDrawable.draw(canvas);
+        canvas.drawText(first ? visibleDate : visibleDateNext, getWidth() / 2 - w / 2, getPx(44 - 17) + drawOffset, timeDivPaint);
+    }
+
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
@@ -74,14 +88,21 @@ public class ConversationListView extends ImagingListView {
 
             int drawOffset = offset;
 
-            serviceDrawable.setBounds(
-                    getWidth() / 2 - timeDivMeasure / 2 - servicePadding.left,
-                    getPx(44 - 8) - serviceDrawable.getIntrinsicHeight() + drawOffset,
-                    getWidth() / 2 + timeDivMeasure / 2 + servicePadding.right,
-                    getPx(44 - 8) + drawOffset);
-            serviceDrawable.draw(canvas);
-            canvas.drawText(visibleDate, getWidth() / 2 - timeDivMeasure / 2, getPx(44 - 17) + drawOffset, timeDivPaint);
+            if (offset == 0) {
+                drawTime(canvas, drawOffset, 1.0f, true);
+            } else {
+                float ratio = Math.max(0.0f, Math.abs(offset / (float) getPx(DELTA)));
+                drawTime(canvas, drawOffset + getPx(DELTA), ratio, false);
+                drawTime(canvas, drawOffset, 1.0f - ratio, true);
+            }
         }
+
+//        View child = getChildAt(1);
+//        if (child != null) {
+//            Paint p = new Paint();
+//            p.setColor(0x66ff0000);
+//            canvas.drawRect(child.getLeft(), child.getTop(), child.getRight(), child.getBottom(), p);
+//        }
     }
 
     protected int getPx(float dp) {
@@ -109,9 +130,10 @@ public class ConversationListView extends ImagingListView {
                 int realFirstVisibleItem = firstVisibleItem - getHeaderViewsCount();
                 if (realFirstVisibleItem >= 0 && realFirstVisibleItem < adapter.getCount()) {
                     int date = ((ConversationAdapter) adapter).getItemDate(realFirstVisibleItem);
+                    int prevDate = date;
                     boolean isSameDays = true;
                     if (realFirstVisibleItem > 0) {
-                        int prevDate = ((ConversationAdapter) adapter).getItemDate(realFirstVisibleItem + 2);
+                        prevDate = ((ConversationAdapter) adapter).getItemDate(realFirstVisibleItem + 1);
                         isSameDays = TextUtil.areSameDays(prevDate, date);
                     }
 
@@ -123,6 +145,8 @@ public class ConversationListView extends ImagingListView {
                         if (view != null) {
                             offset = Math.min(view.getTop() - getPx(DELTA), 0);
                         }
+                        visibleDateNext = TextUtil.formatDateLong(prevDate);
+                        timeDivMeasureNext = (int) timeDivPaint.measureText(visibleDateNext);
                     }
 
                     visibleDate = TextUtil.formatDateLong(date);
