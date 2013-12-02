@@ -133,10 +133,11 @@ public class UpdateProcessor {
                                 } catch (RpcException e) {
                                     Logger.t(TAG, e);
                                     // Temporary fix
-                                    updateState.setFullState(0, 0, 0, 0);
+                                    // updateState.setFullState(0, 0, 0, 0);
+                                    // getHandler().sendEmptyMessageDelayed(0, 1000);
                                 } catch (IOException e) {
                                     Logger.t(TAG, e);
-                                    getHandler().sendEmptyMessageDelayed(0, 1000);
+                                    // getHandler().sendEmptyMessageDelayed(0, 1000);
                                 }
                             }
 

@@ -189,7 +189,7 @@ public class ConversationListView extends ImagingListView {
                     int date = ((ConversationAdapter) adapter).getItemDate(realFirstVisibleItem);
                     int prevDate = date;
                     boolean isSameDays = true;
-                    if (realFirstVisibleItem > 0) {
+                    if (realFirstVisibleItem > 0 && realFirstVisibleItem + 2 < adapter.getCount()) {
                         prevDate = ((ConversationAdapter) adapter).getItemDate(realFirstVisibleItem + 1);
                         isSameDays = TextUtil.areSameDays(prevDate, date);
                     }
