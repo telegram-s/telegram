@@ -69,7 +69,7 @@ public class MediaReceiverFragment extends StelsFragment {
     }
 
     public void requestPhotoChooserWithDelete(final int requestId) {
-        new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{
+        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{
                 getStringSafe(R.string.st_receiver_photo),
                 getStringSafe(R.string.st_receiver_gallery),
                 getStringSafe(R.string.st_receiver_delete)},
@@ -84,11 +84,13 @@ public class MediaReceiverFragment extends StelsFragment {
                             onPhotoDeleted(requestId);
                         }
                     }
-                }).show();
+                }).create();
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
     }
 
     public void requestPhotoChooser(final int requestId) {
-        new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{
+        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{
                 getStringSafe(R.string.st_receiver_photo),
                 getStringSafe(R.string.st_receiver_gallery)},
                 new DialogInterface.OnClickListener() {
@@ -100,7 +102,9 @@ public class MediaReceiverFragment extends StelsFragment {
                             requestPhotoFromGallery(requestId);
                         }
                     }
-                }).show();
+                }).create();
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
     }
 
     public void requestPhotoFromCamera(int requestId) {

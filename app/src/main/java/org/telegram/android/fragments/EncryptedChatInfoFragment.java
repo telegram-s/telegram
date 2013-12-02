@@ -130,7 +130,7 @@ public class EncryptedChatInfoFragment extends StelsFragment {
         selfDestructTimerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AlertDialog.Builder(getActivity())
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
                         .setItems(new CharSequence[]{"Off", "2s", "5s", "1m", "1h", "1d", "1w"}, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -159,7 +159,9 @@ public class EncryptedChatInfoFragment extends StelsFragment {
                                         return;
                                 }
                             }
-                        }).show();
+                        }).create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
             }
         });
 

@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
@@ -23,6 +24,9 @@ import org.telegram.android.ui.TextUtil;
  */
 public class ConversationListView extends ImagingListView {
 
+    private static final int DELTA = 26;
+
+
     private String visibleDate = null;
 
     private int timeDivMeasure;
@@ -32,6 +36,8 @@ public class ConversationListView extends ImagingListView {
     private TextPaint timeDivPaint;
     private Drawable serviceDrawable;
     private Rect servicePadding;
+
+    private int offset;
 
     public ConversationListView(Context context) {
         super(context);
@@ -65,13 +71,16 @@ public class ConversationListView extends ImagingListView {
         super.draw(canvas);
 
         if (visibleDate != null) {
+
+            int drawOffset = offset;
+
             serviceDrawable.setBounds(
                     getWidth() / 2 - timeDivMeasure / 2 - servicePadding.left,
-                    getPx(44 - 8) - serviceDrawable.getIntrinsicHeight(),
+                    getPx(44 - 8) - serviceDrawable.getIntrinsicHeight() + drawOffset,
                     getWidth() / 2 + timeDivMeasure / 2 + servicePadding.right,
-                    getPx(44 - 8));
+                    getPx(44 - 8) + drawOffset);
             serviceDrawable.draw(canvas);
-            canvas.drawText(visibleDate, getWidth() / 2 - timeDivMeasure / 2, getPx(44 - 17), timeDivPaint);
+            canvas.drawText(visibleDate, getWidth() / 2 - timeDivMeasure / 2, getPx(44 - 17) + drawOffset, timeDivPaint);
         }
     }
 
@@ -100,6 +109,22 @@ public class ConversationListView extends ImagingListView {
                 int realFirstVisibleItem = firstVisibleItem - getHeaderViewsCount();
                 if (realFirstVisibleItem >= 0 && realFirstVisibleItem < adapter.getCount()) {
                     int date = ((ConversationAdapter) adapter).getItemDate(realFirstVisibleItem);
+                    boolean isSameDays = true;
+                    if (realFirstVisibleItem > 0) {
+                        int prevDate = ((ConversationAdapter) adapter).getItemDate(realFirstVisibleItem + 2);
+                        isSameDays = TextUtil.areSameDays(prevDate, date);
+                    }
+
+
+                    if (isSameDays) {
+                        offset = 0;
+                    } else {
+                        View view = getChildAt(firstVisibleItem - realFirstVisibleItem);
+                        if (view != null) {
+                            offset = Math.min(view.getTop() - getPx(DELTA), 0);
+                        }
+                    }
+
                     visibleDate = TextUtil.formatDateLong(date);
                     timeDivMeasure = (int) timeDivPaint.measureText(visibleDate);
                 }

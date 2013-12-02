@@ -257,7 +257,7 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
                         if (contact != null) {
                             getRootController().openUser(contact.getUid());
                         } else {
-                            new AlertDialog.Builder(context).setTitle(R.string.st_contacts_not_registered_title)
+                            AlertDialog dialog = new AlertDialog.Builder(context).setTitle(R.string.st_contacts_not_registered_title)
                                     .setMessage(getStringSafe(R.string.st_contacts_not_registered_message).replace("{0}", name))
                                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                                         @Override
@@ -289,7 +289,9 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
                                                 }
                                             }
                                         }
-                                    }).setNegativeButton(R.string.st_no, null).show();
+                                    }).setNegativeButton(R.string.st_no, null).create();
+                            dialog.setCanceledOnTouchOutside(true);
+                            dialog.show();
                         }
                     }
                 });

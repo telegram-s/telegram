@@ -350,7 +350,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     }
 
     private void deleteDialog() {
-        new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_delete_header)
+        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_delete_header)
                 .setMessage(peerType == PeerType.PEER_CHAT ? R.string.st_dialogs_delete_group : R.string.st_dialogs_delete_history)
                 .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                     @Override
@@ -401,7 +401,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             }
                         });
                     }
-                }).setNegativeButton(R.string.st_no, null).show();
+                }).setNegativeButton(R.string.st_no, null).create();
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
     }
 
     private void updateActionMode() {
@@ -727,14 +729,16 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
         }
 
-        new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_action_title).setItems(items.toArray(new CharSequence[items.size()]), new DialogInterface.OnClickListener() {
+        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_action_title).setItems(items.toArray(new CharSequence[items.size()]), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (i >= 0 && i < actions.size()) {
                     actions.get(i).run();
                 }
             }
-        }).show();
+        }).create();
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
     }
 
     @Override
@@ -1824,7 +1828,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 if (object.getState() == MessageState.FAILURE) {
                                     onMessageClick(object);
                                 } else {
-                                    new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_cancel_title).setMessage(R.string.st_conv_cancel_message)
+                                    AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_cancel_title).setMessage(R.string.st_conv_cancel_message)
                                             .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -1832,11 +1836,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                                     application.notifyUIUpdate();
                                                 }
                                             }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
 
-                                        }
-                                    }).show();
+                                                }
+                                            }).create();
+                                    dialog.setCanceledOnTouchOutside(true);
+                                    dialog.show();
                                 }
                             }
                         }

@@ -428,12 +428,14 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 int inviter = users[i - 1].second;
                 final User user = application.getEngine().getUser(uid);
                 if (uid == application.getCurrentUid()) {
-                    new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{getStringSafe(R.string.st_edit_dialog_action_leave)}, new DialogInterface.OnClickListener() {
+                    AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{getStringSafe(R.string.st_edit_dialog_action_leave)}, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             leaveChat();
                         }
-                    }).show();
+                    }).create();
+                    alertDialog.setCanceledOnTouchOutside(true);
+                    alertDialog.show();
                 } else {
                     CharSequence[] items;
                     if (fullChatInfo.getAdminId() == application.getCurrentUid() || inviter == application.getCurrentUid()) {
@@ -448,7 +450,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                                 getStringSafe(R.string.st_edit_dialog_action_dialog).replace("{0}", user.getFirstName())
                         };
                     }
-                    new AlertDialog.Builder(getActivity()).setItems(items, new DialogInterface.OnClickListener() {
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity()).setItems(items, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             if (i == 0) {
@@ -459,7 +461,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                                 removeUser(user.getUid());
                             }
                         }
-                    }).show();
+                    }).create();
+                    dialog.setCanceledOnTouchOutside(true);
+                    dialog.show();
                 }
                 return true;
             }
@@ -476,7 +480,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     }
 
     private void leaveChat() {
-        new AlertDialog.Builder(getActivity()).setTitle(R.string.st_edit_dialog_delete_title)
+        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_edit_dialog_delete_title)
                 .setMessage(R.string.st_edit_dialog_delete_message)
                 .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                     @Override
@@ -511,7 +515,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                         });
                     }
                 })
-                .setNegativeButton(R.string.st_no, null).show();
+                .setNegativeButton(R.string.st_no, null).create();
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
     }
 
     private void updateNotificationSound() {

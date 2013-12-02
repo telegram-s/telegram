@@ -127,9 +127,7 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
             }
 
             if (e.isRepeatable()) {
-
-
-                new AlertDialog.Builder(getActivity()).setTitle(R.string.st_error_title).setMessage(errorMessage).setPositiveButton(R.string.st_repeat, new DialogInterface.OnClickListener() {
+                AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_error_title).setMessage(errorMessage).setPositiveButton(R.string.st_repeat, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         onRepeat.run();
@@ -139,14 +137,18 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
                     public void onClick(DialogInterface dialogInterface, int i) {
                         onCancel.run();
                     }
-                }).show();
+                }).create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
             } else {
-                new AlertDialog.Builder(getActivity()).setTitle(R.string.st_error_title).setMessage(errorMessage).setPositiveButton(R.string.st_ok, new DialogInterface.OnClickListener() {
+                AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_error_title).setMessage(errorMessage).setPositiveButton(R.string.st_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         onCancel.run();
                     }
-                }).show();
+                }).create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
             }
         }
     };

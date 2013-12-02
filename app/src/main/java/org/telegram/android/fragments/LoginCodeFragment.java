@@ -226,7 +226,7 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
     private void onTimeout(boolean fromBackground) {
         if (fromBackground || codeSending) {
             counterTextView.setText(Html.fromHtml("<font color='#006FC8'>" + getStringSafe(R.string.st_login_code_call_manual) + "</font>"));
-            new AlertDialog.Builder(getActivity())
+            AlertDialog dialog = new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.st_login_code_call_header)
                     .setMessage(R.string.st_login_code_call_message)
                     .setNegativeButton(R.string.st_no, null)
@@ -240,7 +240,9 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
                                 }
                             });
                         }
-                    }).show();
+                    }).create();
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.show();
         } else {
             if (cyclic != null) {
                 cyclic.stop();
