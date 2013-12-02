@@ -109,15 +109,18 @@ public class ConversationListView extends ImagingListView {
         super.draw(canvas);
 
         if (isTimeVisible) {
-            if (visibleDate != null) {
+            int drawOffset = offset;
 
-                int drawOffset = offset;
-
-                if (offset == 0) {
+            if (offset == 0) {
+                if (visibleDate != null) {
                     drawTime(canvas, drawOffset, 1.0f, true);
-                } else {
-                    float ratio = Math.max(0.0f, Math.abs(offset / (float) getPx(DELTA)));
+                }
+            } else {
+                float ratio = Math.max(0.0f, Math.abs(offset / (float) getPx(DELTA)));
+                if (visibleDateNext != null) {
                     drawTime(canvas, drawOffset + getPx(DELTA), ratio, false);
+                }
+                if (visibleDate != null) {
                     drawTime(canvas, drawOffset, 1.0f - ratio, true);
                 }
             }
@@ -133,6 +136,9 @@ public class ConversationListView extends ImagingListView {
     }
 
     private class ScrollListener implements OnScrollListener {
+        private int state = SCROLL_STATE_IDLE;
+        private int lastVisibleItem = -1;
+        private int lastTop = 0;
 
         @Override
         public void onScrollStateChanged(AbsListView absListView, int i) {
@@ -144,14 +150,13 @@ public class ConversationListView extends ImagingListView {
                 handler.removeMessages(0);
                 handler.sendEmptyMessageDelayed(0, UI_TIMEOUT);
             }
-        }
 
-        int lastVisibleItem = -1;
-        int lastTop = 0;
+            state = i;
+        }
 
         @Override
         public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            if (lastVisibleItem == -1 || lastVisibleItem != firstVisibleItem) {
+            if (lastVisibleItem == -1 || lastVisibleItem != firstVisibleItem || state == SCROLL_STATE_IDLE) {
                 lastVisibleItem = firstVisibleItem;
                 lastTop = 0;
                 View view = getChildAt(0 + getHeaderViewsCount());
@@ -197,12 +202,20 @@ public class ConversationListView extends ImagingListView {
                         if (view != null) {
                             offset = Math.min(view.getTop() - getPx(DELTA), 0);
                         }
-                        visibleDateNext = TextUtil.formatDateLong(prevDate);
-                        timeDivMeasureNext = (int) timeDivPaint.measureText(visibleDateNext);
+                        if (!TextUtil.areSameDays(prevDate, System.currentTimeMillis() / 1000)) {
+                            visibleDateNext = TextUtil.formatDateLong(prevDate);
+                            timeDivMeasureNext = (int) timeDivPaint.measureText(visibleDateNext);
+                        } else {
+                            visibleDateNext = null;
+                        }
                     }
 
-                    visibleDate = TextUtil.formatDateLong(date);
-                    timeDivMeasure = (int) timeDivPaint.measureText(visibleDate);
+                    if (!TextUtil.areSameDays(date, System.currentTimeMillis() / 1000)) {
+                        visibleDate = TextUtil.formatDateLong(date);
+                        timeDivMeasure = (int) timeDivPaint.measureText(visibleDate);
+                    } else {
+                        visibleDate = null;
+                    }
                 }
             }
         }
