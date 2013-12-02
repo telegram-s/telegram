@@ -64,15 +64,15 @@ public class ConversationListView extends ImagingListView {
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-//        if (visibleDate != null) {
-//            serviceDrawable.setBounds(
-//                    getWidth() / 2 - timeDivMeasure / 2 - servicePadding.left,
-//                    getPx(44 - 8) - serviceDrawable.getIntrinsicHeight(),
-//                    getWidth() / 2 + timeDivMeasure / 2 + servicePadding.right,
-//                    getPx(44 - 8));
-//            serviceDrawable.draw(canvas);
-//            canvas.drawText(visibleDate, getWidth() / 2 - timeDivMeasure / 2, getPx(44 - 17), timeDivPaint);
-//        }
+        if (visibleDate != null) {
+            serviceDrawable.setBounds(
+                    getWidth() / 2 - timeDivMeasure / 2 - servicePadding.left,
+                    getPx(44 - 8) - serviceDrawable.getIntrinsicHeight(),
+                    getWidth() / 2 + timeDivMeasure / 2 + servicePadding.right,
+                    getPx(44 - 8));
+            serviceDrawable.draw(canvas);
+            canvas.drawText(visibleDate, getWidth() / 2 - timeDivMeasure / 2, getPx(44 - 17), timeDivPaint);
+        }
     }
 
     protected int getPx(float dp) {

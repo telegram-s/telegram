@@ -32,6 +32,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
+import org.telegram.android.StelsFragment;
 import org.telegram.android.config.DebugSettings;
 import org.telegram.android.core.*;
 import org.telegram.android.core.model.*;
@@ -517,10 +518,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     }
 
     protected void doSend() {
-        long start = System.currentTimeMillis();
         String message = editText.getText().toString().trim();
+        if (message.length() == 0) {
+            return;
+        }
         application.getMessageSender().postTextMessage(peerType, peerId, message);
-        // application.getEngine().sendMessage(peerType, peerId, message);
         application.getSyncKernel().getBackgroundSync().resetTypingDelay();
         onSourceDataChanged();
         editText.setText("");
@@ -1945,5 +1947,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         public int getItemDate(int id) {
             return getItem(id).getDate();
         }
+    }
+
+    @Override
+    public boolean isParentFragment(StelsFragment fragment) {
+        return false;
     }
 }

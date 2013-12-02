@@ -81,14 +81,29 @@ public class FragmentScreenController implements RootController {
 
     public void doUp() {
         if (backStack.size() > 1) {
-            StelsFragment rootFragment = backStack.get(0);
-            rootFragment.setHasOptionsMenu(true);
-            prepareBackTransaction()
-                    .remove(backStack.get(backStack.size() - 1))
-                    .attach(rootFragment).commit();
-            while (backStack.size() > 1) {
-                backStack.remove(backStack.size() - 1);
+            StelsFragment currentFragment = backStack.get(backStack.size() - 1);
+
+            int count = 1;
+            for (int i = backStack.size() - 2; i > 0; i--) {
+                if (!currentFragment.isParentFragment(backStack.get(i))) {
+                    count++;
+                } else {
+                    break;
+                }
             }
+
+            popFragment(count);
+
+            // StelsFragment rootFragment = backStack.get(0);
+            // rootFragment.setHasOptionsMenu(true);
+
+//            prepareBackTransaction()
+//                    .remove(backStack.get(backStack.size() - 1))
+//                    .attach(rootFragment).commit();
+
+//            while (backStack.size() > 1) {
+//                backStack.remove(backStack.size() - 1);
+//            }
         }
     }
 

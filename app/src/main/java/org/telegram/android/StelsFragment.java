@@ -228,4 +228,8 @@ public class StelsFragment extends StelsBaseFragment {
     public Drawable getBackgroundDrawable() {
         return new ColorDrawable(Color.WHITE);
     }
+
+    public boolean isParentFragment(StelsFragment fragment) {
+        return true;
+    }
 }
