@@ -5,6 +5,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -16,6 +19,7 @@ import com.extradea.framework.images.ui.ImagingListView;
 import com.google.android.gms.internal.ca;
 import com.google.android.gms.internal.da;
 import org.telegram.android.R;
+import org.telegram.android.log.Logger;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.TextUtil;
 
@@ -25,6 +29,9 @@ import org.telegram.android.ui.TextUtil;
 public class ConversationListView extends ImagingListView {
 
     private static final int DELTA = 26;
+
+    private static final int ACTIVATE_DELTA = 50;
+    private static final long UI_TIMEOUT = 900;
 
 
     private String visibleDate = null;
@@ -39,6 +46,23 @@ public class ConversationListView extends ImagingListView {
     private Rect servicePadding;
 
     private int offset;
+
+    private boolean isTimeVisible = false;
+    private Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == 0) {
+                isTimeVisible = false;
+                scrollDistance = 0;
+                invalidate();
+            } else if (msg.what == 1) {
+                isTimeVisible = true;
+                invalidate();
+            }
+        }
+    };
+
+    private int scrollDistance;
 
     public ConversationListView(Context context) {
         super(context);
@@ -84,25 +108,20 @@ public class ConversationListView extends ImagingListView {
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-        if (visibleDate != null) {
+        if (isTimeVisible) {
+            if (visibleDate != null) {
 
-            int drawOffset = offset;
+                int drawOffset = offset;
 
-            if (offset == 0) {
-                drawTime(canvas, drawOffset, 1.0f, true);
-            } else {
-                float ratio = Math.max(0.0f, Math.abs(offset / (float) getPx(DELTA)));
-                drawTime(canvas, drawOffset + getPx(DELTA), ratio, false);
-                drawTime(canvas, drawOffset, 1.0f - ratio, true);
+                if (offset == 0) {
+                    drawTime(canvas, drawOffset, 1.0f, true);
+                } else {
+                    float ratio = Math.max(0.0f, Math.abs(offset / (float) getPx(DELTA)));
+                    drawTime(canvas, drawOffset + getPx(DELTA), ratio, false);
+                    drawTime(canvas, drawOffset, 1.0f - ratio, true);
+                }
             }
         }
-
-//        View child = getChildAt(1);
-//        if (child != null) {
-//            Paint p = new Paint();
-//            p.setColor(0x66ff0000);
-//            canvas.drawRect(child.getLeft(), child.getTop(), child.getRight(), child.getBottom(), p);
-//        }
     }
 
     protected int getPx(float dp) {
@@ -117,11 +136,44 @@ public class ConversationListView extends ImagingListView {
 
         @Override
         public void onScrollStateChanged(AbsListView absListView, int i) {
+            if (i == SCROLL_STATE_FLING || i == SCROLL_STATE_TOUCH_SCROLL) {
+                handler.removeMessages(0);
+            }
 
+            if (i == SCROLL_STATE_IDLE) {
+                handler.removeMessages(0);
+                handler.sendEmptyMessageDelayed(0, UI_TIMEOUT);
+            }
         }
+
+        int lastVisibleItem = -1;
+        int lastTop = 0;
 
         @Override
         public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            if (lastVisibleItem == -1 || lastVisibleItem != firstVisibleItem) {
+                lastVisibleItem = firstVisibleItem;
+                lastTop = 0;
+                View view = getChildAt(0 + getHeaderViewsCount());
+                if (view != null) {
+                    lastTop = view.getTop();
+                }
+            } else {
+                View view = getChildAt(0 + getHeaderViewsCount());
+                if (view != null) {
+                    int topDelta = Math.abs(view.getTop() - lastTop);
+                    lastTop = view.getTop();
+                    scrollDistance += topDelta;
+                    if (scrollDistance > getPx(ACTIVATE_DELTA) && !isTimeVisible) {
+                        isTimeVisible = true;
+                        handler.removeMessages(0);
+                    }
+                }
+            }
+
+
+            // handler.removeMessages(0);
+
             ListAdapter adapter = getAdapter();
             if (adapter instanceof HeaderViewListAdapter) {
                 adapter = ((HeaderViewListAdapter) adapter).getWrappedAdapter();
