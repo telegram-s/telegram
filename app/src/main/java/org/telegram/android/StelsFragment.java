@@ -122,12 +122,13 @@ public class StelsFragment extends StelsBaseFragment {
 
     protected CharSequence highlightSecureTitleText(String src) {
         SpannableString res = SpannableString.valueOf("#" + src);
-        Drawable srcImage = application.getResources().getDrawable(R.drawable.st_ic_lock_green);
+        Drawable srcImage = application.getResources().getDrawable(R.drawable.st_bar_lock);
         srcImage.setBounds(0, 0, srcImage.getIntrinsicWidth(), srcImage.getIntrinsicHeight());
         Drawable inset = new InsetDrawable(srcImage, 0, 0, getPx(4), 0);
         inset.setBounds(0, 0, srcImage.getIntrinsicWidth() + getPx(4), srcImage.getIntrinsicHeight());
         res.setSpan(new ImageSpan(inset, ImageSpan.ALIGN_BASELINE), 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-        res.setSpan(new ForegroundColorSpan(0xff67b540), 1, src.length() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        //res.setSpan(new ForegroundColorSpan(0xff67b540), 1, src.length() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        res.setSpan(new ForegroundColorSpan(0xffffffff), 1, src.length() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return res;
     }
 

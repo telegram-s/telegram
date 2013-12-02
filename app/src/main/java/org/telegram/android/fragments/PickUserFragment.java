@@ -290,13 +290,10 @@ public class PickUserFragment extends StelsFragment {
 
         MenuItem searchItem = menu.findItem(R.id.searchMenu);
         SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint(getStringSafe(R.string.st_pick_user_filter));
+        // searchView.setQueryHint(getStringSafe(R.string.st_pick_user_filter));
+        searchView.setQueryHint("");
 
         ((ImageView) searchView.findViewById(R.id.abs__search_button)).setImageResource(R.drawable.st_bar_ic_search);
-
-        AutoCompleteTextView searchText = (AutoCompleteTextView) searchView.findViewById(R.id.abs__search_src_text);
-        searchText.setHintTextColor(0xccB8B8B8);
-        searchText.setTextColor(0xff010101);
 
         searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
