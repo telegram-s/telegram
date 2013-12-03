@@ -215,12 +215,59 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
             address.ports.put(25, 0);
         }
 
+        HashMap<Integer, HashMap<String, DcAddress>> otherAddresses = new HashMap<Integer, HashMap<String, DcAddress>>();
 
+        for (TLDcInfo i : infos) {
+            if (i.getVersion() == maxVersion) {
+                continue;
+            }
+
+            if (!otherAddresses.containsKey(i.getVersion())) {
+                otherAddresses.put(i.getVersion(), new HashMap<String, DcAddress>());
+            }
+
+            HashMap<String, DcAddress> addressHashMap = otherAddresses.get(i.getVersion());
+
+            if (addressHashMap.containsKey(i.getAddress())) {
+                addressHashMap.get(i.getAddress()).ports.put(i.getPort(), 1);
+            } else {
+                DcAddress address = new DcAddress();
+                address.ports.put(i.getPort(), 1);
+                address.host = i.getAddress();
+                addressHashMap.put(i.getAddress(), address);
+            }
+        }
+
+        for (Integer version : otherAddresses.keySet()) {
+            for (DcAddress address : otherAddresses.get(version).values()) {
+                if (mainAddresses.containsKey(address.host)) {
+                    continue;
+                }
+                address.ports.put(443, 2);
+                address.ports.put(80, 1);
+                address.ports.put(25, 0);
+            }
+        }
+
+
+        // Writing main addresses
         int index = 0;
+
         for (DcAddress address : mainAddresses.values()) {
             for (Integer port : address.ports.keySet()) {
                 int priority = maxVersion + address.ports.get(port);
                 res.add(new ConnectionInfo(index++, priority, address.host, port));
+            }
+        }
+
+        // Writing other addresses
+
+        for (Integer version : otherAddresses.keySet()) {
+            for (DcAddress address : otherAddresses.get(version).values()) {
+                for (Integer port : address.ports.keySet()) {
+                    int priority = version + address.ports.get(port);
+                    res.add(new ConnectionInfo(index++, priority, address.host, port));
+                }
             }
         }
 
