@@ -41,7 +41,7 @@ public class AuthController {
                             try {
                                 Authorizer authorizer = new Authorizer();
                                 ConnectionInfo[] info = getApiStorage().getAvailableConnections(getApiStorage().getPrimaryDc());
-                                PqAuth auth = authorizer.doAuth(info[0].getAddress(), info[0].getPort());
+                                PqAuth auth = authorizer.doAuth(info);
                                 if (getApiStorage().getAuthKey(getApiStorage().getPrimaryDc()) != null) {
                                     notifyStateChange(AuthState.COMPLETED);
                                     return;
