@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -30,6 +31,7 @@ public class ConversationListView extends ImagingListView {
 
     private static final int DELTA = 26;
 
+    private static final long ANIMATION_DURATION = 200;
     private static final int ACTIVATE_DELTA = 50;
     private static final long UI_TIMEOUT = 900;
 
@@ -47,13 +49,17 @@ public class ConversationListView extends ImagingListView {
 
     private int offset;
 
+    private long animationTime = 0;
     private boolean isTimeVisible = false;
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == 0) {
-                isTimeVisible = false;
-                scrollDistance = 0;
+                if (isTimeVisible) {
+                    isTimeVisible = false;
+                    scrollDistance = 0;
+                    animationTime = SystemClock.uptimeMillis();
+                }
                 invalidate();
             } else if (msg.what == 1) {
                 isTimeVisible = true;
@@ -108,22 +114,47 @@ public class ConversationListView extends ImagingListView {
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
+        boolean isAnimated = false;
+        boolean isShown;
         if (isTimeVisible) {
+            isShown = isTimeVisible;
+        } else {
+            isShown = SystemClock.uptimeMillis() - animationTime < ANIMATION_DURATION;
+        }
+
+        if (isShown) {
+            float animationRatio = 1.0f;
+            if (SystemClock.uptimeMillis() - animationTime < ANIMATION_DURATION) {
+                isAnimated = true;
+                animationRatio = (SystemClock.uptimeMillis() - animationTime) / ((float) ANIMATION_DURATION);
+                if (animationRatio > 1.0f) {
+                    animationRatio = 1.0f;
+                }
+
+                if (!isTimeVisible) {
+                    animationRatio = 1.0f - animationRatio;
+                }
+            }
+
             int drawOffset = offset;
 
             if (offset == 0) {
                 if (visibleDate != null) {
-                    drawTime(canvas, drawOffset, 1.0f, true);
+                    drawTime(canvas, drawOffset, 1.0f * animationRatio, true);
                 }
             } else {
                 float ratio = Math.min(1.0f, Math.abs(offset / (float) getPx(DELTA)));
                 if (visibleDateNext != null) {
-                    drawTime(canvas, drawOffset + getPx(DELTA), ratio, false);
+                    drawTime(canvas, drawOffset + getPx(DELTA), ratio * animationRatio, false);
                 }
                 if (visibleDate != null) {
-                    drawTime(canvas, drawOffset, 1.0f - ratio, true);
+                    drawTime(canvas, drawOffset, (1.0f - ratio) * animationRatio, true);
                 }
             }
+        }
+
+        if (isAnimated) {
+            invalidate();
         }
     }
 
@@ -171,6 +202,7 @@ public class ConversationListView extends ImagingListView {
                     scrollDistance += topDelta;
                     if (scrollDistance > getPx(ACTIVATE_DELTA) && !isTimeVisible) {
                         isTimeVisible = true;
+                        animationTime = SystemClock.uptimeMillis();
                         handler.removeMessages(0);
                     }
                 }
