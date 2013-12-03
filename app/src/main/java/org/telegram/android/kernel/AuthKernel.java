@@ -53,7 +53,7 @@ public class AuthKernel {
             storage = new ApiStorage(kernel.getApplication());
         }
         checkState();
-        storage.write();
+        // storage.write();
     }
 
     public ApiStorage getApiStorage() {

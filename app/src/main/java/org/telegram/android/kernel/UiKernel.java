@@ -81,7 +81,9 @@ public class UiKernel {
         Logger.d(TAG, "Creating ui kernel");
         this.responsibility = new UiResponsibility();
         this.notifications = new Notifications(application);
+        long start = SystemClock.uptimeMillis();
         this.emojiProcessor = new EmojiProcessor(application);
+        Logger.d(TAG, "Emoji loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
         this.lastEmoji = new LastEmojiProcessor(application);
         this.textSaver = new TextSaver(application);
         this.wallpaperHolder = new WallpaperHolder(application);
@@ -236,17 +238,11 @@ public class UiKernel {
     private void onAppGoesForeground() {
         emojiProcessor.loadEmoji();
         application.getKernel().getSyncKernel().getBackgroundSync().onAppVisibilityChanged();
-        if (application.getEncryptedChatProcessor() != null) {
-            application.getEncryptedChatProcessor().onUserGoesOnline();
-        }
         kernel.getLifeKernel().onAppVisible();
     }
 
     private void onAppGoesBackground() {
         application.getKernel().getSyncKernel().getBackgroundSync().onAppVisibilityChanged();
-        if (application.getEncryptedChatProcessor() != null) {
-            application.getEncryptedChatProcessor().onUserGoesOffline();
-        }
         kernel.getLifeKernel().onAppHidden();
     }
 

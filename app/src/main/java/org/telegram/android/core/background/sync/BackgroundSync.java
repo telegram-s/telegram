@@ -35,6 +35,7 @@ public class BackgroundSync extends AbsBackgroundSync {
     private static final int SYNC_DELETIONS = 4;
     private static final int SYNC_TYPING = 5;
     private static final int SYNC_HISTORY = 6;
+    private static final int SYNC_ACCEPTOR = 7;
 
     private static final String TAG = "BackgroundSync";
 
@@ -54,6 +55,11 @@ public class BackgroundSync extends AbsBackgroundSync {
         registerSyncSingle(SYNC_DELETIONS, "deletionsSync");
         registerSyncEvent(SYNC_TYPING, "typingSync");
         registerSyncSingle(SYNC_HISTORY, "historyReadSync");
+        registerSyncEvent(SYNC_ACCEPTOR, "encryptedAcceptor");
+    }
+
+    public void resetEncAcceptorSync() {
+        resetSync(SYNC_ACCEPTOR);
     }
 
     public void resetHistorySync() {
@@ -88,6 +94,7 @@ public class BackgroundSync extends AbsBackgroundSync {
 
     public void onAppVisibilityChanged() {
         resetSync(SYNC_ONLINE);
+        resetSync(SYNC_ACCEPTOR);
     }
 
     public void resetDeletionsSync() {
@@ -225,6 +232,16 @@ public class BackgroundSync extends AbsBackgroundSync {
                     application.getEngine().onMaxRemoteViewed(description.getPeerType(), description.getPeerId(), mid);
                 }
             }
+        }
+    }
+
+    protected void encryptedAcceptor() throws Exception {
+        if (!application.getUiKernel().isAppActive()) {
+            return;
+        }
+        EncryptedChat[] chats = application.getEngine().getPendingEncryptedChats();
+        for (EncryptedChat chat : chats) {
+            application.getEncryptionController().confirmEncryption(chat.getId());
         }
     }
 }

@@ -1,5 +1,6 @@
 package org.telegram.android.kernel;
 
+import android.os.SystemClock;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.api.auth.TLAuthorization;
@@ -133,58 +134,84 @@ public class ApplicationKernel {
     }
 
     public void initTechKernel() {
+        long start = SystemClock.uptimeMillis();
         techKernel = new TechKernel(application);
+        Logger.d(TAG, "TechKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initLifeKernel() {
+        long start = SystemClock.uptimeMillis();
         lifeKernel = new LifeKernel(this);
+        Logger.d(TAG, "LifeKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initBasicUiKernel() {
+        long start = SystemClock.uptimeMillis();
         uiKernel = new UiKernel(this);
+        Logger.d(TAG, "UiKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initSearchKernel() {
+        long start = SystemClock.uptimeMillis();
         searchKernel = new SearchKernel(application);
+        Logger.d(TAG, "SearchKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initAuthKernel() {
+        long start = SystemClock.uptimeMillis();
         authKernel = new AuthKernel(this);
+        Logger.d(TAG, "AuthKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initSettingsKernel() {
+        long start = SystemClock.uptimeMillis();
         settingsKernel = new SettingsKernel(this);
+        Logger.d(TAG, "SettingsKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initStorageKernel() {
+        long start = SystemClock.uptimeMillis();
         storageKernel = new StorageKernel(this);
+        Logger.d(TAG, "StorageKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initSourcesKernel() {
+        long start = SystemClock.uptimeMillis();
         dataSourceKernel = new DataSourceKernel(this);
+        Logger.d(TAG, "DataSourceKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initFileKernel() {
+        long start = SystemClock.uptimeMillis();
         fileKernel = new FileKernel(this);
+        Logger.d(TAG, "FileKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initEncryptedKernel() {
+        long start = SystemClock.uptimeMillis();
         encryptedKernel = new EncryptedKernel(this);
+        Logger.d(TAG, "EncryptedKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initSyncKernel() {
+        long start = SystemClock.uptimeMillis();
         syncKernel = new SyncKernel(this);
+        Logger.d(TAG, "SyncKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void initApiKernel() {
+        long start = SystemClock.uptimeMillis();
         apiKernel = new ApiKernel(this);
+        Logger.d(TAG, "ApiKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void runKernels() {
+        long start = SystemClock.uptimeMillis();
         storageKernel.runKernel();
         apiKernel.runKernel();
         syncKernel.runKernel();
         lifeKernel.runKernel();
+        Logger.d(TAG, "Kernels started in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void logIn(TLAuthorization authorization) {

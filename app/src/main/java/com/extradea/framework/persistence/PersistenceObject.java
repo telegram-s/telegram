@@ -127,7 +127,7 @@ public abstract class PersistenceObject implements Serializable {
         try {
             load(openRead(getClass().getName() + ".sav", false));
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             load(openRead(getClass().getName() + ".sav", true));
         }
         afterLoad();

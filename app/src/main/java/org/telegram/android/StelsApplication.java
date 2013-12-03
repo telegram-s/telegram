@@ -207,10 +207,6 @@ public class StelsApplication extends Application implements ImageSupport {
         return kernel.getEncryptedKernel().getSelfDestructProcessor();
     }
 
-    public EncryptedChatProcessor getEncryptedChatProcessor() {
-        return kernel.getEncryptedKernel().getEncryptedChatProcessor();
-    }
-
     public VersionHolder getVersionHolder() {
         return kernel.getTechKernel().getVersionHolder();
     }

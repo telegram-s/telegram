@@ -51,7 +51,7 @@ public class EncryptionController {
             enableEncryption(encChat, (TLEncryptedChat) chat);
         }
         application.getEngine().updateEncryptedChat(chat);
-        application.getEncryptedChatProcessor().checkChats();
+        application.getSyncKernel().getBackgroundSync().resetEncAcceptorSync();
     }
 
     public byte[] encryptMessage(TLAbsDecryptedMessage message, int chatId) throws IOException {
