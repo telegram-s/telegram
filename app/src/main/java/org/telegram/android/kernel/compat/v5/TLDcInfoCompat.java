@@ -1,4 +1,4 @@
-package org.telegram.android.core.model.storage;
+package org.telegram.android.kernel.compat.v5;
 
 import org.telegram.tl.TLContext;
 import org.telegram.tl.TLObject;
@@ -8,30 +8,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import static org.telegram.tl.StreamingUtils.*;
+import static org.telegram.tl.StreamingUtils.readInt;
 
 /**
- * Created with IntelliJ IDEA.
- * User: ex3ndr
- * Date: 08.11.13
- * Time: 23:54
+ * Created by ex3ndr on 03.12.13.
  */
-public class TLDcInfo extends TLObject {
-
-    public static final int CLASS_ID = 0x3db4ea98;
+public class TLDcInfoCompat extends TLObject {
+    public static final int CLASS_ID = 0x5d28839d;
 
     private int dcId;
     private String address;
     private int port;
-    private int version;
 
-    public TLDcInfo(int dcId, String address, int port, int version) {
+    public TLDcInfoCompat(int dcId, String address, int port) {
         this.dcId = dcId;
         this.address = address;
         this.port = port;
-        this.version = version;
     }
 
-    public TLDcInfo() {
+    public TLDcInfoCompat() {
 
     }
 
@@ -47,10 +42,6 @@ public class TLDcInfo extends TLObject {
         return port;
     }
 
-    public int getVersion() {
-        return version;
-    }
-
     @Override
     public int getClassId() {
         return CLASS_ID;
@@ -61,7 +52,6 @@ public class TLDcInfo extends TLObject {
         writeInt(dcId, stream);
         writeTLString(address, stream);
         writeInt(port, stream);
-        writeInt(version, stream);
     }
 
     @Override
@@ -69,6 +59,5 @@ public class TLDcInfo extends TLObject {
         dcId = readInt(stream);
         address = readTLString(stream);
         port = readInt(stream);
-        version = readInt(stream);
     }
 }

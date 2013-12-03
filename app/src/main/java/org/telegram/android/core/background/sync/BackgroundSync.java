@@ -8,6 +8,7 @@ import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.log.Logger;
 import org.telegram.api.*;
+import org.telegram.api.engine.TimeoutException;
 import org.telegram.api.messages.TLAffectedHistory;
 import org.telegram.api.requests.*;
 import org.telegram.tl.TLIntVector;
@@ -27,7 +28,7 @@ public class BackgroundSync extends AbsBackgroundSync {
     private static final int TYPING_SEND_TIMEOUT = 5000;
 
     private static final int SYNC_DC = 1;
-    private static final int SYNC_DC_INTERVAL = 12 * HOUR;
+    private static final int SYNC_DC_INTERVAL = HOUR;
     private static final int SYNC_ONLINE = 2;
     private static final int SYNC_ONLINE_INTERVAL = 60 * SEC;
     private static final int SYNC_PUSH = 3;
@@ -107,8 +108,30 @@ public class BackgroundSync extends AbsBackgroundSync {
 
     // Sync entities
     protected void dcSync() throws Exception {
-        TLConfig config = application.getApi().doRpcCall(new TLRequestHelpGetConfig());
-        application.getApiStorage().updateSettings(config);
+        boolean synced = false;
+        try {
+            TLConfig config = application.getApi().doRpcCall(new TLRequestHelpGetConfig());
+            application.getApiStorage().updateSettings(config);
+            application.getApi().resetConnectionInfo();
+            synced = true;
+        } catch (TimeoutException e) {
+            int[] knownDcs = application.getApiStorage().getKnownDc();
+            for (int i = 0; i < knownDcs.length; i++) {
+                try {
+                    TLConfig config = application.getApi().doRpcCallToDc(new TLRequestHelpGetConfig(), knownDcs[i]);
+                    application.getApiStorage().updateSettings(config);
+                    application.getApi().resetConnectionInfo();
+                    synced = true;
+                    break;
+                } catch (TimeoutException e1) {
+
+                }
+            }
+        }
+
+        if (!synced) {
+            throw new TimeoutException();
+        }
     }
 
     protected void onlineSync() throws Exception {

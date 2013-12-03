@@ -325,8 +325,9 @@ public class LoginFragment extends StelsFragment {
                             throw new AsyncException(e);
                         }
 
-                        if (application.getApiStorage().getConnectionInfo(destDC) == null) {
+                        if (application.getApiStorage().getAvailableConnections(destDC).length == 0) {
                             TLConfig config = rpc(new TLRequestHelpGetConfig());
+                            application.getApi().resetConnectionInfo();
                             application.getApiStorage().updateSettings(config);
                         }
 

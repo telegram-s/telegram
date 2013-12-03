@@ -6,7 +6,9 @@ import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.storage.*;
+import org.telegram.android.kernel.compat.v5.TLDcInfoCompat;
 import org.telegram.tl.TLContext;
+import org.telegram.tl.TLObject;
 
 /**
  * Created with IntelliJ IDEA.
@@ -67,5 +69,18 @@ public class TLLocalContext extends TLContext {
         registerClass(TLLastKnownSalt.CLASS_ID, TLLastKnownSalt.class);
         registerClass(TLOldSession.CLASS_ID, TLOldSession.class);
         registerClass(TLStorage.CLASS_ID, TLStorage.class);
+
+        // Compat
+        registerCompatClass(TLDcInfoCompat.CLASS_ID, TLDcInfoCompat.class);
+    }
+
+    @Override
+    protected TLObject convertCompatClass(TLObject src) {
+        if (src instanceof TLDcInfoCompat) {
+            TLDcInfoCompat compat = (TLDcInfoCompat) src;
+            return new TLDcInfo(compat.getDcId(), compat.getAddress(), compat.getPort(), 0);
+        }
+
+        return src;
     }
 }

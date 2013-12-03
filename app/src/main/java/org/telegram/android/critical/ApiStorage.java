@@ -6,6 +6,7 @@ import org.telegram.android.core.model.storage.TLDcInfo;
 import org.telegram.android.core.model.storage.TLKey;
 import org.telegram.android.core.model.storage.TLLastKnownSalt;
 import org.telegram.android.core.model.storage.TLStorage;
+import org.telegram.android.log.Logger;
 import org.telegram.api.TLConfig;
 import org.telegram.api.TLDcOption;
 import org.telegram.api.TLUserSelf;
@@ -16,6 +17,8 @@ import org.telegram.mtproto.state.AbsMTProtoState;
 import org.telegram.mtproto.state.ConnectionInfo;
 import org.telegram.mtproto.state.KnownSalt;
 
+import java.util.*;
+
 /**
  * Created with IntelliJ IDEA.
  * User: ex3ndr
@@ -25,12 +28,27 @@ import org.telegram.mtproto.state.KnownSalt;
 public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState {
     public static final String STORAGE_FILE_NAME = "api.bin";
 
+    private static final String TAG = "ApiStorage";
+
     public ApiStorage(Context context) {
         super(context, STORAGE_FILE_NAME, TLStorage.class, TLLocalContext.getInstance());
 
         if (getObj().getDcInfos().size() == 0) {
-            getObj().getDcInfos().add(new TLDcInfo(1, DcInitialConfig.ADDRESS, DcInitialConfig.PORT));
+            getObj().getDcInfos().add(new TLDcInfo(1, DcInitialConfig.ADDRESS, DcInitialConfig.PORT, 0));
         }
+    }
+
+    public int[] getKnownDc() {
+        HashSet<Integer> dcs = new HashSet<Integer>();
+        for (TLDcInfo dcInfo : getObj().getDcInfos()) {
+            dcs.add(dcInfo.getDcId());
+        }
+        Integer[] dcsArray = dcs.toArray(new Integer[0]);
+        int[] res = new int[dcs.size()];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = dcsArray[i];
+        }
+        return res;
     }
 
     @Override
@@ -40,15 +58,6 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
 
     private TLKey findKey(int dc) {
         for (TLKey key : getObj().getKeys()) {
-            if (key.getDcId() == dc) {
-                return key;
-            }
-        }
-        return null;
-    }
-
-    private TLDcInfo findDc(int dc) {
-        for (TLDcInfo key : getObj().getDcInfos()) {
             if (key.getDcId() == dc) {
                 return key;
             }
@@ -101,15 +110,56 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
 
     @Override
     public synchronized void updateSettings(TLConfig config) {
-        getObj().getDcInfos().clear();
+        int version = 0;
+        for (TLDcInfo info : getObj().getDcInfos()) {
+            version = Math.max(version, info.getVersion());
+        }
+
+        boolean hasUpdates = false;
         for (TLDcOption option : config.getDcOptions()) {
-            getObj().getDcInfos().add(new TLDcInfo(option.getId(), option.getIpAddress(), option.getPort()));
+            boolean contains = false;
+            for (TLDcInfo info : getObj().getDcInfos().toArray(new TLDcInfo[0])) {
+                if (info.getAddress().equals(option.getIpAddress()) && info.getPort() == option.getPort() && info.getDcId() == option.getId() && info.getVersion() == version) {
+                    contains = true;
+                    break;
+                }
+            }
+
+            if (!contains) {
+                hasUpdates = true;
+            }
+        }
+
+        if (!hasUpdates) {
+            Logger.d(TAG, "No updates for DC");
+            return;
+        }
+
+        int nextVersion = version + 1;
+        for (TLDcOption option : config.getDcOptions()) {
+            for (TLDcInfo info : getObj().getDcInfos().toArray(new TLDcInfo[0])) {
+                if (info.getAddress().equals(option.getIpAddress()) && info.getDcId() == option.getId()) {
+                    getObj().getDcInfos().remove(info);
+                }
+            }
+            getObj().getDcInfos().add(new TLDcInfo(option.getId(), option.getIpAddress(), option.getPort(), nextVersion));
         }
         write();
     }
 
     public synchronized void updateDCInfo(int dcId, String ip, int port) {
-        getObj().getDcInfos().add(new TLDcInfo(dcId, ip, port));
+        for (TLDcInfo info : getObj().getDcInfos().toArray(new TLDcInfo[0])) {
+            if (info.getAddress().equals(ip) && info.getPort() == port && info.getDcId() == dcId) {
+                getObj().getDcInfos().remove(info);
+            }
+        }
+
+        int version = 0;
+        for (TLDcInfo info : getObj().getDcInfos()) {
+            version = Math.max(version, info.getVersion());
+        }
+
+        getObj().getDcInfos().add(new TLDcInfo(dcId, ip, port, version));
         write();
     }
 
@@ -130,11 +180,57 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
     }
 
     @Override
-    public synchronized ConnectionInfo getConnectionInfo(int dcId) {
-        TLDcInfo info = findDc(dcId);
-        return info != null ? new ConnectionInfo(info.getAddress(), info.getPort()) : null;
-    }
+    public ConnectionInfo[] getAvailableConnections(int dcId) {
+        ArrayList<TLDcInfo> infos = new ArrayList<TLDcInfo>();
+        int maxVersion = 0;
+        for (TLDcInfo info : getObj().getDcInfos()) {
+            if (info.getDcId() == dcId) {
+                infos.add(info);
+                maxVersion = Math.max(maxVersion, info.getVersion());
+            }
+        }
 
+        ArrayList<ConnectionInfo> res = new ArrayList<ConnectionInfo>();
+
+        // Maximum version addresses
+        HashMap<String, DcAddress> mainAddresses = new HashMap<String, DcAddress>();
+        for (TLDcInfo i : infos) {
+            if (i.getVersion() != maxVersion) {
+                continue;
+            }
+
+            if (mainAddresses.containsKey(i.getAddress())) {
+                mainAddresses.get(i.getAddress()).ports.put(i.getPort(), 1);
+            } else {
+                DcAddress address = new DcAddress();
+                address.ports.put(i.getPort(), 1);
+                address.host = i.getAddress();
+                mainAddresses.put(i.getAddress(), address);
+            }
+        }
+
+        for (DcAddress address : mainAddresses.values()) {
+            address.ports.put(443, 2);
+            address.ports.put(80, 1);
+            address.ports.put(25, 0);
+        }
+
+
+        int index = 0;
+        for (DcAddress address : mainAddresses.values()) {
+            for (Integer port : address.ports.keySet()) {
+                int priority = maxVersion + address.ports.get(port);
+                res.add(new ConnectionInfo(index++, priority, address.host, port));
+            }
+        }
+
+        Logger.d(TAG, "Created connections for dc #" + dcId);
+        for (ConnectionInfo c : res) {
+            Logger.d(TAG, "Connection: #" + c.getId() + " " + c.getAddress() + ":" + c.getPort() + " at " + c.getPriority());
+        }
+
+        return res.toArray(new ConnectionInfo[0]);
+    }
 
     private synchronized void writeKnownSalts(int dcId, KnownSalt[] salts) {
         TLKey key = findKey(dcId);
@@ -164,8 +260,8 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
             }
 
             @Override
-            public ConnectionInfo fetchConnectionInfo() {
-                return ApiStorage.this.getConnectionInfo(dcId);
+            public ConnectionInfo[] getAvailableConnections() {
+                return ApiStorage.this.getAvailableConnections(dcId);
             }
 
             @Override
@@ -193,13 +289,15 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
 
     @Override
     public synchronized void reset() {
-        getObj().getDcInfos().clear();
-        getObj().getDcInfos().add(new TLDcInfo(1, DcInitialConfig.ADDRESS, DcInitialConfig.PORT));
-
         getObj().getKeys().clear();
         getObj().setAuthorized(false);
         getObj().setPrimaryDc(1);
         getObj().setUid(0);
         write();
+    }
+
+    private class DcAddress {
+        public String host;
+        public HashMap<Integer, Integer> ports = new HashMap<Integer, Integer>();
     }
 }

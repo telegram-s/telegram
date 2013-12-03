@@ -214,7 +214,7 @@ public class AuthKernel {
             Logger.d(TAG, "Key: " + key.getDcId() + ":" + key.isAuthorised());
         }
         for (TLDcInfo dc : storage.getObj().getDcInfos()) {
-            Logger.d(TAG, "Address: " + dc.getDcId() + " " + dc.getAddress() + ":" + dc.getPort());
+            Logger.d(TAG, "Address: " + dc.getDcId() + " " + dc.getAddress() + ":" + dc.getPort() + " @" + dc.getVersion());
         }
 
         if (storage.isAuthenticated()) {
