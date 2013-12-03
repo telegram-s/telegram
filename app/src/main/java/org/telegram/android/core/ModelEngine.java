@@ -1143,7 +1143,7 @@ public class ModelEngine {
         nmsg.setSenderId(senderId);
         getMessagesDao().create(nmsg);
         application.getDataSourceKernel().onSourceAddMessage(nmsg);
-        updateDescriptorShortEnc(nmsg);
+        updateDescriptorShort(nmsg);
         updateMaxDate(nmsg);
         return true;
     }
