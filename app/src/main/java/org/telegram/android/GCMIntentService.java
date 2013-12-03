@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.google.android.gcm.GCMBaseIntentService;
+import org.json.JSONObject;
 import org.telegram.android.R;
 
 
@@ -40,6 +41,28 @@ public class GCMIntentService extends GCMBaseIntentService {
      */
     @Override
     protected void onMessage(Context context, Intent intent) {
+        try {
+            String key = intent.getStringExtra("loc_key");
+            if ("DC_UPDATE".equals(key)) {
+                String data = intent.getStringExtra("custom");
+                JSONObject object = new JSONObject(data);
+                int dc = object.getInt("dc");
+                String addr = object.getString("addr");
+                String[] parts = addr.split(":");
+                if (parts.length != 2) {
+                    return;
+                }
+                String ip = parts[0];
+                int port = Integer.parseInt(parts[1]);
+
+                StelsApplication application = ((StelsApplication) context.getApplicationContext());
+                application.getKernel().getAuthKernel().getApiStorage().updateDCInfo(dc, ip, port);
+                application.getSyncKernel().getBackgroundSync().resetDcSync();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // ((StelsApplication) context.getApplicationContext()).getPushController().onPushArrived(intent);
     }
 

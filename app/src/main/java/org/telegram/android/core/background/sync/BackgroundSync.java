@@ -59,6 +59,10 @@ public class BackgroundSync extends AbsBackgroundSync {
         registerSyncEvent(SYNC_ACCEPTOR, "encryptedAcceptor");
     }
 
+    public void resetDcSync() {
+        resetSync(SYNC_DC);
+    }
+
     public void resetEncAcceptorSync() {
         resetSync(SYNC_ACCEPTOR);
     }
