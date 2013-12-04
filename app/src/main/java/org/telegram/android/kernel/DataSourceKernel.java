@@ -107,30 +107,38 @@ public class DataSourceKernel {
     }
 
     public void onSourceAddMessage(ChatMessage message) {
+        Logger.d(TAG, "find view source1");
         ViewSource<ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
         if (res == null)
             return;
+        Logger.d(TAG, "founded view source1");
         res.addItem(message);
     }
 
     public void onSourceAddMessageHacky(ChatMessage message) {
+        Logger.d(TAG, "find view source2");
         ViewSource<ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
         if (res == null)
             return;
+        Logger.d(TAG, "founded view source2");
         res.addToEndHacky(message);
     }
 
     public void onSourceRemoveMessage(ChatMessage message) {
+        Logger.d(TAG, "find view source3");
         ViewSource<ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
         if (res == null)
             return;
+        Logger.d(TAG, "founded view source3");
         res.removeItem(message);
     }
 
     public void onSourceUpdateMessage(ChatMessage message) {
+        Logger.d(TAG, "find view source4");
         ViewSource<ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
         if (res == null)
             return;
+        Logger.d(TAG, "founded view source4");
         res.updateItem(message);
     }
 

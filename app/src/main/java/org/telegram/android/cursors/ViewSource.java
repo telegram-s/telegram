@@ -229,7 +229,9 @@ public abstract class ViewSource<T> {
     }
 
     public synchronized void updateItem(T itm) {
+        Logger.d(TAG, "updateItem: " + itm);
         long key = getItemKey(itm);
+        Logger.d(TAG, "item key: " + key);
 //        if (!items.containsKey(key)) {
 //            return;
 //        }
