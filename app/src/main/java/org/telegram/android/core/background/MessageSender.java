@@ -192,7 +192,6 @@ public class MessageSender {
                     Logger.t(TAG, e);
                     return;
                 }
-                long id = Entropy.generateRandomId();
                 while (SystemClock.uptimeMillis() - start < TIMEOUT) {
                     synchronized (states) {
                         SendState state = states.get(message.getDatabaseId());
@@ -307,7 +306,7 @@ public class MessageSender {
 
                                 TLAbsSentEncryptedMessage encryptedMessage =
                                         application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(
-                                                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), id, bundle,
+                                                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle,
                                                 inputEncryptedFile));
 
                                 TLLocalPhoto photo = new TLLocalPhoto();
@@ -368,7 +367,7 @@ public class MessageSender {
                                 }
 
                                 TLAbsStatedMessage sent = application.getApi().doRpcCall(
-                                        new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedPhoto(inputFile), id));
+                                        new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedPhoto(inputFile), message.getRandomId()));
                                 // application.getUpdateProcessor().onMessage(sent);
                                 try {
                                     TLMessage msgRes = (TLMessage) sent.getMessage();
@@ -531,7 +530,7 @@ public class MessageSender {
 
                                 TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(
                                         new TLRequestMessagesSendEncryptedFile(
-                                                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), id, bundle, inputFile));
+                                                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle, inputFile));
 
                                 TLLocalVideo localVideo = new TLLocalVideo();
                                 localVideo.setDuration((int) (timeInmillisec / 1000));
@@ -644,7 +643,7 @@ public class MessageSender {
                                 video.setW(width);
                                 video.setH(height);
 
-                                TLAbsStatedMessage sent = application.getApi().doRpcCall(new TLRequestMessagesSendMedia(peer, video, id));
+                                TLAbsStatedMessage sent = application.getApi().doRpcCall(new TLRequestMessagesSendMedia(peer, video, message.getRandomId()));
                                 try {
                                     TLMessage msgRes = (TLMessage) sent.getMessage();
                                     TLLocalVideo mediaVideo = EngineUtils.convertVideo((TLMessageMediaVideo) msgRes.getMedia());

@@ -25,11 +25,6 @@ import java.util.Random;
  * Created: 28.07.13 19:28
  */
 public class EngineUtils {
-    private static final Random rnd = new Random();
-
-    public static long generateRandomId() {
-        return rnd.nextLong();
-    }
 
     public static TLAbsLocalAvatarPhoto convertAvatarPhoto(TLAbsChatPhoto chatPhoto) {
         if (chatPhoto instanceof TLChatPhoto) {

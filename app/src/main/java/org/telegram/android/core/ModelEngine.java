@@ -1299,7 +1299,7 @@ public class ModelEngine {
         msg.setDate(date);
         msg.setSenderId(application.getCurrentUid());
         msg.setState(MessageState.PENDING);
-        msg.setRandomId(EngineUtils.generateRandomId());
+        msg.setRandomId(Entropy.generateRandomId());
         updateMaxDate(msg);
         return msg;
     }
@@ -1317,7 +1317,7 @@ public class ModelEngine {
         msg.setDate(date);
         msg.setSenderId(application.getCurrentUid());
         msg.setState(MessageState.PENDING);
-        msg.setRandomId(EngineUtils.generateRandomId());
+        msg.setRandomId(Entropy.generateRandomId());
         updateMaxDate(msg);
         return msg;
     }
@@ -1454,7 +1454,7 @@ public class ModelEngine {
         }
         msg.setDate(date);
         msg.setState(MessageState.PENDING);
-        msg.setRandomId(EngineUtils.generateRandomId());
+        msg.setRandomId(Entropy.generateRandomId());
         getMessagesDao().update(msg);
         application.getDataSourceKernel().onSourceUpdateMessage(msg);
         application.getMessageSender().sendMedia(msg);
@@ -1471,7 +1471,7 @@ public class ModelEngine {
         }
         msg.setDate(date);
         msg.setState(MessageState.PENDING);
-        msg.setRandomId(EngineUtils.generateRandomId());
+        msg.setRandomId(Entropy.generateRandomId());
         getMessagesDao().update(msg);
         application.getDataSourceKernel().onSourceUpdateMessage(msg);
         application.getMessageSender().sendMessage(msg);
