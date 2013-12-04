@@ -1950,6 +1950,7 @@ public class ModelEngine {
             @Override
             public Void call() throws Exception {
                 for (Pair<ChatMessage, ChatMessage> msgs : diff) {
+                    Logger.d(TAG, "newMessages: " + msgs.second.getMid());
                     ChatMessage orig = msgs.first;
                     ChatMessage changed = msgs.second;
 
@@ -1965,11 +1966,15 @@ public class ModelEngine {
                         application.getDataSourceKernel().onSourceUpdateMessage(changed);
                     }
 
+                    Logger.d(TAG, "newMessages2");
+
                     if (changed.getRawContentType() == ContentType.MESSAGE_PHOTO) {
                         saveMedia(changed.getMid(), changed);
                     } else if (changed.getRawContentType() == ContentType.MESSAGE_VIDEO) {
                         saveMedia(changed.getMid(), changed);
                     }
+
+                    Logger.d(TAG, "newMessages3");
 
                     DialogDescription description = getDescriptionForPeer(changed.getPeerType(), changed.getPeerId());
                     if (description == null) {
@@ -2004,7 +2009,9 @@ public class ModelEngine {
                             application.getDialogSource().getViewSource().updateItem(description);
                         }
                     }
+                    Logger.d(TAG, "newMessages4");
                 }
+                Logger.d(TAG, "newMessages:ended");
                 return null;
             }
         });
