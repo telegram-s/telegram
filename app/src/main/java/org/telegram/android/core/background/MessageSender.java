@@ -297,9 +297,18 @@ public class MessageSender {
                             int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)), 0);
                             try {
                                 byte[] bundle = application.getEncryptionController().encryptMessage(decryptedMessage, chat.getId());
+
+                                TLAbsInputEncryptedFile inputEncryptedFile;
+                                if (result.isUsedBigFile()) {
+                                    inputEncryptedFile = new TLInputEncryptedFileBigUploaded(fileId, result.getPartsCount(), fingerprint);
+                                } else {
+                                    inputEncryptedFile = new TLInputEncryptedFileUploaded(fileId, result.getPartsCount(), result.getHash(), fingerprint);
+                                }
+
                                 TLAbsSentEncryptedMessage encryptedMessage =
-                                        application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), id, bundle,
-                                                new TLInputEncryptedFileUploaded(fileId, result.getPartsCount(), result.getHash(), fingerprint)));
+                                        application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(
+                                                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), id, bundle,
+                                                inputEncryptedFile));
 
                                 TLLocalPhoto photo = new TLLocalPhoto();
                                 photo.setFastPreviewW(previewResult.getW());
@@ -350,8 +359,16 @@ public class MessageSender {
                             return;
                         } else {
                             try {
-                                TLAbsStatedMessage sent = application.getApi().doRpcCall(new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedPhoto(new TLInputFile(
-                                        fileId, result.getPartsCount(), "file.jpg", result.getHash())), id));
+
+                                TLAbsInputFile inputFile;
+                                if (result.isUsedBigFile()) {
+                                    inputFile = new TLInputFileBig(fileId, result.getPartsCount(), "file.jpg");
+                                } else {
+                                    inputFile = new TLInputFile(fileId, result.getPartsCount(), "file.jpg", result.getHash());
+                                }
+
+                                TLAbsStatedMessage sent = application.getApi().doRpcCall(
+                                        new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedPhoto(inputFile), id));
                                 // application.getUpdateProcessor().onMessage(sent);
                                 try {
                                     TLMessage msgRes = (TLMessage) sent.getMessage();
@@ -504,8 +521,17 @@ public class MessageSender {
 
                             try {
                                 byte[] bundle = application.getEncryptionController().encryptMessage(decryptedMessage, chat.getId());
-                                TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), id, bundle,
-                                        new TLInputEncryptedFileUploaded(fileId, result.getPartsCount(), result.getHash(), fingerprint)));
+
+                                TLAbsInputEncryptedFile inputFile;
+                                if (result.isUsedBigFile()) {
+                                    inputFile = new TLInputEncryptedFileBigUploaded(fileId, result.getPartsCount(), fingerprint);
+                                } else {
+                                    inputFile = new TLInputEncryptedFileUploaded(fileId, result.getPartsCount(), result.getHash(), fingerprint);
+                                }
+
+                                TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(
+                                        new TLRequestMessagesSendEncryptedFile(
+                                                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), id, bundle, inputFile));
 
                                 TLLocalVideo localVideo = new TLLocalVideo();
                                 localVideo.setDuration((int) (timeInmillisec / 1000));
@@ -608,7 +634,11 @@ public class MessageSender {
                             try {
                                 TLInputMediaUploadedThumbVideo video = new TLInputMediaUploadedThumbVideo();
                                 //TLInputMediaUploadedVideo video = new TLInputMediaUploadedVideo();
-                                video.setFile(new TLInputFile(fileId, result.getPartsCount(), "file.mp4", result.getHash()));
+                                if (result.isUsedBigFile()) {
+                                    video.setFile(new TLInputFileBig(fileId, result.getPartsCount(), "file.mp4"));
+                                } else {
+                                    video.setFile(new TLInputFile(fileId, result.getPartsCount(), "file.mp4", result.getHash()));
+                                }
                                 video.setThumb(new TLInputFile(thumbFileId, thumbResult.getPartsCount(), "file.jpg", thumbResult.getHash()));
                                 video.setDuration((int) (timeInmillisec / 1000));
                                 video.setW(width);
