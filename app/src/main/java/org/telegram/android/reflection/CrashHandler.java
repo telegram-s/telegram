@@ -23,9 +23,13 @@ public class CrashHandler {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
-                Logger.t("UNHANDLED", ex);
-                Logger.dropOnCrash();
-                originalHandler.uncaughtException(thread, ex);
+                try {
+                    Logger.t("UNHANDLED", ex);
+                    Logger.dropOnCrash();
+                    originalHandler.uncaughtException(thread, ex);
+                } catch (Throwable t) {
+
+                }
             }
         });
     }
