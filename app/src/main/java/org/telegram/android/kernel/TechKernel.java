@@ -42,7 +42,7 @@ public class TechKernel {
             if (!versionHolder.isWasUpgraded()) {
                 if (versionHolder.getCurrentVersionInstalled() == 0) {
 //                  if (isLoggedIn()) {
-                    versionHolder.setWasUpgraded(true);
+                    versionHolder.setWasUpgraded(false);
 //                  }
                 } else {
                     if (versionHolder.getCurrentVersionInstalled() != versionCode) {

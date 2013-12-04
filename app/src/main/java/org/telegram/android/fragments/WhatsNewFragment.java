@@ -129,7 +129,7 @@ public class WhatsNewFragment extends StelsFragment {
                     linearLayout.addView(textView);
                 }
 
-                {
+                if (s.getHint() != null) {
                     TextView textView = new TextView(getActivity());
                     textView.setTypeface(FontController.loadTypeface(getActivity(), "regular"));
                     textView.setTextColor(getResources().getColor(R.color.st_black_text));
