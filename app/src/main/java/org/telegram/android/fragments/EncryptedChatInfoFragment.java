@@ -177,8 +177,8 @@ public class EncryptedChatInfoFragment extends StelsFragment {
         }
         runUiTask(new AsyncAction() {
 
-            private long randomId = EngineUtils.generateRandomId();
-            private long randomIntId = EngineUtils.generateRandomId();
+            private long randomId = Entropy.generateRandomId();
+            private long randomIntId = Entropy.generateRandomId();
 
             @Override
             public void execute() throws AsyncException {

@@ -708,8 +708,8 @@ public class MessageSender {
                 return;
             }
 
-            long randomId = EngineUtils.generateRandomId();
-            TLRequestMessagesSendEncrypted request = new TLRequestMessagesSendEncrypted(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), randomId, bundle);
+
+            TLRequestMessagesSendEncrypted request = new TLRequestMessagesSendEncrypted(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle);
 
             final long start = SystemClock.uptimeMillis();
             application.getApi().doRpcCall(request, TIMEOUT, new RpcCallbackEx<TLAbsSentEncryptedMessage>() {
