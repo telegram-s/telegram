@@ -94,7 +94,7 @@ public class MessageSource {
         }
         this.peerType = _peerType;
         this.peerId = _peerId;
-        this.messagesSource = new ViewSource<ChatMessage>(_application.getResponsibility()) {
+        this.messagesSource = new ViewSource<ChatMessage>() {
 
             @Override
             protected ChatMessage[] loadItems(int offset) {
