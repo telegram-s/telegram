@@ -72,8 +72,8 @@ public class SyncKernel {
 
     public void logOut() {
         typingStates.clearState();
-        updateProcessor.clearData();
         updateProcessor.destroy();
+        updateProcessor.clearData();
         updateProcessor = null;
     }
 }

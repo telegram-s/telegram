@@ -1103,11 +1103,6 @@ public class UpdateProcessor {
         correctorHandler.removeMessages(0);
         correctorHandler.removeMessages(1);
         corrector.interrupt();
-        try {
-            corrector.join(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         further.clear();
     }
 

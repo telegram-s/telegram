@@ -287,6 +287,9 @@ public class ContactsSource {
                 @Override
                 public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
+                    if (!application.isLoggedIn()) {
+                        return;
+                    }
                     if (!selfChange && state != ContactSourceState.IN_PROGRESS) {
                         Logger.d(TAG, "Contacts changed in observer.");
 

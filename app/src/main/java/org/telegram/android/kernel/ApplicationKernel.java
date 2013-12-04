@@ -225,12 +225,26 @@ public class ApplicationKernel {
 
     // Executing may take time
     public void logOut() {
+        long start = SystemClock.uptimeMillis();
         authKernel.logOut();
+        Logger.d(TAG, "LogOut: atuhKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         storageKernel.logOut();
+        Logger.d(TAG, "LogOut: storageKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         settingsKernel.logOut();
+        Logger.d(TAG, "LogOut: settingsKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         apiKernel.updateTelegramApi();
+        Logger.d(TAG, "LogOut: apiKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         syncKernel.logOut();
+        Logger.d(TAG, "LogOut: syncKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         dataSourceKernel.logOut();
+        Logger.d(TAG, "LogOut: dataSourceKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         uiKernel.logOut();
+        Logger.d(TAG, "LogOut: uiKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 }

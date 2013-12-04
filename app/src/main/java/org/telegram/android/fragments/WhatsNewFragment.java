@@ -98,7 +98,7 @@ public class WhatsNewFragment extends StelsFragment {
             for (Definition s : definitions) {
                 {
                     TextView textView = new TextView(getActivity());
-                    textView.setTypeface(FontController.loadTypeface(getActivity(), "thin"));
+                    textView.setTypeface(FontController.loadTypeface(getActivity(), "regular"));
                     textView.setTextColor(getResources().getColor(R.color.st_black_text));
                     textView.setTextSize(16);
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -109,7 +109,7 @@ public class WhatsNewFragment extends StelsFragment {
 
                 for (String record : s.content) {
                     TextView textView = new TextView(getActivity());
-                    textView.setTypeface(FontController.loadTypeface(getActivity(), "thin"));
+                    textView.setTypeface(FontController.loadTypeface(getActivity(), "regular"));
                     textView.setTextColor(getResources().getColor(R.color.st_black_text));
                     textView.setTextSize(16);
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -131,7 +131,7 @@ public class WhatsNewFragment extends StelsFragment {
 
                 {
                     TextView textView = new TextView(getActivity());
-                    textView.setTypeface(FontController.loadTypeface(getActivity(), "thin"));
+                    textView.setTypeface(FontController.loadTypeface(getActivity(), "regular"));
                     textView.setTextColor(getResources().getColor(R.color.st_black_text));
                     textView.setTextSize(16);
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
