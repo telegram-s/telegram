@@ -7,6 +7,9 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
@@ -302,6 +305,12 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
 
         mainContainer = res.findViewById(R.id.mainContainer);
         listView = (ListView) res.findViewById(R.id.dialogsList);
+
+//        TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
+//                new ColorDrawable(getResources().getColor(R.color.st_selector)),
+//                new ColorDrawable(getResources().getColor(R.color.st_selector_end))});
+//        listView.setSelector(drawable);
+
         listView.addFooterView(bottomPadding, null, false);
         listView.setAdapter(new HeaderViewListAdapter(
                 new ArrayList<ListView.FixedViewInfo>(0),
