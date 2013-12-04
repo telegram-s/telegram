@@ -342,11 +342,12 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                             try {
                                                 rpcRaw(new TLRequestMessagesDiscardEncryption(description.getPeerId()));
                                             } catch (RpcException e) {
-                                                if ("ENCRYPTION_ALREADY_DECLINED".equals(e.getErrorTag())) {
-                                                    e.printStackTrace();
-                                                } else {
-                                                    throw new AsyncException(e);
-                                                }
+                                                e.printStackTrace();
+//                                                if ("ENCRYPTION_ALREADY_DECLINED".equals(e.getErrorTag())) {
+//                                                    e.printStackTrace();
+//                                                } else {
+//                                                    throw new AsyncException(e);
+//                                                }
                                             }
                                             getEngine().deleteEncryptedChat(description.getPeerId());
                                             getEngine().deleteHistory(description.getPeerType(), description.getPeerId());

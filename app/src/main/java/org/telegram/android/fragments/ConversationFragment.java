@@ -362,11 +362,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     try {
                                         rpcRaw(new TLRequestMessagesDiscardEncryption(peerId));
                                     } catch (RpcException e) {
-                                        if ("ENCRYPTION_ALREADY_DECLINED".equals(e.getErrorTag())) {
-                                            e.printStackTrace();
-                                        } else {
-                                            throw new AsyncException(e);
-                                        }
+                                        e.printStackTrace();
+//                                        if ("ENCRYPTION_ALREADY_DECLINED".equals(e.getErrorTag())) {
+//                                            e.printStackTrace();
+//                                        } else {
+//                                            throw new AsyncException(e);
+//                                        }
                                     }
                                     getEngine().deleteEncryptedChat(peerId);
                                     getEngine().deleteHistory(peerType, peerId);
