@@ -108,6 +108,16 @@ public class StelsFragment extends StelsBaseFragment {
         return html("<font color='#ffffff'>" + src + "</font>");
     }
 
+    protected CharSequence highlightSubtitleText(int resId) {
+        //return html("<font color='#006FC8'>" + getStringSafe(resId) + "</font>");
+        return html("<font color='#d0dbe7'>" + getStringSafe(resId) + "</font>");
+    }
+
+    protected CharSequence highlightSubtitleText(String src) {
+        // return html("<font color='#006FC8'>" + src + "</font>");
+        return html("<font color='#d0dbe7'>" + src + "</font>");
+    }
+
     protected CharSequence highlightText(int resId) {
         return html("<font color='#006FC8'>" + getStringSafe(resId) + "</font>");
     }

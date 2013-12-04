@@ -1079,25 +1079,25 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             if (peerId == 333000) {
                 getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText("Telegram"));
                 if (application.getTypingStates().isUserTyping(peerId)) {
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.lang_common_typing));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));
                 } else {
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.st_support_hint));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_support_hint));
                 }
             } else {
                 User user = application.getEngine().getUser(peerId);
                 getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(user.getDisplayName()));
 
                 if (application.getTypingStates().isUserTyping(peerId)) {
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.lang_common_typing));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));
                 } else {
                     int status = getUserState(user.getStatus());
                     if (status < 0) {
-                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.st_offline));
+                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_offline));
                     } else if (status == 0) {
-                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.st_online));
+                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_online));
                     } else {
                         getSherlockActivity().getSupportActionBar().setSubtitle(
-                                highlightTitleText(TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang))));
+                                highlightSubtitleText(TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang))));
                     }
                 }
             }
@@ -1106,27 +1106,27 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             if (chat.getUserId() == 333000) {
                 getSherlockActivity().getSupportActionBar().setTitle(highlightSecureTitleText("Telegram"));
                 if (application.getTypingStates().isEncryptedTyping(chat.getId())) {
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.lang_common_typing));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));
                 } else {
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.st_support_hint));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_support_hint));
                 }
             } else {
                 User user = application.getEngine().getUser(chat.getUserId());
                 getSherlockActivity().getSupportActionBar().setTitle(highlightSecureTitleText(user.getDisplayName()));
                 if (chat.getState() == EncryptedChatState.DISCARDED) {
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.st_conv_enc_cancelled));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_conv_enc_cancelled));
                 } else {
                     if (application.getTypingStates().isEncryptedTyping(chat.getId())) {
-                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.lang_common_typing));
+                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));
                     } else {
                         int status = getUserState(user.getStatus());
                         if (status < 0) {
-                            getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.st_offline));
+                            getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_offline));
                         } else if (status == 0) {
-                            getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.st_online));
+                            getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_online));
                         } else {
                             getSherlockActivity().getSupportActionBar().setSubtitle(
-                                    highlightTitleText(TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang))));
+                                    highlightSubtitleText(TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang))));
                         }
                     }
                 }
@@ -1138,7 +1138,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(description.getTitle()));
             FullChatInfo chatInfo = application.getChatSource().getChatInfo(peerId);
             if (description.getParticipantsCount() == 0 || (chatInfo != null && chatInfo.isForbidden())) {
-                getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(R.string.st_conv_removed));
+                getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_conv_removed));
             } else {
                 int[] typing = application.getTypingStates().getChatTypes(peerId);
                 if (typing.length == 0) {
@@ -1154,10 +1154,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     description.getParticipantsCount()).replace("{d}", "" +
                                     I18nUtil.getInstance().correctFormatNumber(description.getParticipantsCount()));
                             title += ",</light> " + I18nUtil.getInstance().correctFormatNumber(onlineCount) + " " + getStringSafe(R.string.st_online);
-                            getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(title));
+                            getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(title));
                         } else {
                             getSherlockActivity().getSupportActionBar().setSubtitle(
-                                    highlightTitleText(
+                                    highlightSubtitleText(
                                             "<light>" +
                                                     getQuantityString(R.plurals.st_members,
                                                             description.getParticipantsCount())
@@ -1165,7 +1165,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         }
                     } else {
                         getSherlockActivity().getSupportActionBar().setSubtitle(
-                                highlightTitleText(
+                                highlightSubtitleText(
                                         "<light>" +
                                                 getQuantityString(R.plurals.st_members,
                                                         description.getParticipantsCount())
@@ -1176,7 +1176,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     for (int i = 0; i < names.length; i++) {
                         names[i] = application.getEngine().getUser(typing[i]).getFirstName();
                     }
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightTitleText(TextUtil.formatTyping(names)));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(TextUtil.formatTyping(names)));
                 }
             }
         }
