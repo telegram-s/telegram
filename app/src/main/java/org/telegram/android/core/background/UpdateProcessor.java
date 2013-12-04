@@ -43,6 +43,8 @@ public class UpdateProcessor {
 
     private static final int CHECK_TIMEOUT = 2000;
 
+    private static final int DIFF_TIMEOUT = 60000;
+
     private StelsApplication application;
     private Thread corrector;
     private Handler correctorHandler;
@@ -83,7 +85,7 @@ public class UpdateProcessor {
                             if (!hasState()) {
                                 Logger.d(TAG, "Retreiving fresh state");
                                 try {
-                                    TLState state = application.getApi().doRpcCall(new TLRequestUpdatesGetState());
+                                    TLState state = application.getApi().doRpcCall(new TLRequestUpdatesGetState(), DIFF_TIMEOUT);
                                     if (isDestroyed) {
                                         return;
                                     }
@@ -107,7 +109,7 @@ public class UpdateProcessor {
                             } else {
                                 Logger.d(TAG, "Getting difference");
                                 try {
-                                    TLAbsDifference diff = application.getApi().doRpcCall(new TLRequestUpdatesGetDifference(updateState.getPts(), updateState.getDate(), updateState.getQts()));
+                                    TLAbsDifference diff = application.getApi().doRpcCall(new TLRequestUpdatesGetDifference(updateState.getPts(), updateState.getDate(), updateState.getQts()), DIFF_TIMEOUT);
                                     if (isDestroyed) {
                                         return;
                                     }
