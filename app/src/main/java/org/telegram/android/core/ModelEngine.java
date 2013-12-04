@@ -1955,15 +1955,23 @@ public class ModelEngine {
                     ChatMessage changed = msgs.second;
 
                     if (orig == null) {
+                        Logger.d(TAG, "newMessages1_1");
                         getMessagesDao().create(changed);
+                        Logger.d(TAG, "newMessages1_2");
                         if (!changed.isOut() && changed.getState() == MessageState.SENT) {
                             newUnread.add(changed.getMid());
                         }
+                        Logger.d(TAG, "newMessages1_3");
                         application.getDataSourceKernel().onSourceAddMessage(changed);
+                        Logger.d(TAG, "newMessages1_4");
                     } else {
+                        Logger.d(TAG, "newMessages2_1");
                         changed.setDatabaseId(orig.getDatabaseId());
+                        Logger.d(TAG, "newMessages2_2");
                         getMessagesDao().update(changed);
+                        Logger.d(TAG, "newMessages2_3");
                         application.getDataSourceKernel().onSourceUpdateMessage(changed);
+                        Logger.d(TAG, "newMessages2_4");
                     }
 
                     Logger.d(TAG, "newMessages2");
