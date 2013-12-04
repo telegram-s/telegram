@@ -3,6 +3,7 @@ package org.telegram.android.core.background;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import com.crittercism.app.Crittercism;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.DialogDescription;
@@ -105,6 +106,7 @@ public class UpdateProcessor {
                                     return;
                                 } catch (IOException e) {
                                     Logger.t(TAG, e);
+                                    Crittercism.logHandledException(e);
                                 }
                             } else {
                                 Logger.d(TAG, "Getting difference");
@@ -134,11 +136,13 @@ public class UpdateProcessor {
                                     return;
                                 } catch (RpcException e) {
                                     Logger.t(TAG, e);
+                                    Crittercism.logHandledException(e);
                                     // Temporary fix
                                     // updateState.setFullState(0, 0, 0, 0);
                                     // getHandler().sendEmptyMessageDelayed(0, 1000);
                                 } catch (IOException e) {
                                     Logger.t(TAG, e);
+                                    Crittercism.logHandledException(e);
                                     // getHandler().sendEmptyMessageDelayed(0, 1000);
                                 }
                             }
