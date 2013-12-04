@@ -26,10 +26,10 @@ public class CrashHandler {
                 try {
                     Logger.t("UNHANDLED", ex);
                     Logger.dropOnCrash();
-                    originalHandler.uncaughtException(thread, ex);
                 } catch (Throwable t) {
 
                 }
+                originalHandler.uncaughtException(thread, ex);
             }
         });
     }
