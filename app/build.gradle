@@ -44,8 +44,8 @@ dependencies {
     compile files('libs/ormlite-android-4.47.jar')
 }
 
-def basicVersion = '1.2'
-def customVersionCode = '1024';
+def basicVersion = '1.3'
+def customVersionCode = '10240';
 
 if (project.hasProperty('buildIndex')) {
     project.version = basicVersion + '.' + project.buildIndex
@@ -169,8 +169,8 @@ android {
     }
 }
 
-task lightDist(dependsOn: ['assembleCommonRelease','assembleCommonDebuggable', 'assembleDctestDebuggable', 'assembleBetaRelease']) << {
+task lightDist(dependsOn: ['assembleCommonRelease', 'assembleCommonDebuggable', 'assembleDctestDebuggable', 'assembleBetaRelease']) << {
 }
 
-task dist(dependsOn: ['assembleCommonRelease','assembleCommonDebuggable', 'assembleDctestDebuggable', 'assembleBetaRelease', 'assembleHdpiRelease','assembleMdpiRelease','assembleXhdpiRelease','assembleXxhdpiRelease']) << {
+task dist(dependsOn: ['assembleCommonRelease', 'assembleCommonDebuggable', 'assembleDctestDebuggable', 'assembleBetaRelease', 'assembleHdpiRelease', 'assembleMdpiRelease', 'assembleXhdpiRelease', 'assembleXxhdpiRelease']) << {
 }
