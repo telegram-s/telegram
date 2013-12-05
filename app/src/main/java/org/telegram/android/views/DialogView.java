@@ -640,7 +640,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
         layoutTitleTop = getPx(16);
         if (isEncrypted) {
-            layoutEncryptedTop = getPx(10);
+            layoutEncryptedTop = getPx(20);
             if (isRtl) {
                 if (description.getSenderId() == application.getCurrentUid()) {
                     layoutTitleLeft = timeWidth + getPx(16) + getPx(16);
@@ -657,7 +657,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                     layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(4);
                 }
 
-                layoutEncryptedLeft = getPx(84);
+                layoutEncryptedLeft = getPx(86);
             }
         } else {
             if (isRtl) {
@@ -670,9 +670,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             } else {
                 layoutTitleLeft = getPx(82);
                 if (description.getSenderId() == application.getCurrentUid()) {
-                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(24) - getPx(16);
+                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(24) - getPx(8);
                 } else {
-                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(16);
+                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(8);
                 }
             }
         }
