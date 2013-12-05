@@ -97,7 +97,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     //    private Drawable emptyDrawable;
     private Bitmap empty;
-    private Rect avatarRect;
+    private RectF avatarRect;
     private Bitmap avatar;
     private Paint avatarBgPaint;
 
@@ -307,7 +307,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         stateFailure = getResources().getDrawable(R.drawable.st_dialogs_warning);
         secureIcon = getResources().getDrawable(R.drawable.st_ic_lock_green);
 
-        avatarRect = new Rect();
+        avatarRect = new RectF();
     }
 
     public void setDescription(DialogDescription description) {
@@ -652,9 +652,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             } else {
                 layoutTitleLeft = getPx(80) + getPx(20);
                 if (description.getSenderId() == application.getCurrentUid()) {
-                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(16);
+                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(24);
                 } else {
-                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(4);
+                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(12);
                 }
 
                 layoutEncryptedLeft = getPx(86);
@@ -670,9 +670,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             } else {
                 layoutTitleLeft = getPx(82);
                 if (description.getSenderId() == application.getCurrentUid()) {
-                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(24) - getPx(8);
+                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(24) - getPx(12);
                 } else {
-                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(8);
+                    layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(12);
                 }
             }
         }
@@ -793,7 +793,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 wTitle = wTitle.substring(150) + "...";
             }
             TextPaint paint = isEncrypted ? titleEncryptedPaint : (isHighlighted ? titleHighlightPaint : titlePaint);
-            CharSequence sequence = TextUtils.ellipsize(wTitle, paint, layoutTitleWidth, TextUtils.TruncateAt.END);
+            Spannable preSequence = application.getEmojiProcessor().processEmojiCutMutable(wTitle, EmojiProcessor.CONFIGURATION_DIALOGS);
+            CharSequence sequence = TextUtils.ellipsize(preSequence, paint, layoutTitleWidth, TextUtils.TruncateAt.END);
             titleLayout = new StaticLayout(sequence, paint, layoutTitleWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         }
 
@@ -893,7 +894,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         if (avatar != null) {
             canvas.drawBitmap(avatar, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
         } else {
-            canvas.drawRect(avatarRect, avatarBgPaint);
+            canvas.drawRoundRect(avatarRect, getPx(2), getPx(2), avatarBgPaint);
             canvas.drawBitmap(empty, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
         }
 
