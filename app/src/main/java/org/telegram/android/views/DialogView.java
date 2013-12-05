@@ -5,6 +5,7 @@ import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.*;
+import android.text.style.ForegroundColorSpan;
 import com.extradea.framework.images.ImageReceiver;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
@@ -30,19 +31,26 @@ import org.telegram.tl.TLObject;
 public class DialogView extends BaseView implements TypingStates.TypingListener {
 
     // Resources
+    private static int HIGHLIGHT_COLOR = 0xff006FC8;
+    private static int UNREAD_COLOR = 0xff010101;
+    private static int READ_COLOR = 0xff808080;
+
     private static boolean isLoaded = false;
     private static Paint avatarPaint;
     private static Paint counterPaint;
     private static TextPaint titlePaint;
     private static TextPaint titleHighlightPaint;
     private static TextPaint titleEncryptedPaint;
+
     private static TextPaint bodyPaint;
     private static TextPaint bodyHighlightPaint;
-    private static TextPaint senderPaint;
-    private static TextPaint senderHighlightPaint;
+    private static TextPaint bodyUnreadPaint;
+    // private static TextPaint senderPaint;
+    // private static TextPaint senderHighlightPaint;
     private static TextPaint typingPaint;
     private static TextPaint clockPaint;
     private static TextPaint counterTitlePaint;
+
 
     private static Bitmap userPlaceholder;
     private static Bitmap groupPlaceholder;
@@ -67,7 +75,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     // PreparedData
     private String title;
     private String body;
-    private String senderTitle;
+    // private String senderTitle;
     private String time;
     private String unreadCountText;
 
@@ -77,7 +85,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     private int unreadCount;
 
     private Layout bodyLayout;
-    private Layout senderLayout;
+    // private Layout senderLayout;
     private Layout titleLayout;
 
     //    private Drawable emptyDrawable;
@@ -115,11 +123,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private int layoutEncryptedTop;
     private int layoutEncryptedLeft;
-
-    private int layoutGroupSenderTop;
-    private int layoutGroupSenderLeft;
-
-    private int layoutGroupContentTop;
 
     private int layoutStateTop;
     private int layoutStateLeft;
@@ -180,7 +183,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 titlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
             titlePaint.setColor(0xff010101);
-            titlePaint.setTextSize(getSp(17.5f));
+            titlePaint.setTextSize(getSp(20f));
             titlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             if (FontController.USE_SUBPIXEL) {
@@ -189,7 +192,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 titleHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
             titleHighlightPaint.setColor(0xff006FC8);
-            titleHighlightPaint.setTextSize(getSp(17.5f));
+            titleHighlightPaint.setTextSize(getSp(20f));
             titleHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             if (FontController.USE_SUBPIXEL) {
@@ -198,7 +201,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 titleEncryptedPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
             titleEncryptedPaint.setColor(0xff68b741);
-            titleEncryptedPaint.setTextSize(getSp(17.5f));
+            titleEncryptedPaint.setTextSize(getSp(20f));
             titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             if (FontController.USE_SUBPIXEL) {
@@ -215,36 +218,45 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             } else {
                 bodyPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
-            bodyPaint.setColor(0xff808080);
-            bodyPaint.setTextSize(getSp(15.5f));
-            bodyPaint.setTypeface(FontController.loadTypeface(context, "light"));
+            bodyPaint.setColor(READ_COLOR);
+            bodyPaint.setTextSize(getSp(17f));
+            bodyPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+
+            if (FontController.USE_SUBPIXEL) {
+                bodyUnreadPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                bodyUnreadPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
+            bodyUnreadPaint.setColor(UNREAD_COLOR);
+            bodyUnreadPaint.setTextSize(getSp(17f));
+            bodyUnreadPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             if (FontController.USE_SUBPIXEL) {
                 bodyHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
             } else {
                 bodyHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
-            bodyHighlightPaint.setColor(0xff006FC8);
-            bodyHighlightPaint.setTextSize(getSp(15.5f));
-            bodyHighlightPaint.setTypeface(FontController.loadTypeface(context, "light"));
+            bodyHighlightPaint.setColor(HIGHLIGHT_COLOR);
+            bodyHighlightPaint.setTextSize(getSp(17f));
+            bodyHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
-            if (FontController.USE_SUBPIXEL) {
-                senderPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-            } else {
-                senderPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            }
-            senderPaint.setColor(0xff808080);
-            senderPaint.setTextSize(getSp(16f));
-            senderPaint.setTypeface(FontController.loadTypeface(context, "regular"));
-
-            if (FontController.USE_SUBPIXEL) {
-                senderHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-            } else {
-                senderHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            }
-            senderHighlightPaint.setColor(0xff006FC8);
-            senderHighlightPaint.setTextSize(getSp(16f));
-            senderHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+//            if (FontController.USE_SUBPIXEL) {
+//                senderPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+//            } else {
+//                senderPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+//            }
+//            senderPaint.setColor(0xff808080);
+//            senderPaint.setTextSize(getSp(16f));
+//            senderPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+//
+//            if (FontController.USE_SUBPIXEL) {
+//                senderHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+//            } else {
+//                senderHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+//            }
+//            senderHighlightPaint.setColor(0xff006FC8);
+//            senderHighlightPaint.setTextSize(getSp(16f));
+//            senderHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             if (FontController.USE_SUBPIXEL) {
                 typingPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
@@ -409,22 +421,22 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         // Body
         isBodyHighlighted = description.getContentType() != ContentType.MESSAGE_TEXT;
 
-        if (isGroup) {
-            if (description.getSenderId() == currentUserUid) {
-                senderTitle = getResources().getString(R.string.st_dialog_you);
-            } else {
-                senderTitle = description.getSenderTitle();
-            }
-        }
+//        if (isGroup) {
+//            if (description.getSenderId() == currentUserUid) {
+//                senderTitle = getResources().getString(R.string.st_dialog_you);
+//            } else {
+//                senderTitle = description.getSenderTitle();
+//            }
+//        }
 
         if (description.getRawContentType() == ContentType.MESSAGE_TEXT) {
             String rawMessage = description.getMessage();
             if (rawMessage.length() > 50) {
-                rawMessage = rawMessage.substring(0, 50);
+                rawMessage = rawMessage.substring(0, 50) + "...";
             }
-            String[] rows = rawMessage.split("\n", 3);
-            if (rows.length == 3) {
-                rawMessage = rows[0] + "\n" + rows[1];
+            String[] rows = rawMessage.split("\n", 2);
+            if (rows.length == 2) {
+                rawMessage = rows[0];
             }
             body = rawMessage;
         } else if (description.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
@@ -541,7 +553,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
         int timeWidth = (int) clockPaint.measureText(time);
 
-        layoutTimeTop = getPx(24);
+        layoutTimeTop = getPx(34);
         if (isRtl) {
             layoutTimeLeft = getPx(8);
         } else {
@@ -601,7 +613,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         }
         layoutMarkRect = new RectF(layoutMarkLeft, layoutMarkTop, layoutMarkLeft + layoutMarkWidth, layoutMarkBottom);
 
-        layoutTitleTop = getPx(8);
+        layoutTitleTop = getPx(16);
         if (isEncrypted) {
             layoutEncryptedTop = getPx(10);
             if (isRtl) {
@@ -613,7 +625,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - getPx(80) - getPx(14) - getPx(6);
                 layoutEncryptedLeft = getMeasuredWidth() - getPx(80) - getPx(12);
             } else {
-                layoutTitleLeft = getPx(80) + getPx(18);
+                layoutTitleLeft = getPx(80) + getPx(20);
                 if (description.getSenderId() == application.getCurrentUid()) {
                     layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(16);
                 } else {
@@ -631,7 +643,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 }
                 layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - getPx(80);
             } else {
-                layoutTitleLeft = getPx(80);
+                layoutTitleLeft = getPx(82);
                 if (description.getSenderId() == application.getCurrentUid()) {
                     layoutTitleWidth = getMeasuredWidth() - layoutTitleLeft - timeWidth - getPx(24) - getPx(16);
                 } else {
@@ -640,18 +652,18 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             }
         }
 
-        if (isGroup) {
-            layoutGroupSenderTop = getPx(46);
-            if (isRtl) {
-                int senderWidth = (int) senderPaint.measureText(senderTitle);
-                layoutGroupSenderLeft = getMeasuredWidth() - getPx(80) - senderWidth;
-            } else {
-                layoutGroupSenderLeft = getPx(80);
-            }
-        }
+//        if (isGroup) {
+//            layoutGroupSenderTop = getPx(46);
+//            if (isRtl) {
+//                int senderWidth = (int) senderPaint.measureText(senderTitle);
+//                layoutGroupSenderLeft = getMeasuredWidth() - getPx(80) - senderWidth;
+//            } else {
+//                layoutGroupSenderLeft = getPx(80);
+//            }
+//        }
 
-        layoutMainTop = getPx(32);
-        layoutMainWidth = getMeasuredWidth() - getPx(80 + 8);
+        layoutMainTop = getPx(44);
+        layoutMainWidth = getMeasuredWidth() - getPx(78 + 8);
         if (isRtl) {
             layoutMainLeft = getMeasuredWidth() - layoutMainWidth - getPx(80);
             if (layoutMarkWidth != 0) {
@@ -659,66 +671,101 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 layoutMainWidth -= layoutMarkWidth + getPx(8);
             }
         } else {
-            layoutMainLeft = getPx(80);
+            layoutMainLeft = getPx(82);
             if (layoutMarkWidth != 0) {
                 layoutMainWidth -= layoutMarkWidth + getPx(8);
             }
         }
 
-        layoutGroupContentTop = getPx(66 - 14);
-
         // Building text layouts
-        // Body
-        if (EmojiProcessor.containsEmoji(body)) {
-            if (isGroup) {
-                String str;
-                if (application.isRTL()) {
-                    str = body.replace("\n", " ");
-                } else {
-                    str = body.replace("\n", " ");
-                }
-                CharSequence sequence = application.getEmojiProcessor().processEmojiCutMutable(str, EmojiProcessor.CONFIGURATION_DIALOGS);
-                sequence = TextUtils.ellipsize(sequence, bodyPaint, layoutMainWidth, TextUtils.TruncateAt.END);
-                bodyLayout = new StaticLayout(sequence, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        {
+            String str = body.replace("\n", " ");
+
+            TextPaint bodyTextPaint;
+            if (isBodyHighlighted) {
+                bodyTextPaint = bodyHighlightPaint;
             } else {
-                String str;
-                if (application.isRTL()) {
-                    str = body;
+                if (description.getUnreadCount() != 0 && description.getSenderId() != currentUserUid) {
+                    bodyTextPaint = bodyUnreadPaint;
                 } else {
-                    str = body;
-                }
-                CharSequence sequence = application.getEmojiProcessor().processEmojiCutMutable(str, EmojiProcessor.CONFIGURATION_DIALOGS);
-                bodyLayout = new StaticLayout(sequence, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-                if (bodyLayout.getLineCount() > 2) {
-                    int start = bodyLayout.getLineStart(1);
-                    String rawFirstLine = str.substring(0, start);
-                    String rawLastLine = str.substring(start, bodyLayout.getLineEnd(1));
-                    rawLastLine = TextUtils.ellipsize(application.getEmojiProcessor().processEmojiMutable(rawLastLine, EmojiProcessor.CONFIGURATION_DIALOGS), bodyPaint, layoutMainWidth, TextUtils.TruncateAt.END).toString();
-                    sequence = application.getEmojiProcessor().processEmojiCompatMutable(rawFirstLine + rawLastLine, EmojiProcessor.CONFIGURATION_DIALOGS);
-                    bodyLayout = new StaticLayout(sequence, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                    bodyTextPaint = bodyPaint;
                 }
             }
-        } else {
-            if (isGroup) {
-                CharSequence sequence = TextUtils.ellipsize(body.replace("\n", " "), bodyPaint, layoutMainWidth, TextUtils.TruncateAt.END);
-                bodyLayout = new StaticLayout(sequence, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+
+            int nameLength = 0;
+            if (description.getSenderId() == currentUserUid) {
+                String name = getResources().getString(R.string.st_dialog_you);
+                nameLength = name.length();
+                str = name + ": " + str;
             } else {
-                bodyLayout = new StaticLayout(body, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-                if (bodyLayout.getLineCount() > 2) {
-                    int start = bodyLayout.getLineStart(1);
-                    String rawFirstLine = body.substring(0, start);
-                    String rawLastLine = body.substring(start, bodyLayout.getLineEnd(1));
-                    rawLastLine = TextUtils.ellipsize(application.getEmojiProcessor().processEmojiMutable(rawFirstLine + rawLastLine, EmojiProcessor.CONFIGURATION_DIALOGS), bodyPaint, layoutMainWidth, TextUtils.TruncateAt.END).toString();
-                    bodyLayout = new StaticLayout(rawLastLine, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                if (isGroup) {
+                    User user = application.getEngine().getUser(description.getSenderId());
+                    nameLength = user.getFirstName().length();
+                    str = user.getFirstName() + ": " + str;
                 }
             }
+
+            String preSequence = TextUtils.ellipsize(str, bodyTextPaint, layoutMainWidth, TextUtils.TruncateAt.END).toString();
+            Spannable sequence = application.getEmojiProcessor().processEmojiCutMutable(preSequence, EmojiProcessor.CONFIGURATION_DIALOGS);
+
+            if (nameLength != 0) {
+                sequence.setSpan(new ForegroundColorSpan(HIGHLIGHT_COLOR), 0, nameLength, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+            }
+
+            CharSequence resSequence = TextUtils.ellipsize(sequence, bodyTextPaint, layoutMainWidth, TextUtils.TruncateAt.END);
+            bodyLayout = new StaticLayout(resSequence, bodyTextPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         }
+        // Body
+//        if (EmojiProcessor.containsEmoji(body)) {
+//            if (isGroup) {
+//                String str = body.replace("\n", " ");
+//                if (application.isRTL()) {
+//                    str = body.replace("\n", " ");
+//                } else {
+//                    str = body.replace("\n", " ");
+//                }
+//                CharSequence sequence = application.getEmojiProcessor().processEmojiCutMutable(str, EmojiProcessor.CONFIGURATION_DIALOGS);
+//                sequence = TextUtils.ellipsize(sequence, bodyPaint, layoutMainWidth, TextUtils.TruncateAt.END);
+//                bodyLayout = new StaticLayout(sequence, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+//            } else {
+//                String str;
+//                if (application.isRTL()) {
+//                    str = body;
+//                } else {
+//                    str = body;
+//                }
+//                CharSequence sequence = application.getEmojiProcessor().processEmojiCutMutable(str, EmojiProcessor.CONFIGURATION_DIALOGS);
+//                bodyLayout = new StaticLayout(sequence, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+//                if (bodyLayout.getLineCount() > 2) {
+//                    int start = bodyLayout.getLineStart(1);
+//                    String rawFirstLine = str.substring(0, start);
+//                    String rawLastLine = str.substring(start, bodyLayout.getLineEnd(1));
+//                    rawLastLine = TextUtils.ellipsize(application.getEmojiProcessor().processEmojiMutable(rawLastLine, EmojiProcessor.CONFIGURATION_DIALOGS), bodyPaint, layoutMainWidth, TextUtils.TruncateAt.END).toString();
+//                    sequence = application.getEmojiProcessor().processEmojiCompatMutable(rawFirstLine + rawLastLine, EmojiProcessor.CONFIGURATION_DIALOGS);
+//                    bodyLayout = new StaticLayout(sequence, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+//                }
+//            }
+//        } else {
+//            if (isGroup) {
+//                CharSequence sequence = TextUtils.ellipsize(body.replace("\n", " "), bodyPaint, layoutMainWidth, TextUtils.TruncateAt.END);
+//                bodyLayout = new StaticLayout(sequence, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+//            } else {
+//                bodyLayout = new StaticLayout(body, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+//                if (bodyLayout.getLineCount() > 2) {
+//                    int start = bodyLayout.getLineStart(1);
+//                    String rawFirstLine = body.substring(0, start);
+//                    String rawLastLine = body.substring(start, bodyLayout.getLineEnd(1));
+//                    rawLastLine = TextUtils.ellipsize(application.getEmojiProcessor().processEmojiMutable(rawFirstLine + rawLastLine, EmojiProcessor.CONFIGURATION_DIALOGS), bodyPaint, layoutMainWidth, TextUtils.TruncateAt.END).toString();
+//                    bodyLayout = new StaticLayout(rawLastLine, isBodyHighlighted ? bodyHighlightPaint : bodyPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+//                }
+//            }
+//        }
 
         // Title
         {
             String wTitle = title.replace("\n", " ");
-            if (wTitle.length() > 100) {
-                wTitle = wTitle.substring(100) + "...";
+            if (wTitle.length() > 150) {
+                wTitle = wTitle.substring(150) + "...";
             }
             TextPaint paint = isEncrypted ? titleEncryptedPaint : (isHighlighted ? titleHighlightPaint : titlePaint);
             CharSequence sequence = TextUtils.ellipsize(wTitle, paint, layoutTitleWidth, TextUtils.TruncateAt.END);
@@ -726,15 +773,15 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         }
 
         // Group sender
-        if (isGroup) {
-            String wName = senderTitle.replace("\n", " ");
-            if (wName.length() > 100) {
-                wName = wName.substring(100) + "...";
-            }
-            TextPaint spaint = description.getSenderId() == currentUserUid ? senderPaint : senderHighlightPaint;
-            CharSequence ssequence = TextUtils.ellipsize(wName, spaint, layoutMainWidth, TextUtils.TruncateAt.END);
-            senderLayout = new StaticLayout(ssequence, spaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-        }
+//        if (isGroup) {
+//            String wName = senderTitle.replace("\n", " ");
+//            if (wName.length() > 100) {
+//                wName = wName.substring(100) + "...";
+//            }
+//            TextPaint spaint = description.getSenderId() == currentUserUid ? senderPaint : senderHighlightPaint;
+//            CharSequence ssequence = TextUtils.ellipsize(wName, spaint, layoutMainWidth, TextUtils.TruncateAt.END);
+//            senderLayout = new StaticLayout(ssequence, spaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+//        }
 
         avatarRect.set(layoutAvatarLeft, layoutAvatarTop, layoutAvatarLeft + getPx(64), layoutAvatarTop + getPx(64));
     }
@@ -812,22 +859,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             typingLayout.draw(canvas);
             canvas.restore();
         } else {
-            if (isGroup) {
-                canvas.save();
-                canvas.translate(layoutMainLeft, layoutMainTop);
-                senderLayout.draw(canvas);
-                canvas.restore();
-
-                canvas.save();
-                canvas.translate(layoutMainLeft, layoutGroupContentTop);
-                bodyLayout.draw(canvas);
-                canvas.restore();
-            } else {
-                canvas.save();
-                canvas.translate(layoutMainLeft, layoutMainTop);
-                bodyLayout.draw(canvas);
-                canvas.restore();
-            }
+            canvas.save();
+            canvas.translate(layoutMainLeft, layoutMainTop);
+            bodyLayout.draw(canvas);
+            canvas.restore();
         }
 
         if (avatar != null) {
