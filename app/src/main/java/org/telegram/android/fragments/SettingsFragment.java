@@ -340,7 +340,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                             TLFileLocation largeLocation = (TLFileLocation) largePhotoSize.getLocation();
                             TLLocalAvatarPhoto profilePhoto = new TLLocalAvatarPhoto();
                             profilePhoto.setPreviewLocation(new TLLocalFileLocation(smallLocation.getDcId(), smallLocation.getVolumeId(), smallLocation.getLocalId(), smallLocation.getSecret(), smallPhotoSize.getSize()));
-                            profilePhoto.setPreviewLocation(new TLLocalFileLocation(largeLocation.getDcId(), largeLocation.getVolumeId(), largeLocation.getLocalId(), largeLocation.getSecret(), largePhotoSize.getSize()));
+                            profilePhoto.setFullLocation(new TLLocalFileLocation(largeLocation.getDcId(), largeLocation.getVolumeId(), largeLocation.getLocalId(), largeLocation.getSecret(), largePhotoSize.getSize()));
                             application.getEngine().onUserAvatarChanges(application.getCurrentUid(), profilePhoto);
                             application.getUserSource().notifyUserChanged(application.getCurrentUid());
                         }
