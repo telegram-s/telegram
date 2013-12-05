@@ -1955,34 +1955,22 @@ public class ModelEngine {
                     ChatMessage changed = msgs.second;
 
                     if (orig == null) {
-                        Logger.d(TAG, "newMessages1_1");
                         getMessagesDao().create(changed);
-                        Logger.d(TAG, "newMessages1_2");
                         if (!changed.isOut() && changed.getState() == MessageState.SENT) {
                             newUnread.add(changed.getMid());
                         }
-                        Logger.d(TAG, "newMessages1_3");
                         application.getDataSourceKernel().onSourceAddMessage(changed);
-                        Logger.d(TAG, "newMessages1_4");
                     } else {
-                        Logger.d(TAG, "newMessages2_1");
                         changed.setDatabaseId(orig.getDatabaseId());
-                        Logger.d(TAG, "newMessages2_2");
                         getMessagesDao().update(changed);
-                        Logger.d(TAG, "newMessages2_3");
                         application.getDataSourceKernel().onSourceUpdateMessage(changed);
-                        Logger.d(TAG, "newMessages2_4");
                     }
-
-                    Logger.d(TAG, "newMessages2");
 
                     if (changed.getRawContentType() == ContentType.MESSAGE_PHOTO) {
                         saveMedia(changed.getMid(), changed);
                     } else if (changed.getRawContentType() == ContentType.MESSAGE_VIDEO) {
                         saveMedia(changed.getMid(), changed);
                     }
-
-                    Logger.d(TAG, "newMessages3");
 
                     DialogDescription description = getDescriptionForPeer(changed.getPeerType(), changed.getPeerId());
                     if (description == null) {
@@ -2017,7 +2005,6 @@ public class ModelEngine {
                             application.getDialogSource().getViewSource().updateItem(description);
                         }
                     }
-                    Logger.d(TAG, "newMessages4");
                 }
                 Logger.d(TAG, "newMessages:ended");
                 return null;

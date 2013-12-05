@@ -110,11 +110,9 @@ public abstract class ViewSource<T> {
     }
 
     private synchronized ArrayList<T> buildNewWorkingSet() {
-        Logger.d(TAG, "buildNewWorkingSet");
         long start = SystemClock.uptimeMillis();
         ArrayList<T> res = new ArrayList<T>(items.values());
         Collections.sort(res, comparator);
-        Logger.d(TAG, "buildNewWorkingSet in " + (SystemClock.uptimeMillis() - start) + " ms");
         return res;
     }
 
@@ -127,21 +125,17 @@ public abstract class ViewSource<T> {
     }
 
     private synchronized void setState(InternalSourceState state) {
-        Logger.d(TAG, "setState");
         this.state = state;
         invalidateState();
-        Logger.d(TAG, "setState end");
     }
 
     public synchronized void invalidateData() {
-        Logger.d(TAG, "invalidateData");
         nextWorkingSet = buildNewWorkingSet();
         if (responsibility != null) {
             responsibility.waitForResume();
         }
         handler.removeMessages(1);
         handler.sendEmptyMessage(1);
-        Logger.d(TAG, "invalidateData end");
     }
 
     private synchronized void invalidateDataAndState(InternalSourceState state) {
