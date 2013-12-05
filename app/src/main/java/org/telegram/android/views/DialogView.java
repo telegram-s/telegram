@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.text.*;
 import android.text.style.ForegroundColorSpan;
 import com.extradea.framework.images.ImageReceiver;
+import com.extradea.framework.images.tasks.RoundedImageTask;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.TypingStates;
@@ -31,9 +32,12 @@ import org.telegram.tl.TLObject;
 public class DialogView extends BaseView implements TypingStates.TypingListener {
 
     // Resources
-    private static int HIGHLIGHT_COLOR = 0xff006FC8;
+    private static int HIGHLIGHT_COLOR = 0xff5d90ca;
     private static int UNREAD_COLOR = 0xff010101;
-    private static int READ_COLOR = 0xff808080;
+    private static int READ_COLOR = 0xffa8a8a8;
+
+    private static int READ_TIME_COLOR = 0xff898989;
+    private static int UNREAD_TIME_COLOR = 0xff6597c4;
 
     private static boolean isLoaded = false;
     private static Paint avatarPaint;
@@ -48,7 +52,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     // private static TextPaint senderPaint;
     // private static TextPaint senderHighlightPaint;
     private static TextPaint typingPaint;
-    private static TextPaint clockPaint;
+
+    private static TextPaint readClockPaint;
+    private static TextPaint unreadClockPaint;
+
     private static TextPaint counterTitlePaint;
 
 
@@ -98,6 +105,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     private boolean isEncrypted;
     private boolean isHighlighted;
     private boolean isBodyHighlighted;
+    private boolean isUnreadOut;
 
     // Typing
 
@@ -205,13 +213,22 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             if (FontController.USE_SUBPIXEL) {
-                clockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+                unreadClockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
             } else {
-                clockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+                unreadClockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
-            clockPaint.setColor(0xff006FC8);
-            clockPaint.setTextSize(getSp(14));
-            clockPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+            unreadClockPaint.setColor(UNREAD_TIME_COLOR);
+            unreadClockPaint.setTextSize(getSp(14));
+            unreadClockPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+
+            if (FontController.USE_SUBPIXEL) {
+                readClockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                readClockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
+            readClockPaint.setColor(READ_TIME_COLOR);
+            readClockPaint.setTextSize(getSp(14));
+            readClockPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             if (FontController.USE_SUBPIXEL) {
                 bodyPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
@@ -340,7 +357,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 task.setMaxHeight(getPx(64));
                 task.setMaxWidth(getPx(64));
                 task.setFillRect(true);
-                avatarReceiver.receiveImage(task);
+                RoundedImageTask roundedImageTask = new RoundedImageTask(task);
+                roundedImageTask.setRadius(getPx(2));
+                avatarReceiver.receiveImage(roundedImageTask);
                 avatar = avatarReceiver.getResult();
             } else {
                 avatarReceiver.receiveImage(null);
@@ -534,6 +553,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                     break;
             }
         }
+
+        if (description.getUnreadCount() != 0 && description.getSenderId() != currentUserUid) {
+            isUnreadOut = true;
+        } else {
+            isUnreadOut = false;
+        }
     }
 
     @Override
@@ -551,7 +576,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             layoutAvatarLeft = getPx(8);
         }
 
-        int timeWidth = (int) clockPaint.measureText(time);
+        int timeWidth = (int) unreadClockPaint.measureText(time);
 
         layoutTimeTop = getPx(34);
         if (isRtl) {
@@ -560,7 +585,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             layoutTimeLeft = getMeasuredWidth() - getPx(8) - timeWidth;
         }
 
-        layoutStateTop = getPx(13);
+        layoutStateTop = getPx(22);
 
         if (isRtl) {
             layoutStateLeft = getPx(8) + timeWidth + getPx(7);
@@ -685,7 +710,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             if (isBodyHighlighted) {
                 bodyTextPaint = bodyHighlightPaint;
             } else {
-                if (description.getUnreadCount() != 0 && description.getSenderId() != currentUserUid) {
+                if (isUnreadOut) {
                     bodyTextPaint = bodyUnreadPaint;
                 } else {
                     bodyTextPaint = bodyPaint;
@@ -851,7 +876,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             }
         }
 
-        canvas.drawText(time, layoutTimeLeft, layoutTimeTop, clockPaint);
+        canvas.drawText(time, layoutTimeLeft, layoutTimeTop, isUnreadOut ? unreadClockPaint : readClockPaint);
 
         if (typingLayout != null) {
             canvas.save();

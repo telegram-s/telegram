@@ -11,6 +11,7 @@
     <com.extradea.framework.images.ui.ImagingListView android:layout_height="fill_parent"
                                                       android:layout_width="fill_parent"
                                                       android:cacheColorHint="@android:color/white"
+                                                      android:divider="@drawable/st_divider_short"
                                                       android:drawSelectorOnTop="true"
                                                       android:id="@+id/dialogsList"/>
 
