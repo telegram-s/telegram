@@ -8,24 +8,22 @@
                                          android:paddingBottom="4dp"
                                          android:background="@drawable/st_list_selector">
 
-    <ImageView android:layout_height="50dp"
-               android:layout_width="50dp"
+    <ImageView android:layout_height="52dp"
+               android:layout_width="52dp"
                android:scaleType="center"
-               android:src="@drawable/st_contacts_share"
-               android:layout_marginLeft="4dp"
-               android:layout_marginRight="4dp"/>
+               android:src="@drawable/st_contacts_share"/>
 
     <LinearLayout android:layout_height="fill_parent"
                   android:layout_width="0dp"
-                  android:layout_marginLeft="4dp"
-                  android:layout_marginRight="4dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
                   ext:layout_weight="1"
                   android:orientation="vertical"
                   android:gravity="center_vertical">
         <TextView android:layout_height="wrap_content"
                   android:layout_width="fill_parent"
                   android:textSize="19sp"
-                  android:textColor="@color/st_blue_bright"
+                  android:textColor="#5e91ca"
                   android:singleLine="true"
                   android:lines="1"
                   android:text="@string/st_contacts_invite"

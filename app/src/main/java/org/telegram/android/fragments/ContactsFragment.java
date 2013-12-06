@@ -26,16 +26,24 @@ import org.telegram.android.StelsFragment;
 import org.telegram.android.core.ContactSourceListener;
 import org.telegram.android.core.ContactSourceState;
 import org.telegram.android.core.model.Contact;
+import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
+import org.telegram.android.core.model.media.TLLocalAvatarEmpty;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.tasks.AsyncAction;
+import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.tasks.ProgressInterface;
 import org.telegram.android.ui.DataSourceUpdater;
 import org.telegram.android.ui.FilterMatcher;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
+import org.telegram.api.TLAbsInputUser;
+import org.telegram.api.TLInputUserContact;
+import org.telegram.api.requests.TLRequestContactsDeleteContacts;
+import org.telegram.tl.TLVector;
 
 import java.util.ArrayList;
 
@@ -104,39 +112,6 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
             }
         });
 
-        contactsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
-                if (i == 0) {
-                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                    shareIntent.setType("text/plain");
-                    shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, application.getDynamicConfig().getInviteMessage());
-                    startActivity(shareIntent);
-                } else {
-                    Cursor c = (Cursor) adapterView.getItemAtPosition(i);
-                    long id = c.getLong(c.getColumnIndex(ContactsContract.Contacts._ID));
-//                    new AlertDialog.Builder(getActivity()).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialogInterface, int b) {
-//                            Cursor c = (Cursor) adapterView.getItemAtPosition(i);
-//                            String lookupKey = c.getString(c.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
-//                            Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey);
-//                            application.getContentResolver().delete(uri, null, null);
-//                        }
-//                    }).setNegativeButton("No", null).show();
-
-                    Contact[] contacts = application.getEngine().getContactsForLocalId(id);
-                    if (contacts.length > 0) {
-                        getRootController().openUser(contacts[0].getUid());
-                    }
-
-
-//                    User user = (User) adapterView.getItemAtPosition(i);
-//                    getRootController().openDialog(PeerType.PEER_USER, user.getUid());
-                }
-            }
-        });
-
         originalUsers = new User[0];
         filteredUsers = new User[0];
         isLoaded = false;
@@ -168,6 +143,122 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
             displayName = ContactsContract.Contacts.DISPLAY_NAME_ALTERNATIVE;
         }
 
+        contactsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
+                if (i == 0) {
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, application.getDynamicConfig().getInviteMessage());
+                    startActivity(shareIntent);
+                } else {
+                    Cursor c = (Cursor) adapterView.getItemAtPosition(i);
+                    final long id = c.getLong(c.getColumnIndex(ContactsContract.Contacts._ID));
+//                    new AlertDialog.Builder(getActivity()).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialogInterface, int b) {
+//                            Cursor c = (Cursor) adapterView.getItemAtPosition(i);
+//                            String lookupKey = c.getString(c.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+//                            Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey);
+//                            application.getContentResolver().delete(uri, null, null);
+//                        }
+//                    }).setNegativeButton("No", null).show();
+
+                    Contact[] contacts = application.getEngine().getContactsForLocalId(id);
+                    if (contacts.length > 0) {
+                        getRootController().openUser(contacts[0].getUid());
+                    } else {
+                        String srcName = c.getString(c.getColumnIndex(displayName));
+                        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_contacts_not_registered_title)
+                                .setMessage(getStringSafe(R.string.st_contacts_not_registered_message).replace("{0}", srcName))
+                                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        try {
+                                            Cursor pCur = application.getContentResolver().query(
+                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                                    null,
+                                                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                                                    new String[]{id + ""}, null);
+
+                                            if (pCur.moveToFirst()) {
+                                                String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                                                Intent sendSms = new Intent(Intent.ACTION_VIEW, Uri.parse("tel:" + phoneNo));
+                                                sendSms.putExtra("address", phoneNo);
+                                                sendSms.putExtra("sms_body", application.getDynamicConfig().getInviteMessage());
+                                                sendSms.setType("vnd.android-dir/mms-sms");
+                                                startActivity(sendSms);
+                                            } else {
+                                                Context context1 = getActivity();
+                                                if (context1 != null) {
+                                                    Toast.makeText(context1, R.string.st_error_unable_sms, Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            Context context1 = getActivity();
+                                            if (context1 != null) {
+                                                Toast.makeText(context1, R.string.st_error_unable_sms, Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    }
+                                }).setNegativeButton(R.string.st_no, null).create();
+                        dialog.setCanceledOnTouchOutside(true);
+                        dialog.show();
+
+                    }
+
+
+//                    User user = (User) adapterView.getItemAtPosition(i);
+//                    getRootController().openDialog(PeerType.PEER_USER, user.getUid());
+                }
+            }
+        });
+        contactsList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(final AdapterView<?> adapterView, View view, final int i, long l) {
+                if (i == 0) {
+                    return false;
+                }
+
+                new AlertDialog.Builder(getActivity()).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int b) {
+                        Cursor c = (Cursor) adapterView.getItemAtPosition(i);
+                        long id = c.getLong(c.getColumnIndex(ContactsContract.Contacts._ID));
+                        String lookupKey = c.getString(c.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+                        final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey);
+
+                        final Contact[] contacts = application.getEngine().getContactsForLocalId(id);
+                        if (contacts.length > 0) {
+                            runUiTask(new AsyncAction() {
+                                @Override
+                                public void execute() throws AsyncException {
+                                    TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
+                                    for (Contact c : contacts) {
+                                        inputUsers.add(new TLInputUserContact(c.getUid()));
+                                    }
+                                    rpc(new TLRequestContactsDeleteContacts(inputUsers));
+
+                                    for (Contact c : contacts) {
+                                        User u = application.getEngine().getUser(c.getUid());
+                                        u.setLinkType(LinkType.REQUEST);
+                                        application.getEngine().getUsersDao().update(u);
+                                    }
+
+                                    application.getContentResolver().delete(uri, null, null);
+                                    application.getContactsSource().resetState();
+                                }
+                            });
+                        } else {
+                            application.getContentResolver().delete(uri, null, null);
+                        }
+                    }
+                }).setNegativeButton("No", null).show();
+
+                return true;
+            }
+        });
+
         ContentResolver cr = application.getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
                 new String[]{
@@ -186,10 +277,46 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 
             @Override
             public void bindView(View view, final Context context, Cursor cursor) {
-                final String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                final long id = cursor.getLong(cursor.getColumnIndex(ContactsContract.Contacts._ID));
                 String srcName = cursor.getString(cursor.getColumnIndex(displayName));
 
+                Contact[] contacts = application.getEngine().getContactsForLocalId(id);
+                TextView onlineView = (TextView) view.findViewById(R.id.status);
+
+                if (contacts.length > 0) {
+                    User u = application.getEngine().getUser(contacts[0].getUid());
+                    ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(Placeholders.getUserPlaceholder(u.getUid()));
+                    if (u.getPhoto() != null && (u.getPhoto() instanceof TLLocalAvatarPhoto)) {
+                        TLLocalAvatarPhoto p = (TLLocalAvatarPhoto) u.getPhoto();
+                        ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(new StelsImageTask((TLLocalFileLocation) p.getPreviewLocation()));
+                    } else {
+                        ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
+                    }
+
+                    int statusValue = getUserState(u.getStatus());
+                    if (statusValue < 0) {
+                        onlineView.setText(R.string.st_offline);
+                        onlineView.setTextColor(getResources().getColor(R.color.st_grey_text));
+                    } else if (statusValue == 0) {
+                        onlineView.setText(R.string.st_online);
+                        onlineView.setTextColor(getResources().getColor(R.color.st_blue_bright));
+                    } else {
+                        onlineView.setTextColor(getResources().getColor(R.color.st_grey_text));
+                        onlineView.setText(TextUtil.formatHumanReadableLastSeen(statusValue, getStringSafe(R.string.st_lang)));
+                    }
+
+                    onlineView.setVisibility(View.VISIBLE);
+                    view.findViewById(R.id.shareIcon).setVisibility(View.GONE);
+                } else {
+                    ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(R.drawable.st_user_placeholder);
+                    ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
+                    onlineView.setVisibility(View.GONE);
+                    view.findViewById(R.id.shareIcon).setVisibility(View.VISIBLE);
+                }
+
                 ((TextView) view.findViewById(R.id.name)).setText(srcName);
+
+
             }
         };
 

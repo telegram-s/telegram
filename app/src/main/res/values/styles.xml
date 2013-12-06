@@ -117,6 +117,9 @@
 
         <item name="actionOverflowButtonStyle">@style/AppOverFlow</item>
         <item name="android:actionOverflowButtonStyle">@style/AppOverFlow</item>
+
+        <item name="android:fastScrollTrackDrawable">@drawable/holo_fastscroll_normal_track</item>
+        <item name="android:fastScrollThumbDrawable">@drawable/holo_fastscroll_thumb</item>
     </style>
     <style name="AppTheme.Photo" parent="Theme.Sherlock">
         <item name="android:windowBackground">@android:color/black</item>

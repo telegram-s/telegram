@@ -8,22 +8,20 @@
                                          android:paddingTop="4dp"
                                          android:paddingBottom="4dp">
 
-    <com.extradea.framework.images.ui.FastWebImageView android:layout_height="50dp"
-                                                       android:layout_width="50dp"
-                                                       android:id="@+id/avatar"
-                                                       android:layout_marginLeft="4dp"
-                                                       android:layout_marginRight="4dp"/>
+    <com.extradea.framework.images.ui.FastWebImageView android:layout_height="52dp"
+                                                       android:layout_width="52dp"
+                                                       android:id="@+id/avatar"/>
 
     <LinearLayout android:layout_height="fill_parent"
                   android:layout_width="0dp"
-                  android:layout_marginLeft="4dp"
-                  android:layout_marginRight="4dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
                   ext:layout_weight="1"
                   android:orientation="vertical"
                   android:gravity="center_vertical">
         <TextView android:layout_height="wrap_content"
                   android:layout_width="fill_parent"
-                  android:textSize="19sp"
+                  android:textSize="18sp"
                   android:textColor="@color/st_black_text"
                   android:singleLine="true"
                   android:lines="1"
@@ -37,7 +35,12 @@
                   android:textColor="@color/st_grey_text"
                   android:maxLines="1"
                   android:singleLine="true"
-                  ext:customFont="light"
                   android:id="@+id/status"/>
     </LinearLayout>
+
+    <ImageView android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               ext:layout_gravity="center_vertical"
+               android:id="@+id/shareIcon"
+               android:src="@drawable/holo_ic_social_share"/>
 </org.telegram.android.ui.RtlLinearLayout>

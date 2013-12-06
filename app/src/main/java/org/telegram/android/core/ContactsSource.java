@@ -565,12 +565,12 @@ public class ContactsSource {
             complete(operationList);
         }
         Logger.d(TAG, "applying changes ends");
-        /*HashSet<String> removed = new HashSet<String>();
-        for (String key : localContacts.keySet()) {
-            if (!founded.contains(key)) {
-                removed.add(key);
-            }
-        }*/
+//        HashSet<String> removed = new HashSet<String>();
+//        for (String key : localContacts.keySet()) {
+//            if (!founded.contains(key)) {
+//                removed.add(key);
+//            }
+//        }
     }
 
     private void addContact(boolean withCheck, Account account, User user, String name, String phone, ArrayList<ContentProviderOperation> operationList) {
