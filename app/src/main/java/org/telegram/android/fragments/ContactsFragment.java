@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.text.Html;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
@@ -50,10 +51,8 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
     private User[] originalUsers;
     private User[] filteredUsers;
     private boolean isLoaded;
-    private boolean applyFilter;
-    private BaseAdapter contactsAdapter;
+    // private BaseAdapter contactsAdapter;
     private CursorAdapter localContactsAdapter;
-    private BaseAdapter allAdapter;
     private ListView contactsList;
     private View empty;
     private View loading;
@@ -107,15 +106,33 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 
         contactsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(final AdapterView<?> adapterView, View view, final int i, long l) {
                 if (i == 0) {
                     Intent shareIntent = new Intent(Intent.ACTION_SEND);
                     shareIntent.setType("text/plain");
                     shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, application.getDynamicConfig().getInviteMessage());
                     startActivity(shareIntent);
                 } else {
-                    User user = (User) adapterView.getItemAtPosition(i);
-                    getRootController().openDialog(PeerType.PEER_USER, user.getUid());
+                    Cursor c = (Cursor) adapterView.getItemAtPosition(i);
+                    long id = c.getLong(c.getColumnIndex(ContactsContract.Contacts._ID));
+//                    new AlertDialog.Builder(getActivity()).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialogInterface, int b) {
+//                            Cursor c = (Cursor) adapterView.getItemAtPosition(i);
+//                            String lookupKey = c.getString(c.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+//                            Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey);
+//                            application.getContentResolver().delete(uri, null, null);
+//                        }
+//                    }).setNegativeButton("No", null).show();
+
+                    Contact[] contacts = application.getEngine().getContactsForLocalId(id);
+                    if (contacts.length > 0) {
+                        getRootController().openUser(contacts[0].getUid());
+                    }
+
+
+//                    User user = (User) adapterView.getItemAtPosition(i);
+//                    getRootController().openDialog(PeerType.PEER_USER, user.getUid());
                 }
             }
         });
@@ -124,246 +141,55 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
         filteredUsers = new User[0];
         isLoaded = false;
 
-        final Context context = getActivity();
-        contactsAdapter = new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return filteredUsers.length;
-            }
+        int sort_order = 1;
+        int display_order = 1;
+        try {
+            sort_order = Settings.System.getInt(application.getContentResolver(), "android.contacts.SORT_ORDER");
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            display_order = Settings.System.getInt(application.getContentResolver(), "android.contacts.DISPLAY_ORDER");
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
 
-            @Override
-            public User getItem(int i) {
-                return filteredUsers[i];
-            }
+        final String sortKey;
+        if (sort_order == 1) {
+            sortKey = ContactsContract.Contacts.SORT_KEY_PRIMARY;
+        } else {
+            sortKey = ContactsContract.Contacts.SORT_KEY_ALTERNATIVE;
+        }
 
-            @Override
-            public boolean hasStableIds() {
-                return true;
-            }
-
-            @Override
-            public long getItemId(int i) {
-                return getItem(i).getUid();
-            }
-
-            @Override
-            public View getView(int i, View view, ViewGroup viewGroup) {
-                if (view == null) {
-                    view = View.inflate(context, R.layout.contacts_item, null);
-                }
-
-                final User object = getItem(i);
-
-                if (matcher != null) {
-                    SpannableString string = new SpannableString(object.getDisplayName());
-                    matcher.highlight(context, string);
-                    ((TextView) view.findViewById(R.id.name)).setText(string);
-                } else {
-                    ((TextView) view.findViewById(R.id.name)).setText(object.getDisplayName());
-                }
-
-                FastWebImageView imageView = (FastWebImageView) view.findViewById(R.id.avatar);
-                imageView.setLoadingDrawable(Placeholders.USER_PLACEHOLDERS[object.getUid() % Placeholders.USER_PLACEHOLDERS.length]);
-                if (object.getPhoto() instanceof TLLocalAvatarPhoto) {
-                    TLLocalAvatarPhoto userPhoto = (TLLocalAvatarPhoto) object.getPhoto();
-                    if (userPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                        imageView.requestTask(new StelsImageTask((TLLocalFileLocation) userPhoto.getPreviewLocation()));
-                    } else {
-                        imageView.requestTask(null);
-                    }
-                } else {
-                    imageView.requestTask(null);
-                }
-
-                int status = getUserState(object.getStatus());
-                if (status < 0) {
-                    ((TextView) view.findViewById(R.id.status)).setText(R.string.st_offline);
-                    ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                } else if (status == 0) {
-                    ((TextView) view.findViewById(R.id.status)).setText(R.string.st_online);
-                    ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_blue_bright));
-                } else {
-                    ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                    ((TextView) view.findViewById(R.id.status)).setText(
-                            TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang)));
-                }
-
-                return view;
-            }
-        };
+        final String displayName;
+        if (display_order == 1) {
+            displayName = ContactsContract.Contacts.DISPLAY_NAME_PRIMARY;
+        } else {
+            displayName = ContactsContract.Contacts.DISPLAY_NAME_ALTERNATIVE;
+        }
 
         ContentResolver cr = application.getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
                 new String[]{
                         ContactsContract.Contacts._ID,
-                        ContactsContract.Contacts.DISPLAY_NAME
+                        ContactsContract.Contacts.LOOKUP_KEY,
+                        displayName
                 },
-                ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0 and " + ContactsContract.Contacts.DISPLAY_NAME + " NOTNULL", null, ContactsContract.Contacts.SORT_KEY_ALTERNATIVE);
+                ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0 ", null, sortKey);
 
-        localContactsAdapter = new CursorAdapter(context, cur, false) {
-
-            private boolean visible(Cursor cursor) {
-                return cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)) != null;
-            }
+        localContactsAdapter = new CursorAdapter(getActivity(), cur, false) {
 
             @Override
             public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-                return View.inflate(context, R.layout.contacts_item_local, null);
+                return View.inflate(context, R.layout.contacts_item, null);
             }
 
             @Override
             public void bindView(View view, final Context context, Cursor cursor) {
                 final String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                String srcName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                final String name = srcName == null ? "???" : srcName;
-                String[] items = name.split(" ");
-                String key = items[items.length - 1];
+                String srcName = cursor.getString(cursor.getColumnIndex(displayName));
 
-                boolean separatorVisible = false;
-                if (cursor.getPosition() == 0) {
-                    separatorVisible = true;
-                } else {
-                    // Prev item
-                    cursor.move(-1);
-                    String prevName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                    cursor.move(1);
-                    if (prevName == null) {
-                        prevName = "???";
-                    }
-                    String[] prevItems = prevName.split(" ");
-                    String prevKey = prevItems[prevItems.length - 1];
-
-                    if (!prevKey.substring(0, 1).equalsIgnoreCase(key.substring(0, 1))) {
-                        separatorVisible = true;
-                    }
-                }
-                String res = "";
-                for (int i = 0; i < items.length; i++) {
-                    if (i != 0) {
-                        res += " ";
-                    }
-                    if (i == items.length - 1) {
-                        res += "<b>" + items[i] + "</b>";
-                    } else {
-                        res += items[i];
-                    }
-                }
-                ((TextView) view.findViewById(R.id.title)).setText(Html.fromHtml(res));
-
-                view.findViewById(R.id.title).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Contact contact = application.getEngine().getContactUid(Integer.parseInt(id));
-                        if (contact != null) {
-                            getRootController().openUser(contact.getUid());
-                        } else {
-                            AlertDialog dialog = new AlertDialog.Builder(context).setTitle(R.string.st_contacts_not_registered_title)
-                                    .setMessage(getStringSafe(R.string.st_contacts_not_registered_message).replace("{0}", name))
-                                    .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            try {
-                                                Cursor pCur = application.getContentResolver().query(
-                                                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                                                        null,
-                                                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                                                        new String[]{id}, null);
-
-                                                if (pCur.moveToFirst()) {
-                                                    String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                                                    Intent sendSms = new Intent(Intent.ACTION_VIEW, Uri.parse("tel:" + phoneNo));
-                                                    sendSms.putExtra("address", phoneNo);
-                                                    sendSms.putExtra("sms_body", application.getDynamicConfig().getInviteMessage());
-                                                    sendSms.setType("vnd.android-dir/mms-sms");
-                                                    startActivity(sendSms);
-                                                } else {
-                                                    Context context1 = getActivity();
-                                                    if (context1 != null) {
-                                                        Toast.makeText(context1, R.string.st_error_unable_sms, Toast.LENGTH_SHORT).show();
-                                                    }
-                                                }
-                                            } catch (Exception e) {
-                                                Context context1 = getActivity();
-                                                if (context1 != null) {
-                                                    Toast.makeText(context1, R.string.st_error_unable_sms, Toast.LENGTH_SHORT).show();
-                                                }
-                                            }
-                                        }
-                                    }).setNegativeButton(R.string.st_no, null).create();
-                            dialog.setCanceledOnTouchOutside(true);
-                            dialog.show();
-                        }
-                    }
-                });
-                if (separatorVisible) {
-                    ((TextView) view.findViewById(R.id.separator)).setText(key.substring(0, 1).toUpperCase());
-                    view.findViewById(R.id.separatorContainer).setVisibility(View.VISIBLE);
-                } else {
-                    view.findViewById(R.id.separatorContainer).setVisibility(View.GONE);
-                }
-            }
-        };
-
-        allAdapter = new BaseAdapter() {
-            @Override
-            public int getCount() {
-                if (applyFilter) {
-                    return contactsAdapter.getCount();
-                } else {
-                    return contactsAdapter.getCount() + localContactsAdapter.getCount();
-                }
-            }
-
-            @Override
-            public boolean areAllItemsEnabled() {
-                return false;
-            }
-
-            @Override
-            public boolean isEnabled(int position) {
-                return position < contactsAdapter.getCount();
-            }
-
-            @Override
-            public Object getItem(int i) {
-                if (i < contactsAdapter.getCount()) {
-                    return contactsAdapter.getItem(i);
-                } else {
-                    return localContactsAdapter.getItem(i - contactsAdapter.getCount());
-                }
-            }
-
-            @Override
-            public long getItemId(int i) {
-                if (i < contactsAdapter.getCount()) {
-                    return contactsAdapter.getItemId(i);
-                } else {
-                    return localContactsAdapter.getItemId(i - contactsAdapter.getCount());
-                }
-            }
-
-            @Override
-            public int getItemViewType(int position) {
-                if (position < contactsAdapter.getCount()) {
-                    return contactsAdapter.getItemViewType(position);
-                } else {
-                    return localContactsAdapter.getItemViewType(position - contactsAdapter.getCount())
-                            + contactsAdapter.getViewTypeCount();
-                }
-            }
-
-            @Override
-            public int getViewTypeCount() {
-                return localContactsAdapter.getViewTypeCount() + contactsAdapter.getViewTypeCount();
-            }
-
-            @Override
-            public View getView(int i, View view, ViewGroup viewGroup) {
-                if (i < contactsAdapter.getCount()) {
-                    return contactsAdapter.getView(i, view, viewGroup);
-                } else {
-                    return localContactsAdapter.getView(i - contactsAdapter.getCount(), view, viewGroup);
-                }
+                ((TextView) view.findViewById(R.id.name)).setText(srcName);
             }
         };
 
@@ -378,7 +204,7 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 //            }
 //        });
         contactsList.addHeaderView(share);
-        contactsList.setAdapter(allAdapter);
+        contactsList.setAdapter(localContactsAdapter);
 
         if (application.getContactsSource().isCacheAlive()) {
             originalUsers = application.getContactsSource().getSortedUsers();
@@ -403,25 +229,29 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 
         onDataChanged();
 
+        loading.setVisibility(View.GONE);
+        empty.setVisibility(View.GONE);
+        contactsList.setVisibility(View.VISIBLE);
+
         return res;
     }
 
     private void doFilter() {
-        if (matcher != null && matcher.getQuery().length() > 0) {
-            ArrayList<User> filtered = new ArrayList<User>();
-            for (User u : originalUsers) {
-                if (matcher.isMatched(u.getDisplayName())) {
-                    filtered.add(u);
-                }
-            }
-            filteredUsers = filtered.toArray(new User[0]);
-            applyFilter = true;
-        } else {
-            filteredUsers = originalUsers;
-            applyFilter = false;
-        }
-        allAdapter.notifyDataSetChanged();
-        onDataChanged();
+//        if (matcher != null && matcher.getQuery().length() > 0) {
+//            ArrayList<User> filtered = new ArrayList<User>();
+//            for (User u : originalUsers) {
+//                if (matcher.isMatched(u.getDisplayName())) {
+//                    filtered.add(u);
+//                }
+//            }
+//            filteredUsers = filtered.toArray(new User[0]);
+//            applyFilter = true;
+//        } else {
+//            filteredUsers = originalUsers;
+//            applyFilter = false;
+//        }
+//        allAdapter.notifyDataSetChanged();
+//        onDataChanged();
     }
 
     @Override
@@ -499,20 +329,20 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
     }
 
     private void onDataChanged() {
-        if (allAdapter.getCount() == 0 || !isLoaded) {
-            if (application.getContactsSource().getState() == ContactSourceState.SYNCED && isLoaded) {
-                loading.setVisibility(View.GONE);
-                empty.setVisibility(View.VISIBLE);
-            } else {
-                loading.setVisibility(View.VISIBLE);
-                empty.setVisibility(View.GONE);
-            }
-            contactsList.setVisibility(View.GONE);
-        } else {
-            loading.setVisibility(View.GONE);
-            empty.setVisibility(View.GONE);
-            contactsList.setVisibility(View.VISIBLE);
-        }
+//        if (allAdapter.getCount() == 0 || !isLoaded) {
+//            if (application.getContactsSource().getState() == ContactSourceState.SYNCED && isLoaded) {
+//                loading.setVisibility(View.GONE);
+//                empty.setVisibility(View.VISIBLE);
+//            } else {
+//                loading.setVisibility(View.VISIBLE);
+//                empty.setVisibility(View.GONE);
+//            }
+//            contactsList.setVisibility(View.GONE);
+//        } else {
+//            loading.setVisibility(View.GONE);
+//            empty.setVisibility(View.GONE);
+//            contactsList.setVisibility(View.VISIBLE);
+//        }
     }
 
     @Override

@@ -634,7 +634,6 @@ public class UpdateProcessor {
             application.notifyUIUpdate();
             application.getNotifications().onNewMessageJoined(src.getDisplayName(), src.getUid(), 0, src.getPhoto());
             application.getContactsSource().resetState();
-            application.getContactsSource().startSync();
         } else if (update instanceof TLUpdateEncryption) {
             application.getEncryptionController().onUpdateEncryption(((TLUpdateEncryption) update).getChat());
         } else if (update instanceof TLUpdateEncryptedChatTyping) {

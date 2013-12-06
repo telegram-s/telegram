@@ -862,80 +862,124 @@ public class ModelEngine {
         }
     }
 
-    public void onImportedContacts(final Map<Integer, Long> importedContacts) {
+    public void onImportedContacts(final HashMap<Long, HashSet<Integer>> importedContacts) {
         getContactsDao().callBatchTasks(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
-                for (Integer uid : importedContacts.keySet()) {
-                    Contact contact = getUidContact(uid);
-                    if (contact != null) {
-                        contact.setLocalId(importedContacts.get(uid));
-                        getContactsDao().update(contact);
+                for (Long localId : importedContacts.keySet()) {
+                    Contact[] contacts = getContactsForLocalId(localId);
+                    HashSet<Integer> uids = importedContacts.get(localId);
+                    for (Integer uid : uids) {
+                        boolean contains = false;
+                        for (Contact contact : contacts) {
+                            if (contact.getUid() == uid) {
+                                contains = true;
+                                break;
+                            }
+                        }
+
+                        if (!contains) {
+                            Contact contact = new Contact(uid, localId, getUser(uid), false);
+                            getContactsDao().create(contact);
+                        }
+                    }
+
+                    for (Contact contact : contacts) {
+                        boolean contains = false;
+                        for (Integer uid : uids) {
+                            if (contact.getUid() == uid) {
+                                contains = true;
+                                break;
+                            }
+                        }
+
+                        if (!contains) {
+                            getContactsDao().delete(contact);
+                        }
                     }
                 }
+//                for (Integer uid : importedContacts.keySet()) {
+//                    Contact contact = getUidContact(uid);
+//                    if (contact != null) {
+//                        contact.setLocalId(importedContacts.get(uid));
+//                        getContactsDao().update(contact);
+//                    }
+//                }
                 return null;
             }
         });
     }
 
-    public Contact getUidContact(int uid) {
-        try {
-            QueryBuilder<Contact, Long> builder = getContactsDao().queryBuilder();
-            builder.where().eq("uid", uid);
-            return getContactsDao().queryForFirst(builder.prepare());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+    public Contact[] getContactsForLocalId(long localId) {
+        return getContactsDao().queryForEq("localId", localId).toArray(new Contact[0]);
     }
 
-    public Contact getContactUid(int localId) {
-        try {
-            QueryBuilder<Contact, Long> builder = getContactsDao().queryBuilder();
-            builder.where().eq("localId", localId);
-            return getContactsDao().queryForFirst(builder.prepare());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+    public Contact[] getContactsForUid(int uid) {
+        return getContactsDao().queryForEq("uid", uid).toArray(new Contact[0]);
     }
+
+//    public Contact getUidContact(int uid) {
+//        try {
+//            QueryBuilder<Contact, Long> builder = getContactsDao().queryBuilder();
+//            builder.where().eq("uid", uid);
+//            return getContactsDao().queryForFirst(builder.prepare());
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return null;
+//    }
+//
+//    public Contact getContactUid(int localId) {
+//        try {
+//            QueryBuilder<Contact, Long> builder = getContactsDao().queryBuilder();
+//            builder.where().eq("localId", localId);
+//            return getContactsDao().queryForFirst(builder.prepare());
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return null;
+//    }
 
     public void updateContact(int uid, long localId) {
-        Contact contact = getUidContact(uid);
-        contact.setLocalId(localId);
-        getContactsDao().update(contact);
+//        Contact contact = getUidContact(uid);
+//        contact.setLocalId(localId);
+//        getContactsDao().update(contact);
     }
 
     public void addContact(int uid, long localId) {
-        if (getUidContact(uid) != null)
-            return;
-        User user = getUser(uid);
-        if (user == null) {
-            return;
-        }
-        getContactsDao().create(new Contact(uid, localId, user, false));
+//        if (getUidContact(uid) != null)
+//            return;
+//        User user = getUser(uid);
+//        if (user == null) {
+//            return;
+//        }
+//        getContactsDao().create(new Contact(uid, localId, user, false));
     }
 
     public void onContacts(List<TLAbsUser> users, List<TLContact> contacts) {
         onUsers(users);
 
-        final List<Contact> converted = new ArrayList<Contact>();
-        for (TLContact contact : contacts) {
-            converted.add(new Contact(contact.getUserId(), 0, getUser(contact.getUserId()), contact.getMutual()));
-        }
+//        final List<Contact> converted = new ArrayList<Contact>();
+//        for (TLContact contact : contacts) {
+//            converted.add(new Contact(contact.getUserId(), 0, getUser(contact.getUserId()), contact.getMutual()));
+//        }
+//
+//        DiffUtils.applyDiffUpdate(converted, getContactsDao(), new Comparator<Contact>() {
+//            @Override
+//            public int compare(Contact contact, Contact contact2) {
+//                if (contact.getUid() == contact2.getUid()) {
+//                    return 0;
+//                } else {
+//                    return 1;
+//                }
+//            }
+//        });
+    }
 
-        DiffUtils.applyDiffUpdate(converted, getContactsDao(), new Comparator<Contact>() {
-            @Override
-            public int compare(Contact contact, Contact contact2) {
-                if (contact.getUid() == contact2.getUid()) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            }
-        });
+    public User[] getContacts() {
+        return getUsersDao().queryForEq("linkType", LinkType.CONTACT).toArray(new User[0]);
     }
 
     public void onUserLinkChanged(int uid, int link) {

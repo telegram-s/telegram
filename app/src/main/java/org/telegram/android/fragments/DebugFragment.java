@@ -38,6 +38,12 @@ public class DebugFragment extends StelsFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_debug, container, false);
+        res.findViewById(R.id.resetContactsSync).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                application.getContactsSource().resetState();
+            }
+        });
         res.findViewById(R.id.resetDcSync).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

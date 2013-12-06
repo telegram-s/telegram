@@ -13,6 +13,11 @@
 
         <Button android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:text="Reset Contacts Sync"
+                android:id="@+id/resetContactsSync"/>
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
                 android:text="Reset DC Sync"
                 android:id="@+id/resetDcSync"/>
 

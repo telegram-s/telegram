@@ -1,6 +1,8 @@
 package org.telegram.android.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.Ringtone;
@@ -21,6 +23,7 @@ import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.core.UserSourceListener;
 import org.telegram.android.core.model.Contact;
+import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
@@ -363,7 +366,7 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
         inflater.inflate(R.menu.user_menu, menu);
         menu.findItem(R.id.blockUserMenu).setTitle(highlightMenuText(R.string.st_profile_menu_block));
         menu.findItem(R.id.addContact).setTitle(highlightMenuText(R.string.st_profile_menu_add));
-        if (application.getEngine().getUidContact(userId) != null) {
+        if (application.getEngine().getContactsForUid(userId).length > 0) {
             menu.findItem(R.id.addContact).setVisible(false);
             if (!application.getTechKernel().getTechReflection().isOnSdCard()) {
                 menu.findItem(R.id.viewBook).setVisible(true);
@@ -374,7 +377,7 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
             menu.findItem(R.id.editName).setVisible(false);
         } else {
             menu.findItem(R.id.viewBook).setVisible(false);
-            if (user != null && user.getPhone() != null && user.getPhone().length() > 0) {
+            if (user != null && user.getPhone() != null && user.getPhone().length() > 0 && user.getLinkType() != LinkType.CONTACT) {
                 menu.findItem(R.id.addContact).setVisible(true);
             } else {
                 menu.findItem(R.id.addContact).setVisible(false);
@@ -418,10 +421,25 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
             });
             return true;
         } else if (item.getItemId() == R.id.viewBook) {
-            Contact contact = application.getEngine().getUidContact(userId);
-            if (contact != null) {
+            final Contact[] contacts = application.getEngine().getContactsForUid(userId);
+            if (contacts.length == 1) {
                 startActivity(new Intent(Intent.ACTION_VIEW)
-                        .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contact.getLocalId() + "")));
+                        .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[0].getLocalId() + "")));
+            } else {
+                CharSequence[] sequences = new CharSequence[contacts.length];
+                for (int i = 0; i < contacts.length; i++) {
+                    User user = getEngine().getUser(contacts[i].getUid());
+                    sequences[i] = user.getDisplayName();
+                }
+                AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(sequences, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        startActivity(new Intent(Intent.ACTION_VIEW)
+                                .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[i].getLocalId() + "")));
+                    }
+                }).create();
+                alertDialog.setCanceledOnTouchOutside(true);
+                alertDialog.show();
             }
             return true;
         } else if (item.getItemId() == R.id.addContact) {

@@ -159,7 +159,6 @@ public class DataSourceKernel {
         dialogSource.startSync();
 
         contactsSource.resetState();
-        contactsSource.startSync();
 
         for (MessageSource source : messageSources.values()) {
             source.destroy();

@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
+import android.util.Pair;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.Configuration;
@@ -132,8 +133,6 @@ public class ContactsSource {
 
     private final CopyOnWriteArrayList<ContactSourceListener> listeners = new CopyOnWriteArrayList<ContactSourceListener>();
 
-    private PreparedQuery<Contact> contactsPreparedQuery;
-
     private long maxContactId;
 
     private String lastSyncHash;
@@ -166,7 +165,7 @@ public class ContactsSource {
                 e.printStackTrace();
             }
         }
-        return application.getEngine().getUsersById(contactsCache.toArray());
+        return application.getEngine().getContacts();
     }
 
     public User[] getSortedUsers() {
@@ -222,18 +221,6 @@ public class ContactsSource {
         return !(lastSyncHash != null && lastSyncHash.equals(bookHash));
     }
 
-    public PreparedQuery<Contact> getUiQuery() {
-        if (contactsPreparedQuery == null) {
-            try {
-                QueryBuilder<Contact, Long> baseQuery = application.getEngine().getContactsDao().queryBuilder();
-                contactsPreparedQuery = baseQuery.prepare();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return contactsPreparedQuery;
-    }
-
     public ContactSourceState getState() {
         return state;
     }
@@ -273,6 +260,7 @@ public class ContactsSource {
     public synchronized void resetState() {
         this.preferences.edit().remove("max_sync_id").remove("sync_hash").commit();
         this.lastSyncHash = null;
+        startSync();
     }
 
     public synchronized void startSync() {
@@ -312,9 +300,9 @@ public class ContactsSource {
                     public void run() {
                         while (application.isLoggedIn()) {
                             if (contactsCache == null) {
-                                List<Contact> users = application.getEngine().getContactsDao().query(getUiQuery());
+                                User[] users = application.getEngine().getContacts();
                                 HashSet<Integer> nCache = new HashSet<Integer>();
-                                for (Contact u : users) {
+                                for (User u : users) {
                                     nCache.add(u.getUid());
                                 }
                                 contactsCache = nCache;
@@ -341,20 +329,19 @@ public class ContactsSource {
         application.getEngine().onUserLinkChanged(uid, LinkType.CONTACT);
         application.getUserSource().notifyUserChanged(uid);
 
-        if (!application.getTechKernel().getTechReflection().isOnSdCard()) {
-            if (application.getEngine().getUidContact(uid) != null) {
-                User user = application.getEngine().getUser(uid);
-                long nid = addContact(true, application.getKernel().getAuthKernel().getAccount(), user, firstName + " " + lastName, user.getPhone());
-                application.getEngine().updateContact(uid, nid);
-            } else {
-                User user = application.getEngine().getUser(uid);
-                long id = addContact(false, application.getKernel().getAuthKernel().getAccount(), user, firstName + " " + lastName, user.getPhone());
-                application.getEngine().addContact(uid, id);
-            }
-        }
+//        if (!application.getTechKernel().getTechReflection().isOnSdCard()) {
+//            if (application.getEngine().getContactsForUid(uid).length > 0) {
+//                User user = application.getEngine().getUser(uid);
+//                long nid = addContact(true, application.getKernel().getAuthKernel().getAccount(), user, firstName + " " + lastName, user.getPhone());
+//                application.getEngine().updateContact(uid, nid);
+//            } else {
+//                User user = application.getEngine().getUser(uid);
+//                long id = addContact(false, application.getKernel().getAuthKernel().getAccount(), user, firstName + " " + lastName, user.getPhone());
+//                application.getEngine().addContact(uid, id);
+//            }
+//        }
 
         resetState();
-        startSync();
     }
 
     private String phoneBookHash(PhoneBookRecord[] book) {
@@ -387,9 +374,7 @@ public class ContactsSource {
             return new PhoneBookRecord[0];
         }
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                null, ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0" +
-                " AND " +
-                ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '1'", null, ContactsContract.Contacts._ID + " desc");
+                null, ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0", null, ContactsContract.Contacts._ID + " desc");
         if (cur == null) {
             return new PhoneBookRecord[0];
         }
@@ -441,6 +426,10 @@ public class ContactsSource {
         return records.toArray(new PhoneBookRecord[records.size()]);
     }
 
+    private String unifyPhone(String s) {
+        return s.replaceAll("[^\\d]", "");
+    }
+
     private void doUploadContacts() throws Exception {
         long startFetchingContacts = System.currentTimeMillis();
         long newMaxId = maxContactId;
@@ -452,23 +441,48 @@ public class ContactsSource {
 
         HashMap<Long, Long> idMap = new HashMap<Long, Long>();
 
+        HashMap<String, Long> phoneMap = new HashMap<String, Long>();
+        HashMap<Long, HashSet<Long>> realPhoneMap = new HashMap<Long, HashSet<Long>>();
+
         for (PhoneBookRecord record : book) {
             for (Phone phone : record.getPhones()) {
                 idMap.put(phone.getId(), record.getContactId());
-                inputContacts.add(new TLInputContact(phone.getId(), phone.getNumber(), record.getFirstName(), record.getLastName()));
+
+                String phoneVal = unifyPhone(phone.getNumber());
+                if (phoneMap.containsKey(phoneVal)) {
+                    realPhoneMap.get(phoneMap.get(phoneVal)).add(phone.getId());
+                } else {
+                    HashSet<Long> phoneIdSet = new HashSet<Long>();
+                    phoneIdSet.add(phone.getId());
+                    realPhoneMap.put(phone.getId(), phoneIdSet);
+                    phoneMap.put(phoneVal, phone.getId());
+                    inputContacts.add(new TLInputContact(phone.getId(), phoneVal, record.getFirstName(), record.getLastName()));
+                }
             }
         }
 
         TLImportedContacts importedContacts = application.getApi().doRpcCall(new TLRequestContactsImportContacts(inputContacts, false), 15000);
-        HashMap<Integer, Long> imported = new HashMap<Integer, Long>();
-        for (TLImportedContact contact : importedContacts.getImported()) {
-            imported.put(contact.getUserId(), idMap.get(contact.getClientId()));
-        }
         application.getEngine().onUsers(importedContacts.getUsers());
-        application.getEngine().onImportedContacts(imported);
-        List<Contact> users = application.getEngine().getContactsDao().query(getUiQuery());
-        for (Contact u : users) {
-            contactsCache.add(u.getUid());
+
+        HashMap<Long, HashSet<Integer>> importedUsers = new HashMap<Long, HashSet<Integer>>();
+
+        for (TLImportedContact contact : importedContacts.getImported()) {
+            for (Long phoneId : realPhoneMap.get(contact.getClientId())) {
+                long contactId = idMap.get(phoneId);
+                int userId = contact.getUserId();
+                if (importedUsers.containsKey(contactId)) {
+                    importedUsers.get(contactId).add(userId);
+                } else {
+                    HashSet<Integer> set = new HashSet<Integer>();
+                    set.add(userId);
+                    importedUsers.put(contactId, set);
+                }
+            }
+        }
+        application.getEngine().onImportedContacts(importedUsers);
+
+        for (User user : application.getEngine().getContacts()) {
+            contactsCache.add(user.getUid());
         }
 
         maxContactId = newMaxId;
@@ -506,8 +520,8 @@ public class ContactsSource {
         if (response instanceof TLContacts) {
             TLContacts contacts = (TLContacts) response;
             application.getEngine().onContacts(contacts.getUsers(), contacts.getContacts());
-            List<Contact> users = application.getEngine().getContactsDao().query(getUiQuery());
-            for (Contact u : users) {
+            User[] users = application.getEngine().getContacts();
+            for (User u : users) {
                 contactsCache.add(u.getUid());
             }
             notifyDataChanged();
@@ -536,11 +550,19 @@ public class ContactsSource {
         Logger.d(TAG, "Readed saved contacts");
 
         HashSet<Integer> founded = new HashSet<Integer>();
+        ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
         for (User u : users) {
             founded.add(u.getUid());
             if (!localContacts.containsKey(u.getUid())) {
-                addContact(false, application.getKernel().getAuthKernel().getAccount(), u, u.getDisplayName(), u.getPhone());
+                addContact(false, application.getKernel().getAuthKernel().getAccount(), u, u.getDisplayName(), u.getPhone(), operationList);
+                if (operationList.size() > 200) {
+                    complete(operationList);
+                    operationList.clear();
+                }
             }
+        }
+        if (operationList.size() > 0) {
+            complete(operationList);
         }
         Logger.d(TAG, "applying changes ends");
         /*HashSet<String> removed = new HashSet<String>();
@@ -551,10 +573,7 @@ public class ContactsSource {
         }*/
     }
 
-    private long addContact(boolean withCheck, Account account, User user, String name, String phone) {
-        ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-
-        int first = 0;
+    private void addContact(boolean withCheck, Account account, User user, String name, String phone, ArrayList<ContentProviderOperation> operationList) {
         if (withCheck) {
             ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(ContactsContract.RawContacts.CONTENT_URI);
             builder.withSelection(
@@ -563,8 +582,9 @@ public class ContactsSource {
                             ContactsContract.RawContacts.SYNC2 + " = ?",
                     new String[]{account.name, account.type, "" + user.getUid()});
             operationList.add(builder.build());
-            first++;
         }
+
+        int first = operationList.size();
 
         //Create our RawContact
         ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI);
@@ -598,18 +618,28 @@ public class ContactsSource {
         builder.withValue(ContactsContract.Data.DATA4, user.getUid());
         operationList.add(builder.build());
 
+//        try {
+//            ContentProviderResult[] results = application.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operationList);
+//            if (results.length < 4) {
+//                return 0;
+//            }
+//            return Long.parseLong(results[results.length - 4].uri.getLastPathSegment());
+//        } catch (RemoteException e) {
+//            e.printStackTrace();
+//        } catch (OperationApplicationException e) {
+//            e.printStackTrace();
+//        }
+//        return 0;
+    }
+
+    private void complete(ArrayList<ContentProviderOperation> operationList) {
         try {
-            ContentProviderResult[] results = application.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operationList);
-            if (results.length < 4) {
-                return 0;
-            }
-            return Long.parseLong(results[results.length - 4].uri.getLastPathSegment());
+            application.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operationList);
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (OperationApplicationException e) {
             e.printStackTrace();
         }
-        return 0;
     }
 
     private void doSync() throws Exception {
@@ -642,5 +672,6 @@ public class ContactsSource {
         }
         this.maxContactId = 0;
         this.contactsCache = null;
+        this.lastSyncHash = null;
     }
 }
