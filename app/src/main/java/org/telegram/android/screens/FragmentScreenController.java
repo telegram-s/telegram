@@ -1,7 +1,9 @@
 package org.telegram.android.screens;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
@@ -422,7 +424,14 @@ public class FragmentScreenController implements RootController {
 
     @Override
     public void addContact(int uid) {
-        openScreen(new AddToContactsFragment(uid));
+        User user = application.getEngine().getUser(uid);
+        Intent intent = new Intent(Intent.ACTION_INSERT);
+        intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
+
+        intent.putExtra(ContactsContract.Intents.Insert.NAME, user.getDisplayName());
+        intent.putExtra(ContactsContract.Intents.Insert.PHONE, "+" + user.getPhone());
+
+        activity.startActivity(intent);
     }
 
     @Override
