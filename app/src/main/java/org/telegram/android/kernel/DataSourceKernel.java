@@ -45,14 +45,20 @@ public class DataSourceKernel {
             }
 
             if (kernel.getTechKernel().getTechReflection().isAppUpgraded() || kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
-                contactsSource.resetState();
+                // contactsSource.resetState();
             }
 
             if (kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
                 MessageSource.clearData(kernel.getApplication());
             }
 
-            contactsSource.startSync();
+            // contactsSource.startSync();
+        }
+    }
+
+    public void runKernel() {
+        if (contactsSource != null) {
+            contactsSource.run();
         }
     }
 
@@ -158,7 +164,9 @@ public class DataSourceKernel {
         dialogSource.resetSync();
         dialogSource.startSync();
 
-        contactsSource.resetState();
+        // contactsSource.resetState();
+
+        contactsSource.run();
 
         for (MessageSource source : messageSources.values()) {
             source.destroy();
@@ -181,7 +189,7 @@ public class DataSourceKernel {
 
         // Clearing contacts states
         contactsSource.destroy();
-        ContactsSource.clearData(kernel.getApplication());
+        // ContactsSource.clearData(kernel.getApplication());
 
         chatSource.clear();
     }

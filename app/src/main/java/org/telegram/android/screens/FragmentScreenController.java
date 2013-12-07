@@ -436,6 +436,6 @@ public class FragmentScreenController implements RootController {
 
     @Override
     public void editContactName(int uid) {
-        openScreen(new EditContactNameFragment(uid));
+        // openScreen(new EditContactNameFragment(uid));
     }
 }

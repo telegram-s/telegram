@@ -211,6 +211,7 @@ public class ApplicationKernel {
         apiKernel.runKernel();
         syncKernel.runKernel();
         lifeKernel.runKernel();
+        dataSourceKernel.runKernel();
         Logger.d(TAG, "Kernels started in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 

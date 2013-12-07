@@ -6,12 +6,10 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
-import org.telegram.android.debug.Assert;
 import org.telegram.android.log.Logger;
 import org.telegram.api.*;
 import org.telegram.api.messages.TLAbsSentMessage;
@@ -25,7 +23,6 @@ import org.telegram.tl.StreamingUtils;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -38,29 +35,61 @@ public class ModelEngine {
     private StelsDatabase database;
     private StelsApplication application;
 
-    private ConcurrentHashMap<Integer, User> userCache;
-
-    private PreparedQuery<User> getUserQuery;
-    private SelectArg getUserIdArg;
-
     private int maxDate = 0;
     private AtomicInteger minMid = null;
     private Object minMidSync = new Object();
 
+    private UsersEngine usersEngine;
+
     public ModelEngine(StelsDatabase database, StelsApplication application) {
         this.database = database;
         this.application = application;
-        this.userCache = new ConcurrentHashMap<Integer, User>();
-
-        try {
-            QueryBuilder<User, Long> queryBuilder = getUsersDao().queryBuilder();
-            getUserIdArg = new SelectArg();
-            queryBuilder.where().eq("uid", getUserIdArg);
-            getUserQuery = queryBuilder.prepare();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.usersEngine = new UsersEngine(this);
     }
+
+    public StelsApplication getApplication() {
+        return application;
+    }
+
+    /**
+     * Users actions
+     */
+
+    public User[] getUsersById(Object[] uids) {
+        return usersEngine.getUsersById(uids);
+    }
+
+    public User cacheUser(User src) {
+        return usersEngine.cacheUser(src);
+    }
+
+    public User[] getContacts() {
+        return usersEngine.getContacts();
+    }
+
+    public void onUserLinkChanged(int uid, int link) {
+        usersEngine.onUserLinkChanged(uid, link);
+    }
+
+    public void onUsers(List<TLAbsUser> users) {
+        usersEngine.onUsers(users);
+    }
+
+    public User getUserRuntime(int id) {
+        return usersEngine.getUserRuntime(id);
+    }
+
+    public User getUser(int id) {
+        return usersEngine.getUser(id);
+    }
+
+    public void clearCache() {
+        usersEngine.clearCache();
+    }
+
+    /**
+     * End users actions
+     */
 
     public int getCurrentTime() {
         return (int) (TimeOverlord.getInstance().getServerTime() / 1000);
@@ -92,40 +121,6 @@ public class ModelEngine {
 
     public RuntimeExceptionDao<FullChatInfo, Long> getFullChatInfoDao() {
         return database.getFullChatInfoDao();
-    }
-
-    public User getUserRuntime(int id) {
-        User res = userCache.get(id);
-        if (res != null)
-            return res;
-
-        synchronized (getUserQuery) {
-            getUserIdArg.setValue(id);
-            List<User> users = getUsersDao().query(getUserQuery);
-            if (users.size() > 0) {
-                userCache.putIfAbsent(id, users.get(0));
-                return userCache.get(id);
-            }
-        }
-
-        throw new RuntimeException("Unknown user #" + id);
-    }
-
-    public User getUser(int id) {
-        User res = userCache.get(id);
-        if (res != null)
-            return res;
-
-        synchronized (getUserQuery) {
-            getUserIdArg.setValue(id);
-            List<User> users = getUsersDao().query(getUserQuery);
-            if (users.size() > 0) {
-                userCache.putIfAbsent(id, users.get(0));
-                return userCache.get(id);
-            }
-        }
-
-        return null;
     }
 
     public void updateEncryptedChatKey(TLAbsEncryptedChat chat, byte[] key) {
@@ -423,93 +418,6 @@ public class ModelEngine {
         } else {
             return res.get(0);
         }
-    }
-
-    /**
-     * Doesn't save order
-     *
-     * @param mid
-     * @return
-     */
-    private User[] getUsersByIdRaw(Object[] mid) {
-        return getUsersById(mid);
-//        try {
-//            ArrayList<User> users = new ArrayList<User>();
-//            QueryBuilder<User, Long> queryBuilder = getUsersDao().queryBuilder();
-//            queryBuilder.where().in("uid", mid);
-//            User[] res = queryBuilder.query().toArray(new User[0]);
-//            for (int i = 0; i < res.length; i++) {
-//                users.add(cacheUser(res[i]));
-//            }
-//            return res;
-//        } catch (SQLException e) {
-//            Logger.t(TAG, e);
-//        }
-//
-//        return new User[0];
-    }
-
-    /**
-     * Doesn't save order
-     *
-     * @param mid
-     * @return
-     */
-    public User[] getUsersById(Object[] mid) {
-        try {
-            ArrayList<Object> missedMids = new ArrayList<Object>();
-            ArrayList<User> users = new ArrayList<User>();
-            for (Object o : mid) {
-                if (userCache.containsKey(o)) {
-                    users.add(userCache.get(o));
-                } else {
-                    missedMids.add(o);
-                }
-            }
-            if (missedMids.size() > 0) {
-                QueryBuilder<User, Long> queryBuilder = getUsersDao().queryBuilder();
-                queryBuilder.where().in("uid", missedMids.toArray(new Object[0]));
-                User[] res = queryBuilder.query().toArray(new User[0]);
-                for (int i = 0; i < res.length; i++) {
-                    users.add(cacheUser(res[i]));
-                }
-            }
-            return users.toArray(new User[0]);
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
-        }
-
-        return new User[0];
-    }
-
-    public void cacheUsers(Object[] mid) {
-        try {
-            ArrayList<Object> missedMids = new ArrayList<Object>();
-            ArrayList<User> users = new ArrayList<User>();
-            for (Object o : mid) {
-                if (userCache.containsKey(o)) {
-                    users.add(userCache.get(o));
-                } else {
-                    missedMids.add(o);
-                }
-            }
-            if (missedMids.size() > 0) {
-                QueryBuilder<User, Long> queryBuilder = getUsersDao().queryBuilder();
-                queryBuilder.where().in("uid", missedMids.toArray(new Object[0]));
-                User[] res = queryBuilder.query().toArray(new User[0]);
-                for (int i = 0; i < res.length; i++) {
-                    users.add(cacheUser(res[i]));
-                }
-            }
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
-        }
-
-    }
-
-    public User cacheUser(User src) {
-        userCache.putIfAbsent(src.getUid(), src);
-        return userCache.get(src.getUid());
     }
 
     public FullChatInfo getFullChatInfo(int chatId) {
@@ -980,83 +888,6 @@ public class ModelEngine {
 //                }
 //            }
 //        });
-    }
-
-    public User[] getContacts() {
-        return getUsersDao().queryForEq("linkType", LinkType.CONTACT).toArray(new User[0]);
-    }
-
-    public void onUserLinkChanged(int uid, int link) {
-        User user = getUser(uid);
-        if (user == null) {
-            return;
-        }
-        user.setLinkType(link);
-        getUsersDao().update(user);
-    }
-
-    public void onUsers(List<TLAbsUser> users) {
-        long start = SystemClock.uptimeMillis();
-        Integer[] ids = new Integer[users.size()];
-        User[] converted = new User[users.size()];
-        for (int i = 0; i < ids.length; i++) {
-            converted[i] = EngineUtils.userFromTlUser(users.get(i));
-            ids[i] = converted[i].getUid();
-        }
-
-        User[] original = getUsersByIdRaw(ids);
-
-        final ArrayList<Pair<User, User>> diff = new ArrayList<Pair<User, User>>();
-
-        for (User m : converted) {
-            User orig = EngineUtils.searchUser(original, m.getUid());
-            diff.add(new Pair<User, User>(orig, m));
-        }
-
-        Logger.d(TAG, "onUsers:prepare: " + (SystemClock.uptimeMillis() - start));
-        start = SystemClock.uptimeMillis();
-        getUsersDao().callBatchTasks(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                for (Pair<User, User> user : diff) {
-                    User orig = user.first;
-                    User changed = user.second;
-
-                    if (orig == null) {
-                        getUsersDao().create(changed);
-                        userCache.putIfAbsent(changed.getUid(), changed);
-                        if (changed.getUid() == application.getCurrentUid()) {
-                            if (application.getUserSource() != null) {
-                                application.getUserSource().notifyUserChanged(application.getCurrentUid());
-                            }
-                        }
-                    } else {
-                        orig.setFirstName(changed.getFirstName());
-                        orig.setLastName(changed.getLastName());
-                        orig.setPhone(changed.getPhone());
-                        orig.setStatus(changed.getStatus());
-                        orig.setAccessHash(changed.getAccessHash());
-                        orig.setLinkType(changed.getLinkType());
-                        getUsersDao().update(orig);
-                    }
-                }
-                return null;
-            }
-        });
-
-        if (Assert.ENABLED) {
-            for (Integer id : ids) {
-                synchronized (getUserQuery) {
-                    getUserIdArg.setValue(id);
-                    List<User> users2 = getUsersDao().query(getUserQuery);
-                    if (users2.size() == 0) {
-                        throw new AssertionError("User #" + id + " not saved to DB!");
-                    }
-                }
-            }
-        }
-
-        Logger.d(TAG, "onUsers:update: " + (SystemClock.uptimeMillis() - start));
     }
 
     private void updateMaxDate(ChatMessage msg) {
@@ -2149,9 +1980,5 @@ public class ModelEngine {
         if (record == null)
             return;
         getMediasDao().delete(record);
-    }
-
-    public void clearCache() {
-        userCache.clear();
     }
 }

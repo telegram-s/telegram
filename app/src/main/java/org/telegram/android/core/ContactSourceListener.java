@@ -5,7 +5,5 @@ package org.telegram.android.core;
  * Created: 31.07.13 16:12
  */
 public interface ContactSourceListener {
-    public void onContactsStateChanged();
-
     public void onContactsDataChanged();
 }

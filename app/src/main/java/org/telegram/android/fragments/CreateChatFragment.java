@@ -94,26 +94,26 @@ public class CreateChatFragment extends StelsFragment {
                 updateFilter();
             }
         });
-        if (originalUsers == null) {
-            if (application.getContactsSource().isCacheAlive()) {
-                originalUsers = application.getContactsSource().getSortedByNameUsers();
-                filteredUsers = originalUsers;
-                bindUi();
-            } else {
-                runUiTask(new AsyncAction() {
-                    @Override
-                    public void execute() throws AsyncException {
-                        originalUsers = application.getContactsSource().getSortedByNameUsers();
-                        filteredUsers = originalUsers;
-                    }
-
-                    @Override
-                    public void afterExecute() {
-                        bindUi();
-                    }
-                });
-            }
-        }
+//        if (originalUsers == null) {
+//            if (application.getContactsSource().isCacheAlive()) {
+//                originalUsers = application.getContactsSource().getSortedByNameUsers();
+//                filteredUsers = originalUsers;
+//                bindUi();
+//            } else {
+//                runUiTask(new AsyncAction() {
+//                    @Override
+//                    public void execute() throws AsyncException {
+//                        originalUsers = application.getContactsSource().getSortedByNameUsers();
+//                        filteredUsers = originalUsers;
+//                    }
+//
+//                    @Override
+//                    public void afterExecute() {
+//                        bindUi();
+//                    }
+//                });
+//            }
+//        }
         return res;
     }
 

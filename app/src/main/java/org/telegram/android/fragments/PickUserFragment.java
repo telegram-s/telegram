@@ -110,37 +110,37 @@ public class PickUserFragment extends StelsFragment {
                 progress.setVisibility(View.GONE);
             }
         });
-        if (originalUsers == null) {
-            if (pickType == PICK_TYPE_CONTACTS && application.getContactsSource().isCacheAlive()) {
-                originalUsers = application.getContactsSource().getSortedByNameUsers();
-                filteredUsers = originalUsers;
-                progress.setVisibility(View.GONE);
-                contactsList.setVisibility(View.VISIBLE);
-                bindUi();
-            } else {
-                runUiTask(new AsyncAction() {
-                    @Override
-                    public void execute() throws AsyncException {
-                        if (pickType == PICK_TYPE_CONTACTS) {
-                            originalUsers = application.getContactsSource().getSortedByNameUsers();
-                        } else {
-                            originalUsers =
-                                    application.getEngine().getUsersDao().query(application.getUserSource().getUiQuery()).toArray(new User[0]);
-                        }
-                        filteredUsers = originalUsers;
-                    }
-
-                    @Override
-                    public void afterExecute() {
-                        bindUi();
-                    }
-                });
-            }
-        } else {
-            progress.setVisibility(View.GONE);
-            contactsList.setVisibility(View.VISIBLE);
-            bindUi();
-        }
+//        if (originalUsers == null) {
+//            if (pickType == PICK_TYPE_CONTACTS && application.getContactsSource().isCacheAlive()) {
+//                originalUsers = application.getContactsSource().getSortedByNameUsers();
+//                filteredUsers = originalUsers;
+//                progress.setVisibility(View.GONE);
+//                contactsList.setVisibility(View.VISIBLE);
+//                bindUi();
+//            } else {
+//                runUiTask(new AsyncAction() {
+//                    @Override
+//                    public void execute() throws AsyncException {
+//                        if (pickType == PICK_TYPE_CONTACTS) {
+//                            originalUsers = application.getContactsSource().getSortedByNameUsers();
+//                        } else {
+//                            originalUsers =
+//                                    application.getEngine().getUsersDao().query(application.getUserSource().getUiQuery()).toArray(new User[0]);
+//                        }
+//                        filteredUsers = originalUsers;
+//                    }
+//
+//                    @Override
+//                    public void afterExecute() {
+//                        bindUi();
+//                    }
+//                });
+//            }
+//        } else {
+//            progress.setVisibility(View.GONE);
+//            contactsList.setVisibility(View.VISIBLE);
+//            bindUi();
+//        }
         return res;
     }
 

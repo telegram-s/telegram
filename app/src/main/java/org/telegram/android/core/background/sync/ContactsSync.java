@@ -2,7 +2,10 @@ package org.telegram.android.core.background.sync;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -31,6 +34,10 @@ import java.util.HashSet;
  */
 public class ContactsSync extends BaseSync {
 
+    public static interface ContactSyncListener {
+        public void onBookUpdated();
+    }
+
     private static final int SYNC_CONTACTS_PRE = 1;
     private static final int SYNC_CONTACTS = 2;
 
@@ -51,6 +58,11 @@ public class ContactsSync extends BaseSync {
     private ArrayList<Contact> contacts;
 
     private boolean isLoaded = true;
+
+    private ContactSyncListener listener;
+
+    private ContentObserver contentObserver;
+    private HandlerThread observerUpdatesThread;
 
     public ContactsSync(StelsApplication application) {
         super(application);
@@ -74,6 +86,20 @@ public class ContactsSync extends BaseSync {
         isLoaded = false;
     }
 
+    public ContactSyncListener getListener() {
+        return listener;
+    }
+
+    public void setListener(ContactSyncListener listener) {
+        this.listener = listener;
+    }
+
+    private void notifyChanged() {
+        if (this.listener != null) {
+            this.listener.onBookUpdated();
+        }
+    }
+
     public boolean isLoaded() {
         return isLoaded;
     }
@@ -88,6 +114,20 @@ public class ContactsSync extends BaseSync {
 
     public void run() {
         init();
+        this.observerUpdatesThread = new HandlerThread("ObserverHandlerThread") {
+            @Override
+            protected void onLooperPrepared() {
+
+                contentObserver = new ContentObserver(new Handler(observerUpdatesThread.getLooper())) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        invalidateContactsSync();
+                    }
+                };
+                application.getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contentObserver);
+            }
+        };
+        this.observerUpdatesThread.start();
     }
 
     public void invalidateContactsSync() {
@@ -111,7 +151,11 @@ public class ContactsSync extends BaseSync {
             }
         }
 
+        notifyChanged();
+
         updateMapping();
+
+        notifyChanged();
 
         resetSync(SYNC_CONTACTS);
     }
@@ -142,7 +186,6 @@ public class ContactsSync extends BaseSync {
 
             Logger.d(TAG, "Imported phones count: " + importedContacts.getImported().size());
 
-
             outer:
             for (PhonesForImport phonesForImport : resultImports) {
                 int uid = 0;
@@ -162,9 +205,11 @@ public class ContactsSync extends BaseSync {
                 bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phonesForImport.value, uid));
             }
             updateMapping();
+            notifyChanged();
             bookPersistence.write();
         } else {
             updateMapping();
+            notifyChanged();
         }
     }
 

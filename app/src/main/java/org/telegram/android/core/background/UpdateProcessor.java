@@ -633,7 +633,7 @@ public class UpdateProcessor {
                     new TLLocalActionUserRegistered());
             application.notifyUIUpdate();
             application.getNotifications().onNewMessageJoined(src.getDisplayName(), src.getUid(), 0, src.getPhoto());
-            application.getContactsSource().resetState();
+            application.getSyncKernel().getContactsSync().invalidateContactsSync();
         } else if (update instanceof TLUpdateEncryption) {
             application.getEncryptionController().onUpdateEncryption(((TLUpdateEncryption) update).getChat());
         } else if (update instanceof TLUpdateEncryptedChatTyping) {

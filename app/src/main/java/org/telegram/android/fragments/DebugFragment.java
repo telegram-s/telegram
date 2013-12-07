@@ -56,40 +56,40 @@ public class DebugFragment extends StelsFragment {
                 startActivity(new Intent().setClass(getActivity(), CrashActivity.class));
             }
         });
-        res.findViewById(R.id.phoneBook).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                runUiTask(new AsyncAction() {
-                    @Override
-                    public void execute() throws AsyncException {
-                        ContactsSource.PhoneBookRecord[] records = application.getContactsSource().loadPhoneBook();
-                        String phoneBook = "START\n";
-                        for (ContactsSource.PhoneBookRecord record : records) {
-                            phoneBook += record.getContactId() + ":" + record.getFirstName() + "/" + record.getLastName() + "\n";
-                            for (ContactsSource.Phone phone : record.getPhones()) {
-                                phoneBook += "PHONE:" + phone.getId() + ":" + phone.getNumber() + "\n";
-                            }
-                        }
-                        phoneBook += "END";
-                        try {
-                            FileOutputStream stream = new FileOutputStream(Environment.getExternalStorageDirectory().toString() + "/phone_book_export.txt");
-                            stream.write(phoneBook.getBytes());
-                            stream.close();
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void afterExecute() {
-                        String fileName = Environment.getExternalStorageDirectory().toString() + "/phone_book_export.txt";
-                        startActivity(new Intent(Intent.ACTION_SEND).setDataAndType(Uri.fromFile(new File(fileName)), "text/plain"));
-                    }
-                });
-            }
-        });
+//        res.findViewById(R.id.phoneBook).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                runUiTask(new AsyncAction() {
+//                    @Override
+//                    public void execute() throws AsyncException {
+//                        ContactsSource.PhoneBookRecord[] records = application.getContactsSource().loadPhoneBook();
+//                        String phoneBook = "START\n";
+//                        for (ContactsSource.PhoneBookRecord record : records) {
+//                            phoneBook += record.getContactId() + ":" + record.getFirstName() + "/" + record.getLastName() + "\n";
+//                            for (ContactsSource.Phone phone : record.getPhones()) {
+//                                phoneBook += "PHONE:" + phone.getId() + ":" + phone.getNumber() + "\n";
+//                            }
+//                        }
+//                        phoneBook += "END";
+//                        try {
+//                            FileOutputStream stream = new FileOutputStream(Environment.getExternalStorageDirectory().toString() + "/phone_book_export.txt");
+//                            stream.write(phoneBook.getBytes());
+//                            stream.close();
+//                        } catch (FileNotFoundException e) {
+//                            e.printStackTrace();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void afterExecute() {
+//                        String fileName = Environment.getExternalStorageDirectory().toString() + "/phone_book_export.txt";
+//                        startActivity(new Intent(Intent.ACTION_SEND).setDataAndType(Uri.fromFile(new File(fileName)), "text/plain"));
+//                    }
+//                });
+//            }
+//        });
 
         CheckBox forceAnim = (CheckBox) res.findViewById(R.id.pageAnimations);
         forceAnim.setChecked(application.getTechKernel().getDebugSettings().isForceAnimations());
