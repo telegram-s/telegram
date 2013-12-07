@@ -182,12 +182,12 @@ public class StelsFragment extends StelsBaseFragment {
 
     public void pickUser() {
         requestedPick = true;
-        getRootController().pickUser(PickUserFragment.PICK_TYPE_CONTACTS);
+        getRootController().pickUser();
     }
 
     public void pickUserAll() {
         requestedPick = true;
-        getRootController().pickUser(PickUserFragment.PICK_TYPE_ALL);
+        getRootController().pickUser();
     }
 
     public void pickLocation() {

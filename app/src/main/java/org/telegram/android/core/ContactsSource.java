@@ -71,9 +71,14 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
     private String settingDisplayOrder;
 
     private LocalContact[] contacts;
+    private LocalContact[] telegramContacts;
 
     public LocalContact[] getContacts() {
         return contacts;
+    }
+
+    public LocalContact[] getTelegramContacts() {
+        return telegramContacts;
     }
 
     public ContactsSource(StelsApplication application) {
@@ -144,6 +149,7 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
 
     @Override
     public void onBookUpdated() {
+        Logger.d(TAG, "onBookUpdated");
 
         ContentResolver cr = application.getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
@@ -163,6 +169,8 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
         }
         application.getEngine().getUsersById(ids.toArray());
 
+        ArrayList<LocalContact> tContacts = new ArrayList<LocalContact>();
+
         if (cur.moveToFirst()) {
             for (int i = 0; i < contacts.length; i++) {
                 final long id = cur.getLong(cur.getColumnIndex(ContactsContract.Contacts._ID));
@@ -177,12 +185,15 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
                 }
                 if (relatedContact != null) {
                     contacts[i] = new LocalContact(id, srcName, relatedContact);
+                    tContacts.add(contacts[i]);
                 } else {
                     contacts[i] = new LocalContact(id, srcName);
                 }
                 cur.moveToNext();
             }
         }
+
+        this.telegramContacts = tContacts.toArray(new LocalContact[tContacts.size()]);
         this.contacts = contacts;
 
         notifyDataChanged();

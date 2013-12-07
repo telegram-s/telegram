@@ -40,7 +40,7 @@ public abstract class BaseSync {
     protected SharedPreferences preferences;
 
     protected BaseSync(StelsApplication application) {
-        this.TAG = getClass().getName();
+        this.TAG = getClass().getSimpleName();
         this.application = application;
         this.preferences = application.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
     }

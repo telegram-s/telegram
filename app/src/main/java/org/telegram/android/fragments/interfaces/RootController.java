@@ -66,7 +66,7 @@ public interface RootController {
 
     public void onLogout();
 
-    public void pickUser(int pickType);
+    public void pickUser();
 
     public void pickLocations();
 

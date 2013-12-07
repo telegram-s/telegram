@@ -94,7 +94,8 @@ public class ContactsSync extends BaseSync {
         this.listener = listener;
     }
 
-    private void notifyChanged() {
+    private synchronized void notifyChanged() {
+        Logger.d(TAG, "notifyChanged");
         if (this.listener != null) {
             this.listener.onBookUpdated();
         }
@@ -135,6 +136,7 @@ public class ContactsSync extends BaseSync {
     }
 
     protected void contactsPreSync() throws Exception {
+        Logger.d(TAG, "PreSync:" + isLoaded);
         if (!isLoaded) {
             PhoneBookRecord[] freshPhoneBook = loadPhoneBook();
             ArrayList<Contact> freshContacts = new ArrayList<Contact>();
@@ -167,7 +169,9 @@ public class ContactsSync extends BaseSync {
         }
         if (phoneBookRecords == null) {
             Logger.w(TAG, "Cancelling contacts sync: preloaded phonebook is empty");
+            return;
         }
+
         PhonesForImport[] phonesForImports = filterPhones(phoneBookRecords);
         PhonesForImport[] resultImports = diff(phonesForImports);
         Logger.d(TAG, "Phone book contacts: " + phoneBookRecords.length);
@@ -214,12 +218,14 @@ public class ContactsSync extends BaseSync {
     }
 
     protected void updateMapping() {
+        Logger.d(TAG, "updateMapping");
         PhoneBookRecord[] phoneBookRecords;
         synchronized (phoneBookSync) {
             phoneBookRecords = currentPhoneBook;
         }
         if (phoneBookRecords == null) {
             Logger.w(TAG, "Cancelling contact mapping: preloaded phonebook is empty");
+            return;
         }
 
         HashMap<Long, HashSet<Integer>> imported = new HashMap<Long, HashSet<Integer>>();

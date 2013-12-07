@@ -58,6 +58,9 @@ import org.telegram.android.StelsApplication;
  */
 @RemoteView
 public class RtlLinearLayout extends ViewGroup {
+
+    private static final int MIN_SDK_INT = 17;
+
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
 
@@ -734,7 +737,7 @@ public class RtlLinearLayout extends ViewGroup {
             final int margin = lp.leftMargin + lp.rightMargin;
             final int measuredWidth = child.getMeasuredWidth() + margin;
             maxWidth = Math.max(maxWidth, measuredWidth);
-            if (Build.VERSION.SDK_INT >= 11) {
+            if (Build.VERSION.SDK_INT >= MIN_SDK_INT) {
                 childState = combineMeasuredStates(childState, child.getMeasuredState());
             }
 
@@ -844,7 +847,7 @@ public class RtlLinearLayout extends ViewGroup {
                                         MeasureSpec.EXACTLY));
                     }
 
-                    if (Build.VERSION.SDK_INT >= 11) {
+                    if (Build.VERSION.SDK_INT >= MIN_SDK_INT) {
                         // Child may now not fit in vertical dimension.
                         childState = combineMeasuredStates(childState, child.getMeasuredState()
                                 & (MEASURED_STATE_MASK >> MEASURED_HEIGHT_STATE_SHIFT));
@@ -910,7 +913,7 @@ public class RtlLinearLayout extends ViewGroup {
         // Check against our minimum width
         maxWidth = Math.max(maxWidth, getSuggestedMinimumWidth());
 
-        if (Build.VERSION.SDK_INT >= 11) {
+        if (Build.VERSION.SDK_INT >= MIN_SDK_INT) {
             setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
                     heightSizeAndState);
         } else {
@@ -1084,7 +1087,7 @@ public class RtlLinearLayout extends ViewGroup {
 
             final int margin = lp.topMargin + lp.bottomMargin;
             final int childHeight = child.getMeasuredHeight() + margin;
-            if (Build.VERSION.SDK_INT >= 11) {
+            if (Build.VERSION.SDK_INT >= MIN_SDK_INT) {
                 childState = combineMeasuredStates(childState, child.getMeasuredState());
             }
 
@@ -1180,7 +1183,7 @@ public class RtlLinearLayout extends ViewGroup {
 
         // Reconcile our calculated size with the widthMeasureSpec
         int widthSizeAndState = 0;
-        if (Build.VERSION.SDK_INT >= 11) {
+        if (Build.VERSION.SDK_INT >= MIN_SDK_INT) {
             widthSizeAndState = resolveSizeAndState(widthSize, widthMeasureSpec, 0);
             widthSize = widthSizeAndState & MEASURED_SIZE_MASK;
         } else {
@@ -1241,7 +1244,7 @@ public class RtlLinearLayout extends ViewGroup {
                                 childHeightMeasureSpec);
                     }
 
-                    if (Build.VERSION.SDK_INT >= 11) {
+                    if (Build.VERSION.SDK_INT >= MIN_SDK_INT) {
                         // Child may now not fit in horizontal dimension.
                         childState = combineMeasuredStates(childState,
                                 child.getMeasuredState() & MEASURED_STATE_MASK);
@@ -1338,7 +1341,7 @@ public class RtlLinearLayout extends ViewGroup {
         // Check against our minimum height
         maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
 
-        if (Build.VERSION.SDK_INT >= 11) {
+        if (Build.VERSION.SDK_INT >= MIN_SDK_INT) {
             setMeasuredDimension(widthSizeAndState | (childState & MEASURED_STATE_MASK),
                     resolveSizeAndState(maxHeight, heightMeasureSpec,
                             (childState << MEASURED_HEIGHT_STATE_SHIFT)));
@@ -1581,7 +1584,7 @@ public class RtlLinearLayout extends ViewGroup {
         final int[] maxAscent = mMaxAscent;
         final int[] maxDescent = mMaxDescent;
 
-        if (Build.VERSION.SDK_INT >= 11) {
+        if (Build.VERSION.SDK_INT >= MIN_SDK_INT) {
             final int layoutDirection = getLayoutDirection();
             switch (Gravity.getAbsoluteGravity(majorGravity, layoutDirection)) {
                 case Gravity.RIGHT:

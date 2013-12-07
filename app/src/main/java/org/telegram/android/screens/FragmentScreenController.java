@@ -381,8 +381,8 @@ public class FragmentScreenController implements RootController {
     }
 
     @Override
-    public void pickUser(int pickType) {
-        openScreen(new PickUserFragment(pickType));
+    public void pickUser() {
+        openScreen(new PickUserFragment());
     }
 
     @Override

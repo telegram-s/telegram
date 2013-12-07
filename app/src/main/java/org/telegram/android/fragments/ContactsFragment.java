@@ -260,6 +260,9 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 
 
         MenuItem searchItem = menu.findItem(R.id.searchMenu);
+
+        searchItem.setVisible(isLoaded);
+
         com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) searchItem.getActionView();
         // searchView.setQueryHint(getStringSafe(R.string.st_contacts_filter));
         searchView.setQueryHint("");
@@ -306,12 +309,17 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
             }
         });
 
-        if (application.getUserSettings().showOnlyTelegramContacts()) {
-            menu.findItem(R.id.allContacts).setVisible(true);
+        if (isLoaded) {
+            menu.findItem(R.id.allContacts).setVisible(false);
             menu.findItem(R.id.onlyTContacts).setVisible(false);
         } else {
-            menu.findItem(R.id.allContacts).setVisible(false);
-            menu.findItem(R.id.onlyTContacts).setVisible(true);
+            if (application.getUserSettings().showOnlyTelegramContacts()) {
+                menu.findItem(R.id.allContacts).setVisible(true);
+                menu.findItem(R.id.onlyTContacts).setVisible(false);
+            } else {
+                menu.findItem(R.id.allContacts).setVisible(false);
+                menu.findItem(R.id.onlyTContacts).setVisible(true);
+            }
         }
     }
 
@@ -333,7 +341,7 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 
     private void onDataChanged() {
         if (сontactsAdapter.getCount() == 0 || !isLoaded) {
-            if (application.getContactsSource().getState() == ContactSourceState.SYNCED && isLoaded) {
+            if (isLoaded) {
                 loading.setVisibility(View.GONE);
                 empty.setVisibility(View.VISIBLE);
             } else {
@@ -362,7 +370,10 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
         ContactsSource.LocalContact[] nContacts = application.getContactsSource().getContacts();
         if (nContacts != null) {
             originalUsers = nContacts;
-            isLoaded = true;
+            if (!isLoaded) {
+                isLoaded = true;
+                getSherlockActivity().invalidateOptionsMenu();
+            }
         } else {
             originalUsers = new ContactsSource.LocalContact[0];
         }

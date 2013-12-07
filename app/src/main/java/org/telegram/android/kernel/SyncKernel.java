@@ -76,6 +76,7 @@ public class SyncKernel {
         updateProcessor.clearData();
         updateProcessor.invalidateUpdates();
         updateProcessor.runUpdateProcessor();
+        contactsSync.invalidateContactsSync();
     }
 
     public void logOut() {
