@@ -3,7 +3,11 @@ package org.telegram.android.core.background;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.media.ThumbnailUtils;
 import android.os.*;
+import android.provider.MediaStore;
+import com.crittercism.app.Crittercism;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.files.UploadController;
@@ -468,9 +472,49 @@ public class MessageSender {
                             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                             retriever.setDataSource(uploadingVideo.getFileName());
                             timeInmillisec = Long.parseLong(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-                            img = retriever.getFrameAtTime(0);
-                            width = img.getWidth();
-                            height = img.getHeight();
+
+                            if (Build.VERSION.SDK_INT > 10) {
+                                img = ThumbnailUtils.createVideoThumbnail(uploadingVideo.getFileName(),
+                                        MediaStore.Images.Thumbnails.MINI_KIND);
+
+                                MediaPlayer mp = new MediaPlayer();
+                                final Object locker = new Object();
+                                final int[] sizes = new int[2];
+                                try {
+                                    mp.setDataSource(uploadingVideo.getFileName());
+                                    mp.prepare();
+                                    mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+                                        @Override
+                                        public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                                            synchronized (locker) {
+                                                sizes[0] = width;
+                                                sizes[1] = height;
+                                                locker.notify();
+                                            }
+                                        }
+                                    });
+
+                                    synchronized (locker) {
+                                        if (sizes[0] == 0 || sizes[1] == 1) {
+                                            locker.wait(5000);
+                                        }
+                                    }
+
+                                    if (sizes[0] == 0 || sizes[1] == 1) {
+                                        throw new IOException();
+                                    }
+
+                                    width = sizes[0];
+                                    height = sizes[1];
+                                } catch (Exception e) {
+                                    Crittercism.logHandledException(e);
+                                    throw new IOException();
+                                }
+                            } else {
+                                img = retriever.getFrameAtTime(0);
+                                width = img.getWidth();
+                                height = img.getHeight();
+                            }
                         } catch (Exception e) {
                             Logger.t(TAG, e);
                             break;

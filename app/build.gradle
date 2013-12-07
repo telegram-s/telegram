@@ -45,7 +45,7 @@ dependencies {
 }
 
 def basicVersion = '1.2'
-def customVersionCode = '1024';
+def customVersionCode = '10240';
 
 if (project.hasProperty('buildIndex')) {
     project.version = basicVersion + '.' + project.buildIndex
