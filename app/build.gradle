@@ -126,7 +126,7 @@ android {
         }
 
         dev {
-            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/translation-ru']
+            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
             assets.srcDirs = ['src/res-common/assets']
             java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java']
         }

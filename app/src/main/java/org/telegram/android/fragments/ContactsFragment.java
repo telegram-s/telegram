@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.Html;
@@ -32,6 +33,7 @@ import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarEmpty;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.log.Logger;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
@@ -46,6 +48,7 @@ import org.telegram.api.requests.TLRequestContactsDeleteContacts;
 import org.telegram.tl.TLVector;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Author: Korshakov Stepan
@@ -53,14 +56,19 @@ import java.util.ArrayList;
  */
 public class ContactsFragment extends StelsFragment implements ContactSourceListener {
 
+    private static final String TAG = "ContactsFragment";
+
     private FilterMatcher matcher;
 
+    private String settingSortKey;
+    private String settingDisplayOrder;
+
     private DataSourceUpdater dataSourceUpdater;
-    private User[] originalUsers;
-    private User[] filteredUsers;
+    private LocalContact[] originalUsers;
+    private LocalContact[] filteredUsers;
     private boolean isLoaded;
     // private BaseAdapter contactsAdapter;
-    private CursorAdapter localContactsAdapter;
+    private BaseAdapter localContactsAdapter;
     private ListView contactsList;
     private View empty;
     private View loading;
@@ -112,10 +120,6 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
             }
         });
 
-        originalUsers = new User[0];
-        filteredUsers = new User[0];
-        isLoaded = false;
-
         int sort_order = 1;
         int display_order = 1;
         try {
@@ -129,19 +133,21 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
             e.printStackTrace();
         }
 
-        final String sortKey;
         if (sort_order == 1) {
-            sortKey = ContactsContract.Contacts.SORT_KEY_PRIMARY;
+            settingSortKey = ContactsContract.Contacts.SORT_KEY_PRIMARY;
         } else {
-            sortKey = ContactsContract.Contacts.SORT_KEY_ALTERNATIVE;
+            settingSortKey = ContactsContract.Contacts.SORT_KEY_ALTERNATIVE;
         }
 
-        final String displayName;
         if (display_order == 1) {
-            displayName = ContactsContract.Contacts.DISPLAY_NAME_PRIMARY;
+            settingDisplayOrder = ContactsContract.Contacts.DISPLAY_NAME_PRIMARY;
         } else {
-            displayName = ContactsContract.Contacts.DISPLAY_NAME_ALTERNATIVE;
+            settingDisplayOrder = ContactsContract.Contacts.DISPLAY_NAME_ALTERNATIVE;
         }
+
+        originalUsers = new LocalContact[0];
+        filteredUsers = new LocalContact[0];
+        isLoaded = false;
 
         contactsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -152,25 +158,13 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
                     shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, application.getDynamicConfig().getInviteMessage());
                     startActivity(shareIntent);
                 } else {
-                    Cursor c = (Cursor) adapterView.getItemAtPosition(i);
-                    final long id = c.getLong(c.getColumnIndex(ContactsContract.Contacts._ID));
-//                    new AlertDialog.Builder(getActivity()).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialogInterface, int b) {
-//                            Cursor c = (Cursor) adapterView.getItemAtPosition(i);
-//                            String lookupKey = c.getString(c.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
-//                            Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey);
-//                            application.getContentResolver().delete(uri, null, null);
-//                        }
-//                    }).setNegativeButton("No", null).show();
-
-                    Contact[] contacts = application.getEngine().getContactsForLocalId(id);
+                    final LocalContact contact = (LocalContact) adapterView.getItemAtPosition(i);
+                    Contact[] contacts = application.getEngine().getContactsForLocalId(contact.contactId);
                     if (contacts.length > 0) {
                         getRootController().openUser(contacts[0].getUid());
                     } else {
-                        String srcName = c.getString(c.getColumnIndex(displayName));
                         AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_contacts_not_registered_title)
-                                .setMessage(getStringSafe(R.string.st_contacts_not_registered_message).replace("{0}", srcName))
+                                .setMessage(getStringSafe(R.string.st_contacts_not_registered_message).replace("{0}", contact.displayName))
                                 .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -179,7 +173,7 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
                                                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                                                     null,
                                                     ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                                                    new String[]{id + ""}, null);
+                                                    new String[]{contact.contactId + ""}, null);
 
                                             if (pCur.moveToFirst()) {
                                                 String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
@@ -206,10 +200,6 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
                         dialog.show();
 
                     }
-
-
-//                    User user = (User) adapterView.getItemAtPosition(i);
-//                    getRootController().openDialog(PeerType.PEER_USER, user.getUid());
                 }
             }
         });
@@ -259,41 +249,28 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
             }
         });
 
-        ContentResolver cr = application.getContentResolver();
-        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                new String[]{
-                        ContactsContract.Contacts._ID,
-                        ContactsContract.Contacts.LOOKUP_KEY,
-                        displayName
-                },
-                ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0 ", null, sortKey);
+        final Context context = getActivity();
+        localContactsAdapter = new BaseAdapter() {
 
-        localContactsAdapter = new CursorAdapter(getActivity(), cur, false) {
-
-            @Override
-            public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+            public View newView(Context context) {
                 return View.inflate(context, R.layout.contacts_item, null);
             }
 
-            @Override
-            public void bindView(View view, final Context context, Cursor cursor) {
-                final long id = cursor.getLong(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                String srcName = cursor.getString(cursor.getColumnIndex(displayName));
-
-                Contact[] contacts = application.getEngine().getContactsForLocalId(id);
+            public void bindView(View view, final Context context, int index) {
+                final LocalContact contact = getItem(index);
+                ((TextView) view.findViewById(R.id.name)).setText(contact.displayName);
                 TextView onlineView = (TextView) view.findViewById(R.id.status);
 
-                if (contacts.length > 0) {
-                    User u = application.getEngine().getUser(contacts[0].getUid());
-                    ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(Placeholders.getUserPlaceholder(u.getUid()));
-                    if (u.getPhoto() != null && (u.getPhoto() instanceof TLLocalAvatarPhoto)) {
-                        TLLocalAvatarPhoto p = (TLLocalAvatarPhoto) u.getPhoto();
+                if (contact.user != null) {
+                    ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(Placeholders.getUserPlaceholder(contact.user.getUid()));
+                    if (contact.user.getPhoto() != null && (contact.user.getPhoto() instanceof TLLocalAvatarPhoto)) {
+                        TLLocalAvatarPhoto p = (TLLocalAvatarPhoto) contact.user.getPhoto();
                         ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(new StelsImageTask((TLLocalFileLocation) p.getPreviewLocation()));
                     } else {
                         ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
                     }
 
-                    int statusValue = getUserState(u.getStatus());
+                    int statusValue = getUserState(contact.user.getStatus());
                     if (statusValue < 0) {
                         onlineView.setText(R.string.st_offline);
                         onlineView.setTextColor(getResources().getColor(R.color.st_grey_text));
@@ -314,9 +291,31 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
                     view.findViewById(R.id.shareIcon).setVisibility(View.VISIBLE);
                 }
 
-                ((TextView) view.findViewById(R.id.name)).setText(srcName);
 
+            }
 
+            @Override
+            public int getCount() {
+                return filteredUsers.length;
+            }
+
+            @Override
+            public LocalContact getItem(int i) {
+                return filteredUsers[i];
+            }
+
+            @Override
+            public long getItemId(int i) {
+                return filteredUsers[i].contactId;
+            }
+
+            @Override
+            public View getView(int i, View view, ViewGroup viewGroup) {
+                if (view == null) {
+                    view = newView(context);
+                }
+                bindView(view, context, i);
+                return view;
             }
         };
 
@@ -333,21 +332,63 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
         contactsList.addHeaderView(share);
         contactsList.setAdapter(localContactsAdapter);
 
-        if (application.getContactsSource().isCacheAlive()) {
-            originalUsers = application.getContactsSource().getSortedUsers();
-            doFilter();
-            isLoaded = true;
-        }
+//        if (application.getContactsSource().isCacheAlive()) {
+//            originalUsers = application.getContactsSource().getSortedUsers();
+//            doFilter();
+//            isLoaded = true;
+//        }
 
         dataSourceUpdater = new DataSourceUpdater(this) {
             @Override
             protected void doUpdate() {
+                long start = SystemClock.uptimeMillis();
+                ContentResolver cr = application.getContentResolver();
+                Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
+                        new String[]{
+                                ContactsContract.Contacts._ID,
+                                ContactsContract.Contacts.LOOKUP_KEY,
+                                settingDisplayOrder
+                        },
+                        ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0 ", null, settingSortKey);
+
+                final LocalContact[] contacts = new LocalContact[cur.getCount()];
+
+                Contact[] netContacts = application.getEngine().getAllContacts();
+                HashSet<Integer> ids = new HashSet<Integer>();
+                for (Contact c : netContacts) {
+                    ids.add(c.getUid());
+                }
+                application.getEngine().getUsersById(ids.toArray());
+
+                if (cur.moveToFirst()) {
+                    for (int i = 0; i < contacts.length; i++) {
+                        final long id = cur.getLong(cur.getColumnIndex(ContactsContract.Contacts._ID));
+                        String srcName = cur.getString(cur.getColumnIndex(settingDisplayOrder));
+
+                        User relatedContact = null;
+                        for (Contact contact : netContacts) {
+                            if (contact.getLocalId() == id) {
+                                relatedContact = application.getEngine().getUser(contact.getUid());
+                                break;
+                            }
+                        }
+                        if (relatedContact != null) {
+                            contacts[i] = new LocalContact(id, srcName, relatedContact);
+                        } else {
+                            contacts[i] = new LocalContact(id, srcName);
+                        }
+                        cur.moveToNext();
+                    }
+                }
+
+                Logger.d(TAG, "Contacts loading time in " + (SystemClock.uptimeMillis() - start) + " ms");
+
                 final User[] users = application.getContactsSource().getSortedUsers();
                 secureCallback(new Runnable() {
                     @Override
                     public void run() {
                         isLoaded = true;
-                        originalUsers = users;
+                        originalUsers = contacts;
                         doFilter();
                     }
                 });
@@ -364,21 +405,25 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
     }
 
     private void doFilter() {
-//        if (matcher != null && matcher.getQuery().length() > 0) {
-//            ArrayList<User> filtered = new ArrayList<User>();
-//            for (User u : originalUsers) {
-//                if (matcher.isMatched(u.getDisplayName())) {
-//                    filtered.add(u);
-//                }
-//            }
-//            filteredUsers = filtered.toArray(new User[0]);
-//            applyFilter = true;
-//        } else {
-//            filteredUsers = originalUsers;
-//            applyFilter = false;
-//        }
+        if (matcher != null && matcher.getQuery().length() > 0) {
+            ArrayList<LocalContact> filtered = new ArrayList<LocalContact>();
+            for (LocalContact u : originalUsers) {
+                if (matcher.isMatched(u.displayName)) {
+                    filtered.add(u);
+                }
+            }
+            filteredUsers = filtered.toArray(new LocalContact[0]);
+            // applyFilter = true;
+        } else {
+            filteredUsers = originalUsers;
+            // applyFilter = false;
+        }
 //        allAdapter.notifyDataSetChanged();
-//        onDataChanged();
+//        filteredUsers = originalUsers;
+//         applyFilter = false;
+
+        localContactsAdapter.notifyDataSetChanged();
+        onDataChanged();
     }
 
     @Override
@@ -456,20 +501,20 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
     }
 
     private void onDataChanged() {
-//        if (allAdapter.getCount() == 0 || !isLoaded) {
-//            if (application.getContactsSource().getState() == ContactSourceState.SYNCED && isLoaded) {
-//                loading.setVisibility(View.GONE);
-//                empty.setVisibility(View.VISIBLE);
-//            } else {
-//                loading.setVisibility(View.VISIBLE);
-//                empty.setVisibility(View.GONE);
-//            }
-//            contactsList.setVisibility(View.GONE);
-//        } else {
-//            loading.setVisibility(View.GONE);
-//            empty.setVisibility(View.GONE);
-//            contactsList.setVisibility(View.VISIBLE);
-//        }
+        if (localContactsAdapter.getCount() == 0 || !isLoaded) {
+            if (application.getContactsSource().getState() == ContactSourceState.SYNCED && isLoaded) {
+                loading.setVisibility(View.GONE);
+                empty.setVisibility(View.VISIBLE);
+            } else {
+                loading.setVisibility(View.VISIBLE);
+                empty.setVisibility(View.GONE);
+            }
+            contactsList.setVisibility(View.GONE);
+        } else {
+            loading.setVisibility(View.GONE);
+            empty.setVisibility(View.GONE);
+            contactsList.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -492,5 +537,23 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
     @Override
     public void onContactsDataChanged() {
         dataSourceUpdater.invalidate();
+    }
+
+    private class LocalContact {
+        public long contactId;
+        public String displayName;
+        public User user;
+
+        private LocalContact(long contactId, String displayName) {
+            this.contactId = contactId;
+            this.displayName = displayName;
+            this.user = null;
+        }
+
+        private LocalContact(long contactId, String displayName, User user) {
+            this.contactId = contactId;
+            this.displayName = displayName;
+            this.user = user;
+        }
     }
 }

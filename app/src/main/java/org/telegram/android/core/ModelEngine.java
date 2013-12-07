@@ -910,6 +910,10 @@ public class ModelEngine {
         });
     }
 
+    public Contact[] getAllContacts() {
+        return getContactsDao().queryForAll().toArray(new Contact[0]);
+    }
+
     public Contact[] getContactsForLocalId(long localId) {
         return getContactsDao().queryForEq("localId", localId).toArray(new Contact[0]);
     }
