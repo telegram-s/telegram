@@ -473,7 +473,7 @@ public class MessageSender {
                             retriever.setDataSource(uploadingVideo.getFileName());
                             timeInmillisec = Long.parseLong(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
 
-                            if (Build.VERSION.SDK_INT > 10) {
+                            if (Build.VERSION.SDK_INT < 10) {
                                 img = ThumbnailUtils.createVideoThumbnail(uploadingVideo.getFileName(),
                                         MediaStore.Images.Thumbnails.MINI_KIND);
 
