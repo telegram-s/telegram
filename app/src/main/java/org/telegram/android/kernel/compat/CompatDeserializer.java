@@ -94,9 +94,12 @@ public class CompatDeserializer {
             res.setPreviewHeight(video.getPreviewHeight());
             res.setPreviewWidth(video.getPreviewWidth());
             return res;
+        } else if (object == null) {
+            return null;
+        } else {
+            Logger.d(TAG, "Unknown java object:" + object.toString());
+            return null;
         }
-        Logger.d(TAG, "Unknown java object:" + object.toString());
-        return null;
     }
 
     public static TLObject deserialize(byte[] data) {

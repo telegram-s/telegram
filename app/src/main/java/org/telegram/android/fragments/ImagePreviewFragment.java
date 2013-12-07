@@ -286,6 +286,10 @@ public class ImagePreviewFragment extends StelsFragment {
                     DownloadListener listener = new DownloadListener() {
                         @Override
                         public void onStateChanged(String _key, DownloadState state, int percent) {
+                            if (_key == null) {
+                                return;
+                            }
+
                             if (res.getTag() != this) {
                                 application.getDownloadManager().unregisterListener(this);
                                 return;
@@ -428,12 +432,14 @@ public class ImagePreviewFragment extends StelsFragment {
     }
 
     private void onImageTap() {
-        if (getSherlockActivity().getSupportActionBar().isShowing()) {
-            getSherlockActivity().getSupportActionBar().hide();
-            hideView(bottomPanel);
-        } else {
-            getSherlockActivity().getSupportActionBar().show();
-            showView(bottomPanel);
+        if (getSherlockActivity() != null && getSherlockActivity().getSupportActionBar() != null) {
+            if (getSherlockActivity().getSupportActionBar() != null && getSherlockActivity().getSupportActionBar().isShowing()) {
+                getSherlockActivity().getSupportActionBar().hide();
+                hideView(bottomPanel);
+            } else {
+                getSherlockActivity().getSupportActionBar().show();
+                showView(bottomPanel);
+            }
         }
     }
 

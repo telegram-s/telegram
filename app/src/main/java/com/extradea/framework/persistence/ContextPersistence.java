@@ -54,10 +54,6 @@ public class ContextPersistence extends PersistenceObject {
 
     @Override
     protected InputStream openRead(String path, boolean error) throws IOException {
-        if (error) {
-            return context.getAssets().open(path);
-        } else {
-            return context.openFileInput(path);
-        }
+        return context.openFileInput(path);
     }
 }

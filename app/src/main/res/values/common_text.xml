@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="error_sd_card">SD Card not available</string>
     <string name="lang_common_typing">typing...</string>
     <string name="lang_common_typing_single">{content} is typing...</string>
     <string name="lang_common_typing_multiple">{content} are typing...</string>

@@ -727,7 +727,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
         // Group sender
         if (isGroup) {
-            String wName = senderTitle.replace("\n", " ");
+            String wName = senderTitle != null ? senderTitle.replace("\n", " ") : "UNKNOWN";
             if (wName.length() > 100) {
                 wName = wName.substring(100) + "...";
             }

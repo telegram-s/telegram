@@ -3,7 +3,9 @@ package org.telegram.android.media;
 import android.graphics.*;
 import android.media.MediaScannerConnection;
 import android.os.*;
+import android.widget.Toast;
 import com.extradea.framework.images.utils.ImageUtils;
+import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.log.Logger;
@@ -132,6 +134,12 @@ public class DownloadManager {
         if (downloadPersistence.isDownloaded(resourceKey))
             return;
 
+        String fileName = getDownloadImageFile(resourceKey);
+        if (fileName == null) {
+            Toast.makeText(application, R.string.error_sd_card, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         final DownloadRecord record;
         if (records.containsKey(resourceKey)) {
             record = records.get(resourceKey);
@@ -164,6 +172,12 @@ public class DownloadManager {
         if (downloadPersistence.isDownloaded(resourceKey))
             return;
 
+        String fileName = getDownloadImageFile(resourceKey);
+        if (fileName == null) {
+            Toast.makeText(application, R.string.error_sd_card, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         final DownloadRecord record;
         if (records.containsKey(resourceKey)) {
             record = records.get(resourceKey);
@@ -187,7 +201,7 @@ public class DownloadManager {
         }
 
         requestDownload(resourceKey, record,
-                getDownloadVideoFile(resourceKey),
+                fileName,
                 video.getVideoLocation());
     }
 
@@ -279,6 +293,12 @@ public class DownloadManager {
                         Logger.d(TAG, "@" + key + " = saving thumb");
                         FileOutputStream outputStream = null;
                         try {
+                            String thumbFileName = getPhotoThumbSmallFileName(key);
+                            if (thumbFileName == null) {
+                                Toast.makeText(application, "SD card not available", Toast.LENGTH_SHORT).show();
+                                updateState(key, DownloadState.FAILURE, 100, size);
+                                return;
+                            }
                             outputStream = new FileOutputStream(getPhotoThumbSmallFileName(key));
                             thumb.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
                         } catch (FileNotFoundException e) {
@@ -367,19 +387,31 @@ public class DownloadManager {
     }
 
     private String getDownloadVideoFile(String key) {
-        return application.getExternalCacheDir().getAbsolutePath() + "/video_" + key + ".mp4";
+        if (application.getExternalCacheDir() != null) {
+            return application.getExternalCacheDir().getAbsolutePath() + "/video_" + key + ".mp4";
+        }
+        return null;
     }
 
     private String getDownloadImageFile(String key) {
-        return application.getExternalCacheDir().getAbsolutePath() + "/image_" + key + ".jpg";
+        if (application.getExternalCacheDir() != null) {
+            return application.getExternalCacheDir().getAbsolutePath() + "/image_" + key + ".jpg";
+        }
+        return null;
     }
 
     private String getDownloadImageThumbFile(String key) {
-        return application.getExternalCacheDir().getAbsolutePath() + "/image_thumb_" + key + ".jpg";
+        if (application.getExternalCacheDir() != null) {
+            return application.getExternalCacheDir().getAbsolutePath() + "/image_thumb_" + key + ".jpg";
+        }
+        return null;
     }
 
     private String getDownloadTempFile() {
-        return application.getExternalCacheDir().getAbsolutePath() + "/download_" + Entropy.generateRandomId() + ".bin";
+        if (application.getExternalCacheDir() != null) {
+            return application.getExternalCacheDir().getAbsolutePath() + "/download_" + Entropy.generateRandomId() + ".bin";
+        }
+        return null;
     }
 
 

@@ -2,9 +2,9 @@
 <resources>
     <string name="whats_new_design_title">Design, speed and stability</string>
     <string name="whats_new_design_0">New blue design</string>
-    <string name="whats_new_design_1">Speed up photo, video and message delivery</string>
-    <string name="whats_new_design_2">Optimizations to "firewalled" countries</string>
-    <string name="whats_new_design_3">Much better stability</string>
+    <string name="whats_new_design_1">Faster message, photo and video delivery</string>
+    <string name="whats_new_design_2">Optimized for firewalled countries</string>
+    <string name="whats_new_design_3">Highly improved stability</string>
 
     <string name="whats_new_secret_title">Added secret chats</string>
     <string name="whats_new_secret_hint">Start a secret chat from the "Write to" menu or from a contact\'s profile.
