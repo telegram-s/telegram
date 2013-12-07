@@ -17,6 +17,7 @@ public class UserSettings {
     private boolean isWallpaperSolid = false;
     private int currentWallpaperSolidColor = 0;
     private boolean isSaveToGalleryEnabled = true;
+    private boolean showOnlyTelegramContacts = false;
 
     public UserSettings(Context context) {
         preferences = context.getSharedPreferences("org.telegram.android.UserSettings.pref", Context.MODE_PRIVATE);
@@ -25,6 +26,7 @@ public class UserSettings {
         currentWallpaperSolidColor = preferences.getInt("wallpaperColor", currentWallpaperSolidColor);
         isWallpaperSolid = preferences.getBoolean("isWallpaperSolid", isWallpaperSolid);
         isSaveToGalleryEnabled = preferences.getBoolean("save_to_gallery", isSaveToGalleryEnabled);
+        showOnlyTelegramContacts = preferences.getBoolean("only_telegram", showOnlyTelegramContacts);
     }
 
     public int getCurrentWallpaperId() {
@@ -85,5 +87,15 @@ public class UserSettings {
         isWallpaperSolid = false;
         currentWallpaperSolidColor = 0;
         isSaveToGalleryEnabled = true;
+        showOnlyTelegramContacts = false;
+    }
+
+    public boolean showOnlyTelegramContacts() {
+        return showOnlyTelegramContacts;
+    }
+
+    public void setShowOnlyTelegramContacts(boolean value) {
+        showOnlyTelegramContacts = value;
+        preferences.edit().putBoolean("only_telegram", value).commit();
     }
 }

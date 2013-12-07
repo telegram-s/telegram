@@ -6,4 +6,12 @@
           android:icon="@drawable/st_bar_ic_search"
           android:title="Search"
           android:showAsAction="always|collapseActionView"/>
+
+    <item android:id="@+id/onlyTContacts"
+          android:title="Only Telegram contacts"
+          android:showAsAction="never"/>
+
+    <item android:id="@+id/allContacts"
+          android:title="All contacts"
+          android:showAsAction="never"/>
 </menu>

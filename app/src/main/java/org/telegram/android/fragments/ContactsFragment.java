@@ -48,6 +48,7 @@ import org.telegram.api.requests.TLRequestContactsDeleteContacts;
 import org.telegram.tl.TLVector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 
 /**
@@ -405,9 +406,19 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
     }
 
     private void doFilter() {
+        ArrayList<LocalContact> preFiltered = new ArrayList<LocalContact>();
+        if (application.getUserSettings().showOnlyTelegramContacts()) {
+            for (LocalContact u : originalUsers) {
+                if (u.user != null) {
+                    preFiltered.add(u);
+                }
+            }
+        } else {
+            Collections.addAll(preFiltered, originalUsers);
+        }
         if (matcher != null && matcher.getQuery().length() > 0) {
             ArrayList<LocalContact> filtered = new ArrayList<LocalContact>();
-            for (LocalContact u : originalUsers) {
+            for (LocalContact u : preFiltered) {
                 if (matcher.isMatched(u.displayName)) {
                     filtered.add(u);
                 }
@@ -415,7 +426,7 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
             filteredUsers = filtered.toArray(new LocalContact[0]);
             // applyFilter = true;
         } else {
-            filteredUsers = originalUsers;
+            filteredUsers = preFiltered.toArray(new LocalContact[0]);
             // applyFilter = false;
         }
 //        allAdapter.notifyDataSetChanged();
@@ -498,6 +509,30 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
                 return true;
             }
         });
+
+        if (application.getUserSettings().showOnlyTelegramContacts()) {
+            menu.findItem(R.id.allContacts).setVisible(true);
+            menu.findItem(R.id.onlyTContacts).setVisible(false);
+        } else {
+            menu.findItem(R.id.allContacts).setVisible(false);
+            menu.findItem(R.id.onlyTContacts).setVisible(true);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.onlyTContacts) {
+            application.getUserSettings().setShowOnlyTelegramContacts(true);
+            getSherlockActivity().invalidateOptionsMenu();
+            doFilter();
+            return true;
+        } else if (item.getItemId() == R.id.allContacts) {
+            application.getUserSettings().setShowOnlyTelegramContacts(false);
+            getSherlockActivity().invalidateOptionsMenu();
+            doFilter();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void onDataChanged() {
