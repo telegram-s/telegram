@@ -5,6 +5,7 @@ import org.telegram.android.core.TypingStates;
 import org.telegram.android.core.background.MessageSender;
 import org.telegram.android.core.background.UpdateProcessor;
 import org.telegram.android.core.background.sync.BackgroundSync;
+import org.telegram.android.core.background.sync.ContactsSync;
 
 /**
  * Created by ex3ndr on 16.11.13.
@@ -12,6 +13,7 @@ import org.telegram.android.core.background.sync.BackgroundSync;
 public class SyncKernel {
     private ApplicationKernel kernel;
 
+    private ContactsSync contactsSync;
     private BackgroundSync backgroundSync;
     private UpdateProcessor updateProcessor;
     private MessageSender messageSender;
@@ -44,12 +46,17 @@ public class SyncKernel {
         return backgroundSync;
     }
 
+    public ContactsSync getContactsSync() {
+        return contactsSync;
+    }
+
     private void init() {
         messageSender = new MessageSender(kernel.getApplication());
         typingStates = new TypingStates(kernel.getApplication());
         // updateProcessor = new UpdateProcessor(kernel.getApplication());
         dynamicConfig = new DynamicConfig(kernel.getApplication());
         backgroundSync = new BackgroundSync(kernel.getApplication());
+        contactsSync = new ContactsSync(kernel.getApplication());
     }
 
     public void runKernel() {
@@ -60,6 +67,7 @@ public class SyncKernel {
             // actions.checkHistory();
         }
         backgroundSync.run();
+        contactsSync.run();
     }
 
     public void logIn() {

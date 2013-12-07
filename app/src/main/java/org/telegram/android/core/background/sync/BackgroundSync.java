@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Created by ex3ndr on 22.11.13.
  */
-public class BackgroundSync extends AbsBackgroundSync {
+public class BackgroundSync extends BaseSync {
     private static final int SEC = 1;
     private static final int MIN = 60 * SEC;
     private static final int HOUR = 60 * MIN;
@@ -37,7 +37,6 @@ public class BackgroundSync extends AbsBackgroundSync {
     private static final int SYNC_TYPING = 5;
     private static final int SYNC_HISTORY = 6;
     private static final int SYNC_ACCEPTOR = 7;
-
     private static final String TAG = "BackgroundSync";
 
     private StelsApplication application;

@@ -41,7 +41,7 @@ public class DebugFragment extends StelsFragment {
         res.findViewById(R.id.resetContactsSync).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                application.getContactsSource().resetState();
+                application.getSyncKernel().getContactsSync().invalidateContactsSync();
             }
         });
         res.findViewById(R.id.resetDcSync).setOnClickListener(new View.OnClickListener() {

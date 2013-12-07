@@ -15,15 +15,20 @@ import java.util.HashMap;
 /**
  * Created by ex3ndr on 01.12.13.
  */
-public abstract class AbsBackgroundSync {
+public abstract class BaseSync {
     private static final String PREFERENCES_NAME = "org.telegram.android";
-    private static final String TAG = "AbsBackgroundSync";
+    private final String TAG;
 
     private static final long ERROR_DELAY = 5000;
     private static final long NO_API_DELAY = 10000;
     private static final long NO_LOGIN_DELAY = 10000;
 
+    private static final int HANDLER_ONLINE = 0;
+    private static final int HANDLER_OFFLINE = 1;
+
     private HashMap<Integer, SyncHolder> syncEntities = new HashMap<Integer, SyncHolder>();
+
+    private HashMap<Integer, Handler> syncHandlers;
 
     private HandlerThread networkThread;
     private HandlerThread offlineThread;
@@ -34,7 +39,8 @@ public abstract class AbsBackgroundSync {
 
     protected SharedPreferences preferences;
 
-    protected AbsBackgroundSync(StelsApplication application) {
+    protected BaseSync(StelsApplication application) {
+        this.TAG = getClass().getName();
         this.application = application;
         this.preferences = application.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
     }
@@ -55,6 +61,10 @@ public abstract class AbsBackgroundSync {
         this.networkHandler = new SyncHandler(networkThread.getLooper());
         this.offlineHandler = new SyncHandler(offlineThread.getLooper());
 
+        this.syncHandlers = new HashMap<Integer, Handler>();
+        this.syncHandlers.put(HANDLER_ONLINE, networkHandler);
+        this.syncHandlers.put(HANDLER_OFFLINE, offlineHandler);
+
         for (SyncHolder entity : syncEntities.values()) {
             if (!entity.isAutostart) {
                 continue;
@@ -74,23 +84,39 @@ public abstract class AbsBackgroundSync {
         }
     }
 
+    private Handler getHandler(SyncHolder holder) {
+        if (holder.isOffline) {
+            return syncHandlers.get(HANDLER_OFFLINE);
+        } else {
+            return syncHandlers.get(HANDLER_ONLINE);
+        }
+    }
+
     protected void registerOfflineSync(int id, String methodName, int timeout) {
         registerSync(id, methodName, timeout, true, true, true, true);
     }
 
     protected void registerTechSync(int id, String methodName, int timeout) {
-        registerSync(id, methodName, timeout, true, true, false, true);
+        registerSync(id, methodName, timeout, true, true, false, false);
     }
 
     protected void registerSync(int id, String methodName, int timeout) {
-        registerSync(id, methodName, timeout, true, true, true, true);
+        registerSync(id, methodName, timeout, true, true, true, false);
     }
 
     protected void registerSyncSingle(int id, String methodName) {
+        registerSync(id, methodName, Integer.MAX_VALUE, false, true, true, false);
+    }
+
+    protected void registerSyncSingleOffline(int id, String methodName) {
         registerSync(id, methodName, Integer.MAX_VALUE, false, true, true, true);
     }
 
     protected void registerSyncEvent(int id, String methodName) {
+        registerSync(id, methodName, Integer.MAX_VALUE, false, false, true, false);
+    }
+
+    protected void registerSyncEventOffline(int id, String methodName) {
         registerSync(id, methodName, Integer.MAX_VALUE, false, false, true, true);
     }
 
@@ -133,16 +159,27 @@ public abstract class AbsBackgroundSync {
         }
 
         synchronized (entity) {
-            try {
-                Logger.d(TAG, "Starting sync: " + entity.name);
-                entity.method.invoke(this);
-                Logger.d(TAG, "Sync ended: " + entity.name);
+            entity.isInProgress = true;
+        }
+        try {
+            Logger.d(TAG, "Starting sync: " + entity.name);
+            entity.method.invoke(this);
+            Logger.d(TAG, "Sync ended: " + entity.name);
+            synchronized (entity) {
+                entity.isInProgress = false;
+                if (entity.isInvalidatedDuringExecution) {
+                    return;
+                }
                 if (entity.isCyclic) {
                     markAsSynced(syncId);
                 }
-            } catch (Exception e) {
-                Logger.w(TAG, "Sync failure: " + entity.name);
-                Logger.t(TAG, e);
+            }
+        } catch (Exception e) {
+            Logger.w(TAG, "Sync failure: " + entity.name);
+            Logger.t(TAG, e);
+            synchronized (entity) {
+                entity.isInProgress = false;
+                entity.isInvalidatedDuringExecution = false;
                 syncFailure(syncId);
             }
         }
@@ -185,20 +222,18 @@ public abstract class AbsBackgroundSync {
             return;
         }
 
-        if (entity.isOffline) {
-            offlineHandler.removeMessages(entity.id);
-            if (delay > 0) {
-                offlineHandler.sendEmptyMessageDelayed(entity.id, delay);
-            } else {
-                offlineHandler.sendEmptyMessage(entity.id);
+        synchronized (entity) {
+            if (entity.isInProgress) {
+                entity.isInvalidatedDuringExecution = true;
             }
+        }
+
+        Handler handler = getHandler(entity);
+        handler.removeMessages(entity.id);
+        if (delay > 0) {
+            handler.sendEmptyMessageDelayed(entity.id, delay);
         } else {
-            networkHandler.removeMessages(entity.id);
-            if (delay > 0) {
-                networkHandler.sendEmptyMessageDelayed(entity.id, delay);
-            } else {
-                networkHandler.sendEmptyMessage(entity.id);
-            }
+            handler.sendEmptyMessage(entity.id);
         }
     }
 
@@ -222,5 +257,7 @@ public abstract class AbsBackgroundSync {
         public boolean isCyclic;
         public boolean isAutostart;
         public Method method;
+        public boolean isInProgress;
+        public boolean isInvalidatedDuringExecution;
     }
 }

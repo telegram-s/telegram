@@ -18,10 +18,16 @@ import org.telegram.android.Configuration;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.LinkType;
+import org.telegram.android.core.model.TLLocalContext;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
+import org.telegram.android.core.model.phone.TLLocalBook;
+import org.telegram.android.core.model.phone.TLLocalBookContact;
+import org.telegram.android.core.model.phone.TLLocalBookPhone;
+import org.telegram.android.core.model.storage.TLStorage;
+import org.telegram.android.critical.TLPersistence;
 import org.telegram.android.log.Logger;
 import org.telegram.api.*;
 import org.telegram.api.contacts.TLAbsContacts;
@@ -31,6 +37,7 @@ import org.telegram.api.requests.TLRequestContactsGetContacts;
 import org.telegram.api.requests.TLRequestContactsImportContacts;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.time.TimeOverlord;
+import org.telegram.tl.TLObject;
 import org.telegram.tl.TLVector;
 
 import java.security.MessageDigest;
@@ -133,22 +140,18 @@ public class ContactsSource {
 
     private final CopyOnWriteArrayList<ContactSourceListener> listeners = new CopyOnWriteArrayList<ContactSourceListener>();
 
-    private long maxContactId;
-
-    private String lastSyncHash;
-
     private SharedPreferences preferences;
 
     private boolean isClosed = false;
 
     private ContentObserver contentObserver;
 
+    private String lastSyncHash;
+
     public ContactsSource(StelsApplication application) {
         this.state = ContactSourceState.UNSYNCED;
         this.application = application;
         this.preferences = application.getSharedPreferences("org.telegram.android.contacts", Context.MODE_PRIVATE);
-        this.maxContactId = preferences.getLong("max_sync_id", 0);
-        this.lastSyncHash = preferences.getString("sync_hash", null);
         this.observerUpdatesThread = new HandlerThread("ObserverHandlerThread");
         this.observerUpdatesThread.start();
     }
@@ -214,7 +217,6 @@ public class ContactsSource {
         return (int) (TimeOverlord.getInstance().getServerTime() / 1000);
     }
 
-
     private boolean checkPhonesChanged() {
         PhoneBookRecord[] book = loadPhoneBook();
         String bookHash = phoneBookHash(book);
@@ -258,8 +260,6 @@ public class ContactsSource {
     }
 
     public synchronized void resetState() {
-        this.preferences.edit().remove("max_sync_id").remove("sync_hash").commit();
-        this.lastSyncHash = null;
         startSync();
     }
 
@@ -432,7 +432,6 @@ public class ContactsSource {
 
     private void doUploadContacts() throws Exception {
         long startFetchingContacts = System.currentTimeMillis();
-        long newMaxId = maxContactId;
         TLVector<TLInputContact> inputContacts = new TLVector<TLInputContact>();
 
         PhoneBookRecord[] book = loadPhoneBook();
@@ -461,37 +460,36 @@ public class ContactsSource {
             }
         }
 
-        TLImportedContacts importedContacts = application.getApi().doRpcCall(new TLRequestContactsImportContacts(inputContacts, false), 15000);
-        application.getEngine().onUsers(importedContacts.getUsers());
-
-        HashMap<Long, HashSet<Integer>> importedUsers = new HashMap<Long, HashSet<Integer>>();
-
-        for (TLImportedContact contact : importedContacts.getImported()) {
-            for (Long phoneId : realPhoneMap.get(contact.getClientId())) {
-                long contactId = idMap.get(phoneId);
-                int userId = contact.getUserId();
-                if (importedUsers.containsKey(contactId)) {
-                    importedUsers.get(contactId).add(userId);
-                } else {
-                    HashSet<Integer> set = new HashSet<Integer>();
-                    set.add(userId);
-                    importedUsers.put(contactId, set);
-                }
-            }
-        }
-        application.getEngine().onImportedContacts(importedUsers);
-
-        for (User user : application.getEngine().getContacts()) {
-            contactsCache.add(user.getUid());
-        }
-
-        maxContactId = newMaxId;
-        lastSyncHash = bookHash;
-        if (isClosed) {
-            return;
-        }
-        preferences.edit().putLong("max_sync_id", maxContactId).putString("sync_hash", bookHash).commit();
-        notifyDataChanged();
+//        TLImportedContacts importedContacts = application.getApi().doRpcCall(new TLRequestContactsImportContacts(inputContacts, false), 15000);
+//        application.getEngine().onUsers(importedContacts.getUsers());
+//
+//        HashMap<Long, HashSet<Integer>> importedUsers = new HashMap<Long, HashSet<Integer>>();
+//
+//        for (TLImportedContact contact : importedContacts.getImported()) {
+//            for (Long phoneId : realPhoneMap.get(contact.getClientId())) {
+//                long contactId = idMap.get(phoneId);
+//                int userId = contact.getUserId();
+//                if (importedUsers.containsKey(contactId)) {
+//                    importedUsers.get(contactId).add(userId);
+//                } else {
+//                    HashSet<Integer> set = new HashSet<Integer>();
+//                    set.add(userId);
+//                    importedUsers.put(contactId, set);
+//                }
+//            }
+//        }
+//        application.getEngine().onImportedContacts(importedUsers);
+//
+//        for (User user : application.getEngine().getContacts()) {
+//            contactsCache.add(user.getUid());
+//        }
+//
+//        lastSyncHash = bookHash;
+//        if (isClosed) {
+//            return;
+//        }
+//        preferences.edit().putString("sync_hash", bookHash).commit();
+//        notifyDataChanged();
     }
 
     private void doSyncContacts() throws Exception {
@@ -670,8 +668,7 @@ public class ContactsSource {
             application.getContentResolver().unregisterContentObserver(this.contentObserver);
             this.contentObserver = null;
         }
-        this.maxContactId = 0;
         this.contactsCache = null;
-        this.lastSyncHash = null;
     }
+
 }

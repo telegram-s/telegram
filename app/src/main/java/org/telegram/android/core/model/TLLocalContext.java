@@ -4,6 +4,10 @@ import org.telegram.android.core.model.local.TLLocalUserStatusEmpty;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
 import org.telegram.android.core.model.media.*;
+import org.telegram.android.core.model.phone.TLLocalBook;
+import org.telegram.android.core.model.phone.TLLocalBookContact;
+import org.telegram.android.core.model.phone.TLLocalBookPhone;
+import org.telegram.android.core.model.phone.TLLocalImportedPhone;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.storage.*;
 import org.telegram.android.kernel.compat.v5.TLDcInfoCompat;
@@ -72,6 +76,12 @@ public class TLLocalContext extends TLContext {
 
         // Compat
         registerCompatClass(TLDcInfoCompat.CLASS_ID, TLDcInfoCompat.class);
+
+        // PhoneBook
+        registerClass(TLLocalBook.CLASS_ID, TLLocalBook.class);
+        registerClass(TLLocalImportedPhone.CLASS_ID, TLLocalImportedPhone.class);
+        registerClass(TLLocalBookContact.CLASS_ID, TLLocalBookContact.class);
+        registerClass(TLLocalBookPhone.CLASS_ID, TLLocalBookPhone.class);
     }
 
     @Override
