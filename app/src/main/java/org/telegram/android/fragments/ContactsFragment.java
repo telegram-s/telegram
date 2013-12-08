@@ -9,7 +9,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,25 +16,15 @@ import android.widget.*;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
-import org.telegram.android.core.ContactSourceListener;
-import org.telegram.android.core.ContactSourceState;
 import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.User;
-import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
-import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
-import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.fragments.common.BaseContactsFragment;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
-import org.telegram.android.tasks.ProgressInterface;
-import org.telegram.android.ui.FilterMatcher;
-import org.telegram.android.ui.Placeholders;
-import org.telegram.android.ui.TextUtil;
 import org.telegram.api.TLAbsInputUser;
 import org.telegram.api.TLInputPeerContact;
 import org.telegram.api.TLInputUserContact;
@@ -44,33 +33,18 @@ import org.telegram.api.requests.TLRequestContactsBlock;
 import org.telegram.api.requests.TLRequestContactsDeleteContacts;
 import org.telegram.api.requests.TLRequestMessagesDeleteHistory;
 import org.telegram.tl.TLVector;
-import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
-import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Author: Korshakov Stepan
  * Created: 30.07.13 11:33
  */
-public class ContactsFragment extends StelsFragment implements ContactSourceListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
-
-    private FilterMatcher matcher;
-
-    private boolean isLoaded;
-    private ContactsSource.LocalContact[] originalUsers;
-    private ContactsSource.LocalContact[] filteredUsers;
-    private String[] headers;
-    private Integer[] headerStart;
-    private ContactsAdapter сontactsAdapter;
-    private StickyListHeadersListView contactsList;
-    private View empty;
-    private View loading;
+public class ContactsFragment extends BaseContactsFragment {
     private View mainContainer;
 
-    private int selectedIndex = -1;
-    private int selectedTop = 0;
+    @Override
+    public boolean isSaveInStack() {
+        return false;
+    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -86,104 +60,9 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            selectedTop = savedInstanceState.getInt("selectedTop", 0);
-            selectedIndex = savedInstanceState.getInt("selectedIndex", -1);
-        }
-
-        setDefaultProgressInterface(new ProgressInterface() {
-            @Override
-            public void showContent() {
-                contactsList.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void hideContent() {
-                contactsList.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void showProgress() {
-                loading.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void hideProgress() {
-                loading.setVisibility(View.GONE);
-            }
-        });
-    }
-
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        if (savedInstanceState != null) {
-            selectedTop = savedInstanceState.getInt("selectedTop", 0);
-            selectedIndex = savedInstanceState.getInt("selectedIndex", -1);
-        }
-
-        final Context context = getActivity();
-
-        View res = inflater.inflate(R.layout.contacts_list, container, false);
-
-        loading = res.findViewById(R.id.loading);
-        empty = res.findViewById(R.id.empty);
-        mainContainer = res.findViewById(R.id.mainContainer);
-
-        contactsList = (StickyListHeadersListView) res.findViewById(R.id.contactsList);
-        contactsList.setOnItemClickListener(this);
-        contactsList.setOnItemLongClickListener(this);
-        View share = inflater.inflate(R.layout.contacts_item_share, null);
-        contactsList.addHeaderView(share);
-
-        originalUsers = new ContactsSource.LocalContact[0];
-        filteredUsers = new ContactsSource.LocalContact[0];
-        isLoaded = false;
-
-        сontactsAdapter = new ContactsAdapter();
-        contactsList.setAdapter(сontactsAdapter);
-        reloadData();
-
-        if (selectedIndex >= 0) {
-            contactsList.setSelectionFromTop(selectedIndex, selectedTop);
-        }
-
-        return res;
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
-
-        application.getContactsSource().registerListener(this);
-        onContactsDataChanged();
-
         updateHeaderPadding();
-    }
-
-    private void saveListPosition() {
-        if (contactsList != null) {
-            int index = contactsList.getFirstVisiblePosition();
-            View v = contactsList.getChildAt(0);
-            if (v != null) {
-                selectedTop = v.getTop();
-                selectedIndex = index;
-            } else {
-                selectedTop = 0;
-                selectedIndex = -1;
-            }
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        application.getContactsSource().unregisterListener(this);
-        saveListPosition();
     }
 
     @Override
@@ -194,7 +73,7 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_contacts_title));
         getSherlockActivity().getSupportActionBar().setSubtitle(null);
 
-        if (!isLoaded) {
+        if (!isLoaded()) {
             return;
         }
 
@@ -228,8 +107,7 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                matcher = new FilterMatcher(newText.trim().toLowerCase());
-                reloadData();
+                doFilter(newText);
                 return true;
             }
         });
@@ -242,8 +120,7 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                matcher = null;
-                reloadData();
+                doFilter(null);
                 return true;
             }
         });
@@ -273,91 +150,21 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
         return super.onOptionsItemSelected(item);
     }
 
-    private void reloadData() {
-        boolean isContactsLoaded = application.getContactsSource().getContacts() != null;
-
-        if (!isContactsLoaded) {
-            originalUsers = new ContactsSource.LocalContact[0];
-            filteredUsers = new ContactsSource.LocalContact[0];
-
-            loading.setVisibility(View.VISIBLE);
-            empty.setVisibility(View.GONE);
-            contactsList.setVisibility(View.GONE);
-
-            return;
-        } else {
-            loading.setVisibility(View.GONE);
-        }
-
-        if (application.getUserSettings().showOnlyTelegramContacts()) {
-            originalUsers = application.getContactsSource().getTelegramContacts();
-        } else {
-            originalUsers = application.getContactsSource().getContacts();
-        }
-
-        if (matcher != null && matcher.getQuery().length() > 0) {
-            ArrayList<ContactsSource.LocalContact> filtered = new ArrayList<ContactsSource.LocalContact>();
-            for (ContactsSource.LocalContact u : originalUsers) {
-                if (matcher.isMatched(u.displayName)) {
-                    filtered.add(u);
-                }
-            }
-            filteredUsers = filtered.toArray(new ContactsSource.LocalContact[filtered.size()]);
-        } else {
-            filteredUsers = originalUsers;
-        }
-
-        ArrayList<String> nHeaders = new ArrayList<String>();
-        ArrayList<Integer> nHeaderStarts = new ArrayList<Integer>();
-
-        char header = '\0';
-
-        for (int i = 0; i < filteredUsers.length; i++) {
-            if (filteredUsers[i].header != header) {
-                nHeaders.add("" + filteredUsers[i].header);
-                nHeaderStarts.add(i);
-            }
-        }
-
-        headers = nHeaders.toArray(new String[0]);
-        headerStart = nHeaderStarts.toArray(new Integer[0]);
-
-        сontactsAdapter.notifyDataSetChanged();
-
-        if (filteredUsers.length == 0) {
-            empty.setVisibility(View.VISIBLE);
-            contactsList.setVisibility(View.GONE);
-        } else {
-            empty.setVisibility(View.GONE);
-            contactsList.setVisibility(View.VISIBLE);
-        }
-
-        if (!isLoaded) {
-            isLoaded = true;
-            getSherlockActivity().invalidateOptionsMenu();
-        }
+    @Override
+    protected boolean showOnlyTelegramContacts() {
+        return application.getUserSettings().showOnlyTelegramContacts();
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        matcher = null;
-        loading = null;
-        empty = null;
-        contactsList = null;
+    protected int getLayout() {
+        return R.layout.contacts_list;
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        saveListPosition();
-        outState.putInt("selectedIndex", selectedIndex);
-        outState.putInt("selectedTop", selectedTop);
-    }
-
-    @Override
-    public void onContactsDataChanged() {
-        reloadData();
+    protected void onCreateView(View res, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mainContainer = res.findViewById(R.id.mainContainer);
+        View share = inflater.inflate(R.layout.contacts_item_share, null);
+        getListView().addHeaderView(share);
     }
 
     @Override
@@ -453,9 +260,15 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 
                                                         application.getContentResolver().delete(uri, null, null);
                                                     }
+
+                                                    @Override
+                                                    public void afterExecute() {
+                                                        reloadData();
+                                                    }
                                                 });
                                             } else {
                                                 application.getContentResolver().delete(uri, null, null);
+                                                reloadData();
                                             }
                                         }
                                     }).setNegativeButton(R.string.st_no, null).create();
@@ -467,25 +280,51 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
                         } else if (i == 2) {
                             getRootController().shareContact(contact.user.getUid());
                         } else if (i == 3) {
-                            runUiTask(new AsyncAction() {
-                                @Override
-                                public void execute() throws AsyncException {
-                                    rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
-                                }
-                            });
+                            AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                                    .setMessage(getStringSafe(R.string.st_contacts_block).replace("{0}", contact.displayName))
+                                    .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            runUiTask(new AsyncAction() {
+                                                @Override
+                                                public void execute() throws AsyncException {
+                                                    rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
+                                                }
+                                            });
+                                        }
+                                    }).setNegativeButton(R.string.st_no, null).create();
+                            alertDialog.setCanceledOnTouchOutside(true);
+                            alertDialog.show();
                         } else if (i == 4) {
-//                            runUiTask(new AsyncAction() {
-//                                @Override
-//                                public void execute() throws AsyncException {
-//                                    TLAffectedHistory tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.user.getUid()), 0));
-//                                    application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
-//                                    while (tlAffectedHistory.getOffset() > 0) {
-//                                        tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.user.getUid()), tlAffectedHistory.getOffset()));
-//                                        application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
-//                                    }
-//                                    rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
-//                                }
-//                            });
+                            AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                                    .setMessage(getStringSafe(R.string.st_contacts_block_delete).replace("{0}", contact.displayName))
+                                    .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            runUiTask(new AsyncAction() {
+                                                @Override
+                                                public void execute() throws AsyncException {
+                                                    TLAffectedHistory tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.user.getUid()), 0));
+                                                    application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
+                                                    while (tlAffectedHistory.getOffset() > 0) {
+                                                        tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.user.getUid()), tlAffectedHistory.getOffset()));
+                                                        application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
+                                                    }
+                                                    rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
+
+                                                    final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.lookupKey);
+                                                    application.getContentResolver().delete(uri, null, null);
+                                                }
+
+                                                @Override
+                                                public void afterExecute() {
+                                                    reloadData();
+                                                }
+                                            });
+                                        }
+                                    }).setNegativeButton(R.string.st_no, null).create();
+                            alertDialog.setCanceledOnTouchOutside(true);
+                            alertDialog.show();
                         }
                     }
                 }).create();
@@ -494,114 +333,5 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
 
 
         return true;
-    }
-
-    private class ContactsAdapter extends BaseAdapter implements StickyListHeadersAdapter, SectionIndexer {
-        public View newView(Context context) {
-            return View.inflate(context, R.layout.contacts_item, null);
-        }
-
-        public void bindView(View view, final Context context, int index) {
-            final ContactsSource.LocalContact contact = getItem(index);
-
-            if (matcher != null) {
-                SpannableString spannableString = new SpannableString(contact.displayName);
-                matcher.highlight(context, spannableString);
-                ((TextView) view.findViewById(R.id.name)).setText(spannableString);
-            } else {
-                ((TextView) view.findViewById(R.id.name)).setText(contact.displayName);
-            }
-
-            TextView onlineView = (TextView) view.findViewById(R.id.status);
-
-            if (contact.user != null) {
-                ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(Placeholders.getUserPlaceholder(contact.user.getUid()));
-                if (contact.user.getPhoto() != null && (contact.user.getPhoto() instanceof TLLocalAvatarPhoto)) {
-                    TLLocalAvatarPhoto p = (TLLocalAvatarPhoto) contact.user.getPhoto();
-                    ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(new StelsImageTask((TLLocalFileLocation) p.getPreviewLocation()));
-                } else {
-                    ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
-                }
-
-                int statusValue = getUserState(contact.user.getStatus());
-                if (statusValue < 0) {
-                    onlineView.setText(R.string.st_offline);
-                    onlineView.setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                } else if (statusValue == 0) {
-                    onlineView.setText(R.string.st_online);
-                    onlineView.setTextColor(context.getResources().getColor(R.color.st_blue_bright));
-                } else {
-                    onlineView.setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                    onlineView.setText(TextUtil.formatHumanReadableLastSeen(statusValue, getStringSafe(R.string.st_lang)));
-                }
-
-                onlineView.setVisibility(View.VISIBLE);
-                view.findViewById(R.id.shareIcon).setVisibility(View.GONE);
-            } else {
-                ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(R.drawable.st_user_placeholder);
-                ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
-                onlineView.setVisibility(View.GONE);
-                view.findViewById(R.id.shareIcon).setVisibility(View.VISIBLE);
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return filteredUsers.length;
-        }
-
-        @Override
-        public ContactsSource.LocalContact getItem(int i) {
-            return filteredUsers[i];
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return filteredUsers[i].contactId;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            if (view == null) {
-                view = newView(getActivity());
-            }
-            bindView(view, getActivity(), i);
-            return view;
-        }
-
-        @Override
-        public View getHeaderView(int i, View view, ViewGroup viewGroup) {
-            if (view == null) {
-                view = View.inflate(getActivity(), R.layout.contact_item_header, null);
-            }
-            ((TextView) view.findViewById(R.id.header)).setText(getItem(i).header + "");
-            return view;
-        }
-
-        @Override
-        public long getHeaderId(int i) {
-            return getItem(i).header;
-        }
-
-        @Override
-        public Object[] getSections() {
-            return headers;
-        }
-
-        @Override
-        public int getPositionForSection(int i) {
-            return headerStart[i];
-        }
-
-        @Override
-        public int getSectionForPosition(int ind) {
-            for (int i = 0; i < headerStart.length; i++) {
-                if (headerStart[i] <= ind) {
-                    return i;
-                }
-            }
-
-            return headerStart.length - 1;
-        }
     }
 }

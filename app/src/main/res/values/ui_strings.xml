@@ -234,6 +234,10 @@
 
     <string name="st_contacts_delete">Are you sure want to delete contact \'{0}\'?
     </string>
+    <string name="st_contacts_block">Are you sure want to block contact \'{0}\'?
+    </string>
+    <string name="st_contacts_block_delete">Are you sure want to block contact \'{0}\' and delete contact history?
+    </string>
 
     <string name="st_profile_title">Info</string>
     <string name="st_profile_header_phone">PHONE</string>
