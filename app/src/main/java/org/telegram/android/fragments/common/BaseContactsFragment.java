@@ -119,6 +119,18 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
         return res;
     }
 
+    public boolean filterItem(ContactsSource.LocalContact contact) {
+        return true;
+    }
+
+    public ContactsSource.LocalContact getContactAt(int index) {
+        return filteredContacts[index];
+    }
+
+    public int getContactsCount() {
+        return filteredContacts.length;
+    }
+
     public boolean isLoaded() {
         return isLoaded;
     }
@@ -127,10 +139,12 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
         boolean isContactsLoaded = application.getContactsSource().getContacts() != null;
         if (!isContactsLoaded) {
             hideList();
+            hideContent();
             hideEmpty();
             showLoading();
             return;
         } else {
+            showContent();
             hideLoading();
         }
 
@@ -143,13 +157,23 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
         if (matcher != null && matcher.getQuery().length() > 0) {
             ArrayList<ContactsSource.LocalContact> filtered = new ArrayList<ContactsSource.LocalContact>();
             for (ContactsSource.LocalContact u : allContacts) {
+                if (!filterItem(u)) {
+                    continue;
+                }
                 if (matcher.isMatched(u.displayName)) {
                     filtered.add(u);
                 }
             }
             filteredContacts = filtered.toArray(new ContactsSource.LocalContact[filtered.size()]);
         } else {
-            filteredContacts = allContacts;
+            ArrayList<ContactsSource.LocalContact> filtered = new ArrayList<ContactsSource.LocalContact>();
+            for (ContactsSource.LocalContact u : allContacts) {
+                if (!filterItem(u)) {
+                    continue;
+                }
+                filtered.add(u);
+            }
+            filteredContacts = filtered.toArray(new ContactsSource.LocalContact[filtered.size()]);
         }
 
         ArrayList<String> nHeaders = new ArrayList<String>();
@@ -191,6 +215,10 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
             matcher = new FilterMatcher(query.trim().toLowerCase());
         }
         reloadData();
+    }
+
+    protected boolean isFiltering() {
+        return matcher != null;
     }
 
     protected void hideContent() {

@@ -8,7 +8,8 @@
               android:id="@+id/mainContainer"
               android:paddingTop="45dp">
     <FrameLayout android:layout_width="fill_parent"
-                 android:layout_height="wrap_content">
+                 android:layout_height="wrap_content"
+                 android:id="@+id/header">
         <EditText android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
                   android:minHeight="52dp"
@@ -44,6 +45,12 @@
                   android:textSize="19sp"
                   android:id="@+id/empty"
                   android:text="@string/st_no_contacts"/>
+
+        <ProgressBar android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="center"
+                     android:id="@+id/loading"
+                     style="@style/Widget.Sherlock.Light.ProgressBar"/>
 
         <se.emilsjolander.stickylistheaders.StickyListHeadersListView android:layout_height="fill_parent"
                                                                       android:layout_width="fill_parent"

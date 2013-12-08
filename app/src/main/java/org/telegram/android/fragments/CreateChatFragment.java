@@ -41,6 +41,7 @@ public class CreateChatFragment extends BaseContactsFragment {
     private TextView counterView;
     private TextView doneButton;
     private View mainContainer;
+    private View headerContainer;
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -78,10 +79,25 @@ public class CreateChatFragment extends BaseContactsFragment {
     }
 
     @Override
+    protected void hideContent() {
+        if (headerContainer != null) {
+            headerContainer.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    protected void showContent() {
+        if (headerContainer != null) {
+            headerContainer.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
     protected void onCreateView(View view, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mainContainer = view.findViewById(R.id.mainContainer);
         updateHeaderPadding();
         inputEdit = (EditText) view.findViewById(R.id.inputEdit);
+        headerContainer = view.findViewById(R.id.header);
         counterView = (TextView) view.findViewById(R.id.counter);
         inputEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -102,6 +118,9 @@ public class CreateChatFragment extends BaseContactsFragment {
                     filter = filter.substring(1);
                 }
                 doFilter(filter);
+                if (getContactsCount() == 1) {
+                    addUser(getContactAt(0).user);
+                }
             }
         });
     }
@@ -275,6 +294,17 @@ public class CreateChatFragment extends BaseContactsFragment {
             }
             getRootController().completeCreateChat(uids);
         }
+    }
+
+    @Override
+    public boolean filterItem(ContactsSource.LocalContact contact) {
+        if (contact.user.getUid() == application.getCurrentUid()) {
+            return false;
+        }
+        if (selected.contains(contact.user.getUid()) && isFiltering()) {
+            return false;
+        }
+        return true;
     }
 
     @Override
