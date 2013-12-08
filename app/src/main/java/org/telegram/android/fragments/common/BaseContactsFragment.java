@@ -6,10 +6,7 @@ import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.SectionIndexer;
-import android.widget.TextView;
+import android.widget.*;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
@@ -45,6 +42,8 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
 
     private StickyListHeadersListView listView;
     private ContactsAdapter contactsAdapter;
+
+    private boolean isMultiple;
 
     private int selectedTop;
     private int selectedIndex;
@@ -99,6 +98,7 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
         listView = (StickyListHeadersListView) res.findViewById(R.id.contactsList);
         loading = res.findViewById(R.id.loading);
         empty = res.findViewById(R.id.empty);
+        isMultiple = useMultipleSelection();
         onCreateView(res, inflater, container, savedInstanceState);
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
@@ -239,6 +239,14 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
 
     protected abstract void onCreateView(View view, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
 
+    protected boolean useMultipleSelection() {
+        return false;
+    }
+
+    protected boolean isSelected(int index) {
+        return false;
+    }
+
     private void saveListPosition() {
         if (listView != null) {
             int index = listView.getFirstVisiblePosition();
@@ -301,7 +309,7 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
 
     private class ContactsAdapter extends BaseAdapter implements StickyListHeadersAdapter, SectionIndexer {
         public View newView(Context context) {
-            return View.inflate(context, R.layout.contacts_item, null);
+            return View.inflate(context, isMultiple ? R.layout.contacts_item_pick : R.layout.contacts_item, null);
         }
 
         public void bindView(View view, final Context context, int index) {
@@ -339,12 +347,24 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
                 }
 
                 onlineView.setVisibility(View.VISIBLE);
-                view.findViewById(R.id.shareIcon).setVisibility(View.GONE);
+                if (!isMultiple) {
+                    view.findViewById(R.id.shareIcon).setVisibility(View.GONE);
+                }
             } else {
                 ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(R.drawable.st_user_placeholder);
                 ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
                 onlineView.setVisibility(View.GONE);
-                view.findViewById(R.id.shareIcon).setVisibility(View.VISIBLE);
+                if (!isMultiple) {
+                    view.findViewById(R.id.shareIcon).setVisibility(View.VISIBLE);
+                }
+            }
+
+            if (isMultiple) {
+                if (isSelected(index)) {
+                    ((ImageView) view.findViewById(R.id.contactSelected)).setImageResource(R.drawable.holo_btn_check_on);
+                } else {
+                    ((ImageView) view.findViewById(R.id.contactSelected)).setImageResource(R.drawable.holo_btn_check_off);
+                }
             }
         }
 

@@ -880,14 +880,14 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
 
     @Override
     protected void onFragmentResult(int resultCode, final Object data) {
-        if (data instanceof User) {
+        if (data instanceof Integer) {
             runUiTask(new AsyncAction() {
                 private int chatId;
 
                 @Override
                 public void execute() throws AsyncException {
                     try {
-                        chatId = application.getEncryptionController().requestEncryption(((User) data).getUid());
+                        chatId = application.getEncryptionController().requestEncryption((Integer) data);
                     } catch (RpcException e) {
                         e.printStackTrace();
                         throw new AsyncException(e);

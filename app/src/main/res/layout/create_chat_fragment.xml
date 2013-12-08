@@ -45,16 +45,16 @@
                   android:id="@+id/empty"
                   android:text="@string/st_no_contacts"/>
 
-        <com.extradea.framework.images.ui.ImagingListView android:layout_height="fill_parent"
-                                                          android:layout_width="fill_parent"
-                                                          android:paddingTop="4dp"
-                                                          android:paddingLeft="@dimen/fast_scroll_padding_left"
-                                                          android:paddingRight="@dimen/fast_scroll_padding_right"
-                                                          android:scrollbarStyle="insideOverlay"
-                                                          android:scrollbars="none"
-                                                          android:clipToPadding="false"
-                                                          android:fastScrollEnabled="true"
-                                                          android:fastScrollAlwaysVisible="true"
-                                                          android:id="@+id/contacts"/>
+        <se.emilsjolander.stickylistheaders.StickyListHeadersListView android:layout_height="fill_parent"
+                                                                      android:layout_width="fill_parent"
+                                                                      android:paddingTop="4dp"
+                                                                      android:paddingLeft="@dimen/fast_scroll_padding_left"
+                                                                      android:paddingRight="@dimen/fast_scroll_padding_right"
+                                                                      android:scrollbarStyle="insideOverlay"
+                                                                      android:scrollbars="none"
+                                                                      android:clipToPadding="false"
+                                                                      android:fastScrollEnabled="true"
+                                                                      android:fastScrollAlwaysVisible="true"
+                                                                      android:id="@+id/contactsList"/>
     </FrameLayout>
 </LinearLayout>
