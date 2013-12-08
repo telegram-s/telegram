@@ -337,7 +337,7 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
 
     private class ContactsAdapter extends BaseAdapter implements StickyListHeadersAdapter, SectionIndexer {
         public View newView(Context context) {
-            return View.inflate(context, isMultiple ? R.layout.contacts_item_pick : R.layout.contacts_item, null);
+            return View.inflate(context, isMultiple ? R.layout.contacts_item_multiple : R.layout.contacts_item_single, null);
         }
 
         public void bindView(View view, final Context context, int index) {

@@ -239,6 +239,12 @@
     <string name="st_contacts_block_delete">Are you sure want to block contact \'{0}\' and delete contact history?
     </string>
 
+    <string name="st_contacts_action_view">View in address book</string>
+    <string name="st_contacts_action_share">Share contact</string>
+    <string name="st_contacts_action_delete">Delete contact</string>
+    <string name="st_contacts_action_block">Block contact</string>
+    <string name="st_contacts_action_block_and_delete">Block and delete contact</string>
+
     <string name="st_profile_title">Info</string>
     <string name="st_profile_header_phone">PHONE</string>
     <string name="st_profile_header_settings">SETTINGS</string>
