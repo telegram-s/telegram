@@ -200,8 +200,6 @@ public class ContactsSync extends BaseSync {
         Logger.d(TAG, "Phone book uniq phones: " + phonesForImports.length);
         Logger.d(TAG, "Diff phones count: " + resultImports.length);
 
-        Thread.sleep(10000);
-
         if (resultImports.length > 0) {
             TLVector<TLInputContact> inputContacts = new TLVector<TLInputContact>();
             for (PhonesForImport phonesForImport : resultImports) {
