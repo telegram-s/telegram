@@ -16,7 +16,6 @@ import java.util.HashMap;
  * Created by ex3ndr on 01.12.13.
  */
 public abstract class BaseSync {
-    private static final String PREFERENCES_NAME = "org.telegram.android";
     private final String TAG;
 
     private static final long ERROR_DELAY = 5000;
@@ -39,10 +38,10 @@ public abstract class BaseSync {
 
     protected SharedPreferences preferences;
 
-    protected BaseSync(StelsApplication application) {
+    protected BaseSync(StelsApplication application, String prefsName) {
         this.TAG = getClass().getSimpleName();
         this.application = application;
-        this.preferences = application.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+        this.preferences = application.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
     }
 
     protected void init() {

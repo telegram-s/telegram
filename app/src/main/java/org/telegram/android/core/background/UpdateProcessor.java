@@ -48,6 +48,7 @@ public class UpdateProcessor {
 
     private StelsApplication application;
     private Thread corrector;
+    private Looper correctorLooper;
     private Handler correctorHandler;
 
     private boolean isInvalidated;
@@ -60,6 +61,7 @@ public class UpdateProcessor {
     private boolean isDestroyed = false;
     private boolean isStarted = false;
 
+
     public UpdateProcessor(StelsApplication _application) {
         this.application = _application;
         this.isInvalidated = false;
@@ -69,6 +71,7 @@ public class UpdateProcessor {
             @Override
             public void run() {
                 Looper.prepare();
+                correctorLooper = Looper.myLooper();
                 correctorHandler = new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
@@ -1107,6 +1110,7 @@ public class UpdateProcessor {
         isDestroyed = true;
         correctorHandler.removeMessages(0);
         correctorHandler.removeMessages(1);
+        correctorLooper.quit();
         corrector.interrupt();
         further.clear();
     }

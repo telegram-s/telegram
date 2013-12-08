@@ -193,6 +193,8 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
             }
         }
 
+        cur.close();
+
         this.telegramContacts = tContacts.toArray(new LocalContact[tContacts.size()]);
         this.contacts = contacts;
 
@@ -203,18 +205,31 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
     public class LocalContact {
         public long contactId;
         public String displayName;
+        public char header;
         public User user;
 
         private LocalContact(long contactId, String displayName) {
             this.contactId = contactId;
             this.displayName = displayName;
             this.user = null;
+            setHeader();
         }
 
         private LocalContact(long contactId, String displayName, User user) {
             this.contactId = contactId;
             this.displayName = displayName;
             this.user = user;
+            setHeader();
+        }
+
+        private void setHeader() {
+            if (displayName.length() == 0) {
+                header = '#';
+            } else if (Character.isLetter(displayName.charAt(0))) {
+                header = (displayName.charAt(0) + "").toUpperCase().charAt(0);
+            } else {
+                header = '#';
+            }
         }
     }
 }

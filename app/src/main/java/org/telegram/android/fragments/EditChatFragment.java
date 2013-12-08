@@ -675,7 +675,8 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     @Override
     protected void onFragmentResult(int resultCode, Object data) {
         if (resultCode == Activity.RESULT_OK) {
-            final User user = (User) data;
+            Integer uid = (Integer) data;
+            final User user = application.getEngine().getUser(uid);
             runUiTask(new AsyncAction() {
                 @Override
                 public void execute() throws AsyncException {

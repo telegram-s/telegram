@@ -172,7 +172,7 @@ public class PickUserFragment extends StelsFragment implements ContactSourceList
                 view.findViewById(R.id.contactContainer).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        setResult(Activity.RESULT_OK, object);
+                        setResult(Activity.RESULT_OK, object.user.getUid());
                         getActivity().onBackPressed();
                     }
                 });
@@ -211,10 +211,10 @@ public class PickUserFragment extends StelsFragment implements ContactSourceList
     }
 
     private void doFilter(String filter) {
-        if (filter == null || filter.length() == 0) {
+        if (filter == null || filter.trim().length() == 0) {
             matcher = null;
         } else {
-            matcher = new FilterMatcher(filter);
+            matcher = new FilterMatcher(filter.trim());
         }
         reloadData();
     }

@@ -135,7 +135,8 @@ public class BlockedFragment extends StelsFragment {
     @Override
     protected void onFragmentResult(int resultCode, Object data) {
         if (resultCode == Activity.RESULT_OK) {
-            final User user = (User) data;
+            Integer uid = (Integer) data;
+            final User user = application.getEngine().getUser(uid);
             runUiTask(new AsyncAction() {
                 User[] nUsers;
 

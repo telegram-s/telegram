@@ -19,6 +19,9 @@ import java.util.List;
  * Created by ex3ndr on 22.11.13.
  */
 public class BackgroundSync extends BaseSync {
+
+    private static final String SETTINGS_NAME = "org.telegram.android";
+
     private static final int SEC = 1;
     private static final int MIN = 60 * SEC;
     private static final int HOUR = 60 * MIN;
@@ -47,7 +50,7 @@ public class BackgroundSync extends BaseSync {
     private long typingTime;
 
     public BackgroundSync(StelsApplication application) {
-        super(application);
+        super(application, SETTINGS_NAME);
         this.application = application;
         registerTechSync(SYNC_DC, "dcSync", SYNC_DC_INTERVAL);
         registerSync(SYNC_ONLINE, "onlineSync", SYNC_ONLINE_INTERVAL);

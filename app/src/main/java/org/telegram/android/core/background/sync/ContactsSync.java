@@ -38,6 +38,8 @@ public class ContactsSync extends BaseSync {
         public void onBookUpdated();
     }
 
+    private static final String SETTINGS_NAME = "org.telegram.android.contacts";
+
     private static final int SYNC_CONTACTS_PRE = 1;
     private static final int SYNC_CONTACTS = 2;
 
@@ -59,13 +61,15 @@ public class ContactsSync extends BaseSync {
 
     private boolean isLoaded = true;
 
+    private boolean isSynced = false;
+
     private ContactSyncListener listener;
 
     private ContentObserver contentObserver;
     private HandlerThread observerUpdatesThread;
 
     public ContactsSync(StelsApplication application) {
-        super(application);
+        super(application, SETTINGS_NAME);
 
         this.application = application;
         this.bookPersistence = new TLPersistence<TLLocalBook>(application, "book_sync.bin", TLLocalBook.class, TLLocalContext.getInstance());
@@ -83,7 +87,17 @@ public class ContactsSync extends BaseSync {
             isoCountry = "us";
         }
 
+        isSynced = preferences.getBoolean("is_synced", false);
         isLoaded = false;
+    }
+
+    public void clear() {
+        preferences.edit().putBoolean("is_synced", false).commit();
+        this.isSynced = false;
+        this.isLoaded = false;
+        this.bookPersistence.getObj().getImportedPhones().clear();
+        this.bookPersistence.getObj().getContacts().clear();
+        this.bookPersistence.write();
     }
 
     public ContactSyncListener getListener() {
@@ -96,6 +110,10 @@ public class ContactsSync extends BaseSync {
 
     private synchronized void notifyChanged() {
         Logger.d(TAG, "notifyChanged");
+        if (!isSynced) {
+            Logger.d(TAG, "ignoring notifyChanged: not synced");
+            return;
+        }
         if (this.listener != null) {
             this.listener.onBookUpdated();
         }
@@ -103,6 +121,10 @@ public class ContactsSync extends BaseSync {
 
     public boolean isLoaded() {
         return isLoaded;
+    }
+
+    public boolean isSynced() {
+        return isSynced;
     }
 
     public ArrayList<Contact> getContacts() {
@@ -178,6 +200,8 @@ public class ContactsSync extends BaseSync {
         Logger.d(TAG, "Phone book uniq phones: " + phonesForImports.length);
         Logger.d(TAG, "Diff phones count: " + resultImports.length);
 
+        Thread.sleep(10000);
+
         if (resultImports.length > 0) {
             TLVector<TLInputContact> inputContacts = new TLVector<TLInputContact>();
             for (PhonesForImport phonesForImport : resultImports) {
@@ -209,10 +233,14 @@ public class ContactsSync extends BaseSync {
                 bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phonesForImport.value, uid));
             }
             updateMapping();
+            isSynced = true;
+            preferences.edit().putBoolean("is_synced", true).commit();
             notifyChanged();
             bookPersistence.write();
         } else {
             updateMapping();
+            isSynced = true;
+            preferences.edit().putBoolean("is_synced", true).commit();
             notifyChanged();
         }
     }
