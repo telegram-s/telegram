@@ -14,4 +14,12 @@
     <item android:id="@+id/allContacts"
           android:title="All contacts"
           android:showAsAction="never"/>
+
+    <item android:id="@+id/addContact"
+          android:title="Add contact"
+          android:showAsAction="never"/>
+
+    <item android:id="@+id/systemContacts"
+          android:title="System contacts"
+          android:showAsAction="never"/>
 </menu>

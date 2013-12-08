@@ -377,7 +377,7 @@ public class ContactsSync extends BaseSync {
                     Phonenumber.PhoneNumber phonenumber = phoneUtil.parse(phoneNo, isoCountry);
                     phoneNo = phonenumber.getCountryCode() + "" + phonenumber.getNationalNumber();
                 } catch (NumberParseException e) {
-                    continue;
+                    phoneNo = phoneNo.replaceAll("[^\\d]", "");
                 }
 
                 record.getPhones().add(new Phone(phoneNo, phoneId));
