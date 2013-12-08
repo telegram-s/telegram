@@ -232,6 +232,9 @@
     <string name="st_contacts_not_registered_message">{0} is not registered in Telegram. Send an invitation?
     </string>
 
+    <string name="st_contacts_delete">Are you sure want to delete contact \'{0}\'?
+    </string>
+
     <string name="st_profile_title">Info</string>
     <string name="st_profile_header_phone">PHONE</string>
     <string name="st_profile_header_settings">SETTINGS</string>

@@ -28,6 +28,7 @@ import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
@@ -36,8 +37,12 @@ import org.telegram.android.ui.FilterMatcher;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.TLAbsInputUser;
+import org.telegram.api.TLInputPeerContact;
 import org.telegram.api.TLInputUserContact;
+import org.telegram.api.messages.TLAffectedHistory;
+import org.telegram.api.requests.TLRequestContactsBlock;
 import org.telegram.api.requests.TLRequestContactsDeleteContacts;
+import org.telegram.api.requests.TLRequestMessagesDeleteHistory;
 import org.telegram.tl.TLVector;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
@@ -111,7 +116,6 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
             }
         });
     }
-
 
 
     @Override
@@ -414,39 +418,80 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
             return false;
         }
 
-        new AlertDialog.Builder(getActivity()).setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int b) {
-                Cursor c = (Cursor) adapterView.getItemAtPosition(i);
-                long id = c.getLong(c.getColumnIndex(ContactsContract.Contacts._ID));
-                String lookupKey = c.getString(c.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
-                final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, lookupKey);
+        final ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);
 
-                final Contact[] contacts = application.getEngine().getContactsForLocalId(id);
-                if (contacts.length > 0) {
-                    runUiTask(new AsyncAction() {
-                        @Override
-                        public void execute() throws AsyncException {
-                            TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
-                            for (Contact c : contacts) {
-                                inputUsers.add(new TLInputUserContact(c.getUid()));
-                            }
-                            rpc(new TLRequestContactsDeleteContacts(inputUsers));
+        AlertDialog contextMenu = new AlertDialog.Builder(getActivity())
+                .setTitle(contact.displayName)
+                .setItems(new CharSequence[]{
+                        "View in People", "Delete contact", "Share contact", "Block contact", "Block and delete contact"
+                }, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (i == 1) {
+                            AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                                    .setMessage(getStringSafe(R.string.st_contacts_delete).replace("{0}", contact.displayName))
+                                    .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int b) {
+                                            final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.lookupKey);
+                                            final Contact[] contacts = application.getEngine().getContactsForLocalId(contact.contactId);
+                                            if (contacts.length > 0) {
+                                                runUiTask(new AsyncAction() {
+                                                    @Override
+                                                    public void execute() throws AsyncException {
+                                                        TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
+                                                        for (Contact c : contacts) {
+                                                            inputUsers.add(new TLInputUserContact(c.getUid()));
+                                                        }
+                                                        rpc(new TLRequestContactsDeleteContacts(inputUsers));
 
-                            for (Contact c : contacts) {
-                                User u = application.getEngine().getUser(c.getUid());
-                                u.setLinkType(LinkType.REQUEST);
-                                application.getEngine().getUsersDao().update(u);
-                            }
+                                                        for (Contact c : contacts) {
+                                                            User u = application.getEngine().getUser(c.getUid());
+                                                            u.setLinkType(LinkType.REQUEST);
+                                                            application.getEngine().getUsersDao().update(u);
+                                                        }
 
-                            application.getContentResolver().delete(uri, null, null);
+                                                        application.getContentResolver().delete(uri, null, null);
+                                                    }
+                                                });
+                                            } else {
+                                                application.getContentResolver().delete(uri, null, null);
+                                            }
+                                        }
+                                    }).setNegativeButton(R.string.st_no, null).create();
+                            alertDialog.setCanceledOnTouchOutside(true);
+                            alertDialog.show();
+                        } else if (i == 0) {
+                            startActivity(new Intent(Intent.ACTION_VIEW)
+                                    .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contact.contactId + "")));
+                        } else if (i == 2) {
+                            getRootController().shareContact(contact.user.getUid());
+                        } else if (i == 3) {
+                            runUiTask(new AsyncAction() {
+                                @Override
+                                public void execute() throws AsyncException {
+                                    rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
+                                }
+                            });
+                        } else if (i == 4) {
+//                            runUiTask(new AsyncAction() {
+//                                @Override
+//                                public void execute() throws AsyncException {
+//                                    TLAffectedHistory tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.user.getUid()), 0));
+//                                    application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
+//                                    while (tlAffectedHistory.getOffset() > 0) {
+//                                        tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.user.getUid()), tlAffectedHistory.getOffset()));
+//                                        application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
+//                                    }
+//                                    rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
+//                                }
+//                            });
                         }
-                    });
-                } else {
-                    application.getContentResolver().delete(uri, null, null);
-                }
-            }
-        }).setNegativeButton("No", null).show();
+                    }
+                }).create();
+        contextMenu.setCanceledOnTouchOutside(true);
+        contextMenu.show();
+
 
         return true;
     }
