@@ -287,10 +287,10 @@ public class CreateChatFragment extends BaseContactsFragment {
 
     private void doCreateChat() {
         if (selected.size() > 0) {
-            User[] bUids = selected.toArray(new User[selected.size()]);
+            Integer[] bUids = selected.toArray(new Integer[selected.size()]);
             int[] uids = new int[bUids.length];
             for (int i = 0; i < uids.length; i++) {
-                uids[i] = bUids[i].getUid();
+                uids[i] = bUids[i];
             }
             getRootController().completeCreateChat(uids);
         }
