@@ -64,6 +64,9 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
     private View loading;
     private View mainContainer;
 
+    private int selectedIndex = -1;
+    private int selectedTop = 0;
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -80,6 +83,11 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            selectedTop = savedInstanceState.getInt("selectedTop", 0);
+            selectedIndex = savedInstanceState.getInt("selectedIndex", -1);
+        }
 
         setDefaultProgressInterface(new ProgressInterface() {
             @Override
@@ -104,8 +112,15 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
         });
     }
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        if (savedInstanceState != null) {
+            selectedTop = savedInstanceState.getInt("selectedTop", 0);
+            selectedIndex = savedInstanceState.getInt("selectedIndex", -1);
+        }
 
         final Context context = getActivity();
 
@@ -128,6 +143,11 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
         сontactsAdapter = new ContactsAdapter();
         contactsList.setAdapter(сontactsAdapter);
         reloadData();
+
+        if (selectedIndex >= 0) {
+            contactsList.setSelectionFromTop(selectedIndex, selectedTop);
+        }
+
         return res;
     }
 
@@ -141,10 +161,25 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
         updateHeaderPadding();
     }
 
+    private void saveListPosition() {
+        if (contactsList != null) {
+            int index = contactsList.getFirstVisiblePosition();
+            View v = contactsList.getChildAt(0);
+            if (v != null) {
+                selectedTop = v.getTop();
+                selectedIndex = index;
+            } else {
+                selectedTop = 0;
+                selectedIndex = -1;
+            }
+        }
+    }
+
     @Override
     public void onPause() {
         super.onPause();
         application.getContactsSource().unregisterListener(this);
+        saveListPosition();
     }
 
     @Override
@@ -306,6 +341,14 @@ public class ContactsFragment extends StelsFragment implements ContactSourceList
         loading = null;
         empty = null;
         contactsList = null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        saveListPosition();
+        outState.putInt("selectedIndex", selectedIndex);
+        outState.putInt("selectedTop", selectedTop);
     }
 
     @Override
