@@ -374,7 +374,6 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
             } else {
                 menu.findItem(R.id.viewBook).setVisible(false);
             }
-            menu.findItem(R.id.editName).setVisible(false);
         } else {
             menu.findItem(R.id.viewBook).setVisible(false);
             if (user != null && user.getPhone() != null && user.getPhone().length() > 0 && user.getLinkType() != LinkType.CONTACT) {
@@ -382,7 +381,6 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
             } else {
                 menu.findItem(R.id.addContact).setVisible(false);
             }
-            menu.findItem(R.id.editName).setVisible(false);
         }
         if (user != null && user.getPhone() != null && user.getPhone().length() > 0) {
             menu.findItem(R.id.shareContact).setVisible(true);
@@ -444,8 +442,6 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
             return true;
         } else if (item.getItemId() == R.id.addContact) {
             getRootController().addContact(userId);
-        } else if (item.getItemId() == R.id.editName) {
-            getRootController().editContactName(userId);
         } else if (item.getItemId() == R.id.shareContact) {
             getRootController().shareContact(userId);
         }

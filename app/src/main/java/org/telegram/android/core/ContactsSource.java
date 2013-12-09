@@ -1,55 +1,19 @@
 package org.telegram.android.core;
 
-import android.accounts.Account;
 import android.content.*;
-import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
-import android.os.RemoteException;
-import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.provider.Settings;
-import android.util.Pair;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
-import org.telegram.android.Configuration;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.background.sync.ContactsSync;
 import org.telegram.android.core.model.Contact;
-import org.telegram.android.core.model.LinkType;
-import org.telegram.android.core.model.TLLocalContext;
 import org.telegram.android.core.model.User;
-import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
-import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
-import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
-import org.telegram.android.core.model.phone.TLLocalBook;
-import org.telegram.android.core.model.phone.TLLocalBookContact;
-import org.telegram.android.core.model.phone.TLLocalBookPhone;
-import org.telegram.android.core.model.storage.TLStorage;
-import org.telegram.android.critical.TLPersistence;
 import org.telegram.android.log.Logger;
-import org.telegram.api.*;
-import org.telegram.api.contacts.TLAbsContacts;
-import org.telegram.api.contacts.TLContacts;
-import org.telegram.api.contacts.TLImportedContacts;
-import org.telegram.api.requests.TLRequestContactsGetContacts;
-import org.telegram.api.requests.TLRequestContactsImportContacts;
-import org.telegram.mtproto.secure.CryptoUtils;
-import org.telegram.mtproto.time.TimeOverlord;
-import org.telegram.tl.TLObject;
-import org.telegram.tl.TLVector;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * Author: Korshakov Stepan

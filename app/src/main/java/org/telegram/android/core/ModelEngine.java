@@ -782,6 +782,13 @@ public class ModelEngine {
                     Contact[] contacts = getContactsForLocalId(localId);
                     HashSet<Integer> uids = importedContacts.get(localId);
                     for (Integer uid : uids) {
+                        User u = getUser(uid);
+                        if (u.getLinkType() != LinkType.CONTACT) {
+                            u.setLinkType(LinkType.CONTACT);
+                        }
+                        getUsersDao().update(u);
+                    }
+                    for (Integer uid : uids) {
                         boolean contains = false;
                         for (Contact contact : contacts) {
                             if (contact.getUid() == uid) {

@@ -118,7 +118,6 @@ public class ContactsSync extends BaseSync {
         this.isSynced = false;
         this.isLoaded = false;
         this.bookPersistence.getObj().getImportedPhones().clear();
-        this.bookPersistence.getObj().getContacts().clear();
         this.bookPersistence.write();
     }
 
@@ -129,7 +128,7 @@ public class ContactsSync extends BaseSync {
             }
         }
 
-        bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phone, uid));
+        bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phone, uid, false));
         bookPersistence.write();
     }
 
@@ -337,11 +336,16 @@ public class ContactsSync extends BaseSync {
 
                 for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
                     if (importedPhone.getPhone().equals(phonesForImport.value)) {
-                        continue outer;
+                        if (!importedPhone.isImported()) {
+                            bookPersistence.getObj().getImportedPhones().remove(importedPhone);
+                            break;
+                        } else {
+                            continue outer;
+                        }
                     }
                 }
 
-                bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phonesForImport.value, uid));
+                bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phonesForImport.value, uid, true));
             }
             updateMapping();
             isSynced = true;
@@ -521,6 +525,10 @@ public class ContactsSync extends BaseSync {
         outer:
         for (PhonesForImport p : phones) {
             for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
+                if (!importedPhone.isImported()) {
+                    break;
+                }
+
                 if (importedPhone.getPhone().equals(p.value)) {
                     continue outer;
                 }
