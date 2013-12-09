@@ -242,14 +242,16 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
         }
         reloadData();
         onFilterChanged();
-        contactsAdapter.notifyDataSetInvalidated();
-        listView.invalidateViews();
-        listView.post(new Runnable() {
-            @Override
-            public void run() {
-                listView.setSelection(0);
-            }
-        });
+        if (matcher != null) {
+            contactsAdapter.notifyDataSetInvalidated();
+            listView.invalidateViews();
+            listView.post(new Runnable() {
+                @Override
+                public void run() {
+                    listView.setSelection(0);
+                }
+            });
+        }
     }
 
     protected void onFilterChanged() {
