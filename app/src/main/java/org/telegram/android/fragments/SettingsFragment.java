@@ -1,5 +1,6 @@
 package org.telegram.android.fragments;
 
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -158,6 +159,12 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
             @Override
             public void onClick(View view) {
                 getRootController().openDialog(PeerType.PEER_USER, 333000);
+            }
+        });
+        res.findViewById(R.id.googlePlay).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://play.google.com/store/apps/details?id=" + application.getPackageName())));
             }
         });
         res.findViewById(R.id.notifications).setOnClickListener(new View.OnClickListener() {

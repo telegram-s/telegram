@@ -298,6 +298,29 @@
               android:layout_height="@dimen/st_section_div_h"
               android:layout_marginLeft="8dp"
               android:layout_marginRight="8dp"
+              android:background="@color/st_section_div"/>
+
+        <FrameLayout android:layout_width="fill_parent"
+                     android:layout_height="48dp"
+                     android:layout_marginRight="8dp"
+                     android:layout_marginLeft="8dp"
+                     android:clickable="true"
+                     android:id="@+id/googlePlay"
+                     android:background="@drawable/st_list_selector">
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_vertical"
+                      android:paddingLeft="8dp"
+                      android:paddingRight="8dp"
+                      android:textSize="19sp"
+                      android:textColor="@color/st_black_text"
+                      android:text="@string/st_settings_play"/>
+        </FrameLayout>
+
+        <View android:layout_width="fill_parent"
+              android:layout_height="@dimen/st_section_div_h"
+              android:layout_marginLeft="8dp"
+              android:layout_marginRight="8dp"
               android:background="@color/st_section_div"
               android:id="@+id/developmentDiv"/>
 

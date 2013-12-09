@@ -147,6 +147,7 @@
     <string name="st_settings_header_support">SUPPORT</string>
     <string name="st_settings_header_about">ABOUT</string>
     <string name="st_settings_version">App version</string>
+    <string name="st_settings_play">Google Play</string>
     <string name="st_settings_blocked">Blocked users</string>
     <string name="st_settings_background">Chat background</string>
     <string name="st_settings_support">Ask a Question</string>
