@@ -2,7 +2,9 @@ package org.telegram.android.fragments.common;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.text.SpannableString;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +25,7 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by ex3ndr on 08.12.13.
@@ -107,6 +110,29 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
         filteredContacts = new ContactsSource.LocalContact[0];
         contactsAdapter = new ContactsAdapter();
         listView.setAdapter(contactsAdapter);
+
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+
+            boolean isScrolling = false;
+
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+                if (i == SCROLL_STATE_IDLE) {
+                    application.getImageController().doResume();
+                    isScrolling = false;
+                } else {
+                    application.getImageController().doPause();
+                    isScrolling = true;
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+                if (isScrolling) {
+                    application.getImageController().doPause();
+                }
+            }
+        });
 
         reloadData();
 

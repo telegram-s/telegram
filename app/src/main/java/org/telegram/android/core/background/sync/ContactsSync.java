@@ -62,7 +62,6 @@ public class ContactsSync extends BaseSync {
     private static final boolean TWO_SIDE_SYNC = true;
 
     private static final String TAG = "ContactsSync";
-    private static final String TAG_N = "ContactsSync_N";
 
     private StelsApplication application;
 
