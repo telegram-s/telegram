@@ -778,16 +778,11 @@ public class ModelEngine {
         getContactsDao().callBatchTasks(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
+                HashSet<Integer> allUids = new HashSet<Integer>();
                 for (Long localId : importedContacts.keySet()) {
                     Contact[] contacts = getContactsForLocalId(localId);
                     HashSet<Integer> uids = importedContacts.get(localId);
-                    for (Integer uid : uids) {
-                        User u = getUser(uid);
-                        if (u.getLinkType() != LinkType.CONTACT) {
-                            u.setLinkType(LinkType.CONTACT);
-                        }
-                        getUsersDao().update(u);
-                    }
+                    allUids.addAll(uids);
                     for (Integer uid : uids) {
                         boolean contains = false;
                         for (Contact contact : contacts) {
@@ -817,13 +812,13 @@ public class ModelEngine {
                         }
                     }
                 }
-//                for (Integer uid : importedContacts.keySet()) {
-//                    Contact contact = getUidContact(uid);
-//                    if (contact != null) {
-//                        contact.setLocalId(importedContacts.get(uid));
-//                        getContactsDao().update(contact);
-//                    }
-//                }
+
+                for (User u : getUsersById(allUids.toArray())) {
+                    if (u.getLinkType() != LinkType.CONTACT) {
+                        u.setLinkType(LinkType.CONTACT);
+                        getUsersDao().update(u);
+                    }
+                }
                 return null;
             }
         });
