@@ -381,6 +381,20 @@ public class ContactsFragment extends BaseContactsFragment {
                                 }
                                 rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
 
+                                Contact[] contacts = application.getEngine().getContactsForLocalId(contact.contactId);
+
+                                TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
+                                for (Contact c : contacts) {
+                                    inputUsers.add(new TLInputUserContact(c.getUid()));
+                                }
+                                rpc(new TLRequestContactsDeleteContacts(inputUsers));
+
+                                for (Contact c : contacts) {
+                                    User u = application.getEngine().getUser(c.getUid());
+                                    u.setLinkType(LinkType.REQUEST);
+                                    application.getEngine().getUsersDao().update(u);
+                                }
+
                                 final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.lookupKey);
                                 application.getContentResolver().delete(uri, null, null);
                             }
