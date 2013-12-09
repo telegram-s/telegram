@@ -124,49 +124,49 @@ android {
         common {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
             assets.srcDirs = ['src/res-common/assets']
-            java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java']
+            java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java', 'src/res-common/java']
         }
 
         dev {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
             assets.srcDirs = ['src/res-common/assets']
-            java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java']
+            java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java', 'src/res-common/java']
         }
 
         beta {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/translation-ru']
             assets.srcDirs = ['src/res-common/assets']
-            java.srcDirs = ['src/dc-production/java', 'src/keys-beta/java']
+            java.srcDirs = ['src/dc-production/java', 'src/keys-beta/java', 'src/res-common/java']
         }
 
         dctest {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/dc-test/res']
             assets.srcDirs = ['src/res-common/assets']
-            java.srcDirs = ['src/dc-test/java', 'src/keys-prime/java']
+            java.srcDirs = ['src/dc-test/java', 'src/keys-prime/java', 'src/res-common/java']
         }
 
         mdpi {
             res.srcDirs = ['src/res-mdpi/res']
             assets.srcDirs = ['src/res-mdpi/assets']
-            java.srcDirs = ['src/dc-production/java']
+            java.srcDirs = ['src/dc-production/java', 'src/res-mdpi/java']
         }
 
         hdpi {
             res.srcDirs = ['src/res-hdpi/res']
             assets.srcDirs = ['src/res-hdpi/assets']
-            java.srcDirs = ['src/dc-production/java']
+            java.srcDirs = ['src/dc-production/java', 'src/res-hdpi/java']
         }
 
         xhdpi {
             res.srcDirs = ['src/res-xhdpi/res']
             assets.srcDirs = ['src/res-xhdpi/assets']
-            java.srcDirs = ['src/dc-production/java']
+            java.srcDirs = ['src/dc-production/java', 'src/res-xhdpi/java']
         }
 
         xxhdpi {
             res.srcDirs = ['src/res-xxhdpi/res']
             assets.srcDirs = ['src/res-xxhdpi/assets']
-            java.srcDirs = ['src/dc-production/java']
+            java.srcDirs = ['src/dc-production/java', 'src/res-xxhdpi/java']
         }
     }
 }

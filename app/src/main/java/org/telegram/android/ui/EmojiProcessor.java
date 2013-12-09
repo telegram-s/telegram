@@ -8,10 +8,10 @@ import android.os.Process;
 import android.text.Spannable;
 import android.text.TextPaint;
 import android.text.style.ReplacementSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
+import org.telegram.config.SmileysPack;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,48 +77,35 @@ public class EmojiProcessor {
 
     private int rectSize = 0;
 
-    private boolean hasSmileyPack(String id) {
-        try {
-            String[] files = application.getAssets().list("");
-            for (String s : files) {
-                if (s.equals("emoji_c_" + id + ".jpg")) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
     public EmojiProcessor(StelsApplication application) {
-
+        long start = System.currentTimeMillis();
         this.application = application;
 
         density = application.getResources().getDisplayMetrics().density;
 
         emojiSideSize = (int) (density * 20);
 
+        Logger.d(TAG, "Emoji phase 0 in " + (System.currentTimeMillis() - start) + " ms");
+
         if (density >= 2 || density == 1) {
             if (density >= 2) {
                 // XHDPI and more
-                if (hasSmileyPack("2")) {
+                if (SmileysPack.PACK_2) {
                     layoutType = LAYOUT_2X_1;
-                } else if (hasSmileyPack("15")) {
+                } else if (SmileysPack.PACK_15) {
                     layoutType = LAYOUT_15X_1;
-                } else if (hasSmileyPack("1")) {
+                } else if (SmileysPack.PACK_1) {
                     layoutType = LAYOUT_1X;
                 } else {
                     throw new RuntimeException("Unable to find smileys pack");
                 }
             } else {
                 // MDPI
-                if (hasSmileyPack("1")) {
+                if (SmileysPack.PACK_1) {
                     layoutType = LAYOUT_1X;
-                } else if (hasSmileyPack("15")) {
+                } else if (SmileysPack.PACK_15) {
                     layoutType = LAYOUT_15X_1;
-                } else if (hasSmileyPack("2")) {
+                } else if (SmileysPack.PACK_2) {
                     layoutType = LAYOUT_2X_2;
                 } else {
                     throw new RuntimeException("Unable to find smileys pack");
@@ -127,28 +114,31 @@ public class EmojiProcessor {
         } else {
             if (density > 1) { // 1.3333 and 1.5
                 // HDPI & TVDPI
-                if (hasSmileyPack("15")) {
+                if (SmileysPack.PACK_15) {
                     layoutType = LAYOUT_15X_1;
-                } else if (hasSmileyPack("2")) {
+                } else if (SmileysPack.PACK_2) {
                     layoutType = LAYOUT_2X_1;
-                } else if (hasSmileyPack("1")) {
+                } else if (SmileysPack.PACK_1) {
                     layoutType = LAYOUT_1X;
                 } else {
                     throw new RuntimeException("Unable to find smileys pack");
                 }
             } else { // 0.75
                 // LDPI
-                if (hasSmileyPack("15")) {
+                if (SmileysPack.PACK_15) {
                     layoutType = LAYOUT_15X_2;
-                } else if (hasSmileyPack("1")) {
+                } else if (SmileysPack.PACK_1) {
                     layoutType = LAYOUT_1X;
-                } else if (hasSmileyPack("2")) {
+                } else if (SmileysPack.PACK_2) {
                     layoutType = LAYOUT_2X_2;
                 } else {
                     throw new RuntimeException("Unable to find smileys pack");
                 }
             }
         }
+
+        Logger.d(TAG, "Emoji phase 1 in " + (System.currentTimeMillis() - start) + " ms");
+        start = System.currentTimeMillis();
 
         switch (layoutType) {
             default:
@@ -186,6 +176,9 @@ public class EmojiProcessor {
         bodyPaint.setTextSize(getSp(15.5f));
         originalMetrics.put(CONFIGURATION_DIALOGS, bodyPaint.getFontMetricsInt());
 
+        Logger.d(TAG, "Emoji phase 2 in " + (System.currentTimeMillis() - start) + " ms");
+        start = System.currentTimeMillis();
+
         for (int i = 0; i < EMOJI_MAP.length; i++) {
             int x = i % COUNT_IN_ROW;
             int y = i / COUNT_IN_ROW;
@@ -196,6 +189,8 @@ public class EmojiProcessor {
             emojiRects.put(id, emojiRect);
             indexes.put(EMOJI_MAP[i], i);
         }
+
+        Logger.d(TAG, "Emoji phase 3 in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     protected int getSp(float sp) {

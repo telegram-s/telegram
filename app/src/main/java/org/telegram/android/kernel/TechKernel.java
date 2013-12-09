@@ -14,6 +14,9 @@ import org.telegram.android.reflection.TechReflection;
  * Created by ex3ndr on 16.11.13.
  */
 public class TechKernel {
+
+    private static final String TAG = "TechKernel";
+
     private StelsApplication application;
 
     private TechReflection techReflection;
@@ -25,19 +28,24 @@ public class TechKernel {
     public TechKernel(StelsApplication application) {
         this.application = application;
 
+        long start = System.currentTimeMillis();
         techReflection = new TechReflection(application);
+        Logger.d(TAG, "TechReflection in " + (System.currentTimeMillis() - start) + " ms");
+        start = System.currentTimeMillis();
         monitor = new ConnectionMonitor(application);
+        Logger.d(TAG, "ConnectionMonitor in " + (System.currentTimeMillis() - start) + " ms");
+        start = System.currentTimeMillis();
         debugSettings = new DebugSettings(application);
-
         if (debugSettings.isSaveLogs()) {
             Logger.enableDiskLog();
         } else {
             Logger.disableDiskLog();
         }
+        Logger.d(TAG, "DebugSettings in " + (System.currentTimeMillis() - start) + " ms");
+        start = System.currentTimeMillis();
 
         versionHolder = new VersionHolder(application);
         versionHolder.tryLoad();
-        versionHolder.trySave();
 
         try {
             PackageInfo pInfo = application.getPackageManager().getPackageInfo(application.getPackageName(), 0);
@@ -58,7 +66,11 @@ public class TechKernel {
             e.printStackTrace();
         }
 
+        Logger.d(TAG, "VersionHolder in " + (System.currentTimeMillis() - start) + " ms");
+        start = System.currentTimeMillis();
+
         this.systemConfig = new SystemConfig(application);
+        Logger.d(TAG, "SystemConfig in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     public SystemConfig getSystemConfig() {
