@@ -58,7 +58,7 @@ public class StelsApplication extends Application implements ImageSupport {
 
         kernel.getUiKernel().onAppPause();
 
-        Logger.d(TAG, "Loading application in " + (SystemClock.uptimeMillis() - start) + " ms");
+        Logger.d(TAG, "Kernels loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public boolean isRTL() {

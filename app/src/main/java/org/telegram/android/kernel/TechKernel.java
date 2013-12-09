@@ -45,7 +45,6 @@ public class TechKernel {
         start = System.currentTimeMillis();
 
         versionHolder = new VersionHolder(application);
-        versionHolder.tryLoad();
 
         try {
             PackageInfo pInfo = application.getPackageManager().getPackageInfo(application.getPackageName(), 0);

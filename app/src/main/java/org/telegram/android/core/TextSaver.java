@@ -1,5 +1,6 @@
 package org.telegram.android.core;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import com.extradea.framework.persistence.ContextPersistence;
 import org.telegram.android.StelsApplication;
@@ -12,35 +13,46 @@ import java.util.HashMap;
  * Date: 18.10.13
  * Time: 22:29
  */
-public class TextSaver extends ContextPersistence {
+public class TextSaver {
 
-    static final long serialVersionUID = 1L;
+    private SharedPreferences preferences;
 
-    private HashMap<Long, String> savedText = new HashMap<Long, String>();
+    private HashMap<String, String> savedText = new HashMap<String, String>();
 
     public TextSaver(StelsApplication application) {
-        super(application);
-        tryLoad();
+        preferences = application.getSharedPreferences("org.telegram.android.TextSaver.pref", Context.MODE_PRIVATE);
+        preferences.getAll();
+    }
+
+    private String getKey(int peerType, int peerId) {
+        return (peerId * 10L + peerType) + "";
     }
 
     public void saveText(String text, int peerType, int peerId) {
-        savedText.put(peerId * 10L + peerType, text);
-        trySave();
+        String key = getKey(peerType, peerId);
+        savedText.put(key, text);
+        preferences.edit().putString(key, text).commit();
     }
 
     public void clearText(int peerType, int peerId) {
-        if (savedText.containsKey(peerId * 10L + peerType)) {
-            savedText.remove(peerId * 10L + peerType);
-            trySave();
+        String key = getKey(peerType, peerId);
+        if (savedText.containsKey(key)) {
+            preferences.edit().remove(key).commit();
+            savedText.remove(key);
         }
     }
 
     public String getText(int peerType, int peerId) {
-        return savedText.get(peerId * 10L + peerType);
+        String key = getKey(peerType, peerId);
+        return savedText.get(key);
     }
 
     public void reset() {
         savedText.clear();
-        trySave();
+        SharedPreferences.Editor editor = preferences.edit();
+        for (String key : savedText.keySet()) {
+            editor.remove(key);
+        }
+        editor.commit();
     }
 }

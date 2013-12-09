@@ -84,9 +84,16 @@ public class UiKernel {
         long start = SystemClock.uptimeMillis();
         this.emojiProcessor = new EmojiProcessor(application);
         Logger.d(TAG, "Emoji loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         this.lastEmoji = new LastEmojiProcessor(application);
+        Logger.d(TAG, "LastEmojiProcessor loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         this.textSaver = new TextSaver(application);
+        Logger.d(TAG, "TextSaver loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         this.wallpaperHolder = new WallpaperHolder(application);
+        Logger.d(TAG, "WallpaperHolder loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         this.screenLogicType = ScreenLogicType.SINGLE_STATIC;
         this.isAppActive = false;
         this.isAppActive = false;
@@ -100,10 +107,16 @@ public class UiKernel {
                 new CachedImageWorker()
         });
 
+        Logger.d(TAG, "ImageController loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
+
         I18nUtil.init(application);
         TextUtil.init(application);
         AsyncException.initLocalisation(application);
         ApiUtils.init(application, kernel.getTechKernel().getTechReflection().getScreenSize());
+
+        Logger.d(TAG, "Misc UI loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
     }
 
     public UiResponsibility getResponsibility() {

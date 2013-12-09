@@ -1,13 +1,16 @@
 package org.telegram.android.config;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import com.extradea.framework.persistence.ContextPersistence;
 
 /**
  * Author: Korshakov Stepan
  * Created: 12.09.13 14:41
  */
-public class DebugSettings extends ContextPersistence {
+public class DebugSettings {
+
+    private SharedPreferences preferences;
 
     public static final int LAYER_DEFAULT = 0;
     public static final int LAYER_NONE = 1;
@@ -27,70 +30,76 @@ public class DebugSettings extends ContextPersistence {
     private boolean isSaveLogs = false;
 
     public DebugSettings(Context context) {
-        super(context);
-        tryLoad();
+        preferences = context.getSharedPreferences("org.telegram.android.DebugSettings.pref", Context.MODE_PRIVATE);
+        isSaveLogs = preferences.getBoolean("isSaveLogs", false);
+        isDeveloperMode = preferences.getBoolean("isDeveloperMode", false);
+        forceAnimations = preferences.getBoolean("forceAnimations", false);
+        conversationListLayerType = preferences.getInt("conversationListLayerType", 0);
+        conversationListItemLayerType = preferences.getInt("conversationListItemLayerType", 0);
+        dialogListLayerType = preferences.getInt("dialogListLayerType", 0);
+        dialogListItemLayerType = preferences.getInt("dialogListItemLayerType", 0);
     }
 
     public int getDialogListLayerType() {
         return dialogListLayerType;
     }
 
-    public void setDialogListLayerType(int dialogListLayerType) {
+    public synchronized void setDialogListLayerType(int dialogListLayerType) {
         this.dialogListLayerType = dialogListLayerType;
-        trySave();
+        preferences.edit().putInt("dialogListLayerType", dialogListLayerType).commit();
     }
 
     public int getDialogListItemLayerType() {
         return dialogListItemLayerType;
     }
 
-    public void setDialogListItemLayerType(int dialogListItemLayerType) {
+    public synchronized void setDialogListItemLayerType(int dialogListItemLayerType) {
         this.dialogListItemLayerType = dialogListItemLayerType;
-        trySave();
+        preferences.edit().putInt("dialogListItemLayerType", dialogListItemLayerType).commit();
     }
 
     public int getConversationListLayerType() {
         return conversationListLayerType;
     }
 
-    public void setConversationListLayerType(int conversationListLayerType) {
+    public synchronized void setConversationListLayerType(int conversationListLayerType) {
         this.conversationListLayerType = conversationListLayerType;
-        trySave();
+        preferences.edit().putInt("conversationListLayerType", conversationListLayerType).commit();
     }
 
     public int getConversationListItemLayerType() {
         return conversationListItemLayerType;
     }
 
-    public void setConversationListItemLayerType(int conversationListItemLayerType) {
+    public synchronized void setConversationListItemLayerType(int conversationListItemLayerType) {
         this.conversationListItemLayerType = conversationListItemLayerType;
-        trySave();
+        preferences.edit().putInt("conversationListItemLayerType", conversationListItemLayerType).commit();
     }
 
     public boolean isForceAnimations() {
         return forceAnimations;
     }
 
-    public void setForceAnimations(boolean forceAnimations) {
+    public synchronized void setForceAnimations(boolean forceAnimations) {
         this.forceAnimations = forceAnimations;
-        trySave();
+        preferences.edit().putBoolean("forceAnimations", forceAnimations).commit();
     }
 
     public boolean isDeveloperMode() {
         return isDeveloperMode;
     }
 
-    public void setDeveloperMode(boolean developerMode) {
+    public synchronized void setDeveloperMode(boolean developerMode) {
         isDeveloperMode = developerMode;
-        trySave();
+        preferences.edit().putBoolean("isDeveloperMode", isDeveloperMode).commit();
     }
 
     public boolean isSaveLogs() {
         return isSaveLogs;
     }
 
-    public void setSaveLogs(boolean saveLogs) {
+    public synchronized void setSaveLogs(boolean saveLogs) {
         isSaveLogs = saveLogs;
-        trySave();
+        preferences.edit().putBoolean("isSaveLogs", isSaveLogs).commit();
     }
 }

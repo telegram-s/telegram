@@ -2,18 +2,15 @@ package org.telegram.android.core;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import org.telegram.android.R;
 import org.telegram.android.core.model.*;
 import org.telegram.android.log.Logger;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -37,7 +34,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private boolean wasUpgraded = false;
 
     public StelsDatabase(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION, R.raw.ormlite_config);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
         getWritableDatabase().execSQL("PRAGMA synchronous = OFF;");
     }
