@@ -431,6 +431,8 @@ public class FragmentScreenController implements RootController {
         intent.putExtra(ContactsContract.Intents.Insert.NAME, user.getDisplayName());
         intent.putExtra(ContactsContract.Intents.Insert.PHONE, "+" + user.getPhone());
 
+        intent.putExtra("finishActivityOnSaveCompleted", true);
+
         activity.startActivity(intent);
     }
 
