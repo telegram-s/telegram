@@ -184,6 +184,7 @@ public class ContactsSync extends BaseSync {
 
     public void invalidateContactsSync() {
         resetSync(SYNC_CONTACTS_PRE);
+        resetSync(SYNC_CONTACTS_TWO_SIDE);
     }
 
     private void invalidateIntegration() {
