@@ -40,6 +40,7 @@ import org.telegram.tl.TLVector;
  */
 public class ContactsFragment extends BaseContactsFragment {
     private View mainContainer;
+    private View share;
 
     @Override
     public boolean isSaveInStack() {
@@ -57,6 +58,17 @@ public class ContactsFragment extends BaseContactsFragment {
             return;
         }
         mainContainer.setPadding(0, getBarHeight(), 0, 0);
+    }
+
+    @Override
+    protected void onFilterChanged() {
+        if (share != null) {
+            if (isFiltering()) {
+                share.findViewById(R.id.container).setVisibility(View.GONE);
+            } else {
+                share.findViewById(R.id.container).setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override
@@ -171,7 +183,7 @@ public class ContactsFragment extends BaseContactsFragment {
     @Override
     protected void onCreateView(View res, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mainContainer = res.findViewById(R.id.mainContainer);
-        View share = inflater.inflate(R.layout.contacts_header_share, null);
+        share = inflater.inflate(R.layout.contacts_header_share, null);
         getListView().addHeaderView(share);
     }
 

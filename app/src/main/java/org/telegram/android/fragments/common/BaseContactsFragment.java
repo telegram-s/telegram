@@ -241,6 +241,13 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
             matcher = new FilterMatcher(query.trim().toLowerCase());
         }
         reloadData();
+        onFilterChanged();
+        contactsAdapter.notifyDataSetInvalidated();
+        listView.invalidateViews();
+    }
+
+    protected void onFilterChanged() {
+
     }
 
     protected boolean isFiltering() {
