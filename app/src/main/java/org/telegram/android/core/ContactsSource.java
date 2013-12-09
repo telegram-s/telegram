@@ -176,6 +176,7 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
             for (int i = 0; i < contacts.length; i++) {
                 final long id = cur.getLong(cur.getColumnIndex(ContactsContract.Contacts._ID));
                 String srcName = cur.getString(cur.getColumnIndex(settingDisplayOrder));
+                String sortName = cur.getString(cur.getColumnIndex(settingSortKey));
                 String lookupKey = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
 
                 User relatedContact = null;
@@ -186,10 +187,10 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
                     }
                 }
                 if (relatedContact != null) {
-                    contacts[i] = new LocalContact(id, lookupKey, srcName, relatedContact);
+                    contacts[i] = new LocalContact(id, lookupKey, srcName, sortName, relatedContact);
                     tContacts.add(contacts[i]);
                 } else {
-                    contacts[i] = new LocalContact(id, lookupKey, srcName);
+                    contacts[i] = new LocalContact(id, lookupKey, srcName, sortName);
                 }
                 cur.moveToNext();
             }
@@ -211,27 +212,27 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
         public char header;
         public User user;
 
-        private LocalContact(long contactId, String lookupKey, String displayName) {
+        private LocalContact(long contactId, String lookupKey, String displayName, String sortName) {
             this.contactId = contactId;
             this.displayName = displayName;
             this.lookupKey = lookupKey;
             this.user = null;
-            setHeader();
+            setHeader(sortName);
         }
 
-        private LocalContact(long contactId, String lookupKey, String displayName, User user) {
+        private LocalContact(long contactId, String lookupKey, String displayName, String sortName, User user) {
             this.contactId = contactId;
             this.displayName = displayName;
             this.lookupKey = lookupKey;
             this.user = user;
-            setHeader();
+            setHeader(sortName);
         }
 
-        private void setHeader() {
-            if (displayName.length() == 0) {
+        private void setHeader(String s) {
+            if (s == null || s.length() == 0) {
                 header = '#';
-            } else if (Character.isLetter(displayName.charAt(0))) {
-                header = (displayName.charAt(0) + "").toUpperCase().charAt(0);
+            } else if (Character.isLetter(s.charAt(0))) {
+                header = (s.charAt(0) + "").toUpperCase().charAt(0);
             } else {
                 header = '#';
             }
