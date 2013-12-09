@@ -208,11 +208,19 @@ public class ApplicationKernel {
     public void runKernels() {
         long start = SystemClock.uptimeMillis();
         storageKernel.runKernel();
+        Logger.d(TAG, "Storate run in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         apiKernel.runKernel();
+        Logger.d(TAG, "ApiKernel run in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         syncKernel.runKernel();
+        Logger.d(TAG, "SyncKernel run in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         lifeKernel.runKernel();
+        Logger.d(TAG, "LifeKernel run in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         dataSourceKernel.runKernel();
-        Logger.d(TAG, "Kernels started in " + (SystemClock.uptimeMillis() - start) + " ms");
+        Logger.d(TAG, "DataSourceKernel run in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void logIn(TLAuthorization authorization) {

@@ -48,14 +48,14 @@ public abstract class BaseSync {
         this.TAG = getClass().getSimpleName();
         this.application = application;
         this.preferences = application.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
-    }
 
-    protected void init() {
         this.networkThread = new HandlerThread("BackgroundNetworkSyncThread", Thread.MIN_PRIORITY);
         this.offlineThread = new HandlerThread("BackgroundOfflineSyncThread", Thread.MIN_PRIORITY);
         this.networkThread.start();
         this.offlineThread.start();
+    }
 
+    protected void init() {
         while (this.networkThread.getLooper() == null) {
             Thread.yield();
         }
