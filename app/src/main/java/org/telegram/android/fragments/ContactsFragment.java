@@ -192,7 +192,7 @@ public class ContactsFragment extends BaseContactsFragment {
         if (i == 0) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, application.getTechKernel().getSystemConfig().getInviteMessage());
+            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, getStringSafe(R.string.st_invite_big));
             startActivity(shareIntent);
         } else {
             final ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);
@@ -216,7 +216,7 @@ public class ContactsFragment extends BaseContactsFragment {
                                         String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                                         Intent sendSms = new Intent(Intent.ACTION_VIEW, Uri.parse("tel:" + phoneNo));
                                         sendSms.putExtra("address", phoneNo);
-                                        sendSms.putExtra("sms_body", application.getTechKernel().getSystemConfig().getInviteMessage());
+                                        sendSms.putExtra("sms_body", getStringSafe(R.string.st_invite_short));
                                         sendSms.setType("vnd.android-dir/mms-sms");
                                         startActivity(sendSms);
                                     } else {

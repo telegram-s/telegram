@@ -59,7 +59,7 @@ public class BackgroundSync extends BaseSync {
         registerSyncEvent(SYNC_TYPING, "typingSync");
         registerSyncSingle(SYNC_HISTORY, "historyReadSync");
         registerSyncEvent(SYNC_ACCEPTOR, "encryptedAcceptor");
-        registerSync(SYNC_INVITE, "onlineSync", SYNC_INVITE_INTERVAL);
+        registerSync(SYNC_INVITE, "inviteSync", SYNC_INVITE_INTERVAL);
     }
 
     public void resetInviteSync() {

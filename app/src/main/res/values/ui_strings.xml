@@ -466,4 +466,24 @@
 
     <string name="st_whats_new_title">What\'s new</string>
     <string name="st_whats_new_continue">Continue messaging</string>
+
+    <string name="st_invite_short">
+        Hey, let's switch to Telegram http://telegram.org/dl1
+    </string>
+
+    <string name="st_invite_big">
+        Hey,
+
+        I just downloaded Telegram Messenger on my Android.
+
+        It is a smartphone messenger which replaces SMS. This app even lets me send pictures, video and other
+        multimedia!
+
+        Telegram Messenger is available for Android and iPhone. There is no PIN or username to remember - it works just
+        like SMS and uses your internet data plan.
+
+        Get it now from and say good-bye to SMS!
+
+        http://telegram.org/dl1
+    </string>
 </resources>
