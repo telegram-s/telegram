@@ -434,6 +434,8 @@ public class FragmentScreenController implements RootController {
         intent.putExtra("finishActivityOnSaveCompleted", true);
 
         activity.startActivity(intent);
+
+        application.getSyncKernel().getContactsSync().addPhoneMapping(uid, user.getPhone());
     }
 
     @Override

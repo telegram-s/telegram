@@ -830,6 +830,17 @@ public class ModelEngine {
         return getContactsDao().queryForEq("localId", localId).toArray(new Contact[0]);
     }
 
+    public void deleteContactsForLocalId(long localId) {
+        try {
+            DeleteBuilder<Contact, Long> builder = getContactsDao().deleteBuilder();
+            builder.where().eq("localId", localId);
+            getContactsDao().delete(builder.prepare());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        // getContactsDao().delete("localId", localId).toArray(new Contact[0]);
+    }
+
     public Contact[] getContactsForUid(int uid) {
         return getContactsDao().queryForEq("uid", uid).toArray(new Contact[0]);
     }

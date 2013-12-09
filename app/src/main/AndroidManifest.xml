@@ -3,7 +3,7 @@
           android:versionCode="1024"
           android:versionName="debug"
           package="org.telegram.android"
-          android:installLocation="auto">
+          android:installLocation="internalOnly">
     <supports-screens android:anyDensity="true" android:smallScreens="true" android:normalScreens="true"
                       android:largeScreens="true" android:resizeable="true" android:xlargeScreens="true"/>
 

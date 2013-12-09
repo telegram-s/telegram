@@ -329,6 +329,7 @@ public class ContactsFragment extends BaseContactsFragment {
                                     }
 
                                     application.getContentResolver().delete(uri, null, null);
+                                    application.getSyncKernel().getContactsSync().removeContact(contact.contactId);
                                 }
 
                                 @Override
@@ -338,6 +339,7 @@ public class ContactsFragment extends BaseContactsFragment {
                             });
                         } else {
                             application.getContentResolver().delete(uri, null, null);
+                            application.getSyncKernel().getContactsSync().removeContact(contact.contactId);
                             reloadData();
                         }
                     }
@@ -397,6 +399,7 @@ public class ContactsFragment extends BaseContactsFragment {
 
                                 final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.lookupKey);
                                 application.getContentResolver().delete(uri, null, null);
+                                application.getSyncKernel().getContactsSync().removeContact(contact.contactId);
                             }
 
                             @Override

@@ -122,6 +122,37 @@ public class ContactsSync extends BaseSync {
         this.bookPersistence.write();
     }
 
+    public void addPhoneMapping(int uid, String phone) {
+        for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
+            if (importedPhone.getPhone().equals(phone)) {
+                return;
+            }
+        }
+
+        bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phone, uid));
+        bookPersistence.write();
+    }
+
+    public void removeContact(long contactId) {
+        Contact[] relatedContacts = application.getEngine().getContactsForLocalId(contactId);
+        application.getEngine().deleteContactsForLocalId(contactId);
+
+        HashSet<Integer> uids = new HashSet<Integer>();
+        for (Contact c : relatedContacts) {
+            uids.add(c.getUid());
+        }
+
+        for (Integer uid : uids) {
+            synchronized (contactsSync) {
+                Logger.d(TAG, "Writing integration contacts...");
+
+                Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, application.getKernel().getAuthKernel().getAccount().name).appendQueryParameter(
+                        ContactsContract.RawContacts.ACCOUNT_TYPE, application.getKernel().getAuthKernel().getAccount().type).build();
+                application.getContentResolver().delete(rawContactUri, ContactsContract.RawContacts.SYNC2 + " = " + uid, null);
+            }
+        }
+    }
+
     public void resetSync() {
         Logger.d(TAG, "resetSync");
         resetSync(SYNC_CONTACTS_PRE);
