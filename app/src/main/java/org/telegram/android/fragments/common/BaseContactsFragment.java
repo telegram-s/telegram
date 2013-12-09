@@ -248,7 +248,9 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
             listView.post(new Runnable() {
                 @Override
                 public void run() {
-                    listView.setSelection(0);
+                    if (filteredContacts.length > 0) {
+                        listView.setSelection(0);
+                    }
                 }
             });
         }
