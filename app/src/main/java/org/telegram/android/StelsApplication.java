@@ -1,6 +1,7 @@
 package org.telegram.android;
 
 import android.app.Application;
+import android.os.SystemClock;
 import com.extradea.framework.images.ImageController;
 import com.extradea.framework.images.ImageSupport;
 import org.telegram.android.kernel.api.AuthController;
@@ -11,6 +12,7 @@ import org.telegram.android.core.files.UploadController;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.critical.ApiStorage;
 import org.telegram.android.kernel.*;
+import org.telegram.android.log.Logger;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.screens.ScreenLogicType;
@@ -22,10 +24,14 @@ import org.telegram.api.engine.TelegramApi;
  * Created: 22.07.13 0:55
  */
 public class StelsApplication extends Application implements ImageSupport {
+
+    private static final String TAG = "StelsApplication";
+
     private ApplicationKernel kernel;
 
     @Override
     public void onCreate() {
+        long start = SystemClock.uptimeMillis();
         CrashHandler.init(this);
         kernel = new ApplicationKernel(this);
         super.onCreate();
@@ -51,6 +57,8 @@ public class StelsApplication extends Application implements ImageSupport {
         kernel.runKernels();
 
         kernel.getUiKernel().onAppPause();
+
+        Logger.d(TAG, "Loading application in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public boolean isRTL() {
@@ -169,10 +177,6 @@ public class StelsApplication extends Application implements ImageSupport {
 
     public DownloadManager getDownloadManager() {
         return kernel.getFileKernel().getDownloadManager();
-    }
-
-    public DynamicConfig getDynamicConfig() {
-        return kernel.getSyncKernel().getDynamicConfig();
     }
 
     public UiResponsibility getResponsibility() {

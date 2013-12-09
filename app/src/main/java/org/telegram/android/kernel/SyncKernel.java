@@ -1,11 +1,12 @@
 package org.telegram.android.kernel;
 
-import org.telegram.android.core.DynamicConfig;
 import org.telegram.android.core.TypingStates;
 import org.telegram.android.core.background.MessageSender;
 import org.telegram.android.core.background.UpdateProcessor;
 import org.telegram.android.core.background.sync.BackgroundSync;
 import org.telegram.android.core.background.sync.ContactsSync;
+
+import java.util.Locale;
 
 /**
  * Created by ex3ndr on 16.11.13.
@@ -18,8 +19,6 @@ public class SyncKernel {
     private UpdateProcessor updateProcessor;
     private MessageSender messageSender;
     private TypingStates typingStates;
-
-    private DynamicConfig dynamicConfig;
 
     public SyncKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
@@ -38,10 +37,6 @@ public class SyncKernel {
         return typingStates;
     }
 
-    public DynamicConfig getDynamicConfig() {
-        return dynamicConfig;
-    }
-
     public BackgroundSync getBackgroundSync() {
         return backgroundSync;
     }
@@ -54,7 +49,6 @@ public class SyncKernel {
         messageSender = new MessageSender(kernel.getApplication());
         typingStates = new TypingStates(kernel.getApplication());
         // updateProcessor = new UpdateProcessor(kernel.getApplication());
-        dynamicConfig = new DynamicConfig(kernel.getApplication());
         backgroundSync = new BackgroundSync(kernel.getApplication());
         contactsSync = new ContactsSync(kernel.getApplication());
     }
@@ -68,6 +62,10 @@ public class SyncKernel {
         }
         backgroundSync.run();
         contactsSync.run();
+
+        if (!Locale.getDefault().getLanguage().equals(kernel.getTechKernel().getSystemConfig().getInviteMessageLang())) {
+            backgroundSync.resetInviteSync();
+        }
     }
 
     public void logIn() {

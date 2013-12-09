@@ -11,6 +11,8 @@ import com.extradea.framework.persistence.ContextPersistence;
  */
 public class VersionHolder extends ContextPersistence {
 
+    static final long serialVersionUID = 2587807235563473358L;
+
     protected int prevVersionInstalled;
     protected int currentVersionInstalled;
     protected boolean wasUpgraded;

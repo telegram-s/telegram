@@ -13,6 +13,7 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
@@ -24,6 +25,7 @@ import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.fragments.*;
 import org.telegram.android.fragments.interfaces.FragmentResultController;
 import org.telegram.android.fragments.interfaces.RootController;
+import org.telegram.android.log.Logger;
 import org.telegram.android.screens.FragmentScreenController;
 import org.telegram.android.screens.RootControllerHolder;
 import org.telegram.android.screens.ScreenLogicType;
@@ -37,6 +39,8 @@ import java.util.ArrayList;
  * Created: 28.07.13 19:09
  */
 public class StartActivity extends StelsSmileyActivity implements FragmentResultController, RootControllerHolder {
+
+    private static final String TAG = "StartActivity";
 
     private static final int STATE_GENERAL = -1;
     private static final int STATE_TOUR = 0;
@@ -67,6 +71,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     }
 
     public void onCreate(Bundle savedInstanceState) {
+        long start = SystemClock.uptimeMillis();
         super.onCreate(savedInstanceState);
         Bundle savedState = null;
         if (savedInstanceState != null && savedInstanceState.containsKey("screen_controller")) {
@@ -106,6 +111,8 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         if (getIntent().getAction() != null) {
             onIntent(getIntent());
         }
+
+        Logger.d(TAG, "Loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     private void doInitApp() {

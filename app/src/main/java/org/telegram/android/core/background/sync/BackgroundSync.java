@@ -9,11 +9,13 @@ import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.log.Logger;
 import org.telegram.api.*;
 import org.telegram.api.engine.TimeoutException;
+import org.telegram.api.help.TLInviteText;
 import org.telegram.api.messages.TLAffectedHistory;
 import org.telegram.api.requests.*;
 import org.telegram.tl.TLIntVector;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by ex3ndr on 22.11.13.
@@ -36,6 +38,8 @@ public class BackgroundSync extends BaseSync {
     private static final int SYNC_TYPING = 5;
     private static final int SYNC_HISTORY = 6;
     private static final int SYNC_ACCEPTOR = 7;
+    private static final int SYNC_INVITE = 8;
+    private static final int SYNC_INVITE_INTERVAL = 24 * HOUR;
     private static final String TAG = "BackgroundSync";
 
     private StelsApplication application;
@@ -55,6 +59,11 @@ public class BackgroundSync extends BaseSync {
         registerSyncEvent(SYNC_TYPING, "typingSync");
         registerSyncSingle(SYNC_HISTORY, "historyReadSync");
         registerSyncEvent(SYNC_ACCEPTOR, "encryptedAcceptor");
+        registerSync(SYNC_INVITE, "onlineSync", SYNC_INVITE_INTERVAL);
+    }
+
+    public void resetInviteSync() {
+        resetSync(SYNC_INVITE);
     }
 
     public void resetDcSync() {
@@ -114,6 +123,7 @@ public class BackgroundSync extends BaseSync {
         try {
             TLConfig config = application.getApi().doRpcCall(new TLRequestHelpGetConfig());
             application.getApiStorage().updateSettings(config);
+            application.getTechKernel().getSystemConfig().onConfig(config);
             application.getApi().resetConnectionInfo();
             synced = true;
         } catch (TimeoutException e) {
@@ -122,6 +132,7 @@ public class BackgroundSync extends BaseSync {
                 try {
                     TLConfig config = application.getApi().doRpcCallToDc(new TLRequestHelpGetConfig(), knownDcs[i]);
                     application.getApiStorage().updateSettings(config);
+                    application.getTechKernel().getSystemConfig().onConfig(config);
                     application.getApi().resetConnectionInfo();
                     synced = true;
                     break;
@@ -268,5 +279,11 @@ public class BackgroundSync extends BaseSync {
         for (EncryptedChat chat : chats) {
             application.getEncryptionController().confirmEncryption(chat.getId());
         }
+    }
+
+    protected void inviteSync() throws Exception {
+        String locale = Locale.getDefault().getLanguage();
+        TLInviteText text = application.getApi().doRpcCall(new TLRequestHelpGetInviteText(locale));
+        application.getTechKernel().getSystemConfig().onInviteMessage(text.getMessage(), locale);
     }
 }
