@@ -11,12 +11,18 @@ import org.telegram.android.log.Logger;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Created by ex3ndr on 01.12.13.
  */
 public abstract class BaseSync {
     private final String TAG;
+
+    protected static final int SEC = 1;
+    protected static final int MIN = 60 * SEC;
+    protected static final int HOUR = 60 * MIN;
 
     private static final long ERROR_DELAY = 5000;
     private static final long NO_API_DELAY = 10000;
@@ -25,7 +31,7 @@ public abstract class BaseSync {
     private static final int HANDLER_ONLINE = 0;
     private static final int HANDLER_OFFLINE = 1;
 
-    private HashMap<Integer, SyncHolder> syncEntities = new HashMap<Integer, SyncHolder>();
+    private SortedMap<Integer, SyncHolder> syncEntities = new TreeMap<Integer, SyncHolder>();
 
     private HashMap<Integer, Handler> syncHandlers;
 

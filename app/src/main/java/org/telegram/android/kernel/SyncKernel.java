@@ -82,6 +82,7 @@ public class SyncKernel {
     public void logOut() {
         typingStates.clearState();
         contactsSync.clear();
+        contactsSync.resetSync();
         if (updateProcessor != null) {
             updateProcessor.destroy();
             updateProcessor.clearData();

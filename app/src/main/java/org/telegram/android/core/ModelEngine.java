@@ -55,6 +55,10 @@ public class ModelEngine {
      * Users actions
      */
 
+    public UsersEngine getUsersEngine() {
+        return usersEngine;
+    }
+
     public User[] getUsersById(Object[] uids) {
         return usersEngine.getUsersById(uids);
     }

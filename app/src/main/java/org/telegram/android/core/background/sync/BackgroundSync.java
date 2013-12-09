@@ -22,10 +22,6 @@ public class BackgroundSync extends BaseSync {
 
     private static final String SETTINGS_NAME = "org.telegram.android";
 
-    private static final int SEC = 1;
-    private static final int MIN = 60 * SEC;
-    private static final int HOUR = 60 * MIN;
-
     private static final int ONLINE_TIMEOUT = 70000;
     private static final int TYPING_TIMEOUT = 8000;
     private static final int TYPING_SEND_TIMEOUT = 5000;
