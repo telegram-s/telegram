@@ -2,6 +2,7 @@ package org.telegram.android.kernel;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.os.SystemClock;
 import org.telegram.android.R;
 import org.telegram.android.core.model.storage.TLDcInfo;
 import org.telegram.android.core.model.storage.TLKey;
@@ -43,17 +44,26 @@ public class AuthKernel {
         this.kernel = kernel;
         ACCOUNT_TYPE = kernel.getApplication().getString(R.string.config_account_type);
 
-        Logger.d(TAG, "Loading auth kernel");
+        long start = SystemClock.uptimeMillis();
+        boolean loaded = tryLoadGeneral();
+        Logger.d(TAG, "General loading in " + (SystemClock.uptimeMillis() - start) + " ms");
 
-        if (!tryLoadGeneral()) {
+        start = SystemClock.uptimeMillis();
+        if (!loaded) {
             tryLoadObsolete();
         }
+        Logger.d(TAG, "Obsolete loading in " + (SystemClock.uptimeMillis() - start) + " ms");
 
+
+        start = SystemClock.uptimeMillis();
         if (storage == null) {
             storage = new ApiStorage(kernel.getApplication());
         }
+        Logger.d(TAG, "ApiStorage loading in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        start = SystemClock.uptimeMillis();
         checkState();
-        // storage.write();
+        Logger.d(TAG, "Api state check loading in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public ApiStorage getApiStorage() {
@@ -66,9 +76,12 @@ public class AuthKernel {
 
     private boolean tryLoadGeneral() {
         boolean res = new File(kernel.getApplication().getFilesDir().getPath() + "/" + ApiStorage.STORAGE_FILE_NAME).exists();
-        Logger.d(TAG, "No exisiting configuration");
+        if (!res) {
+            Logger.d(TAG, "No exisiting configuration");
+            return false;
+        }
         storage = new ApiStorage(kernel.getApplication());
-        return res;
+        return true;
     }
 
     private void tryLoadObsolete() {

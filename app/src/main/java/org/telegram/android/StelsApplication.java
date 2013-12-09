@@ -29,12 +29,20 @@ public class StelsApplication extends Application implements ImageSupport {
 
     private ApplicationKernel kernel;
 
+    private long appCreateTime;
+    private long appStartTime;
+
+    private boolean isLoaded = false;
+
     @Override
     public void onCreate() {
         long start = SystemClock.uptimeMillis();
+        appStartTime = start;
         CrashHandler.init(this);
         kernel = new ApplicationKernel(this);
         super.onCreate();
+
+        long initStart = SystemClock.uptimeMillis();
 
         // None of this objects starts doing something in background until someone ack them about this
         kernel.initTechKernel(); // Technical information about environment. Might be loaded first.
@@ -54,11 +62,24 @@ public class StelsApplication extends Application implements ImageSupport {
 
         kernel.initApiKernel(); // Initializing api kernel
 
+        Logger.d(TAG, "Kernels created in " + (SystemClock.uptimeMillis() - initStart) + " ms");
+
         kernel.runKernels();
 
         kernel.getUiKernel().onAppPause();
 
         Logger.d(TAG, "Kernels loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        appCreateTime = SystemClock.uptimeMillis();
+    }
+
+    public void onLoaded() {
+        if (isLoaded) {
+            return;
+        }
+
+        Logger.d(TAG, "Kernel: all loading in " + (SystemClock.uptimeMillis() - appStartTime) + " ms");
+        Logger.d(TAG, "Kernel: complete loading in " + (SystemClock.uptimeMillis() - appCreateTime) + " ms");
     }
 
     public boolean isRTL() {

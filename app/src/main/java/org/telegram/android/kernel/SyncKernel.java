@@ -5,6 +5,7 @@ import org.telegram.android.core.background.MessageSender;
 import org.telegram.android.core.background.UpdateProcessor;
 import org.telegram.android.core.background.sync.BackgroundSync;
 import org.telegram.android.core.background.sync.ContactsSync;
+import org.telegram.android.log.Logger;
 
 import java.util.Locale;
 
@@ -12,6 +13,9 @@ import java.util.Locale;
  * Created by ex3ndr on 16.11.13.
  */
 public class SyncKernel {
+
+    private static final String TAG = "SyncKernel";
+
     private ApplicationKernel kernel;
 
     private ContactsSync contactsSync;
@@ -46,11 +50,21 @@ public class SyncKernel {
     }
 
     private void init() {
+        long start = System.currentTimeMillis();
         messageSender = new MessageSender(kernel.getApplication());
+        Logger.d(TAG, "MessageSender loaded in " + (System.currentTimeMillis() - start) + " ms");
+
+        start = System.currentTimeMillis();
         typingStates = new TypingStates(kernel.getApplication());
-        // updateProcessor = new UpdateProcessor(kernel.getApplication());
+        Logger.d(TAG, "TypingStates loaded in " + (System.currentTimeMillis() - start) + " ms");
+
+        start = System.currentTimeMillis();
         backgroundSync = new BackgroundSync(kernel.getApplication());
+        Logger.d(TAG, "BackgroundSync loaded in " + (System.currentTimeMillis() - start) + " ms");
+
+        start = System.currentTimeMillis();
         contactsSync = new ContactsSync(kernel.getApplication());
+        Logger.d(TAG, "ContactsSync loaded in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     public void runKernel() {

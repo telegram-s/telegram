@@ -91,14 +91,19 @@ public class ContactsSync extends BaseSync {
     public ContactsSync(StelsApplication application) {
         super(application, SETTINGS_NAME);
 
+        long start = SystemClock.uptimeMillis();
         this.application = application;
         this.bookPersistence = new TLPersistence<TLLocalBook>(application, "book_sync.bin", TLLocalBook.class, TLLocalContext.getInstance());
+        Logger.d(TAG, "Persistence loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
+        start = SystemClock.uptimeMillis();
         registerSyncSingleOffline(SYNC_CONTACTS_PRE, "contactsPreSync");
         registerSyncSingleOffline(SYNC_CONTACTS_INTEGRATION, "updateIntegration");
         registerSyncEvent(SYNC_CONTACTS, "contactsSync");
         registerSync(SYNC_CONTACTS_TWO_SIDE, "updateContacts", SYNC_CONTACTS_TWO_SIDE_TIMEOUT);
+        Logger.d(TAG, "Sync registered in " + (SystemClock.uptimeMillis() - start) + " ms");
 
+        start = SystemClock.uptimeMillis();
         TelephonyManager manager = (TelephonyManager) application.getSystemService(Context.TELEPHONY_SERVICE);
 
         if (manager.getSimCountryIso() != null) {
@@ -111,6 +116,7 @@ public class ContactsSync extends BaseSync {
 
         isSynced = preferences.getBoolean("is_synced", false);
         isLoaded = false;
+        Logger.d(TAG, "Completed init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void clear() {

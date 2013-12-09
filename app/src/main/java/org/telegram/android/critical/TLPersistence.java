@@ -1,6 +1,7 @@
 package org.telegram.android.critical;
 
 import android.content.Context;
+import org.telegram.android.log.Logger;
 import org.telegram.tl.TLContext;
 import org.telegram.tl.TLObject;
 
@@ -13,6 +14,9 @@ import java.io.*;
  * Time: 0:29
  */
 public class TLPersistence<T extends TLObject> {
+
+    private static final String TAG = "KernelPersistence";
+
     private Class<T> destClass;
     private TLContext context;
     private SafeFileWriter writer;
@@ -23,7 +27,9 @@ public class TLPersistence<T extends TLObject> {
         this.context = tlContext;
         this.writer = new SafeFileWriter(context, fileName);
 
+        long start = System.currentTimeMillis();
         byte[] data = writer.loadData();
+        Logger.d(TAG, "Loaded state in " + (System.currentTimeMillis() - start) + " ms");
         if (data != null) {
             try {
                 ByteArrayInputStream stream = new ByteArrayInputStream(data);

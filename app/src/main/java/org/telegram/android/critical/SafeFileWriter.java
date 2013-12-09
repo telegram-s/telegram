@@ -52,8 +52,7 @@ public class SafeFileWriter {
             os.getFD().sync();
             os.close();
             os = null;
-            boolean res = file.renameTo(getFile());
-            String s = res+"";
+            file.renameTo(getFile());
         } catch (FileNotFoundException e) {
             Logger.t(TAG, e);
         } catch (IOException e) {

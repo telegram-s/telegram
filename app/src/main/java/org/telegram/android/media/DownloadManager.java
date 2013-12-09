@@ -50,7 +50,7 @@ public class DownloadManager {
         }
     }
 
-    private static int SMALL_THUMB_SIDE;
+    private final int SMALL_THUMB_SIDE;
 
     private DownloadPersistence downloadPersistence;
 
@@ -78,7 +78,6 @@ public class DownloadManager {
         this.service = Executors.newFixedThreadPool(3);
         this.application = application;
         this.downloadPersistence = new DownloadPersistence(application);
-        this.downloadPersistence.tryLoad();
 
         SMALL_THUMB_SIDE = (int) (application.getResources().getDisplayMetrics().density * 75);
     }

@@ -10,10 +10,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.os.SystemClock;
+import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
@@ -112,7 +109,15 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             onIntent(getIntent());
         }
 
-        Logger.d(TAG, "Loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+        Logger.d(TAG, "Kernel: Activity loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        Handler handler = new Handler();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                application.onLoaded();
+            }
+        });
     }
 
     private void doInitApp() {

@@ -14,6 +14,10 @@ import org.telegram.android.core.model.ChatMessage;
  * Time: 19:27
  */
 public class SelfDestructProcessor {
+
+    private static final int MSG_INITIAL_DELETIONS = 0;
+    private static final int MSG_DESTROY = 1;
+
     private StelsApplication application;
     private HandlerThread thread = new HandlerThread("SelfDestructThread");
     private Handler handler;
@@ -27,10 +31,14 @@ public class SelfDestructProcessor {
         handler = new Handler(thread.getLooper()) {
             @Override
             public void handleMessage(Message msg) {
-                ChatMessage message = application.getEngine().getMessageByDbId(msg.what);
-                if (message != null) {
-                    application.getEngine().selfDestructMessage(message.getDatabaseId());
-                    application.notifyUIUpdate();
+                if (msg.what == MSG_INITIAL_DELETIONS) {
+                    checkInitialDeletions();
+                } else if (msg.what == MSG_DESTROY) {
+                    ChatMessage message = application.getEngine().getMessageByDbId(msg.arg1);
+                    if (message != null) {
+                        application.getEngine().selfDestructMessage(message.getDatabaseId());
+                        application.notifyUIUpdate();
+                    }
                 }
             }
         };
@@ -38,10 +46,15 @@ public class SelfDestructProcessor {
 
     public void performSelfDestruct(int databaseId, int time) {
         handler.removeMessages(databaseId);
-        handler.sendEmptyMessageAtTime(databaseId, (SystemClock.uptimeMillis() - System.currentTimeMillis()) + time * 1000L);
+        Message message = handler.obtainMessage(MSG_DESTROY, databaseId, 0);
+        handler.sendMessageAtTime(message, (SystemClock.uptimeMillis() - System.currentTimeMillis()) + time * 1000L);
     }
 
-    public void checkInitialDeletions() {
+    public void requestInitialDeletions() {
+        handler.sendEmptyMessage(MSG_INITIAL_DELETIONS);
+    }
+
+    private void checkInitialDeletions() {
         int currentTime = (int) (System.currentTimeMillis() / 1000);
         ChatMessage[] messages = application.getEngine().findDiedMessages(currentTime);
         for (ChatMessage msg : messages) {
