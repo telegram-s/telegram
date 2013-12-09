@@ -218,7 +218,7 @@ public class Logger {
         if (!ENABLED) {
             return;
         }
-        Log.d("T|" + TAG, message);
+        Log.d("T|" + TAG, Thread.currentThread().getName() + "| " + message);
         if (isEnabled && isInitied) {
             addLogRecord(new LogRecord(System.currentTimeMillis(), TAG, Thread.currentThread().getName(), message));
         }
@@ -250,7 +250,7 @@ public class Logger {
         if (!ENABLED) {
             return;
         }
-        Log.w("T|" + TAG, message);
+        Log.w("T|" + TAG, Thread.currentThread().getName() + "| " + message);
         if (isEnabled && isInitied) {
             addLogRecord(new LogRecord(System.currentTimeMillis(), TAG, Thread.currentThread().getName(), message));
         }

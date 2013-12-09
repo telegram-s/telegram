@@ -123,6 +123,7 @@ public class ContactsSync extends BaseSync {
     }
 
     public void resetSync() {
+        Logger.d(TAG, "resetSync");
         resetSync(SYNC_CONTACTS_PRE);
         resetSync(SYNC_CONTACTS_TWO_SIDE);
     }
@@ -184,10 +185,12 @@ public class ContactsSync extends BaseSync {
     public void invalidateContactsSync() {
         resetSync(SYNC_CONTACTS_PRE);
         resetSync(SYNC_CONTACTS_TWO_SIDE);
+        Logger.d(TAG, "invalidateContactsSync");
     }
 
     private void invalidateIntegration() {
         resetSync(SYNC_CONTACTS_INTEGRATION);
+        Logger.d(TAG, "invalidateIntegration");
     }
 
     protected void contactsPreSync() throws Exception {
@@ -218,6 +221,11 @@ public class ContactsSync extends BaseSync {
     }
 
     protected void updateContacts() throws Exception {
+        if (!isSynced) {
+            Logger.d(TAG, "Ignoring contacts loading: not synced");
+            return;
+        }
+
         String hash;
         User[] contacts = application.getEngine().getUsersEngine().getContacts();
         if (contacts.length == 0) {
@@ -297,45 +305,51 @@ public class ContactsSync extends BaseSync {
 
                 bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phonesForImport.value, uid));
             }
-            if (TWO_SIDE_SYNC) {
-                // updateIntegration();
-                invalidateIntegration();
-            }
             updateMapping();
             isSynced = true;
             preferences.edit().putBoolean("is_synced", true).commit();
             notifyChanged();
+            invalidateIntegration();
             bookPersistence.write();
         } else {
             updateMapping();
             isSynced = true;
             preferences.edit().putBoolean("is_synced", true).commit();
             notifyChanged();
+            invalidateIntegration();
         }
     }
 
     protected void updateIntegration() {
+        if (!isSynced) {
+            Logger.d(TAG, "Ignoring integration: not synced");
+            return;
+        }
+
+        long start = SystemClock.uptimeMillis();
+        User[] users = application.getEngine().getUsersEngine().getContacts();
+        HashMap<Integer, Long> localContacts = new HashMap<Integer, Long>();
         synchronized (contactsSync) {
             Logger.d(TAG, "Writing integration contacts...");
-            long start = SystemClock.uptimeMillis();
-            User[] users = application.getEngine().getUsersEngine().getContacts();
+
             Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, application.getKernel().getAuthKernel().getAccount().name).appendQueryParameter(
                     ContactsContract.RawContacts.ACCOUNT_TYPE, application.getKernel().getAuthKernel().getAccount().type).build();
             Cursor c1 = application.getContentResolver().query(rawContactUri, new String[]{BaseColumns._ID, ContactsContract.RawContacts.SYNC2}, null, null, null);
-            HashMap<Integer, Long> localContacts = new HashMap<Integer, Long>();
             if (c1 != null) {
                 while (c1.moveToNext()) {
                     localContacts.put(c1.getInt(1), c1.getLong(0));
                 }
                 c1.close();
             }
+        }
 
-            Logger.d(TAG, "Readed saved contacts in " + (SystemClock.uptimeMillis() - start) + " ms");
-            start = SystemClock.uptimeMillis();
+        Logger.d(TAG, "Readed saved contacts in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
 
-            ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-            for (User u : users) {
-                if (!localContacts.containsKey(u.getUid())) {
+        ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+        for (User u : users) {
+            if (!localContacts.containsKey(u.getUid())) {
+                synchronized (contactsSync) {
                     addContact(false, application.getKernel().getAuthKernel().getAccount(), u, u.getDisplayName(), u.getPhone(), operationList);
                     if (operationList.size() > 480) {
                         complete(operationList);
@@ -343,11 +357,13 @@ public class ContactsSync extends BaseSync {
                     }
                 }
             }
+        }
+        synchronized (contactsSync) {
             if (operationList.size() > 0) {
                 complete(operationList);
             }
-            Logger.d(TAG, "Changes applied in " + (SystemClock.uptimeMillis() - start) + " ms");
         }
+        Logger.d(TAG, "Changes applied in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     private void addContact(boolean withCheck, Account account, User user, String name, String phone, ArrayList<ContentProviderOperation> operationList) {
@@ -455,6 +471,8 @@ public class ContactsSync extends BaseSync {
             }
         }
 
+        Logger.d(TAG, "build map in " + (SystemClock.uptimeMillis() - start) + " ms");
+
         application.getEngine().onImportedContacts(imported);
 
         Logger.d(TAG, "updatedMapping in " + (SystemClock.uptimeMillis() - start) + " ms");
@@ -504,7 +522,12 @@ public class ContactsSync extends BaseSync {
                 return new PhoneBookRecord[0];
             }
             Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                    null, ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0", null, ContactsContract.Contacts._ID + " desc");
+                    new String[]
+                            {
+                                    ContactsContract.Contacts._ID,
+                                    ContactsContract.Contacts.DISPLAY_NAME
+                            },
+                    ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0", null, ContactsContract.Contacts._ID + " desc");
             if (cur == null) {
                 return new PhoneBookRecord[0];
             }
@@ -533,7 +556,11 @@ public class ContactsSync extends BaseSync {
 
             Cursor pCur = cr.query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                    null,
+                    new String[]{
+                            ContactsContract.CommonDataKinds.Phone._ID,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                            ContactsContract.CommonDataKinds.Phone.NUMBER
+                    },
                     null,
                     null, ContactsContract.CommonDataKinds.Phone._ID + " desc");
             if (pCur == null) {
@@ -543,9 +570,18 @@ public class ContactsSync extends BaseSync {
             int idPhoneIndex = pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID);
             int idNumberIndex = pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
 
+            Logger.d(TAG, "Phone book phase 1 in " + (SystemClock.uptimeMillis() - start) + " ms");
+
             if (phoneUtil == null) {
                 phoneUtil = PhoneNumberUtil.getInstance();
+                try {
+                    phoneUtil.parse("+79995555555", isoCountry);
+                } catch (NumberParseException e) {
+                    e.printStackTrace();
+                }
             }
+
+            Logger.d(TAG, "Phone book phase 2 in " + (SystemClock.uptimeMillis() - start) + " ms");
 
             while (pCur.moveToNext()) {
                 long contactId = pCur.getLong(idContactIndex);
@@ -560,6 +596,7 @@ public class ContactsSync extends BaseSync {
                     } catch (NumberParseException e) {
                         phoneNo = phoneNo.replaceAll("[^\\d]", "");
                     }
+                    phoneNo = phoneNo.replaceAll("[^\\d]", "");
 
                     record.getPhones().add(new Phone(phoneNo, phoneId));
                 }
