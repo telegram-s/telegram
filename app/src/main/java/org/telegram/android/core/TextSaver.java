@@ -13,6 +13,9 @@ import java.util.HashMap;
  * Time: 22:29
  */
 public class TextSaver extends ContextPersistence {
+
+    static final long serialVersionUID = 1L;
+
     private HashMap<Long, String> savedText = new HashMap<Long, String>();
 
     public TextSaver(StelsApplication application) {

@@ -12,6 +12,8 @@ import java.util.HashSet;
  */
 public class LastEmojiProcessor extends ContextPersistence {
 
+    static final long serialVersionUID = 1L;
+
     public static final int LAST_EMOJI_COUNT = 30;
 
     private long[] lastSmileys;
