@@ -244,6 +244,12 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
         onFilterChanged();
         contactsAdapter.notifyDataSetInvalidated();
         listView.invalidateViews();
+        listView.post(new Runnable() {
+            @Override
+            public void run() {
+                listView.setSelection(0);
+            }
+        });
     }
 
     protected void onFilterChanged() {
@@ -343,6 +349,7 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
         listView = null;
         empty = null;
         loading = null;
+        matcher = null;
     }
 
     @Override
