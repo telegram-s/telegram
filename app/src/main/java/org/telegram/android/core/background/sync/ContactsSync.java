@@ -143,6 +143,13 @@ public class ContactsSync extends BaseSync {
         }
 
         for (Integer uid : uids) {
+            for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
+                if (importedPhone.getUid() == uid) {
+                    bookPersistence.getObj().getImportedPhones().remove(importedPhone);
+                    bookPersistence.write();
+                    break;
+                }
+            }
             synchronized (contactsSync) {
                 Logger.d(TAG, "Writing integration contacts...");
 
