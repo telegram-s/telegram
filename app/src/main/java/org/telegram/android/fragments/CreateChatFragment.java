@@ -166,7 +166,7 @@ public class CreateChatFragment extends BaseContactsFragment {
     }
 
     private void removeUser(User user) {
-        selected.remove(user);
+        selected.remove(user.getUid());
         updateEditText();
         updateCounter();
     }
