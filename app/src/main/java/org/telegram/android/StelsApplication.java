@@ -63,6 +63,7 @@ public class StelsApplication extends Application implements ImageSupport {
         kernel.initApiKernel(); // Initializing api kernel
 
         Logger.d(TAG, "Kernels created in " + (SystemClock.uptimeMillis() - initStart) + " ms");
+        CrashHandler.trackMeasure("startup", "kernelsCreate", (SystemClock.uptimeMillis() - initStart));
 
         kernel.runKernels();
 

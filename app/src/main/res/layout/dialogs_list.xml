@@ -8,12 +8,12 @@
              android:background="@android:color/white"
              android:id="@+id/mainContainer"
              android:paddingTop="48dp">
-    <com.extradea.framework.images.ui.ImagingListView android:layout_height="fill_parent"
-                                                      android:layout_width="fill_parent"
-                                                      android:cacheColorHint="@android:color/white"
-                                                      android:divider="@drawable/st_divider_short"
-                                                      android:drawSelectorOnTop="true"
-                                                      android:id="@+id/dialogsList"/>
+    <ListView android:layout_height="fill_parent"
+              android:layout_width="fill_parent"
+              android:cacheColorHint="@android:color/white"
+              android:divider="@drawable/st_divider_short"
+              android:drawSelectorOnTop="true"
+              android:id="@+id/dialogsList"/>
 
     <LinearLayout android:layout_width="wrap_content"
                   android:layout_height="wrap_content"

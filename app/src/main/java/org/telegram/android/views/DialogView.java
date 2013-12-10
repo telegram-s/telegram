@@ -17,6 +17,8 @@ import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.wireframes.DialogWireframe;
 import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.media.TelegramImageTask;
+import org.telegram.android.media.avatar.AvatarHolder;
 import org.telegram.android.ui.EmojiProcessor;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.Placeholders;
@@ -69,7 +71,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private StelsApplication application;
 
-    private ImageReceiver avatarReceiver;
+    private AvatarHolder avatarHolder;
 
     // Data
 
@@ -94,7 +96,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     //    private Drawable emptyDrawable;
     private Bitmap empty;
     private RectF avatarRect;
-    private Bitmap avatar;
     private Paint avatarBgPaint;
 
     private boolean isGroup;
@@ -152,26 +153,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
         this.currentUserUid = application.getCurrentUid();
         this.isRtl = application.isRTL();
-        this.avatarReceiver = new ImageReceiver() {
+        this.avatarHolder = new AvatarHolder(application.getUiKernel().getAvatarLoader()) {
             @Override
-            public void onImageLoaded(Bitmap result) {
-                avatar = result;
-                postInvalidate();
-            }
-
-            @Override
-            public void onImageLoadFailure() {
-                avatar = null;
-                postInvalidate();
-            }
-
-            @Override
-            public void onNoImage() {
-                avatar = null;
-                postInvalidate();
+            public void onAvatarChanged() {
+                invalidate();
             }
         };
-        this.avatarReceiver.register(application.getImageController());
 
         application.getTypingStates().registerListener(this);
 
@@ -335,19 +322,25 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         if (photo instanceof TLLocalAvatarPhoto) {
             TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) photo;
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                StelsImageTask task = new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
-                task.setMaxHeight(getPx(64));
-                task.setMaxWidth(getPx(64));
-                task.setFillRect(true);
-                RoundedImageTask roundedImageTask = new RoundedImageTask(task);
-                roundedImageTask.setRadius(getPx(2));
-                avatarReceiver.receiveImage(roundedImageTask);
-                avatar = avatarReceiver.getResult();
+//                StelsImageTask task = new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
+//                task.setMaxHeight(getPx(64));
+//                task.setMaxWidth(getPx(64));
+//                task.setFillRect(true);
+//                RoundedImageTask roundedImageTask = new RoundedImageTask(task);
+//                roundedImageTask.setRadius(getPx(2));
+//                avatarReceiver.receiveImage(roundedImageTask);
+//                avatar = avatarReceiver.getResult();
+//                avatarReceiver.receiveImage(new TelegramImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation(),
+//                        160));
+//                avatar = avatarReceiver.getResult();
+                avatarHolder.setAvatarSource((TLLocalFileLocation) avatarPhoto.getPreviewLocation(), 0);
             } else {
-                avatarReceiver.receiveImage(null);
+                avatarHolder.clearAvatarSource();
+                // avatarReceiver.receiveImage(null);
             }
         } else {
-            avatarReceiver.receiveImage(null);
+            avatarHolder.clearAvatarSource();
+            // avatarReceiver.receiveImage(null);
         }
 
         if (getMeasuredHeight() != 0 || getMeasuredWidth() != 0) {
@@ -362,17 +355,17 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        avatarReceiver.onRemovedFromParent();
-        avatar = null;
-        postInvalidate();
+        // avatarReceiver.onRemovedFromParent();
+        // avatar = null;
+        // postInvalidate();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        avatarReceiver.onAddedToParent();
-        avatar = avatarReceiver.getResult();
-        postInvalidate();
+        // avatarReceiver.onAddedToParent();
+        // avatar = avatarReceiver.getResult();
+        // postInvalidate();
     }
 
     @Override
@@ -680,8 +673,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             canvas.restore();
         }
 
-        if (avatar != null) {
-            canvas.drawBitmap(avatar, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
+        if (avatarHolder.getAvatar() != null) {
+            canvas.drawBitmap(avatarHolder.getAvatar(), layoutAvatarLeft, layoutAvatarTop, avatarPaint);
         } else {
             canvas.drawRoundRect(avatarRect, getPx(2), getPx(2), avatarBgPaint);
             canvas.drawBitmap(empty, layoutAvatarLeft, layoutAvatarTop, avatarPaint);
