@@ -131,6 +131,13 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
 
         // Current version
 
+        definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_contacts_title),
+                new String[]{
+                        getString(R.string.whats_contacts_0),
+                        getString(R.string.whats_contacts_1),
+                        getString(R.string.whats_contacts_2),
+                }, null));
+
         if (prevVersionCode < 672) {
             definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_new_design_title),
                     new String[]{
