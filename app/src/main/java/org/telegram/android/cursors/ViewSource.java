@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadFactory;
  * Author: Korshakov Stepan
  * Created: 04.08.13 7:50
  */
-public abstract class ViewSource<T> {
+public abstract class ViewSource<T, V> {
     private ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
         @Override
         public Thread newThread(Runnable runnable) {
@@ -174,10 +174,10 @@ public abstract class ViewSource<T> {
                 Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
                 long start = SystemClock.uptimeMillis();
                 int offset = items.size();
-                T[] res = loadItems(offset);
+                V[] res = loadItems(offset);
                 Logger.w(TAG, "loadingMore loaded " + res.length + " in " + (SystemClock.uptimeMillis() - start) + " ms");
                 boolean hasAdded = false;
-                for (T re : res) {
+                for (V re : res) {
                     if (!addItem(re)) {
                         hasAdded = true;
                     }
@@ -207,40 +207,44 @@ public abstract class ViewSource<T> {
         return workingSet.get(index);
     }
 
-    public synchronized boolean addItem(T itm) {
-        long key = getItemKey(itm);
+    public synchronized boolean addItem(V itm) {
+        T dest = convert(itm);
+        long key = getItemKey(dest);
         boolean res = items.containsKey(key);
-        items.put(key, itm);
+        items.put(key, dest);
         invalidated = true;
         return res;
     }
 
-    public synchronized boolean addToEndHacky(T itm) {
-        long key = getItemKey(itm);
+    public synchronized boolean addToEndHacky(V itm) {
+        T dest = convert(itm);
+        long key = getItemKey(dest);
         boolean res = items.containsKey(key);
-        items.put(key, itm);
-        workingSet.add(0, itm);
+        items.put(key, dest);
+        workingSet.add(0, dest);
         invalidated = true;
         return res;
     }
 
-    public synchronized void removeItem(T itm) {
-        items.remove(getItemKey(itm));
+    public synchronized void removeItem(V itm) {
+        T dest = convert(itm);
+        items.remove(getItemKey(dest));
         invalidated = true;
     }
 
-    public synchronized void updateItem(T itm) {
+    public synchronized void updateItem(V itm) {
+        T dest = convert(itm);
         Logger.d(TAG, "updateItem: " + itm);
-        long key = getItemKey(itm);
+        long key = getItemKey(dest);
         Logger.d(TAG, "item key: " + key);
 //        if (!items.containsKey(key)) {
 //            return;
 //        }
-        items.put(key, itm);
+        items.put(key, dest);
         invalidated = true;
     }
 
-    protected abstract T[] loadItems(int offset);
+    protected abstract V[] loadItems(int offset);
 
     protected abstract long getSortingKey(T obj);
 
@@ -285,4 +289,6 @@ public abstract class ViewSource<T> {
     public void destroy() {
         isDestroyed = true;
     }
+
+    protected abstract T convert(V item);
 }

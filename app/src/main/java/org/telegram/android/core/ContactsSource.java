@@ -57,12 +57,12 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
         try {
             sort_order = Settings.System.getInt(application.getContentResolver(), "android.contacts.SORT_ORDER");
         } catch (Settings.SettingNotFoundException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
         try {
             display_order = Settings.System.getInt(application.getContentResolver(), "android.contacts.DISPLAY_ORDER");
         } catch (Settings.SettingNotFoundException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
 
         if (sort_order == 1) {

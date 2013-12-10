@@ -30,6 +30,8 @@ import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
+import org.telegram.android.core.wireframes.DialogWireframe;
+import org.telegram.android.log.Logger;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.cursors.ViewSourceListener;
 import org.telegram.android.cursors.ViewSourceState;
@@ -63,6 +65,8 @@ import java.util.HashSet;
  * Created: 28.07.13 19:35
  */
 public class DialogsFragment extends StelsFragment implements ViewSourceListener {
+
+    private static final String TAG = "DialogsFragment";
 
     public static final String ACTION_FORWARD = "action_forward";
     public static final String ACTION_FORWARD_MULTIPLE = "action_forward_multiple";
@@ -138,7 +142,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
     private Integer[] actionMids;
     private int actionUid;
 
-    private ArrayList<DialogDescription> workingSet;
+    private ArrayList<DialogWireframe> workingSet;
     private BaseAdapter dialogAdapter;
     private View mainContainer;
     private ListView listView;
@@ -226,6 +230,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        long start = System.currentTimeMillis();
         if (savedInstanceState != null) {
             action = savedInstanceState.getString("action");
             actionUri = savedInstanceState.getString("actionUri");
@@ -249,7 +254,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             }
 
             @Override
-            public DialogDescription getItem(int i) {
+            public DialogWireframe getItem(int i) {
                 return workingSet.get(i);
             }
 
@@ -265,7 +270,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
 
             @Override
             public View getView(int i, View view, ViewGroup viewGroup) {
-                DialogDescription description = getItem(i);
+                DialogWireframe description = getItem(i);
                 if (view == null) {
                     view = new DialogView(getActivity());
                 }
@@ -319,8 +324,8 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Object item = adapterView.getItemAtPosition(i);
-                if (item instanceof DialogDescription) {
-                    DialogDescription description = (DialogDescription) item;
+                if (item instanceof DialogWireframe) {
+                    DialogWireframe description = (DialogWireframe) item;
                     onItemClicked(description);
                 }
             }
@@ -328,7 +333,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final DialogDescription description = (DialogDescription) adapterView.getItemAtPosition(i);
+                final DialogWireframe description = (DialogWireframe) adapterView.getItemAtPosition(i);
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_delete_header)
                         .setMessage(description.getPeerType() == PeerType.PEER_CHAT ? R.string.st_dialogs_delete_group : R.string.st_dialogs_delete_history)
                         .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
@@ -507,30 +512,18 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
         // dialogAdapter.notifyDataSetChanged();
         onDataStateChanged();
 
+        Logger.d(TAG, "Loading in " + (System.currentTimeMillis() - start) + " ms");
+
         return res;
     }
 
-    private String getDialogName(DialogDescription description) {
-        String name = description.getTitle();
-        if (description.getPeerType() == PeerType.PEER_USER) {
-            User u = getEngine().getUser(description.getPeerId());
-            name = u.getDisplayName();
-        } else if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
-            EncryptedChat chat = application.getEngine().getEncryptedChat(description.getPeerId());
-            User u = getEngine().getUser(chat.getUserId());
-            name = u.getDisplayName();
-        }
-
-        return name;
-    }
-
-    private void onItemClicked(final DialogDescription description) {
+    private void onItemClicked(final DialogWireframe description) {
         if (ACTION_SEND_CONTACT.equals(action)) {
             if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
                 Toast.makeText(getActivity(), R.string.st_dialogs_share_to_secret, Toast.LENGTH_SHORT).show();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_contact).replace("{0}", getDialogName(description)))
+                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_contact).replace("{0}", description.getDialogTitle()))
                         .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -551,7 +544,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             }
         } else if (ACTION_SEND_TEXT.equals(action)) {
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                    .setMessage(getStringSafe(R.string.st_dialogs_confirm_send).replace("{0}", getDialogName(description)))
+                    .setMessage(getStringSafe(R.string.st_dialogs_confirm_send).replace("{0}", description.getDialogTitle()))
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -575,7 +568,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                 Toast.makeText(getActivity(), R.string.st_dialogs_forward_to_secret, Toast.LENGTH_SHORT).show();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward_multiple).replace("{0}", getDialogName(description)))
+                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward_multiple).replace("{0}", description.getDialogTitle()))
                         .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -601,7 +594,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                 Toast.makeText(getActivity(), R.string.st_dialogs_forward_to_secret, Toast.LENGTH_SHORT).show();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward).replace("{0}", getDialogName(description)))
+                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward).replace("{0}", description.getDialogTitle()))
                         .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -625,7 +618,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
 
             int textId = sendImage ? R.string.st_dialogs_confirm_image : R.string.st_dialogs_confirm_video;
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                    .setMessage(getStringSafe(textId).replace("{0}", getDialogName(description)))
+                    .setMessage(getStringSafe(textId).replace("{0}", description.getDialogTitle()))
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -690,7 +683,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             dialog.show();
         } else if (ACTION_SEND_IMAGES.equals(action)) {
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                    .setMessage(getStringSafe(R.string.st_dialogs_confirm_images).replace("{0}", getDialogName(description)))
+                    .setMessage(getStringSafe(R.string.st_dialogs_confirm_images).replace("{0}", description.getDialogTitle()))
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {

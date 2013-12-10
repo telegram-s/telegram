@@ -1,5 +1,6 @@
 package org.telegram.android.kernel;
 
+import android.os.HandlerThread;
 import android.os.SystemClock;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;

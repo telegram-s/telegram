@@ -73,7 +73,7 @@ public class MessageSource {
 
     private int peerType, peerId;
 
-    private ViewSource<ChatMessage> messagesSource;
+    private ViewSource<ChatMessage, ChatMessage> messagesSource;
 
     private SharedPreferences preferences;
 
@@ -94,7 +94,7 @@ public class MessageSource {
         }
         this.peerType = _peerType;
         this.peerId = _peerId;
-        this.messagesSource = new ViewSource<ChatMessage>() {
+        this.messagesSource = new ViewSource<ChatMessage, ChatMessage>() {
 
             @Override
             protected ChatMessage[] loadItems(int offset) {
@@ -210,10 +210,15 @@ public class MessageSource {
                     requestLoadMore(getItemsCount());
                 }
             }
+
+            @Override
+            protected ChatMessage convert(ChatMessage item) {
+                return item;
+            }
         };
     }
 
-    public ViewSource<ChatMessage> getMessagesSource() {
+    public ViewSource<ChatMessage, ChatMessage> getMessagesSource() {
         return messagesSource;
     }
 

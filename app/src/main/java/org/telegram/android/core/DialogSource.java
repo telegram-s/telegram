@@ -6,11 +6,11 @@ import android.os.SystemClock;
 import com.crittercism.app.Crittercism;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.Configuration;
+import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
-import org.telegram.android.core.model.ContentType;
-import org.telegram.android.core.model.DialogDescription;
-import org.telegram.android.core.model.PeerType;
-import org.telegram.android.core.model.User;
+import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.service.*;
+import org.telegram.android.core.wireframes.DialogWireframe;
 import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.cursors.ViewSourceState;
 import org.telegram.android.log.Logger;
@@ -64,7 +64,7 @@ public class DialogSource {
 
     private StelsApplication application;
 
-    private ViewSource<DialogDescription> dialogsSource;
+    private ViewSource<DialogWireframe, DialogDescription> dialogsSource;
 
     private SharedPreferences preferences;
 
@@ -82,7 +82,7 @@ public class DialogSource {
             this.state = DialogSourceState.SYNCED;
         }
 
-        this.dialogsSource = new ViewSource<DialogDescription>() {
+        this.dialogsSource = new ViewSource<DialogWireframe, DialogDescription>() {
             @Override
             protected DialogDescription[] loadItems(int offset) {
                 if (offset < PAGE_OVERLAP) {
@@ -145,12 +145,12 @@ public class DialogSource {
             }
 
             @Override
-            protected long getSortingKey(DialogDescription obj) {
+            protected long getSortingKey(DialogWireframe obj) {
                 return obj.getDate();
             }
 
             @Override
-            protected long getItemKey(DialogDescription obj) {
+            protected long getItemKey(DialogWireframe obj) {
                 return obj.getDatabaseId();
             }
 
@@ -179,6 +179,11 @@ public class DialogSource {
                     requestLoadMore(getItemsCount());
                 }
             }
+
+            @Override
+            protected DialogWireframe convert(DialogDescription item) {
+                return DialogSource.this.convert(item);
+            }
         };
     }
 
@@ -187,7 +192,7 @@ public class DialogSource {
         service.shutdownNow();
     }
 
-    public ViewSource<DialogDescription> getViewSource() {
+    public ViewSource<DialogWireframe, DialogDescription> getViewSource() {
         return dialogsSource;
     }
 
@@ -336,5 +341,144 @@ public class DialogSource {
         } else {
             return true;
         }
+    }
+
+    protected String getString(int id) {
+        return application.getString(id);
+    }
+
+    protected DialogWireframe convert(DialogDescription item) {
+        DialogWireframe res = new DialogWireframe(item.getDatabaseId(), item.getPeerId(), item.getPeerType());
+
+        res.setSenderId(item.getSenderId());
+        res.setMine(res.getSenderId() == application.getCurrentUid());
+        res.setSender(application.getEngine().getUser(item.getSenderId()));
+
+        if (res.getPeerType() == PeerType.PEER_USER) {
+            res.setDialogUser(application.getEngine().getUser(res.getPeerId()));
+        } else if (res.getPeerType() == PeerType.PEER_CHAT) {
+            res.setChatAvatar(item.getPhoto());
+            res.setChatTitle(item.getTitle());
+        } else if (res.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+            EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(res.getPeerId());
+            res.setDialogUser(application.getEngine().getUser(encryptedChat.getUserId()));
+        } else {
+            throw new RuntimeException("Unknown peer type: " + res.getPeerType());
+        }
+
+        res.setDate(item.getDate());
+        res.setMessageState(item.getMessageState());
+        res.setContentType(item.getRawContentType());
+
+        if (res.getContentType() == ContentType.MESSAGE_TEXT) {
+            String rawMessage = item.getMessage();
+            if (rawMessage.length() > 50) {
+                rawMessage = rawMessage.substring(0, 50) + "...";
+            }
+            String[] rows = rawMessage.split("\n", 2);
+            if (rows.length == 2) {
+                rawMessage = rows[0];
+            }
+            res.setMessage(rawMessage);
+        } else if (res.getContentType() == ContentType.MESSAGE_SYSTEM) {
+            String body;
+            TLObject object = item.getExtras();
+            if (object != null && object instanceof TLAbsLocalAction) {
+                boolean isMyself = res.isMine();
+                if (object instanceof TLLocalActionChatCreate) {
+                    body = getString(isMyself ? R.string.st_dialog_created_group_you : R.string.st_dialog_created_group);
+                } else if (object instanceof TLLocalActionChatDeleteUser) {
+                    int uid = ((TLLocalActionChatDeleteUser) object).getUserId();
+                    if (uid == res.getSenderId()) {
+                        body = getString(isMyself ? R.string.st_dialog_left_user_you : R.string.st_dialog_left_user);
+                    } else {
+                        if (uid == application.getCurrentUid()) {
+                            body = getString(R.string.st_dialog_kicked_user_of_you).replace("{0}", getString(R.string.st_dialog_you_r));
+                        } else {
+                            User usr = application.getEngine().getUserRuntime(uid);
+                            body = getString(isMyself ? R.string.st_dialog_kicked_user_you : R.string.st_dialog_kicked_user).replace("{0}", usr.getDisplayName());
+                        }
+                    }
+                } else if (object instanceof TLLocalActionChatAddUser) {
+                    int uid = ((TLLocalActionChatAddUser) object).getUserId();
+                    if (uid == res.getSenderId()) {
+                        body = getString(isMyself ? R.string.st_dialog_enter_user_you : R.string.st_dialog_enter_user);
+                    } else {
+                        if (uid == application.getCurrentUid()) {
+                            body = getString(R.string.st_dialog_added_user_of_you).replace("{0}", getString(R.string.st_dialog_you_r));
+                        } else {
+                            User usr = application.getEngine().getUserRuntime(uid);
+                            body = getString(isMyself ? R.string.st_dialog_added_user_you : R.string.st_dialog_added_user).replace("{0}", usr.getDisplayName());
+                        }
+                    }
+                } else if (object instanceof TLLocalActionChatDeletePhoto) {
+                    body = getString(isMyself ? R.string.st_dialog_removed_photo_you : R.string.st_dialog_removed_photo);
+                } else if (object instanceof TLLocalActionChatEditPhoto) {
+                    body = getString(isMyself ? R.string.st_dialog_changed_photo_you : R.string.st_dialog_changed_photo);
+                } else if (object instanceof TLLocalActionChatEditTitle) {
+                    body = getString(isMyself ? R.string.st_dialog_changed_name_you : R.string.st_dialog_changed_name);
+                } else if (object instanceof TLLocalActionUserRegistered) {
+                    body = getString(R.string.st_dialog_user_joined_app);
+                } else if (object instanceof TLLocalActionUserEditPhoto) {
+                    body = getString(R.string.st_dialog_user_add_avatar);
+                } else if (object instanceof TLLocalActionEncryptedTtl) {
+                    TLLocalActionEncryptedTtl ttl = (TLLocalActionEncryptedTtl) object;
+                    if (res.isMine()) {
+                        if (ttl.getTtlSeconds() > 0) {
+                            body = getString(R.string.st_dialog_encrypted_switched_you).replace(
+                                    "{time}", TextUtil.formatHumanReadableDuration(ttl.getTtlSeconds()));
+                        } else {
+                            body = getString(R.string.st_dialog_encrypted_switched_off_you);
+                        }
+                    } else {
+                        if (ttl.getTtlSeconds() > 0) {
+                            body = getString(R.string.st_dialog_encrypted_switched).replace(
+                                    "{time}", TextUtil.formatHumanReadableDuration(ttl.getTtlSeconds()));
+                        } else {
+                            body = getString(R.string.st_dialog_encrypted_switched_off);
+                        }
+                    }
+                } else if (object instanceof TLLocalActionEncryptedCancelled) {
+                    body = getString(R.string.st_dialog_encrypted_cancelled);
+                } else if (object instanceof TLLocalActionEncryptedRequested) {
+                    body = getString(R.string.st_dialog_encrypted_requested);
+                } else if (object instanceof TLLocalActionEncryptedWaiting) {
+                    body = getString(R.string.st_dialog_encrypted_waiting)
+                            .replace("{name}", res.getDialogUser().getFirstName());
+                } else if (object instanceof TLLocalActionEncryptedCreated) {
+                    body = getString(R.string.st_dialog_encrypted_created);
+                } else if (object instanceof TLLocalActionEncryptedMessageDestructed) {
+                    body = getString(R.string.st_dialog_encrypted_selfdestructed);
+                } else {
+                    body = getString(R.string.st_dialog_system);
+                }
+            } else {
+                body = getString(R.string.st_dialog_system);
+            }
+            res.setMessage(body);
+        } else {
+            String body;
+            switch (res.getContentType()) {
+                case ContentType.MESSAGE_VIDEO:
+                    body = getString(R.string.st_dialog_video);
+                    break;
+                case ContentType.MESSAGE_GEO:
+                    body = getString(R.string.st_dialog_geo);
+                    break;
+                case ContentType.MESSAGE_PHOTO:
+                    body = getString(R.string.st_dialog_photo);
+                    break;
+                case ContentType.MESSAGE_CONTACT:
+                    body = getString(R.string.st_dialog_contact);
+                    break;
+                default:
+                    body = getString(R.string.st_dialog_unknown);
+                    break;
+            }
+            res.setMessage(body);
+        }
+
+
+        return res;
     }
 }

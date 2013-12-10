@@ -108,15 +108,23 @@ public class UiKernel {
         });
 
         Logger.d(TAG, "ImageController loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
-        start = SystemClock.uptimeMillis();
 
+        start = SystemClock.uptimeMillis();
         I18nUtil.init(application);
-        TextUtil.init(application);
-        AsyncException.initLocalisation(application);
-        ApiUtils.init(application, kernel.getTechKernel().getTechReflection().getScreenSize());
+        Logger.d(TAG, "Misc UI1 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
-        Logger.d(TAG, "Misc UI loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();
+        TextUtil.init(application);
+        Logger.d(TAG, "Misc UI2 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        start = SystemClock.uptimeMillis();
+        AsyncException.initLocalisation(application);
+        Logger.d(TAG, "Misc UI3 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        start = SystemClock.uptimeMillis();
+        ApiUtils.init(application, kernel.getTechKernel().getTechReflection().getScreenSize());
+        Logger.d(TAG, "Misc UI4 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+
     }
 
     public UiResponsibility getResponsibility() {
