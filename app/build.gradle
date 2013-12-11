@@ -40,8 +40,9 @@ dependencies {
 
     // Jars
     compile files('libs/gcm.jar')
+    compile files('libs/libGoogleAnalyticsServices.jar')
     compile files('libs/libphonenumber-5.9.jar')
-    compile files('libs/crittercism-sdkonly-4.3.0.jar')
+    compile files('libs/bugsense-3.6.jar')
     compile files('libs/ormlite-core-4.47.jar')
     compile files('libs/ormlite-android-4.47.jar')
 }

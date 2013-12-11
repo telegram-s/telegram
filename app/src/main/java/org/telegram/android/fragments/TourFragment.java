@@ -259,6 +259,8 @@ public class TourFragment extends StelsFragment {
                         goneView(indicators[i]);
                     }
                 }
+
+                sendEvent("page_view", index + "");
             }
 
             @Override

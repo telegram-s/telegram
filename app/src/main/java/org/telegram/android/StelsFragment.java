@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.text.BidiFormatter;
 import android.text.Editable;
@@ -81,11 +82,11 @@ public class StelsFragment extends StelsBaseFragment {
     }
 
     protected CharSequence highlightMenuText(int resId) {
-        return html("<font color='#010101'>" + getStringSafe(resId) + "</font>");
-    }
-
-    protected CharSequence highlightMenuText(String src) {
-        return html("<font color='#010101'>" + src + "</font>");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            return html("<font color='#010101'>" + getStringSafe(resId) + "</font>");
+        } else {
+            return getStringSafe(resId);
+        }
     }
 
     protected CharSequence highlightTitleDisabledText(int resId) {
@@ -213,6 +214,8 @@ public class StelsFragment extends StelsBaseFragment {
                     ((FragmentResultController) getActivity()).getResultData());
         }
 
+        sendEvent("#resume");
+
         // getActivity().getWindow().setBackgroundDrawable(getBackgroundDrawable());
     }
 
@@ -241,5 +244,19 @@ public class StelsFragment extends StelsBaseFragment {
 
     public boolean isParentFragment(StelsFragment fragment) {
         return true;
+    }
+
+    protected void sendEvent(String type) {
+        application.getKernel().sendEvent(getClass().getSimpleName() + ":" + type);
+    }
+
+    protected void sendEvent(String type, String message) {
+        application.getKernel().sendEvent(getClass().getSimpleName() + ":" +type, message);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        sendEvent("#resume");
     }
 }

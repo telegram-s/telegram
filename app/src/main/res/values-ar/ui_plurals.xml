@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="st_members">
         <item quantity="zero">ولا عضو</item>
@@ -8,6 +8,18 @@
         <item quantity="many">{d} عضو</item>
         <item quantity="other">{d} عضو</item>
     </plurals>
+    
+    <!-- NEW LINES -->
+    <plurals name="st_new_messages">
+        <item quantity="zero">لا يوجد رسائل جديدة</item>
+        <item quantity="one">رسالة جديدة</item>
+        <item quantity="two">رسالتين جديدتين</item>
+        <item quantity="few">{d} رسائل جديدة</item>
+        <item quantity="many">{d} رسالة جديدة</item>
+        <item quantity="other">{d} رسالة جديدة</item>
+    </plurals>
+    <!-- END NEW LINES -->
+    
     <plurals name="st_members_caps">
         <item quantity="zero">ولا عضو</item>
         <item quantity="one">عضو واحد</item>

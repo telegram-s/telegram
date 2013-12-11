@@ -226,6 +226,7 @@ public class UiKernel {
         isAppVisible = true;
         lastStartTime = SystemClock.uptimeMillis();
         checkGoesOnline();
+        application.getKernel().sendEvent("app_state", "visible");
     }
 
     public void onAppPause() {
@@ -235,6 +236,7 @@ public class UiKernel {
         handler.removeMessages(0);
         handler.sendEmptyMessageDelayed(0, ACTIVE_TIMEOUT);
         notifications.onActivityPaused();
+        application.getKernel().sendEvent("app_state", "hidden");
     }
 
 
@@ -260,11 +262,13 @@ public class UiKernel {
         emojiProcessor.loadEmoji();
         application.getKernel().getSyncKernel().getBackgroundSync().onAppVisibilityChanged();
         kernel.getLifeKernel().onAppVisible();
+        application.getKernel().sendEvent("app_state", "foreground");
     }
 
     private void onAppGoesBackground() {
         application.getKernel().getSyncKernel().getBackgroundSync().onAppVisibilityChanged();
         kernel.getLifeKernel().onAppHidden();
+        application.getKernel().sendEvent("app_state", "background");
     }
 
     public void logIn() {

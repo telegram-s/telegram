@@ -428,12 +428,14 @@ public class ImagePreviewFragment extends StelsFragment {
     }
 
     private void onImageTap() {
-        if (getSherlockActivity().getSupportActionBar().isShowing()) {
-            getSherlockActivity().getSupportActionBar().hide();
-            hideView(bottomPanel);
-        } else {
-            getSherlockActivity().getSupportActionBar().show();
-            showView(bottomPanel);
+        if (getSherlockActivity() != null && getSherlockActivity().getSupportActionBar() != null) {
+            if (getSherlockActivity().getSupportActionBar().isShowing()) {
+                getSherlockActivity().getSupportActionBar().hide();
+                hideView(bottomPanel);
+            } else {
+                getSherlockActivity().getSupportActionBar().show();
+                showView(bottomPanel);
+            }
         }
     }
 

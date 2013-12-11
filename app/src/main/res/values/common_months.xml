@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="lang_month_pattern">{day} {month}</string>
+    <string name="lang_month_pattern">{month} {day}</string>
     <string name="lang_january">January</string>
     <string name="lang_february">February</string>
     <string name="lang_march">March</string>

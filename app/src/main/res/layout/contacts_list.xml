@@ -8,17 +8,17 @@
              android:background="@android:color/white"
              android:id="@+id/mainContainer">
 
-    <se.emilsjolander.stickylistheaders.StickyListHeadersListView android:layout_height="fill_parent"
-                                                                  android:layout_width="fill_parent"
-                                                                  android:paddingRight="32dp"
-                                                                  android:paddingLeft="16dp"
-                                                                  android:scrollbarStyle="outsideOverlay"
-                                                                  android:drawSelectorOnTop="true"
-                                                                  android:scrollbars="none"
-                                                                  android:clipToPadding="false"
-                                                                  android:fastScrollEnabled="true"
-                                                                  android:fastScrollAlwaysVisible="true"
-                                                                  android:id="@+id/contactsList"/>
+    <org.telegram.android.ui.StickyFix android:layout_height="fill_parent"
+                                       android:layout_width="fill_parent"
+                                       android:paddingLeft="@dimen/fast_scroll_padding_left"
+                                       android:paddingRight="@dimen/fast_scroll_padding_right"
+                                       android:scrollbarStyle="outsideOverlay"
+                                       android:drawSelectorOnTop="true"
+                                       android:scrollbars="none"
+                                       android:clipToPadding="false"
+                                       android:fastScrollEnabled="true"
+                                       android:fastScrollAlwaysVisible="true"
+                                       android:id="@+id/contactsList"/>
 
     <TextView android:layout_width="wrap_content"
               android:layout_height="wrap_content"

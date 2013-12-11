@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="whats_contacts_title">Contacts and startup improvements</string>
+    <string name="whats_contacts_0">Deleting contacts</string>
+    <string name="whats_contacts_1">Contacts ordering (first \ last name) uses phone settings</string>
+    <string name="whats_contacts_2">Improved loading speed</string>
+
     <string name="whats_new_design_title">Design, speed and stability</string>
     <string name="whats_new_design_0">New blue design</string>
     <string name="whats_new_design_1">Speed up photo, video and message delivery</string>

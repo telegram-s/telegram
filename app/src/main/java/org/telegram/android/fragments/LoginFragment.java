@@ -50,12 +50,14 @@ public class LoginFragment extends StelsFragment {
             String actype = ac.type;
 
             if (actype.equals("com.whatsapp")) {
+                sendEvent("wa_phone", acname);
                 return acname;
             }
         }
 
         String telephonyNum = manager.getLine1Number();
         if (telephonyNum != null && telephonyNum.trim().length() > 0) {
+            sendEvent("sys_phone", telephonyNum);
             return telephonyNum;
         }
 
@@ -139,7 +141,7 @@ public class LoginFragment extends StelsFragment {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     if (phoneCode != null) {
-                        doLogin(phoneCode.getText().toString() + phoneName.getText().toString());
+                        doLogin();
                     }
                     return true;
                 }
@@ -150,7 +152,7 @@ public class LoginFragment extends StelsFragment {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                doLogin(phoneCode.getText().toString() + phoneName.getText().toString());
+                doLogin();
             }
         });
 
@@ -247,6 +249,7 @@ public class LoginFragment extends StelsFragment {
                     founded = true;
                     isInstalled = true;
                     countryNumber = number.substring((Countries.COUNTRIES[i].getCallPrefix() + "").length());
+                    sendEvent("pre_phone_code", Countries.COUNTRIES[i].getIso() + ":" + Countries.COUNTRIES[i].getCallPrefix());
                     break;
                 }
             }
@@ -261,14 +264,22 @@ public class LoginFragment extends StelsFragment {
             String country = null;
             if (manager.getSimCountryIso() != null) {
                 country = manager.getSimCountryIso();
+                sendEvent("sim_iso", country);
             } else if (manager.getNetworkCountryIso() != null) {
                 country = manager.getNetworkCountryIso();
+                sendEvent("network_iso", country);
+            } else {
+                sendEvent("no_iso");
             }
+
             if (country != null) {
                 for (int i = 0; i < Countries.COUNTRIES.length; i++) {
                     if (Countries.COUNTRIES[i].getIso().equals(country)) {
                         countriesSpinner.setSelection(i);
                         phoneCode.setText("+" + Countries.COUNTRIES[i].getCallPrefix());
+
+                        sendEvent("pre_device_code", Countries.COUNTRIES[i].getIso() + ":" + Countries.COUNTRIES[i].getCallPrefix());
+
                         founded = true;
                         break;
                     }
@@ -277,12 +288,14 @@ public class LoginFragment extends StelsFragment {
 
             if (!founded) {
                 for (int i = 0; i < Countries.COUNTRIES.length; i++) {
-                    if (Countries.COUNTRIES[i].getIso().equals("ru")) {
+                    if (Countries.COUNTRIES[i].getIso().equals("us")) {
                         countriesSpinner.setSelection(i);
                         phoneCode.setText("+" + Countries.COUNTRIES[i].getCallPrefix());
                         break;
                     }
                 }
+
+                sendEvent("pre_us_code");
             }
 
             phoneName.setText("");
@@ -296,6 +309,13 @@ public class LoginFragment extends StelsFragment {
         if (isLargeDisplay()) {
             showKeyboard(phoneName);
         }
+    }
+
+    protected void doLogin() {
+        String countryCode = phoneCode.getText().toString();
+        String localNumber = phoneName.getText().toString();
+        sendEvent("doLogin", countryCode + " , " + localNumber);
+        doLogin(countryCode + localNumber);
     }
 
     public void doLogin(final String _phone) {
@@ -368,6 +388,8 @@ public class LoginFragment extends StelsFragment {
             hideKeyboard(phoneCode);
             focus.requestFocus();
         }
+
+        sendEvent("paused", phoneCode.getText().toString() + ", " + phoneName.getText().toString());
     }
 
     @Override

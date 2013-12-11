@@ -122,8 +122,10 @@ public class LoginSignupFragment extends MediaReceiverFragment {
             @Override
             public void onClick(View view) {
                 if (photoFile != null || photoUri != null) {
+                    sendEvent("photo_request_delete");
                     requestPhotoChooserWithDelete(0);
                 } else {
+                    sendEvent("photo_request");
                     requestPhotoChooser(0);
                 }
             }
@@ -151,6 +153,9 @@ public class LoginSignupFragment extends MediaReceiverFragment {
                         String[] names = displayNameAlt.split(",");
                         String lName = names[0].trim();
                         String fName = names[1].trim();
+
+                        sendEvent("pre_fname", fName);
+                        sendEvent("pre_lname", lName);
 
                         firstName.setText(fName);
                         lastName.setText(lName);
@@ -198,8 +203,12 @@ public class LoginSignupFragment extends MediaReceiverFragment {
 
     @Override
     protected void onPhotoArrived(Uri uri, int width, int height, int requestId) {
+        sendEvent("photo_arrived");
+
         if (cropSupported(uri)) {
             requestCrop(uri, 200, 200, 0);
+
+            sendEvent("request_crop");
         } else {
             photoFile = null;
             photoUri = uri.toString();
@@ -210,6 +219,8 @@ public class LoginSignupFragment extends MediaReceiverFragment {
 
     @Override
     protected void onPhotoCropped(Uri uri, int requestId) {
+        sendEvent("photo_cropped");
+
         photoFile = null;
         photoUri = uri.toString();
 
@@ -218,6 +229,9 @@ public class LoginSignupFragment extends MediaReceiverFragment {
 
     @Override
     protected void onPhotoDeleted(int requestId) {
+
+        sendEvent("photo_deleted");
+
         photoFile = null;
         photoUri = null;
 
@@ -225,6 +239,8 @@ public class LoginSignupFragment extends MediaReceiverFragment {
     }
 
     public void doSignup(final String firstName2, final String lastName2) {
+        sendEvent("doSignup", firstName2 + ", " + lastName2);
+
         hideKeyboard(firstName);
         hideKeyboard(lastName);
         focus.requestFocus();
@@ -259,6 +275,7 @@ public class LoginSignupFragment extends MediaReceiverFragment {
                                 "MyPhoto", new TLInputGeoPointEmpty(), new TLInputPhotoCropAuto()));
                     }
                 } catch (RpcException e) {
+                    sendEvent("doSignupError", e.getMessage());
                     if ("PHONE_NUMBER_OCCUPIED".equals(e.getErrorTag())) {
                         try {
                             authorization = rpcRaw(new TLRequestAuthSignIn(phoneNumber, phoneHash, code));
@@ -329,6 +346,7 @@ public class LoginSignupFragment extends MediaReceiverFragment {
         hideKeyboard(firstName);
         hideKeyboard(lastName);
         focus.requestFocus();
+        sendEvent("pause", firstName.getText().toString() + ", " + lastName.getText().toString());
     }
 
     @Override

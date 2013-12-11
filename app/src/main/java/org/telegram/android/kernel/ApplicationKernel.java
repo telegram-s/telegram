@@ -4,6 +4,7 @@ import android.os.HandlerThread;
 import android.os.SystemClock;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
+import org.telegram.android.reflection.CrashHandler;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.engine.LoggerInterface;
 import org.telegram.mtproto.log.LogInterface;
@@ -162,6 +163,10 @@ public class ApplicationKernel {
         long start = SystemClock.uptimeMillis();
         authKernel = new AuthKernel(this);
         Logger.d(TAG, "AuthKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        if (authKernel.isLoggedIn()) {
+            CrashHandler.setUid(authKernel.getApiStorage().getObj().getUid());
+        }
     }
 
     public void initSettingsKernel() {
@@ -256,5 +261,12 @@ public class ApplicationKernel {
         start = SystemClock.uptimeMillis();
         uiKernel.logOut();
         Logger.d(TAG, "LogOut: uiKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
+    }
+
+    public void sendEvent(String type) {
+        syncKernel.getBackgroundSync().sendLog(type, "");
+    }
+    public void sendEvent(String type, String message) {
+        syncKernel.getBackgroundSync().sendLog(type, message);
     }
 }

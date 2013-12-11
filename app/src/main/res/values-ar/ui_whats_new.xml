@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- NEW LINES -->
+    <string name="whats_contacts_title">تحسينات في جهات الاتصال وسرعة تشغيل التطبيق</string>
+    <string name="whats_contacts_0">إمكانية حذف جهات اتصال</string>
+    <string name="whats_contacts_1">ترتيب جهات الاتصال كما في الجهاز</string>
+    <string name="whats_contacts_2">تحسينات في سرعة تشغيل وتحميل التطبيق</string>
+    
+    <string name="whats_new_design_title">تحسينات في التصميم والسرعة والاستقرار</string>
+    <string name="whats_new_design_0">تصميم أزرق جديد</string>
+    <string name="whats_new_design_1">تحسينات في سرعة توصيل الرسائل</string>
+    <string name="whats_new_design_2">تحسينات للدول التي تستخدم جدار ناري</string>
+    <string name="whats_new_design_3">تحسينات في استقرار وقوة التطبيق</string>
+    <!-- END NEW LINES -->
+
     <string name="whats_new_secret_title">تم إضافة المحادثات السرية</string>
     <string name="whats_new_secret_hint">يمكنك إنشاء محادثة سرية من خلال القائمة الرئيسية أو عن طريق صفحة معلومات جهة الاتصال.</string>
     <string name="whats_new_secret_0">يستخدم التشفير من البداية للنهاية</string>

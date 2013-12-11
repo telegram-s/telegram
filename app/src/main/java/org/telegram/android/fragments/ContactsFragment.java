@@ -31,6 +31,7 @@ import org.telegram.api.TLInputUserContact;
 import org.telegram.api.messages.TLAffectedHistory;
 import org.telegram.api.requests.TLRequestContactsBlock;
 import org.telegram.api.requests.TLRequestContactsDeleteContacts;
+import org.telegram.api.requests.TLRequestHelpSaveAppLog;
 import org.telegram.api.requests.TLRequestMessagesDeleteHistory;
 import org.telegram.tl.TLVector;
 
@@ -90,6 +91,11 @@ public class ContactsFragment extends BaseContactsFragment {
         }
 
         inflater.inflate(R.menu.contacts_menu, menu);
+
+        menu.findItem(R.id.systemContacts).setTitle(highlightMenuText(R.string.st_contacts_menu_book));
+        menu.findItem(R.id.addContact).setTitle(highlightMenuText(R.string.st_contacts_menu_add_contact));
+        menu.findItem(R.id.allContacts).setTitle(highlightMenuText(R.string.st_contacts_menu_all_contacts));
+        menu.findItem(R.id.onlyTContacts).setTitle(highlightMenuText(R.string.st_contacts_menu_only_t));
 
         MenuItem searchItem = menu.findItem(R.id.searchMenu);
 
@@ -192,7 +198,7 @@ public class ContactsFragment extends BaseContactsFragment {
         if (i == 0) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, getStringSafe(R.string.st_invite_big));
+            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, getStringSafe(R.string.st_invite_short));
             startActivity(shareIntent);
         } else {
             final ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);

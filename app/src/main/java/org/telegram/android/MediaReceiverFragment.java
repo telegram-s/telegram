@@ -143,11 +143,12 @@ public class MediaReceiverFragment extends StelsFragment {
     }
 
     public boolean cropSupported(Uri data) {
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setType("image/*");
-        intent.setData(data);
-        List<ResolveInfo> list = getActivity().getPackageManager().queryIntentActivities(intent, 0);
-        return list.size() != 0;
+//        Intent intent = new Intent("com.android.camera.action.CROP");
+//        intent.setType("image/*");
+//        intent.setData(data);
+//        List<ResolveInfo> list = getActivity().getPackageManager().queryIntentActivities(intent, 0);
+//        return list.size() != 0;
+        return false;
     }
 
     public void requestCrop(String fileName, int width, int height, int requestId) {
