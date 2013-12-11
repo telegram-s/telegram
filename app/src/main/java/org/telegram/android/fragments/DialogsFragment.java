@@ -25,11 +25,13 @@ import com.nineoldandroids.animation.ObjectAnimator;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.config.DebugSettings;
+import org.telegram.android.core.DialogSource;
 import org.telegram.android.core.DialogSourceState;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
+import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.cursors.ViewSourceListener;
 import org.telegram.android.cursors.ViewSourceState;
@@ -238,7 +240,9 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
         View res = inflater.inflate(R.layout.dialogs_list, container, false);
 
         if (workingSet == null) {
-            workingSet = application.getDialogSource().getViewSource().getCurrentWorkingSet();
+            DialogSource source = application.getDialogSource();
+            ViewSource<DialogDescription> viewSource = source.getViewSource();
+            workingSet = viewSource.getCurrentWorkingSet();
         }
 
         dialogAdapter = new BaseAdapter() {
