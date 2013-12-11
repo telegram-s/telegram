@@ -38,7 +38,7 @@ public class BackgroundSync extends BaseSync {
     private static final int SYNC_ONLINE = 2;
     private static final int SYNC_ONLINE_INTERVAL = 60 * SEC;
     private static final int SYNC_PUSH = 3;
-    private static final int SYNC_PUSH_INTERVAL = 60 * SEC;
+    private static final int SYNC_PUSH_INTERVAL = 6 * HOUR;
     private static final int SYNC_DELETIONS = 4;
     private static final int SYNC_TYPING = 5;
     private static final int SYNC_HISTORY = 6;

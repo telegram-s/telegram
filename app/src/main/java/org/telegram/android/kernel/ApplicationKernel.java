@@ -2,6 +2,7 @@ package org.telegram.android.kernel;
 
 import android.os.HandlerThread;
 import android.os.SystemClock;
+import com.google.android.gcm.GCMRegistrar;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.android.reflection.CrashHandler;
@@ -212,6 +213,7 @@ public class ApplicationKernel {
     }
 
     public void runKernels() {
+        long kernelsStart = SystemClock.uptimeMillis();
         long start = SystemClock.uptimeMillis();
         storageKernel.runKernel();
         Logger.d(TAG, "Storate run in " + (SystemClock.uptimeMillis() - start) + " ms");
@@ -227,6 +229,11 @@ public class ApplicationKernel {
         start = SystemClock.uptimeMillis();
         dataSourceKernel.runKernel();
         Logger.d(TAG, "DataSourceKernel run in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
+        GCMRegistrar.register(application, "216315056253");
+        Logger.d(TAG, "Push register in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        Logger.d(TAG, "Kernels started in " + (SystemClock.uptimeMillis() - kernelsStart) + " ms");
     }
 
     public void logIn(TLAuthorization authorization) {
@@ -266,6 +273,7 @@ public class ApplicationKernel {
     public void sendEvent(String type) {
         syncKernel.getBackgroundSync().sendLog(type, "");
     }
+
     public void sendEvent(String type, String message) {
         syncKernel.getBackgroundSync().sendLog(type, message);
     }

@@ -442,7 +442,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             Spannable sequence = application.getEmojiProcessor().processEmojiCutMutable(preSequence, EmojiProcessor.CONFIGURATION_DIALOGS);
 
             if (nameLength != 0) {
-                sequence.setSpan(new ForegroundColorSpan(HIGHLIGHT_COLOR), 0, nameLength, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+                sequence.setSpan(new ForegroundColorSpan(HIGHLIGHT_COLOR), 0, Math.min(nameLength, sequence.length()), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
             }
 
             CharSequence resSequence = TextUtils.ellipsize(sequence, bodyTextPaint, layout.layoutMainWidth, TextUtils.TruncateAt.END);
