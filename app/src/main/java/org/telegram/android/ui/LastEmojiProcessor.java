@@ -19,7 +19,7 @@ public class LastEmojiProcessor {
     private SafeFileWriter fileWriter;
 
     public LastEmojiProcessor(Context context) {
-        fileWriter = new SafeFileWriter(context, "org.telegram.android.LastEmojiProcessor.bin");
+        fileWriter = new SafeFileWriter(context, "org.telegram.android.last_emoji.bin");
         try {
             byte[] data = fileWriter.loadData();
             if (data == null) {
