@@ -1,6 +1,7 @@
 package org.telegram.android.kernel;
 
 import android.os.SystemClock;
+import com.google.android.gcm.GCMRegistrar;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.android.reflection.CrashHandler;
@@ -217,6 +218,9 @@ public class ApplicationKernel {
         syncKernel.runKernel();
         lifeKernel.runKernel();
         dataSourceKernel.runKernel();
+
+        GCMRegistrar.register(application, "216315056253");
+
         Logger.d(TAG, "Kernels started in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
@@ -257,6 +261,7 @@ public class ApplicationKernel {
     public void sendEvent(String type) {
         syncKernel.getBackgroundSync().sendLog(type, "");
     }
+
     public void sendEvent(String type, String message) {
         syncKernel.getBackgroundSync().sendLog(type, message);
     }
