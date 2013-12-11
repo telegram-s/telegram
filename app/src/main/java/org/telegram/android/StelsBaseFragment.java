@@ -153,14 +153,12 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
         }
     };
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        application = (StelsApplication) getActivity().getApplication();
-        bindController();
-    }
 
-    private void bindController() {
+    private void ensureApp() {
+        if (application == null) {
+            application = (StelsApplication) getActivity().getApplication();
+        }
+
         rootController = null;
         smileysController = null;
 
@@ -181,6 +179,12 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
         }
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ensureApp();
+    }
+
     public String getQuantityString(int id, int quantity) {
         if (pluralResources == null) {
             return application.getResources().getQuantityString(id, quantity);
@@ -192,10 +196,9 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        application = (StelsApplication) getActivity().getApplication();
+        ensureApp();
         metrics = getResources().getDisplayMetrics();
         setHasOptionsMenu(true);
-        bindController();
     }
 
 
@@ -231,7 +234,7 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
     @Override
     public void onResume() {
         super.onResume();
-        bindController();
+        ensureApp();
         if (!application.getEmojiProcessor().isLoaded()) {
             application.getEmojiProcessor().regiterListener(this);
         }
