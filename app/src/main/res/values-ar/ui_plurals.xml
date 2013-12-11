@@ -17,12 +17,12 @@
         <item quantity="other">{d} new messages</item> 
         -->
 
-        <item quantity="zero">???</item>
-        <item quantity="one">????</item>
-        <item quantity="two">????</item>
-        <item quantity="few">{d} ???</item>
-        <item quantity="many">{d} ???</item>
-        <item quantity="other">{d} ???</item>
+        <item quantity="zero">---</item>
+        <item quantity="one">---</item>
+        <item quantity="two">---</item>
+        <item quantity="few">{d} ---</item>
+        <item quantity="many">{d} ---</item>
+        <item quantity="other">{d} ---</item>
     </plurals>
     <!-- END NEW LINES -->
     
