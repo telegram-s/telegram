@@ -81,20 +81,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private int state;
 
-    private Layout bodyLayout;
-    // private Layout senderLayout;
-    private Layout titleLayout;
-
     //    private Drawable emptyDrawable;
     private Bitmap empty;
     private Bitmap avatar;
     private Paint avatarBgPaint;
-
-    private boolean isGroup;
-    private boolean isEncrypted;
-    private boolean isHighlighted;
-    private boolean isBodyHighlighted;
-    private boolean isUnreadOut;
 
     // Typing
 
@@ -192,24 +182,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             bodyHighlightPaint.setTextSize(sp(17f));
             bodyHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
-//            if (FontController.USE_SUBPIXEL) {
-//                senderPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-//            } else {
-//                senderPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-//            }
-//            senderPaint.setColor(0xff808080);
-//            senderPaint.setTextSize(getSp(16f));
-//            senderPaint.setTypeface(FontController.loadTypeface(context, "regular"));
-//
-//            if (FontController.USE_SUBPIXEL) {
-//                senderHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-//            } else {
-//                senderHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-//            }
-//            senderHighlightPaint.setColor(0xff006FC8);
-//            senderHighlightPaint.setTextSize(getSp(16f));
-//            senderHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
-
             if (FontController.USE_SUBPIXEL) {
                 typingPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
             } else {
@@ -288,7 +260,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             this.userTypes = application.getTypingStates().isUserTyping(description.getPeerId());
         }
 
-        prepareData();
+        photo = description.getDialogAvatar();
 
         if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
             EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(description.getPeerId());
@@ -350,42 +322,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), getPx(80));
     }
 
-    private void prepareData() {
-        // Title and highlight
-        this.title = description.getDialogTitle();
-        this.photo = description.getDialogAvatar();
-
-        if (description.getPeerType() == PeerType.PEER_USER) {
-            if (description.getPeerId() == 333000) {
-                this.isHighlighted = false;
-            } else {
-                User user = description.getDialogUser();
-                this.photo = user.getPhoto();
-                this.isHighlighted = user.getLinkType() == LinkType.FOREIGN;
-            }
-            this.isGroup = false;
-            this.isEncrypted = false;
-        } else if (description.getPeerType() == PeerType.PEER_CHAT) {
-            this.isHighlighted = false;
-            this.isGroup = true;
-            this.isEncrypted = false;
-        } else if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
-            this.isHighlighted = false;
-            this.isGroup = false;
-            this.isEncrypted = true;
-        }
-
-        body = description.getMessage();
-
-        isBodyHighlighted = description.getContentType() != ContentType.MESSAGE_TEXT;
-
-        if (description.getUnreadCount() != 0 && description.getSenderId() != currentUserUid) {
-            isUnreadOut = true;
-        } else {
-            isUnreadOut = false;
-        }
-    }
-
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (changed) {
@@ -408,57 +344,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         if (layout == null) {
             layout = new DialogLayout();
             layout.build(description, getMeasuredWidth(), getMeasuredHeight(), application);
-        }
-
-        // Building text layouts
-        {
-            String str = body.replace("\n", " ");
-
-            TextPaint bodyTextPaint;
-            if (isBodyHighlighted) {
-                bodyTextPaint = bodyHighlightPaint;
-            } else {
-                if (isUnreadOut) {
-                    bodyTextPaint = bodyUnreadPaint;
-                } else {
-                    bodyTextPaint = bodyPaint;
-                }
-            }
-
-            int nameLength = 0;
-            if (description.getSenderId() == currentUserUid) {
-                String name = getResources().getString(R.string.st_dialog_you);
-                nameLength = name.length();
-                str = name + ": " + str;
-            } else {
-                if (isGroup) {
-                    User user = description.getSender();
-                    nameLength = user.getFirstName().length();
-                    str = user.getFirstName() + ": " + str;
-                }
-            }
-
-            String preSequence = TextUtils.ellipsize(str, bodyTextPaint, layout.layoutMainWidth, TextUtils.TruncateAt.END).toString();
-            Spannable sequence = application.getEmojiProcessor().processEmojiCutMutable(preSequence, EmojiProcessor.CONFIGURATION_DIALOGS);
-
-            if (nameLength != 0) {
-                sequence.setSpan(new ForegroundColorSpan(HIGHLIGHT_COLOR), 0, Math.min(nameLength, sequence.length()), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-            }
-
-            CharSequence resSequence = TextUtils.ellipsize(sequence, bodyTextPaint, layout.layoutMainWidth, TextUtils.TruncateAt.END);
-            bodyLayout = new StaticLayout(resSequence, bodyTextPaint, layout.layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-        }
-
-        // Title
-        {
-            String wTitle = title.replace("\n", " ");
-            if (wTitle.length() > 150) {
-                wTitle = wTitle.substring(150) + "...";
-            }
-            TextPaint paint = isEncrypted ? titleEncryptedPaint : (isHighlighted ? titleHighlightPaint : titlePaint);
-            Spannable preSequence = application.getEmojiProcessor().processEmojiCutMutable(wTitle, EmojiProcessor.CONFIGURATION_DIALOGS);
-            CharSequence sequence = TextUtils.ellipsize(preSequence, paint, layout.layoutTitleWidth, TextUtils.TruncateAt.END);
-            titleLayout = new StaticLayout(sequence, paint, layout.layoutTitleWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         }
     }
 
@@ -503,14 +388,14 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             updateTyping();
         }
 
-        if (isEncrypted) {
+        if (layout.isEncrypted) {
             bounds(secureIcon, layout.layoutEncryptedLeft, layout.layoutEncryptedTop);
             secureIcon.draw(canvas);
         }
 
         canvas.save();
         canvas.translate(layout.layoutTitleLeft, layout.layoutTitleTop);
-        titleLayout.draw(canvas);
+        layout.titleLayout.draw(canvas);
         canvas.restore();
 
         if (state != MessageState.FAILURE && description.getSenderId() == currentUserUid) {
@@ -533,7 +418,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             }
         }
 
-        canvas.drawText(layout.time, layout.layoutTimeLeft, layout.layoutTimeTop, isUnreadOut ? unreadClockPaint : readClockPaint);
+        canvas.drawText(layout.time, layout.layoutTimeLeft, layout.layoutTimeTop, layout.isUnreadOut ? unreadClockPaint : readClockPaint);
 
         if (typingLayout != null) {
             canvas.save();
@@ -543,7 +428,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         } else {
             canvas.save();
             canvas.translate(layout.layoutMainLeft, layout.layoutMainTop);
-            bodyLayout.draw(canvas);
+            layout.bodyLayout.draw(canvas);
             canvas.restore();
         }
 
@@ -649,7 +534,43 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
         public String time;
 
+        public boolean isGroup;
+        public boolean isEncrypted;
+        public boolean isHighlighted;
+        public boolean isBodyHighlighted;
+        public boolean isUnreadOut;
+
+        public Layout bodyLayout;
+        public Layout titleLayout;
+
         public void build(DialogWireframe description, int w, int h, StelsApplication application) {
+            if (description.getPeerType() == PeerType.PEER_USER) {
+                if (description.getPeerId() == 333000) {
+                    isHighlighted = false;
+                } else {
+                    User user = description.getDialogUser();
+                    isHighlighted = user.getLinkType() == LinkType.FOREIGN;
+                }
+                isGroup = false;
+                isEncrypted = false;
+            } else if (description.getPeerType() == PeerType.PEER_CHAT) {
+                isHighlighted = false;
+                isGroup = true;
+                isEncrypted = false;
+            } else if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                isHighlighted = false;
+                isGroup = false;
+                isEncrypted = true;
+            }
+
+            isBodyHighlighted = description.getContentType() != ContentType.MESSAGE_TEXT;
+
+            if (description.getUnreadCount() != 0 && description.isMine()) {
+                isUnreadOut = true;
+            } else {
+                isUnreadOut = false;
+            }
+
             time = org.telegram.android.ui.TextUtil.formatDate(description.getDate(), application);
             isRtl = application.isRTL();
 
@@ -777,6 +698,64 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             }
 
             avatarRect.set(layoutAvatarLeft, layoutAvatarTop, layoutAvatarLeft + px(64), layoutAvatarTop + px(64));
+
+
+            // Building text layouts
+            {
+                String message = description.getMessage();
+                if (message.length() > 150) {
+                    message = message.substring(0, 150) + "...";
+                }
+                message = message.replace("\n", " ");
+
+                TextPaint bodyTextPaint;
+                if (isBodyHighlighted) {
+                    bodyTextPaint = bodyHighlightPaint;
+                } else {
+                    if (isUnreadOut) {
+                        bodyTextPaint = bodyUnreadPaint;
+                    } else {
+                        bodyTextPaint = bodyPaint;
+                    }
+                }
+
+                int nameLength = 0;
+                if (description.isMine()) {
+                    String name = application.getResources().getString(R.string.st_dialog_you);
+                    nameLength = name.length();
+                    message = name + ": " + message;
+                } else {
+                    if (isGroup) {
+                        User user = description.getSender();
+                        nameLength = user.getFirstName().length();
+                        message = user.getFirstName() + ": " + message;
+                    }
+                }
+
+                String preSequence = TextUtils.ellipsize(message, bodyTextPaint, layoutMainWidth, TextUtils.TruncateAt.END).toString();
+                Spannable sequence = application.getEmojiProcessor().processEmojiCutMutable(preSequence, EmojiProcessor.CONFIGURATION_DIALOGS);
+
+                if (nameLength != 0) {
+                    sequence.setSpan(new ForegroundColorSpan(HIGHLIGHT_COLOR), 0, Math.min(nameLength, sequence.length()), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+                }
+
+                CharSequence resSequence = TextUtils.ellipsize(sequence, bodyTextPaint, layoutMainWidth, TextUtils.TruncateAt.END);
+                bodyLayout = new StaticLayout(resSequence, bodyTextPaint, layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            }
+
+            // Title
+            {
+                String title = description.getDialogTitle();
+                if (title.length() > 150) {
+                    title = title.substring(150) + "...";
+                }
+                title = title.replace("\n", " ");
+
+                TextPaint paint = isEncrypted ? titleEncryptedPaint : (isHighlighted ? titleHighlightPaint : titlePaint);
+                Spannable preSequence = application.getEmojiProcessor().processEmojiCutMutable(title, EmojiProcessor.CONFIGURATION_DIALOGS);
+                CharSequence sequence = TextUtils.ellipsize(preSequence, paint, layoutTitleWidth, TextUtils.TruncateAt.END);
+                titleLayout = new StaticLayout(sequence, paint, layoutTitleWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            }
         }
     }
 }
