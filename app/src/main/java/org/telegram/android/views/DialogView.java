@@ -544,6 +544,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         public Layout titleLayout;
 
         public void build(DialogWireframe description, int w, int h, StelsApplication application) {
+            layoutH = h;
+            layoutW = w;
+
             if (description.getPeerType() == PeerType.PEER_USER) {
                 if (description.getPeerId() == 333000) {
                     isHighlighted = false;
