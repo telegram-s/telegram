@@ -105,6 +105,22 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
         onCreateView(res, inflater, container, savedInstanceState);
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
+
+        listView.setPadding(
+                (int) listView.getResources().getDimension(R.dimen.fast_scroll_padding_left), 0,
+                (int) listView.getResources().getDimension(R.dimen.fast_scroll_padding_right), 0);
+        listView.getWrappedList().invalidateViews();
+        listView.post(new Runnable() {
+            @Override
+            public void run() {
+                listView.setPadding(
+                        (int) listView.getResources().getDimension(R.dimen.fast_scroll_padding_left), 0,
+                        (int) listView.getResources().getDimension(R.dimen.fast_scroll_padding_right), 0);
+                listView.getWrappedList().invalidateViews();
+                listView.invalidate();
+            }
+        });
+
         isLoaded = false;
         allContacts = new ContactsSource.LocalContact[0];
         filteredContacts = new ContactsSource.LocalContact[0];
