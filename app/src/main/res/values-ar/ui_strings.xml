@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
+    <!-- 
+     NEW STRINGS: 
+     st_settings_play
+     st_invite_short
+     st_invite_big
+     st_contacts_action_view
+     st_contacts_action_share
+     st_contacts_action_delete
+     st_contacts_action_block
+     st_contacts_action_block_and_delete
+     
+     st_contacts_delete
+     st_contacts_block
+     st_contacts_block_delete
+     
+     st_contacts_menu_only_t
+     st_contacts_menu_all_contacts
+     st_contacts_menu_add_contact
+     st_contacts_menu_book
+     -->
+    
     <string name="st_lang">ar</string>
     <string name="st_app_name">تيليجرام</string>
 
@@ -112,6 +134,7 @@
     <string name="st_settings_header_support">الدعم</string>
     <string name="st_settings_header_about">حول</string>
     <string name="st_settings_version">إصدار البرنامج</string>
+    <string name="st_settings_play">Google Play</string>
     <string name="st_settings_blocked">جهات الاتصال المحظورة</string>
     <string name="st_settings_background">خلفية المحادثة</string>
     <string name="st_settings_support">اسأل سؤالًا</string>
@@ -178,6 +201,25 @@
     <string name="st_contacts_invite">قم بدعوة صديق</string>
     <string name="st_contacts_not_registered_title">جهة الاتصال غير مسجلة في تيليجرام</string>
     <string name="st_contacts_not_registered_message">{0} غير مسجل في تيليجرام. هل ترغب في دعوته؟</string>
+    
+    <string name="st_contacts_delete">Are you sure want to delete contact \'{0}\'?
+    </string>
+    <string name="st_contacts_block">Are you sure want to block contact \'{0}\'?
+    </string>
+    <string name="st_contacts_block_delete">Are you sure want to block contact \'{0}\' and delete contact history?
+    </string>
+    
+    <string name="st_contacts_action_view">View in address book</string>
+    <string name="st_contacts_action_share">Share contact</string>
+    <string name="st_contacts_action_delete">Delete contact</string>
+    <string name="st_contacts_action_block">Block contact</string>
+    <string name="st_contacts_action_block_and_delete">Block and delete contact</string>
+    
+    <string name="st_contacts_menu_only_t">Only Telegram contacts</string>
+    <string name="st_contacts_menu_all_contacts">All contacts</string>
+    <string name="st_contacts_menu_add_contact">Add contact</string>
+    <string name="st_contacts_menu_book">Phone address book</string>
+
     <string name="st_profile_title">المعلومات</string>
     <string name="st_profile_header_phone">رقم الهاتف</string>
     <string name="st_profile_header_settings">الإعدادات</string>
@@ -352,4 +394,24 @@
 
     <string name="st_whats_new_title">ما الجديد</string>
     <string name="st_whats_new_continue">تابع المراسلة</string>
+    
+    <string name="st_invite_short">
+        Hey, let\'s switch to Telegram http://telegram.org/dl1
+    </string>
+    
+    <string name="st_invite_big">
+        Hey,
+        
+        I just downloaded Telegram Messenger on my Android.
+        
+        It is a smartphone messenger which replaces SMS. This app even lets me send pictures, video and other
+        multimedia!
+        
+        Telegram Messenger is available for Android and iPhone. There is no PIN or username to remember - it works just
+        like SMS and uses your internet data plan.
+        
+        Get it now from and say good-bye to SMS!
+        
+        http://telegram.org/dl1
+    </string>
 </resources>

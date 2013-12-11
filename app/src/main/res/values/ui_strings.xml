@@ -246,6 +246,11 @@
     <string name="st_contacts_action_block">Block contact</string>
     <string name="st_contacts_action_block_and_delete">Block and delete contact</string>
 
+    <string name="st_contacts_menu_only_t">Only Telegram contacts</string>
+    <string name="st_contacts_menu_all_contacts">All contacts</string>
+    <string name="st_contacts_menu_add_contact">Add contact</string>
+    <string name="st_contacts_menu_book">Phone address book</string>
+
     <string name="st_profile_title">Info</string>
     <string name="st_profile_header_phone">PHONE</string>
     <string name="st_profile_header_settings">SETTINGS</string>

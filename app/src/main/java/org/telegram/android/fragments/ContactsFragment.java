@@ -91,6 +91,11 @@ public class ContactsFragment extends BaseContactsFragment {
 
         inflater.inflate(R.menu.contacts_menu, menu);
 
+        menu.findItem(R.id.systemContacts).setTitle(highlightMenuText(R.string.st_contacts_menu_book));
+        menu.findItem(R.id.addContact).setTitle(highlightMenuText(R.string.st_contacts_menu_add_contact));
+        menu.findItem(R.id.allContacts).setTitle(highlightMenuText(R.string.st_contacts_menu_all_contacts));
+        menu.findItem(R.id.onlyTContacts).setTitle(highlightMenuText(R.string.st_contacts_menu_only_t));
+
         MenuItem searchItem = menu.findItem(R.id.searchMenu);
 
         com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) searchItem.getActionView();
