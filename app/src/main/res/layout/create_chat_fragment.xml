@@ -52,16 +52,16 @@
                      android:id="@+id/loading"
                      style="@style/Widget.Sherlock.Light.ProgressBar"/>
 
-        <se.emilsjolander.stickylistheaders.StickyListHeadersListView android:layout_height="fill_parent"
-                                                                      android:layout_width="fill_parent"
-                                                                      android:paddingTop="4dp"
-                                                                      android:paddingLeft="@dimen/fast_scroll_padding_left"
-                                                                      android:paddingRight="@dimen/fast_scroll_padding_right"
-                                                                      android:scrollbarStyle="outsideOverlay"
-                                                                      android:scrollbars="none"
-                                                                      android:clipToPadding="false"
-                                                                      android:fastScrollEnabled="true"
-                                                                      android:fastScrollAlwaysVisible="true"
-                                                                      android:id="@+id/contactsList"/>
+        <org.telegram.android.ui.StickyFix android:layout_height="fill_parent"
+                                           android:layout_width="fill_parent"
+                                           android:paddingTop="4dp"
+                                           android:paddingLeft="@dimen/fast_scroll_padding_left"
+                                           android:paddingRight="@dimen/fast_scroll_padding_right"
+                                           android:scrollbarStyle="outsideOverlay"
+                                           android:scrollbars="none"
+                                           android:clipToPadding="false"
+                                           android:fastScrollEnabled="true"
+                                           android:fastScrollAlwaysVisible="true"
+                                           android:id="@+id/contactsList"/>
     </FrameLayout>
 </LinearLayout>
