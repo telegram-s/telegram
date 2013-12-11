@@ -198,7 +198,7 @@ public class ContactsFragment extends BaseContactsFragment {
         if (i == 0) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, getStringSafe(R.string.st_invite_big));
+            shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, getStringSafe(R.string.st_invite_short));
             startActivity(shareIntent);
         } else {
             final ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);
