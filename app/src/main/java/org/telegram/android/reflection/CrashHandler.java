@@ -1,6 +1,8 @@
 package org.telegram.android.reflection;
 
 import com.bugsense.trace.BugSenseHandler;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.MapBuilder;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
 

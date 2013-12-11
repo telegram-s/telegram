@@ -93,7 +93,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                 onInitApp(true);
             }
         } else {
-            currentState = savedInstanceState.getInt("currentState", STATE_LOGIN);
+            setState(savedInstanceState.getInt("currentState", STATE_LOGIN));
             barVisible = savedInstanceState.getBoolean("barVisible");
             if (barVisible) {
                 showBar();
@@ -121,8 +121,20 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         });
     }
 
-    private void doInitApp() {
+    protected void setState(int stateId) {
+        this.currentState = stateId;
 
+        if (stateId == STATE_GENERAL) {
+            application.getKernel().sendEvent("app_state", "general");
+        } else if (stateId == STATE_LOGIN) {
+            application.getKernel().sendEvent("app_state", "login");
+        } else if (stateId == STATE_LOGIN_CODE) {
+            application.getKernel().sendEvent("app_state", "login_code");
+        } else if (stateId == STATE_SIGNUP) {
+            application.getKernel().sendEvent("app_state", "signup");
+        } else if (stateId == STATE_TOUR) {
+            application.getKernel().sendEvent("app_state", "tour");
+        }
     }
 
     private void onInitUpdated() {
@@ -171,6 +183,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         if (definitions.size() == 0) {
             onInitApp(true);
         } else {
+            application.getKernel().sendEvent("show_whats_new");
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragmentContainer, new WhatsNewFragment(definitions.toArray(new WhatsNewFragment.Definition[0])), "whatsNewFragment")
                     .commit();
@@ -197,7 +210,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                 controller.openDialogs(true);
                 showBar();
             }
-            currentState = STATE_GENERAL;
+            setState(STATE_GENERAL);
         } else {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             if (first) {
@@ -206,7 +219,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                 transaction.replace(R.id.fragmentContainer, new LoginFragment(), "loginFragment");
             }
             transaction.commit();
-            currentState = STATE_LOGIN;
+            setState(STATE_LOGIN);
             hideBar();
         }
     }
@@ -384,7 +397,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                         .replace(R.id.fragmentContainer, new LoginFragment())
                         .commit();
                 getSupportFragmentManager().executePendingTransactions();
-                currentState = STATE_LOGIN;
+                setState(STATE_LOGIN);
                 hideBar();
             }
         }
@@ -395,7 +408,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                 .replace(R.id.fragmentContainer, new LoginCodeFragment(phone, phoneHash))
                 .commit();
         getSupportFragmentManager().executePendingTransactions();
-        currentState = STATE_LOGIN_CODE;
+        setState(STATE_LOGIN_CODE);
         hideBar();
     }
 
@@ -408,7 +421,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         }
         transaction.replace(R.id.fragmentContainer, new LoginSignupFragment(phone, phoneHash, code));
         transaction.commit();
-        currentState = STATE_SIGNUP;
+        setState(STATE_SIGNUP);
         hideBar();
     }
 
@@ -424,7 +437,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         }
 
         controller.openDialogs(false);
-        currentState = STATE_GENERAL;
+        setState(STATE_GENERAL);
         showBar();
     }
 
@@ -432,16 +445,17 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragmentContainer, new LoginFragment(), "loginFragment")
                 .commit();
-        currentState = STATE_LOGIN;
+        setState(STATE_LOGIN);
     }
 
     @Override
     public void onBackPressed() {
+        application.getKernel().sendEvent("app_back");
         if (currentState == STATE_LOGIN_CODE || currentState == STATE_SIGNUP) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, new LoginFragment())
                     .commit();
-            currentState = STATE_LOGIN;
+            setState(STATE_LOGIN);
         } else {
             if (!((FragmentScreenController) controller).doSystemBack()) {
                 finish();

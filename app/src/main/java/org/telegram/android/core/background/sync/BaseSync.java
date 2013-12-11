@@ -121,6 +121,10 @@ public abstract class BaseSync {
         registerSync(id, methodName, Integer.MAX_VALUE, false, false, true, false);
     }
 
+    protected void registerSyncEventAnon(int id, String methodName) {
+        registerSync(id, methodName, Integer.MAX_VALUE, false, false, false, false);
+    }
+
     protected void registerSyncEventOffline(int id, String methodName) {
         registerSync(id, methodName, Integer.MAX_VALUE, false, false, true, true);
     }

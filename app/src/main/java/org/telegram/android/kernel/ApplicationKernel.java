@@ -253,4 +253,11 @@ public class ApplicationKernel {
         uiKernel.logOut();
         Logger.d(TAG, "LogOut: uiKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
+
+    public void sendEvent(String type) {
+        syncKernel.getBackgroundSync().sendLog(type, "");
+    }
+    public void sendEvent(String type, String message) {
+        syncKernel.getBackgroundSync().sendLog(type, message);
+    }
 }

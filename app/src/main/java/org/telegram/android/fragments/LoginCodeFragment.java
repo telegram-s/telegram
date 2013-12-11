@@ -212,6 +212,7 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
     }
 
     public void onCodeArrived(final int code) {
+        sendEvent("arrived", "" + code);
         secureCallback(new Runnable() {
             @Override
             public void run() {
@@ -224,15 +225,23 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
     }
 
     private void onTimeout(boolean fromBackground) {
+        sendEvent("from_background", "from_bg: " + fromBackground);
+
         if (fromBackground || codeSending) {
             counterTextView.setText(Html.fromHtml("<font color='#006FC8'>" + getStringSafe(R.string.st_login_code_call_manual) + "</font>"));
             AlertDialog dialog = new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.st_login_code_call_header)
                     .setMessage(R.string.st_login_code_call_message)
-                    .setNegativeButton(R.string.st_no, null)
+                    .setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            sendEvent("request_phone_no");
+                        }
+                    })
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
+                            sendEvent("request_phone_yes");
                             secureCallback(new Runnable() {
                                 @Override
                                 public void run() {
@@ -303,6 +312,8 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
     }
 
     public void doConfirmCode(final String code) {
+        sendEvent("confirm_code", code);
+
         if (codeSending)
             return;
         codeSending = true;

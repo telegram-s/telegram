@@ -214,6 +214,8 @@ public class StelsFragment extends StelsBaseFragment {
                     ((FragmentResultController) getActivity()).getResultData());
         }
 
+        sendEvent("#resume");
+
         // getActivity().getWindow().setBackgroundDrawable(getBackgroundDrawable());
     }
 
@@ -242,5 +244,19 @@ public class StelsFragment extends StelsBaseFragment {
 
     public boolean isParentFragment(StelsFragment fragment) {
         return true;
+    }
+
+    protected void sendEvent(String type) {
+        application.getKernel().sendEvent(getClass().getSimpleName() + ":" + type);
+    }
+
+    protected void sendEvent(String type, String message) {
+        application.getKernel().sendEvent(getClass().getSimpleName() + ":" +type, message);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        sendEvent("#resume");
     }
 }

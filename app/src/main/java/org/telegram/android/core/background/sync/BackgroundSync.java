@@ -12,8 +12,12 @@ import org.telegram.api.engine.TimeoutException;
 import org.telegram.api.help.TLInviteText;
 import org.telegram.api.messages.TLAffectedHistory;
 import org.telegram.api.requests.*;
+import org.telegram.mtproto.time.TimeOverlord;
 import org.telegram.tl.TLIntVector;
+import org.telegram.tl.TLVector;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,9 +44,12 @@ public class BackgroundSync extends BaseSync {
     private static final int SYNC_ACCEPTOR = 7;
     private static final int SYNC_INVITE = 8;
     private static final int SYNC_INVITE_INTERVAL = 24 * HOUR;
+    private static final int SYNC_LOG = 9;
     private static final String TAG = "BackgroundSync";
 
     private StelsApplication application;
+
+    private final ArrayList<TLInputAppEvent> logs = new ArrayList<TLInputAppEvent>();
 
     private final Object typingLock = new Object();
     private int typingPeerType;
@@ -60,6 +67,15 @@ public class BackgroundSync extends BaseSync {
         registerSyncSingle(SYNC_HISTORY, "historyReadSync");
         registerSyncEvent(SYNC_ACCEPTOR, "encryptedAcceptor");
         registerSync(SYNC_INVITE, "inviteSync", SYNC_INVITE_INTERVAL);
+        registerSyncEventAnon(SYNC_LOG, "sendLog");
+    }
+
+    public void sendLog(String type, String data) {
+        double time = TimeOverlord.getInstance().getServerTime() / 1000.0;
+        synchronized (logs) {
+            logs.add(new TLInputAppEvent(time, type, 0, data));
+        }
+        resetSync(SYNC_LOG);
     }
 
     public void resetInviteSync() {
@@ -285,5 +301,17 @@ public class BackgroundSync extends BaseSync {
         String locale = Locale.getDefault().getLanguage();
         TLInviteText text = application.getApi().doRpcCall(new TLRequestHelpGetInviteText(locale));
         application.getTechKernel().getSystemConfig().onInviteMessage(text.getMessage(), locale);
+    }
+
+    protected void sendLog() throws Exception {
+        TLInputAppEvent[] appEvents = null;
+        synchronized (logs) {
+            appEvents = logs.toArray(new TLInputAppEvent[0]);
+        }
+        if (appEvents.length > 0) {
+            TLVector<TLInputAppEvent> events = new TLVector<TLInputAppEvent>();
+            Collections.addAll(events, appEvents);
+            application.getApi().doRpcCall(new TLRequestHelpSaveAppLog(events));
+        }
     }
 }

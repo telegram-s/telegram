@@ -31,6 +31,7 @@ import org.telegram.api.TLInputUserContact;
 import org.telegram.api.messages.TLAffectedHistory;
 import org.telegram.api.requests.TLRequestContactsBlock;
 import org.telegram.api.requests.TLRequestContactsDeleteContacts;
+import org.telegram.api.requests.TLRequestHelpSaveAppLog;
 import org.telegram.api.requests.TLRequestMessagesDeleteHistory;
 import org.telegram.tl.TLVector;
 

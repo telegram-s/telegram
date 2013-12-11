@@ -8,6 +8,7 @@ import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
+import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.service.TLLocalActionUserRegistered;
 import org.telegram.android.core.model.update.*;
@@ -601,7 +602,7 @@ public class UpdateProcessor {
             application.getUserSource().notifyUserChanged(updateUserName.getUserId());
         } else if (update instanceof TLUpdateUserPhoto) {
             TLUpdateUserPhoto updateUserPhoto = (TLUpdateUserPhoto) update;
-            TLLocalAvatarPhoto photo = (TLLocalAvatarPhoto) EngineUtils.convertAvatarPhoto(updateUserPhoto.getPhoto());
+            TLAbsLocalAvatarPhoto photo = EngineUtils.convertAvatarPhoto(updateUserPhoto.getPhoto());
             application.getEngine().onUserAvatarChanges(updateUserPhoto.getUserId(), photo);
 //            application.getEngine().onNewInternalServiceMessage(PeerType.PEER_USER, updateUserPhoto.getUserId(),
 //                    updateUserPhoto.getUserId(),
