@@ -17,6 +17,7 @@ import android.util.TypedValue;
 import android.view.*;
 import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.analytics.tracking.android.EasyTracker;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.fragments.*;
@@ -468,6 +469,12 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        EasyTracker.getInstance(this).activityStart(this);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         application.getUiKernel().onAppResume(this);
@@ -490,6 +497,12 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         application.getUiKernel().onAppPause();
         unregisterReceiver(logoutReceiver);
         // getWindow().setBackgroundDrawableResource(R.drawable.smileys_bg);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EasyTracker.getInstance(this).activityStop(this);
     }
 
     @Override
