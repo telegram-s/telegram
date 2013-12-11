@@ -67,6 +67,7 @@ public class PickUserFragment extends BaseContactsFragment {
 
     @Override
     protected void onCreateView(View view, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        setResult(Activity.RESULT_CANCELED, null);
         mainContainer = view.findViewById(R.id.mainContainer);
     }
 
