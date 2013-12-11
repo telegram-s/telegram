@@ -12,6 +12,7 @@ import org.telegram.api.engine.TimeoutException;
 import org.telegram.api.help.TLInviteText;
 import org.telegram.api.messages.TLAffectedHistory;
 import org.telegram.api.requests.*;
+import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
 import org.telegram.tl.TLIntVector;
 import org.telegram.tl.TLVector;
@@ -47,6 +48,8 @@ public class BackgroundSync extends BaseSync {
     private static final int SYNC_LOG = 9;
     private static final String TAG = "BackgroundSync";
 
+    private long appSession = Entropy.generateRandomId() ^ 0x0F;
+
     private StelsApplication application;
 
     private final ArrayList<TLInputAppEvent> logs = new ArrayList<TLInputAppEvent>();
@@ -73,7 +76,7 @@ public class BackgroundSync extends BaseSync {
     public void sendLog(String type, String data) {
         double time = TimeOverlord.getInstance().getServerTime() / 1000.0;
         synchronized (logs) {
-            logs.add(new TLInputAppEvent(time, type, 0, data));
+            logs.add(new TLInputAppEvent(time, type, appSession, data));
         }
         resetSync(SYNC_LOG);
     }
