@@ -21,10 +21,7 @@ import org.telegram.android.media.CachedImageWorker;
 import org.telegram.android.media.StelsImageWorker;
 import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.android.tasks.AsyncException;
-import org.telegram.android.ui.EmojiProcessor;
-import org.telegram.android.ui.LastEmojiProcessor;
-import org.telegram.android.ui.TextUtil;
-import org.telegram.android.ui.UiResponsibility;
+import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
 
 /**
@@ -110,6 +107,8 @@ public class UiKernel {
         Logger.d(TAG, "ImageController loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         start = SystemClock.uptimeMillis();
+        UiMeasure.METRICS = application.getResources().getDisplayMetrics();
+        UiMeasure.DENSITY = UiMeasure.METRICS.density;
         I18nUtil.init(application);
         Logger.d(TAG, "Misc UI1 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 

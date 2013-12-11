@@ -15,6 +15,7 @@ import org.telegram.android.cursors.ViewSourceState;
 import org.telegram.android.log.Logger;
 import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.ui.TextUtil;
+import org.telegram.android.views.DialogView;
 import org.telegram.api.TLAbsMessageAction;
 import org.telegram.api.TLMessageActionChatAddUser;
 import org.telegram.api.TLMessageActionChatDeleteUser;
@@ -478,6 +479,7 @@ public class DialogSource {
             res.setMessage(body);
         }
 
+        res.setPreparedLayout(DialogView.prepareLayoutCache(res, application));
 
         return res;
     }

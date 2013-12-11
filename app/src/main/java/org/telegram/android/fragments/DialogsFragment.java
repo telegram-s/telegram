@@ -290,7 +290,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                             break;
                     }
                 }
-                dialogView.setDescription(description);
+                dialogView.setDescription(description, description.getPreparedLayout());
                 application.getDialogSource().getViewSource().onItemsShown(i);
                 return view;
             }

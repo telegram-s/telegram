@@ -12,6 +12,8 @@ import org.telegram.android.ui.TextUtil;
  */
 public class DialogWireframe {
 
+    private Object preparedLayout;
+
     private int databaseId;
 
     private int peerId;
@@ -186,5 +188,13 @@ public class DialogWireframe {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Object getPreparedLayout() {
+        return preparedLayout;
+    }
+
+    public void setPreparedLayout(Object preparedLayout) {
+        this.preparedLayout = preparedLayout;
     }
 }
