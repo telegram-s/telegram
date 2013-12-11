@@ -5,7 +5,6 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:0.6.3+'
-        classpath 'com.newrelic.agent.android:agent-gradle-plugin:3.214.0'
     }
 }
 
@@ -19,7 +18,6 @@ repositories {
 project.group = "org.telegram"
 
 apply plugin: 'android'
-apply plugin: 'newrelic'
 
 dependencies {
     // Android basic dependencies
@@ -28,7 +26,6 @@ dependencies {
     compile 'com.android.support:support-v4:19.0.+'
     compile 'com.google.android.gms:play-services:4.0.+'
     compile 'se.emilsjolander:stickylistheaders:2.1.3'
-    compile 'com.newrelic.agent.android:android-agent:3.214.0'
 
     // Telegram api
     compile project(':tl-core')

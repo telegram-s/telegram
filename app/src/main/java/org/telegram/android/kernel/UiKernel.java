@@ -1,6 +1,5 @@
 package org.telegram.android.kernel;
 
-import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -20,8 +19,6 @@ import org.telegram.android.core.model.PeerType;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.CachedImageWorker;
 import org.telegram.android.media.StelsImageWorker;
-import org.telegram.android.media.TelegramImageWorker;
-import org.telegram.android.media.avatar.AvatarLoader;
 import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.EmojiProcessor;
@@ -67,10 +64,6 @@ public class UiKernel {
 
     private WallpaperHolder wallpaperHolder;
 
-    private TelegramImageWorker telegramImageWorker;
-
-    private AvatarLoader avatarLoader;
-
     private int openedChatPeerId;
     private int openedChatPeerType;
 
@@ -105,20 +98,14 @@ public class UiKernel {
         this.isAppActive = false;
         this.isAppActive = false;
 
-        telegramImageWorker = new TelegramImageWorker(application);
-
         imageController = new ImageController(application, new ImageWorker[]{
                 new FileSystemWorker(application),
                 new DownloadWorker(),
                 new CornersWorker(),
                 new StelsImageWorker(application),
                 new StelsImageWorker(application),
-                new CachedImageWorker(),
-                telegramImageWorker
+                new CachedImageWorker()
         });
-
-
-        avatarLoader = new AvatarLoader(application);
 
         Logger.d(TAG, "ImageController loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
@@ -138,10 +125,6 @@ public class UiKernel {
         ApiUtils.init(application, kernel.getTechKernel().getTechReflection().getScreenSize());
         Logger.d(TAG, "Misc UI4 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
-    }
-
-    public AvatarLoader getAvatarLoader() {
-        return avatarLoader;
     }
 
     public UiResponsibility getResponsibility() {
@@ -271,10 +254,6 @@ public class UiKernel {
             isAppActive = false;
             onAppGoesBackground();
         }
-    }
-
-    public void putToCache(Bitmap bitmap) {
-        telegramImageWorker.putToCache(bitmap);
     }
 
     private void onAppGoesForeground() {

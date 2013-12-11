@@ -101,10 +101,9 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             }
         }
 
-//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//            getWindow().setFormat(PixelFormat.RGB_565);
-//        }
-        getWindow().setFormat(PixelFormat.RGB_565);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            getWindow().setFormat(PixelFormat.RGB_565);
+        }
 
         if (getIntent().getAction() != null) {
             onIntent(getIntent());
