@@ -3,7 +3,6 @@ package org.telegram.android.core;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
-import com.crittercism.app.Crittercism;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.Configuration;
 import org.telegram.android.StelsApplication;
@@ -14,6 +13,7 @@ import org.telegram.android.core.model.User;
 import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.cursors.ViewSourceState;
 import org.telegram.android.log.Logger;
+import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.TLAbsMessageAction;
 import org.telegram.api.TLMessageActionChatAddUser;
@@ -132,7 +132,7 @@ public class DialogSource {
                             // TODO: fix drop login
                             // application.dropLogin();
                             Logger.d(TAG, "Missed user: " + uid);
-                            Crittercism.logHandledException(new RuntimeException("Reset by missed user: " + uid));
+                            CrashHandler.logHandledException(new RuntimeException("Reset by missed user: " + uid));
                             return new DialogDescription[0];
                         }
                     }

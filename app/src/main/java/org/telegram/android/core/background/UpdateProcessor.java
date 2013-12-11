@@ -3,7 +3,6 @@ package org.telegram.android.core.background;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import com.crittercism.app.Crittercism;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.DialogDescription;
@@ -13,6 +12,7 @@ import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.service.TLLocalActionUserRegistered;
 import org.telegram.android.core.model.update.*;
 import org.telegram.android.log.Logger;
+import org.telegram.android.reflection.CrashHandler;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
 import org.telegram.api.TLMessage;
@@ -107,9 +107,11 @@ public class UpdateProcessor {
                                     isInvalidated = false;
                                     onValidated();
                                     return;
+                                } catch (RpcException e) {
+                                    Logger.t(TAG, e);
+                                    CrashHandler.logHandledException(e);
                                 } catch (IOException e) {
                                     Logger.t(TAG, e);
-                                    Crittercism.logHandledException(e);
                                 }
                             } else {
                                 Logger.d(TAG, "Getting difference");
@@ -139,14 +141,9 @@ public class UpdateProcessor {
                                     return;
                                 } catch (RpcException e) {
                                     Logger.t(TAG, e);
-                                    Crittercism.logHandledException(e);
-                                    // Temporary fix
-                                    // updateState.setFullState(0, 0, 0, 0);
-                                    // getHandler().sendEmptyMessageDelayed(0, 1000);
+                                    CrashHandler.logHandledException(e);
                                 } catch (IOException e) {
                                     Logger.t(TAG, e);
-                                    Crittercism.logHandledException(e);
-                                    // getHandler().sendEmptyMessageDelayed(0, 1000);
                                 }
                             }
 

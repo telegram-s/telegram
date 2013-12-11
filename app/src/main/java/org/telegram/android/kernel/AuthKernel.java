@@ -19,6 +19,7 @@ import org.telegram.android.kernel.compat.v2.CompatCredentials2;
 import org.telegram.android.kernel.compat.v2.TLUserSelfCompat2;
 import org.telegram.android.kernel.compat.v3.CompatAuthCredentials3;
 import org.telegram.android.log.Logger;
+import org.telegram.android.reflection.CrashHandler;
 import org.telegram.api.TLAbsUser;
 import org.telegram.api.auth.TLAuthorization;
 
@@ -253,6 +254,7 @@ public class AuthKernel {
 
     public void logIn(TLAuthorization authorization) {
         storage.doAuth(authorization);
+        CrashHandler.setUid(storage.getObj().getUid());
         ArrayList<TLAbsUser> users = new ArrayList<TLAbsUser>();
         users.add(authorization.getUser());
         kernel.getStorageKernel().getModel().onUsers(users);

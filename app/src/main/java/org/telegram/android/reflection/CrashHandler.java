@@ -1,7 +1,6 @@
 package org.telegram.android.reflection;
 
-import com.crittercism.app.Crittercism;
-import com.crittercism.app.CrittercismConfig;
+import com.bugsense.trace.BugSenseHandler;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
 
@@ -13,10 +12,7 @@ import org.telegram.android.log.Logger;
  */
 public class CrashHandler {
     public static void init(StelsApplication application) {
-        CrittercismConfig config = new CrittercismConfig();
-        config.setLogcatReportingEnabled(true);
-        config.setDelaySendingAppLoad(true);
-        Crittercism.initialize(application, "522b33d9d0d8f70727000008");
+        BugSenseHandler.initAndStartSession(application, "e6d19090");
 
         // Flushing logs to disk
         final Thread.UncaughtExceptionHandler originalHandler = Thread.getDefaultUncaughtExceptionHandler();
@@ -32,5 +28,13 @@ public class CrashHandler {
                 originalHandler.uncaughtException(thread, ex);
             }
         });
+    }
+
+    public static void logHandledException(Exception e) {
+        BugSenseHandler.sendException(e);
+    }
+
+    public static void setUid(int uid) {
+        BugSenseHandler.setUserIdentifier("u" + uid);
     }
 }
