@@ -21,6 +21,7 @@ import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.Placeholders;
@@ -95,7 +96,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private boolean showUnreadMessagesNotify;
     private int unreadMessagesCount;
 
-    private ChatMessage message;
+    private MessageWireframe message;
 
     private OnClickListener onBubbleClick;
     private OnClickListener onAvatarClick;
@@ -231,7 +232,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         bind(message, showTimeSeparator, showUnreadMessagesNotify, unreadMessagesCount);
     }
 
-    public final void bind(ChatMessage message, boolean showTime, boolean showUnread, int unreadMessagesCount) {
+    public final void bind(MessageWireframe message, boolean showTime, boolean showUnread, int unreadMessagesCount) {
         this.message = message;
         if (showTimeSeparator != showTime) {
             requestLayout();
@@ -249,23 +250,23 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
         showTimeSeparator = showTime;
         if (showTimeSeparator) {
-            timeDivText = org.telegram.android.ui.TextUtil.formatDateLong(message.getDate());
+            timeDivText = org.telegram.android.ui.TextUtil.formatDateLong(message.message.getDate());
         }
         bindCommonInt(message);
         bindCommon(message);
-        if (oldId != -1 && message.getDatabaseId() == oldId) {
+        if (oldId != -1 && message.message.getDatabaseId() == oldId) {
             bindUpdateInt(message);
             bindUpdate(message);
         } else {
             bindNewInt(message);
             bindNewView(message);
         }
-        oldId = message.getDatabaseId();
+        oldId = message.message.getDatabaseId();
     }
 
-    private void bindCommonInt(ChatMessage message) {
-        showAvatar = !message.isOut() && message.getPeerType() == PeerType.PEER_CHAT;
-        isOut = message.isOut();
+    private void bindCommonInt(MessageWireframe message) {
+        showAvatar = !message.message.isOut() && message.message.getPeerType() == PeerType.PEER_CHAT;
+        isOut = message.message.isOut();
 
         if (isOut) {
             currentBubbleDrawable = bubbleOutDrawable;
@@ -276,8 +277,8 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         }
 
         if (showAvatar) {
-            placeholder = getResources().getDrawable(Placeholders.getUserBubblePlaceholder(message.getSenderId()));
-            User user = application.getEngine().getUser(message.getSenderId());
+            placeholder = getResources().getDrawable(Placeholders.getUserBubblePlaceholder(message.message.getSenderId()));
+            User user = application.getEngine().getUser(message.message.getSenderId());
             if (user != null) {
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
                     TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) user.getPhoto();
@@ -305,23 +306,23 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         }
     }
 
-    private void bindNewInt(ChatMessage message) {
+    private void bindNewInt(MessageWireframe message) {
 
     }
 
-    private void bindUpdateInt(ChatMessage message) {
+    private void bindUpdateInt(MessageWireframe message) {
 
     }
 
-    protected void bindNewView(ChatMessage message) {
+    protected void bindNewView(MessageWireframe message) {
 
     }
 
-    protected void bindUpdate(ChatMessage message) {
+    protected void bindUpdate(MessageWireframe message) {
 
     }
 
-    protected void bindCommon(ChatMessage message) {
+    protected void bindCommon(MessageWireframe message) {
 
     }
 

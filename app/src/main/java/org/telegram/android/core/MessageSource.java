@@ -10,6 +10,7 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.Configuration;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.cursors.ViewSourceState;
 import org.telegram.android.log.Logger;
@@ -73,7 +74,7 @@ public class MessageSource {
 
     private int peerType, peerId;
 
-    private ViewSource<ChatMessage, ChatMessage> messagesSource;
+    private ViewSource<MessageWireframe, ChatMessage> messagesSource;
 
     private SharedPreferences preferences;
 
@@ -94,7 +95,7 @@ public class MessageSource {
         }
         this.peerType = _peerType;
         this.peerId = _peerId;
-        this.messagesSource = new ViewSource<ChatMessage, ChatMessage>() {
+        this.messagesSource = new ViewSource<MessageWireframe, ChatMessage>() {
 
             @Override
             protected ChatMessage[] loadItems(int offset) {
@@ -172,17 +173,17 @@ public class MessageSource {
             }
 
             @Override
-            protected long getSortingKey(ChatMessage obj) {
-                if (obj.getMid() <= 0) {
-                    return obj.getDate() * 1000000L + 999999L;
+            protected long getSortingKey(MessageWireframe obj) {
+                if (obj.message.getMid() <= 0) {
+                    return obj.message.getDate() * 1000000L + 999999L;
                 } else {
-                    return obj.getDate() * 1000000L + Math.abs(obj.getMid());
+                    return obj.message.getDate() * 1000000L + Math.abs(obj.message.getMid());
                 }
             }
 
             @Override
-            protected long getItemKey(ChatMessage obj) {
-                return obj.getDatabaseId();
+            protected long getItemKey(MessageWireframe obj) {
+                return obj.message.getDatabaseId();
             }
 
             @Override
@@ -212,13 +213,19 @@ public class MessageSource {
             }
 
             @Override
-            protected ChatMessage convert(ChatMessage item) {
-                return item;
+            protected MessageWireframe convert(ChatMessage item) {
+                MessageWireframe res = new MessageWireframe();
+                res.message = item;
+                res.senderUser = application.getEngine().getUser(item.getSenderId());
+                if (res.message.isForwarded()) {
+                    res.forwardUser = application.getEngine().getUser(item.getForwardSenderId());
+                }
+                return res;
             }
         };
     }
 
-    public ViewSource<ChatMessage, ChatMessage> getMessagesSource() {
+    public ViewSource<MessageWireframe, ChatMessage> getMessagesSource() {
         return messagesSource;
     }
 

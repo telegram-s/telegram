@@ -16,6 +16,7 @@ import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.MessageState;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalContact;
+import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.Placeholders;
 
@@ -153,32 +154,32 @@ public class MessageContactView extends BaseMsgView {
     }
 
     @Override
-    protected void bindNewView(ChatMessage message) {
-        this.state = message.getState();
+    protected void bindNewView(MessageWireframe message) {
+        this.state = message.message.getState();
         this.prevState = -1;
     }
 
     @Override
-    protected void bindUpdate(ChatMessage message) {
-        if (this.state != message.getState()) {
+    protected void bindUpdate(MessageWireframe message) {
+        if (this.state != message.message.getState()) {
             this.prevState = this.state;
-            this.state = message.getState();
+            this.state = message.message.getState();
             this.stateChangeTime = SystemClock.uptimeMillis();
         }
     }
 
     @Override
-    protected void bindCommon(ChatMessage message) {
-        TLLocalContact contact = (TLLocalContact) message.getExtras();
+    protected void bindCommon(MessageWireframe message) {
+        TLLocalContact contact = (TLLocalContact) message.message.getExtras();
         title = (contact.getFirstName() + " " + contact.getLastName()).trim();
         phone = org.telegram.android.ui.TextUtil.formatPhone(contact.getPhoneNumber());
-        if (message.isOut()) {
+        if (message.message.isOut()) {
             senderPaint.setColor(0xff739f53);
         } else {
             senderPaint.setColor(0xff4884cf);
         }
-        this.date = org.telegram.android.ui.TextUtil.formatTime(message.getDate(), getContext());
-        this.showState = message.isOut();
+        this.date = org.telegram.android.ui.TextUtil.formatTime(message.message.getDate(), getContext());
+        this.showState = message.message.isOut();
 
         this.placeholder = getResources().getDrawable(Placeholders.getUserPlaceholder(contact.getUserId()));
         this.showAddButton = (application.getEngine().getUser(contact.getUserId()).getLinkType() != LinkType.CONTACT)

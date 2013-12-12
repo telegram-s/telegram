@@ -10,6 +10,7 @@ import android.text.util.Linkify;
 import android.util.AttributeSet;
 import org.telegram.android.R;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.ui.EmojiProcessor;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.Placeholders;
@@ -55,11 +56,9 @@ public class MessageView extends BaseMsgView {
     private int layoutHeight;
     private int timeWidth;
     private int forwardOffset;
-    private boolean isGroupChat;
 
-    public MessageView(Context context, boolean isGroupChat) {
+    public MessageView(Context context) {
         super(context);
-        this.isGroupChat = isGroupChat;
         init();
     }
 
@@ -151,14 +150,14 @@ public class MessageView extends BaseMsgView {
     }
 
     @Override
-    protected void bindNewView(ChatMessage msg) {
-        this.message = msg.getMessage();
-        if (msg.isBodyHasSmileys()) {
-            this.spannable = application.getEmojiProcessor().processEmojiCompatMutable(msg.getMessage(), EmojiProcessor.CONFIGURATION_BUBBLES);
+    protected void bindNewView(MessageWireframe msg) {
+        this.message = msg.message.getMessage();
+        if (msg.message.isBodyHasSmileys()) {
+            this.spannable = application.getEmojiProcessor().processEmojiCompatMutable(msg.message.getMessage(), EmojiProcessor.CONFIGURATION_BUBBLES);
             Linkify.addLinks(this.spannable, Linkify.ALL);
             fixLinks(spannable);
         } else {
-            Spannable tmpSpannable = new SpannableString(msg.getMessage());
+            Spannable tmpSpannable = new SpannableString(msg.message.getMessage());
             if (Linkify.addLinks(tmpSpannable, Linkify.ALL)) {
                 this.spannable = tmpSpannable;
                 fixLinks(spannable);
@@ -166,24 +165,24 @@ public class MessageView extends BaseMsgView {
                 this.spannable = null;
             }
         }
-        this.date = TextUtil.formatTime(msg.getDate(), getContext());
-        this.state = msg.getState();
+        this.date = TextUtil.formatTime(msg.message.getDate(), getContext());
+        this.state = msg.message.getState();
         this.prevState = -1;
-        this.isOut = msg.isOut();
+        this.isOut = msg.message.isOut();
         this.showState = isOut;
-        this.isGroup = msg.getPeerType() == PeerType.PEER_CHAT && !isOut;
+        this.isGroup = msg.message.getPeerType() == PeerType.PEER_CHAT && !isOut;
         if (isGroup) {
-            User user = application.getEngine().getUser(msg.getSenderId());
+            User user = application.getEngine().getUser(msg.message.getSenderId());
             this.senderName = user.getDisplayName();
-            if (!msg.isForwarded()) {
-                this.senderPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[msg.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
-                this.forwardingPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[msg.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
+            if (!msg.message.isForwarded()) {
+                this.senderPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[msg.message.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
+                this.forwardingPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[msg.message.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
             }
         }
 
-        if (msg.isForwarded()) {
+        if (msg.message.isForwarded()) {
             isForwarded = true;
-            User forwardedUser = application.getEngine().getUser(msg.getForwardSenderId());
+            User forwardedUser = application.getEngine().getUser(msg.message.getForwardSenderId());
             this.forwarderName = forwardedUser.getDisplayName();
             if (isOut) {
                 this.forwardingPaint.setColor(0xff739f53);
@@ -200,20 +199,20 @@ public class MessageView extends BaseMsgView {
     }
 
     @Override
-    protected void bindUpdate(ChatMessage msg) {
-        this.date = TextUtil.formatTime(msg.getDate(), getContext());
-        if (this.state != msg.getState()) {
+    protected void bindUpdate(MessageWireframe msg) {
+        this.date = TextUtil.formatTime(msg.message.getDate(), getContext());
+        if (this.state != msg.message.getState()) {
             this.prevState = this.state;
-            this.state = msg.getState();
+            this.state = msg.message.getState();
             this.stateChangeTime = SystemClock.uptimeMillis();
         }
         if (isGroup) {
-            User user = application.getEngine().getUser(msg.getSenderId());
+            User user = application.getEngine().getUser(msg.message.getSenderId());
             this.senderName = user.getDisplayName();
         }
-        if (msg.isForwarded()) {
+        if (msg.message.isForwarded()) {
             isForwarded = true;
-            User forwardedUser = application.getEngine().getUser(msg.getForwardSenderId());
+            User forwardedUser = application.getEngine().getUser(msg.message.getForwardSenderId());
             this.forwarderName = forwardedUser.getDisplayName();
         } else {
             isForwarded = false;

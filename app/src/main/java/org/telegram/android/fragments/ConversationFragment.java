@@ -39,6 +39,7 @@ import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
+import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.cursors.ViewSourceListener;
 import org.telegram.android.cursors.ViewSourceState;
 import org.telegram.android.log.Logger;
@@ -80,7 +81,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     private int peerId;
     private int peerType;
 
-    private ArrayList<ChatMessage> workingSet;
+    private ArrayList<MessageWireframe> workingSet;
     private BaseAdapter dialogAdapter;
     private View mainContainer;
     private ConversationListView listView;
@@ -571,9 +572,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }, start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
     }
 
-    protected void onMessageClick(final ChatMessage message) {
-        if (message.getContentType() == ContentType.MESSAGE_CONTACT) {
-            final int uid = ((TLLocalContact) message.getExtras()).getUserId();
+    protected void onMessageClick(final MessageWireframe message) {
+        if (message.message.getContentType() == ContentType.MESSAGE_CONTACT) {
+            final int uid = ((TLLocalContact) message.message.getExtras()).getUserId();
             getRootController().openUser(uid);
 //            if (application.getEngine().getUidContact(uid) != null || uid == application.getCurrentUid()) {
 //                getRootController().openUser(uid);
@@ -596,12 +597,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         ArrayList<CharSequence> items = new ArrayList<CharSequence>();
         final ArrayList<Runnable> actions = new ArrayList<Runnable>();
 
-        if (message.getRawContentType() == ContentType.MESSAGE_TEXT) {
+        if (message.message.getRawContentType() == ContentType.MESSAGE_TEXT) {
             items.add(getStringSafe(R.string.st_conv_action_copy));
             actions.add(new Runnable() {
                 @Override
                 public void run() {
-                    copyToPastebin(message.getMessage());
+                    copyToPastebin(message.message.getMessage());
                     Toast.makeText(getActivity(), R.string.st_conv_copied, Toast.LENGTH_SHORT).show();
                 }
             });
@@ -614,14 +615,14 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        editText.getText().append("\"" + message.getMessage() + "\" ");
+                        editText.getText().append("\"" + message.message.getMessage() + "\" ");
                         showKeyboard(editText);
                     }
                 });
             }
         }
 
-        if (message.getState() != MessageState.PENDING && message.getState() != MessageState.FAILURE && peerType != PeerType.PEER_USER_ENCRYPTED) {
+        if (message.message.getState() != MessageState.PENDING && message.message.getState() != MessageState.FAILURE && peerType != PeerType.PEER_USER_ENCRYPTED) {
             if (isEnabledInput) {
                 items.add(getStringSafe(R.string.st_conv_action_forward));
                 actions.add(new Runnable() {
@@ -631,37 +632,37 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        getRootController().forwardMessage(message.getMid());
+                        getRootController().forwardMessage(message.message.getMid());
                     }
                 });
             }
         }
 
-        if (message.getState() == MessageState.FAILURE) {
+        if (message.message.getState() == MessageState.FAILURE) {
             items.add(getStringSafe(R.string.st_conv_action_delete));
             actions.add(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().deleteUnsentMessage(message.getDatabaseId());
+                    application.getEngine().deleteUnsentMessage(message.message.getDatabaseId());
                     application.notifyUIUpdate();
                 }
             });
         }
 
-        if (message.getState() == MessageState.SENT || message.getState() == MessageState.READED) {
+        if (message.message.getState() == MessageState.SENT || message.message.getState() == MessageState.READED) {
             items.add(getStringSafe(R.string.st_conv_action_delete));
             actions.add(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().deleteSentMessage(message.getDatabaseId());
+                    application.getEngine().deleteSentMessage(message.message.getDatabaseId());
                     application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
                     application.notifyUIUpdate();
                 }
             });
         }
 
-        if (message.isForwarded() && message.getRawContentType() == ContentType.MESSAGE_TEXT) {
-            final User forwarded = getEngine().getUser(message.getForwardSenderId());
+        if (message.message.isForwarded() && message.message.getRawContentType() == ContentType.MESSAGE_TEXT) {
+            final User forwarded = getEngine().getUser(message.message.getForwardSenderId());
             items.add(forwarded.getDisplayName());
             actions.add(new Runnable() {
                 @Override
@@ -671,8 +672,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             });
         }
 
-        if (message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
-            final TLLocalContact contact = (TLLocalContact) message.getExtras();
+        if (message.message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+            final TLLocalContact contact = (TLLocalContact) message.message.getExtras();
             items.add(contact.getFirstName() + " " + contact.getLastName());
             actions.add(new Runnable() {
                 @Override
@@ -682,35 +683,35 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             });
         }
 
-        if (message.getState() == MessageState.FAILURE && (
-                message.getRawContentType() == ContentType.MESSAGE_TEXT ||
-                        message.getRawContentType() == ContentType.MESSAGE_GEO ||
-                        message.getRawContentType() == ContentType.MESSAGE_CONTACT ||
-                        message.isForwarded())) {
+        if (message.message.getState() == MessageState.FAILURE && (
+                message.message.getRawContentType() == ContentType.MESSAGE_TEXT ||
+                        message.message.getRawContentType() == ContentType.MESSAGE_GEO ||
+                        message.message.getRawContentType() == ContentType.MESSAGE_CONTACT ||
+                        message.message.isForwarded())) {
             items.add(getStringSafe(R.string.st_conv_action_try_again));
             actions.add(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().tryAgain(message.getDatabaseId());
+                    application.getEngine().tryAgain(message.message.getDatabaseId());
                     application.notifyUIUpdate();
                 }
             });
         }
 
-        if (message.getState() == MessageState.FAILURE && (message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
-                message.getRawContentType() == ContentType.MESSAGE_PHOTO) && !(message.isForwarded())) {
+        if (message.message.getState() == MessageState.FAILURE && (message.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
+                message.message.getRawContentType() == ContentType.MESSAGE_PHOTO) && !(message.message.isForwarded())) {
             items.add(getStringSafe(R.string.st_conv_action_try_again));
             actions.add(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().tryAgainMedia(message.getDatabaseId());
+                    application.getEngine().tryAgainMedia(message.message.getDatabaseId());
                     application.notifyUIUpdate();
                 }
             });
         }
 
         // Add links
-        Spannable text = new SpannableString(message.getMessage());
+        Spannable text = new SpannableString(message.message.getMessage());
         if (Linkify.addLinks(text, Linkify.ALL)) {
             for (final URLSpan span : text.getSpans(0, text.length(), URLSpan.class)) {
                 try {
@@ -1359,7 +1360,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     @Override
     public void onSourceDataChanged() {
 
-        ArrayList<ChatMessage> nWorkingSet = source.getMessagesSource().getCurrentWorkingSet();
+        ArrayList<MessageWireframe> nWorkingSet = source.getMessagesSource().getCurrentWorkingSet();
         Logger.d(TAG, "onSourceDataChanged: " + firstUnreadMessage + ", " + isFreshUpdate);
         if (isFreshUpdate) {
             if (nWorkingSet.size() == 0) {
@@ -1379,14 +1380,14 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 Logger.d(TAG, "Founded first unread message: " + unreadMessage);
                 int index = -1;
                 for (int i = 0; i < nWorkingSet.size(); i++) {
-                    ChatMessage message = nWorkingSet.get(i);
+                    MessageWireframe message = nWorkingSet.get(i);
                     if (peerType != PeerType.PEER_USER_ENCRYPTED) {
-                        if (!message.isOut() && unreadMessage == message.getMid()) {
+                        if (!message.message.isOut() && unreadMessage == message.message.getMid()) {
                             index = i;
                             break;
                         }
                     } else {
-                        if (!message.isOut() && unreadMessage == message.getRandomId()) {
+                        if (!message.message.isOut() && unreadMessage == message.message.getRandomId()) {
                             index = i;
                             break;
                         }
@@ -1396,7 +1397,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     firstUnreadMessage = unreadMessage;
                     unreadCount = 0;
                     for (int i = 0; i <= index; i++) {
-                        ChatMessage message = nWorkingSet.get(i);
+                        ChatMessage message = nWorkingSet.get(i).message;
                         if (!message.isOut()) {
                             unreadCount++;
                         }
@@ -1491,26 +1492,26 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
 
         @Override
-        public ChatMessage getItem(int i) {
+        public MessageWireframe getItem(int i) {
             return workingSet.get(getCount() - i - 1);
         }
 
         @Override
         public long getItemId(int i) {
-            return getItem(i).getDatabaseId();
+            return getItem(i).message.getDatabaseId();
         }
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
-            ChatMessage message = getItem(i);
+            MessageWireframe message = getItem(i);
             if (view == null) {
                 view = newView(application, message, viewGroup);
             }
 
             boolean showTime = i == 0;
             if (i > 0) {
-                ChatMessage prev = getItem(i - 1);
-                showTime = !TextUtil.areSameDays(prev.getDate(), message.getDate());
+                MessageWireframe prev = getItem(i - 1);
+                showTime = !TextUtil.areSameDays(prev.message.getDate(), message.message.getDate());
             }
 
             bindView(view, application, message, showTime);
@@ -1538,18 +1539,18 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         @Override
         public int getItemViewType(int position) {
-            ChatMessage msg = getItem(position);
-            if (msg.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
+            MessageWireframe msg = getItem(position);
+            if (msg.message.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
                 return 2;
             }
-            if (msg.getRawContentType() == ContentType.MESSAGE_PHOTO ||
-                    msg.getRawContentType() == ContentType.MESSAGE_VIDEO ||
-                    msg.getRawContentType() == ContentType.MESSAGE_GEO ||
-                    msg.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
+            if (msg.message.getRawContentType() == ContentType.MESSAGE_PHOTO ||
+                    msg.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
+                    msg.message.getRawContentType() == ContentType.MESSAGE_GEO ||
+                    msg.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                 return 1;
             }
 
-            if (msg.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+            if (msg.message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
                 return 3;
             }
 
@@ -1562,35 +1563,35 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
 
 
-        public View newView(Context context, ChatMessage object, ViewGroup parent) {
-            if (object.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
+        public View newView(Context context, MessageWireframe object, ViewGroup parent) {
+            if (object.message.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
                 return View.inflate(context, R.layout.conv_item_system, null);
             }
 
-            if (object.getRawContentType() == ContentType.MESSAGE_PHOTO ||
-                    object.getRawContentType() == ContentType.MESSAGE_VIDEO ||
-                    object.getRawContentType() == ContentType.MESSAGE_GEO ||
-                    object.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
+            if (object.message.getRawContentType() == ContentType.MESSAGE_PHOTO ||
+                    object.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
+                    object.message.getRawContentType() == ContentType.MESSAGE_GEO ||
+                    object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                 return new MessageMediaView(context);
-            } else if (object.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+            } else if (object.message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
                 return new MessageContactView(context);
             } else {
-                return new MessageView(context, peerType == PeerType.PEER_CHAT);
+                return new MessageView(context);
             }
         }
 
-        public void bindView(View view, Context context, final ChatMessage object, boolean showTime) {
-            if (object.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
+        public void bindView(View view, Context context, final MessageWireframe object, boolean showTime) {
+            if (object.message.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
                 TextView timeView = (TextView) view.findViewById(R.id.time);
                 if (showTime) {
-                    timeView.setText(TextUtil.formatDateLong(object.getDate()));
+                    timeView.setText(TextUtil.formatDateLong(object.message.getDate()));
                     timeView.setVisibility(View.VISIBLE);
                 } else {
                     timeView.setVisibility(View.GONE);
                 }
 
                 boolean showDiv = false;
-                if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                if (!object.message.isOut() && object.message.getMid() == firstUnreadMessage) {
                     showDiv = true;
                 }
 
@@ -1607,8 +1608,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 messageView.setMovementMethod(LinkMovementMethod.getInstance());
                 FastWebImageView imageView = (FastWebImageView) view.findViewById(R.id.image);
 
-                TLAbsLocalAction action = (TLAbsLocalAction) object.getExtras();
-                User sender = getEngine().getUser(object.getSenderId());
+                TLAbsLocalAction action = (TLAbsLocalAction) object.message.getExtras();
+                User sender = getEngine().getUser(object.message.getSenderId());
                 boolean byMyself = sender.getUid() == application.getCurrentUid();
                 String senderName = byMyself ? getStringSafe(R.string.st_message_by_you) : sender.getDisplayName();
                 String senderHtml = "<b><a href='#" + sender.getUid() + "'>" + unicodeWrap(TextUtils.htmlEncode(senderName)) + "</a></b>";
@@ -1679,7 +1680,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     imageView.setVisibility(View.GONE);
                 } else if (action instanceof TLLocalActionChatDeleteUser) {
                     TLLocalActionChatDeleteUser deleteUser = (TLLocalActionChatDeleteUser) action;
-                    if (object.getSenderId() == deleteUser.getUserId()) {
+                    if (object.message.getSenderId() == deleteUser.getUserId()) {
                         messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_left_user_you : R.string.st_message_left_user).replace("{0}", senderHtml)));
                     } else {
                         User removed = getEngine().getUser(deleteUser.getUserId());
@@ -1715,27 +1716,27 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
         }
 
-        public void bindChatView(final BaseMsgView view, final Context context, final ChatMessage object, boolean showTime) {
+        public void bindChatView(final BaseMsgView view, final Context context, final MessageWireframe object, boolean showTime) {
             view.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    if (selected.contains(object.getDatabaseId())) {
-                        selected.remove(object.getDatabaseId());
+                    if (selected.contains(object.message.getDatabaseId())) {
+                        selected.remove(object.message.getDatabaseId());
                     } else {
-                        selected.add(object.getDatabaseId());
+                        selected.add(object.message.getDatabaseId());
                     }
-                    ((BaseMsgView) v).setChecked(selected.contains(object.getDatabaseId()));
+                    ((BaseMsgView) v).setChecked(selected.contains(object.message.getDatabaseId()));
                     updateActionMode();
                     return true;
                 }
             });
 
-            view.setChecked(selected.contains(object.getDatabaseId()));
+            view.setChecked(selected.contains(object.message.getDatabaseId()));
 
-            if (object.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+            if (object.message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
                 MessageContactView messageView = (MessageContactView) view;
                 boolean showDiv = false;
-                if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                if (!object.message.isOut() && object.message.getMid() == firstUnreadMessage) {
                     showDiv = true;
                 }
                 messageView.bind(object, showTime, showDiv, unreadCount);
@@ -1744,12 +1745,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     @Override
                     public void onClick(View view) {
                         if (selected.size() > 0) {
-                            if (selected.contains(object.getDatabaseId())) {
-                                selected.remove(object.getDatabaseId());
+                            if (selected.contains(object.message.getDatabaseId())) {
+                                selected.remove(object.message.getDatabaseId());
                             } else {
-                                selected.add(object.getDatabaseId());
+                                selected.add(object.message.getDatabaseId());
                             }
-                            ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                            ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
                             updateActionMode();
                         } else {
                             onMessageClick(object);
@@ -1759,19 +1760,19 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 messageView.setOnAvatarClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        getRootController().openUser(object.getSenderId());
+                        getRootController().openUser(object.message.getSenderId());
                     }
                 });
                 messageView.setOnAddContactClick(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        getRootController().addContact(((TLLocalContact) object.getExtras()).getUserId());
+                        getRootController().addContact(((TLLocalContact) object.message.getExtras()).getUserId());
                     }
                 });
-            } else if (object.getRawContentType() == ContentType.MESSAGE_TEXT) {
+            } else if (object.message.getRawContentType() == ContentType.MESSAGE_TEXT) {
                 MessageView messageView = (MessageView) view;
                 boolean showDiv = false;
-                if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                if (!object.message.isOut() && object.message.getMid() == firstUnreadMessage) {
                     showDiv = true;
                 }
                 messageView.bind(object, showTime, showDiv, unreadCount);
@@ -1780,12 +1781,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     @Override
                     public void onClick(View view) {
                         if (selected.size() > 0) {
-                            if (selected.contains(object.getDatabaseId())) {
-                                selected.remove(object.getDatabaseId());
+                            if (selected.contains(object.message.getDatabaseId())) {
+                                selected.remove(object.message.getDatabaseId());
                             } else {
-                                selected.add(object.getDatabaseId());
+                                selected.add(object.message.getDatabaseId());
                             }
-                            ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                            ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
                             updateActionMode();
                         } else {
                             onMessageClick(object);
@@ -1795,45 +1796,47 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 messageView.setOnAvatarClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        getRootController().openUser(object.getSenderId());
+                        getRootController().openUser(object.message.getSenderId());
                     }
                 });
-            } else if (object.getRawContentType() == ContentType.MESSAGE_PHOTO || object.getRawContentType() == ContentType.MESSAGE_VIDEO || object.getRawContentType() == ContentType.MESSAGE_GEO
-                    || object.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
+            } else if (object.message.getRawContentType() == ContentType.MESSAGE_PHOTO
+                    || object.message.getRawContentType() == ContentType.MESSAGE_VIDEO
+                    || object.message.getRawContentType() == ContentType.MESSAGE_GEO
+                    || object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                 MessageMediaView messageView = (MessageMediaView) view;
                 boolean showDiv = false;
-                if (!object.isOut() && object.getMid() == firstUnreadMessage) {
+                if (!object.message.isOut() && object.message.getMid() == firstUnreadMessage) {
                     showDiv = true;
                 }
                 messageView.bind(object, showTime, showDiv, unreadCount);
                 messageView.setOnAvatarClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        getRootController().openUser(object.getSenderId());
+                        getRootController().openUser(object.message.getSenderId());
                     }
                 });
 
-                if (object.getExtras() instanceof TLUploadingPhoto || object.getExtras() instanceof TLUploadingVideo) {
+                if (object.message.getExtras() instanceof TLUploadingPhoto || object.message.getExtras() instanceof TLUploadingVideo) {
                     messageView.setOnBubbleClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
-                                if (selected.contains(object.getDatabaseId())) {
-                                    selected.remove(object.getDatabaseId());
+                                if (selected.contains(object.message.getDatabaseId())) {
+                                    selected.remove(object.message.getDatabaseId());
                                 } else {
-                                    selected.add(object.getDatabaseId());
+                                    selected.add(object.message.getDatabaseId());
                                 }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
                                 updateActionMode();
                             } else {
-                                if (object.getState() == MessageState.FAILURE) {
+                                if (object.message.getState() == MessageState.FAILURE) {
                                     onMessageClick(object);
                                 } else {
                                     AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_cancel_title).setMessage(R.string.st_conv_cancel_message)
                                             .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                                    application.getMessageSender().cancelUpload(object.getDatabaseId());
+                                                    application.getMessageSender().cancelUpload(object.message.getDatabaseId());
                                                     application.notifyUIUpdate();
                                                 }
                                             }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
@@ -1848,9 +1851,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             }
                         }
                     });
-                } else if (object.getExtras() instanceof TLLocalPhoto) {
+                } else if (object.message.getExtras() instanceof TLLocalPhoto) {
 
-                    TLLocalPhoto photo = (TLLocalPhoto) object.getExtras();
+                    TLLocalPhoto photo = (TLLocalPhoto) object.message.getExtras();
                     if (!(photo.getFullLocation() instanceof TLLocalFileEmpty)) {
                         final String key = DownloadManager.getPhotoKey(photo);
                         DownloadState state = application.getDownloadManager().getState(key);
@@ -1862,23 +1865,23 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             @Override
                             public void onClick(View view) {
                                 if (selected.size() > 0) {
-                                    if (selected.contains(object.getDatabaseId())) {
-                                        selected.remove(object.getDatabaseId());
+                                    if (selected.contains(object.message.getDatabaseId())) {
+                                        selected.remove(object.message.getDatabaseId());
                                     } else {
-                                        selected.add(object.getDatabaseId());
+                                        selected.add(object.message.getDatabaseId());
                                     }
-                                    ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                                    ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
                                     updateActionMode();
                                 } else {
                                     DownloadState state = application.getDownloadManager().getState(key);
                                     if (state == DownloadState.COMPLETED) {
-                                        getRootController().openImage(object.getMid(), peerType, peerId);
+                                        getRootController().openImage(object.message.getMid(), peerType, peerId);
                                     } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
                                         // CANCEL
                                         application.getDownloadManager().abortDownload(key);
                                     } else {
                                         // Check
-                                        application.getDownloadManager().requestDownload((TLLocalPhoto) object.getExtras());
+                                        application.getDownloadManager().requestDownload((TLLocalPhoto) object.message.getExtras());
                                     }
                                 }
                             }
@@ -1886,18 +1889,18 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     } else {
                         messageView.setOnBubbleClickListener(null);
                     }
-                } else if (object.getExtras() instanceof TLLocalVideo) {
-                    final String key = DownloadManager.getVideoKey((TLLocalVideo) object.getExtras());
+                } else if (object.message.getExtras() instanceof TLLocalVideo) {
+                    final String key = DownloadManager.getVideoKey((TLLocalVideo) object.message.getExtras());
                     messageView.setOnBubbleClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
-                                if (selected.contains(object.getDatabaseId())) {
-                                    selected.remove(object.getDatabaseId());
+                                if (selected.contains(object.message.getDatabaseId())) {
+                                    selected.remove(object.message.getDatabaseId());
                                 } else {
-                                    selected.add(object.getDatabaseId());
+                                    selected.add(object.message.getDatabaseId());
                                 }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
                                 updateActionMode();
                             } else {
                                 DownloadState state = application.getDownloadManager().getState(key);
@@ -1909,28 +1912,28 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     // CANCEL
                                     application.getDownloadManager().abortDownload(key);
                                 } else {
-                                    TLLocalVideo video = (TLLocalVideo) object.getExtras();
+                                    TLLocalVideo video = (TLLocalVideo) object.message.getExtras();
                                     // Check
                                     application.getDownloadManager().requestDownload(video);
                                 }
                             }
                         }
                     });
-                } else if (object.getExtras() instanceof TLLocalGeo) {
+                } else if (object.message.getExtras() instanceof TLLocalGeo) {
                     messageView.setOnBubbleClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
-                                if (selected.contains(object.getDatabaseId())) {
-                                    selected.remove(object.getDatabaseId());
+                                if (selected.contains(object.message.getDatabaseId())) {
+                                    selected.remove(object.message.getDatabaseId());
                                 } else {
-                                    selected.add(object.getDatabaseId());
+                                    selected.add(object.message.getDatabaseId());
                                 }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.getDatabaseId()));
+                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
                                 updateActionMode();
                             } else {
-                                TLLocalGeo geo = (TLLocalGeo) object.getExtras();
-                                getRootController().viewLocation(geo.getLatitude(), geo.getLongitude(), object.getSenderId());
+                                TLLocalGeo geo = (TLLocalGeo) object.message.getExtras();
+                                getRootController().viewLocation(geo.getLatitude(), geo.getLongitude(), object.message.getSenderId());
                             }
                         }
                     });
@@ -1952,7 +1955,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         @Override
         public int getItemDate(int id) {
-            return getItem(id).getDate();
+            return getItem(id).message.getDate();
         }
     }
 

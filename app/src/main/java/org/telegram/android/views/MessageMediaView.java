@@ -15,6 +15,7 @@ import org.telegram.android.core.background.MessageSender;
 import org.telegram.android.core.background.SenderListener;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.*;
+import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.media.*;
 import org.telegram.android.ui.*;
 import org.telegram.api.TLFileLocation;
@@ -301,7 +302,7 @@ public class MessageMediaView extends BaseMsgView {
         postInvalidate();
     }
 
-    private void bindMedia(ChatMessage message) {
+    private void bindMedia(MessageWireframe message) {
         this.previewHeight = 0;
         this.previewWidth = 0;
         this.previewTask = null;
@@ -313,8 +314,8 @@ public class MessageMediaView extends BaseMsgView {
         this.showMapPoint = false;
         this.key = null;
 
-        if (message.getExtras() instanceof TLLocalPhoto) {
-            TLLocalPhoto mediaPhoto = (TLLocalPhoto) message.getExtras();
+        if (message.message.getExtras() instanceof TLLocalPhoto) {
+            TLLocalPhoto mediaPhoto = (TLLocalPhoto) message.message.getExtras();
             if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0) {
                 previewHeight = mediaPhoto.getFastPreviewH();
                 previewWidth = mediaPhoto.getFastPreviewW();
@@ -373,8 +374,8 @@ public class MessageMediaView extends BaseMsgView {
             } else {
                 isDownloadable = false;
             }
-        } else if (message.getExtras() instanceof TLLocalVideo) {
-            TLLocalVideo mediaVideo = (TLLocalVideo) message.getExtras();
+        } else if (message.message.getExtras() instanceof TLLocalVideo) {
+            TLLocalVideo mediaVideo = (TLLocalVideo) message.message.getExtras();
             isVideo = true;
             duration = TextUtil.formatDuration(mediaVideo.getDuration());
             placeholderPaint.setColor(Color.BLACK);
@@ -428,8 +429,8 @@ public class MessageMediaView extends BaseMsgView {
                     }
                 }
             }
-        } else if (message.getExtras() instanceof TLUploadingPhoto) {
-            TLUploadingPhoto photo = (TLUploadingPhoto) message.getExtras();
+        } else if (message.message.getExtras() instanceof TLUploadingPhoto) {
+            TLUploadingPhoto photo = (TLUploadingPhoto) message.message.getExtras();
             if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
                 previewTask = new UriImageTask(photo.getFileUri());
             } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
@@ -455,8 +456,8 @@ public class MessageMediaView extends BaseMsgView {
             previewTask.setFillRect(true);
 
             isUploadable = true;
-        } else if (message.getExtras() instanceof TLUploadingVideo) {
-            TLUploadingVideo video = (TLUploadingVideo) message.getExtras();
+        } else if (message.message.getExtras() instanceof TLUploadingVideo) {
+            TLUploadingVideo video = (TLUploadingVideo) message.message.getExtras();
             previewWidth = video.getPreviewWidth();
             previewHeight = video.getPreviewHeight();
 
@@ -478,8 +479,8 @@ public class MessageMediaView extends BaseMsgView {
             previewTask.setMaxWidth(scaledW);
             previewTask.setMaxHeight(scaledH);
             isUploadable = true;
-        } else if (message.getExtras() instanceof TLLocalGeo) {
-            TLLocalGeo geo = (TLLocalGeo) message.getExtras();
+        } else if (message.message.getExtras() instanceof TLLocalGeo) {
+            TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();
             previewWidth = getPx(160);
             previewHeight = getPx(160);
 
@@ -543,18 +544,18 @@ public class MessageMediaView extends BaseMsgView {
     }
 
     @Override
-    protected void bindNewView(ChatMessage message) {
-        this.databaseId = message.getDatabaseId();
-        this.isOut = message.isOut();
-        this.date = TextUtil.formatTime(message.getDate(), getContext());
-        this.isGroup = message.getPeerType() == PeerType.PEER_CHAT && !isOut;
+    protected void bindNewView(MessageWireframe message) {
+        this.databaseId = message.message.getDatabaseId();
+        this.isOut = message.message.isOut();
+        this.date = TextUtil.formatTime(message.message.getDate(), getContext());
+        this.isGroup = message.message.getPeerType() == PeerType.PEER_CHAT && !isOut;
         if (isOut) {
             placeholderPaint.setColor(0xffD9FFB9);
         } else {
             placeholderPaint.setColor(Color.WHITE);
         }
         this.previewCached = null;
-        this.state = message.getState();
+        this.state = message.message.getState();
         this.prevState = -1;
         this.oldPreview = null;
 
@@ -575,11 +576,11 @@ public class MessageMediaView extends BaseMsgView {
     }
 
     @Override
-    protected void bindUpdate(ChatMessage message) {
+    protected void bindUpdate(MessageWireframe message) {
 
-        if (this.state != message.getState()) {
+        if (this.state != message.message.getState()) {
             this.prevState = this.state;
-            this.state = message.getState();
+            this.state = message.message.getState();
             this.stateChangeTime = SystemClock.uptimeMillis();
         }
 

@@ -2,6 +2,7 @@ package org.telegram.android.kernel;
 
 import org.telegram.android.core.*;
 import org.telegram.android.core.model.ChatMessage;
+import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.log.Logger;
 
@@ -103,7 +104,7 @@ public class DataSourceKernel {
         }
     }
 
-    public synchronized ViewSource<ChatMessage, ChatMessage> getMessagesViewSource(int peerType, int peerId) {
+    public synchronized ViewSource<MessageWireframe, ChatMessage> getMessagesViewSource(int peerType, int peerId) {
         long id = peerType + peerId * 10;
         if (messageSources.containsKey(id)) {
             return messageSources.get(id).getMessagesSource();
@@ -113,28 +114,28 @@ public class DataSourceKernel {
     }
 
     public void onSourceAddMessage(ChatMessage message) {
-        ViewSource<ChatMessage, ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
+        ViewSource<MessageWireframe, ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
         if (res == null)
             return;
         res.addItem(message);
     }
 
     public void onSourceAddMessageHacky(ChatMessage message) {
-        ViewSource<ChatMessage, ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
+        ViewSource<MessageWireframe, ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
         if (res == null)
             return;
         res.addToEndHacky(message);
     }
 
     public void onSourceRemoveMessage(ChatMessage message) {
-        ViewSource<ChatMessage, ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
+        ViewSource<MessageWireframe, ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
         if (res == null)
             return;
         res.removeItem(message);
     }
 
     public void onSourceUpdateMessage(ChatMessage message) {
-        ViewSource<ChatMessage, ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
+        ViewSource<MessageWireframe, ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
         if (res == null)
             return;
         res.updateItem(message);
