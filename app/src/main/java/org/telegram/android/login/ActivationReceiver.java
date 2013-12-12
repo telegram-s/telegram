@@ -8,6 +8,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+import org.telegram.android.log.Logger;
+import org.telegram.android.reflection.CrashHandler;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +19,8 @@ import java.util.regex.Pattern;
  * Created: 31.07.13 8:35
  */
 public class ActivationReceiver {
+
+    private static final String TAG = "ActivationReceiver";
 
     private Context context;
 
@@ -33,20 +37,27 @@ public class ActivationReceiver {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Bundle bundle = intent.getExtras();
-                if (bundle != null) {
-                    Object[] pdus = (Object[]) bundle.get("pdus");
-                    for (int i = 0; i < pdus.length; i++) {
-                        SmsMessage msg = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                        if (msg == null)
-                            continue;
-                        if (msg.getDisplayOriginatingAddress() == null)
-                            continue;
+                try {
+                    Bundle bundle = intent.getExtras();
+                    if (bundle != null) {
+                        Object[] pdus = (Object[]) bundle.get("pdus");
+                        if (pdus != null) {
+                            for (int i = 0; i < pdus.length; i++) {
+                                SmsMessage msg = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                                if (msg == null)
+                                    continue;
+                                if (msg.getDisplayOriginatingAddress() == null)
+                                    continue;
 
-                        if (onSms(msg.getMessageBody())) {
-                            abortBroadcast();
+                                if (onSms(msg.getMessageBody())) {
+                                    abortBroadcast();
+                                }
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    Logger.t(TAG, e);
+                    CrashHandler.logHandledException(e);
                 }
             }
         };
@@ -60,8 +71,9 @@ public class ActivationReceiver {
                 foundedCode(Integer.parseInt(m.group(1)));
                 return true;
             }
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Exception e) {
+            Logger.t(TAG, e);
+            CrashHandler.logHandledException(e);
         }
         return false;
     }
@@ -102,19 +114,31 @@ public class ActivationReceiver {
             };
             this.checker.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.t(TAG, e);
+            CrashHandler.logHandledException(e);
         }
     }
 
     private void check() {
-        Cursor cursor = context.getContentResolver().query(Uri.parse("content://sms/inbox"), new String[]{"body", "address"},
-                "date>?", new String[]{"" + (sentTime - 6) * 1000L}, "date desc limit 3");
-        if (cursor.moveToFirst()) {
-            do {
-                String body = cursor.getString(0);
-                onSms(body);
-            } while (cursor.moveToNext());
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(Uri.parse("content://sms/inbox"), new String[]{"body", "address"},
+                    "date>?", new String[]{"" + (sentTime - 6) * 1000L}, "date desc limit 3");
+            if (cursor.moveToFirst()) {
+                do {
+                    String body = cursor.getString(0);
+                    onSms(body);
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Logger.t(TAG, e);
+            CrashHandler.logHandledException(e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
+
     }
 
     public void stopReceivingActivation() {
