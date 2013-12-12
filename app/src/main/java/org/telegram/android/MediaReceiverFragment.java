@@ -195,7 +195,7 @@ public class MediaReceiverFragment extends StelsFragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(final int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == Activity.RESULT_OK) {
@@ -220,18 +220,25 @@ public class MediaReceiverFragment extends StelsFragment {
                         width = tmp;
                     }
 
-                    onPhotoArrived(imageFileName, width, height, (requestCode - REQUEST_BASE) / 4);
+                    final int finalWidth = width;
+                    final int finalHeight = height;
+                    secureCallback(new Runnable() {
+                        @Override
+                        public void run() {
+                            onPhotoArrived(imageFileName, finalWidth, finalHeight, (requestCode - REQUEST_BASE) / 4);
+                        }
+                    });
                 } else if (requestCode % 4 == 1) {
                     if (data == null)
                         return;
 
-                    Uri selectedImageUri = data.getData();
+                    final Uri selectedImageUri = data.getData();
 
                     int width = 0;
                     int height = 0;
 
                     try {
-                        InputStream stream = getActivity().getContentResolver().openInputStream(selectedImageUri);
+                        InputStream stream = application.getContentResolver().openInputStream(selectedImageUri);
                         BitmapFactory.Options o = new BitmapFactory.Options();
                         o.inJustDecodeBounds = true;
                         BitmapFactory.decodeStream(stream, new Rect(), o);
@@ -247,19 +254,36 @@ public class MediaReceiverFragment extends StelsFragment {
                         width = tmp;
                     }
 
-                    if (selectedImageUri.getScheme().equals("file")) {
-                        onPhotoArrived(selectedImageUri.getPath(), width, height, (requestCode - REQUEST_BASE) / 4);
-                    } else {
-                        onPhotoArrived(selectedImageUri, width, height, (requestCode - REQUEST_BASE) / 4);
-                    }
+                    final int finalWidth = width;
+                    final int finalHeight = height;
+                    secureCallback(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (selectedImageUri.getScheme().equals("file")) {
+                                onPhotoArrived(selectedImageUri.getPath(), finalWidth, finalHeight, (requestCode - REQUEST_BASE) / 4);
+                            } else {
+                                onPhotoArrived(selectedImageUri, finalWidth, finalHeight, (requestCode - REQUEST_BASE) / 4);
+                            }
+                        }
+                    });
                 } else if (requestCode % 4 == 2) {
-                    onVideoArrived(videoFileName, (requestCode - REQUEST_BASE) / 4);
+                    secureCallback(new Runnable() {
+                        @Override
+                        public void run() {
+                            onVideoArrived(videoFileName, (requestCode - REQUEST_BASE) / 4);
+                        }
+                    });
                 } else if (requestCode % 4 == 3) {
                     /*Uri selectedImageUri = data.getData();
                     if (selectedImageUri == null) {
 
                     }*/
-                    onPhotoCropped(Uri.fromFile(new File(imageFileName)), (requestCode - REQUEST_BASE) / 4);
+                    secureCallback(new Runnable() {
+                        @Override
+                        public void run() {
+                            onPhotoCropped(Uri.fromFile(new File(imageFileName)), (requestCode - REQUEST_BASE) / 4);
+                        }
+                    });
                 }
             }
         }

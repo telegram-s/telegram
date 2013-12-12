@@ -310,6 +310,7 @@ public class BackgroundSync extends BaseSync {
         TLInputAppEvent[] appEvents = null;
         synchronized (logs) {
             appEvents = logs.toArray(new TLInputAppEvent[0]);
+            logs.clear();
         }
         if (appEvents.length > 0) {
             TLVector<TLInputAppEvent> events = new TLVector<TLInputAppEvent>();
