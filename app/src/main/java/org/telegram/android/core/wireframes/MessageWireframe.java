@@ -8,6 +8,14 @@ import org.telegram.android.core.model.User;
  */
 public class MessageWireframe {
     public ChatMessage message;
+
+    public long randomId;
+    public int databaseId;
+    public int mid;
+    public int peerId;
+    public int peerType;
+    public int date;
+
     public User senderUser;
     public User forwardUser;
 }

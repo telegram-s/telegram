@@ -172,7 +172,7 @@ public class MessageView extends BaseMsgView {
         this.showState = isOut;
         this.isGroup = msg.message.getPeerType() == PeerType.PEER_CHAT && !isOut;
         if (isGroup) {
-            User user = application.getEngine().getUser(msg.message.getSenderId());
+            User user = msg.senderUser;
             this.senderName = user.getDisplayName();
             if (!msg.message.isForwarded()) {
                 this.senderPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[msg.message.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
@@ -182,8 +182,7 @@ public class MessageView extends BaseMsgView {
 
         if (msg.message.isForwarded()) {
             isForwarded = true;
-            User forwardedUser = application.getEngine().getUser(msg.message.getForwardSenderId());
-            this.forwarderName = forwardedUser.getDisplayName();
+            this.forwarderName = msg.forwardUser.getDisplayName();
             if (isOut) {
                 this.forwardingPaint.setColor(0xff739f53);
                 this.senderPaint.setColor(0xff739f53);
@@ -212,8 +211,7 @@ public class MessageView extends BaseMsgView {
         }
         if (msg.message.isForwarded()) {
             isForwarded = true;
-            User forwardedUser = application.getEngine().getUser(msg.message.getForwardSenderId());
-            this.forwarderName = forwardedUser.getDisplayName();
+            this.forwarderName = msg.forwardUser.getDisplayName();
         } else {
             isForwarded = false;
         }

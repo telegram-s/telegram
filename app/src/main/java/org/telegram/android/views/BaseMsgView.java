@@ -16,7 +16,6 @@ import android.view.*;
 import android.widget.Checkable;
 import com.extradea.framework.images.ImageReceiver;
 import org.telegram.android.R;
-import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
@@ -278,7 +277,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
         if (showAvatar) {
             placeholder = getResources().getDrawable(Placeholders.getUserBubblePlaceholder(message.message.getSenderId()));
-            User user = application.getEngine().getUser(message.message.getSenderId());
+            User user = message.senderUser;
             if (user != null) {
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
                     TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) user.getPhoto();

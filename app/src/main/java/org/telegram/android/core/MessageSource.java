@@ -216,6 +216,14 @@ public class MessageSource {
             protected MessageWireframe convert(ChatMessage item) {
                 MessageWireframe res = new MessageWireframe();
                 res.message = item;
+
+                res.peerId = item.getPeerId();
+                res.peerType = item.getPeerType();
+                res.mid = item.getMid();
+                res.databaseId = item.getDatabaseId();
+                res.randomId = item.getRandomId();
+                res.date = item.getDate();
+
                 res.senderUser = application.getEngine().getUser(item.getSenderId());
                 if (res.message.isForwarded()) {
                     res.forwardUser = application.getEngine().getUser(item.getForwardSenderId());
