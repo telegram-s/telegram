@@ -100,7 +100,7 @@ public class DownloadManager {
         }
     }
 
-    public synchronized DownloadState getState(String key) {
+    public DownloadState getState(String key) {
         if (downloadPersistence.isDownloaded(key))
             return DownloadState.COMPLETED;
 
@@ -112,7 +112,7 @@ public class DownloadManager {
         return DownloadState.NONE;
     }
 
-    public synchronized int getDownloadProgress(String key) {
+    public int getDownloadProgress(String key) {
         if (downloadPersistence.isDownloaded(key))
             return 100;
 
@@ -124,7 +124,7 @@ public class DownloadManager {
         return 0;
     }
 
-    public synchronized void requestDownload(TLLocalPhoto photo) {
+    public void requestDownload(TLLocalPhoto photo) {
 
         final String resourceKey = getPhotoKey(photo);
 
@@ -158,7 +158,7 @@ public class DownloadManager {
                 photo.getFullLocation());
     }
 
-    public synchronized void requestDownload(TLLocalVideo video) {
+    public void requestDownload(TLLocalVideo video) {
         final String resourceKey = getVideoKey(video);
         if (downloadPersistence.isDownloaded(resourceKey))
             return;
@@ -382,7 +382,7 @@ public class DownloadManager {
     }
 
 
-    private synchronized void updateState(final String key, final DownloadState state, final int percent, int bytes) {
+    private void updateState(final String key, final DownloadState state, final int percent, int bytes) {
         Logger.d(TAG, "State: " + key + " = " + state + " " + percent + "%");
 
         DownloadRecord record = records.get(key);
