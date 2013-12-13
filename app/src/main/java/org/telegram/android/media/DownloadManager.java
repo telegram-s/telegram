@@ -322,7 +322,7 @@ public class DownloadManager {
         });
     }
 
-    public synchronized void abortDownload(String key) {
+    public void abortDownload(String key) {
         DownloadRecord record = records.get(key);
         if (record != null) {
             updateState(key, DownloadState.CANCELLED, record.downloadedPercent, record.downloaded);
@@ -330,12 +330,12 @@ public class DownloadManager {
         }
     }
 
-    public synchronized void saveDownloadImage(String key, String fileName) throws IOException {
+    public void saveDownloadImage(String key, String fileName) throws IOException {
         IOUtils.copy(new File(fileName), new File(getDownloadImageFile(key)));
         downloadPersistence.markDownloaded(key);
     }
 
-    public synchronized void saveDownloadVideo(String key, String fileName) throws IOException {
+    public void saveDownloadVideo(String key, String fileName) throws IOException {
         IOUtils.copy(new File(fileName), new File(getDownloadVideoFile(key)));
         downloadPersistence.markDownloaded(key);
     }
