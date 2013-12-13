@@ -1519,20 +1519,20 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             source.getMessagesSource().onItemsShown(getCount() - i - 1);
 
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                switch (application.getTechKernel().getDebugSettings().getConversationListItemLayerType()) {
-                    default:
-                    case DebugSettings.LAYER_NONE:
-                        view.setLayerType(View.LAYER_TYPE_NONE, null);
-                        break;
-                    case DebugSettings.LAYER_HARDWARE:
-                        view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-                        break;
-                    case DebugSettings.LAYER_SOFTWARE:
-                        view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-                        break;
-                }
-            }
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//                switch (application.getTechKernel().getDebugSettings().getConversationListItemLayerType()) {
+//                    default:
+//                    case DebugSettings.LAYER_NONE:
+//                        view.setLayerType(View.LAYER_TYPE_NONE, null);
+//                        break;
+//                    case DebugSettings.LAYER_HARDWARE:
+//                        view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+//                        break;
+//                    case DebugSettings.LAYER_SOFTWARE:
+//                        view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+//                        break;
+//                }
+//            }
 
             return view;
         }

@@ -15,6 +15,7 @@ import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.cursors.ViewSourceState;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.TextUtil;
+import org.telegram.android.views.MessageView;
 import org.telegram.api.TLAbsInputPeer;
 import org.telegram.api.TLInputPeerChat;
 import org.telegram.api.TLInputPeerContact;
@@ -230,6 +231,11 @@ public class MessageSource {
                 if (res.message.isForwarded()) {
                     res.forwardUser = application.getEngine().getUser(item.getForwardSenderId());
                 }
+
+                if (item.getRawContentType() == ContentType.MESSAGE_TEXT) {
+                    res.cachedLayout = MessageView.prepareLayout(res, application);
+                }
+
                 return res;
             }
         };

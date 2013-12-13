@@ -13,6 +13,7 @@ import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
+import org.telegram.android.log.Logger;
 import org.telegram.android.ui.*;
 
 /**
@@ -20,6 +21,8 @@ import org.telegram.android.ui.*;
  * Created: 14.08.13 20:26
  */
 public class MessageView extends BaseMsgView {
+    private static final String TAG = "MessageView";
+
     private static TextPaint bodyPaint;
     private static TextPaint clockOutPaint;
     private static TextPaint senderPaintBase;
@@ -41,6 +44,8 @@ public class MessageView extends BaseMsgView {
     private long stateChangeTime;
 
     private MessageLayout messageLayout;
+    private MessageLayout[] cachedLayout;
+
     private MessageWireframe wireframe;
 
     public MessageView(Context context) {
@@ -74,14 +79,6 @@ public class MessageView extends BaseMsgView {
         forwardingPaintBase.setColor(0xff000000);
 
         isLoaded = true;
-    }
-
-    private static TextPaint initTextPaint() {
-        if (FontController.USE_SUBPIXEL) {
-            return new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-        } else {
-            return new TextPaint(Paint.ANTI_ALIAS_FLAG);
-        }
     }
 
     protected void init() {
@@ -129,9 +126,11 @@ public class MessageView extends BaseMsgView {
     @Override
     protected void bindNewView(MessageWireframe msg) {
         this.wireframe = msg;
+        if (msg.cachedLayout instanceof MessageLayout[]) {
+            cachedLayout = (MessageLayout[]) msg.cachedLayout;
+        }
         this.state = msg.message.getState();
         this.prevState = -1;
-
 
         messageLayout = null;
         requestLayout();
@@ -140,6 +139,9 @@ public class MessageView extends BaseMsgView {
     @Override
     protected void bindUpdate(MessageWireframe msg) {
         this.wireframe = msg;
+        if (msg.cachedLayout instanceof MessageLayout[]) {
+            cachedLayout = (MessageLayout[]) msg.cachedLayout;
+        }
         if (this.state != msg.message.getState()) {
             this.prevState = this.state;
             this.state = msg.message.getState();
@@ -155,9 +157,21 @@ public class MessageView extends BaseMsgView {
 
     @Override
     protected void measureBubbleContent(int desiredWidth) {
-        if (messageLayout == null) {
-            messageLayout = new MessageLayout();
-            messageLayout.build(wireframe, desiredWidth, application);
+        if (messageLayout == null || messageLayout.layoutDesiredWidth != desiredWidth) {
+            messageLayout = null;
+            if (cachedLayout != null) {
+                for (MessageLayout l : cachedLayout) {
+                    if (l.layoutDesiredWidth == desiredWidth) {
+                        messageLayout = l;
+                        break;
+                    }
+                }
+            }
+
+            if (messageLayout == null) {
+                messageLayout = new MessageLayout();
+                messageLayout.build(wireframe, desiredWidth, application);
+            }
         }
 
         setBubbleMeasuredContent(messageLayout.layoutRealWidth, messageLayout.layoutHeight);
@@ -261,7 +275,11 @@ public class MessageView extends BaseMsgView {
     }
 
     public static Object prepareLayout(MessageWireframe wireframe, StelsApplication application1) {
-        return null;
+        MessageLayout layoutV = new MessageLayout();
+        layoutV.build(wireframe, 434, application1);
+        MessageLayout layoutH = new MessageLayout();
+        layoutH.build(wireframe, 373, application1);
+        return new MessageLayout[]{layoutV, layoutH};
     }
 
     private static class MessageLayout {
@@ -289,6 +307,9 @@ public class MessageView extends BaseMsgView {
         private int forwardOffset;
 
         public void build(MessageWireframe wireframe, int desiredWidth, StelsApplication application) {
+
+            Logger.d(TAG, "Build layout start");
+
             checkResources(application);
 
             senderPaint = initTextPaint();
@@ -302,8 +323,8 @@ public class MessageView extends BaseMsgView {
             forwardingPaint.setColor(0xff000000);
 
             this.layoutDesiredWidth = desiredWidth;
-            this.showState = isOut;
             this.isOut = wireframe.message.isOut();
+            this.showState = isOut;
             this.isGroup = wireframe.message.getPeerType() == PeerType.PEER_CHAT && !isOut;
             if (isGroup) {
                 User user = wireframe.senderUser;
@@ -340,10 +361,19 @@ public class MessageView extends BaseMsgView {
             }
 
             layoutDesiredWidth = desiredWidth;
+            long start = SystemClock.uptimeMillis();
+
             this.spannable = application.getEmojiProcessor().processEmojiCompatMutable(wireframe.message.getMessage(), EmojiProcessor.CONFIGURATION_BUBBLES);
+
+            // spannable = new SpannableString(wireframe.message.getMessage());
+            Logger.d(TAG, "Emoji processed in " + (SystemClock.uptimeMillis() - start) + " ms");
+            start = SystemClock.uptimeMillis();
             Linkify.addLinks(this.spannable, Linkify.ALL);
             fixLinks(spannable);
+            Logger.d(TAG, "Added links in " + (SystemClock.uptimeMillis() - start) + " ms");
+            start = SystemClock.uptimeMillis();
             layout = new StaticLayout(spannable, bodyPaint, desiredWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
+            Logger.d(TAG, "Built base layout in " + (SystemClock.uptimeMillis() - start) + " ms");
 
             if (layout.getLineCount() < 20) {
                 int layoutTextWidth = 0;
@@ -407,6 +437,8 @@ public class MessageView extends BaseMsgView {
                 int width = (int) senderPaintBase.measureText(senderNameMeasured);
                 layoutRealWidth = Math.max(layoutRealWidth, width);
             }
+
+            Logger.d(TAG, "Build layout end");
         }
     }
 
@@ -435,5 +467,13 @@ public class MessageView extends BaseMsgView {
 
     protected static int sp(float sp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, UiMeasure.METRICS);
+    }
+
+    private static TextPaint initTextPaint() {
+        if (FontController.USE_SUBPIXEL) {
+            return new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            return new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
     }
 }
