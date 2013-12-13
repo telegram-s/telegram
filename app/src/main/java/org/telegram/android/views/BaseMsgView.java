@@ -16,6 +16,7 @@ import android.view.*;
 import android.widget.Checkable;
 import com.extradea.framework.images.ImageReceiver;
 import org.telegram.android.R;
+import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
@@ -40,13 +41,14 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private static final int TOUCHED_BUBBLE = 2;
     private static final int TOUCHED_ADD_CONTACT = 3;
 
-    private int BUBBLE_PADDING;
-    private int AVATAR_OFFSET;
-    private int AVATAR_SIZE;
-    private int AVATAR_LEFT;
-    private int AVATAR_BOTTOM;
-    private int UNREAD_HEIGHT;
-    private int UNREAD_OFFSET;
+    private static int BUBBLE_PADDING;
+    private static int AVATAR_OFFSET;
+    private static int AVATAR_SIZE;
+    private static int AVATAR_LEFT;
+    private static int AVATAR_BOTTOM;
+    private static int UNREAD_HEIGHT;
+    private static int UNREAD_OFFSET;
+    private static boolean isLoaded;
 
     private TextPaint timeDivPaint;
     private TextPaint newDivPaint;
@@ -131,14 +133,26 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         init();
     }
 
+    private static void checkResources(Context context) {
+        if (isLoaded) {
+            return;
+        }
+
+        AVATAR_OFFSET = px(39);
+        AVATAR_SIZE = px(42);
+        AVATAR_LEFT = px(6);
+        AVATAR_BOTTOM = px(4);
+        BUBBLE_PADDING = px(39);
+        UNREAD_HEIGHT = px(24);
+        UNREAD_OFFSET = px(18);
+
+        isLoaded = true;
+    }
+
+
     protected void init() {
-        AVATAR_OFFSET = getPx(39);
-        AVATAR_SIZE = getPx(42);
-        AVATAR_LEFT = getPx(6);
-        AVATAR_BOTTOM = getPx(4);
-        BUBBLE_PADDING = getPx(39);
-        UNREAD_HEIGHT = getPx(24);
-        UNREAD_OFFSET = getPx(18);
+
+        checkResources(getContext());
 
         if (FontController.USE_SUBPIXEL) {
             timeDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
@@ -673,5 +687,16 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     public void toggle() {
         isBubbleChecked = !isBubbleChecked;
         invalidate();
+    }
+
+    public static int getBubblePadding(MessageWireframe wireframe, Rect bubblePadding, int width, StelsApplication application1) {
+        boolean showAvatar = !wireframe.message.isOut() && wireframe.message.getPeerType() == PeerType.PEER_CHAT;
+
+        int bubbleMaxSize = width - BUBBLE_PADDING - bubblePadding.left - bubblePadding.right;
+        if (showAvatar) {
+            bubbleMaxSize -= AVATAR_OFFSET;
+        }
+
+        return bubbleMaxSize;
     }
 }

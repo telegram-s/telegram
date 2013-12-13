@@ -7,6 +7,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.ui.UiMeasure;
 
 /**
  * Author: Korshakov Stepan
@@ -57,5 +58,13 @@ public class BaseView extends View {
 
     protected void bounds(Drawable d, int x, int y, int w, int h) {
         d.setBounds(x, y, x + w, y + h);
+    }
+
+    protected static int px(float dp) {
+        return (int) (dp * UiMeasure.DENSITY + 0.5f);
+    }
+
+    protected static int sp(float sp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, UiMeasure.METRICS);
     }
 }

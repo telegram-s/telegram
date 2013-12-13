@@ -27,6 +27,8 @@ public class MessageView extends BaseMsgView {
     private static TextPaint clockOutPaint;
     private static TextPaint senderPaintBase;
     private static TextPaint forwardingPaintBase;
+    private static Rect inBubblePadding;
+    private static Rect outBubblePadding;
     private static boolean isLoaded;
 
     private Paint clockIconPaint;
@@ -77,6 +79,14 @@ public class MessageView extends BaseMsgView {
         forwardingPaintBase.setTypeface(FontController.loadTypeface(context, "light"));
         forwardingPaintBase.setTextSize(sp(16));
         forwardingPaintBase.setColor(0xff000000);
+
+        Drawable inBubble = context.getResources().getDrawable(R.drawable.st_bubble_in);
+        inBubblePadding = new Rect();
+        inBubble.getPadding(inBubblePadding);
+
+        Drawable outBubble = context.getResources().getDrawable(R.drawable.st_bubble_out);
+        outBubblePadding = new Rect();
+        inBubble.getPadding(outBubblePadding);
 
         isLoaded = true;
     }
@@ -161,7 +171,7 @@ public class MessageView extends BaseMsgView {
             messageLayout = null;
             if (cachedLayout != null) {
                 for (MessageLayout l : cachedLayout) {
-                    if (l.layoutDesiredWidth == desiredWidth) {
+                    if (Math.abs(l.layoutDesiredWidth - desiredWidth) < 6) {
                         messageLayout = l;
                         break;
                     }
@@ -275,10 +285,23 @@ public class MessageView extends BaseMsgView {
     }
 
     public static Object prepareLayout(MessageWireframe wireframe, StelsApplication application1) {
+        checkResources(application1);
+
+        int maxWidthH;
+        int maxWidthV;
+        if (wireframe.message.isOut()) {
+            maxWidthH = getBubblePadding(wireframe, outBubblePadding, UiMeasure.METRICS.widthPixels, application1);
+            maxWidthV = getBubblePadding(wireframe, outBubblePadding, UiMeasure.METRICS.heightPixels, application1);
+        } else {
+            maxWidthH = getBubblePadding(wireframe, inBubblePadding, UiMeasure.METRICS.widthPixels, application1);
+            maxWidthV = getBubblePadding(wireframe, inBubblePadding, UiMeasure.METRICS.heightPixels, application1);
+        }
+
+        // getBubblePadding(wireframe,)
         MessageLayout layoutV = new MessageLayout();
-        layoutV.build(wireframe, 434, application1);
+        layoutV.build(wireframe, maxWidthV, application1);
         MessageLayout layoutH = new MessageLayout();
-        layoutH.build(wireframe, 373, application1);
+        layoutH.build(wireframe, maxWidthH, application1);
         return new MessageLayout[]{layoutV, layoutH};
     }
 
@@ -459,14 +482,6 @@ public class MessageView extends BaseMsgView {
             spannable.removeSpan(span);
             spannable.setSpan(newSpan, start, end, flags);
         }
-    }
-
-    protected static int px(float dp) {
-        return (int) (dp * UiMeasure.DENSITY + 0.5f);
-    }
-
-    protected static int sp(float sp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, UiMeasure.METRICS);
     }
 
     private static TextPaint initTextPaint() {
