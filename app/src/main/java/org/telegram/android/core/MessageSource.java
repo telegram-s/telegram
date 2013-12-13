@@ -14,6 +14,7 @@ import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.cursors.ViewSourceState;
 import org.telegram.android.log.Logger;
+import org.telegram.android.ui.TextUtil;
 import org.telegram.api.TLAbsInputPeer;
 import org.telegram.api.TLInputPeerChat;
 import org.telegram.api.TLInputPeerContact;
@@ -222,7 +223,8 @@ public class MessageSource {
                 res.mid = item.getMid();
                 res.databaseId = item.getDatabaseId();
                 res.randomId = item.getRandomId();
-                res.date = item.getDate();
+                res.dateValue = item.getDate();
+                res.date = TextUtil.formatTime(item.getDate(), application);
 
                 res.senderUser = application.getEngine().getUser(item.getSenderId());
                 if (res.message.isForwarded()) {

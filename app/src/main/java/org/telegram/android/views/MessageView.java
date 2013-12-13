@@ -8,24 +8,24 @@ import android.text.*;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import org.telegram.android.R;
+import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
-import org.telegram.android.ui.EmojiProcessor;
-import org.telegram.android.ui.FontController;
-import org.telegram.android.ui.Placeholders;
-import org.telegram.android.ui.TextUtil;
+import org.telegram.android.ui.*;
 
 /**
  * Author: Korshakov Stepan
  * Created: 14.08.13 20:26
  */
 public class MessageView extends BaseMsgView {
+    private static TextPaint bodyPaint;
+    private static TextPaint clockOutPaint;
+    private static TextPaint senderPaintBase;
+    private static TextPaint forwardingPaintBase;
+    private static boolean isLoaded;
 
-    private TextPaint bodyPaint;
-    private TextPaint clockOutPaint;
-    private TextPaint senderPaint;
-    private TextPaint forwardingPaint;
     private Paint clockIconPaint;
 
     private Drawable statePending;
@@ -36,33 +36,47 @@ public class MessageView extends BaseMsgView {
     private static final int COLOR_ERROR = 0xffDB4942;
     private static final int COLOR_IN = 0xffA1AAB3;
 
-    private String message;
-    private Spannable spannable;
-    private String date;
     private int state;
     private int prevState;
     private long stateChangeTime;
-    private boolean isOut;
-    private boolean isGroup;
-    private boolean isForwarded;
-    private boolean showState;
-    private String forwarderName;
-    private String forwarderNameMeasured;
-    private String senderName;
-    private String senderNameMeasured;
 
-    private StaticLayout layout;
-    private int layoutRealWidth;
-    private int layoutHeight;
-    private int timeWidth;
-    private int forwardOffset;
+    private MessageLayout messageLayout;
+    private MessageWireframe wireframe;
 
     public MessageView(Context context) {
         super(context);
         init();
     }
 
-    private TextPaint initTextPaint() {
+    private static void checkResources(Context context) {
+        if (isLoaded) {
+            return;
+        }
+
+        bodyPaint = initTextPaint();
+        bodyPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+        bodyPaint.setTextSize(sp(16));
+        bodyPaint.setColor(0xff000000);
+
+        clockOutPaint = initTextPaint();
+        clockOutPaint.setTypeface(FontController.loadTypeface(context, "italic"));
+        clockOutPaint.setTextSize(sp(12f));
+        clockOutPaint.setColor(0xff70B15C);
+
+        senderPaintBase = initTextPaint();
+        senderPaintBase.setTypeface(FontController.loadTypeface(context, "regular"));
+        senderPaintBase.setTextSize(sp(16));
+        senderPaintBase.setColor(0xff000000);
+
+        forwardingPaintBase = initTextPaint();
+        forwardingPaintBase.setTypeface(FontController.loadTypeface(context, "light"));
+        forwardingPaintBase.setTextSize(sp(16));
+        forwardingPaintBase.setColor(0xff000000);
+
+        isLoaded = true;
+    }
+
+    private static TextPaint initTextPaint() {
         if (FontController.USE_SUBPIXEL) {
             return new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
         } else {
@@ -73,25 +87,7 @@ public class MessageView extends BaseMsgView {
     protected void init() {
         super.init();
 
-        bodyPaint = initTextPaint();
-        bodyPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
-        bodyPaint.setTextSize(getSp(16));
-        bodyPaint.setColor(0xff000000);
-
-        senderPaint = initTextPaint();
-        senderPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
-        senderPaint.setTextSize(getSp(16));
-        senderPaint.setColor(0xff000000);
-
-        forwardingPaint = initTextPaint();
-        forwardingPaint.setTypeface(FontController.loadTypeface(getContext(), "light"));
-        forwardingPaint.setTextSize(getSp(16));
-        forwardingPaint.setColor(0xff000000);
-
-        clockOutPaint = initTextPaint();
-        clockOutPaint.setTypeface(FontController.loadTypeface(getContext(), "italic"));
-        clockOutPaint.setTextSize(getSp(12f));
-        clockOutPaint.setColor(0xff70B15C);
+        checkResources(getContext());
 
         clockIconPaint = new Paint();
         clockIconPaint.setStyle(Paint.Style.STROKE);
@@ -130,203 +126,77 @@ public class MessageView extends BaseMsgView {
         }
     }
 
-    private void fixLinks(Spannable spannable) {
-        for (URLSpan span : spannable.getSpans(0, spannable.length(), URLSpan.class)) {
-            final String url = span.getURL();
-            int start = spannable.getSpanStart(span);
-            int end = spannable.getSpanEnd(span);
-            int flags = spannable.getSpanFlags(span);
-            URLSpan newSpan = new URLSpan(url) {
-                @Override
-                public void updateDrawState(TextPaint paramTextPaint) {
-                    super.updateDrawState(paramTextPaint);
-                    paramTextPaint.setUnderlineText(false);
-                    paramTextPaint.setColor(0xff006FC8);
-                }
-            };
-            spannable.removeSpan(span);
-            spannable.setSpan(newSpan, start, end, flags);
-        }
-    }
-
     @Override
     protected void bindNewView(MessageWireframe msg) {
-        this.message = msg.message.getMessage();
-        if (msg.message.isBodyHasSmileys()) {
-            this.spannable = application.getEmojiProcessor().processEmojiCompatMutable(msg.message.getMessage(), EmojiProcessor.CONFIGURATION_BUBBLES);
-            Linkify.addLinks(this.spannable, Linkify.ALL);
-            fixLinks(spannable);
-        } else {
-            Spannable tmpSpannable = new SpannableString(msg.message.getMessage());
-            if (Linkify.addLinks(tmpSpannable, Linkify.ALL)) {
-                this.spannable = tmpSpannable;
-                fixLinks(spannable);
-            } else {
-                this.spannable = null;
-            }
-        }
-        this.date = TextUtil.formatTime(msg.message.getDate(), getContext());
+        this.wireframe = msg;
         this.state = msg.message.getState();
         this.prevState = -1;
-        this.isOut = msg.message.isOut();
-        this.showState = isOut;
-        this.isGroup = msg.message.getPeerType() == PeerType.PEER_CHAT && !isOut;
-        if (isGroup) {
-            User user = msg.senderUser;
-            this.senderName = user.getDisplayName();
-            if (!msg.message.isForwarded()) {
-                this.senderPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[msg.message.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
-                this.forwardingPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[msg.message.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
-            }
-        }
 
-        if (msg.message.isForwarded()) {
-            isForwarded = true;
-            this.forwarderName = msg.forwardUser.getDisplayName();
-            if (isOut) {
-                this.forwardingPaint.setColor(0xff739f53);
-                this.senderPaint.setColor(0xff739f53);
-            } else {
-                this.forwardingPaint.setColor(0xff4884cf);
-                this.senderPaint.setColor(0xff4884cf);
-            }
-        } else {
-            isForwarded = false;
-        }
 
+        messageLayout = null;
         requestLayout();
     }
 
     @Override
     protected void bindUpdate(MessageWireframe msg) {
-        this.date = TextUtil.formatTime(msg.message.getDate(), getContext());
+        this.wireframe = msg;
         if (this.state != msg.message.getState()) {
             this.prevState = this.state;
             this.state = msg.message.getState();
             this.stateChangeTime = SystemClock.uptimeMillis();
         }
-        if (isGroup) {
-            User user = application.getEngine().getUser(msg.message.getSenderId());
-            this.senderName = user.getDisplayName();
-        }
-        if (msg.message.isForwarded()) {
-            isForwarded = true;
-            this.forwarderName = msg.forwardUser.getDisplayName();
-        } else {
-            isForwarded = false;
-        }
 
-        invalidate();
+        if (messageLayout != null) {
+            invalidate();
+        } else {
+            requestLayout();
+        }
     }
 
     @Override
     protected void measureBubbleContent(int desiredWidth) {
-        if (spannable != null) {
-            layout = new StaticLayout(spannable, bodyPaint, desiredWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
-        } else {
-            layout = new StaticLayout(message, bodyPaint, desiredWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
+        if (messageLayout == null) {
+            messageLayout = new MessageLayout();
+            messageLayout.build(wireframe, desiredWidth, application);
         }
 
-        if (layout.getLineCount() < 20) {
-            int layoutTextWidth = 0;
-
-            for (int i = 0; i < layout.getLineCount(); i++) {
-                layoutTextWidth = (int) Math.max(layout.getLineWidth(i), layoutTextWidth);
-            }
-
-            if (layoutTextWidth < layout.getWidth() - getPx(10)) {
-                if (spannable != null) {
-                    layout = new StaticLayout(spannable, bodyPaint, layoutTextWidth + getPx(2), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
-                } else {
-                    layout = new StaticLayout(message, bodyPaint, layoutTextWidth + getPx(2), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
-                }
-            }
-        }
-
-        layoutRealWidth = layout.getWidth();
-
-        timeWidth = (int) clockOutPaint.measureText(date) + getPx((showState ? 23 : 0) + 6);
-
-        if (layout.getLineCount() == 1) {
-            boolean isLastRtl = layout.getParagraphDirection(0) == Layout.DIR_RIGHT_TO_LEFT;
-            if (!isLastRtl && desiredWidth - layoutRealWidth > timeWidth) {
-                layoutRealWidth += timeWidth;
-                layoutHeight = layout.getHeight() + getPx(3);
-            } else if (isLastRtl && desiredWidth - layout.getWidth() > timeWidth) {
-                layoutRealWidth = layout.getWidth() + timeWidth;
-                layoutHeight = layout.getHeight() + getPx(3);
-            } else {
-                if (isLastRtl) {
-                    layoutRealWidth = layout.getWidth();
-                }
-
-                layoutHeight = layout.getHeight() + getPx(17);
-            }
-        } else {
-            boolean isLastRtl = layout.getParagraphDirection(layout.getLineCount() - 1) == Layout.DIR_RIGHT_TO_LEFT;
-            if (!isLastRtl && (desiredWidth - layout.getLineWidth(layout.getLineCount() - 1) > timeWidth)) {
-                layoutRealWidth = (int) Math.max(layoutRealWidth, layout.getLineWidth(layout.getLineCount() - 1) + timeWidth);
-                layoutHeight = layout.getHeight() + getPx(3);
-            } else if (isLastRtl && (desiredWidth - layout.getWidth() > timeWidth)) {
-                layoutRealWidth = (int) Math.max(layoutRealWidth, layout.getWidth() + timeWidth);
-                layoutHeight = layout.getHeight() + getPx(3);
-            } else {
-                layoutHeight = layout.getHeight() + getPx(17);
-            }
-        }
-
-        if (layoutRealWidth < timeWidth) {
-            layoutRealWidth = timeWidth;
-        }
-
-        if (isForwarded) {
-            layoutHeight += getPx(19) * 2;
-            forwardOffset = (int) forwardingPaint.measureText("From ");
-            layoutRealWidth = (int) Math.max(layoutRealWidth, forwardingPaint.measureText("Forwarded message"));
-            forwarderNameMeasured = TextUtils.ellipsize(forwarderName, senderPaint, desiredWidth - forwardOffset, TextUtils.TruncateAt.END).toString();
-            layoutRealWidth = (int) Math.max(layoutRealWidth, forwardOffset + senderPaint.measureText(forwarderNameMeasured));
-        }
-
-        if (isGroup && !isOut && !isForwarded) {
-            layoutHeight += getPx(19);
-            senderNameMeasured = TextUtils.ellipsize(senderName, senderPaint, desiredWidth, TextUtils.TruncateAt.END).toString();
-            int width = (int) senderPaint.measureText(senderNameMeasured);
-            layoutRealWidth = Math.max(layoutRealWidth, width);
-        }
-
-        setBubbleMeasuredContent(layoutRealWidth, layoutHeight);
+        setBubbleMeasuredContent(messageLayout.layoutRealWidth, messageLayout.layoutHeight);
     }
 
     @Override
     protected boolean drawBubble(Canvas canvas) {
+        if (messageLayout == null) {
+            requestLayout();
+            return false;
+        }
 
         boolean isAnimated = false;
 
-        if (isForwarded) {
-            canvas.drawText("Forwarded message", 0, getPx(16), forwardingPaint);
-            canvas.drawText("From", 0, getPx(35), forwardingPaint);
-            canvas.drawText(forwarderNameMeasured, forwardOffset, getPx(35), senderPaint);
+        if (messageLayout.isForwarded) {
+            canvas.drawText("Forwarded message", 0, getPx(16), messageLayout.forwardingPaint);
+            canvas.drawText("From", 0, getPx(35), messageLayout.forwardingPaint);
+            canvas.drawText(messageLayout.forwarderNameMeasured, messageLayout.forwardOffset, getPx(35), messageLayout.senderPaint);
             canvas.save();
             canvas.translate(0, getPx(19) * 2);
-            layout.draw(canvas);
+            messageLayout.layout.draw(canvas);
             canvas.restore();
         } else {
-            if (!isOut & isGroup) {
-                canvas.drawText(senderNameMeasured, 0, getPx(16), senderPaint);
+            if (!messageLayout.isOut & messageLayout.isGroup) {
+                canvas.drawText(messageLayout.senderNameMeasured, 0, getPx(16), messageLayout.senderPaint);
                 canvas.save();
                 canvas.translate(0, getPx(19));
-                layout.draw(canvas);
+                messageLayout.layout.draw(canvas);
                 canvas.restore();
             } else {
-                layout.draw(canvas);
+                messageLayout.layout.draw(canvas);
             }
         }
 
 
-        if (showState) {
+        if (messageLayout.showState) {
             if (state == MessageState.PENDING) {
                 canvas.save();
-                canvas.translate(layoutRealWidth - getPx(12), layoutHeight - getPx(12) - getPx(3));
+                canvas.translate(messageLayout.layoutRealWidth - getPx(12), messageLayout.layoutHeight - getPx(12) - getPx(3));
                 canvas.drawCircle(getPx(6), getPx(6), getPx(6), clockIconPaint);
                 double time = (System.currentTimeMillis() / 15.0) % (12 * 60);
                 double angle = (time / (6 * 60)) * Math.PI;
@@ -350,13 +220,13 @@ public class MessageView extends BaseMsgView {
                 int offset = (int) (getPx(5) * progress);
                 int alphaNew = (int) (progress * 255);
 
-                bounds(stateSent, layoutRealWidth - stateSent.getIntrinsicWidth() - offset,
-                        layoutHeight - stateSent.getIntrinsicHeight() - getPx(3));
+                bounds(stateSent, messageLayout.layoutRealWidth - stateSent.getIntrinsicWidth() - offset,
+                        messageLayout.layoutHeight - stateSent.getIntrinsicHeight() - getPx(3));
                 stateSent.setAlpha(255);
                 stateSent.draw(canvas);
 
-                bounds(stateHalfCheck, layoutRealWidth - stateHalfCheck.getIntrinsicWidth() + getPx(5) - offset,
-                        layoutHeight - stateHalfCheck.getIntrinsicHeight() - getPx(3));
+                bounds(stateHalfCheck, messageLayout.layoutRealWidth - stateHalfCheck.getIntrinsicWidth() + getPx(5) - offset,
+                        messageLayout.layoutHeight - stateHalfCheck.getIntrinsicHeight() - getPx(3));
                 stateHalfCheck.setAlpha(alphaNew);
                 stateHalfCheck.draw(canvas);
 
@@ -366,13 +236,13 @@ public class MessageView extends BaseMsgView {
             } else {
                 Drawable stateDrawable = getStateDrawable(state);
 
-                bounds(stateDrawable, layoutRealWidth - stateDrawable.getIntrinsicWidth(), layoutHeight - stateDrawable.getIntrinsicHeight() - getPx(3));
+                bounds(stateDrawable, messageLayout.layoutRealWidth - stateDrawable.getIntrinsicWidth(), messageLayout.layoutHeight - stateDrawable.getIntrinsicHeight() - getPx(3));
                 stateDrawable.setAlpha(255);
                 stateDrawable.draw(canvas);
 
                 if (state == MessageState.READED) {
-                    bounds(stateSent, layoutRealWidth - stateSent.getIntrinsicWidth() - getPx(5),
-                            layoutHeight - stateDrawable.getIntrinsicHeight() - getPx(3));
+                    bounds(stateSent, messageLayout.layoutRealWidth - stateSent.getIntrinsicWidth() - getPx(5),
+                            messageLayout.layoutHeight - stateDrawable.getIntrinsicHeight() - getPx(3));
                     stateSent.setAlpha(255);
                     stateSent.draw(canvas);
                 }
@@ -386,7 +256,184 @@ public class MessageView extends BaseMsgView {
         } else {
             clockOutPaint.setColor(COLOR_IN);
         }
-        canvas.drawText(date, layoutRealWidth - timeWidth + getPx(6), layoutHeight - getPx(4), clockOutPaint);
+        canvas.drawText(wireframe.date, messageLayout.layoutRealWidth - messageLayout.timeWidth + getPx(6), messageLayout.layoutHeight - getPx(4), clockOutPaint);
         return isAnimated;
+    }
+
+    public static Object prepareLayout(MessageWireframe wireframe, StelsApplication application1) {
+        return null;
+    }
+
+    private static class MessageLayout {
+        private Spannable spannable;
+
+        private TextPaint senderPaint;
+        private TextPaint forwardingPaint;
+
+        private StaticLayout layout;
+        private int layoutDesiredWidth;
+        private int layoutRealWidth;
+        private int layoutHeight;
+        private int timeWidth;
+
+        private String forwarderName;
+        private String forwarderNameMeasured;
+        private String senderName;
+        private String senderNameMeasured;
+
+        private boolean isOut;
+        private boolean isGroup;
+        private boolean isForwarded;
+        private boolean showState;
+
+        private int forwardOffset;
+
+        public void build(MessageWireframe wireframe, int desiredWidth, StelsApplication application) {
+            checkResources(application);
+
+            senderPaint = initTextPaint();
+            senderPaint.setTypeface(FontController.loadTypeface(application, "regular"));
+            senderPaint.setTextSize(sp(16));
+            senderPaint.setColor(0xff000000);
+
+            forwardingPaint = initTextPaint();
+            forwardingPaint.setTypeface(FontController.loadTypeface(application, "light"));
+            forwardingPaint.setTextSize(sp(16));
+            forwardingPaint.setColor(0xff000000);
+
+            this.layoutDesiredWidth = desiredWidth;
+            this.showState = isOut;
+            this.isOut = wireframe.message.isOut();
+            this.isGroup = wireframe.message.getPeerType() == PeerType.PEER_CHAT && !isOut;
+            if (isGroup) {
+                User user = wireframe.senderUser;
+                this.senderName = user.getDisplayName();
+                if (!wireframe.message.isForwarded()) {
+                    senderPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[wireframe.message.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
+                    forwardingPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[wireframe.message.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
+                }
+            }
+
+            if (wireframe.message.isForwarded()) {
+                isForwarded = true;
+                this.forwarderName = wireframe.forwardUser.getDisplayName();
+                if (isOut) {
+                    forwardingPaint.setColor(0xff739f53);
+                    senderPaint.setColor(0xff739f53);
+                } else {
+                    forwardingPaint.setColor(0xff4884cf);
+                    senderPaint.setColor(0xff4884cf);
+                }
+            } else {
+                isForwarded = false;
+            }
+
+            if (isGroup) {
+                User user = application.getEngine().getUser(wireframe.message.getSenderId());
+                this.senderName = user.getDisplayName();
+            }
+            if (wireframe.message.isForwarded()) {
+                isForwarded = true;
+                this.forwarderName = wireframe.forwardUser.getDisplayName();
+            } else {
+                isForwarded = false;
+            }
+
+            layoutDesiredWidth = desiredWidth;
+            this.spannable = application.getEmojiProcessor().processEmojiCompatMutable(wireframe.message.getMessage(), EmojiProcessor.CONFIGURATION_BUBBLES);
+            Linkify.addLinks(this.spannable, Linkify.ALL);
+            fixLinks(spannable);
+            layout = new StaticLayout(spannable, bodyPaint, desiredWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
+
+            if (layout.getLineCount() < 20) {
+                int layoutTextWidth = 0;
+
+                for (int i = 0; i < layout.getLineCount(); i++) {
+                    layoutTextWidth = (int) Math.max(layout.getLineWidth(i), layoutTextWidth);
+                }
+
+                if (layoutTextWidth < layout.getWidth() - px(10)) {
+                    layout = new StaticLayout(spannable, bodyPaint, layoutTextWidth + px(2), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
+                }
+            }
+
+            layoutRealWidth = layout.getWidth();
+
+            timeWidth = (int) clockOutPaint.measureText(wireframe.date) + px((showState ? 23 : 0) + 6);
+
+            if (layout.getLineCount() == 1) {
+                boolean isLastRtl = layout.getParagraphDirection(0) == Layout.DIR_RIGHT_TO_LEFT;
+                if (!isLastRtl && desiredWidth - layoutRealWidth > timeWidth) {
+                    layoutRealWidth += timeWidth;
+                    layoutHeight = layout.getHeight() + px(3);
+                } else if (isLastRtl && desiredWidth - layout.getWidth() > timeWidth) {
+                    layoutRealWidth = layout.getWidth() + timeWidth;
+                    layoutHeight = layout.getHeight() + px(3);
+                } else {
+                    if (isLastRtl) {
+                        layoutRealWidth = layout.getWidth();
+                    }
+
+                    layoutHeight = layout.getHeight() + px(17);
+                }
+            } else {
+                boolean isLastRtl = layout.getParagraphDirection(layout.getLineCount() - 1) == Layout.DIR_RIGHT_TO_LEFT;
+                if (!isLastRtl && (desiredWidth - layout.getLineWidth(layout.getLineCount() - 1) > timeWidth)) {
+                    layoutRealWidth = (int) Math.max(layoutRealWidth, layout.getLineWidth(layout.getLineCount() - 1) + timeWidth);
+                    layoutHeight = layout.getHeight() + px(3);
+                } else if (isLastRtl && (desiredWidth - layout.getWidth() > timeWidth)) {
+                    layoutRealWidth = (int) Math.max(layoutRealWidth, layout.getWidth() + timeWidth);
+                    layoutHeight = layout.getHeight() + px(3);
+                } else {
+                    layoutHeight = layout.getHeight() + px(17);
+                }
+            }
+
+            if (layoutRealWidth < timeWidth) {
+                layoutRealWidth = timeWidth;
+            }
+
+            if (isForwarded) {
+                layoutHeight += px(19) * 2;
+                forwardOffset = (int) forwardingPaintBase.measureText("From ");
+                layoutRealWidth = (int) Math.max(layoutRealWidth, forwardingPaintBase.measureText("Forwarded message"));
+                forwarderNameMeasured = TextUtils.ellipsize(forwarderName, senderPaintBase, desiredWidth - forwardOffset, TextUtils.TruncateAt.END).toString();
+                layoutRealWidth = (int) Math.max(layoutRealWidth, forwardOffset + senderPaintBase.measureText(forwarderNameMeasured));
+            }
+
+            if (isGroup && !isOut && !isForwarded) {
+                layoutHeight += px(19);
+                senderNameMeasured = TextUtils.ellipsize(senderName, senderPaintBase, desiredWidth, TextUtils.TruncateAt.END).toString();
+                int width = (int) senderPaintBase.measureText(senderNameMeasured);
+                layoutRealWidth = Math.max(layoutRealWidth, width);
+            }
+        }
+    }
+
+    private static void fixLinks(Spannable spannable) {
+        for (URLSpan span : spannable.getSpans(0, spannable.length(), URLSpan.class)) {
+            final String url = span.getURL();
+            int start = spannable.getSpanStart(span);
+            int end = spannable.getSpanEnd(span);
+            int flags = spannable.getSpanFlags(span);
+            URLSpan newSpan = new URLSpan(url) {
+                @Override
+                public void updateDrawState(TextPaint paramTextPaint) {
+                    super.updateDrawState(paramTextPaint);
+                    paramTextPaint.setUnderlineText(false);
+                    paramTextPaint.setColor(0xff006FC8);
+                }
+            };
+            spannable.removeSpan(span);
+            spannable.setSpan(newSpan, start, end, flags);
+        }
+    }
+
+    protected static int px(float dp) {
+        return (int) (dp * UiMeasure.DENSITY + 0.5f);
+    }
+
+    protected static int sp(float sp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, UiMeasure.METRICS);
     }
 }

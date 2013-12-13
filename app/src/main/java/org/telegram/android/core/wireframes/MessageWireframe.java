@@ -14,7 +14,8 @@ public class MessageWireframe {
     public int mid;
     public int peerId;
     public int peerType;
-    public int date;
+    public int dateValue;
+    public String date;
 
     public User senderUser;
     public User forwardUser;
