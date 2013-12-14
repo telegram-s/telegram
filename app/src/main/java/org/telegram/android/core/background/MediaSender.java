@@ -190,6 +190,14 @@ public class MediaSender {
         return destFile;
     }
 
+    private EncryptedFile encryptFile(String fileName) throws Exception {
+        String resFile = getUploadTempFile();
+        byte[] iv = Entropy.generateSeed(32);
+        byte[] key = Entropy.generateSeed(32);
+        CryptoUtils.AES256IGEEncrypt(new File(fileName), new File(resFile), iv, key);
+        return new EncryptedFile(resFile, iv, key);
+    }
+
     private TLAbsStatedMessage doSendPhoto(Uploader.UploadResult result, ChatMessage message) throws Exception {
         TLAbsInputPeer peer;
         if (message.getPeerType() == PeerType.PEER_USER) {
@@ -208,6 +216,57 @@ public class MediaSender {
 
         return application.getApi().doRpcCall(
                 new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedPhoto(inputFile), message.getRandomId()), TIMEOUT);
+    }
+
+    private EncryptedSent doSendPhotoEnc(String originalFile, EncryptedFile encryptedFile, Uploader.UploadResult result, Optimizer.FastPreviewResult previewResult,
+                                         ChatMessage message) throws Exception {
+        EncryptedChat chat = application.getEngine().getEncryptedChat(message.getPeerId());
+        TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
+        decryptedMessage.setRandomId(message.getRandomId());
+        decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
+        decryptedMessage.setMessage("");
+
+        Point size = Optimizer.getSize(originalFile);
+        decryptedMessage.setMedia(new TLDecryptedMessageMediaPhoto(previewResult.getData(),
+                previewResult.getW(), previewResult.getH(), size.x, size.y, (int) new File(originalFile).length(),
+                encryptedFile.getKey(), encryptedFile.getIv()));
+
+        byte[] digest = MD5Raw(concat(encryptedFile.getKey(), encryptedFile.getIv()));
+        int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)), 0);
+
+        byte[] bundle = application.getEncryptionController().encryptMessage(decryptedMessage, chat.getId());
+
+        TLAbsInputEncryptedFile inputEncryptedFile;
+        if (result.isUsedBigFile()) {
+            inputEncryptedFile = new TLInputEncryptedFileBigUploaded(result.getFileId(), result.getPartsCount(), fingerprint);
+        } else {
+            inputEncryptedFile = new TLInputEncryptedFileUploaded(result.getFileId(), result.getPartsCount(), result.getHash(), fingerprint);
+        }
+
+        TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(
+                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle,
+                inputEncryptedFile), TIMEOUT);
+
+        TLLocalPhoto photo = new TLLocalPhoto();
+        photo.setFastPreviewW(previewResult.getW());
+        photo.setFastPreviewH(previewResult.getH());
+        photo.setFastPreview(previewResult.getData());
+        photo.setFastPreviewKey(decryptedMessage.getRandomId() + "_photo");
+        photo.setFullW(size.x);
+        photo.setFullH(size.y);
+        if (encryptedMessage instanceof TLSentEncryptedFile) {
+            TLSentEncryptedFile file = (TLSentEncryptedFile) encryptedMessage;
+            if (file.getFile() instanceof TLEncryptedFile) {
+                TLEncryptedFile file1 = (TLEncryptedFile) file.getFile();
+                photo.setFullLocation(new TLLocalEncryptedFileLocation(file1.getId(), file1.getAccessHash(), file1.getSize(), file1.getDcId(), encryptedFile.getKey(), encryptedFile.getIv()));
+            } else {
+                photo.setFullLocation(new TLLocalFileEmpty());
+            }
+        } else {
+            photo.setFullLocation(new TLLocalFileEmpty());
+        }
+
+        return new EncryptedSent(encryptedMessage, photo);
     }
 
     private void saveUploadedPhoto(TLAbsStatedMessage sent, String uploadFileName) throws Exception {
@@ -243,6 +302,24 @@ public class MediaSender {
         completePhotoSending(sent, uploadFileName, message);
     }
 
+    private void uploadEncryptedPhoto(ChatMessage message) throws Exception {
+        EncryptedChat chat = application.getEngine().getEncryptedChat(message.getPeerId());
+        String uploadFileName = preparePhoto(message);
+        EncryptedFile encryptedFile = encryptFile(uploadFileName);
+        Uploader.UploadResult result = uploadFile(encryptedFile.getFileName(), message.getDatabaseId());
+        Optimizer.FastPreviewResult previewResult = Optimizer.buildPreview(uploadFileName);
+        EncryptedSent encryptedMessage = doSendPhotoEnc(uploadFileName, encryptedFile, result, previewResult, message);
+
+        if (encryptedMessage.getPhoto().getFullLocation() instanceof TLLocalEncryptedFileLocation) {
+            String downloadKey = DownloadManager.getPhotoKey(encryptedMessage.getPhoto());
+            application.getDownloadManager().saveDownloadImagePreview(downloadKey, uploadFileName);
+            application.getDownloadManager().saveDownloadImage(downloadKey, uploadFileName);
+        }
+
+        message.setMessageTimeout(chat.getSelfDestructTime());
+        application.getEngine().onMessageEncPhotoSent(message, encryptedMessage.getEncryptedMessage().getDate(), encryptedMessage.getPhoto());
+    }
+
     public void sendMedia(final ChatMessage message) {
         SendState sendState = new SendState();
         sendState.isSent = false;
@@ -255,14 +332,19 @@ public class MediaSender {
             @Override
             public void run() {
                 Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-                if (message.getPeerType() != PeerType.PEER_USER_ENCRYPTED && message.getExtras() instanceof TLUploadingPhoto) {
+                if (message.getExtras() instanceof TLUploadingPhoto) {
                     try {
-                        uploadPhoto(message);
+                        if (message.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                            uploadEncryptedPhoto(message);
+                        } else {
+                            uploadPhoto(message);
+                        }
                         synchronized (states) {
                             SendState state = states.get(message.getDatabaseId());
                             state.isSent = true;
                             updateState(message.getDatabaseId(), state);
                         }
+                        application.notifyUIUpdate();
                     } catch (Exception e) {
                         e.printStackTrace();
                         synchronized (states) {
@@ -761,4 +843,47 @@ public class MediaSender {
             }
         });
     }
+
+    private class EncryptedSent {
+        private TLAbsSentEncryptedMessage encryptedMessage;
+        private TLLocalPhoto photo;
+
+        private EncryptedSent(TLAbsSentEncryptedMessage encryptedMessage, TLLocalPhoto photo) {
+            this.encryptedMessage = encryptedMessage;
+            this.photo = photo;
+        }
+
+        public TLAbsSentEncryptedMessage getEncryptedMessage() {
+            return encryptedMessage;
+        }
+
+        public TLLocalPhoto getPhoto() {
+            return photo;
+        }
+    }
+
+    private class EncryptedFile {
+        private String fileName;
+        private byte[] iv;
+        private byte[] key;
+
+        private EncryptedFile(String fileName, byte[] iv, byte[] key) {
+            this.fileName = fileName;
+            this.iv = iv;
+            this.key = key;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+
+        public byte[] getIv() {
+            return iv;
+        }
+
+        public byte[] getKey() {
+            return key;
+        }
+    }
+
 }
