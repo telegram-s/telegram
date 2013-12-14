@@ -1,6 +1,7 @@
 package org.telegram.android.kernel;
 
 import org.telegram.android.core.TypingStates;
+import org.telegram.android.core.background.MediaSender;
 import org.telegram.android.core.background.MessageSender;
 import org.telegram.android.core.background.UpdateProcessor;
 import org.telegram.android.core.background.sync.BackgroundSync;
@@ -22,6 +23,7 @@ public class SyncKernel {
     private BackgroundSync backgroundSync;
     private UpdateProcessor updateProcessor;
     private MessageSender messageSender;
+    private MediaSender mediaSender;
     private TypingStates typingStates;
 
     public SyncKernel(ApplicationKernel kernel) {
@@ -35,6 +37,10 @@ public class SyncKernel {
 
     public MessageSender getMessageSender() {
         return messageSender;
+    }
+
+    public MediaSender getMediaSender() {
+        return mediaSender;
     }
 
     public TypingStates getTypingStates() {
@@ -53,6 +59,10 @@ public class SyncKernel {
         long start = System.currentTimeMillis();
         messageSender = new MessageSender(kernel.getApplication());
         Logger.d(TAG, "MessageSender loaded in " + (System.currentTimeMillis() - start) + " ms");
+
+        start = System.currentTimeMillis();
+        mediaSender = new MediaSender(kernel.getApplication());
+        Logger.d(TAG, "MediaSender loaded in " + (System.currentTimeMillis() - start) + " ms");
 
         start = System.currentTimeMillis();
         typingStates = new TypingStates(kernel.getApplication());

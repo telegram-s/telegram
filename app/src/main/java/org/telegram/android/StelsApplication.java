@@ -147,6 +147,11 @@ public class StelsApplication extends Application implements ImageSupport {
         return kernel.getSyncKernel().getMessageSender();
     }
 
+    public MediaSender getMediaSender() {
+        return kernel.getSyncKernel().getMediaSender();
+    }
+
+
     public DialogSource getDialogSource() {
         return kernel.getDataSourceKernel().getDialogSource();
     }

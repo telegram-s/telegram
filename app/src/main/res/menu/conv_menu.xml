@@ -20,6 +20,10 @@
             <item android:id="@+id/attachLocation"
                   android:icon="@drawable/st_bar_ic_attach_location"
                   android:title="Location"/>
+
+            <item android:id="@+id/attachDocument"
+                  android:icon="@drawable/st_bar_ic_attach_location"
+                  android:title="Document"/>
         </menu>
     </item>
     <item android:id="@+id/userAvatar"

@@ -4,12 +4,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
+import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.service.TLLocalActionUserRegistered;
 import org.telegram.android.core.model.update.*;
 import org.telegram.android.log.Logger;
@@ -269,6 +271,14 @@ public class UpdateProcessor {
             return identity;
         } else if (object instanceof TLLocalMessageSentStated) {
             TLAbsStatedMessage statedMessage = ((TLLocalMessageSentStated) object).getAbsStatedMessage();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = statedMessage.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = statedMessage.getPts();
+            identity.date = 0;
+            return identity;
+        } else if (object instanceof TLLocalMessageSentPhoto) {
+            TLAbsStatedMessage statedMessage = ((TLLocalMessageSentPhoto) object).getAbsStatedMessage();
             PackageIdentity identity = new PackageIdentity();
             identity.seq = statedMessage.getSeq();
             identity.seqEnd = 0;
@@ -565,6 +575,23 @@ public class UpdateProcessor {
             application.getEngine().onMessageSent(
                     ((TLLocalMessageEncryptedSent) update).getMessage(),
                     ((TLLocalMessageEncryptedSent) update).getEncryptedMessage().getDate());
+        } else if (update instanceof TLLocalMessageSentPhoto) {
+            TLLocalMessageSentPhoto sentPhoto = (TLLocalMessageSentPhoto) update;
+            TLMessage message = (TLMessage) sentPhoto.getAbsStatedMessage().getMessage();
+            TLLocalPhoto object = (TLLocalPhoto) EngineUtils.convertMedia(message.getMedia());
+            if (object.getFastPreview().length == 0) {
+                object.setFastPreview(sentPhoto.getFastPreview());
+                object.setFastPreviewW(sentPhoto.getFastPreviewW());
+                object.setFastPreviewH(sentPhoto.getFastPreviewH());
+
+                TLAbsPhotoSize size = ApiUtils.findSmallest((TLPhoto) ((TLMessageMediaPhoto) message.getMedia()).getPhoto());
+                if (size instanceof TLPhotoSize) {
+                    object.setFastPreviewKey(((TLPhotoSize) size).getLocation().getLocalId() + "." + ((TLPhotoSize) size).getLocation().getVolumeId());
+                } else if (size instanceof TLPhotoCachedSize) {
+                    object.setFastPreviewKey(((TLPhotoCachedSize) size).getLocation().getLocalId() + "." + ((TLPhotoCachedSize) size).getLocation().getVolumeId());
+                }
+            }
+            application.getEngine().onMessagePhotoSent(sentPhoto.getMessage(), message.getDate(), message.getId(), object);
         }
     }
 
@@ -656,6 +683,12 @@ public class UpdateProcessor {
             } else {
                 application.getNotifications().onAuthUnrecognized(authorization.getDevice());
             }
+        } else if (update instanceof TLUpdateChatParticipantAdd) {
+            TLUpdateChatParticipantAdd addUser = (TLUpdateChatParticipantAdd) update;
+            application.getEngine().onChatUserShortAdded(addUser.getChatId(), addUser.getInviterId(), addUser.getUserId());
+        } else if (update instanceof TLUpdateChatParticipantDelete) {
+            TLUpdateChatParticipantDelete deleteUser = (TLUpdateChatParticipantDelete) update;
+            application.getEngine().onChatUserShortRemoved(deleteUser.getChatId(), deleteUser.getUserId());
         }
     }
 

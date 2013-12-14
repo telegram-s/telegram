@@ -79,7 +79,8 @@ public class DownloadManager {
         this.application = application;
         this.downloadPersistence = new DownloadPersistence(application);
 
-        SMALL_THUMB_SIDE = (int) (application.getResources().getDisplayMetrics().density * 75);
+        final int margin = (int) (4 * application.getResources().getDisplayMetrics().density);
+        SMALL_THUMB_SIDE = ((Math.min(application.getResources().getDisplayMetrics().widthPixels, application.getResources().getDisplayMetrics().heightPixels) - 5 * margin) / 4);
     }
 
     public void registerListener(DownloadListener listener) {
@@ -270,28 +271,13 @@ public class DownloadManager {
 
                     if (record.photo != null) {
                         Logger.d(TAG, "@" + key + " = building thumb");
-                        Bitmap thumb = ImageUtils.getBitmapThumb(fileName, SMALL_THUMB_SIDE, SMALL_THUMB_SIDE);
-                        if (thumb == null) {
-                            updateState(key, DownloadState.FAILURE, 0, 0);
-                            return;
-                        }
-                        Logger.d(TAG, "@" + key + " = saving thumb");
-                        FileOutputStream outputStream = null;
                         try {
-                            outputStream = new FileOutputStream(getPhotoThumbSmallFileName(key));
-                            thumb.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
-                        } catch (FileNotFoundException e) {
+                            saveDownloadImagePreview(key, fileName);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                             Logger.t(TAG, e);
                             updateState(key, DownloadState.FAILURE, 100, size);
                             return;
-                        } finally {
-                            if (outputStream != null) {
-                                try {
-                                    outputStream.close();
-                                } catch (IOException e) {
-                                    Logger.t(TAG, e);
-                                }
-                            }
                         }
 
                         try {
@@ -333,6 +319,25 @@ public class DownloadManager {
     public void saveDownloadImage(String key, String fileName) throws IOException {
         IOUtils.copy(new File(fileName), new File(getDownloadImageFile(key)));
         downloadPersistence.markDownloaded(key);
+    }
+
+    public void saveDownloadImagePreview(String key, String fileName) throws IOException {
+        Bitmap thumb = ImageUtils.getBitmapThumb(fileName, SMALL_THUMB_SIDE, SMALL_THUMB_SIDE);
+        if (thumb == null) {
+            updateState(key, DownloadState.FAILURE, 0, 0);
+            return;
+        }
+
+        Logger.d(TAG, "@" + key + " = saving thumb");
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(getPhotoThumbSmallFileName(key));
+            thumb.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        }
     }
 
     public void saveDownloadVideo(String key, String fileName) throws IOException {

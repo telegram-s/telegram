@@ -558,6 +558,10 @@ public class ModelEngine {
         }
     }
 
+    public void onChatUserShortAdded(int chatId, int inviter, int uid) {
+        onChatUserAdded(chatId, inviter, uid);
+    }
+
     public void onChatUserAdded(int chatId, int inviter, int uid) {
         FullChatInfo chatInfo = getFullChatInfo(chatId);
         if (chatInfo != null) {
@@ -605,6 +609,11 @@ public class ModelEngine {
             getDialogsDao().update(description);
             application.getDialogSource().getViewSource().updateItem(description);
         }
+    }
+
+    public void onChatUserShortRemoved(int chatId, int uid) {
+
+        onChatUserRemoved(chatId, uid);
     }
 
     public void onChatUserRemoved(int chatId, int uid) {
@@ -1218,6 +1227,18 @@ public class ModelEngine {
         return msg;
     }
 
+    private int sendDocument(int peerType, int peerId, TLUploadingDocument doc) {
+        ChatMessage msg = prepareSendMessage(peerType, peerId);
+        msg.setMessage("Document");
+        msg.setContentType(ContentType.MESSAGE_DOCUMENT);
+        msg.setExtras(doc);
+        getMessagesDao().create(msg);
+        application.getDataSourceKernel().onSourceAddMessage(msg);
+        application.getMediaSender().sendMedia(msg);
+        updateDescriptorPending(msg);
+        return msg.getDatabaseId();
+    }
+
     private int sendPhoto(int peerType, int peerId, TLUploadingPhoto photo) {
         ChatMessage msg = prepareSendMessage(peerType, peerId);
         msg.setMessage("Photo");
@@ -1225,7 +1246,7 @@ public class ModelEngine {
         msg.setExtras(photo);
         getMessagesDao().create(msg);
         application.getDataSourceKernel().onSourceAddMessage(msg);
-        application.getMessageSender().sendMedia(msg);
+        application.getMediaSender().sendMedia(msg);
         updateDescriptorPending(msg);
         return msg.getDatabaseId();
     }
@@ -1237,7 +1258,7 @@ public class ModelEngine {
         msg.setExtras(video);
         getMessagesDao().create(msg);
         application.getDataSourceKernel().onSourceAddMessage(msg);
-        application.getMessageSender().sendMedia(msg);
+        application.getMediaSender().sendMedia(msg);
         updateDescriptorPending(msg);
         return msg.getDatabaseId();
     }
@@ -1353,7 +1374,7 @@ public class ModelEngine {
         msg.setRandomId(Entropy.generateRandomId());
         getMessagesDao().update(msg);
         application.getDataSourceKernel().onSourceUpdateMessage(msg);
-        application.getMessageSender().sendMedia(msg);
+        application.getMediaSender().sendMedia(msg);
         updateDescriptorPending(msg);
     }
 
@@ -1655,9 +1676,31 @@ public class ModelEngine {
         }
     }
 
-    public synchronized void onMessagePhotoSent(ChatMessage msg, int date, TLLocalPhoto photo) {
+    public synchronized void onMessageEncPhotoSent(ChatMessage msg, int date, TLLocalPhoto photo) {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
+        msg.setExtras(photo);
+        getMessagesDao().update(msg);
+        updateMaxDate(msg);
+        application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        saveMedia(msg.getMid(), msg);
+        DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
+        if (description != null) {
+            if (description.getTopMessageId() == -msg.getDatabaseId()) {
+                description.setMessageState(MessageState.SENT);
+                description.setDate(msg.getDate());
+                description.setTopMessageId(msg.getMid());
+                getDialogsDao().update(description);
+                application.getDialogSource().getViewSource().updateItem(description);
+                application.getDialogSource().getViewSource().invalidateData();
+            }
+        }
+    }
+
+    public synchronized void onMessagePhotoSent(ChatMessage msg, int date, int mid, TLLocalPhoto photo) {
+        msg.setState(MessageState.SENT);
+        msg.setDate(date);
+        msg.setMid(mid);
         msg.setExtras(photo);
         getMessagesDao().update(msg);
         updateMaxDate(msg);

@@ -30,7 +30,7 @@ dependencies {
     // Telegram api
     compile project(':tl-core')
     compile project(':mtproto')
-    compile files('../libraries/telegram-api/libs/tl-api-v9.jar')
+    compile files('../libraries/telegram-api/libs/tl-api-v10.jar')
     compile project(':telegram-api')
 
     // Ui dependencies

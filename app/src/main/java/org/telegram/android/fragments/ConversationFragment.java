@@ -1825,7 +1825,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                             .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                                    application.getMessageSender().cancelUpload(object.message.getDatabaseId());
+                                                    application.getMediaSender().cancelUpload(object.message.getDatabaseId());
                                                     application.notifyUIUpdate();
                                                 }
                                             }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {

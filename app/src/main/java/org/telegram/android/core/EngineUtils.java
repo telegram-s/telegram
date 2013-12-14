@@ -142,6 +142,32 @@ public class EngineUtils {
             }
         } else if (messageMedia instanceof TLMessageMediaUnsupported) {
             return new TLLocalUnknown(((TLMessageMediaUnsupported) messageMedia).getBytes());
+        } else if (messageMedia instanceof TLMessageMediaDocument) {
+            TLAbsDocument document = ((TLMessageMediaDocument) messageMedia).getDocument();
+            if (document instanceof TLDocument) {
+                TLDocument doc = (TLDocument) document;
+                TLLocalDocument res = new TLLocalDocument(
+                        new TLLocalFileDocument(doc.getId(), doc.getAccessHash(), doc.getSize(), doc.getDcId()),
+                        doc.getUserId(), doc.getDate(), doc.getFileName(), doc.getMimeType());
+
+                if (doc.getThumb() instanceof TLPhotoCachedSize) {
+                    TLPhotoCachedSize cachedSize = (TLPhotoCachedSize) doc.getThumb();
+                    res.setFastPreview(cachedSize.getBytes(), cachedSize.getW(), cachedSize.getH());
+                } else if (doc.getThumb() instanceof TLPhotoSize) {
+                    TLPhotoSize photoSize = (TLPhotoSize) doc.getThumb();
+                    if (photoSize.getLocation() instanceof TLFileLocation) {
+                        TLFileLocation location = (TLFileLocation) photoSize.getLocation();
+                        res.setPreview(new TLLocalFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret(), photoSize.getSize()),
+                                photoSize.getW(), photoSize.getH());
+                    }
+                }
+
+                return res;
+            } else {
+                return new TLLocalDocument();
+            }
+        } else if (messageMedia instanceof TLMessageMediaAudio) {
+            return new TLLocalEmpty();
         } else if (messageMedia instanceof TLMessageMediaEmpty) {
             return new TLLocalEmpty();
         } else {
@@ -326,6 +352,8 @@ public class EngineUtils {
                 res.setContentType(ContentType.MESSAGE_CONTACT);
             } else if (res.getExtras() instanceof TLLocalUnknown) {
                 res.setContentType(ContentType.MESSAGE_UNKNOWN);
+            } else if (res.getExtras() instanceof TLLocalDocument) {
+                res.setContentType(ContentType.MESSAGE_DOCUMENT);
             } else {
                 res.setContentType(ContentType.MESSAGE_TEXT);
             }
@@ -368,6 +396,8 @@ public class EngineUtils {
                 res.setContentType(ContentType.MESSAGE_GEO | ContentType.MESSAGE_FORWARDED);
             } else if (res.getExtras() instanceof TLLocalContact) {
                 res.setContentType(ContentType.MESSAGE_CONTACT | ContentType.MESSAGE_FORWARDED);
+            } else if (res.getExtras() instanceof TLLocalDocument) {
+                res.setContentType(ContentType.MESSAGE_UNKNOWN | ContentType.MESSAGE_DOCUMENT);
             } else if (res.getExtras() instanceof TLLocalUnknown) {
                 res.setContentType(ContentType.MESSAGE_UNKNOWN | ContentType.MESSAGE_FORWARDED);
             } else {
@@ -412,8 +442,7 @@ public class EngineUtils {
         if (status instanceof TLUserStatusOnline) {
             return new TLLocalUserStatusOnline(((TLUserStatusOnline) status).getExpires());
         }
-        if (status instanceof TLUserStatusOffline)
-        {
+        if (status instanceof TLUserStatusOffline) {
             return new TLLocalUserStatusOffline(((TLUserStatusOffline) status).getWasOnline());
         }
         return new TLLocalUserStatusEmpty();

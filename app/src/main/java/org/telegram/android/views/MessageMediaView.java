@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 import com.extradea.framework.images.ImageReceiver;
 import com.extradea.framework.images.tasks.*;
 import org.telegram.android.R;
+import org.telegram.android.core.background.MediaSender;
 import org.telegram.android.core.background.MessageSender;
 import org.telegram.android.core.background.SenderListener;
 import org.telegram.android.core.model.*;
@@ -208,7 +209,7 @@ public class MessageMediaView extends BaseMsgView {
 
         senderListener = new SenderListener() {
             @Override
-            public void onUploadStateChanged(int localId, MessageSender.SendState state) {
+            public void onUploadStateChanged(int localId, MediaSender.SendState state) {
                 if (databaseId != localId)
                     return;
 
@@ -231,7 +232,7 @@ public class MessageMediaView extends BaseMsgView {
                 postInvalidate();
             }
         };
-        application.getMessageSender().registerListener(senderListener);
+        application.getMediaSender().registerListener(senderListener);
 
         receiver = new ImageReceiver() {
             @Override
@@ -526,7 +527,7 @@ public class MessageMediaView extends BaseMsgView {
         }
 
         if (isUploadable) {
-            MessageSender.SendState state = application.getMessageSender().getSendState(databaseId);
+            MediaSender.SendState state = application.getMediaSender().getSendState(databaseId);
             if (state != null) {
                 if (downloadProgress != state.getUploadProgress()) {
                     oldDownloadProgress = downloadProgress;
