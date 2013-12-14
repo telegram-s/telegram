@@ -47,14 +47,6 @@ public class CreateChatFragment extends BaseContactsFragment {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         getSherlockActivity().invalidateOptionsMenu();
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (mainContainer == null) {
-            return;
-        }
-        mainContainer.setPadding(0, getBarHeight(), 0, 0);
     }
 
     @Override
@@ -95,7 +87,6 @@ public class CreateChatFragment extends BaseContactsFragment {
     @Override
     protected void onCreateView(View view, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mainContainer = view.findViewById(R.id.mainContainer);
-        updateHeaderPadding();
         inputEdit = (EditText) view.findViewById(R.id.inputEdit);
         headerContainer = view.findViewById(R.id.header);
         counterView = (TextView) view.findViewById(R.id.counter);
@@ -123,13 +114,6 @@ public class CreateChatFragment extends BaseContactsFragment {
                 }
             }
         });
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateHeaderPadding();
     }
 
     @Override

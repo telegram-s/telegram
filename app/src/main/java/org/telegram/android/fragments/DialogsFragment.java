@@ -172,51 +172,6 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (listView == null || mainContainer == null || searchListView == null || empty == null
-                || searchHint == null || searchEmpty == null) {
-            return;
-        }
-        //if (isSlow()) {
-        mainContainer.setPadding(0, getBarHeight(), 0, 0);
-//        } else {
-//            Logger.w("ListResize", "------------------");
-//            final int delta = listView.getPaddingTop() - getBarHeight();
-//            Logger.w("ListResize", "delta: " + delta);
-//            Logger.w("ListResize", "barHeight: " + getBarHeight());
-//
-//            final int index = listView.getFirstVisiblePosition();
-//            Logger.w("ListResize", "index: " + index);
-//            int top = 0;
-//            View v = listView.getChildAt(0);
-//            if (v != null) {
-//                Logger.w("ListResize", "top: " + listView.getPaddingTop());
-//                Logger.w("ListResize", "top_v: " + v.getTop());
-//                top = v.getTop() - listView.getPaddingTop() - delta;
-//                Logger.w("ListResize", "top_n: " + top);
-//            }
-//
-//            listView.setPadding(0, getBarHeight(), 0, 0);
-//            paddingTop = listView.getPaddingTop();
-//
-//
-//            if (v != null && delta != 0) {
-//                listView.setSelectionFromTop(index, top);
-//            }
-//
-//            searchListView.setPadding(0, getBarHeight(), 0, 0);
-//            searchHint.setPadding(0, getBarHeight() + getPx(12), 0, 0);
-//            searchEmpty.setPadding(0, getBarHeight() + getPx(12), 0, 0);
-//            empty.setPadding(0, getBarHeight() / 2, 0, 0);
-//        }
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
@@ -509,7 +464,6 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
         if (selectedIndex >= 0) {
             listView.setSelectionFromTop(selectedIndex, selectedTop);
         }
-        updateHeaderPadding();
 
         application.getDialogSource().getViewSource().onConnected();
 
@@ -756,8 +710,6 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
 
         applyFreshData();
         onDataStateChanged();
-
-        updateHeaderPadding();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             switch (application.getTechKernel().getDebugSettings().getDialogListLayerType()) {

@@ -81,8 +81,8 @@
 
         <item name="android:windowBackground">@android:color/white</item>
 
-        <item name="android:windowActionBarOverlay">true</item>
-        <item name="windowActionBarOverlay">true</item>
+        <item name="android:windowActionBarOverlay">false</item>
+        <item name="windowActionBarOverlay">false</item>
 
         <item name="android:actionBarStyle">@style/AppTheme.Theme.ActionBarStyle</item>
         <item name="actionBarStyle">@style/AppTheme.Theme.ActionBarStyle</item>
@@ -101,8 +101,8 @@
 
         <item name="android:dropDownSelector">@drawable/st_list_selector</item>
 
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="windowContentOverlay">@null</item>
+        <item name="android:windowContentOverlay">@drawable/st_content_overlay</item>
+        <item name="windowContentOverlay">@drawable/st_content_overlay</item>
 
         <item name="android:scrollViewStyle">@style/AppTheme.ScrollViewStyle</item>
 

@@ -49,19 +49,6 @@ public class ContactsFragment extends BaseContactsFragment {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (mainContainer == null) {
-            return;
-        }
-        mainContainer.setPadding(0, getBarHeight(), 0, 0);
-    }
-
-    @Override
     protected void onFilterChanged() {
         if (share != null) {
             if (isFiltering()) {
@@ -70,12 +57,6 @@ public class ContactsFragment extends BaseContactsFragment {
                 share.findViewById(R.id.container).setVisibility(View.VISIBLE);
             }
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateHeaderPadding();
     }
 
     @Override

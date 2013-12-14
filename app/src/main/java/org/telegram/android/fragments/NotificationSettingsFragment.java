@@ -66,23 +66,9 @@ public class NotificationSettingsFragment extends StelsFragment {
     private View inAppPreviewContainer;
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (mainContainer == null) {
-            return;
-        }
-        mainContainer.setPadding(0, getBarHeight(), 0, 0);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_notifications, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
-        updateHeaderPadding();
 
         allAlertCheck = (ImageView) res.findViewById(R.id.allAlertCheck);
         allVibrationLabel = (TextView) res.findViewById(R.id.allVibrationLabel);
@@ -476,12 +462,6 @@ public class NotificationSettingsFragment extends StelsFragment {
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_notifications_title));
         getSherlockActivity().getSupportActionBar().setSubtitle(null);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateHeaderPadding();
     }
 
     @Override

@@ -82,20 +82,6 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (progress == null || mainContainer == null) {
-            return;
-        }
-        mainContainer.setPadding(0, getBarHeight(), 0, 0);
-        progress.setPadding(0, getBarHeight() / 2, 0, 0);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             userId = savedInstanceState.getInt("userId");
@@ -335,7 +321,6 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
     public void onResume() {
         super.onResume();
         application.getUserSource().registerListener(this);
-        updateHeaderPadding();
     }
 
     @Override

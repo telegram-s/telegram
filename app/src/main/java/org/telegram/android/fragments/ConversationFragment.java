@@ -151,14 +151,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         getSherlockActivity().invalidateOptionsMenu();
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (listView == null || mainContainer == null || empty == null || emptyEncrypted == null || loading == null) {
-            return;
-        }
-        mainContainer.setPadding(0, getBarHeight(), 0, 0);
     }
 
     @Override
@@ -207,8 +199,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             mainContainer.setBackgroundDrawable(drawable);
         }
         listView.setCacheColorHint(0);
-
-        updateHeaderPadding();
 
         contactsPanel = res.findViewById(R.id.contactsPanel);
 
@@ -800,7 +790,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     @Override
     public void onResume() {
         super.onResume();
-        updateHeaderPadding();
         source.getMessagesSource().addListener(this);
         application.getChatSource().registerListener(this);
         application.getTypingStates().registerListener(this);

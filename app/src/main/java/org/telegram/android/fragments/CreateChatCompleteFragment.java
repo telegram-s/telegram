@@ -118,23 +118,9 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (mainContainer == null) {
-            return;
-        }
-        mainContainer.setPadding(getPx(16), getBarHeight(), getPx(16), 0);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.create_chat_complete, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
-        updateHeaderPadding();
 
         avatarImage = (FastWebImageView) res.findViewById(R.id.avatar);
         avatarImage.setLoadingDrawable(R.drawable.st_group_placeholder);
@@ -173,7 +159,6 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
     public void onResume() {
         super.onResume();
         showKeyboard(chatTitleView);
-        updateHeaderPadding();
     }
 
     private void doCreate() {

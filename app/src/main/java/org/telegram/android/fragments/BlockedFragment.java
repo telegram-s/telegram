@@ -42,26 +42,11 @@ public class BlockedFragment extends StelsFragment {
     private User[] users = null;
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (usersList == null) {
-            return;
-        }
-        usersList.setPadding(getPx(16), getBarHeight(), getPx(16), 0);
-        empty.setPadding(getPx(24), getBarHeight() + getPx(12), getPx(24), 0);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.blocked_list, container, false);
         loading = res.findViewById(R.id.loading);
         empty = res.findViewById(R.id.empty);
         usersList = (ListView) res.findViewById(R.id.usersList);
-        updateHeaderPadding();
         View bottomPadding = View.inflate(getActivity(), R.layout.blocked_bottom, null);
         usersList.addFooterView(bottomPadding, null, false);
         usersList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -249,12 +234,6 @@ public class BlockedFragment extends StelsFragment {
                 }
             });
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateHeaderPadding();
     }
 
     @Override

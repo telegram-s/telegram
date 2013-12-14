@@ -45,14 +45,6 @@ public class PickUserFragment extends BaseContactsFragment {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         getSherlockActivity().invalidateOptionsMenu();
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (mainContainer == null) {
-            return;
-        }
-        mainContainer.setPadding(0, getBarHeight(), 0, 0);
     }
 
     @Override
@@ -138,11 +130,5 @@ public class PickUserFragment extends BaseContactsFragment {
             }
         });
 
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateHeaderPadding();
     }
 }

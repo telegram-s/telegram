@@ -57,23 +57,9 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     private long lastDebugClickTime = 0;
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (mainContainer == null) {
-            return;
-        }
-        mainContainer.setPadding(0, getBarHeight(), 0, 0);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_main, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
-        updateHeaderPadding();
         galleryCheck = (ImageView) res.findViewById(R.id.saveToGalleryCheck);
 
         if (application.getUserSettings().isSaveToGalleryEnabled()) {
@@ -236,7 +222,6 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     public void onResume() {
         super.onResume();
         application.getUserSource().registerListener(this);
-        updateHeaderPadding();
         updateUser();
     }
 

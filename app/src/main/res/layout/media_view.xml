@@ -10,7 +10,7 @@
                                                       android:drawSelectorOnTop="true"
                                                       android:paddingLeft="2dp"
                                                       android:paddingRight="2dp"
-                                                      android:paddingTop="51dp"
+                                                      android:paddingTop="4dp"
                                                       android:paddingBottom="2dp"
                                                       android:clipToPadding="false"
                                                       android:gravity="center_horizontal"

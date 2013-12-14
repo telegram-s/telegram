@@ -15,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
 import android.view.*;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
@@ -119,6 +120,32 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                 application.onLoaded();
             }
         });
+
+        setWindowContentOverlayCompat();
+    }
+
+    private void setWindowContentOverlayCompat() {
+        if (Build.VERSION.SDK_INT == 18) {
+            // Get the content view
+            View contentView = findViewById(android.R.id.content);
+
+            // Make sure it's a valid instance of a FrameLayout
+            if (contentView instanceof FrameLayout) {
+                TypedValue tv = new TypedValue();
+
+                // Get the windowContentOverlay value of the current theme
+                if (getTheme().resolveAttribute(
+                        android.R.attr.windowContentOverlay, tv, true)) {
+
+                    // If it's a valid resource, set it as the foreground drawable
+                    // for the content view
+                    if (tv.resourceId != 0) {
+                        ((FrameLayout) contentView).setForeground(
+                                getResources().getDrawable(tv.resourceId));
+                    }
+                }
+            }
+        }
     }
 
     protected void setState(int stateId) {
@@ -145,12 +172,12 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         // Current version
 
         if (prevVersionCode < 732) {
-        definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_contacts_title),
-                new String[]{
-                        getString(R.string.whats_contacts_0),
-                        getString(R.string.whats_contacts_1),
-                        getString(R.string.whats_contacts_2),
-                }, null));
+            definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_contacts_title),
+                    new String[]{
+                            getString(R.string.whats_contacts_0),
+                            getString(R.string.whats_contacts_1),
+                            getString(R.string.whats_contacts_2),
+                    }, null));
         }
 
         if (prevVersionCode < 672) {

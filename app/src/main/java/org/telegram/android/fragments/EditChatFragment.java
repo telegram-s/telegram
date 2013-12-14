@@ -105,16 +105,6 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        updateHeaderPadding();
-    }
-
-    private void updateHeaderPadding() {
-        if (listView == null) {
-            return;
-        }
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) listView.getLayoutParams();
-        params.topMargin = getBarHeight();
-        listView.setLayoutParams(params);
     }
 
     @Override
@@ -135,7 +125,6 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         forbidden = res.findViewById(R.id.forbidden);
         progress = res.findViewById(R.id.progress);
         listView = (ListView) res.findViewById(R.id.mainListView);
-        updateHeaderPadding();
 
         View footer = inflater.inflate(R.layout.chat_edit_footer, null);
         footer.findViewById(R.id.leaveChat).setOnClickListener(new View.OnClickListener() {
@@ -744,7 +733,6 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     public void onResume() {
         super.onResume();
         application.getChatSource().registerListener(this);
-        updateHeaderPadding();
     }
 
     @Override
