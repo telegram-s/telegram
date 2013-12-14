@@ -60,25 +60,32 @@ public class FragmentScreenController implements RootController {
     }
 
     private FragmentTransaction prepareTransaction() {
-        if (application.getScreenLogicType() == ScreenLogicType.SINGLE_ANIMATED) {
-            application.getResponsibility().doPause(300);
-            application.getImageController().doPause(300);
-            return activity.getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit);
-        } else {
-            return activity.getSupportFragmentManager().beginTransaction();
-        }
+//        if (application.getScreenLogicType() == ScreenLogicType.SINGLE_ANIMATED) {
+//            application.getResponsibility().doPause(300);
+//            application.getImageController().doPause(300);
+//            return activity.getSupportFragmentManager().beginTransaction()
+//                    .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit);
+//        } else {
+//            return activity.getSupportFragmentManager().beginTransaction();
+//        }
+//        return activity.getSupportFragmentManager().beginTransaction()
+//                .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit);
+
+        return activity.getSupportFragmentManager().beginTransaction();
     }
 
     private FragmentTransaction prepareBackTransaction() {
-        if (application.getScreenLogicType() == ScreenLogicType.SINGLE_ANIMATED) {
-            application.getResponsibility().doPause(300);
-            application.getImageController().doPause(300);
-            return activity.getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.anim.fragment_close_enter, R.anim.fragment_close_exit);
-        } else {
-            return activity.getSupportFragmentManager().beginTransaction();
-        }
+//        if (application.getScreenLogicType() == ScreenLogicType.SINGLE_ANIMATED) {
+//            application.getResponsibility().doPause(300);
+//            application.getImageController().doPause(300);
+//            return activity.getSupportFragmentManager().beginTransaction()
+//                    .setCustomAnimations(R.anim.fragment_close_enter, R.anim.fragment_close_exit);
+//        } else {
+//            return activity.getSupportFragmentManager().beginTransaction();
+//        }
+//        return activity.getSupportFragmentManager().beginTransaction()
+//                .setCustomAnimations(R.anim.fragment_close_enter, R.anim.fragment_close_exit);
+        return activity.getSupportFragmentManager().beginTransaction();
     }
 
     public void doUp() {

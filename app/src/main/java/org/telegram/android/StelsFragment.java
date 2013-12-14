@@ -20,7 +20,6 @@ import org.telegram.android.core.ModelEngine;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
-import org.telegram.android.fragments.PickUserFragment;
 import org.telegram.android.fragments.interfaces.FragmentResultController;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.ui.StelsTypefaceSpan;
@@ -133,7 +132,7 @@ public class StelsFragment extends StelsBaseFragment {
 
     protected CharSequence highlightSecureTitleText(String src) {
         SpannableString res = SpannableString.valueOf("#" + src);
-        Drawable srcImage = application.getResources().getDrawable(R.drawable.st_bar_lock);
+        Drawable srcImage = application.getResources().getDrawable(R.drawable.st_bar_ic_lock);
         srcImage.setBounds(0, 0, srcImage.getIntrinsicWidth(), srcImage.getIntrinsicHeight());
         Drawable inset = new InsetDrawable(srcImage, 0, 0, getPx(4), 0);
         inset.setBounds(0, 0, srcImage.getIntrinsicWidth() + getPx(4), srcImage.getIntrinsicHeight());

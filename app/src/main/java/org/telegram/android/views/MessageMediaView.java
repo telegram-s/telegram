@@ -16,6 +16,7 @@ import org.telegram.android.core.background.SenderListener;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
+import org.telegram.android.log.Logger;
 import org.telegram.android.media.*;
 import org.telegram.android.ui.*;
 import org.telegram.api.TLFileLocation;
