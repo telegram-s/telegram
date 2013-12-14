@@ -50,6 +50,15 @@ public class DownloadManager {
         }
     }
 
+    public static String getDocumentKey(TLLocalDocument document) {
+        if (document.getFileLocation() instanceof TLLocalFileDocument) {
+            return ((TLLocalFileDocument) document.getFileLocation()).getDcId() + "_" +
+                    ((TLLocalFileDocument) document.getFileLocation()).getId();
+        }
+        return null;
+    }
+
+
     private final int SMALL_THUMB_SIDE;
 
     private DownloadPersistence downloadPersistence;
@@ -342,6 +351,11 @@ public class DownloadManager {
 
     public void saveDownloadVideo(String key, String fileName) throws IOException {
         IOUtils.copy(new File(fileName), new File(getDownloadVideoFile(key)));
+        downloadPersistence.markDownloaded(key);
+    }
+
+    public void saveDownloadDoc(String key, String fileName) throws IOException {
+        IOUtils.copy(new File(fileName), new File(getDownloadImageFile(key)));
         downloadPersistence.markDownloaded(key);
     }
 

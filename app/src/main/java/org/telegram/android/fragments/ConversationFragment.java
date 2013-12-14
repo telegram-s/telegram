@@ -992,6 +992,17 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             return true;
         }
 
+        if (item.getItemId() == R.id.attachDocument) {
+            if (!isEnabledInput) {
+                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            application.getEngine().sendDocument(peerType, peerId, "/storage/emulated/0/Deserialize.trace");
+            application.notifyUIUpdate();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -1507,22 +1518,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
             source.getMessagesSource().onItemsShown(getCount() - i - 1);
 
-
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//                switch (application.getTechKernel().getDebugSettings().getConversationListItemLayerType()) {
-//                    default:
-//                    case DebugSettings.LAYER_NONE:
-//                        view.setLayerType(View.LAYER_TYPE_NONE, null);
-//                        break;
-//                    case DebugSettings.LAYER_HARDWARE:
-//                        view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-//                        break;
-//                    case DebugSettings.LAYER_SOFTWARE:
-//                        view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-//                        break;
-//                }
-//            }
-
             return view;
         }
 
@@ -1535,6 +1530,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             if (msg.message.getRawContentType() == ContentType.MESSAGE_PHOTO ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_GEO ||
+                    msg.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT ||
+                    msg.message.getRawContentType() == ContentType.MESSAGE_AUDIO ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                 return 1;
             }
@@ -1560,6 +1557,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             if (object.message.getRawContentType() == ContentType.MESSAGE_PHOTO ||
                     object.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
                     object.message.getRawContentType() == ContentType.MESSAGE_GEO ||
+                    object.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT ||
+                    object.message.getRawContentType() == ContentType.MESSAGE_AUDIO ||
                     object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                 return new MessageMediaView(context);
             } else if (object.message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
@@ -1791,6 +1790,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             } else if (object.message.getRawContentType() == ContentType.MESSAGE_PHOTO
                     || object.message.getRawContentType() == ContentType.MESSAGE_VIDEO
                     || object.message.getRawContentType() == ContentType.MESSAGE_GEO
+                    || object.message.getRawContentType() == ContentType.MESSAGE_AUDIO
+                    || object.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT
                     || object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
                 MessageMediaView messageView = (MessageMediaView) view;
                 boolean showDiv = false;

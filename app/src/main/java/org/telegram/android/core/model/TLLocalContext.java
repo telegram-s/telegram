@@ -45,8 +45,10 @@ public class TLLocalContext extends TLContext {
         registerClass(TLLocalPhoto.CLASS_ID, TLLocalPhoto.class);
         registerClass(TLLocalUnknown.CLASS_ID, TLLocalUnknown.class);
         registerClass(TLLocalVideo.CLASS_ID, TLLocalVideo.class);
+        registerClass(TLLocalDocument.CLASS_ID, TLLocalDocument.class);
         registerClass(TLUploadingPhoto.CLASS_ID, TLUploadingPhoto.class);
         registerClass(TLUploadingVideo.CLASS_ID, TLUploadingVideo.class);
+        registerClass(TLUploadingDocument.CLASS_ID, TLUploadingDocument.class);
 
         // Service
         registerClass(TLLocalActionChatAddUser.CLASS_ID, TLLocalActionChatAddUser.class);

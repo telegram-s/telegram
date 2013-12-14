@@ -1,13 +1,20 @@
 package org.telegram.android.core.model.media;
 
+import org.telegram.tl.TLContext;
 import org.telegram.tl.TLObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import static org.telegram.tl.StreamingUtils.*;
 
 /**
  * Created by ex3ndr on 14.12.13.
  */
 public class TLLocalDocument extends TLObject {
 
-    private static final int CLASS_ID = 0;
+    public static final int CLASS_ID = 0x16f85dee;
 
     private boolean isAvailable = false;
 
@@ -21,7 +28,7 @@ public class TLLocalDocument extends TLObject {
     private byte[] fastPreview = new byte[0];
     private int previewW = 0;
     private int previewH = 0;
-    private TLAbsLocalFileLocation preview = new TLLocalFileEmpty();
+    private TLAbsLocalFileLocation previewLocation = new TLLocalFileEmpty();
 
     public TLLocalDocument(TLAbsLocalFileLocation fileLocation, int uid, int date, String fileName, String mimeType) {
         this.fileLocation = fileLocation;
@@ -35,16 +42,55 @@ public class TLLocalDocument extends TLObject {
         fastPreview = data;
         previewW = w;
         previewH = h;
-        preview = new TLLocalFileEmpty();
+        previewLocation = new TLLocalFileEmpty();
     }
 
     public void setPreview(TLLocalFileLocation location, int w, int h) {
         previewW = w;
         previewH = h;
-        preview = location;
+        previewLocation = location;
         fastPreview = new byte[0];
     }
 
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public TLAbsLocalFileLocation getFileLocation() {
+        return fileLocation;
+    }
+
+    public int getUid() {
+        return uid;
+    }
+
+    public int getDate() {
+        return date;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public byte[] getFastPreview() {
+        return fastPreview;
+    }
+
+    public int getPreviewW() {
+        return previewW;
+    }
+
+    public int getPreviewH() {
+        return previewH;
+    }
+
+    public TLAbsLocalFileLocation getPreview() {
+        return previewLocation;
+    }
 
     public TLLocalDocument() {
 
@@ -52,6 +98,34 @@ public class TLLocalDocument extends TLObject {
 
     @Override
     public int getClassId() {
-        return 0;
+        return CLASS_ID;
+    }
+
+    @Override
+    public void serializeBody(OutputStream stream) throws IOException {
+        writeTLBool(isAvailable, stream);
+        writeTLObject(fileLocation, stream);
+        writeInt(uid, stream);
+        writeInt(date, stream);
+        writeTLString(fileName, stream);
+        writeTLString(mimeType, stream);
+        writeTLBytes(fastPreview, stream);
+        writeInt(previewW, stream);
+        writeInt(previewH, stream);
+        writeTLObject(previewLocation, stream);
+    }
+
+    @Override
+    public void deserializeBody(InputStream stream, TLContext context) throws IOException {
+        isAvailable = readTLBool(stream);
+        fileLocation = (TLAbsLocalFileLocation) readTLObject(stream, context);
+        uid = readInt(stream);
+        date = readInt(stream);
+        fileName = readTLString(stream);
+        mimeType = readTLString(stream);
+        fastPreview = readTLBytes(stream);
+        previewW = readInt(stream);
+        previewH = readInt(stream);
+        previewLocation = (TLAbsLocalFileLocation) readTLObject(stream, context);
     }
 }

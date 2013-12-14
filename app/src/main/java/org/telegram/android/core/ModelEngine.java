@@ -1190,6 +1190,11 @@ public class ModelEngine {
         return sendPhoto(peerType, peerId, photo);
     }
 
+    public int sendDocument(int peerType, int peerId, String fileName) {
+        TLUploadingDocument document = new TLUploadingDocument(fileName);
+        return sendDocument(peerType, peerId, document);
+    }
+
     private ChatMessage prepareSendMessage(int peerType, int peerId) {
         ChatMessage msg = new ChatMessage();
         msg.setMid(getMinMid() - 1);
