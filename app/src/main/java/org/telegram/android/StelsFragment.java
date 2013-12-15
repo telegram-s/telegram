@@ -180,6 +180,11 @@ public class StelsFragment extends StelsBaseFragment {
         }
     }
 
+    public void pickFile() {
+        requestedPick = true;
+        getRootController().pickFile();
+    }
+
     public void pickUser() {
         requestedPick = true;
         getRootController().pickUser();
@@ -250,7 +255,11 @@ public class StelsFragment extends StelsBaseFragment {
     }
 
     protected void sendEvent(String type, String message) {
-        application.getKernel().sendEvent(getClass().getSimpleName() + ":" +type, message);
+        application.getKernel().sendEvent(getClass().getSimpleName() + ":" + type, message);
+    }
+
+    public boolean onBackPressed() {
+        return false;
     }
 
     @Override

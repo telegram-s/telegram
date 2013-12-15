@@ -59,7 +59,7 @@
                   android:theme="@style/AppTheme.Theme"
                   android:windowSoftInputMode="adjustResize"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-                  android:launchMode="singleTask">
+                  android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>

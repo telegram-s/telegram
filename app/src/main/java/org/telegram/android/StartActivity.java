@@ -486,7 +486,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                     .commit();
             setState(STATE_LOGIN);
         } else {
-            if (!((FragmentScreenController) controller).doSystemBack()) {
+            if (!controller.doSystemBack()) {
                 finish();
             }
         }

@@ -233,24 +233,12 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                 if (view == null) {
                     view = new DialogView(getActivity());
                 }
+
                 DialogView dialogView = (DialogView) view;
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    switch (application.getTechKernel().getDebugSettings().getDialogListItemLayerType()) {
-                        default:
-                        case DebugSettings.LAYER_NONE:
-                            view.setLayerType(View.LAYER_TYPE_NONE, null);
-                            break;
-                        case DebugSettings.LAYER_HARDWARE:
-                            view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-                            break;
-                        case DebugSettings.LAYER_SOFTWARE:
-                            view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-                            break;
-                    }
-                }
                 dialogView.setDescription(description, description.getPreparedLayout());
                 application.getDialogSource().getViewSource().onItemsShown(i);
+
                 return view;
             }
         };

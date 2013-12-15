@@ -998,8 +998,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 return true;
             }
 
-            application.getEngine().sendDocument(peerType, peerId, "/storage/emulated/0/Deserialize.trace");
-            application.notifyUIUpdate();
+            pickFile();
             return true;
         }
 
@@ -1009,11 +1008,16 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     @Override
     protected void onFragmentResult(int resultCode, Object data) {
         if (resultCode == Activity.RESULT_OK) {
-            TLLocalGeo point = (TLLocalGeo) data;
-            application.getEngine().sendLocation(peerType, peerId, point);
-            application.getSyncKernel().getBackgroundSync().resetTypingDelay();
-            application.notifyUIUpdate();
-            editText.setText("");
+            if (data instanceof TLLocalGeo) {
+                TLLocalGeo point = (TLLocalGeo) data;
+                application.getEngine().sendLocation(peerType, peerId, point);
+                application.getSyncKernel().getBackgroundSync().resetTypingDelay();
+                application.notifyUIUpdate();
+                editText.setText("");
+            } else if (data instanceof String) {
+                application.getEngine().sendDocument(peerType, peerId, (String) data);
+                application.notifyUIUpdate();
+            }
         }
     }
 

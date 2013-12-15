@@ -68,6 +68,8 @@ public interface RootController {
 
     public void pickUser();
 
+    public void pickFile();
+
     public void pickLocations();
 
     public void viewLocation(double lat, double lon, int uid);

@@ -119,13 +119,15 @@ public class FragmentScreenController implements RootController {
     public boolean doSystemBack() {
         if (backStack.size() > 1) {
             StelsFragment currentFragment = backStack.get(backStack.size() - 1);
-            StelsFragment prevFragment = backStack.get(backStack.size() - 2);
-            prevFragment.setHasOptionsMenu(true);
-            backStack.remove(backStack.size() - 1);
-            prepareBackTransaction()
-                    .remove(currentFragment)
-                    .attach(prevFragment)
-                    .commit();
+            if (!currentFragment.onBackPressed()) {
+                StelsFragment prevFragment = backStack.get(backStack.size() - 2);
+                prevFragment.setHasOptionsMenu(true);
+                backStack.remove(backStack.size() - 1);
+                prepareBackTransaction()
+                        .remove(currentFragment)
+                        .attach(prevFragment)
+                        .commit();
+            }
             return true;
         } else {
             return false;
@@ -167,7 +169,17 @@ public class FragmentScreenController implements RootController {
         for (int i = 0; i < count - 1; i++) {
             backStack.remove(backStack.size() - 2);
         }
-        doSystemBack();
+
+        if (backStack.size() > 1) {
+            StelsFragment currentFragment = backStack.get(backStack.size() - 1);
+            StelsFragment prevFragment = backStack.get(backStack.size() - 2);
+            prevFragment.setHasOptionsMenu(true);
+            backStack.remove(backStack.size() - 1);
+            prepareBackTransaction()
+                    .remove(currentFragment)
+                    .attach(prevFragment)
+                    .commit();
+        }
     }
 
     @Override
@@ -390,6 +402,11 @@ public class FragmentScreenController implements RootController {
     @Override
     public void pickUser() {
         openScreen(new PickUserFragment());
+    }
+
+    @Override
+    public void pickFile() {
+        openScreen(new PickFileFragment());
     }
 
     @Override

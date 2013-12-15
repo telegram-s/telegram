@@ -9,10 +9,7 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.UiNotifier;
 import org.telegram.android.util.IOUtils;
-import org.telegram.api.TLAbsInputFileLocation;
-import org.telegram.api.TLInputEncryptedFileLocation;
-import org.telegram.api.TLInputFileLocation;
-import org.telegram.api.TLInputVideoFileLocation;
+import org.telegram.api.*;
 import org.telegram.api.engine.file.Downloader;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
@@ -221,6 +218,10 @@ public class DownloadManager {
             dcId = ((TLLocalEncryptedFileLocation) fileLocation).getDcId();
             size = ((TLLocalEncryptedFileLocation) fileLocation).getSize();
             location = new TLInputEncryptedFileLocation(((TLLocalEncryptedFileLocation) fileLocation).getId(), ((TLLocalEncryptedFileLocation) fileLocation).getAccessHash());
+        } else if (fileLocation instanceof TLLocalFileDocument) {
+            dcId = ((TLLocalFileDocument) fileLocation).getDcId();
+            size = ((TLLocalFileDocument) fileLocation).getSize();
+            location = new TLInputDocumentFileLocation(((TLLocalFileDocument) fileLocation).getId(), ((TLLocalFileDocument) fileLocation).getAccessHash());
         } else {
             return;
         }
