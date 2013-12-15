@@ -54,13 +54,17 @@ public class TLLocalFileDocument extends TLAbsLocalFileLocation {
 
     @Override
     public void serializeBody(OutputStream stream) throws IOException {
+        writeInt(dcId, stream);
         writeLong(id, stream);
         writeLong(accessHash, stream);
+        writeInt(size, stream);
     }
 
     @Override
     public void deserializeBody(InputStream stream, TLContext context) throws IOException {
+        dcId=readInt(stream);
         id = readLong(stream);
         accessHash = readLong(stream);
+        size = readInt(stream);
     }
 }

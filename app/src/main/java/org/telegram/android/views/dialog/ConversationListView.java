@@ -20,6 +20,7 @@ import com.extradea.framework.images.ui.ImagingListView;
 import com.google.android.gms.internal.ca;
 import com.google.android.gms.internal.da;
 import org.telegram.android.R;
+import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.TextUtil;
@@ -35,6 +36,7 @@ public class ConversationListView extends ImagingListView {
     private static final int ACTIVATE_DELTA = 50;
     private static final long UI_TIMEOUT = 900;
 
+    private StelsApplication application;
 
     private String visibleDate = null;
     private int timeDivMeasure;
@@ -86,7 +88,10 @@ public class ConversationListView extends ImagingListView {
     }
 
     private void init() {
+        application = (StelsApplication) getContext().getApplicationContext();
+
         setOnScrollListener(new ScrollListener());
+
         serviceDrawable = getResources().getDrawable(R.drawable.st_bubble_service);
         servicePadding = new Rect();
         serviceDrawable.getPadding(servicePadding);
@@ -173,13 +178,17 @@ public class ConversationListView extends ImagingListView {
 
         @Override
         public void onScrollStateChanged(AbsListView absListView, int i) {
+
             if (i == SCROLL_STATE_FLING || i == SCROLL_STATE_TOUCH_SCROLL) {
                 handler.removeMessages(0);
             }
 
             if (i == SCROLL_STATE_IDLE) {
+                application.getImageController().doResume();
                 handler.removeMessages(0);
                 handler.sendEmptyMessageDelayed(0, UI_TIMEOUT);
+            } else {
+                application.getImageController().doPause();
             }
 
             state = i;
@@ -187,6 +196,8 @@ public class ConversationListView extends ImagingListView {
 
         @Override
         public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            application.getImageController().doPause();
+
             if (lastVisibleItem == -1 || lastVisibleItem != firstVisibleItem || state == SCROLL_STATE_IDLE) {
                 lastVisibleItem = firstVisibleItem;
                 lastTop = 0;

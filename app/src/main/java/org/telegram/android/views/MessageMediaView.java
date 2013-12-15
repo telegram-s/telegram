@@ -88,7 +88,7 @@ public class MessageMediaView extends BaseMsgView {
     private DownloadListener downloadListener;
     private SenderListener senderListener;
 
-    private boolean isAnimatedProgress = false;
+    private boolean isAnimatedProgress = true;
 
     private boolean scaleUpMedia = false;
 
@@ -255,37 +255,6 @@ public class MessageMediaView extends BaseMsgView {
             }
         };
         receiver.register(application.getImageController());
-    }
-
-    public Bitmap getThumb() {
-        if (preview != null) {
-            return preview;
-        }
-
-        if (previewCached != null) {
-            return previewCached;
-        }
-        return null;
-    }
-
-    public int getThumbX() {
-        /*Bitmap thumb = getThumb();
-        int offset = 0;
-        if (thumb != null) {
-            offset = (desiredWidth - thumb.getWidth()) / 2;
-        }
-        return getContentX() + offset;*/
-        return getContentX();
-    }
-
-    public int getThumbY() {
-        /*Bitmap thumb = getThumb();
-        int offset = 0;
-        if (thumb != null) {
-            offset = (desiredHeight - thumb.getHeight()) / 2;
-        }
-        return getContentY() + offset;*/
-        return getContentY();
     }
 
     @Override
