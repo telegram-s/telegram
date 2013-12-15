@@ -50,7 +50,7 @@ public class DownloadManager {
     public static String getDocumentKey(TLLocalDocument document) {
         if (document.getFileLocation() instanceof TLLocalFileDocument) {
             return ((TLLocalFileDocument) document.getFileLocation()).getDcId() + "_" +
-                    ((TLLocalFileDocument) document.getFileLocation()).getId();
+                    ((TLLocalFileDocument) document.getFileLocation()).getId() + "_" + document.getFileName();
         }
         return null;
     }
@@ -65,6 +65,7 @@ public class DownloadManager {
     private class DownloadRecord {
         public TLLocalVideo video;
         public TLLocalPhoto photo;
+        public TLLocalDocument doc;
         public int downloaded;
         public int downloadedPercent;
         public DownloadState state;
@@ -130,6 +131,40 @@ public class DownloadManager {
 
         return 0;
     }
+
+    public void requestDownload(TLLocalDocument doc) {
+        final String resourceKey = getDocumentKey(doc);
+
+        if (downloadPersistence.isDownloaded(resourceKey))
+            return;
+
+        final DownloadRecord record;
+        if (records.containsKey(resourceKey)) {
+            record = records.get(resourceKey);
+            if (record.state == DownloadState.CANCELLED ||
+                    record.state == DownloadState.FAILURE ||
+                    record.state == DownloadState.NONE) {
+                record.state = DownloadState.PENDING;
+                record.downloaded = 0;
+                record.downloadedPercent = 0;
+                record.doc = doc;
+                updateState(resourceKey, record.state, 0, 0);
+            }
+        } else {
+            record = new DownloadRecord();
+            record.state = DownloadState.PENDING;
+            record.downloaded = 0;
+            record.downloadedPercent = 0;
+            record.doc = doc;
+            records.put(resourceKey, record);
+            updateState(resourceKey, record.state, 0, 0);
+        }
+
+        requestDownload(resourceKey, record,
+                getDownloadDocFile(resourceKey),
+                doc.getFileLocation());
+    }
+
 
     public void requestDownload(TLLocalPhoto photo) {
 
@@ -298,7 +333,7 @@ public class DownloadManager {
                         } catch (Exception e) {
                             Logger.t(TAG, e);
                         }
-                    } else {
+                    } else if (record.video != null) {
                         Logger.d(TAG, "@" + key + " = writing to gallery");
                         if (application.getUserSettings().isSaveToGalleryEnabled()) {
                             try {
@@ -307,6 +342,8 @@ public class DownloadManager {
                                 Logger.t(TAG, e);
                             }
                         }
+                    } else if (record.doc != null) {
+
                     }
                     Logger.d(TAG, "@" + key + " = mark as downloaded");
                     downloadPersistence.markDownloaded(key);
@@ -381,6 +418,10 @@ public class DownloadManager {
         return getDownloadImageFile(key);
     }
 
+    public String getDocFileName(String key) {
+        return getDownloadDocFile(key);
+    }
+
     public String getPhotoThumbSmallFileName(String key) {
         return getDownloadImageThumbFile(key);
     }
@@ -391,6 +432,10 @@ public class DownloadManager {
 
     private String getDownloadImageFile(String key) {
         return application.getExternalCacheDir().getAbsolutePath() + "/image_" + key + ".jpg";
+    }
+
+    private String getDownloadDocFile(String key) {
+        return application.getExternalCacheDir().getAbsolutePath() + "/doc_" + key;
     }
 
     private String getDownloadImageThumbFile(String key) {

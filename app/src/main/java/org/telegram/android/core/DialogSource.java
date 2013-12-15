@@ -2,6 +2,8 @@ package org.telegram.android.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.SystemClock;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.Configuration;
@@ -44,11 +46,11 @@ public class DialogSource {
         preferences.edit().remove("state").commit();
     }
 
-    public static final int PAGE_SIZE = 25;
+    public static final int PAGE_SIZE = 10;
 
     public static final int PAGE_OVERLAP = 3;
 
-    public static final int PAGE_REQUEST_PADDING = 20;
+    public static final int PAGE_REQUEST_PADDING = 10;
 
     private ExecutorService service = Executors.newSingleThreadExecutor(new ThreadFactory() {
         @Override
@@ -86,57 +88,28 @@ public class DialogSource {
         this.dialogsSource = new ViewSource<DialogWireframe, DialogDescription>() {
             @Override
             protected DialogDescription[] loadItems(int offset) {
+                long start = SystemClock.uptimeMillis();
+                TLLocalContext.getInstance();
+                Logger.d(TAG, "Context created in " + (SystemClock.uptimeMillis() - start) + " ms");
+
                 if (offset < PAGE_OVERLAP) {
                     offset = 0;
                 } else {
                     offset -= PAGE_OVERLAP;
                 }
 
-                if (offset == 0) {
-                    TextUtil.formatPhone("+75555555555");
-                }
-
                 try {
                     QueryBuilder<DialogDescription, Long> queryBuilder = application.getEngine().getDialogsDao().queryBuilder();
+                    Logger.d(TAG, "Builder created in " + (SystemClock.uptimeMillis() - start) + " ms");
                     queryBuilder.orderBy("date", false);
                     queryBuilder.where().ne("date", 0);
                     queryBuilder.offset(offset);
                     queryBuilder.limit(PAGE_SIZE);
+                    // queryBuilder.selectColumns("_id", "peerType", "peerId", "title", "date", "senderTitle", "message", "messageState", "senderId", "photo", "extras");
                     List<DialogDescription> dialogDescriptions = application.getEngine().getDialogsDao().query(queryBuilder.prepare());
+                    Logger.d(TAG, "Queried in " + (SystemClock.uptimeMillis() - start) + " ms");
                     DialogDescription[] res = dialogDescriptions.toArray(new DialogDescription[dialogDescriptions.size()]);
-                    HashSet<Integer> uids = new HashSet<Integer>();
-                    for (int i = 0; i < res.length; i++) {
-                        if (res[i].getPeerType() == PeerType.PEER_USER) {
-                            uids.add(res[i].getPeerId());
-                        }
-                        if (res[i].getContentType() == ContentType.MESSAGE_SYSTEM) {
-                            TLObject object = res[i].getExtras();
-                            if (object != null && object instanceof TLAbsMessageAction) {
-                                if (object instanceof TLMessageActionChatAddUser) {
-                                    uids.add(((TLMessageActionChatAddUser) object).getUserId());
-                                } else if (object instanceof TLMessageActionChatDeleteUser) {
-                                    uids.add(((TLMessageActionChatDeleteUser) object).getUserId());
-                                }
-                            }
-                        }
-                    }
-                    User[] users = application.getEngine().getUsersById(uids.toArray());
-                    for (Integer uid : uids) {
-                        boolean founded = false;
-                        for (User user : users) {
-                            if (user.getUid() == uid) {
-                                founded = true;
-                                break;
-                            }
-                        }
-                        if (!founded) {
-                            // TODO: fix drop login
-                            // application.dropLogin();
-                            Logger.d(TAG, "Missed user: " + uid);
-                            CrashHandler.logHandledException(new RuntimeException("Reset by missed user: " + uid));
-                            return new DialogDescription[0];
-                        }
-                    }
+                    Logger.d(TAG, "Loaded items in " + (SystemClock.uptimeMillis() - start) + " ms");
                     return res;
                 } catch (Exception e) {
                     e.printStackTrace();

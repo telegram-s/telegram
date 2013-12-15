@@ -318,28 +318,6 @@ public class MessageMediaView extends BaseMsgView {
 
         if (message.message.getExtras() instanceof TLLocalPhoto) {
             TLLocalPhoto mediaPhoto = (TLLocalPhoto) message.message.getExtras();
-            if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0) {
-                previewHeight = mediaPhoto.getFastPreviewH();
-                previewWidth = mediaPhoto.getFastPreviewW();
-
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                if (previewCached != null) {
-                    if (Build.VERSION.SDK_INT >= 11) {
-                        options.inBitmap = previewCached;
-                    }
-                }
-
-                options.inDither = false;
-                options.inTempStorage = bitmapTmp;
-
-                previewCached = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length);
-
-                fastPreviewWidth = mediaPhoto.getFastPreviewW();
-                fastPreviewHeight = mediaPhoto.getFastPreviewH();
-            } else {
-                previewWidth = 0;
-                previewHeight = 0;
-            }
 
             if (!(mediaPhoto.getFullLocation() instanceof TLLocalFileEmpty)) {
                 key = DownloadManager.getPhotoKey(mediaPhoto);
@@ -376,6 +354,49 @@ public class MessageMediaView extends BaseMsgView {
             } else {
                 isDownloadable = false;
             }
+
+
+            if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0 && !isDownloadable) {
+
+                float maxWidth = getPx(160);
+                float maxHeight = getPx(300);
+
+                float scale = maxWidth / mediaPhoto.getFastPreviewW();
+
+                if (mediaPhoto.getFastPreviewH() * scale > maxHeight) {
+                    scale = maxHeight / mediaPhoto.getFastPreviewH();
+                }
+
+                int scaledW = (int) maxWidth;
+                int scaledH = (int) (mediaPhoto.getFastPreviewH() * scale);
+
+                // previewHeight = scaledH;
+                // previewWidth = scaledW;
+
+                previewTask = new CachedImageTask(mediaPhoto, scaledW, scaledH, true);
+
+//                BitmapFactory.Options options = new BitmapFactory.Options();
+//                if (previewCached != null) {
+//                    if (Build.VERSION.SDK_INT >= 11) {
+//                        if (previewCached.getWidth() == 90 && previewCached.getHeight() == 90) {
+//                            options.inBitmap = previewCached;
+//                            options.inMutable = true;
+//                        }
+//                    }
+//                }
+
+//                options.inDither = false;
+//                options.inTempStorage = bitmapTmp;
+
+//                previewCached = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
+
+//                fastPreviewWidth = mediaPhoto.getFastPreviewW();
+//                fastPreviewHeight = mediaPhoto.getFastPreviewH();
+            } else {
+                // previewWidth = 0;
+                // previewHeight = 0;
+            }
+
         } else if (message.message.getExtras() instanceof TLLocalVideo) {
             TLLocalVideo mediaVideo = (TLLocalVideo) message.message.getExtras();
             isVideo = true;
@@ -494,6 +515,14 @@ public class MessageMediaView extends BaseMsgView {
             previewTask.setMaxWidth(previewWidth);
             previewTask.setFillRect(true);
             showMapPoint = true;
+        } else if (message.message.getExtras() instanceof TLUploadingDocument) {
+            previewWidth = getPx(160);
+            previewHeight = getPx(160);
+            isUploadable = true;
+        } else if (message.message.getExtras() instanceof TLLocalDocument) {
+            TLLocalDocument document = (TLLocalDocument) message.message.getExtras();
+            key = DownloadManager.getDocumentKey(document);
+            isDownloadable = true;
         }
 
         if (isDownloadable) {

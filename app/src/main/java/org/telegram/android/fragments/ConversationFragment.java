@@ -1810,7 +1810,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     }
                 });
 
-                if (object.message.getExtras() instanceof TLUploadingPhoto || object.message.getExtras() instanceof TLUploadingVideo) {
+                if (object.message.getExtras() instanceof TLUploadingPhoto || object.message.getExtras() instanceof TLUploadingVideo || object.message.getExtras() instanceof TLUploadingDocument) {
                     messageView.setOnBubbleClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -1928,6 +1928,36 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             } else {
                                 TLLocalGeo geo = (TLLocalGeo) object.message.getExtras();
                                 getRootController().viewLocation(geo.getLatitude(), geo.getLongitude(), object.message.getSenderId());
+                            }
+                        }
+                    });
+                } else if (object.message.getExtras() instanceof TLLocalDocument) {
+                    final String key = DownloadManager.getDocumentKey((TLLocalDocument) object.message.getExtras());
+                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (selected.size() > 0) {
+                                if (selected.contains(object.message.getDatabaseId())) {
+                                    selected.remove(object.message.getDatabaseId());
+                                } else {
+                                    selected.add(object.message.getDatabaseId());
+                                }
+                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
+                                updateActionMode();
+                            } else {
+                                DownloadState state = application.getDownloadManager().getState(key);
+                                if (state == DownloadState.COMPLETED) {
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
+                                    startActivity(intent);
+                                } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
+                                    // CANCEL
+                                    application.getDownloadManager().abortDownload(key);
+                                } else {
+                                    TLLocalDocument video = (TLLocalDocument) object.message.getExtras();
+                                    // Check
+                                    application.getDownloadManager().requestDownload(video);
+                                }
                             }
                         }
                     });

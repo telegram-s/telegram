@@ -41,6 +41,7 @@ public class TLLocalContext extends TLContext {
         registerClass(TLLocalFileEmpty.CLASS_ID, TLLocalFileEmpty.class);
         registerClass(TLLocalFileLocation.CLASS_ID, TLLocalFileLocation.class);
         registerClass(TLLocalFileVideoLocation.CLASS_ID, TLLocalFileVideoLocation.class);
+        registerClass(TLLocalFileDocument.CLASS_ID, TLLocalFileDocument.class);
         registerClass(TLLocalGeo.CLASS_ID, TLLocalGeo.class);
         registerClass(TLLocalPhoto.CLASS_ID, TLLocalPhoto.class);
         registerClass(TLLocalUnknown.CLASS_ID, TLLocalUnknown.class);

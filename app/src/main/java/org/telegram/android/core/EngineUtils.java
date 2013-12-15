@@ -397,7 +397,7 @@ public class EngineUtils {
             } else if (res.getExtras() instanceof TLLocalContact) {
                 res.setContentType(ContentType.MESSAGE_CONTACT | ContentType.MESSAGE_FORWARDED);
             } else if (res.getExtras() instanceof TLLocalDocument) {
-                res.setContentType(ContentType.MESSAGE_UNKNOWN | ContentType.MESSAGE_DOCUMENT);
+                res.setContentType(ContentType.MESSAGE_DOCUMENT | ContentType.MESSAGE_FORWARDED);
             } else if (res.getExtras() instanceof TLLocalUnknown) {
                 res.setContentType(ContentType.MESSAGE_UNKNOWN | ContentType.MESSAGE_FORWARDED);
             } else {
