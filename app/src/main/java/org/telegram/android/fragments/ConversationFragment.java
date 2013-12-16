@@ -360,8 +360,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 //                                            throw new AsyncException(e);
 //                                        }
                                     }
-                                    getEngine().deleteEncryptedChat(peerId);
                                     getEngine().deleteHistory(peerType, peerId);
+                                    getEngine().deleteEncryptedChat(peerId);
                                 } else {
                                     final TLAbsInputPeer peer;
                                     if (peerType == PeerType.PEER_CHAT) {
@@ -1331,7 +1331,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (peerType == PeerType.PEER_USER && peerId == uid) {
             getSherlockActivity().invalidateOptionsMenu();
         }
-        if (peerType == PeerType.PEER_USER_ENCRYPTED && application.getEngine().getEncryptedChat(peerId).getUserId() == uid) {
+        if (peerType == PeerType.PEER_USER_ENCRYPTED) {
             EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(peerId);
             if (encryptedChat != null && encryptedChat.getUserId() == uid) {
                 getSherlockActivity().invalidateOptionsMenu();
