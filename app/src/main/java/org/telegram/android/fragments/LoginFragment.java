@@ -45,20 +45,42 @@ public class LoginFragment extends StelsFragment {
         AccountManager am = AccountManager.get(getActivity());
         Account[] accounts = am.getAccounts();
 
+        String foundedWaPhone = null;
+        String foundedSysPhone = null;
+
         for (Account ac : accounts) {
             String acname = ac.name;
             String actype = ac.type;
 
             if (actype.equals("com.whatsapp")) {
-                sendEvent("wa_phone", acname);
-                return acname;
+                foundedWaPhone = acname;
+                break;
             }
         }
 
         String telephonyNum = manager.getLine1Number();
         if (telephonyNum != null && telephonyNum.trim().length() > 0) {
-            sendEvent("sys_phone", telephonyNum);
-            return telephonyNum;
+            foundedSysPhone = telephonyNum;
+        }
+
+        if (foundedSysPhone != null && foundedWaPhone != null) {
+            if (foundedSysPhone.equals(foundedWaPhone)) {
+                sendEvent("phone_both_eq", foundedWaPhone);
+            } else {
+                sendEvent("phone_both_neq", foundedWaPhone + ", " + foundedSysPhone);
+            }
+        } else if (foundedWaPhone != null) {
+            sendEvent("phone_wa", foundedWaPhone);
+        } else if (foundedSysPhone != null) {
+            sendEvent("phone_sys", foundedSysPhone);
+        } else {
+            sendEvent("phone_none");
+        }
+
+        if (foundedWaPhone != null) {
+            return foundedWaPhone;
+        } else if (foundedSysPhone != null) {
+            return foundedSysPhone;
         }
 
         return null;
@@ -204,7 +226,7 @@ public class LoginFragment extends StelsFragment {
                     int codeNum = Integer.parseInt(code);
                     for (int i = 0; i < Countries.COUNTRIES.length; i++) {
                         // Try to resolve issue with same prefix code in kz
-                        if (Countries.COUNTRIES[i].isDisabled()) {
+                        if (!Countries.COUNTRIES[i].isSearchByCode()) {
                             continue;
                         }
 
@@ -239,7 +261,7 @@ public class LoginFragment extends StelsFragment {
             String countryNumber = number;
             for (int i = 0; i < Countries.COUNTRIES.length; i++) {
                 // Try to resolve issue with same prefix code in kz
-                if (Countries.COUNTRIES[i].isDisabled()) {
+                if (Countries.COUNTRIES[i].isSearchByCode()) {
                     continue;
                 }
 
@@ -274,6 +296,9 @@ public class LoginFragment extends StelsFragment {
 
             if (country != null) {
                 for (int i = 0; i < Countries.COUNTRIES.length; i++) {
+                    if (!Countries.COUNTRIES[i].isSearchByName()) {
+                        continue;
+                    }
                     if (Countries.COUNTRIES[i].getIso().equals(country)) {
                         countriesSpinner.setSelection(i);
                         phoneCode.setText("+" + Countries.COUNTRIES[i].getCallPrefix());
