@@ -71,6 +71,8 @@ public class Notifications {
     private int lastPeerId;
     private int lastPeerType;
 
+    private Random rnd = new Random();
+
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -269,7 +271,7 @@ public class Notifications {
             intent.setClass(application, StartActivity.class);
             intent.putExtra("peerType", peerType);
             intent.putExtra("peerId", peerId);
-            builder.setContentIntent(PendingIntent.getActivity(application, new Random().nextInt(), intent, 0));
+            builder.setContentIntent(PendingIntent.getActivity(application, rnd.nextInt(), intent, 0));
             Bitmap bigPhoto = null;
             if (photo != null) {
                 if (photo instanceof TLLocalAvatarPhoto) {
