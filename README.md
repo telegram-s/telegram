@@ -17,10 +17,10 @@ There are multiple configurations of building app, some of them:
 2. ````gradle assembleCommonRelease```` - Release version for Google Play. Release versions need additional configuration for signing keys.
 3. ````gradle assembleCommonDebuggable```` - Release version with debugging enabled for testing
 4. ````gradle assembleBetaRelease```` - Builds [beta-version](https://play.google.com/store/apps/details?id=org.telegram.android.beta) of an app. Includes russian translations.
-5. ````gradle assembleMdpiRelease```` - Release version for MDPI version
-6. ````gradle assembleHdpiRelease```` - Release version for HDPI version
-7. ````gradle assembleXhdpiRelease```` - Release version for XHDPI version
-8. ````gradle assembleXxhdpiRelease```` - Release version for XXHDPI version
+5. ````gradle assembleMdpiRelease```` - Release version for MDPI devices
+6. ````gradle assembleHdpiRelease```` - Release version for HDPI devices
+7. ````gradle assembleXhdpiRelease```` - Release version for XHDPI devices
+8. ````gradle assembleXxhdpiRelease```` - Release version for XXHDPI devices
 9. ````gradle dist```` - Building release distributive
 10. ````gradle lightDist```` - Building release light version of distributive
 
