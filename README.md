@@ -12,20 +12,21 @@ Building project
 
 #### Build variants
 There are multiple configurations of building app, some of them:
-1) ````gradle assembleDevDebug```` - Development build for IDE, recomended for daily usage
-2) ````gradle assembleCommonRelease```` - Release version for Google Play. Release versions need additional configuration for signing keys.
-3) ````gradle assembleCommonDebuggable```` - Release version with debugging enabled for testing
-4) ````gradle assembleBetaRelease```` - Builds [beta-version](https://play.google.com/store/apps/details?id=org.telegram.android.beta) of an app. Includes russian translations.
-5) ````gradle assembleMdpiRelease```` - Release version for MDPI version
-6) ````gradle assembleHdpiRelease```` - Release version for HDPI version
-7) ````gradle assembleXhdpiRelease```` - Release version for XHDPI version
-8) ````gradle assembleXxhdpiRelease```` - Release version for XXHDPI version
-9) ````gradle dist```` - Building release distributive
-10) ````gradle lightDist```` - Building release light version of distributive
+
+1. ````gradle assembleDevDebug```` - Development build for IDE, recomended for daily usage
+2. ````gradle assembleCommonRelease```` - Release version for Google Play. Release versions need additional configuration for signing keys.
+3. ````gradle assembleCommonDebuggable```` - Release version with debugging enabled for testing
+4. ````gradle assembleBetaRelease```` - Builds [beta-version](https://play.google.com/store/apps/details?id=org.telegram.android.beta) of an app. Includes russian translations.
+5. ````gradle assembleMdpiRelease```` - Release version for MDPI version
+6. ````gradle assembleHdpiRelease```` - Release version for HDPI version
+7. ````gradle assembleXhdpiRelease```` - Release version for XHDPI version
+8. ````gradle assembleXxhdpiRelease```` - Release version for XXHDPI version
+9. ````gradle dist```` - Building release distributive
+10. ````gradle lightDist```` - Building release light version of distributive
 
 #### Build from Sources
-1) Checkout sources with all submodules
-2) Select required build configuration and run required ````gradle```` command
+1. Checkout sources with all submodules
+2. Select required build configuration and run required ````gradle```` command
 
 #### Using from IDE
 
