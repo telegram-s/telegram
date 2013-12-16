@@ -58,6 +58,9 @@ public class Notifications {
     private static final long QUITE_PERIOD = 300;
     private static final long IN_APP_TIMEOUT = 3000;
 
+    private static final int MAX_SENDER_LENGTH = 100;
+    private static final int MAX_MESSAGE_LENGTH = 200;
+
     private static final long[] VIBRATE_PATTERN = new long[]{0, 200};
     private static final int NOTIFICATION_MESSAGE = 0;
     private static final int NOTIFICATION_SYSTEM = 1;
@@ -256,12 +259,22 @@ public class Notifications {
                 PeerType.PEER_USER_ENCRYPTED, chatId, photo);
     }
 
-    private void notifyApp(final NotificationConfig config, final String senderTitle, final int senderId, String message, final int peerType, final int peerId, final TLObject photo) {
+    private void notifyApp(final NotificationConfig config, String senderTitle, final int senderId, String message, final int peerType, final int peerId, final TLObject photo) {
+
+        if (senderTitle.length() > MAX_SENDER_LENGTH) {
+            senderTitle = senderTitle.substring(MAX_SENDER_LENGTH) + "...";
+        }
+
+        if (message.length() > MAX_MESSAGE_LENGTH) {
+            message = message.substring(MAX_MESSAGE_LENGTH) + "...";
+        }
+
         message = application.getEmojiProcessor().fixStringCompat(message);
 
         if (config.useNotification) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(application);
             builder.setSmallIcon(R.drawable.app_notify);
+
             builder.setTicker(senderTitle + ": " + message);
 
             builder.setContentTitle(senderTitle);
@@ -346,6 +359,7 @@ public class Notifications {
 
             if (config.useInAppNotification) {
                 final String finalMessage = message;
+                final String finalSenderTitle = senderTitle;
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -367,7 +381,7 @@ public class Notifications {
                             needAdd = true;
                         }
 
-                        ((TextView) notificationView.findViewById(R.id.name)).setText(senderTitle);
+                        ((TextView) notificationView.findViewById(R.id.name)).setText(finalSenderTitle);
                         ((TextView) notificationView.findViewById(R.id.title)).setText(finalMessage);
 
                         FastWebImageView avatarImage = (FastWebImageView) notificationView.findViewById(R.id.avatar);
