@@ -129,6 +129,11 @@ public class DialogSource {
             }
 
             @Override
+            protected long getItemKeyV(DialogDescription obj) {
+                return obj.getDatabaseId();
+            }
+
+            @Override
             protected ViewSourceState getInternalState() {
                 switch (state) {
                     default:

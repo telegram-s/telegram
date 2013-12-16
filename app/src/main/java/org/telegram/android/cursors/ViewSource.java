@@ -227,8 +227,7 @@ public abstract class ViewSource<T, V> {
     }
 
     public synchronized void removeItem(V itm) {
-        T dest = convert(itm);
-        items.remove(getItemKey(dest));
+        items.remove(getItemKeyV(itm));
         invalidated = true;
     }
 
@@ -249,6 +248,8 @@ public abstract class ViewSource<T, V> {
     protected abstract long getSortingKey(T obj);
 
     protected abstract long getItemKey(T obj);
+
+    protected abstract long getItemKeyV(V obj);
 
     protected abstract ViewSourceState getInternalState();
 

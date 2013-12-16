@@ -189,6 +189,11 @@ public class MessageSource {
             }
 
             @Override
+            protected long getItemKeyV(ChatMessage obj) {
+                return obj.getDatabaseId();
+            }
+
+            @Override
             protected ViewSourceState getInternalState() {
                 switch (state) {
                     default:
