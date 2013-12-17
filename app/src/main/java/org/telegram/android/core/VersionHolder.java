@@ -2,7 +2,6 @@ package org.telegram.android.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.extradea.framework.persistence.ContextPersistence;
 import org.telegram.android.kernel.compat.CompatObjectInputStream;
 import org.telegram.android.kernel.compat.Compats;
 import org.telegram.android.kernel.compat.v6.CompatVersionHolder;

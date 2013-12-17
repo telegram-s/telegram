@@ -2,7 +2,6 @@ package org.telegram.android.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.extradea.framework.persistence.ContextPersistence;
 import org.telegram.android.StelsApplication;
 
 import java.util.HashMap;
