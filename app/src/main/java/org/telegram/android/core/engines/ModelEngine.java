@@ -43,10 +43,13 @@ public class ModelEngine {
 
     private UsersEngine usersEngine;
 
+    private MediaEngine mediaEngine;
+
     public ModelEngine(StelsDatabase database, StelsApplication application) {
         this.database = database;
         this.application = application;
         this.usersEngine = new UsersEngine(this);
+        this.mediaEngine = new MediaEngine(this);
     }
 
     public StelsApplication getApplication() {
@@ -61,20 +64,16 @@ public class ModelEngine {
         return usersEngine;
     }
 
+    public MediaEngine getMediaEngine() {
+        return mediaEngine;
+    }
+
     public User[] getUsersById(Object[] uids) {
         return usersEngine.getUsersById(uids);
     }
 
-    public User cacheUser(User src) {
-        return usersEngine.cacheUser(src);
-    }
-
     public User[] getContacts() {
         return usersEngine.getContacts();
-    }
-
-    public void onUserLinkChanged(int uid, int link) {
-        usersEngine.onUserLinkChanged(uid, link);
     }
 
     public void onUsers(List<TLAbsUser> users) {
@@ -96,6 +95,14 @@ public class ModelEngine {
     /**
      * End users actions
      */
+
+    public int getMediaCount(int peerType, int peerId) {
+        return mediaEngine.getMediaCount(peerType, peerId);
+    }
+
+    public MediaRecord findMedia(int mid) {
+        return mediaEngine.findMedia(mid);
+    }
 
     public int getCurrentTime() {
         return (int) (TimeOverlord.getInstance().getServerTime() / 1000);
@@ -742,152 +749,6 @@ public class ModelEngine {
         }
     }
 
-    public boolean onUserAvatarChanges(int uid, TLAbsLocalAvatarPhoto photo) {
-        User u = getUser(uid);
-        if (u != null) {
-            u.setPhoto(photo);
-            getUsersDao().update(u);
-
-            DialogDescription description = getDescriptionForPeer(PeerType.PEER_USER, uid);
-            if (description != null) {
-                description.setPhoto(photo);
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean onUserNameChanges(int uid, String firstName, String lastName) {
-        User u = getUser(uid);
-        if (u != null) {
-            u.setFirstName(firstName);
-            u.setLastName(lastName);
-            getUsersDao().update(u);
-
-            DialogDescription description = getDescriptionForPeer(PeerType.PEER_USER, uid);
-            if (description != null) {
-                description.setTitle(firstName + " " + lastName);
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void onUserStatus(int uid, TLAbsUserStatus status) {
-        User u = getUser(uid);
-        if (u != null) {
-            u.setStatus(EngineUtils.convertStatus(status));
-            getUsersDao().update(u);
-        }
-    }
-
-    public void onImportedContacts(final HashMap<Long, HashSet<Integer>> importedContacts) {
-        getContactsDao().callBatchTasks(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                HashSet<Integer> allUids = new HashSet<Integer>();
-                for (Long localId : importedContacts.keySet()) {
-                    Contact[] contacts = getContactsForLocalId(localId);
-                    HashSet<Integer> uids = importedContacts.get(localId);
-                    allUids.addAll(uids);
-                    for (Integer uid : uids) {
-                        boolean contains = false;
-                        for (Contact contact : contacts) {
-                            if (contact.getUid() == uid) {
-                                contains = true;
-                                break;
-                            }
-                        }
-
-                        if (!contains) {
-                            Contact contact = new Contact(uid, localId, getUser(uid), false);
-                            getContactsDao().create(contact);
-                        }
-                    }
-
-                    for (Contact contact : contacts) {
-                        boolean contains = false;
-                        for (Integer uid : uids) {
-                            if (contact.getUid() == uid) {
-                                contains = true;
-                                break;
-                            }
-                        }
-
-                        if (!contains) {
-                            getContactsDao().delete(contact);
-                        }
-                    }
-                }
-
-                for (User u : getUsersById(allUids.toArray())) {
-                    if (u.getLinkType() != LinkType.CONTACT) {
-                        u.setLinkType(LinkType.CONTACT);
-                        getUsersDao().update(u);
-                    }
-                }
-                return null;
-            }
-        });
-    }
-
-    public Contact[] getAllContacts() {
-        return getContactsDao().queryForAll().toArray(new Contact[0]);
-    }
-
-    public Contact[] getContactsForLocalId(long localId) {
-        return getContactsDao().queryForEq("localId", localId).toArray(new Contact[0]);
-    }
-
-    public void deleteContactsForLocalId(long localId) {
-        try {
-            DeleteBuilder<Contact, Long> builder = getContactsDao().deleteBuilder();
-            builder.where().eq("localId", localId);
-            getContactsDao().delete(builder.prepare());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        // getContactsDao().delete("localId", localId).toArray(new Contact[0]);
-    }
-
-    public Contact[] getContactsForUid(int uid) {
-        return getContactsDao().queryForEq("uid", uid).toArray(new Contact[0]);
-    }
-
-//    public Contact getUidContact(int uid) {
-//        try {
-//            QueryBuilder<Contact, Long> builder = getContactsDao().queryBuilder();
-//            builder.where().eq("uid", uid);
-//            return getContactsDao().queryForFirst(builder.prepare());
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return null;
-//    }
-//
-//    public Contact getContactUid(int localId) {
-//        try {
-//            QueryBuilder<Contact, Long> builder = getContactsDao().queryBuilder();
-//            builder.where().eq("localId", localId);
-//            return getContactsDao().queryForFirst(builder.prepare());
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return null;
-//    }
-
-    public void updateContact(int uid, long localId) {
-//        Contact contact = getUidContact(uid);
-//        contact.setLocalId(localId);
-//        getContactsDao().update(contact);
-    }
-
     public void addContact(int uid, long localId) {
 //        if (getUidContact(uid) != null)
 //            return;
@@ -1121,7 +982,7 @@ public class ModelEngine {
         nmsg.setMessageTimeout(timeout);
         getMessagesDao().create(nmsg);
         application.getDataSourceKernel().onSourceAddMessage(nmsg);
-        saveMedia(nmsg.getMid(), nmsg);
+        mediaEngine.saveMedia(nmsg.getMid(), nmsg);
         updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
         return true;
@@ -1146,7 +1007,7 @@ public class ModelEngine {
         nmsg.setMessageTimeout(timeout);
         getMessagesDao().create(nmsg);
         application.getDataSourceKernel().onSourceAddMessage(nmsg);
-        saveMedia(nmsg.getMid(), nmsg);
+        mediaEngine.saveMedia(nmsg.getMid(), nmsg);
         updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
         return true;
@@ -1690,7 +1551,7 @@ public class ModelEngine {
         getMessagesDao().update(msg);
         updateMaxDate(msg);
         application.getDataSourceKernel().onSourceUpdateMessage(msg);
-        saveMedia(msg.getMid(), msg);
+        mediaEngine.saveMedia(msg.getMid(), msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
             if (description.getTopMessageId() == -msg.getDatabaseId()) {
@@ -1712,7 +1573,7 @@ public class ModelEngine {
         getMessagesDao().update(msg);
         updateMaxDate(msg);
         application.getDataSourceKernel().onSourceUpdateMessage(msg);
-        saveMedia(msg.getMid(), msg);
+        mediaEngine.saveMedia(msg.getMid(), msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
             if (description.getTopMessageId() == -msg.getDatabaseId()) {
@@ -1733,7 +1594,7 @@ public class ModelEngine {
         getMessagesDao().update(msg);
         updateMaxDate(msg);
         application.getDataSourceKernel().onSourceUpdateMessage(msg);
-        saveMedia(msg.getMid(), msg);
+        mediaEngine.saveMedia(msg.getMid(), msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
             if (description.getTopMessageId() == -msg.getDatabaseId()) {
@@ -1798,7 +1659,7 @@ public class ModelEngine {
             getMessagesDao().update(msg);
             application.getDataSourceKernel().onSourceRemoveMessage(msg);
             if (msg.getExtras() instanceof TLLocalPhoto || msg.getExtras() instanceof TLLocalVideo) {
-                deleteMedia(msg.getMid());
+                mediaEngine.deleteMedia(msg.getMid());
             }
             updateDescriptorDeleteSent(msg.getPeerType(), msg.getPeerId(), msg.getMid());
         }
@@ -1812,7 +1673,7 @@ public class ModelEngine {
             getMessagesDao().update(msg);
             application.getDataSourceKernel().onSourceAddMessage(msg);
             if (msg.getExtras() instanceof TLLocalPhoto || msg.getExtras() instanceof TLLocalVideo) {
-                saveMedia(msg.getMid(), msg);
+                mediaEngine.saveMedia(msg.getMid(), msg);
             }
             updateDescriptorShort(msg);
         }
@@ -1826,7 +1687,7 @@ public class ModelEngine {
         getMessagesDao().update(msg);
         application.getDataSourceKernel().onSourceRemoveMessage(msg);
         if (msg.getExtras() instanceof TLLocalPhoto || msg.getExtras() instanceof TLLocalVideo) {
-            deleteMedia(msg.getMid());
+            mediaEngine.deleteMedia(msg.getMid());
         }
         updateDescriptorDeleteSent(msg.getPeerType(), msg.getPeerId(), msg.getMid());
     }
@@ -1838,7 +1699,7 @@ public class ModelEngine {
         getMessagesDao().delete(msg);
         application.getDataSourceKernel().onSourceRemoveMessage(msg);
         if (msg.getExtras() instanceof TLLocalPhoto || msg.getExtras() instanceof TLLocalVideo) {
-            deleteMedia(msg.getMid());
+            mediaEngine.deleteMedia(msg.getMid());
         }
         updateDescriptorSelfDestructed(msg.getPeerType(), msg.getPeerId(), msg.getMid());
     }
@@ -1913,9 +1774,9 @@ public class ModelEngine {
                     }
 
                     if (changed.getRawContentType() == ContentType.MESSAGE_PHOTO) {
-                        saveMedia(changed.getMid(), changed);
+                        mediaEngine.saveMedia(changed.getMid(), changed);
                     } else if (changed.getRawContentType() == ContentType.MESSAGE_VIDEO) {
-                        saveMedia(changed.getMid(), changed);
+                        mediaEngine.saveMedia(changed.getMid(), changed);
                     }
 
                     DialogDescription description = getDescriptionForPeer(changed.getPeerType(), changed.getPeerId());
@@ -1993,59 +1854,5 @@ public class ModelEngine {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public int getMediaCount(int peerType, int peerId) {
-        PreparedQuery<MediaRecord> query = null;
-        try {
-            QueryBuilder<MediaRecord, Long> builder = getMediasDao().queryBuilder();
-            if (peerType >= 0) {
-                builder.where().eq("peerType", peerType).and().eq("peerId", peerId);
-            }
-            builder.setCountOf(true);
-            query = builder.prepare();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return (int) getMediasDao().countOf(query);
-    }
-
-    public MediaRecord findMedia(int mid) {
-        List<MediaRecord> res = getMediasDao().queryForEq("mid", mid);
-        if (res.size() == 0) {
-            return null;
-        } else {
-            return res.get(0);
-        }
-    }
-
-    public void saveMedia(int mid, ChatMessage sourceMessage) {
-        MediaRecord record = findMedia(mid);
-        if (record != null)
-            return;
-
-        record = new MediaRecord();
-        record.setMid(sourceMessage.getMid());
-        record.setDate(sourceMessage.getDate());
-        record.setPeerId(sourceMessage.getPeerId());
-        record.setPeerType(sourceMessage.getPeerType());
-        if (sourceMessage.getRawContentType() == ContentType.MESSAGE_PHOTO) {
-            record.setPreview(sourceMessage.getExtras());
-        } else if (sourceMessage.getRawContentType() == ContentType.MESSAGE_VIDEO) {
-            record.setPreview(sourceMessage.getExtras());
-        }
-        if (sourceMessage.getForwardSenderId() != 0) {
-            record.setSenderId(sourceMessage.getForwardSenderId());
-        } else {
-            record.setSenderId(sourceMessage.getSenderId());
-        }
-        getMediasDao().create(record);
-    }
-
-    public void deleteMedia(int mid) {
-        MediaRecord record = findMedia(mid);
-        if (record == null)
-            return;
-        getMediasDao().delete(record);
     }
 }

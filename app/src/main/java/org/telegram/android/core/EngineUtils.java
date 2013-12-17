@@ -573,12 +573,21 @@ public class EngineUtils {
         return null;
     }
 
-    public static TLAbsUser findUser(List<TLAbsUser> chats, int id) {
-        for (TLAbsUser user : chats) {
+    public static TLAbsUser findUser(List<TLAbsUser> users, int id) {
+        for (TLAbsUser user : users) {
             if (user.getId() == id) {
                 return user;
             }
         }
         throw new RuntimeException("couldn't find user");
+    }
+
+    public static boolean hasUser(List<TLAbsUser> users, int id) {
+        for (TLAbsUser user : users) {
+            if (user.getId() == id) {
+                return true;
+            }
+        }
+        return false;
     }
 }

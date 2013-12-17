@@ -183,7 +183,7 @@ public class ContactsFragment extends BaseContactsFragment {
             startActivity(shareIntent);
         } else {
             final ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);
-            Contact[] contacts = application.getEngine().getContactsForLocalId(contact.contactId);
+            Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.contactId);
             if (contacts.length > 0) {
                 getRootController().openUser(contacts[0].getUid());
             } else {
@@ -298,7 +298,7 @@ public class ContactsFragment extends BaseContactsFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int b) {
                         final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.lookupKey);
-                        final Contact[] contacts = application.getEngine().getContactsForLocalId(contact.contactId);
+                        final Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.contactId);
                         if (contacts.length > 0) {
                             runUiTask(new AsyncAction() {
                                 @Override
@@ -370,7 +370,7 @@ public class ContactsFragment extends BaseContactsFragment {
                                 }
                                 rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
 
-                                Contact[] contacts = application.getEngine().getContactsForLocalId(contact.contactId);
+                                Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.contactId);
 
                                 TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
                                 for (Contact c : contacts) {

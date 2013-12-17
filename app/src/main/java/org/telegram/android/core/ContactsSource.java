@@ -127,7 +127,7 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
 
         final LocalContact[] contacts = new LocalContact[cur.getCount()];
 
-        Contact[] netContacts = application.getEngine().getAllContacts();
+        Contact[] netContacts = application.getEngine().getUsersEngine().getAllContacts();
         HashSet<Integer> ids = new HashSet<Integer>();
         for (Contact c : netContacts) {
             ids.add(c.getUid());

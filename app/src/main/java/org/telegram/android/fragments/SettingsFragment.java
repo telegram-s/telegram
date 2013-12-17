@@ -333,13 +333,11 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                             TLLocalAvatarPhoto profilePhoto = new TLLocalAvatarPhoto();
                             profilePhoto.setPreviewLocation(new TLLocalFileLocation(smallLocation.getDcId(), smallLocation.getVolumeId(), smallLocation.getLocalId(), smallLocation.getSecret(), smallPhotoSize.getSize()));
                             profilePhoto.setFullLocation(new TLLocalFileLocation(largeLocation.getDcId(), largeLocation.getVolumeId(), largeLocation.getLocalId(), largeLocation.getSecret(), largePhotoSize.getSize()));
-                            application.getEngine().onUserAvatarChanges(application.getCurrentUid(), profilePhoto);
-                            application.getUserSource().notifyUserChanged(application.getCurrentUid());
+                            application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), profilePhoto);
                         }
                     } else {
                         rpc(new TLRequestPhotosUpdateProfilePhoto(new TLInputPhotoEmpty(), new TLInputPhotoCropAuto()));
-                        application.getEngine().onUserAvatarChanges(application.getCurrentUid(), new TLLocalAvatarEmpty());
-                        application.getUserSource().notifyUserChanged(application.getCurrentUid());
+                        application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), new TLLocalAvatarEmpty());
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();

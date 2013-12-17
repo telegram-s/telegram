@@ -19,6 +19,7 @@ import org.telegram.android.reflection.CrashHandler;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
 import org.telegram.api.TLMessage;
+import org.telegram.api.contacts.TLMyLinkContact;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.messages.*;
 import org.telegram.api.requests.TLRequestUpdatesGetDifference;
@@ -608,49 +609,29 @@ public class UpdateProcessor {
 
     private void onUpdate(int date, TLAbsUpdate update, List<TLAbsUser> users, List<TLAbsChat> chats, PackageIdentity identity) {
         Logger.d(TAG, "#### | Update: " + update);
-        if (update instanceof TLUpdateContactLink) {
-//            TLUpdateContactLink link = (TLUpdateContactLink) update;
-//            application.getEngine().onUserLinkChanged(EngineUtils.findUser(users, link.getUserId()));
-//            application.getUserSource().notifyUserChanged(link.getUserId());
-        } else if (update instanceof TLUpdateUserTyping) {
-            application.getTypingStates().onUserTyping(((TLUpdateUserTyping) update).getUserId(), date);
-            application.getUserSource().notifyUserChanged(((TLUpdateUserTyping) update).getUserId());
+
+        if (update instanceof TLUpdateUserTyping) {
+            TLUpdateUserTyping userTyping = ((TLUpdateUserTyping) update);
+            application.getTypingStates().onUserTyping(userTyping.getUserId(), date);
         } else if (update instanceof TLUpdateChatUserTyping) {
             TLUpdateChatUserTyping userTyping = (TLUpdateChatUserTyping) update;
             application.getTypingStates().onUserChatTyping(userTyping.getUserId(), userTyping.getChatId(), date);
         } else if (update instanceof TLUpdateUserStatus) {
             TLUpdateUserStatus updateUserStatus = (TLUpdateUserStatus) update;
-            Logger.d(TAG, "#### | UserStatus " + updateUserStatus.getStatus());
-            application.getEngine().onUserStatus(updateUserStatus.getUserId(), updateUserStatus.getStatus());
-            application.getUserSource().notifyUserChanged(updateUserStatus.getUserId());
+            if (!EngineUtils.hasUser(users, updateUserStatus.getUserId())) {
+                application.getEngine().getUsersEngine().onUserStatus(updateUserStatus.getUserId(), updateUserStatus.getStatus());
+            }
         } else if (update instanceof TLUpdateUserName) {
             TLUpdateUserName updateUserName = (TLUpdateUserName) update;
-            application.getEngine().onUserNameChanges(updateUserName.getUserId(), updateUserName.getFirstName(), updateUserName.getLastName());
-            application.getUserSource().notifyUserChanged(updateUserName.getUserId());
+            if (!EngineUtils.hasUser(users, updateUserName.getUserId())) {
+                application.getEngine().getUsersEngine().onUserNameChanges(updateUserName.getUserId(), updateUserName.getFirstName(), updateUserName.getLastName());
+            }
         } else if (update instanceof TLUpdateUserPhoto) {
             TLUpdateUserPhoto updateUserPhoto = (TLUpdateUserPhoto) update;
-            TLAbsLocalAvatarPhoto photo = EngineUtils.convertAvatarPhoto(updateUserPhoto.getPhoto());
-            application.getEngine().onUserAvatarChanges(updateUserPhoto.getUserId(), photo);
-//            application.getEngine().onNewInternalServiceMessage(PeerType.PEER_USER, updateUserPhoto.getUserId(),
-//                    updateUserPhoto.getUserId(),
-//                    updateUserPhoto.getDate(),
-//                    new TLLocalActionUserEditPhoto(photo));
-            application.getUserSource().notifyUserChanged(updateUserPhoto.getUserId());
-        } else if (update instanceof TLUpdateReadMessages) {
-            TLUpdateReadMessages readMessages = (TLUpdateReadMessages) update;
-            Integer[] ids = readMessages.getMessages().toArray(new Integer[0]);
-            Logger.w(TAG, "updateReadMessage: " + Arrays.toString(ids));
-            application.getEngine().onMessagesReaded(ids);
-            application.notifyUIUpdate();
-        } else if (update instanceof TLUpdateChatParticipants) {
-            TLUpdateChatParticipants participants = (TLUpdateChatParticipants) update;
-            application.getEngine().onChatParticipants(participants.getParticipants());
-        } else if (update instanceof TLUpdateDeleteMessages) {
-            TLUpdateDeleteMessages deleteMessages = (TLUpdateDeleteMessages) update;
-            application.getEngine().onDeletedOnServer(deleteMessages.getMessages().toArray(new Integer[0]));
-        } else if (update instanceof TLUpdateRestoreMessages) {
-            TLUpdateRestoreMessages restoreMessages = (TLUpdateRestoreMessages) update;
-            application.getEngine().onRestoredOnServer(restoreMessages.getMessages().toArray(new Integer[0]));
+            if (!EngineUtils.hasUser(users, updateUserPhoto.getUserId())) {
+                TLAbsLocalAvatarPhoto photo = EngineUtils.convertAvatarPhoto(updateUserPhoto.getPhoto());
+                application.getEngine().getUsersEngine().onUserPhotoChanges(updateUserPhoto.getUserId(), photo);
+            }
         } else if (update instanceof TLUpdateContactRegistered) {
             User src = application.getEngine().getUser(((TLUpdateContactRegistered) update).getUserId());
             application.getEngine().onNewInternalServiceMessage(
@@ -659,9 +640,34 @@ public class UpdateProcessor {
                     src.getUid(),
                     ((TLUpdateContactRegistered) update).getDate(),
                     new TLLocalActionUserRegistered());
-            application.notifyUIUpdate();
             application.getNotifications().onNewMessageJoined(src.getDisplayName(), src.getUid(), 0, src.getPhoto());
+            application.notifyUIUpdate();
             application.getSyncKernel().getContactsSync().invalidateContactsSync();
+        } else if (update instanceof TLUpdateContactLink) {
+            TLUpdateContactLink link = (TLUpdateContactLink) update;
+            if (!EngineUtils.hasUser(users, link.getUserId())) {
+                // TODO: Implement link update
+            }
+        } else if (update instanceof TLUpdateChatParticipants) {
+            TLUpdateChatParticipants participants = (TLUpdateChatParticipants) update;
+            application.getEngine().onChatParticipants(participants.getParticipants());
+        } else if (update instanceof TLUpdateChatParticipantAdd) {
+            TLUpdateChatParticipantAdd addUser = (TLUpdateChatParticipantAdd) update;
+            application.getEngine().onChatUserShortAdded(addUser.getChatId(), addUser.getInviterId(), addUser.getUserId());
+        } else if (update instanceof TLUpdateChatParticipantDelete) {
+            TLUpdateChatParticipantDelete deleteUser = (TLUpdateChatParticipantDelete) update;
+            application.getEngine().onChatUserShortRemoved(deleteUser.getChatId(), deleteUser.getUserId());
+        } else if (update instanceof TLUpdateReadMessages) {
+            TLUpdateReadMessages readMessages = (TLUpdateReadMessages) update;
+            Integer[] ids = readMessages.getMessages().toArray(new Integer[0]);
+            application.getEngine().onMessagesReaded(ids);
+            application.notifyUIUpdate();
+        } else if (update instanceof TLUpdateDeleteMessages) {
+            TLUpdateDeleteMessages deleteMessages = (TLUpdateDeleteMessages) update;
+            application.getEngine().onDeletedOnServer(deleteMessages.getMessages().toArray(new Integer[0]));
+        } else if (update instanceof TLUpdateRestoreMessages) {
+            TLUpdateRestoreMessages restoreMessages = (TLUpdateRestoreMessages) update;
+            application.getEngine().onRestoredOnServer(restoreMessages.getMessages().toArray(new Integer[0]));
         } else if (update instanceof TLUpdateEncryption) {
             application.getEncryptionController().onUpdateEncryption(((TLUpdateEncryption) update).getChat());
         } else if (update instanceof TLUpdateEncryptedChatTyping) {
@@ -674,8 +680,6 @@ public class UpdateProcessor {
             application.getEngine().onEncryptedReaded(read.getChatId(), read.getDate(), read.getMaxDate());
         } else if (update instanceof TLUpdateNewMessage) {
             onUpdateNewMessage((TLUpdateNewMessage) update, users, chats);
-        } else if (update instanceof TLUpdateActivation) {
-
         } else if (update instanceof TLUpdateNewAuthorization) {
             TLUpdateNewAuthorization authorization = (TLUpdateNewAuthorization) update;
             if (authorization.getLocation().length() > 0) {
@@ -683,12 +687,8 @@ public class UpdateProcessor {
             } else {
                 application.getNotifications().onAuthUnrecognized(authorization.getDevice());
             }
-        } else if (update instanceof TLUpdateChatParticipantAdd) {
-            TLUpdateChatParticipantAdd addUser = (TLUpdateChatParticipantAdd) update;
-            application.getEngine().onChatUserShortAdded(addUser.getChatId(), addUser.getInviterId(), addUser.getUserId());
-        } else if (update instanceof TLUpdateChatParticipantDelete) {
-            TLUpdateChatParticipantDelete deleteUser = (TLUpdateChatParticipantDelete) update;
-            application.getEngine().onChatUserShortRemoved(deleteUser.getChatId(), deleteUser.getUserId());
+        } else if (update instanceof TLUpdateActivation) {
+
         }
     }
 

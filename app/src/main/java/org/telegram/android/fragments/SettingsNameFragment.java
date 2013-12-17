@@ -122,7 +122,6 @@ public class SettingsNameFragment extends StelsFragment {
                     ArrayList<TLAbsUser> users = new ArrayList<TLAbsUser>();
                     users.add(user);
                     application.getEngine().onUsers(users);
-                    application.getUserSource().notifyUserChanged(application.getCurrentUid());
                 } catch (RpcException e) {
                     e.printStackTrace();
                     if (!"NAME_NOT_MODIFIED".equals(e.getErrorTag())) {

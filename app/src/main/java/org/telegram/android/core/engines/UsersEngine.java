@@ -3,20 +3,19 @@ package org.telegram.android.core.engines;
 import android.os.SystemClock;
 import android.util.Pair;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
-import com.j256.ormlite.stmt.UpdateBuilder;
+import com.j256.ormlite.stmt.*;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
-import org.telegram.android.core.model.LinkType;
-import org.telegram.android.core.model.User;
+import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.log.Logger;
 import org.telegram.api.TLAbsUser;
 import org.telegram.api.TLAbsUserStatus;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,11 +27,10 @@ public class UsersEngine {
 
     private static final String TAG = "UsersEngine";
 
-    private ModelEngine modelEngine;
-
     private ConcurrentHashMap<Integer, User> userCache;
 
     private RuntimeExceptionDao<User, Long> userDao;
+    private RuntimeExceptionDao<Contact, Long> contactsDao;
 
     private PreparedQuery<User> getUserQuery;
     private SelectArg getUserIdArg;
@@ -40,10 +38,10 @@ public class UsersEngine {
     private StelsApplication application;
 
     public UsersEngine(ModelEngine modelEngine) {
-        this.modelEngine = modelEngine;
         this.application = modelEngine.getApplication();
         this.userCache = new ConcurrentHashMap<Integer, User>();
         this.userDao = modelEngine.getUsersDao();
+        this.contactsDao = modelEngine.getContactsDao();
 
         try {
             QueryBuilder<User, Long> queryBuilder = userDao.queryBuilder();
@@ -126,7 +124,15 @@ public class UsersEngine {
     }
 
     public User[] getContacts() {
-        return userDao.queryForEq("linkType", LinkType.CONTACT).toArray(new User[0]);
+        User[] res = userDao.queryForEq("linkType", LinkType.CONTACT).toArray(new User[0]);
+        for (int i = 0; i < res.length; i++) {
+            res[i] = cacheUser(res[i]);
+        }
+        return res;
+    }
+
+    public Contact[] getAllContacts() {
+        return contactsDao.queryForAll().toArray(new Contact[0]);
     }
 
     public void onUserLinkChanged(int uid, int link) {
@@ -135,29 +141,117 @@ public class UsersEngine {
             return;
         }
         user.setLinkType(link);
-        userDao.update(user);
+        onUsers(user);
+    }
+
+    public void onUserNameChanges(int uid, String firstName, String lastName) {
+        User u = getUser(uid);
+        if (u != null) {
+            u.setFirstName(firstName);
+            u.setLastName(lastName);
+            onUsers(u);
+        }
+    }
+
+    public void onUserPhotoChanges(int uid, TLAbsLocalAvatarPhoto photo) {
+        User u = getUser(uid);
+        if (u != null) {
+            u.setPhoto(photo);
+            onUsers(u);
+        }
     }
 
     public void onUserStatus(int uid, TLAbsUserStatus status) {
         User u = getUser(uid);
         if (u != null) {
             u.setStatus(EngineUtils.convertStatus(status));
-            userDao.update(u);
+            onUsers(u);
         }
     }
 
-    public void onUsers(List<TLAbsUser> users) {
+    public void onImportedContacts(final HashMap<Long, HashSet<Integer>> importedContacts) {
+        contactsDao.callBatchTasks(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                HashSet<Integer> allUids = new HashSet<Integer>();
+                for (Long localId : importedContacts.keySet()) {
+                    Contact[] contacts = getContactsForLocalId(localId);
+                    HashSet<Integer> uids = importedContacts.get(localId);
+                    allUids.addAll(uids);
+                    for (Integer uid : uids) {
+                        boolean contains = false;
+                        for (Contact contact : contacts) {
+                            if (contact.getUid() == uid) {
+                                contains = true;
+                                break;
+                            }
+                        }
+
+                        if (!contains) {
+                            Contact contact = new Contact(uid, localId, getUser(uid), false);
+                            contactsDao.create(contact);
+                        }
+                    }
+
+                    for (Contact contact : contacts) {
+                        boolean contains = false;
+                        for (Integer uid : uids) {
+                            if (contact.getUid() == uid) {
+                                contains = true;
+                                break;
+                            }
+                        }
+
+                        if (!contains) {
+                            contactsDao.delete(contact);
+                        }
+                    }
+                }
+
+                ArrayList<User> updated = new ArrayList<User>();
+                for (User u : getUsersById(allUids.toArray())) {
+                    if (u.getLinkType() != LinkType.CONTACT) {
+                        u.setLinkType(LinkType.CONTACT);
+                        updated.add(u);
+
+                    }
+                }
+                if (updated.size() > 0) {
+                    onUsers(updated.toArray(new User[updated.size()]));
+                }
+                return null;
+            }
+        });
+    }
+
+    public Contact[] getContactsForLocalId(long localId) {
+        return contactsDao.queryForEq("localId", localId).toArray(new Contact[0]);
+    }
+
+    public void deleteContactsForLocalId(long localId) {
+        try {
+            DeleteBuilder<Contact, Long> builder = contactsDao.deleteBuilder();
+            builder.where().eq("localId", localId);
+            contactsDao.delete(builder.prepare());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        // getContactsDao().delete("localId", localId).toArray(new Contact[0]);
+    }
+
+    public Contact[] getContactsForUid(int uid) {
+        return contactsDao.queryForEq("uid", uid).toArray(new Contact[0]);
+    }
+
+    public void onUsers(User... converted) {
         long start = SystemClock.uptimeMillis();
 
-        Logger.d(TAG, "onUsers: " + users.size());
+        Logger.d(TAG, "onUsers: " + converted.length);
 
-        Integer[] ids = new Integer[users.size()];
-        User[] converted = new User[users.size()];
+        Integer[] ids = new Integer[converted.length];
         for (int i = 0; i < ids.length; i++) {
-            converted[i] = EngineUtils.userFromTlUser(users.get(i));
             ids[i] = converted[i].getUid();
         }
-
         User[] original = getUsersById(ids);
 
         final ArrayList<Pair<User, User>> diff = new ArrayList<Pair<User, User>>();
@@ -185,7 +279,7 @@ public class UsersEngine {
 
         }
 
-        Logger.d(TAG, "onUsers: changed " + changed + " of " + users.size());
+        Logger.d(TAG, "onUsers: changed " + changed + " of " + converted.length);
 
         if (changed == 0) {
             return;
@@ -259,5 +353,18 @@ public class UsersEngine {
         });
 
         Logger.d(TAG, "onUsers:update: " + (SystemClock.uptimeMillis() - start));
+
+        for (Pair<User, User> user : diff) {
+            application.getUserSource().notifyUserChanged(user.second.getUid());
+        }
+    }
+
+    public void onUsers(List<TLAbsUser> users) {
+        User[] converted = new User[users.size()];
+        for (int i = 0; i < users.size(); i++) {
+            converted[i] = EngineUtils.userFromTlUser(users.get(i));
+        }
+
+        onUsers(converted);
     }
 }

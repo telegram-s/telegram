@@ -139,8 +139,8 @@ public class ContactsSync extends BaseSync {
     }
 
     public void removeContact(long contactId) {
-        Contact[] relatedContacts = application.getEngine().getContactsForLocalId(contactId);
-        application.getEngine().deleteContactsForLocalId(contactId);
+        Contact[] relatedContacts = application.getEngine().getUsersEngine().getContactsForLocalId(contactId);
+        application.getEngine().getUsersEngine().deleteContactsForLocalId(contactId);
 
         HashSet<Integer> uids = new HashSet<Integer>();
         for (Contact c : relatedContacts) {
@@ -241,7 +241,7 @@ public class ContactsSync extends BaseSync {
         if (!isLoaded) {
             PhoneBookRecord[] freshPhoneBook = loadPhoneBook();
             ArrayList<Contact> freshContacts = new ArrayList<Contact>();
-            Collections.addAll(freshContacts, application.getEngine().getAllContacts());
+            Collections.addAll(freshContacts, application.getEngine().getUsersEngine().getAllContacts());
             synchronized (phoneBookSync) {
                 currentPhoneBook = freshPhoneBook;
                 contacts = freshContacts;
@@ -521,7 +521,7 @@ public class ContactsSync extends BaseSync {
 
         Logger.d(TAG, "build map in " + (SystemClock.uptimeMillis() - start) + " ms");
 
-        application.getEngine().onImportedContacts(imported);
+        application.getEngine().getUsersEngine().onImportedContacts(imported);
 
         Logger.d(TAG, "updatedMapping in " + (SystemClock.uptimeMillis() - start) + " ms");
     }

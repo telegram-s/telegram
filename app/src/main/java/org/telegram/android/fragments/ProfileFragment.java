@@ -351,7 +351,7 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
         inflater.inflate(R.menu.user_menu, menu);
         menu.findItem(R.id.blockUserMenu).setTitle(highlightMenuText(R.string.st_profile_menu_block));
         menu.findItem(R.id.addContact).setTitle(highlightMenuText(R.string.st_profile_menu_add));
-        if (application.getEngine().getContactsForUid(userId).length > 0) {
+        if (application.getEngine().getUsersEngine().getContactsForUid(userId).length > 0) {
             menu.findItem(R.id.addContact).setVisible(false);
             if (!application.getTechKernel().getTechReflection().isOnSdCard()) {
                 menu.findItem(R.id.viewBook).setVisible(true);
@@ -404,7 +404,7 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
             });
             return true;
         } else if (item.getItemId() == R.id.viewBook) {
-            final Contact[] contacts = application.getEngine().getContactsForUid(userId);
+            final Contact[] contacts = application.getEngine().getUsersEngine().getContactsForUid(userId);
             if (contacts.length == 1) {
                 startActivity(new Intent(Intent.ACTION_VIEW)
                         .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[0].getLocalId() + "")));
