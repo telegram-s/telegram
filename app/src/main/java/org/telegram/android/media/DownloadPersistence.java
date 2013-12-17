@@ -21,7 +21,7 @@ public class DownloadPersistence {
     private SafeFileWriter fileWriter;
 
     public DownloadPersistence(Context context) {
-        fileWriter = new SafeFileWriter(context, "org.telegram.android.LastEmojiProcessor.bin");
+        fileWriter = new SafeFileWriter(context, "org.telegram.android.DownloadPersistence.bin");
 
         byte[] data = fileWriter.loadData();
         if (data != null) {

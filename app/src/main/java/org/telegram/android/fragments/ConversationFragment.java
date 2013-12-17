@@ -369,8 +369,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 //                                            throw new AsyncException(e);
 //                                        }
                                     }
-                                    getEngine().deleteEncryptedChat(peerId);
                                     getEngine().deleteHistory(peerType, peerId);
+                                    getEngine().deleteEncryptedChat(peerId);
                                 } else {
                                     final TLAbsInputPeer peer;
                                     if (peerType == PeerType.PEER_CHAT) {
@@ -1326,7 +1326,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (peerType == PeerType.PEER_USER && peerId == uid) {
             getSherlockActivity().invalidateOptionsMenu();
         }
-        if (peerType == PeerType.PEER_USER_ENCRYPTED && application.getEngine().getEncryptedChat(peerId).getUserId() == uid) {
+        if (peerType == PeerType.PEER_USER_ENCRYPTED) {
             EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(peerId);
             if (encryptedChat != null && encryptedChat.getUserId() == uid) {
                 getSherlockActivity().invalidateOptionsMenu();
@@ -1902,9 +1902,14 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             } else {
                                 DownloadState state = application.getDownloadManager().getState(key);
                                 if (state == DownloadState.COMPLETED) {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getVideoFileName(key))), "video/*");
-                                    startActivity(intent);
+                                    String fileName = application.getDownloadManager().getVideoFileName(key);
+                                    if (fileName != null) {
+                                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                                        intent.setDataAndType(Uri.fromFile(new File(fileName)), "video/*");
+                                        startActivity(intent);
+                                    } else {
+                                        Toast.makeText(application, R.string.st_error_sd_unavailable, Toast.LENGTH_SHORT).show();
+                                    }
                                 } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
                                     // CANCEL
                                     application.getDownloadManager().abortDownload(key);

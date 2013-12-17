@@ -271,9 +271,14 @@ public class ImagePreviewFragment extends StelsFragment {
                     playButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getVideoFileName(key))), "video/*");
-                            startActivity(intent);
+                            String fileName = application.getDownloadManager().getVideoFileName(key);
+                            if (fileName != null) {
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setDataAndType(Uri.fromFile(new File(fileName)), "video/*");
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(application, R.string.st_error_sd_unavailable, Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
                     downloadButton.setOnClickListener(new View.OnClickListener() {
@@ -362,7 +367,10 @@ public class ImagePreviewFragment extends StelsFragment {
                                 }
 
                                 if (state == DownloadState.COMPLETED) {
-                                    imageView.setImageTask(new FileSystemImageTask(application.getDownloadManager().getPhotoFileName(key)));
+                                    String fileName = application.getDownloadManager().getPhotoFileName(key);
+                                    if (fileName != null) {
+                                        imageView.setImageTask(new FileSystemImageTask(fileName));
+                                    }
                                     downloadButton.setVisibility(View.GONE);
                                     progressBar.setVisibility(View.GONE);
                                 } else if (state == DownloadState.IN_PROGRESS | state == DownloadState.PENDING) {
@@ -539,6 +547,11 @@ public class ImagePreviewFragment extends StelsFragment {
                 key = DownloadManager.getPhotoKey((TLLocalPhoto) record.getPreview());
                 fileName = application.getDownloadManager().getPhotoFileName(key);
                 fileNameDest = key + ".jpg";
+            }
+
+            if (fileName == null) {
+                Toast.makeText(application, R.string.st_error_sd_unavailable, Toast.LENGTH_SHORT).show();
+                return true;
             }
 
             if (key != null && application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {

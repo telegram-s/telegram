@@ -344,28 +344,33 @@ public class MessageMediaView extends BaseMsgView {
                 previewWidth = mediaPhoto.getFullW();
                 if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
 
-                    float maxWidth = getPx(160);
-                    float maxHeight = getPx(300);
+                    String fileName = application.getDownloadManager().getPhotoFileName(key);
 
-                    float scale = maxWidth / previewWidth;
+                    if (fileName != null) {
 
-                    if (previewHeight * scale > maxHeight) {
-                        scale = maxHeight / previewHeight;
-                    }
+                        float maxWidth = getPx(160);
+                        float maxHeight = getPx(300);
 
-                    int scaledW = (int) maxWidth;
-                    int scaledH = (int) (previewHeight * scale);
+                        float scale = maxWidth / previewWidth;
 
-                    previewTask = new FileSystemImageTask(application.getDownloadManager().getPhotoFileName(key));
-                    previewTask.setMaxWidth(scaledW);
-                    previewTask.setMaxHeight(scaledH);
-                    previewTask.setFillRect(true);
-                    previewTask.setPutInDiskCache(true);
+                        if (previewHeight * scale > maxHeight) {
+                            scale = maxHeight / previewHeight;
+                        }
 
-                    if (oldPreview == null) {
-                        if (mediaPhoto.getFastPreviewH() != 0 && mediaPhoto.getFastPreviewW() != 0) {
-                            CachedImageTask cachedImageTask = new CachedImageTask(mediaPhoto, scaledW, scaledH, true);
-                            oldPreview = application.getImageController().tryToFindInCache(cachedImageTask);
+                        int scaledW = (int) maxWidth;
+                        int scaledH = (int) (previewHeight * scale);
+
+                        previewTask = new FileSystemImageTask(fileName);
+                        previewTask.setMaxWidth(scaledW);
+                        previewTask.setMaxHeight(scaledH);
+                        previewTask.setFillRect(true);
+                        previewTask.setPutInDiskCache(true);
+
+                        if (oldPreview == null) {
+                            if (mediaPhoto.getFastPreviewH() != 0 && mediaPhoto.getFastPreviewW() != 0) {
+                                CachedImageTask cachedImageTask = new CachedImageTask(mediaPhoto, scaledW, scaledH, true);
+                                oldPreview = application.getImageController().tryToFindInCache(cachedImageTask);
+                            }
                         }
                     }
                 }

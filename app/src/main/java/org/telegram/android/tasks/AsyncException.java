@@ -104,6 +104,13 @@ public class AsyncException extends Exception {
             return "User has unsupported version of Telegram.";
         }
 
+        if (errorType.equals("PHOTO_CROP_SIZE_SMALL")) {
+            if (application != null) {
+                return application.getString(R.string.st_error_photo_small);
+            }
+            return "Photo is too small.";
+        }
+
         return null;
     }
 

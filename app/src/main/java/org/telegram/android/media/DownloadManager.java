@@ -3,7 +3,9 @@ package org.telegram.android.media;
 import android.graphics.*;
 import android.media.MediaScannerConnection;
 import android.os.*;
+import android.widget.Toast;
 import com.extradea.framework.images.utils.ImageUtils;
+import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.log.Logger;
@@ -131,6 +133,13 @@ public class DownloadManager {
         if (downloadPersistence.isDownloaded(resourceKey))
             return;
 
+        final String fileName = getPhotoFileName(resourceKey);
+
+        if (fileName == null) {
+            Toast.makeText(application, R.string.st_error_sd_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         final DownloadRecord record;
         if (records.containsKey(resourceKey)) {
             record = records.get(resourceKey);
@@ -153,15 +162,22 @@ public class DownloadManager {
             updateState(resourceKey, record.state, 0, 0);
         }
 
-        requestDownload(resourceKey, record,
-                getDownloadImageFile(resourceKey),
-                photo.getFullLocation());
+        requestDownload(resourceKey, record, fileName, photo.getFullLocation());
     }
 
     public synchronized void requestDownload(TLLocalVideo video) {
         final String resourceKey = getVideoKey(video);
-        if (downloadPersistence.isDownloaded(resourceKey))
+
+        if (downloadPersistence.isDownloaded(resourceKey)) {
             return;
+        }
+
+        final String fileName = getVideoFileName(resourceKey);
+
+        if (fileName == null) {
+            Toast.makeText(application, R.string.st_error_sd_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         final DownloadRecord record;
         if (records.containsKey(resourceKey)) {
@@ -185,9 +201,7 @@ public class DownloadManager {
             updateState(resourceKey, record.state, 0, 0);
         }
 
-        requestDownload(resourceKey, record,
-                getDownloadVideoFile(resourceKey),
-                video.getVideoLocation());
+        requestDownload(resourceKey, record, fileName, video.getVideoLocation());
     }
 
     private void requestDownload(final String key, final DownloadRecord record, final String fileName, final TLAbsLocalFileLocation fileLocation) {
@@ -331,12 +345,23 @@ public class DownloadManager {
     }
 
     public synchronized void saveDownloadImage(String key, String fileName) throws IOException {
-        IOUtils.copy(new File(fileName), new File(getDownloadImageFile(key)));
+        String destFileName = getPhotoFileName(key);
+        if (destFileName == null) {
+            throw new IOException();
+        }
+
+        IOUtils.copy(new File(fileName), new File(destFileName));
         downloadPersistence.markDownloaded(key);
     }
 
     public synchronized void saveDownloadVideo(String key, String fileName) throws IOException {
-        IOUtils.copy(new File(fileName), new File(getDownloadVideoFile(key)));
+
+        String destFileName = getVideoFileName(key);
+        if (destFileName == null) {
+            throw new IOException();
+        }
+
+        IOUtils.copy(new File(fileName), new File(destFileName));
         downloadPersistence.markDownloaded(key);
     }
 
@@ -354,30 +379,31 @@ public class DownloadManager {
     }
 
     public String getVideoFileName(String key) {
-        return getDownloadVideoFile(key);
-    }
-
-    public String getPhotoFileName(String key) {
-        return getDownloadImageFile(key);
-    }
-
-    public String getPhotoThumbSmallFileName(String key) {
-        return getDownloadImageThumbFile(key);
-    }
-
-    private String getDownloadVideoFile(String key) {
+        if (application.getExternalCacheDir() == null) {
+            return null;
+        }
         return application.getExternalCacheDir().getAbsolutePath() + "/video_" + key + ".mp4";
     }
 
-    private String getDownloadImageFile(String key) {
+    public String getPhotoFileName(String key) {
+        if (application.getExternalCacheDir() == null) {
+            return null;
+        }
         return application.getExternalCacheDir().getAbsolutePath() + "/image_" + key + ".jpg";
     }
 
-    private String getDownloadImageThumbFile(String key) {
+    public String getPhotoThumbSmallFileName(String key) {
+        if (application.getExternalCacheDir() == null) {
+            return null;
+        }
         return application.getExternalCacheDir().getAbsolutePath() + "/image_thumb_" + key + ".jpg";
+
     }
 
     private String getDownloadTempFile() {
+        if (application.getExternalCacheDir() == null) {
+            return null;
+        }
         return application.getExternalCacheDir().getAbsolutePath() + "/download_" + Entropy.generateRandomId() + ".bin";
     }
 

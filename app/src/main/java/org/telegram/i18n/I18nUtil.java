@@ -187,20 +187,15 @@ public class I18nUtil {
     }
 
     public String formatMonthShort(int day, int monthId) {
-//        if (locale.equals("ar")) {
-//            return I18nUtil.getInstance().getMonthShort(monthId) + " " + I18nUtil.getInstance().correctFormatNumber(day);
-//        } else {
-//            return I18nUtil.getInstance().correctFormatNumber(day) + " " + I18nUtil.getInstance().getMonthShort(monthId);
-//        }
-        return I18nUtil.getInstance().correctFormatNumber(day) + " " + I18nUtil.getInstance().getMonthShort(monthId);
+        return context.getString(R.string.lang_month_pattern)
+                .replace("{month}", I18nUtil.getInstance().getMonthShort(monthId))
+                .replace("{day}", I18nUtil.getInstance().correctFormatNumber(day));
     }
 
     public String formatMonth(int day, int monthId) {
-//        if (locale.equals("ar")) {
-//            return I18nUtil.getInstance().getMonthName(monthId) + " " + I18nUtil.getInstance().correctFormatNumber(day);
-//        } else {
-//            return I18nUtil.getInstance().correctFormatNumber(day) + " " + I18nUtil.getInstance().getMonthName(monthId);
-//        }
-        return I18nUtil.getInstance().correctFormatNumber(day) + " " + I18nUtil.getInstance().getMonthName(monthId);
+        return context.getString(R.string.lang_month_pattern)
+                .replace("{month}", I18nUtil.getInstance().getMonthName(monthId))
+                .replace("{day}", I18nUtil.getInstance().correctFormatNumber(day));
     }
+
 }

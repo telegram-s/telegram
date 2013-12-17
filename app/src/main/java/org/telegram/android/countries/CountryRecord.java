@@ -8,24 +8,31 @@ public class CountryRecord {
     private String title;
     private String iso;
     private int callPrefix;
-    private boolean disabled;
+    private boolean searchByCode;
+    private boolean searchByName;
 
-    public CountryRecord(String title, String iso, int callPrefix, boolean disabled) {
+    public CountryRecord(String title, String iso, int callPrefix, boolean searchByCode,boolean searchByName) {
         this.title = title;
         this.iso = iso;
         this.callPrefix = callPrefix;
-        this.disabled = disabled;
+        this.searchByCode = searchByCode;
+        this.searchByName = searchByName;
     }
 
     public CountryRecord(String title, String iso, int callPrefix) {
         this.title = title;
         this.iso = iso;
         this.callPrefix = callPrefix;
-        this.disabled = false;
+        this.searchByName = true;
+        this.searchByCode = true;
     }
 
-    public boolean isDisabled() {
-        return disabled;
+    public boolean isSearchByCode() {
+        return searchByCode;
+    }
+
+    public boolean isSearchByName() {
+        return searchByName;
     }
 
     public String getTitle() {
