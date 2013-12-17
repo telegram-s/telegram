@@ -301,9 +301,11 @@ public class EmojiProcessor {
                     isLoaded = true;
                     notifyEmojiUpdated(true);
                     Logger.d(TAG, "emoji loaded in " + (System.currentTimeMillis() - start) + " ms");
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Throwable t) {
+                    t.printStackTrace();
                     Logger.d(TAG, "emoji loading error");
+                    isLoaded = false;
+                    isLoading = false;
                 }
             }
         }.start();
