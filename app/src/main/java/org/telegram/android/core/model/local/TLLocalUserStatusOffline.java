@@ -46,4 +46,16 @@ public class TLLocalUserStatusOffline extends TLAbsLocalUserStatus {
     public void deserializeBody(InputStream stream, TLContext context) throws IOException {
         wasOnline = readInt(stream);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TLLocalUserStatusOffline)) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean equals(TLLocalUserStatusOffline status) {
+        return status.wasOnline == wasOnline;
+    }
 }

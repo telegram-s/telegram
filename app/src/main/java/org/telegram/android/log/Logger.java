@@ -36,6 +36,7 @@ public class Logger {
     private static final String TAG = "Logger";
 
     private static final boolean ENABLED = true;
+    private static final boolean LOG_THREAD = false;
 
     private static ArrayList<LogRecord> cachedRecords = new ArrayList<LogRecord>();
 
@@ -218,7 +219,11 @@ public class Logger {
         if (!ENABLED) {
             return;
         }
-        Log.d("T|" + TAG, Thread.currentThread().getName() + "| " + message);
+        if (LOG_THREAD) {
+            Log.d("T|" + TAG, Thread.currentThread().getName() + "| " + message);
+        } else {
+            Log.d("T|" + TAG, message);
+        }
         if (isEnabled && isInitied) {
             addLogRecord(new LogRecord(System.currentTimeMillis(), TAG, Thread.currentThread().getName(), message));
         }
@@ -250,7 +255,11 @@ public class Logger {
         if (!ENABLED) {
             return;
         }
-        Log.w("T|" + TAG, Thread.currentThread().getName() + "| " + message);
+        if (LOG_THREAD) {
+            Log.w("T|" + TAG, Thread.currentThread().getName() + "| " + message);
+        } else {
+            Log.w("T|" + TAG, message);
+        }
         if (isEnabled && isInitied) {
             addLogRecord(new LogRecord(System.currentTimeMillis(), TAG, Thread.currentThread().getName(), message));
         }

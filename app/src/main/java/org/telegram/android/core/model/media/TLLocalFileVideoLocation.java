@@ -86,4 +86,19 @@ public class TLLocalFileVideoLocation extends TLAbsLocalFileLocation {
         accessHash = readLong(stream);
         size = readInt(stream);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TLLocalFileVideoLocation)) {
+            return false;
+        }
+        return super.equals(o);
+    }
+
+    public boolean equals(TLLocalFileVideoLocation videoLocation) {
+        return videoLocation.dcId == dcId &&
+                videoLocation.videoId == videoId &&
+                videoLocation.accessHash == accessHash &&
+                videoLocation.size == size;
+    }
 }

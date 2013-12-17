@@ -14,4 +14,9 @@ public class TLLocalUserStatusEmpty extends TLAbsLocalUserStatus {
     public int getClassId() {
         return CLASS_ID;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof TLLocalUserStatusEmpty;
+    }
 }

@@ -1,4 +1,4 @@
-package org.telegram.android.core;
+package org.telegram.android.core.engines;
 
 import android.os.SystemClock;
 import android.util.Pair;
@@ -7,6 +7,8 @@ import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.core.EngineUtils;
+import org.telegram.android.core.StelsDatabase;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;

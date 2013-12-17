@@ -14,4 +14,9 @@ public class TLLocalFileEmpty extends TLAbsLocalFileLocation {
     public int getClassId() {
         return CLASS_ID;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof TLLocalFileEmpty;
+    }
 }

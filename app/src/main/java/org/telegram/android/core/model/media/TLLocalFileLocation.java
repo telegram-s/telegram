@@ -99,4 +99,20 @@ public class TLLocalFileLocation extends TLAbsLocalFileLocation implements Seria
         secret = readLong(stream);
         size = readInt(stream);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TLLocalFileLocation)) {
+            return false;
+        }
+        return equals((TLLocalFileLocation) o);
+    }
+
+    public boolean equals(TLLocalFileLocation location) {
+        return location.dcId == dcId &&
+                location.volumeId == volumeId &&
+                location.localId == localId &&
+                location.secret == secret &&
+                location.size == size;
+    }
 }

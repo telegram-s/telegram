@@ -16,7 +16,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import org.telegram.android.core.ModelEngine;
+import org.telegram.android.core.engines.ModelEngine;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;

@@ -58,4 +58,19 @@ public class TLLocalAvatarPhoto extends TLAbsLocalAvatarPhoto {
         previewLocation = (TLAbsLocalFileLocation) readTLObject(stream, context);
         fullLocation = (TLAbsLocalFileLocation) readTLObject(stream, context);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof TLLocalAvatarPhoto)) {
+            return false;
+        }
+        return equals((TLLocalAvatarPhoto) o);
+    }
+
+    public boolean equals(TLLocalAvatarPhoto photo) {
+        return true;
+    }
 }

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.os.SystemClock;
 import com.extradea.framework.images.ImageController;
 import com.extradea.framework.images.ImageSupport;
+import org.telegram.android.core.engines.ModelEngine;
 import org.telegram.android.kernel.api.AuthController;
 import org.telegram.android.config.WallpaperHolder;
 import org.telegram.android.core.*;

@@ -62,9 +62,24 @@ public class TLLocalFileDocument extends TLAbsLocalFileLocation {
 
     @Override
     public void deserializeBody(InputStream stream, TLContext context) throws IOException {
-        dcId=readInt(stream);
+        dcId = readInt(stream);
         id = readLong(stream);
         accessHash = readLong(stream);
         size = readInt(stream);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TLLocalFileDocument)) {
+            return false;
+        }
+        return super.equals(o);
+    }
+
+    public boolean equals(TLLocalFileDocument document) {
+        return document.dcId == dcId &&
+                document.id == id &&
+                document.accessHash == accessHash &&
+                document.size == size;
     }
 }

@@ -1,5 +1,6 @@
 package org.telegram.android.core.model.media;
 
+import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.tl.TLContext;
 
 import java.io.IOException;
@@ -109,5 +110,22 @@ public class TLLocalEncryptedFileLocation extends TLAbsLocalFileLocation {
         dcId = readInt(stream);
         key = readTLBytes(stream);
         iv = readTLBytes(stream);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TLLocalEncryptedFileLocation)) {
+            return false;
+        }
+        return super.equals(o);
+    }
+
+    public boolean equals(TLLocalEncryptedFileLocation fileLocation) {
+        return fileLocation.id == id &&
+                fileLocation.accessHash == accessHash &&
+                fileLocation.size == size &&
+                fileLocation.dcId == dcId &&
+                CryptoUtils.arrayEq(fileLocation.key, key) &&
+                CryptoUtils.arrayEq(fileLocation.iv, iv);
     }
 }

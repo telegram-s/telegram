@@ -1,4 +1,4 @@
-package org.telegram.android.core;
+package org.telegram.android.core.engines;
 
 import android.os.SystemClock;
 import android.util.Pair;
@@ -6,7 +6,9 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
+import com.j256.ormlite.stmt.UpdateBuilder;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.log.Logger;
@@ -146,6 +148,9 @@ public class UsersEngine {
 
     public void onUsers(List<TLAbsUser> users) {
         long start = SystemClock.uptimeMillis();
+
+        Logger.d(TAG, "onUsers: " + users.size());
+
         Integer[] ids = new Integer[users.size()];
         User[] converted = new User[users.size()];
         for (int i = 0; i < ids.length; i++) {
@@ -157,9 +162,33 @@ public class UsersEngine {
 
         final ArrayList<Pair<User, User>> diff = new ArrayList<Pair<User, User>>();
 
+        int changed = 0;
+
         for (User m : converted) {
             User orig = EngineUtils.searchUser(original, m.getUid());
-            diff.add(new Pair<User, User>(orig, m));
+
+            boolean isChanged = false;
+
+            if (orig != null) {
+                if (!orig.equals(m)) {
+                    isChanged = true;
+                    changed++;
+                }
+            } else {
+                isChanged = true;
+                changed++;
+            }
+
+            if (isChanged) {
+                diff.add(new Pair<User, User>(orig, m));
+            }
+
+        }
+
+        Logger.d(TAG, "onUsers: changed " + changed + " of " + users.size());
+
+        if (changed == 0) {
+            return;
         }
 
         Logger.d(TAG, "onUsers:prepare: " + (SystemClock.uptimeMillis() - start));
@@ -167,6 +196,7 @@ public class UsersEngine {
         userDao.callBatchTasks(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
+                int changedColumns = 0;
                 for (Pair<User, User> user : diff) {
                     User orig = user.first;
                     User changed = user.second;
@@ -180,15 +210,50 @@ public class UsersEngine {
                             }
                         }
                     } else {
-                        orig.setFirstName(changed.getFirstName());
-                        orig.setLastName(changed.getLastName());
-                        orig.setPhone(changed.getPhone());
-                        orig.setStatus(changed.getStatus());
-                        orig.setAccessHash(changed.getAccessHash());
-                        orig.setLinkType(changed.getLinkType());
+
+                        UpdateBuilder<User, Long> updateBuilder = userDao.updateBuilder();
+                        updateBuilder.where().eq("_id", orig.getDatabaseId());
+
+                        if (orig.getAccessHash() != changed.getAccessHash()) {
+                            updateBuilder.updateColumnValue("accessHash", changed.getAccessHash());
+                            orig.setAccessHash(changed.getAccessHash());
+                            changedColumns++;
+                        }
+
+                        if (orig.getLinkType() != changed.getLinkType()) {
+                            updateBuilder.updateColumnValue("linkType", changed.getLinkType());
+                            orig.setLinkType(changed.getLinkType());
+                            changedColumns++;
+                        }
+
+                        if (!orig.getFirstName().equals(changed.getFirstName())) {
+                            updateBuilder.updateColumnValue("firstName", changed.getFirstName());
+                            orig.setFirstName(changed.getFirstName());
+                            changedColumns++;
+                        }
+
+                        if (!orig.getLastName().equals(changed.getLastName())) {
+                            updateBuilder.updateColumnValue("lastName", changed.getLastName());
+                            orig.setLastName(changed.getLastName());
+                            changedColumns++;
+                        }
+
+                        if (!orig.getStatus().equals(changed.getStatus())) {
+                            updateBuilder.updateColumnValue("status", changed.getStatus());
+                            orig.setStatus(changed.getStatus());
+                            changedColumns++;
+                        }
+
+                        if (!orig.getPhoto().equals(changed.getPhoto())) {
+                            updateBuilder.updateColumnValue("photo", changed.getPhoto());
+                            orig.setPhoto(changed.getPhoto());
+                            changedColumns++;
+                        }
+
                         userDao.update(orig);
                     }
                 }
+                Logger.d(TAG, "Updated columns: " + changedColumns);
                 return null;
             }
         });

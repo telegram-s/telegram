@@ -1,6 +1,6 @@
 package org.telegram.android.kernel;
 
-import org.telegram.android.core.ModelEngine;
+import org.telegram.android.core.engines.ModelEngine;
 import org.telegram.android.core.StelsDatabase;
 import org.telegram.android.log.Logger;
 

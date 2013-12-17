@@ -144,4 +144,84 @@ public class User {
     public void setLinkType(int linkType) {
         this.linkType = linkType;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof User)) {
+            return false;
+        }
+
+        return equals((User) o);
+    }
+
+    public boolean equals(User u) {
+        if (uid != u.uid) {
+            return false;
+        }
+
+        if (accessHash != u.accessHash) {
+            return false;
+        }
+
+        if (linkType != u.linkType) {
+            return false;
+        }
+
+        if (firstName != null && u.firstName != null) {
+            if (!firstName.equals(u.firstName)) {
+                return false;
+            }
+        } else {
+            // Both or one is null
+            if (firstName != u.firstName) {
+                return false;
+            }
+        }
+
+        if (lastName != null && u.lastName != null) {
+            if (!lastName.equals(u.lastName)) {
+                return false;
+            }
+        } else {
+            // Both or one is null
+            if (lastName != u.lastName) {
+                return false;
+            }
+        }
+
+        if (phone != null && u.phone != null) {
+            if (!phone.equals(u.phone)) {
+                return false;
+            }
+        } else {
+            // Both or one is null
+            if (phone != u.phone) {
+                return false;
+            }
+        }
+
+        if (photo != null && u.photo != null) {
+            if (!photo.equals(u.photo)) {
+                return false;
+            }
+        } else {
+            // Both or one is null
+            if (photo != u.photo) {
+                return false;
+            }
+        }
+
+        if (status != null && u.status != null) {
+            if (!status.equals(u.status)) {
+                return false;
+            }
+        } else {
+            // Both or one is null
+            if (status != u.status) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
