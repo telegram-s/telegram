@@ -11,6 +11,7 @@ import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.log.Logger;
 import org.telegram.api.TLAbsUser;
 import org.telegram.api.TLAbsUserStatus;
+import org.telegram.api.TLContact;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -245,7 +246,6 @@ public class UsersEngine {
 
     public void onUsers(User... converted) {
         long start = SystemClock.uptimeMillis();
-
         Logger.d(TAG, "onUsers: " + converted.length);
 
         Integer[] ids = new Integer[converted.length];
@@ -279,13 +279,13 @@ public class UsersEngine {
 
         }
 
-        Logger.d(TAG, "onUsers: changed " + changed + " of " + converted.length);
+        Logger.d(TAG, "onUsers changed " + changed + " of " + converted.length);
 
         if (changed == 0) {
             return;
         }
 
-        Logger.d(TAG, "onUsers:prepare: " + (SystemClock.uptimeMillis() - start));
+        Logger.d(TAG, "onUsers prepared in " + (SystemClock.uptimeMillis() - start));
         start = SystemClock.uptimeMillis();
         userDao.callBatchTasks(new Callable<Object>() {
             @Override
@@ -352,11 +352,16 @@ public class UsersEngine {
             }
         });
 
-        Logger.d(TAG, "onUsers:update: " + (SystemClock.uptimeMillis() - start));
+        Logger.d(TAG, "onUsers updated in " + (SystemClock.uptimeMillis() - start));
 
-        for (Pair<User, User> user : diff) {
-            application.getUserSource().notifyUserChanged(user.second.getUid());
+        if (application.getUserSource() != null) {
+            for (Pair<User, User> user : diff) {
+                application.getUserSource().notifyUserChanged(user.second.getUid());
+            }
         }
+
+        start = SystemClock.uptimeMillis();
+        Logger.d(TAG, "onUsers notified in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public void onUsers(List<TLAbsUser> users) {
@@ -366,5 +371,9 @@ public class UsersEngine {
         }
 
         onUsers(converted);
+    }
+
+    public void onContacts(List<TLAbsUser> users, List<TLContact> contacts) {
+        onUsers(users);
     }
 }

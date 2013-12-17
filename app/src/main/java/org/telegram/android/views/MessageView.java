@@ -391,7 +391,7 @@ public class MessageView extends BaseMsgView {
             // spannable = new SpannableString(wireframe.message.getMessage());
             Logger.d(TAG, "Emoji processed in " + (SystemClock.uptimeMillis() - start) + " ms");
             start = SystemClock.uptimeMillis();
-            Linkify.addLinks(this.spannable, Linkify.ALL);
+            Linkify.addLinks(this.spannable, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS | Linkify.EMAIL_ADDRESSES);
             fixLinks(spannable);
             Logger.d(TAG, "Added links in " + (SystemClock.uptimeMillis() - start) + " ms");
             start = SystemClock.uptimeMillis();

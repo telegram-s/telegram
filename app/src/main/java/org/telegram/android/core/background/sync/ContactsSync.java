@@ -292,7 +292,7 @@ public class ContactsSync extends BaseSync {
         TLAbsContacts response = application.getApi().doRpcCall(new TLRequestContactsGetContacts(hash));
         if (response instanceof TLContacts) {
             TLContacts contactsResponse = (TLContacts) response;
-            application.getEngine().onContacts(contactsResponse.getUsers(), contactsResponse.getContacts());
+            application.getEngine().getUsersEngine().onContacts(contactsResponse.getUsers(), contactsResponse.getContacts());
         }
 
         if (TWO_SIDE_SYNC) {

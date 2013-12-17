@@ -749,36 +749,6 @@ public class ModelEngine {
         }
     }
 
-    public void addContact(int uid, long localId) {
-//        if (getUidContact(uid) != null)
-//            return;
-//        User user = getUser(uid);
-//        if (user == null) {
-//            return;
-//        }
-//        getContactsDao().create(new Contact(uid, localId, user, false));
-    }
-
-    public void onContacts(List<TLAbsUser> users, List<TLContact> contacts) {
-        onUsers(users);
-
-//        final List<Contact> converted = new ArrayList<Contact>();
-//        for (TLContact contact : contacts) {
-//            converted.add(new Contact(contact.getUserId(), 0, getUser(contact.getUserId()), contact.getMutual()));
-//        }
-//
-//        DiffUtils.applyDiffUpdate(converted, getContactsDao(), new Comparator<Contact>() {
-//            @Override
-//            public int compare(Contact contact, Contact contact2) {
-//                if (contact.getUid() == contact2.getUid()) {
-//                    return 0;
-//                } else {
-//                    return 1;
-//                }
-//            }
-//        });
-    }
-
     private void updateMaxDate(ChatMessage msg) {
         if (msg.getDate() > maxDate) {
             maxDate = msg.getDate();

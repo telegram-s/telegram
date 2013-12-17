@@ -21,7 +21,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private static final String TAG = "Database";
 
     private static final String DATABASE_NAME = "stels.db";
-    private static final int DATABASE_VERSION = 54;
+    private static final int DATABASE_VERSION = 55;
 
     private RuntimeExceptionDao<DialogDescription, Long> dialogsDao;
     private RuntimeExceptionDao<FullChatInfo, Long> fullChatInfoDao;
@@ -36,7 +36,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     public StelsDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
-        getWritableDatabase().execSQL("PRAGMA synchronous = OFF;");
+        getWritableDatabase().execSQL("PRAGMA synchronous = OFF;PRAGMA journal_mode = MEMORY;");
     }
 
     @Override
@@ -52,6 +52,8 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
 
             //User
             database.execSQL("CREATE UNIQUE INDEX mytest_id_idx ON ChatMessage(mid);\n");
+            // database.execSQL("CREATE UNIQUE INDEX user_uid_idx ON user(uid);\n");
+            database.execSQL("CREATE INDEX dlg_date_idx ON dialogdescription(date);\n");
         } catch (SQLException e) {
             Logger.e(TAG, "Can't create database", e);
             throw new RuntimeException(e);
@@ -115,6 +117,9 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             if (oldVersion < 54) {
                 database.execSQL("CREATE INDEX dlg_date_idx ON dialogdescription(date);\n");
             }
+//            if (oldVersion < 55) {
+//                database.execSQL("CREATE UNIQUE INDEX user_uid_idx ON user(uid);\n");
+//            }
 
 //            try {
 //                TableUtils.dropTable(connectionSource, DialogDescription.class, true);
