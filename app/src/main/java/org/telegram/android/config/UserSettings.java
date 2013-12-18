@@ -110,6 +110,7 @@ public class UserSettings {
 
     public void setSendByEnter(boolean sendByEnter) {
         this.sendByEnter = sendByEnter;
+        preferences.edit().putBoolean("sendByEnter", sendByEnter).commit();
     }
 
     public void clearSettings() {

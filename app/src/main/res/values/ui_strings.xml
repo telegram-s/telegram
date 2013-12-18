@@ -338,6 +338,7 @@
     <string name="st_appearance_font_size_normal">Normal</string>
     <string name="st_appearance_font_size_large">Large</string>
     <string name="st_appearance_font_size_huge">Huge</string>
+    <string name="st_appearance_enter">Send by Enter</string>
 
     <string name="st_notifications_title">Notifications and sounds</string>
     <string name="st_notifications_header_common">MESSAGE NOTIFICATIONS</string>

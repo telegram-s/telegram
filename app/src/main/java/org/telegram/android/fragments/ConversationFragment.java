@@ -245,6 +245,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         editText = (EditText) res.findViewById(R.id.text);
 
+        updateImeConfig();
+
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
@@ -274,6 +276,18 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
                 if (application.getUserSettings().isSendByEnter()) {
                     if (keyEvent != null && i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                        doSend();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+        editText.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keycode, KeyEvent keyEvent) {
+                if (application.getUserSettings().isSendByEnter()) {
+                    if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && keycode == KeyEvent.KEYCODE_ENTER) {
                         doSend();
                         return true;
                     }
@@ -344,6 +358,16 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
 
         return res;
+    }
+
+    private void updateImeConfig() {
+        if (application.getUserSettings().isSendByEnter()) {
+            editText.setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT);
+            editText.setImeOptions(EditorInfo.IME_ACTION_SEND);
+        } else {
+            editText.setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
+            editText.setImeOptions(EditorInfo.IME_ACTION_NONE);
+        }
     }
 
     private void deleteDialog() {
@@ -801,6 +825,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         application.getTypingStates().registerListener(this);
         application.getUserSource().registerListener(this);
         application.getEncryptedChatSource().registerListener(this);
+
+        updateImeConfig();
 
         application.getUiKernel().onOpenedChat(peerType, peerId);
 

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -18,14 +19,17 @@ import org.telegram.android.views.MessageView;
 /**
  * Created by ex3ndr on 18.12.13.
  */
-public class SettingsViewFragment extends StelsFragment {
+public class SettingsChatFragment extends StelsFragment {
 
     private TextView fontSizeValue;
+    private ImageView sendByEnterCheck;
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_view, container, false);
         fontSizeValue = (TextView) res.findViewById(R.id.fontSizeValue);
+        sendByEnterCheck = (ImageView) res.findViewById(R.id.sendByEnterCheck);
+
         res.findViewById(R.id.fontSelect).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -92,6 +96,15 @@ public class SettingsViewFragment extends StelsFragment {
                 dialog.show();
             }
         });
+
+        res.findViewById(R.id.sendByEnterSelector).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getUserSettings().setSendByEnter(!application.getUserSettings().isSendByEnter());
+                bindUi();
+            }
+        });
+
         bindUi();
         return res;
     }
@@ -114,6 +127,11 @@ public class SettingsViewFragment extends StelsFragment {
             case UserSettings.BUBBLE_FONT_TINY:
                 fontSizeValue.setText(R.string.st_appearance_font_size_tiny);
                 break;
+        }
+        if (application.getUserSettings().isSendByEnter()) {
+            sendByEnterCheck.setImageResource(R.drawable.holo_btn_check_on);
+        } else {
+            sendByEnterCheck.setImageResource(R.drawable.holo_btn_check_off);
         }
     }
 

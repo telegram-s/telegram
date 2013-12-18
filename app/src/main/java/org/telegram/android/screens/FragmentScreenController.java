@@ -374,7 +374,7 @@ public class FragmentScreenController implements RootController {
 
     @Override
     public void openNotificationSettings() {
-        openScreen(new NotificationSettingsFragment());
+        openScreen(new SettingsNottificationsFragment());
     }
 
     @Override
@@ -384,7 +384,7 @@ public class FragmentScreenController implements RootController {
 
     @Override
     public void openChatSettings() {
-        openScreen(new SettingsViewFragment());
+        openScreen(new SettingsChatFragment());
     }
 
     @Override

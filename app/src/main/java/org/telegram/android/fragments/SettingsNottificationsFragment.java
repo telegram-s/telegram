@@ -22,7 +22,7 @@ import org.telegram.android.StelsFragment;
  * Author: Korshakov Stepan
  * Created: 16.08.13 15:04
  */
-public class NotificationSettingsFragment extends StelsFragment {
+public class SettingsNottificationsFragment extends StelsFragment {
 
     private static final int REQUEST_PICK_SOUND_ALL = 1;
     private static final int REQUEST_PICK_SOUND_GROUP = 2;
