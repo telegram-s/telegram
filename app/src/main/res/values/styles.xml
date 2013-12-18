@@ -134,6 +134,29 @@
         <item name="homeAsUpIndicator">@drawable/st_bar_back_photo</item>
     </style>
 
+    <style name="PickTheme.Theme" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowBackground">@color/st_pick_intent_bg</item>
+    </style>
+
+    <style name="PickDialog.Theme" parent="android:Theme.Dialog">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+
+
+        <!-- No backgrounds, titles or window float -->
+        <item name="android:windowBackground">@drawable/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+
+        <!--<item name="android:windowNoTitle">true</item>-->
+        <!--<item name="android:windowFullscreen">true</item>-->
+        <!--<item name="android:windowIsFloating">true</item>-->
+        <!--<item name="android:windowContentOverlay">@null</item>-->
+        <!--<item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>-->
+        <!--<item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>-->
+        <!--<item name="android:windowBackground">@android:color/transparent</item>-->
+    </style>
+
+
     <style name="DropDown.Stels" parent="Widget.Sherlock.Light.ListView.DropDown">
         <item name="android:divider">@drawable/st_bar_menu_div</item>
         <item name="android:listSelector">@drawable/st_list_selector</item>

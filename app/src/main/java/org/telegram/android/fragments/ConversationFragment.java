@@ -31,6 +31,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.MediaReceiverFragment;
+import org.telegram.android.PickIntentActivity;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.config.DebugSettings;
@@ -1011,7 +1012,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
                 return true;
             }
-            requestVideo(2);
+            // requestVideo(2);
+            new PickIntentDialog(getActivity()).show();
+            // startActivity(new Intent().setClass(getActivity(), PickIntentActivity.class));
             return true;
         }
 

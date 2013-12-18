@@ -31,4 +31,5 @@
     <color name="st_bar_selected_bg">#1CFFFFFF</color>
     <color name="st_bar_title_color">#ffffff</color>
     <color name="st_bar_subtitle_color">#ffffff</color>
+    <color name="st_pick_intent_bg">#80282828</color>
 </resources>
