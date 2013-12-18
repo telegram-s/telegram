@@ -37,6 +37,8 @@ import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.tl.TLVector;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,6 +60,8 @@ public class ContactsSync extends BaseSync {
     private static final int SYNC_CONTACTS_INTEGRATION = 3;
     private static final int SYNC_CONTACTS_TWO_SIDE = 4;
     private static final int SYNC_CONTACTS_TWO_SIDE_TIMEOUT = 12 * HOUR;
+
+    private static final int OP_LIMIT = 20;
 
     private static final boolean TWO_SIDE_SYNC = true;
 
@@ -87,6 +91,8 @@ public class ContactsSync extends BaseSync {
     private HandlerThread observerUpdatesThread;
 
     private final Object contactsSync = new Object();
+
+    private long lastContactsChanged = 0;
 
     public ContactsSync(StelsApplication application) {
         super(application, SETTINGS_NAME);
@@ -207,6 +213,8 @@ public class ContactsSync extends BaseSync {
         return currentPhoneBook;
     }
 
+    private String currentPhoneBookHash;
+
     public void run() {
         init();
         this.observerUpdatesThread = new HandlerThread("ObserverHandlerThread") {
@@ -216,13 +224,49 @@ public class ContactsSync extends BaseSync {
                 contentObserver = new ContentObserver(new Handler(observerUpdatesThread.getLooper())) {
                     @Override
                     public void onChange(boolean selfChange) {
-                        invalidateContactsSync();
+                        if (SystemClock.uptimeMillis() - lastContactsChanged < 1000) {
+                            return;
+                        }
+
+                        if (currentPhoneBookHash == null) {
+                            invalidateContactsSync();
+                        } else {
+                            PhoneBookRecord[] records = loadPhoneBook();
+                            String hash = phoneBookHash(records);
+                            if (!hash.equals(currentPhoneBookHash)) {
+                                currentPhoneBookHash = hash;
+                                invalidateContactsSync();
+                            } else {
+                                lastContactsChanged = SystemClock.uptimeMillis();
+                            }
+                        }
                     }
                 };
-                application.getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contentObserver);
+                application.getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, false, contentObserver);
             }
         };
         this.observerUpdatesThread.start();
+    }
+
+    private String phoneBookHash(PhoneBookRecord[] book) {
+        MessageDigest crypt = null;
+        try {
+            crypt = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            // Never happens
+            return "";
+        }
+
+        for (PhoneBookRecord record : book) {
+            crypt.update(record.getFirstName().getBytes());
+            crypt.update(record.getLastName().getBytes());
+            for (Phone phone : record.getPhones()) {
+                crypt.update(phone.getNumber().getBytes());
+            }
+        }
+
+        return CryptoUtils.ToHex(crypt.digest());
     }
 
     public void invalidateContactsSync() {
@@ -244,6 +288,7 @@ public class ContactsSync extends BaseSync {
             Collections.addAll(freshContacts, application.getEngine().getUsersEngine().getAllContacts());
             synchronized (phoneBookSync) {
                 currentPhoneBook = freshPhoneBook;
+                currentPhoneBookHash = phoneBookHash(currentPhoneBook);
                 contacts = freshContacts;
                 isLoaded = true;
             }
@@ -251,6 +296,7 @@ public class ContactsSync extends BaseSync {
             PhoneBookRecord[] freshPhoneBook = loadPhoneBook();
             synchronized (phoneBookSync) {
                 currentPhoneBook = freshPhoneBook;
+                currentPhoneBookHash = phoneBookHash(currentPhoneBook);
             }
         }
 
@@ -374,6 +420,10 @@ public class ContactsSync extends BaseSync {
             return;
         }
 
+        if (!TWO_SIDE_SYNC) {
+            return;
+        }
+
         long start = SystemClock.uptimeMillis();
         User[] users = application.getEngine().getUsersEngine().getContacts();
         HashMap<Integer, Long> localContacts = new HashMap<Integer, Long>();
@@ -394,19 +444,19 @@ public class ContactsSync extends BaseSync {
         Logger.d(TAG, "Readed saved contacts in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();
 
-        ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-        for (User u : users) {
-            if (!localContacts.containsKey(u.getUid())) {
-                synchronized (contactsSync) {
+        synchronized (contactsSync) {
+            ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+            for (User u : users) {
+                if (!localContacts.containsKey(u.getUid())) {
+
                     addContact(false, application.getKernel().getAuthKernel().getAccount(), u, u.getDisplayName(), u.getPhone(), operationList);
-                    if (operationList.size() > 480) {
-                        complete(operationList);
-                        operationList.clear();
-                    }
+                    //if (operationList.size() > OP_LIMIT) {
+                    complete(operationList);
+                    operationList.clear();
+                    //}
                 }
             }
-        }
-        synchronized (contactsSync) {
+
             if (operationList.size() > 0) {
                 complete(operationList);
             }
@@ -626,11 +676,6 @@ public class ContactsSync extends BaseSync {
 
             if (phoneUtil == null) {
                 phoneUtil = PhoneNumberUtil.getInstance();
-                try {
-                    phoneUtil.parse("+79995555555", isoCountry);
-                } catch (NumberParseException e) {
-                    e.printStackTrace();
-                }
             }
 
             Logger.d(TAG, "Phone book phase 2 in " + (SystemClock.uptimeMillis() - start) + " ms");
@@ -648,7 +693,6 @@ public class ContactsSync extends BaseSync {
                     } catch (NumberParseException e) {
                         phoneNo = phoneNo.replaceAll("[^\\d]", "");
                     }
-                    phoneNo = phoneNo.replaceAll("[^\\d]", "");
 
                     record.getPhones().add(new Phone(phoneNo, phoneId));
                 }
