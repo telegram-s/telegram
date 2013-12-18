@@ -8,10 +8,7 @@ import android.content.OperationApplicationException;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.RemoteException;
-import android.os.SystemClock;
+import android.os.*;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
@@ -63,7 +60,7 @@ public class ContactsSync extends BaseSync {
 
     private static final int OP_LIMIT = 20;
 
-    private static final boolean TWO_SIDE_SYNC = true;
+    private static final boolean TWO_SIDE_SYNC = Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 
     private static final String TAG = "ContactsSync";
 
@@ -245,6 +242,7 @@ public class ContactsSync extends BaseSync {
                 application.getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, false, contentObserver);
             }
         };
+        this.observerUpdatesThread.setPriority(Thread.MIN_PRIORITY);
         this.observerUpdatesThread.start();
     }
 
