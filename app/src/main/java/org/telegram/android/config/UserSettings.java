@@ -14,14 +14,19 @@ public class UserSettings {
 
     public static final int BUBBLE_FONT_NORMAL = 0;
     public static final int BUBBLE_FONT_NORMAL_VALUE = 18;
+    public static final int BUBBLE_FONT_NORMAL_VALUE_CLOCK = 14;
     public static final int BUBBLE_FONT_TINY = 1;
     public static final int BUBBLE_FONT_TINY_VALUE = 14;
+    public static final int BUBBLE_FONT_TINY_VALUE_CLOCK = 12;
     public static final int BUBBLE_FONT_SMALL = 2;
     public static final int BUBBLE_FONT_SMALL_VALUE = 16;
+    public static final int BUBBLE_FONT_SMALL_VALUE_CLOCK = 14;
     public static final int BUBBLE_FONT_LARGE = 3;
     public static final int BUBBLE_FONT_LARGE_VALUE = 20;
+    public static final int BUBBLE_FONT_LARGE_VALUE_CLOCK = 16;
     public static final int BUBBLE_FONT_HUGE = 4;
     public static final int BUBBLE_FONT_HUGE_VALUE = 24;
+    public static final int BUBBLE_FONT_HUGE_VALUE_CLOCK = 20;
 
     private SharedPreferences preferences;
     private int currentWallpaperId = -1;

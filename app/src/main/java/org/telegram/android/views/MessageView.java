@@ -67,45 +67,50 @@ public class MessageView extends BaseMsgView {
 
         StelsApplication application = (StelsApplication) context.getApplicationContext();
 
-        bodyPaint = initTextPaint();
-        bodyPaint.setTypeface(FontController.loadTypeface(context, "regular"));
-
         int fontSize;
+        int fontSizeClock;
         switch (application.getUserSettings().getBubbleFontSizeId()) {
             default:
             case UserSettings.BUBBLE_FONT_NORMAL:
                 fontSize = UserSettings.BUBBLE_FONT_NORMAL_VALUE;
+                fontSizeClock = UserSettings.BUBBLE_FONT_NORMAL_VALUE_CLOCK;
                 break;
             case UserSettings.BUBBLE_FONT_HUGE:
                 fontSize = UserSettings.BUBBLE_FONT_HUGE_VALUE;
+                fontSizeClock = UserSettings.BUBBLE_FONT_HUGE_VALUE_CLOCK;
                 break;
             case UserSettings.BUBBLE_FONT_SMALL:
                 fontSize = UserSettings.BUBBLE_FONT_SMALL_VALUE;
+                fontSizeClock = UserSettings.BUBBLE_FONT_SMALL_VALUE_CLOCK;
                 break;
             case UserSettings.BUBBLE_FONT_TINY:
                 fontSize = UserSettings.BUBBLE_FONT_TINY_VALUE;
+                fontSizeClock = UserSettings.BUBBLE_FONT_TINY_VALUE_CLOCK;
                 break;
             case UserSettings.BUBBLE_FONT_LARGE:
                 fontSize = UserSettings.BUBBLE_FONT_LARGE_VALUE;
+                fontSizeClock = UserSettings.BUBBLE_FONT_LARGE_VALUE_CLOCK;
                 break;
         }
 
+        bodyPaint = initTextPaint();
+        bodyPaint.setTypeface(FontController.loadTypeface(context, "regular"));
         bodyPaint.setTextSize(sp(fontSize));
         bodyPaint.setColor(0xff000000);
 
         clockOutPaint = initTextPaint();
         clockOutPaint.setTypeface(FontController.loadTypeface(context, "italic"));
-        clockOutPaint.setTextSize(sp(12f));
+        clockOutPaint.setTextSize(sp(fontSizeClock));
         clockOutPaint.setColor(0xff70B15C);
 
         senderPaintBase = initTextPaint();
         senderPaintBase.setTypeface(FontController.loadTypeface(context, "regular"));
-        senderPaintBase.setTextSize(sp(16));
+        senderPaintBase.setTextSize(sp(fontSize));
         senderPaintBase.setColor(0xff000000);
 
         forwardingPaintBase = initTextPaint();
         forwardingPaintBase.setTypeface(FontController.loadTypeface(context, "light"));
-        forwardingPaintBase.setTextSize(sp(16));
+        forwardingPaintBase.setTextSize(sp(fontSize));
         forwardingPaintBase.setColor(0xff000000);
 
         Drawable inBubble = context.getResources().getDrawable(R.drawable.st_bubble_in);
@@ -114,7 +119,7 @@ public class MessageView extends BaseMsgView {
 
         Drawable outBubble = context.getResources().getDrawable(R.drawable.st_bubble_out);
         outBubblePadding = new Rect();
-        inBubble.getPadding(outBubblePadding);
+        outBubble.getPadding(outBubblePadding);
 
         isLoaded = true;
     }
@@ -365,12 +370,12 @@ public class MessageView extends BaseMsgView {
 
             senderPaint = initTextPaint();
             senderPaint.setTypeface(FontController.loadTypeface(application, "regular"));
-            senderPaint.setTextSize(sp(16));
+            senderPaint.setTextSize(bodyPaint.getTextSize());
             senderPaint.setColor(0xff000000);
 
             forwardingPaint = initTextPaint();
             forwardingPaint.setTypeface(FontController.loadTypeface(application, "light"));
-            forwardingPaint.setTextSize(sp(16));
+            forwardingPaint.setTextSize(bodyPaint.getTextSize());
             forwardingPaint.setColor(0xff000000);
 
             this.layoutDesiredWidth = desiredWidth;
