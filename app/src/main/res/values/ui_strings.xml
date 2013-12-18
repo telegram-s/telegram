@@ -150,6 +150,7 @@
     <string name="st_settings_version">App version</string>
     <string name="st_settings_play">Google Play</string>
     <string name="st_settings_blocked">Blocked users</string>
+    <string name="st_settings_chat">Chat</string>
     <string name="st_settings_background">Chat background</string>
     <string name="st_settings_support">Ask a Question</string>
     <string name="st_settings_save_photo">Save incoming photos</string>
@@ -327,6 +328,16 @@
     <string name="st_blocked_unblocked">User unblocked</string>
     <string name="st_blocked_empty">No blocked users.</string>
     <string name="st_blocked_phone_hidden">hidden</string>
+
+    <string name="st_appearance_title">Chat settings</string>
+    <string name="st_appearance_header_common">MESSAGE APPEARANCE</string>
+
+    <string name="st_appearance_font_size">Font size</string>
+    <string name="st_appearance_font_size_tiny">Tiny</string>
+    <string name="st_appearance_font_size_small">Small</string>
+    <string name="st_appearance_font_size_normal">Normal</string>
+    <string name="st_appearance_font_size_large">Large</string>
+    <string name="st_appearance_font_size_huge">Huge</string>
 
     <string name="st_notifications_title">Notifications and sounds</string>
     <string name="st_notifications_header_common">MESSAGE NOTIFICATIONS</string>

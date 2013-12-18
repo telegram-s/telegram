@@ -3,7 +3,6 @@ package org.telegram.android.fragments;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -139,6 +138,12 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 } else {
                     requestPhotoChooser(0);
                 }
+            }
+        });
+        res.findViewById(R.id.chatSettings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getRootController().openChatSettings();
             }
         });
         res.findViewById(R.id.support).setOnClickListener(new View.OnClickListener() {

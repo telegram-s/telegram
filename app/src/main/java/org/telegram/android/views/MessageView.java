@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.config.UserSettings;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.log.Logger;
@@ -22,6 +23,10 @@ import org.telegram.android.ui.*;
  */
 public class MessageView extends BaseMsgView {
     private static final String TAG = "MessageView";
+
+    public static void resetSettings() {
+        isLoaded = false;
+    }
 
     private static TextPaint bodyPaint;
     private static TextPaint clockOutPaint;
@@ -60,9 +65,32 @@ public class MessageView extends BaseMsgView {
             return;
         }
 
+        StelsApplication application = (StelsApplication) context.getApplicationContext();
+
         bodyPaint = initTextPaint();
         bodyPaint.setTypeface(FontController.loadTypeface(context, "regular"));
-        bodyPaint.setTextSize(sp(16));
+
+        int fontSize;
+        switch (application.getUserSettings().getBubbleFontSizeId()) {
+            default:
+            case UserSettings.BUBBLE_FONT_NORMAL:
+                fontSize = UserSettings.BUBBLE_FONT_NORMAL_VALUE;
+                break;
+            case UserSettings.BUBBLE_FONT_HUGE:
+                fontSize = UserSettings.BUBBLE_FONT_HUGE_VALUE;
+                break;
+            case UserSettings.BUBBLE_FONT_SMALL:
+                fontSize = UserSettings.BUBBLE_FONT_SMALL_VALUE;
+                break;
+            case UserSettings.BUBBLE_FONT_TINY:
+                fontSize = UserSettings.BUBBLE_FONT_TINY_VALUE;
+                break;
+            case UserSettings.BUBBLE_FONT_LARGE:
+                fontSize = UserSettings.BUBBLE_FONT_LARGE_VALUE;
+                break;
+        }
+
+        bodyPaint.setTextSize(sp(fontSize));
         bodyPaint.setColor(0xff000000);
 
         clockOutPaint = initTextPaint();

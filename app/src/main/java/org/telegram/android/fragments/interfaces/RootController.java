@@ -62,6 +62,8 @@ public interface RootController {
 
     public void openWallpaperSettings();
 
+    public void openChatSettings();
+
     public void openBlocked();
 
     public void onLogout();

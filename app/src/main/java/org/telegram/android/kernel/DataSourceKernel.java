@@ -194,4 +194,14 @@ public class DataSourceKernel {
 
         chatSource.clear();
     }
+
+    public void onFontChanged() {
+        for (MessageSource source : messageSources.values()) {
+            source.destroy();
+        }
+        messageSources.clear();
+
+        dialogSource = new DialogSource(kernel.getApplication());
+        dialogSource.destroy();
+    }
 }

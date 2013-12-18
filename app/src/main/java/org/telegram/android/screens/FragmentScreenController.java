@@ -383,6 +383,11 @@ public class FragmentScreenController implements RootController {
     }
 
     @Override
+    public void openChatSettings() {
+        openScreen(new SettingsViewFragment());
+    }
+
+    @Override
     public void openBlocked() {
         openScreen(new BlockedFragment());
     }

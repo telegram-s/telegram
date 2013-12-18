@@ -11,6 +11,18 @@ import com.extradea.framework.persistence.ContextPersistence;
  * Time: 18:02
  */
 public class UserSettings {
+
+    public static final int BUBBLE_FONT_NORMAL = 0;
+    public static final int BUBBLE_FONT_NORMAL_VALUE = 18;
+    public static final int BUBBLE_FONT_TINY = 1;
+    public static final int BUBBLE_FONT_TINY_VALUE = 14;
+    public static final int BUBBLE_FONT_SMALL = 2;
+    public static final int BUBBLE_FONT_SMALL_VALUE = 16;
+    public static final int BUBBLE_FONT_LARGE = 3;
+    public static final int BUBBLE_FONT_LARGE_VALUE = 20;
+    public static final int BUBBLE_FONT_HUGE = 4;
+    public static final int BUBBLE_FONT_HUGE_VALUE = 24;
+
     private SharedPreferences preferences;
     private int currentWallpaperId = -1;
     private boolean isWallpaperSet = false;
@@ -18,6 +30,8 @@ public class UserSettings {
     private int currentWallpaperSolidColor = 0;
     private boolean isSaveToGalleryEnabled = true;
     private boolean showOnlyTelegramContacts = false;
+    private int bubbleFontSize = BUBBLE_FONT_NORMAL;
+    private boolean sendByEnter = false;
 
     public UserSettings(Context context) {
         preferences = context.getSharedPreferences("org.telegram.android.UserSettings.pref", Context.MODE_PRIVATE);
@@ -27,6 +41,8 @@ public class UserSettings {
         isWallpaperSolid = preferences.getBoolean("isWallpaperSolid", isWallpaperSolid);
         isSaveToGalleryEnabled = preferences.getBoolean("save_to_gallery", isSaveToGalleryEnabled);
         showOnlyTelegramContacts = preferences.getBoolean("only_telegram", showOnlyTelegramContacts);
+        bubbleFontSize = preferences.getInt("bubbleFontSize", bubbleFontSize);
+        sendByEnter = preferences.getBoolean("only_telegram", sendByEnter);
     }
 
     public int getCurrentWallpaperId() {
@@ -74,6 +90,23 @@ public class UserSettings {
         preferences.edit().putBoolean("save_to_gallery", value).commit();
     }
 
+    public int getBubbleFontSizeId() {
+        return bubbleFontSize;
+    }
+
+    public void setBubbleFontSizeId(int bubbleFontSize) {
+        this.bubbleFontSize = bubbleFontSize;
+        preferences.edit().putInt("bubbleFontSize", bubbleFontSize).commit();
+    }
+
+    public boolean isSendByEnter() {
+        return sendByEnter;
+    }
+
+    public void setSendByEnter(boolean sendByEnter) {
+        this.sendByEnter = sendByEnter;
+    }
+
     public void clearSettings() {
         String[] keys = preferences.getAll().keySet().toArray(new String[0]);
         SharedPreferences.Editor editor = preferences.edit();
@@ -88,6 +121,8 @@ public class UserSettings {
         currentWallpaperSolidColor = 0;
         isSaveToGalleryEnabled = true;
         showOnlyTelegramContacts = false;
+        bubbleFontSize = BUBBLE_FONT_NORMAL;
+        sendByEnter = false;
     }
 
     public boolean showOnlyTelegramContacts() {

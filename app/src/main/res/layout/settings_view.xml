@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
+            android:fadingEdge="none">
+    <LinearLayout android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:paddingLeft="16dp"
+                  android:paddingRight="16dp"
+                  android:paddingBottom="16dp">
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="16dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginBottom="2dp"
+                  android:layout_marginRight="8dp"
+                  android:textColor="@color/st_section_text"
+                  android:textSize="@dimen/section_header_text"
+                  android:textStyle="bold"
+                  android:text="@string/st_appearance_header_common"/>
+        <View android:layout_width="fill_parent"
+              android:layout_height="@dimen/st_section_h"
+              android:background="@color/st_section_line"/>
+        <LinearLayout android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:background="@drawable/st_list_selector"
+                      android:id="@+id/fontSelect">
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="12dp"
+                      android:layout_marginBottom="12dp"
+                      android:layout_marginLeft="8dp"
+                      android:layout_marginRight="8dp"
+                      android:textSize="18sp"
+                      android:textColor="@color/st_black_text"
+                      android:text="@string/st_appearance_font_size"/>
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="12dp"
+                      android:layout_marginBottom="12dp"
+                      android:layout_marginLeft="8dp"
+                      android:layout_marginRight="8dp"
+                      android:textSize="18sp"
+                      android:textColor="@color/st_black_text"
+                      android:id="@+id/fontSizeValue"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -272,6 +272,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     doSend();
                     return true;
                 }
+                if (i == EditorInfo.IME_ACTION_DONE) {
+                    doSend();
+                    return true;
+                }
                 return false;
             }
         });
