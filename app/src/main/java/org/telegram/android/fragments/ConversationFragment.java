@@ -272,9 +272,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     doSend();
                     return true;
                 }
-                if (i == EditorInfo.IME_ACTION_DONE) {
-                    doSend();
-                    return true;
+                if (application.getUserSettings().isSendByEnter()) {
+                    if (keyEvent != null && i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                        doSend();
+                        return true;
+                    }
                 }
                 return false;
             }
