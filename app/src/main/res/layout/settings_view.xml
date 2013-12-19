@@ -135,5 +135,44 @@
                       android:id="@+id/fontSizeValue"/>
         </LinearLayout>
 
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="16dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginBottom="2dp"
+                  android:layout_marginRight="8dp"
+                  android:textColor="@color/st_section_text"
+                  android:textSize="@dimen/section_header_text"
+                  android:textStyle="bold"
+                  android:text="@string/st_appearance_header_dialogs"/>
+        <View android:layout_width="fill_parent"
+              android:layout_height="@dimen/st_section_h"
+              android:background="@color/st_section_line"/>
+
+        <LinearLayout android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:background="@drawable/st_list_selector"
+                      android:id="@+id/itemsSizeSelect">
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="12dp"
+                      android:layout_marginBottom="12dp"
+                      android:layout_marginLeft="8dp"
+                      android:layout_marginRight="8dp"
+                      android:textSize="18sp"
+                      android:textColor="@color/st_black_text"
+                      android:text="@string/st_appearance_font_size"/>
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="12dp"
+                      android:layout_marginBottom="12dp"
+                      android:layout_marginLeft="8dp"
+                      android:layout_marginRight="8dp"
+                      android:textSize="18sp"
+                      android:textColor="@color/st_black_text"
+                      android:id="@+id/itemSizeValue"/>
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

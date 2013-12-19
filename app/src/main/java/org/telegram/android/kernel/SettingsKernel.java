@@ -24,11 +24,11 @@ public class SettingsKernel {
     }
 
     public void logIn() {
-        clearSettings();
+        // clearSettings();
     }
 
     public void logOut() {
-        clearSettings();
+        // clearSettings();
     }
 
     public void clearSettings() {

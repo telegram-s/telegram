@@ -11,6 +11,7 @@ import com.extradea.framework.images.ImageReceiver;
 import com.extradea.framework.images.tasks.RoundedImageTask;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.config.UserSettings;
 import org.telegram.android.core.TypingStates;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
@@ -28,6 +29,10 @@ import org.telegram.i18n.I18nUtil;
 public class DialogView extends BaseView implements TypingStates.TypingListener {
 
     private static boolean IS_LARGE = false;
+
+    public static void resetSettings() {
+        isLoaded = false;
+    }
 
     // Resources
     private static int HIGHLIGHT_COLOR = 0xff5b89b1;
@@ -110,6 +115,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private static void checkResources(Context context) {
         if (!isLoaded) {
+            StelsApplication application = (StelsApplication) context.getApplicationContext();
+            IS_LARGE = application.getUserSettings().getDialogItemSize() == UserSettings.DIALOG_SIZE_LARGE;
+
             avatarPaint = new Paint();
 
             if (FontController.USE_SUBPIXEL) {

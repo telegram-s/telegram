@@ -332,6 +332,8 @@
     <string name="st_appearance_title">Chat settings</string>
     <string name="st_appearance_header_common">MESSAGE WINDOW</string>
 
+    <string name="st_appearance_header_dialogs">CHAT LIST</string>
+
     <string name="st_appearance_font_size">Font size</string>
     <string name="st_appearance_font_size_tiny">Tiny</string>
     <string name="st_appearance_font_size_small">Small</string>
@@ -340,6 +342,10 @@
     <string name="st_appearance_font_size_huge">Huge</string>
     <string name="st_appearance_enter">Send by Enter</string>
     <string name="st_appearance_background">Chat background</string>
+
+    <string name="st_appearance_item_size">Style</string>
+    <string name="st_appearance_item_size_normal">Normal</string>
+    <string name="st_appearance_item_size_large">Large</string>
 
     <string name="st_notifications_title">Notifications and sounds</string>
     <string name="st_notifications_header_common">MESSAGE NOTIFICATIONS</string>

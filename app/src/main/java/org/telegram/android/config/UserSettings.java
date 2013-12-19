@@ -12,6 +12,9 @@ import com.extradea.framework.persistence.ContextPersistence;
  */
 public class UserSettings {
 
+    public static final int DIALOG_SIZE_NORMAL = 0;
+    public static final int DIALOG_SIZE_LARGE = 1;
+
     public static final int BUBBLE_FONT_NORMAL = 0;
     public static final int BUBBLE_FONT_NORMAL_VALUE = 18;
     public static final int BUBBLE_FONT_NORMAL_VALUE_CLOCK = 14;
@@ -37,6 +40,7 @@ public class UserSettings {
     private boolean showOnlyTelegramContacts = false;
     private int bubbleFontSize = BUBBLE_FONT_NORMAL;
     private boolean sendByEnter = false;
+    private int dialogItemSize = DIALOG_SIZE_NORMAL;
 
     public UserSettings(Context context) {
         preferences = context.getSharedPreferences("org.telegram.android.UserSettings.pref", Context.MODE_PRIVATE);
@@ -48,6 +52,7 @@ public class UserSettings {
         showOnlyTelegramContacts = preferences.getBoolean("only_telegram", showOnlyTelegramContacts);
         bubbleFontSize = preferences.getInt("bubbleFontSize", bubbleFontSize);
         sendByEnter = preferences.getBoolean("only_telegram", sendByEnter);
+        dialogItemSize = preferences.getInt("bubbleFontSize", dialogItemSize);
     }
 
     public int getCurrentWallpaperId() {
@@ -104,6 +109,15 @@ public class UserSettings {
         preferences.edit().putInt("bubbleFontSize", bubbleFontSize).commit();
     }
 
+    public int getDialogItemSize() {
+        return dialogItemSize;
+    }
+
+    public void setDialogItemSize(int dialogItemSize) {
+        this.dialogItemSize = dialogItemSize;
+        preferences.edit().putInt("dialogItemSize", dialogItemSize).commit();
+    }
+
     public boolean isSendByEnter() {
         return sendByEnter;
     }
@@ -128,6 +142,7 @@ public class UserSettings {
         isSaveToGalleryEnabled = true;
         showOnlyTelegramContacts = false;
         bubbleFontSize = BUBBLE_FONT_NORMAL;
+        dialogItemSize = DIALOG_SIZE_NORMAL;
         sendByEnter = false;
     }
 

@@ -16,6 +16,7 @@ import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.media.Optimizer;
+import org.telegram.android.views.DialogView;
 import org.telegram.android.views.MessageView;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.io.IOException;
 public class SettingsChatFragment extends MediaReceiverFragment {
 
     private TextView fontSizeValue;
+    private TextView dialogSizeValue;
     private ImageView sendByEnterCheck;
     private ImageView galleryCheck;
 
@@ -33,6 +35,7 @@ public class SettingsChatFragment extends MediaReceiverFragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_view, container, false);
         fontSizeValue = (TextView) res.findViewById(R.id.fontSizeValue);
+        dialogSizeValue = (TextView) res.findViewById(R.id.itemSizeValue);
         sendByEnterCheck = (ImageView) res.findViewById(R.id.sendByEnterCheck);
         galleryCheck = (ImageView) res.findViewById(R.id.saveToGalleryCheck);
 
@@ -93,6 +96,61 @@ public class SettingsChatFragment extends MediaReceiverFragment {
                                            application.getUserSettings().setBubbleFontSizeId(sizeIds[i]);
                                            application.getDataSourceKernel().onFontChanged();
                                            MessageView.resetSettings();
+                                           DialogView.resetSettings();
+                                           bindUi();
+                                       }
+                                   }
+                );
+                AlertDialog dialog = builder.create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
+            }
+        });
+
+        res.findViewById(R.id.itemsSizeSelect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                final int[] titles = new int[]{
+                        R.string.st_appearance_item_size_normal,
+                        R.string.st_appearance_item_size_large,
+                };
+                final int[] sizeIds = new int[]{
+                        UserSettings.DIALOG_SIZE_NORMAL,
+                        UserSettings.DIALOG_SIZE_LARGE,
+                };
+
+                builder.setAdapter(new BaseAdapter() {
+                                       @Override
+                                       public int getCount() {
+                                           return titles.length;
+                                       }
+
+                                       @Override
+                                       public Integer getItem(int i) {
+                                           return titles[i];
+                                       }
+
+                                       @Override
+                                       public long getItemId(int i) {
+                                           return 0;
+                                       }
+
+                                       @Override
+                                       public View getView(int i, View view, ViewGroup viewGroup) {
+                                           View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
+                                           TextView text = (TextView) res.findViewById(android.R.id.text1);
+                                           text.setText(titles[i]);
+                                           return res;
+                                       }
+                                   }, new DialogInterface.OnClickListener() {
+                                       @Override
+                                       public void onClick(DialogInterface dialogInterface, int i) {
+                                           application.getUserSettings().setDialogItemSize(sizeIds[i]);
+                                           application.getDataSourceKernel().onFontChanged();
+                                           MessageView.resetSettings();
+                                           DialogView.resetSettings();
                                            bindUi();
                                        }
                                    }
@@ -147,6 +205,17 @@ public class SettingsChatFragment extends MediaReceiverFragment {
                 fontSizeValue.setText(R.string.st_appearance_font_size_tiny);
                 break;
         }
+
+        switch (application.getUserSettings().getDialogItemSize()) {
+            default:
+            case UserSettings.DIALOG_SIZE_NORMAL:
+                dialogSizeValue.setText(R.string.st_appearance_item_size_normal);
+                break;
+            case UserSettings.DIALOG_SIZE_LARGE:
+                dialogSizeValue.setText(R.string.st_appearance_item_size_large);
+                break;
+        }
+
         if (application.getUserSettings().isSendByEnter()) {
             sendByEnterCheck.setImageResource(R.drawable.holo_btn_check_on);
         } else {
