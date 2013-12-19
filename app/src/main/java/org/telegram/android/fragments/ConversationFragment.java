@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -50,6 +52,7 @@ import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
+import org.telegram.android.video.VideoRecorderActivity;
 import org.telegram.android.views.*;
 import org.telegram.android.views.dialog.ConversationAdapter;
 import org.telegram.android.views.dialog.ConversationListView;
@@ -67,6 +70,7 @@ import org.telegram.i18n.I18nUtil;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Author: Korshakov Stepan
@@ -1011,8 +1015,15 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
                 return true;
             }
-            // requestVideo(2);
-            new PickIntentDialog(getActivity()).show();
+
+            requestVideo(2);
+
+//            PickIntentDialog.PickIntentItem[] items = new PickIntentDialog.PickIntentItem[1];
+//            for (int i = 0; i < items.length; i++) {
+//                items[i] = new PickIntentDialog.PickIntentItem(R.drawable.app_icon, "Test");
+//            }
+//
+//            new PickIntentDialog(getActivity(), items).show();
             // startActivity(new Intent().setClass(getActivity(), PickIntentActivity.class));
             return true;
         }

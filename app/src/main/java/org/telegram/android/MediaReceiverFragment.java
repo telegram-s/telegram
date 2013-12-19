@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
@@ -14,9 +15,13 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.widget.Toast;
 import com.extradea.framework.images.utils.ImageUtils;
+import org.telegram.android.ui.pick.PickIntentClickListener;
+import org.telegram.android.ui.pick.PickIntentDialog;
+import org.telegram.android.ui.pick.PickIntentItem;
 import org.telegram.android.video.VideoRecorderActivity;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -119,24 +124,64 @@ public class MediaReceiverFragment extends StelsFragment {
         }
     }
 
-    public void requestPhotoFromGallery(int requestId) {
-        try {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(intent, requestId * 4 + REQUEST_BASE + 1);
-        } catch (Exception e) {
-            Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
+    public void requestPhotoFromGallery(final int requestId) {
+        final Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        // startActivityForResult(intent, requestId * 4 + REQUEST_BASE + 1);
+
+        PackageManager pm = application.getPackageManager();
+
+        final List<ResolveInfo> rList = application.getPackageManager().queryIntentActivities(intent, 0);
+
+        ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
+        for (ResolveInfo info : rList) {
+            items.add(new PickIntentItem(info.loadIcon(pm), info.loadLabel(pm).toString()));
         }
+        PickIntentItem[] pItems = items.toArray(new PickIntentItem[0]);
+
+        new PickIntentDialog(getActivity(), pItems, new PickIntentClickListener() {
+            @Override
+            public void onItemClicked(int index) {
+                ResolveInfo resolveInfo = rList.get(index);
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setClassName(resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name);
+                startActivityForResult(intent, requestId * 4 + REQUEST_BASE + 1);
+            }
+        }).show();
+
+//        try {
+//            Intent intent = new Intent();
+//            intent.setType("image/*");
+//            intent.setAction(Intent.ACTION_GET_CONTENT);
+//            startActivityForResult(intent, requestId * 4 + REQUEST_BASE + 1);
+//        } catch (Exception e) {
+//            Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
+//        }
     }
 
     public void requestVideo(int requestId) {
         try {
             videoFileName = getUploadVideoTempFile();
+
             Intent intent = new Intent();
             intent.setClass(getActivity(), VideoRecorderActivity.class);
             intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(videoFileName)));
-            startActivityForResult(intent, requestId * 4 + REQUEST_BASE + 2);
+
+            startActivityForResult(intent, requestId);
+//            PackageManager pm = application.getPackageManager();
+//
+//            List<ResolveInfo> rList = application.getPackageManager().queryIntentActivities(
+//                    intent, PackageManager.MATCH_DEFAULT_ONLY);
+//
+//            ArrayList<PickIntentDialog.PickIntentItem> items = new ArrayList<PickIntentDialog.PickIntentItem>();
+//            for (ResolveInfo info : rList) {
+//                items.add(new PickIntentDialog.PickIntentItem(info.loadIcon(pm), info.loadLabel(pm).toString()));
+//            }
+//
+//            new PickIntentDialog(getActivity(), items.toArray(new PickIntentDialog.PickIntentItem[0])).show();
         } catch (Exception e) {
             Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
         }
