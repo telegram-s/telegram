@@ -126,6 +126,7 @@ public class PickIntentDialog extends Dialog {
         private int partialOffset;
 
         private int touchSlop;
+        private Scroller scroller;
 
         public RootView(Context context, View header, ScrollView content) {
             super(context);
@@ -133,6 +134,7 @@ public class PickIntentDialog extends Dialog {
             this.content = content;
             this.partialOffset = 300;
             this.touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+            this.scroller = new Scroller(context);
 
             setOrientation(VERTICAL);
             addView(header);
@@ -176,6 +178,14 @@ public class PickIntentDialog extends Dialog {
         }
 
         @Override
+        public void computeScroll() {
+            if (scroller.computeScrollOffset()) {
+                scrollTo(0, scroller.getCurrY());
+                invalidate();
+            }
+        }
+
+        @Override
         public boolean onTouchEvent(MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 touchY = (int) event.getY();
@@ -198,9 +208,12 @@ public class PickIntentDialog extends Dialog {
             } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 int paddingH = getHeight() - partialOffset;
                 if (getScrollY() > -paddingH / 2) {
-                    scrollTo(0, 0);
+                    scroller.startScroll(0, getScrollY(), 0, -getScrollY(), 300);
+                    invalidate();
                 } else {
-                    scrollTo(0, -(getHeight() - partialOffset));
+                    int destScroll = -(getHeight() - partialOffset);
+                    scroller.startScroll(0, getScrollY(), 0, destScroll - getScrollY(), 300);
+                    invalidate();
                 }
                 isDragging = false;
                 return true;

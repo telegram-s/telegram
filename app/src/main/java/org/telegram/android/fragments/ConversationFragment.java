@@ -31,7 +31,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.MediaReceiverFragment;
-import org.telegram.android.PickIntentActivity;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.config.DebugSettings;
