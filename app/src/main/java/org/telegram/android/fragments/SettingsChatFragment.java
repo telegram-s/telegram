@@ -1,7 +1,6 @@
 package org.telegram.android.fragments;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,12 +14,10 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.views.MessageView;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -30,12 +27,14 @@ public class SettingsChatFragment extends MediaReceiverFragment {
 
     private TextView fontSizeValue;
     private ImageView sendByEnterCheck;
+    private ImageView galleryCheck;
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_view, container, false);
         fontSizeValue = (TextView) res.findViewById(R.id.fontSizeValue);
         sendByEnterCheck = (ImageView) res.findViewById(R.id.sendByEnterCheck);
+        galleryCheck = (ImageView) res.findViewById(R.id.saveToGalleryCheck);
 
         res.findViewById(R.id.fontSelect).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,6 +116,13 @@ public class SettingsChatFragment extends MediaReceiverFragment {
                 requestWallpaperChooser(0);
             }
         });
+        res.findViewById(R.id.savePhotos).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getUserSettings().setSaveToGalleryEnabled(!application.getUserSettings().isSaveToGalleryEnabled());
+                bindUi();
+            }
+        });
 
         bindUi();
         return res;
@@ -145,6 +151,11 @@ public class SettingsChatFragment extends MediaReceiverFragment {
             sendByEnterCheck.setImageResource(R.drawable.holo_btn_check_on);
         } else {
             sendByEnterCheck.setImageResource(R.drawable.holo_btn_check_off);
+        }
+        if (application.getUserSettings().isSaveToGalleryEnabled()) {
+            galleryCheck.setImageResource(R.drawable.holo_btn_check_on);
+        } else {
+            galleryCheck.setImageResource(R.drawable.holo_btn_check_off);
         }
     }
 

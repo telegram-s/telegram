@@ -26,21 +26,14 @@
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_h"
               android:background="@color/st_section_line"/>
-        <LinearLayout android:layout_width="fill_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="vertical"
-                      android:background="@drawable/st_list_selector"
-                      android:id="@+id/fontSelect">
-            <TextView android:layout_width="fill_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_marginTop="12dp"
-                      android:layout_marginBottom="12dp"
-                      android:layout_marginLeft="8dp"
-                      android:layout_marginRight="8dp"
-                      android:textSize="18sp"
-                      android:textColor="@color/st_black_text"
-                      android:text="@string/st_appearance_font_size"/>
-            <TextView android:layout_width="fill_parent"
+
+        <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
+                                                 android:layout_height="wrap_content"
+                                                 android:clickable="true"
+                                                 android:background="@drawable/st_list_selector"
+                                                 android:id="@+id/chatBackgrounds">
+
+            <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_marginTop="12dp"
                       android:layout_marginBottom="12dp"
@@ -48,8 +41,39 @@
                       android:layout_marginRight="8dp"
                       android:textSize="18sp"
                       android:textColor="@color/st_black_text"
-                      android:id="@+id/fontSizeValue"/>
-        </LinearLayout>
+                      android:text="@string/st_appearance_background"/>
+        </org.telegram.android.ui.RtlLinearLayout>
+
+        <View android:layout_width="fill_parent"
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
+
+        <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
+                                                 android:layout_height="48dp"
+                                                 android:clickable="true"
+                                                 android:id="@+id/savePhotos"
+                                                 android:background="@drawable/st_list_selector">
+            <TextView android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      ext:layout_gravity="center_vertical"
+                      android:layout_marginRight="8dp"
+                      android:layout_marginLeft="8dp"
+                      ext:layout_weight="1"
+                      android:textSize="19sp"
+                      android:textColor="@color/st_black_text"
+                      android:text="@string/st_settings_save_photo"/>
+
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_marginTop="1dp"
+                       android:layout_marginLeft="4dp"
+                       android:layout_marginRight="4dp"
+                       ext:layout_gravity="center_vertical"
+                       android:src="@drawable/holo_btn_check_on"
+                       android:id="@+id/saveToGalleryCheck"
+                       android:duplicateParentState="true"/>
+        </org.telegram.android.ui.RtlLinearLayout>
+
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_div_h"
               android:background="@color/st_section_div"/>
@@ -81,17 +105,17 @@
                        android:id="@+id/sendByEnterCheck"
                        android:duplicateParentState="true"/>
         </org.telegram.android.ui.RtlLinearLayout>
+
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_div_h"
               android:background="@color/st_section_div"/>
 
-        <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
-                                                 android:layout_height="wrap_content"
-                                                 android:clickable="true"
-                                                 android:background="@drawable/st_list_selector"
-                                                 android:id="@+id/chatBackgrounds">
-
-            <TextView android:layout_width="wrap_content"
+        <LinearLayout android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:background="@drawable/st_list_selector"
+                      android:id="@+id/fontSelect">
+            <TextView android:layout_width="fill_parent"
                       android:layout_height="wrap_content"
                       android:layout_marginTop="12dp"
                       android:layout_marginBottom="12dp"
@@ -99,19 +123,17 @@
                       android:layout_marginRight="8dp"
                       android:textSize="18sp"
                       android:textColor="@color/st_black_text"
-                      android:text="@string/st_appearance_background"/>
-            <!--<View android:layout_width="0dp"-->
-            <!--android:layout_height="0dp"-->
-            <!--ext:layout_weight="1"/>-->
-            <!--<ImageView android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginTop="1dp"-->
-            <!--android:layout_marginRight="8dp"-->
-            <!--android:layout_marginLeft="8dp"-->
-            <!--ext:layout_gravity="center_vertical"-->
-            <!--android:src="@drawable/holo_btn_check_on"-->
-            <!--android:id="@+id/sendByEnterCheck"-->
-            <!--android:duplicateParentState="true"/>-->
-        </org.telegram.android.ui.RtlLinearLayout>
+                      android:text="@string/st_appearance_font_size"/>
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="12dp"
+                      android:layout_marginBottom="12dp"
+                      android:layout_marginLeft="8dp"
+                      android:layout_marginRight="8dp"
+                      android:textSize="18sp"
+                      android:textColor="@color/st_black_text"
+                      android:id="@+id/fontSizeValue"/>
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

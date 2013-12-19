@@ -49,7 +49,6 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     private FastWebImageView avatar;
     private TextView nameView;
     private TextView phoneView;
-    private ImageView galleryCheck;
     private View mainContainer;
 
     private int debugClickCount = 0;
@@ -59,13 +58,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_main, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
-        galleryCheck = (ImageView) res.findViewById(R.id.saveToGalleryCheck);
 
-        if (application.getUserSettings().isSaveToGalleryEnabled()) {
-            galleryCheck.setImageResource(R.drawable.holo_btn_check_on);
-        } else {
-            galleryCheck.setImageResource(R.drawable.holo_btn_check_off);
-        }
         TextView textView = (TextView) res.findViewById(R.id.version);
         PackageInfo pInfo = null;
         try {
@@ -95,19 +88,6 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                         getView().findViewById(R.id.developmentButton).setVisibility(View.VISIBLE);
                         getView().findViewById(R.id.developmentDiv).setVisibility(View.VISIBLE);
                     }
-                }
-            }
-        });
-
-        res.findViewById(R.id.savePhotos).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (application.getUserSettings().isSaveToGalleryEnabled()) {
-                    application.getUserSettings().setSaveToGalleryEnabled(false);
-                    galleryCheck.setImageResource(R.drawable.holo_btn_check_off);
-                } else {
-                    application.getUserSettings().setSaveToGalleryEnabled(true);
-                    galleryCheck.setImageResource(R.drawable.holo_btn_check_on);
                 }
             }
         });
