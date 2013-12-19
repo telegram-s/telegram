@@ -175,6 +175,7 @@ public class ConversationListView extends ImagingListView {
         private int state = SCROLL_STATE_IDLE;
         private int lastVisibleItem = -1;
         private int lastTop = 0;
+        private int lastScrollY = -1;
 
         @Override
         public void onScrollStateChanged(AbsListView absListView, int i) {
@@ -196,7 +197,12 @@ public class ConversationListView extends ImagingListView {
 
         @Override
         public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            application.getImageController().doPause();
+            if (lastScrollY == -1) {
+                lastScrollY = getScrollY();
+            } else if (lastScrollY != getScrollY()) {
+                lastScrollY = getScrollY();
+                application.getImageController().doPause();
+            }
 
             if (lastVisibleItem == -1 || lastVisibleItem != firstVisibleItem || state == SCROLL_STATE_IDLE) {
                 lastVisibleItem = firstVisibleItem;
