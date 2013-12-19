@@ -999,17 +999,17 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
                 return true;
             }
-            requestPhotoFromCamera(0);
+            requestPhotoChooser(0);
             return true;
         }
-        if (item.getItemId() == R.id.attachGallery) {
-            if (!isEnabledInput) {
-                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            requestPhotoFromGallery(1);
-            return true;
-        }
+//        if (item.getItemId() == R.id.attachGallery) {
+//            if (!isEnabledInput) {
+//                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
+//                return true;
+//            }
+//            requestPhotoFromGallery(1);
+//            return true;
+//        }
         if (item.getItemId() == R.id.attachVideo) {
             if (!isEnabledInput) {
                 Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();

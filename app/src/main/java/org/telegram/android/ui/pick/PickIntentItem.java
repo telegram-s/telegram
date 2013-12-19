@@ -1,11 +1,12 @@
 package org.telegram.android.ui.pick;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 /**
-* Created by ex3ndr on 19.12.13.
-*/
+ * Created by ex3ndr on 19.12.13.
+ */
 public class PickIntentItem {
     private int resource;
     private Bitmap bitmap;
@@ -13,6 +14,9 @@ public class PickIntentItem {
 
     private String title;
     private String subtitle;
+
+    private Intent intent;
+    private Object tag;
 
     public PickIntentItem(int resource, String title) {
         this.resource = resource;
@@ -65,5 +69,21 @@ public class PickIntentItem {
 
     public String getSubtitle() {
         return subtitle;
+    }
+
+    public Intent getIntent() {
+        return intent;
+    }
+
+    public void setIntent(Intent intent) {
+        this.intent = intent;
+    }
+
+    public Object getTag() {
+        return tag;
+    }
+
+    public void setTag(Object tag) {
+        this.tag = tag;
     }
 }

@@ -5,6 +5,9 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,12 +24,15 @@ import org.telegram.android.fragments.interfaces.SmileysController;
 import org.telegram.android.screens.RootControllerHolder;
 import org.telegram.android.tasks.*;
 import org.telegram.android.ui.EmojiListener;
+import org.telegram.android.ui.pick.PickIntentItem;
 import org.telegram.android.ui.plurals.PluralResources;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.engine.TimeoutException;
 import org.telegram.tl.TLMethod;
 import org.telegram.tl.TLObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -468,6 +474,23 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
             ((InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(editText,
                     InputMethodManager.SHOW_IMPLICIT);
         }
+    }
+
+    protected PickIntentItem[] createPickIntents(Intent intent) {
+        PackageManager pm = application.getPackageManager();
+        List<ResolveInfo> rList = pm.queryIntentActivities(intent, 0);
+
+        ArrayList<PickIntentItem> res = new ArrayList<PickIntentItem>();
+        for (ResolveInfo info : rList) {
+            PickIntentItem item = new PickIntentItem(info.loadIcon(pm), info.loadLabel(pm).toString());
+            Intent activityIntent = intent.cloneFilter();
+            activityIntent.setClassName(info.activityInfo.packageName, info.activityInfo.name);
+            item.setIntent(activityIntent);
+            item.setTag(info);
+            res.add(item);
+        }
+
+        return res.toArray(new PickIntentItem[res.size()]);
     }
 
     protected int getPx(float dp) {

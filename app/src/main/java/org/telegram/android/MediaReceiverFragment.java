@@ -22,6 +22,7 @@ import org.telegram.android.video.VideoRecorderActivity;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -74,92 +75,58 @@ public class MediaReceiverFragment extends StelsFragment {
     }
 
     public void requestPhotoChooserWithDelete(final int requestId) {
-        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{
-                getStringSafe(R.string.st_receiver_photo),
-                getStringSafe(R.string.st_receiver_gallery),
-                getStringSafe(R.string.st_receiver_delete)},
-                new DialogInterface.OnClickListener() {
+
+        imageFileName = getUploadTempFile();
+        final Uri fileUri = Uri.fromFile(new File(imageFileName));
+
+        ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
+        items.add(new PickIntentItem(R.drawable.holo_light_ic_delete, "Delete"));
+        Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
+        Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
+                .setType("image/*")));
+
+        new PickIntentDialog(getActivity(),
+                items.toArray(new PickIntentItem[items.size()]),
+                new PickIntentClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (i == 0) {
-                            requestPhotoFromCamera(requestId);
-                        } else if (i == 1) {
-                            requestPhotoFromGallery(requestId);
-                        } else {
+                    public void onItemClicked(int index, PickIntentItem item) {
+                        if (item.getIntent() == null) {
                             onPhotoDeleted(requestId);
+                        } else {
+                            if (MediaStore.ACTION_IMAGE_CAPTURE.equals(item.getIntent().getAction())) {
+                                startActivityForResult(item.getIntent().putExtra(MediaStore.EXTRA_OUTPUT, fileUri),
+                                        requestId * 4 + REQUEST_BASE);
+                            } else {
+                                startActivityForResult(item.getIntent(), requestId * 4 + REQUEST_BASE + 1);
+                            }
                         }
                     }
-                }).create();
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.show();
+                }).show();
     }
 
     public void requestPhotoChooser(final int requestId) {
-        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{
-                getStringSafe(R.string.st_receiver_photo),
-                getStringSafe(R.string.st_receiver_gallery)},
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (i == 0) {
-                            requestPhotoFromCamera(requestId);
-                        } else {
-                            requestPhotoFromGallery(requestId);
-                        }
-                    }
-                }).create();
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.show();
-    }
 
-    public void requestPhotoFromCamera(int requestId) {
-        try {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            imageFileName = getUploadTempFile();
-            File file = new File(imageFileName);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-            startActivityForResult(intent, requestId * 4 + REQUEST_BASE);
-        } catch (Exception e) {
-            Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void requestPhotoFromGallery(final int requestId) {
-        final Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        // startActivityForResult(intent, requestId * 4 + REQUEST_BASE + 1);
-
-        PackageManager pm = application.getPackageManager();
-
-        final List<ResolveInfo> rList = application.getPackageManager().queryIntentActivities(intent, 0);
+        imageFileName = getUploadTempFile();
+        final Uri fileUri = Uri.fromFile(new File(imageFileName));
 
         ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
-        for (ResolveInfo info : rList) {
-            items.add(new PickIntentItem(info.loadIcon(pm), info.loadLabel(pm).toString()));
-        }
-        PickIntentItem[] pItems = items.toArray(new PickIntentItem[0]);
+        Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
+        Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
+                .setType("image/*")));
 
-        new PickIntentDialog(getActivity(), pItems, new PickIntentClickListener() {
-            @Override
-            public void onItemClicked(int index) {
-                ResolveInfo resolveInfo = rList.get(index);
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                intent.setClassName(resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name);
-                startActivityForResult(intent, requestId * 4 + REQUEST_BASE + 1);
-            }
-        }).show();
-
-//        try {
-//            Intent intent = new Intent();
-//            intent.setType("image/*");
-//            intent.setAction(Intent.ACTION_GET_CONTENT);
-//            startActivityForResult(intent, requestId * 4 + REQUEST_BASE + 1);
-//        } catch (Exception e) {
-//            Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
-//        }
+        new PickIntentDialog(getActivity(),
+                items.toArray(new PickIntentItem[items.size()]),
+                new PickIntentClickListener() {
+                    @Override
+                    public void onItemClicked(int index, PickIntentItem item) {
+                        if (MediaStore.ACTION_IMAGE_CAPTURE.equals(item.getIntent().getAction())) {
+                            startActivityForResult(item.getIntent().putExtra(MediaStore.EXTRA_OUTPUT, fileUri),
+                                    requestId * 4 + REQUEST_BASE);
+                        } else {
+                            startActivityForResult(item.getIntent(), requestId * 4 + REQUEST_BASE + 1);
+                        }
+                    }
+                }).show();
     }
 
     public void requestVideo(int requestId) {

@@ -125,19 +125,19 @@ public class PickIntentDialog extends Dialog {
                 ((ImageView) item.findViewById(R.id.icon)).setImageBitmap(items[i].getBitmap());
             } else if (items[i].getDrawable() != null) {
                 ((ImageView) item.findViewById(R.id.icon)).setImageDrawable(items[i].getDrawable());
-            } else if (items[i].getResource() == 0) {
+            } else if (items[i].getResource() != 0) {
                 ((ImageView) item.findViewById(R.id.icon)).setImageResource(items[i].getResource());
             } else {
                 ((ImageView) item.findViewById(R.id.icon)).setImageDrawable(null);
             }
 
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(100, 212, 1);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, 212, 1);
             item.setLayoutParams(params);
             final int finalI = i;
             item.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.onItemClicked(finalI);
+                    clickListener.onItemClicked(finalI, items[finalI]);
                     dismiss();
                 }
             });
