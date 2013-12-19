@@ -182,6 +182,12 @@ public class CreateChatFragment extends BaseContactsFragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateCounter();
+    }
+
     private void updateEditText() {
         String src = "";
         for (int i = 0; i < selected.size(); i++) {
