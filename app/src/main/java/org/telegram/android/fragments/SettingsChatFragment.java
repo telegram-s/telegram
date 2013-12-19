@@ -1,7 +1,9 @@
 package org.telegram.android.fragments;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,15 +13,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
+import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.config.UserSettings;
+import org.telegram.android.media.Optimizer;
 import org.telegram.android.views.MessageView;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by ex3ndr on 18.12.13.
  */
-public class SettingsChatFragment extends StelsFragment {
+public class SettingsChatFragment extends MediaReceiverFragment {
 
     private TextView fontSizeValue;
     private ImageView sendByEnterCheck;
@@ -104,6 +111,12 @@ public class SettingsChatFragment extends StelsFragment {
                 bindUi();
             }
         });
+        res.findViewById(R.id.chatBackgrounds).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                requestWallpaperChooser(0);
+            }
+        });
 
         bindUi();
         return res;
@@ -132,6 +145,32 @@ public class SettingsChatFragment extends StelsFragment {
             sendByEnterCheck.setImageResource(R.drawable.holo_btn_check_on);
         } else {
             sendByEnterCheck.setImageResource(R.drawable.holo_btn_check_off);
+        }
+    }
+
+    @Override
+    protected void onPhotoArrived(String fileName, int width, int height, int requestId) {
+        try {
+            String destFileName = application.getFilesDir().getAbsolutePath() + "/current_wallpaper.jpg";
+            Optimizer.optimizeHQ(fileName, destFileName);
+            application.getUserSettings().setWallpaperSet(true);
+            application.getUserSettings().setWallpaperSolid(false);
+            application.getWallpaperHolder().dropCache();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onPhotoArrived(Uri uri, int width, int height, int requestId) {
+        try {
+            String destFileName = application.getFilesDir().getAbsolutePath() + "/current_wallpaper.jpg";
+            Optimizer.optimizeHQ(uri.toString(), getActivity(), destFileName);
+            application.getUserSettings().setWallpaperSet(true);
+            application.getUserSettings().setWallpaperSolid(false);
+            application.getWallpaperHolder().dropCache();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

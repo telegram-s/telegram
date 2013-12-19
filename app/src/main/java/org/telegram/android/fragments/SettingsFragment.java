@@ -176,13 +176,6 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 getRootController().openNameSettings();
             }
         });
-        res.findViewById(R.id.wallpapers).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // getRootController().openWallpaperSettings();
-                requestWallpaperChooser(1);
-            }
-        });
 
         res.findViewById(R.id.developmentButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -197,14 +190,6 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         } else {
             res.findViewById(R.id.developmentButton).setVisibility(View.GONE);
             res.findViewById(R.id.developmentDiv).setVisibility(View.GONE);
-        }
-
-        if (isSlow()) {
-            res.findViewById(R.id.wallpapers).setVisibility(View.GONE);
-            res.findViewById(R.id.wallpapersDiv).setVisibility(View.GONE);
-        } else {
-            res.findViewById(R.id.wallpapers).setVisibility(View.VISIBLE);
-            res.findViewById(R.id.wallpapersDiv).setVisibility(View.VISIBLE);
         }
 
         avatar = (FastWebImageView) res.findViewById(R.id.avatar);

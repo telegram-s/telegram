@@ -88,7 +88,8 @@
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  android:clickable="true"
-                                                 android:background="@drawable/st_list_selector">
+                                                 android:background="@drawable/st_list_selector"
+                                                 android:id="@+id/chatBackgrounds">
 
             <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"

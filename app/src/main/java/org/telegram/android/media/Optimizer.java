@@ -46,6 +46,7 @@ public class Optimizer {
     private static final String TAG = "Optimizer";
 
     private static final int MAX_PIXELS = 1200 * 1200;
+    private static final int MAX_PIXELS_HQ = 1500 * 1500;
 
     private static int getScale(InputStream stream) {
         BitmapFactory.Options o = new BitmapFactory.Options();
@@ -56,6 +57,25 @@ public class Optimizer {
         int scaledW = o.outWidth;
         int scaledH = o.outHeight;
         while (scaledW * scaledH > MAX_PIXELS) {
+            scale *= 2;
+            scaledH /= 2;
+            scaledW /= 2;
+        }
+
+        Logger.d(TAG, "Image Scale = " + scale + ", width: " + o.outWidth + ", height: " + o.outHeight);
+
+        return scale;
+    }
+
+    private static int getScaleHQ(InputStream stream) {
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        o.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(stream, null, o);
+
+        int scale = 1;
+        int scaledW = o.outWidth;
+        int scaledH = o.outHeight;
+        while (scaledW * scaledH > MAX_PIXELS_HQ) {
             scale *= 2;
             scaledH /= 2;
             scaledW /= 2;
@@ -135,9 +155,35 @@ public class Optimizer {
         save(res, destFile);
     }
 
+    public static void optimizeHQ(String srcFile, String destFile) throws IOException {
+        FileInputStream fis = new FileInputStream(srcFile);
+        int scale = getScaleHQ(fis);
+        fis.close();
+
+        fis = new FileInputStream(srcFile);
+        Bitmap res = buildOptimized(fis, scale);
+        fis.close();
+        res = ImageUtils.fixExifRotation(res, srcFile);
+        save(res, destFile);
+    }
+
     public static void optimize(String uri, Context context, String destFile) throws IOException {
         InputStream fis = context.getContentResolver().openInputStream(Uri.parse(uri));
         int scale = getScale(fis);
+        fis.close();
+
+        fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        Bitmap res = buildOptimized(fis, scale);
+        fis.close();
+
+        res = ImageUtils.fixRotation(res, Uri.parse(uri), context);
+
+        save(res, destFile);
+    }
+
+    public static void optimizeHQ(String uri, Context context, String destFile) throws IOException {
+        InputStream fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        int scale = getScaleHQ(fis);
         fis.close();
 
         fis = context.getContentResolver().openInputStream(Uri.parse(uri));
