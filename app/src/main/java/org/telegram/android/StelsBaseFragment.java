@@ -24,7 +24,10 @@ import org.telegram.android.fragments.interfaces.SmileysController;
 import org.telegram.android.screens.RootControllerHolder;
 import org.telegram.android.tasks.*;
 import org.telegram.android.ui.EmojiListener;
+import org.telegram.android.ui.pick.PickIntentClickListener;
+import org.telegram.android.ui.pick.PickIntentDialog;
 import org.telegram.android.ui.pick.PickIntentItem;
+import org.telegram.android.ui.pick.PickPriority;
 import org.telegram.android.ui.plurals.PluralResources;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.engine.TimeoutException;
@@ -32,6 +35,8 @@ import org.telegram.tl.TLMethod;
 import org.telegram.tl.TLObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -487,20 +492,80 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
         }
     }
 
+    protected void startPickerActivity(Intent intent, String title) {
+        PickIntentItem[] pickIntentItems = createPickIntents(intent);
+        PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, new PickIntentClickListener() {
+            @Override
+            public void onItemClicked(int index, PickIntentItem item) {
+                startActivity(item.getIntent());
+            }
+        });
+        dialog.setTitle(title);
+        dialog.show();
+    }
+
+
     protected PickIntentItem[] createPickIntents(Intent intent) {
         PackageManager pm = application.getPackageManager();
         List<ResolveInfo> rList = pm.queryIntentActivities(intent, 0);
 
-        ArrayList<PickIntentItem> res = new ArrayList<PickIntentItem>();
+        ArrayList<PickIntentItem> defaultRes = new ArrayList<PickIntentItem>();
+        ArrayList<PickIntentItem> prioritizedRes = new ArrayList<PickIntentItem>();
+
         for (ResolveInfo info : rList) {
+
+            boolean isPrioritized = false;
+            for (int i = 0; i < PickPriority.PACKAGES_PRIORITY.length; i++) {
+                if (info.activityInfo.packageName.equals(PickPriority.PACKAGES_PRIORITY[i])) {
+                    isPrioritized = true;
+                    break;
+                }
+            }
+
             PickIntentItem item = new PickIntentItem(info.loadIcon(pm), info.loadLabel(pm).toString());
-            Intent activityIntent = intent.cloneFilter();
+            Intent activityIntent = (Intent) intent.clone();
             activityIntent.setClassName(info.activityInfo.packageName, info.activityInfo.name);
             item.setIntent(activityIntent);
             item.setTag(info);
-            res.add(item);
+
+            if (isPrioritized) {
+                prioritizedRes.add(item);
+            } else {
+                defaultRes.add(item);
+            }
         }
 
+        Collections.sort(prioritizedRes, new Comparator<PickIntentItem>() {
+            @Override
+            public int compare(PickIntentItem item, PickIntentItem item2) {
+                int index1 = 0, index2 = 0;
+                for (int i = 0; i < PickPriority.PACKAGES_PRIORITY.length; i++) {
+                    if (item.getIntent().getComponent().getPackageName().equals(PickPriority.PACKAGES_PRIORITY[i])) {
+                        index1 = i;
+                        break;
+                    }
+                }
+                for (int i = 0; i < PickPriority.PACKAGES_PRIORITY.length; i++) {
+                    if (item2.getIntent().getComponent().getPackageName().equals(PickPriority.PACKAGES_PRIORITY[i])) {
+                        index2 = i;
+                        break;
+                    }
+                }
+                return index1 - index2;
+            }
+        });
+
+        Collections.sort(defaultRes, new Comparator<PickIntentItem>() {
+            @Override
+            public int compare(PickIntentItem item, PickIntentItem item2) {
+                return item.getTitle().compareTo(item2.getTitle());
+            }
+        });
+
+
+        ArrayList<PickIntentItem> res = new ArrayList<PickIntentItem>();
+        res.addAll(prioritizedRes);
+        res.addAll(defaultRes);
         return res.toArray(new PickIntentItem[res.size()]);
     }
 

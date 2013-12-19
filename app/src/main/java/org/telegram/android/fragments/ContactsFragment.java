@@ -25,6 +25,9 @@ import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.fragments.common.BaseContactsFragment;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
+import org.telegram.android.ui.pick.PickIntentClickListener;
+import org.telegram.android.ui.pick.PickIntentDialog;
+import org.telegram.android.ui.pick.PickIntentItem;
 import org.telegram.api.TLAbsInputUser;
 import org.telegram.api.TLInputPeerContact;
 import org.telegram.api.TLInputUserContact;
@@ -180,7 +183,17 @@ public class ContactsFragment extends BaseContactsFragment {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
             shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, getStringSafe(R.string.st_invite_short));
-            startActivity(shareIntent);
+
+            PickIntentItem[] pickIntentItems = createPickIntents(shareIntent);
+            PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, new PickIntentClickListener() {
+                @Override
+                public void onItemClicked(int index, PickIntentItem item) {
+                    sendEvent("share_pressed", item.getIntent().getComponent().getPackageName());
+                    startActivity(item.getIntent());
+                }
+            });
+            dialog.setTitle("Share by...");
+            dialog.show();
         } else {
             final ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);
             Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.contactId);
