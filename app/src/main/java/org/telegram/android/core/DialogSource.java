@@ -457,6 +457,8 @@ public class DialogSource {
             res.setMessage(body);
         }
 
+        res.setUnreadCount(item.getUnreadCount());
+
         res.setPreparedLayout(DialogView.prepareLayoutCache(res, application));
 
         return res;

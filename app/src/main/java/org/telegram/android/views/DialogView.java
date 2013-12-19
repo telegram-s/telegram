@@ -27,10 +27,12 @@ import org.telegram.i18n.I18nUtil;
  */
 public class DialogView extends BaseView implements TypingStates.TypingListener {
 
+    private static boolean IS_LARGE = false;
+
     // Resources
-    private static int HIGHLIGHT_COLOR = 0xff5d90ca;
+    private static int HIGHLIGHT_COLOR = 0xff5b89b1;
     private static int UNREAD_COLOR = 0xff010101;
-    private static int READ_COLOR = 0xffa8a8a8;
+    private static int READ_COLOR = 0xffb1b1b1;
 
     private static int READ_TIME_COLOR = 0xff898989;
     private static int UNREAD_TIME_COLOR = 0xff6597c4;
@@ -115,9 +117,15 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             } else {
                 titlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
+
             titlePaint.setColor(0xff010101);
-            titlePaint.setTextSize(sp(20f));
-            titlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
+            if (IS_LARGE) {
+                titlePaint.setTextSize(sp(20f));
+                titlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
+            } else {
+                titlePaint.setTextSize(sp(18f));
+                titlePaint.setTypeface(FontController.loadTypeface(context, "medium"));
+            }
 
             if (FontController.USE_SUBPIXEL) {
                 titleHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
@@ -125,8 +133,13 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 titleHighlightPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
             titleHighlightPaint.setColor(0xff006FC8);
-            titleHighlightPaint.setTextSize(sp(20f));
-            titleHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+            if (IS_LARGE) {
+                titleHighlightPaint.setTextSize(sp(20f));
+                titleHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+            } else {
+                titleHighlightPaint.setTextSize(sp(18f));
+                titleHighlightPaint.setTypeface(FontController.loadTypeface(context, "medium"));
+            }
 
             if (FontController.USE_SUBPIXEL) {
                 titleEncryptedPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
@@ -134,8 +147,13 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 titleEncryptedPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
             titleEncryptedPaint.setColor(0xff68b741);
-            titleEncryptedPaint.setTextSize(sp(20f));
-            titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+            if (IS_LARGE) {
+                titleEncryptedPaint.setTextSize(sp(20f));
+                titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+            } else {
+                titleEncryptedPaint.setTextSize(sp(18f));
+                titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "medium"));
+            }
 
             if (FontController.USE_SUBPIXEL) {
                 unreadClockPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
@@ -197,15 +215,25 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 counterTitlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
             counterTitlePaint.setColor(0xffffffff);
-            counterTitlePaint.setTextSize(sp(15.5f));
+            if (IS_LARGE) {
+                counterTitlePaint.setTextSize(sp(15.5f));
+            } else {
+                counterTitlePaint.setTextSize(sp(14f));
+            }
             counterTitlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             counterPaint = new Paint();
-            counterPaint.setColor(0xff4595D6);
-            isLoaded = true;
+            counterPaint.setColor(0xff8ec85f);
 
-            userPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
-            groupPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
+            if (IS_LARGE) {
+                userPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
+                groupPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
+            } else {
+                userPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
+                groupPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
+            }
+
+            isLoaded = true;
         }
     }
 
@@ -278,11 +306,20 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) photo;
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
                 StelsImageTask task = new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
-                task.setMaxHeight(getPx(64));
-                task.setMaxWidth(getPx(64));
+                if (IS_LARGE) {
+                    task.setMaxHeight(getPx(64));
+                    task.setMaxWidth(getPx(64));
+                } else {
+                    task.setMaxHeight(getPx(56));
+                    task.setMaxWidth(getPx(56));
+                }
                 task.setFillRect(true);
                 RoundedImageTask roundedImageTask = new RoundedImageTask(task);
-                roundedImageTask.setRadius(getPx(2));
+                if (IS_LARGE) {
+                    roundedImageTask.setRadius(getPx(2));
+                } else {
+                    roundedImageTask.setRadius(0);
+                }
                 avatarReceiver.receiveImage(roundedImageTask);
                 avatar = avatarReceiver.getResult();
             } else {
@@ -319,7 +356,11 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), getPx(80));
+        if (IS_LARGE) {
+            setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), getPx(80));
+        } else {
+            setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), getPx(68));
+        }
     }
 
     @Override
@@ -498,6 +539,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
         public boolean isRtl;
 
+        public int layoutPadding;
+        public int layoutBodyPadding;
+
+        public int layoutAvatarWidth;
         public int layoutAvatarTop;
         public int layoutAvatarLeft;
         public int layoutTimeTop;
@@ -577,23 +622,48 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             time = org.telegram.android.ui.TextUtil.formatDate(description.getDate(), application);
             isRtl = application.isRTL();
 
-            layoutAvatarTop = px(8);
-            if (isRtl) {
-                layoutAvatarLeft = w - px(8 + 64);
+            if (IS_LARGE) {
+                layoutAvatarWidth = px(64);
+                layoutPadding = px(8);
+                layoutBodyPadding = layoutAvatarWidth + layoutPadding + px(10);
+                layoutAvatarTop = px(8);
+                layoutTitleTop = px(16);
+                layoutMainTop = px(46);
+                layoutTimeTop = px(34);
+                layoutStateTop = px(22);
+                layoutEncryptedTop = px(20);
+
+                layoutMarkTop = px(44);
+                layoutMarkBottom = layoutMarkTop + px(22);
+                layoutMarkTextTop = layoutMarkTop + px(18);
             } else {
-                layoutAvatarLeft = px(8);
+                layoutAvatarWidth = px(56);
+                layoutPadding = px(8);
+                layoutBodyPadding = layoutAvatarWidth + layoutPadding + px(10);
+                layoutAvatarTop = px(6);
+                layoutTitleTop = px(12);
+                layoutMainTop = px(38);
+                layoutTimeTop = px(28);
+                layoutStateTop = px(16);
+                layoutEncryptedTop = px(14);
+
+                layoutMarkTop = px(38);
+                layoutMarkBottom = layoutMarkTop + px(22);
+                layoutMarkTextTop = layoutMarkTop + px(18);
+            }
+
+            if (isRtl) {
+                layoutAvatarLeft = w - layoutPadding + layoutAvatarWidth;
+            } else {
+                layoutAvatarLeft = layoutPadding;
             }
 
             int timeWidth = (int) unreadClockPaint.measureText(time);
-
-            layoutTimeTop = px(34);
             if (isRtl) {
                 layoutTimeLeft = px(8);
             } else {
                 layoutTimeLeft = w - px(8) - timeWidth;
             }
-
-            layoutStateTop = px(22);
 
             if (isRtl) {
                 layoutStateLeft = px(8) + timeWidth + px(7);
@@ -603,11 +673,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 layoutStateLeftDouble = w - px(8) - timeWidth - px(21);
             }
 
-            layoutMarkTop = px(40);
-            layoutMarkTextTop = px(18);
-            layoutMarkBottom = px(62);
             layoutMarkRadius = px(2);
-            layoutMarkTextTop = px(58);
             if (description.isErrorState() ||
                     (description.getMessageState() == MessageState.FAILURE && description.isMine())) {
                 layoutMarkWidth = px(30);
@@ -646,26 +712,24 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             }
             layoutMarkRect.set(layoutMarkLeft, layoutMarkTop, layoutMarkLeft + layoutMarkWidth, layoutMarkBottom);
 
-            layoutTitleTop = px(16);
             if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
-                layoutEncryptedTop = px(20);
                 if (isRtl) {
                     if (description.isMine()) {
                         layoutTitleLeft = timeWidth + px(16) + px(16);
                     } else {
                         layoutTitleLeft = timeWidth + px(12);
                     }
-                    layoutTitleWidth = w - layoutTitleLeft - px(80) - px(14) - px(6);
-                    layoutEncryptedLeft = w - px(80) - px(12);
+                    layoutTitleWidth = w - layoutTitleLeft - layoutBodyPadding - px(14) - px(6);
+                    layoutEncryptedLeft = w - layoutBodyPadding - px(12);
                 } else {
-                    layoutTitleLeft = px(80) + px(20);
+                    layoutTitleLeft = layoutBodyPadding + px(16);
                     if (description.isMine()) {
                         layoutTitleWidth = w - layoutTitleLeft - timeWidth - px(24);
                     } else {
                         layoutTitleWidth = w - layoutTitleLeft - timeWidth - px(12);
                     }
 
-                    layoutEncryptedLeft = px(86);
+                    layoutEncryptedLeft = layoutBodyPadding + px(2);
                 }
             } else {
                 if (isRtl) {
@@ -674,9 +738,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                     } else {
                         layoutTitleLeft = timeWidth + px(12);
                     }
-                    layoutTitleWidth = w - layoutTitleLeft - px(80);
+                    layoutTitleWidth = w - layoutTitleLeft - layoutBodyPadding;
                 } else {
-                    layoutTitleLeft = px(82);
+                    layoutTitleLeft = layoutBodyPadding;
                     if (description.isMine()) {
                         layoutTitleWidth = w - layoutTitleLeft - timeWidth - px(24) - px(12);
                     } else {
@@ -685,23 +749,21 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 }
             }
 
-            layoutMainTop = px(44);
-            layoutMainWidth = w - px(78 + 8);
+            layoutMainWidth = w - px(6) - layoutBodyPadding;
             if (isRtl) {
-                layoutMainLeft = w - layoutMainWidth - px(80);
+                layoutMainLeft = w - layoutMainWidth - layoutBodyPadding;
                 if (layoutMarkWidth != 0) {
                     layoutMainLeft += layoutMarkWidth + px(8);
                     layoutMainWidth -= layoutMarkWidth + px(8);
                 }
             } else {
-                layoutMainLeft = px(82);
+                layoutMainLeft = layoutBodyPadding;
                 if (layoutMarkWidth != 0) {
                     layoutMainWidth -= layoutMarkWidth + px(8);
                 }
             }
 
-            avatarRect.set(layoutAvatarLeft, layoutAvatarTop, layoutAvatarLeft + px(64), layoutAvatarTop + px(64));
-
+            avatarRect.set(layoutAvatarLeft, layoutAvatarTop, layoutAvatarLeft + layoutAvatarWidth, layoutAvatarTop + layoutAvatarWidth);
 
             // Building text layouts
             {
