@@ -476,6 +476,17 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
         }
     }
 
+    protected boolean hasApplication(String packageName) {
+        try {
+            PackageManager pm = application.getPackageManager();
+            pm.getPackageInfo(packageName, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     protected PickIntentItem[] createPickIntents(Intent intent) {
         PackageManager pm = application.getPackageManager();
         List<ResolveInfo> rList = pm.queryIntentActivities(intent, 0);

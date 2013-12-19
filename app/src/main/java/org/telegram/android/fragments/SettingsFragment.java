@@ -179,7 +179,8 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         res.findViewById(R.id.wallpapers).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getRootController().openWallpaperSettings();
+                // getRootController().openWallpaperSettings();
+                requestWallpaperChooser(1);
             }
         });
 
@@ -277,30 +278,38 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
 
     @Override
     protected void onPhotoArrived(Uri uri, int width, int height, int requestId) {
-        if (cropSupported(uri)) {
-            requestCrop(uri, 200, 200, 0);
-        } else {
-            doUploadAvatar(null, uri);
+        if (requestId == 0) {
+            if (cropSupported(uri)) {
+                requestCrop(uri, 200, 200, 0);
+            } else {
+                doUploadAvatar(null, uri);
+            }
         }
     }
 
     @Override
     protected void onPhotoArrived(final String fileName, int width, int height, int requestId) {
-        if (cropSupported(Uri.fromFile(new File(fileName)))) {
-            requestCrop(fileName, 200, 200, 0);
-        } else {
-            doUploadAvatar(fileName, null);
+        if (requestId == 0) {
+            if (cropSupported(Uri.fromFile(new File(fileName)))) {
+                requestCrop(fileName, 200, 200, 0);
+            } else {
+                doUploadAvatar(fileName, null);
+            }
         }
     }
 
     @Override
     protected void onPhotoCropped(Uri uri, int requestId) {
-        doUploadAvatar(null, uri);
+        if (requestId == 0) {
+            doUploadAvatar(null, uri);
+        }
     }
 
     @Override
     protected void onPhotoDeleted(int requestId) {
-        doUploadAvatar(null, null);
+        if (requestId == 0) {
+            doUploadAvatar(null, null);
+        }
     }
 
     private void doUploadAvatar(final String fileName, final Uri uri) {

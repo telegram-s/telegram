@@ -75,15 +75,17 @@ public class PickIntentItem {
         return intent;
     }
 
-    public void setIntent(Intent intent) {
+    public PickIntentItem setIntent(Intent intent) {
         this.intent = intent;
+        return this;
     }
 
     public Object getTag() {
         return tag;
     }
 
-    public void setTag(Object tag) {
+    public PickIntentItem setTag(Object tag) {
         this.tag = tag;
+        return this;
     }
 }
