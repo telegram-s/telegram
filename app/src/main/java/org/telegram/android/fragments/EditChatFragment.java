@@ -94,6 +94,8 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
     private Pair<Integer, Integer>[] users;
 
+    private int maxChatSize;
+
     public EditChatFragment(int chatId) {
         this.chatId = chatId;
     }
@@ -120,6 +122,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         if (savedInstanceState != null) {
             chatId = savedInstanceState.getInt("chatId");
         }
+
+        maxChatSize = application.getKernel().getTechKernel().getSystemConfig().getMaxChatSize();
+
         View res = inflater.inflate(R.layout.chat_edit, container, false);
 
         forbidden = res.findViewById(R.id.forbidden);
@@ -732,6 +737,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     @Override
     public void onResume() {
         super.onResume();
+        maxChatSize = application.getKernel().getTechKernel().getSystemConfig().getMaxChatSize();
         application.getChatSource().registerListener(this);
     }
 

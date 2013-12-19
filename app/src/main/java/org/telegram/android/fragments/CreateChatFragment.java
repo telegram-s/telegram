@@ -122,7 +122,7 @@ public class CreateChatFragment extends BaseContactsFragment {
         if (selected.contains(contact.user.getUid())) {
             removeUser(contact.user);
         } else {
-            if (selected.size() < 100) {
+            if (selected.size() < application.getTechKernel().getSystemConfig().getMaxChatSize()) {
                 addUser(contact.user);
             } else {
                 Toast.makeText(getActivity(), R.string.st_new_group_maximum, Toast.LENGTH_SHORT).show();
@@ -133,14 +133,14 @@ public class CreateChatFragment extends BaseContactsFragment {
     }
 
     private void updateCounter() {
-        counterView.setText(selected.size() + "/100");
+        counterView.setText(selected.size() + "/" + application.getTechKernel().getSystemConfig().getMaxChatSize());
         if (doneButton != null) {
             doneButton.setText(getStringSafe(R.string.st_new_group_next) + " (" + selected.size() + ")");
         }
     }
 
     private void addUser(User user) {
-        if (selected.size() > 100) {
+        if (selected.size() > application.getTechKernel().getSystemConfig().getMaxChatSize()) {
             Toast.makeText(getActivity(), R.string.st_new_group_maximum, Toast.LENGTH_SHORT).show();
             return;
         }

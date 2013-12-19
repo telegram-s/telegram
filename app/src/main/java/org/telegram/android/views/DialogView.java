@@ -35,7 +35,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     }
 
     // Resources
-    private static int HIGHLIGHT_COLOR = 0xff5b89b1;
+    private static int HIGHLIGHT_COLOR = 0xff3076a4;
     private static int UNREAD_COLOR = 0xff010101;
     private static int READ_COLOR = 0xffb1b1b1;
 
@@ -126,7 +126,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 titlePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
 
-            titlePaint.setColor(0xff010101);
+            titlePaint.setColor(0xff222222);
             if (IS_LARGE) {
                 titlePaint.setTextSize(sp(20f));
                 titlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
@@ -154,7 +154,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             } else {
                 titleEncryptedPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
-            titleEncryptedPaint.setColor(0xff68b741);
+            titleEncryptedPaint.setColor(0xff3a9d43);
             if (IS_LARGE) {
                 titleEncryptedPaint.setTextSize(sp(20f));
                 titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "regular"));
