@@ -889,7 +889,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         inflater.inflate(R.menu.conv_menu, menu);
         menu.findItem(R.id.attachCamera).setTitle(highlightMenuText(R.string.st_conv_menu_photo));
-        menu.findItem(R.id.attachGallery).setTitle(highlightMenuText(R.string.st_conv_menu_gallery));
         menu.findItem(R.id.attachVideo).setTitle(highlightMenuText(R.string.st_conv_menu_video));
         menu.findItem(R.id.attachLocation).setTitle(highlightMenuText(R.string.st_conv_menu_location));
 
