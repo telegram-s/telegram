@@ -18,7 +18,8 @@ import org.telegram.android.R;
  */
 public class PickIntentDialog extends Dialog {
 
-    private static final int ANIMATION_DURATION = 600;
+    private static final int ANIMATION_SCROLL_DURATION = 600;
+    private static final int ANIMATION_APPEAR_DURATION = 400;
 
     private boolean isCanceling = false;
 
@@ -26,10 +27,24 @@ public class PickIntentDialog extends Dialog {
     private PickIntentItem[] items;
     private PickIntentClickListener clickListener;
 
+    private final int CONTENT_PADDING;
+    private final int ROW_PADDING;
+    private final int ITEM_HEIGHT;
+    private final int DIV_HEIGHT;
+
+    private final int VELOCITY_SLOP;
+    private final int SCROLL_DETECT_SLOP;
+
     public PickIntentDialog(Context context, PickIntentItem[] items, PickIntentClickListener clickListener) {
         super(context, R.style.PickDialog_Theme);
         this.items = items;
         this.clickListener = clickListener;
+        VELOCITY_SLOP = (int) (context.getResources().getDisplayMetrics().density * 500);
+        SCROLL_DETECT_SLOP = (int) (context.getResources().getDisplayMetrics().density * 4);
+        CONTENT_PADDING = (int) (context.getResources().getDisplayMetrics().density * 2);
+        ROW_PADDING = (int) (context.getResources().getDisplayMetrics().density * 10);
+        ITEM_HEIGHT = (int) (context.getResources().getDisplayMetrics().density * 106);
+        DIV_HEIGHT = (int) (context.getResources().getDisplayMetrics().density * 2);
         init();
     }
 
@@ -45,7 +60,7 @@ public class PickIntentDialog extends Dialog {
             @Override
             public void run() {
                 ObjectAnimator animator = ObjectAnimator.ofFloat(rootView, "translationY", 0, rootView.getHeight())
-                        .setDuration(500);
+                        .setDuration(ANIMATION_APPEAR_DURATION);
                 animator.setInterpolator(new AccelerateDecelerateInterpolator());
                 animator.start();
                 rootView.postDelayed(new Runnable() {
@@ -53,7 +68,7 @@ public class PickIntentDialog extends Dialog {
                     public void run() {
                         PickIntentDialog.this.superCancel();
                     }
-                }, 400);
+                }, ANIMATION_APPEAR_DURATION);
             }
         });
     }
@@ -94,7 +109,7 @@ public class PickIntentDialog extends Dialog {
 
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(0, 4, 0, 4);
+        layout.setPadding(0, CONTENT_PADDING, 0, CONTENT_PADDING);
         layout.setLayoutParams(new ScrollView.LayoutParams(
                 width,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -110,7 +125,7 @@ public class PickIntentDialog extends Dialog {
 
                 row = new LinearLayout(getContext());
                 row.setOrientation(LinearLayout.HORIZONTAL);
-                row.setPadding(20, 0, 20, 0);
+                row.setPadding(ROW_PADDING, 0, ROW_PADDING, 0);
                 row.setLayoutParams(new LinearLayout.LayoutParams(
                         width,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -131,7 +146,7 @@ public class PickIntentDialog extends Dialog {
                 ((ImageView) item.findViewById(R.id.icon)).setImageDrawable(null);
             }
 
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, 212, 1);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, ITEM_HEIGHT, 1);
             item.setLayoutParams(params);
             final int finalI = i;
             item.setOnClickListener(new View.OnClickListener() {
@@ -176,7 +191,7 @@ public class PickIntentDialog extends Dialog {
             public void run() {
                 ObjectAnimator animator = ObjectAnimator
                         .ofFloat(rootView, "translationY", rootView.getHeight(), 0)
-                        .setDuration(500);
+                        .setDuration(ANIMATION_APPEAR_DURATION);
                 animator.setInterpolator(new AccelerateDecelerateInterpolator());
                 animator.start();
             }
@@ -184,8 +199,18 @@ public class PickIntentDialog extends Dialog {
     }
 
 
+    public void setDividerColor(int color) {
+        rootView.getDiv().setBackgroundColor(color);
+    }
+
+    public void setTitle(String title) {
+        ((TextView) rootView.getHeader().findViewById(R.id.headerTitle)).setText(title);
+    }
+
+
     class RootView extends LinearLayout {
         private View header;
+        private View div;
         private ScrollView content;
 
         private boolean isDragging = false;
@@ -205,11 +230,11 @@ public class PickIntentDialog extends Dialog {
             this.header = header;
             this.content = content;
             if (count > 3) {
-                this.partialOffset = 212 * 2 + 4 + 8 + 56 * 2;
+                this.partialOffset = (int) ((106 * 2 + 62) * context.getResources().getDisplayMetrics().density);
             } else {
-                this.partialOffset = 212 + 4 + 8 + 56 * 2;
+                this.partialOffset = (int) ((106 * 1 + 62) * context.getResources().getDisplayMetrics().density);
             }
-            this.maxHeight = 4 + 8 + 56 * 2 + 212 * ((int) Math.ceil(count / 3.0));
+            this.maxHeight = (int) ((62 + 106 * ((int) Math.ceil(count / 3.0))) * context.getResources().getDisplayMetrics().density);
             this.touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
             this.scroller = new Scroller(context);
             this.tracker = VelocityTracker.obtain();
@@ -219,11 +244,11 @@ public class PickIntentDialog extends Dialog {
                     int paddingH = getHeight() - partialOffset;
                     if (getScrollY() > -paddingH / 2) {
                         int destScroll = -(getHeight() - partialOffset);
-                        scroller.startScroll(0, getScrollY(), 0, destScroll - getScrollY(), ANIMATION_DURATION);
+                        scroller.startScroll(0, getScrollY(), 0, destScroll - getScrollY(), ANIMATION_SCROLL_DURATION);
                         isScrolling = true;
                         postInvalidate();
                     } else {
-                        scroller.startScroll(0, getScrollY(), 0, getOpenScrollPosition() - getScrollY(), ANIMATION_DURATION);
+                        scroller.startScroll(0, getScrollY(), 0, getOpenScrollPosition() - getScrollY(), ANIMATION_SCROLL_DURATION);
                         isScrolling = true;
                         postInvalidate();
                     }
@@ -232,10 +257,10 @@ public class PickIntentDialog extends Dialog {
 
             setOrientation(VERTICAL);
             addView(header);
-            View div = new View(context);
+            div = new View(context);
             div.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    (int) (getResources().getDisplayMetrics().density * 2)));
+                    DIV_HEIGHT));
             div.setBackgroundColor(0xffe3e3e3);
             addView(div);
             addView(content);
@@ -249,16 +274,24 @@ public class PickIntentDialog extends Dialog {
             });
         }
 
+        public View getHeader() {
+            return header;
+        }
+
+        public View getDiv() {
+            return div;
+        }
+
+        public ScrollView getContent() {
+            return content;
+        }
+
         private int getOpenScrollPosition() {
             if (maxHeight > getHeight()) {
                 return 0;
             }
             return maxHeight - getHeight();
         }
-
-//        private int getCloseScrollPosition() {
-//            return -(getHeight() - partialOffset);
-//        }
 
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -280,8 +313,8 @@ public class PickIntentDialog extends Dialog {
                 touchY = (int) ev.getY();
                 touchScrollStart = getScrollY();
             } else if (ev.getAction() == MotionEvent.ACTION_MOVE) {
-                if (getScrollY() == getOpenScrollPosition()) {
-                    if (content.getScrollY() < 10) {
+                if (Math.abs(getScrollY() - getOpenScrollPosition()) < SCROLL_DETECT_SLOP) {
+                    if (content.getScrollY() < SCROLL_DETECT_SLOP) {
                         if (ev.getY() - touchY > touchSlop) {
                             isDragging = true;
                             touchY = (int) ev.getY();
@@ -312,8 +345,7 @@ public class PickIntentDialog extends Dialog {
         }
 
         private void flingScroll(int velocity, int offset) {
-            // Logger.d("PickIntentDialog", "flingScroll " + velocity + " to " + offset);
-            scroller.startScroll(0, getScrollY(), 0, offset - getScrollY(), ANIMATION_DURATION);
+            scroller.startScroll(0, getScrollY(), 0, offset - getScrollY(), ANIMATION_SCROLL_DURATION);
             invalidate();
         }
 
@@ -323,8 +355,6 @@ public class PickIntentDialog extends Dialog {
                 return true;
             }
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                touchY = (int) event.getY();
-//                touchScrollStart = getScrollY();
                 if (event.getY() < -getScrollY()) {
                     cancel();
                     return true;
@@ -347,10 +377,10 @@ public class PickIntentDialog extends Dialog {
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 int paddingH = getHeight() - partialOffset;
-                tracker.computeCurrentVelocity(1000);
-                if (tracker.getYVelocity() < -1000) {
+                tracker.computeCurrentVelocity(VELOCITY_SLOP);
+                if (tracker.getYVelocity() < -VELOCITY_SLOP) {
                     flingScroll((int) tracker.getYVelocity(), getOpenScrollPosition());
-                } else if (tracker.getYVelocity() > 1000) {
+                } else if (tracker.getYVelocity() > VELOCITY_SLOP) {
                     flingScroll((int) tracker.getYVelocity(), -(getHeight() - partialOffset));
                 } else {
 
@@ -358,11 +388,11 @@ public class PickIntentDialog extends Dialog {
                         invalidate();
                     } else {
                         if (getScrollY() > -paddingH / 2) {
-                            scroller.startScroll(0, getScrollY(), 0, getOpenScrollPosition() - getScrollY(), ANIMATION_DURATION);
+                            scroller.startScroll(0, getScrollY(), 0, getOpenScrollPosition() - getScrollY(), ANIMATION_SCROLL_DURATION);
                             invalidate();
                         } else {
                             int destScroll = -(getHeight() - partialOffset);
-                            scroller.startScroll(0, getScrollY(), 0, destScroll - getScrollY(), ANIMATION_DURATION);
+                            scroller.startScroll(0, getScrollY(), 0, destScroll - getScrollY(), ANIMATION_SCROLL_DURATION);
                             invalidate();
                         }
                     }

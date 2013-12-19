@@ -87,7 +87,7 @@ public class MediaReceiverFragment extends StelsFragment {
                 .setType("image/*")));
         items.add(new PickIntentItem(R.drawable.holo_light_ic_delete, "Delete"));
 
-        new PickIntentDialog(getActivity(),
+        PickIntentDialog dialog = new PickIntentDialog(getActivity(),
                 items.toArray(new PickIntentItem[items.size()]),
                 new PickIntentClickListener() {
                     @Override
@@ -105,7 +105,9 @@ public class MediaReceiverFragment extends StelsFragment {
                             }
                         }
                     }
-                }).show();
+                });
+        dialog.setTitle("Edit photo");
+        dialog.show();
     }
 
     public void requestWallpaperChooser(final int requestId) {
@@ -114,20 +116,31 @@ public class MediaReceiverFragment extends StelsFragment {
 
         ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
         items.add(new PickIntentItem(R.drawable.app_icon, "Built-In").setTag("built-in"));
+        items.add(new PickIntentItem(R.drawable.app_icon, "Default").setTag("default"));
+        items.add(new PickIntentItem(R.drawable.holo_light_ic_delete, "No Wallpaper").setTag("empty"));
         if (hasApplication("com.whatsapp") && hasApplication("com.whatsapp.wallpaper")) {
             Collections.addAll(items, createPickIntents(new Intent().setClassName("com.whatsapp", "com.whatsapp.wallpaper.WallpaperPicker")));
         }
         Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
         Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
                 .setType("image/*")));
-        items.add(new PickIntentItem(R.drawable.holo_light_ic_delete, "No Wallpaper"));
 
-        new PickIntentDialog(getActivity(),
+
+        PickIntentDialog dialog = new PickIntentDialog(getActivity(),
                 items.toArray(new PickIntentItem[items.size()]),
                 new PickIntentClickListener() {
                     @Override
                     public void onItemClicked(int index, PickIntentItem item) {
-                        if ("built-in".equals(item.getTag())) {
+                        if ("empty".equals(item.getTag())) {
+                            application.getUserSettings().setWallpaperSet(true);
+                            application.getUserSettings().setWallpaperSolid(true);
+                            application.getUserSettings().setCurrentWallpaperId(0);
+                            application.getUserSettings().setCurrentWallpaperSolidColor(0xffD2E2EE);
+                            application.getWallpaperHolder().dropCache();
+                        } else if ("default".equals(item.getTag())) {
+                            application.getUserSettings().setWallpaperSet(false);
+                            application.getWallpaperHolder().dropCache();
+                        } else if ("built-in".equals(item.getTag())) {
                             getRootController().openWallpaperSettings();
                         } else if (item.getIntent() == null) {
                             onPhotoDeleted(requestId);
@@ -142,45 +155,9 @@ public class MediaReceiverFragment extends StelsFragment {
                             }
                         }
                     }
-                }).show();
-    }
-
-    public void requestWallpaperChooserWithDelete(final int requestId) {
-        imageFileName = getUploadTempFile();
-        final Uri fileUri = Uri.fromFile(new File(imageFileName));
-
-        ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
-        items.add(new PickIntentItem(R.drawable.app_icon, "Built-In").setTag("built-in"));
-        if (hasApplication("com.whatsapp") && hasApplication("com.whatsapp.wallpaper")) {
-            Collections.addAll(items, createPickIntents(new Intent().setClassName("com.whatsapp", "com.whatsapp.wallpaper.WallpaperPicker")));
-        }
-        Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
-        Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
-                .setType("image/*")));
-        items.add(new PickIntentItem(R.drawable.holo_light_ic_delete, "No Wallpaper"));
-        items.add(new PickIntentItem(R.drawable.holo_light_ic_delete, "Delete"));
-
-        new PickIntentDialog(getActivity(),
-                items.toArray(new PickIntentItem[items.size()]),
-                new PickIntentClickListener() {
-                    @Override
-                    public void onItemClicked(int index, PickIntentItem item) {
-                        if ("built-in".equals(item.getTag())) {
-                            getRootController().openWallpaperSettings();
-                        } else if (item.getIntent() == null) {
-                            onPhotoDeleted(requestId);
-                        } else {
-                            if (MediaStore.ACTION_IMAGE_CAPTURE.equals(item.getIntent().getAction())) {
-                                startActivityForResult(item.getIntent().putExtra(MediaStore.EXTRA_OUTPUT, fileUri),
-                                        requestId * REQ_M + REQUEST_BASE);
-                            } else if (Intent.ACTION_GET_CONTENT.equals(item.getIntent().getAction())) {
-                                startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 1);
-                            } else {
-                                startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 4);
-                            }
-                        }
-                    }
-                }).show();
+                });
+        dialog.setTitle("Change wallpaper");
+        dialog.show();
     }
 
     public void requestPhotoChooser(final int requestId) {
@@ -193,7 +170,7 @@ public class MediaReceiverFragment extends StelsFragment {
         Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
                 .setType("image/*")));
 
-        new PickIntentDialog(getActivity(),
+        PickIntentDialog pickIntentDialog = new PickIntentDialog(getActivity(),
                 items.toArray(new PickIntentItem[items.size()]),
                 new PickIntentClickListener() {
                     @Override
@@ -205,7 +182,9 @@ public class MediaReceiverFragment extends StelsFragment {
                             startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 1);
                         }
                     }
-                }).show();
+                });
+        pickIntentDialog.setTitle("Choose photo");
+        pickIntentDialog.show();
     }
 
     public void requestVideo(int requestId) {
