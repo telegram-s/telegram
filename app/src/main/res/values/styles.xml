@@ -134,10 +134,6 @@
         <item name="homeAsUpIndicator">@drawable/st_bar_back_photo</item>
     </style>
 
-    <style name="PickTheme.Theme" parent="@android:style/Theme.Translucent.NoTitleBar">
-        <item name="android:windowBackground">@color/st_pick_intent_bg</item>
-    </style>
-
     <style name="PickDialog.Theme" parent="android:Theme.Dialog">
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">fill_parent</item>

@@ -7,9 +7,6 @@
     <color name="st_black_text">#010101</color>
     <color name="st_empty_conv">#ffffff</color>
     <color name="st_grey_text">#808080</color>
-    <color name="st_msg_tex_color">#000000</color>
-    <color name="st_msg_out_time_color">#70B15C</color>
-    <color name="st_msg_in_time_color">#A1AAB3</color>
     <color name="st_msg_image_time_color">#CECECE</color>
     <color name="st_msg_image_time_bg_color">#99000000</color>
     <color name="st_smileys_div">#151515</color>
@@ -31,5 +28,4 @@
     <color name="st_bar_selected_bg">#1CFFFFFF</color>
     <color name="st_bar_title_color">#ffffff</color>
     <color name="st_bar_subtitle_color">#ffffff</color>
-    <color name="st_pick_intent_bg">#80282828</color>
 </resources>

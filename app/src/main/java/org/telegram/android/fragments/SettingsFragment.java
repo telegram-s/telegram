@@ -180,10 +180,10 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
 
         if (application.isRTL()) {
             nameView.setGravity(Gravity.RIGHT);
-            phoneView.setGravity(Gravity.RIGHT);
+            phoneView.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         } else {
             nameView.setGravity(Gravity.LEFT);
-            phoneView.setGravity(Gravity.LEFT);
+            phoneView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         }
 
         return res;

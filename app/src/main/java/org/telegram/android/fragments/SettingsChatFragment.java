@@ -29,11 +29,13 @@ public class SettingsChatFragment extends MediaReceiverFragment {
     private TextView fontSizeValue;
     private TextView dialogSizeValue;
     private ImageView sendByEnterCheck;
+    private TextView sendByEnterSubtitle;
     private ImageView galleryCheck;
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_view, container, false);
+        sendByEnterSubtitle = (TextView) res.findViewById(R.id.sendByEnterSubtitle);
         fontSizeValue = (TextView) res.findViewById(R.id.fontSizeValue);
         dialogSizeValue = (TextView) res.findViewById(R.id.itemSizeValue);
         sendByEnterCheck = (ImageView) res.findViewById(R.id.sendByEnterCheck);
@@ -190,36 +192,38 @@ public class SettingsChatFragment extends MediaReceiverFragment {
         switch (application.getUserSettings().getBubbleFontSizeId()) {
             default:
             case UserSettings.BUBBLE_FONT_NORMAL:
-                fontSizeValue.setText(R.string.st_appearance_font_size_normal);
+                fontSizeValue.setText(getStringSafe(R.string.st_appearance_font_size).replace("{s}", getStringSafe(R.string.st_appearance_font_size_normal)));
                 break;
             case UserSettings.BUBBLE_FONT_HUGE:
-                fontSizeValue.setText(R.string.st_appearance_font_size_huge);
+                fontSizeValue.setText(getStringSafe(R.string.st_appearance_font_size).replace("{s}", getStringSafe(R.string.st_appearance_font_size_huge)));
                 break;
             case UserSettings.BUBBLE_FONT_LARGE:
-                fontSizeValue.setText(R.string.st_appearance_font_size_large);
+                fontSizeValue.setText(getStringSafe(R.string.st_appearance_font_size).replace("{s}", getStringSafe(R.string.st_appearance_font_size_large)));
                 break;
             case UserSettings.BUBBLE_FONT_SMALL:
-                fontSizeValue.setText(R.string.st_appearance_font_size_small);
+                fontSizeValue.setText(getStringSafe(R.string.st_appearance_font_size).replace("{s}", getStringSafe(R.string.st_appearance_font_size_small)));
                 break;
             case UserSettings.BUBBLE_FONT_TINY:
-                fontSizeValue.setText(R.string.st_appearance_font_size_tiny);
+                fontSizeValue.setText(getStringSafe(R.string.st_appearance_font_size).replace("{s}", getStringSafe(R.string.st_appearance_font_size_tiny)));
                 break;
         }
 
         switch (application.getUserSettings().getDialogItemSize()) {
             default:
             case UserSettings.DIALOG_SIZE_NORMAL:
-                dialogSizeValue.setText(R.string.st_appearance_item_size_normal);
+                dialogSizeValue.setText(getStringSafe(R.string.st_appearance_item_size).replace("{s}", getStringSafe(R.string.st_appearance_item_size_normal)));
                 break;
             case UserSettings.DIALOG_SIZE_LARGE:
-                dialogSizeValue.setText(R.string.st_appearance_item_size_large);
+                dialogSizeValue.setText(getStringSafe(R.string.st_appearance_item_size).replace("{s}", getStringSafe(R.string.st_appearance_item_size_large)));
                 break;
         }
 
         if (application.getUserSettings().isSendByEnter()) {
             sendByEnterCheck.setImageResource(R.drawable.holo_btn_check_on);
+            sendByEnterSubtitle.setText(R.string.st_appearance_enter_subtitle_enable);
         } else {
             sendByEnterCheck.setImageResource(R.drawable.holo_btn_check_off);
+            sendByEnterSubtitle.setText(R.string.st_appearance_enter_subtitle_disable);
         }
         if (application.getUserSettings().isSaveToGalleryEnabled()) {
             galleryCheck.setImageResource(R.drawable.holo_btn_check_on);

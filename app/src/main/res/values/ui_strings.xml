@@ -149,11 +149,16 @@
     <string name="st_settings_header_about">ABOUT</string>
     <string name="st_settings_version">App version</string>
     <string name="st_settings_play">Google Play</string>
+    <string name="st_settings_play_subtitle">Please, rate our app</string>
     <string name="st_settings_blocked">Blocked users</string>
+    <string name="st_settings_blocked_subtitle">List of contacts that you have blocked</string>
     <string name="st_settings_chat">Chat settings</string>
+    <string name="st_settings_chat_subtitle">Wallpaper, send by enter, font size...</string>
     <string name="st_settings_background">Chat background</string>
     <string name="st_settings_support">Ask a Question</string>
+    <string name="st_settings_support_subtitle">Our support will help you</string>
     <string name="st_settings_save_photo">Save incoming photos</string>
+    <string name="st_settings_save_photo_subtitle">Automatically save to phone</string>
     <string name="st_settings_notifications">Notifications and sounds</string>
     <string name="st_settings_log_out">Log Out</string>
 
@@ -334,16 +339,21 @@
 
     <string name="st_appearance_header_dialogs">CHAT LIST</string>
 
-    <string name="st_appearance_font_size">Font size</string>
+    <string name="st_appearance_font_size">Font size: {s}</string>
+    <string name="st_appearance_font_size_subtitle">Font size for conversation screen</string>
     <string name="st_appearance_font_size_tiny">Tiny</string>
     <string name="st_appearance_font_size_small">Small</string>
     <string name="st_appearance_font_size_normal">Normal</string>
     <string name="st_appearance_font_size_large">Large</string>
     <string name="st_appearance_font_size_huge">Huge</string>
-    <string name="st_appearance_enter">Send by Enter</string>
-    <string name="st_appearance_background">Chat background</string>
+    <string name="st_appearance_enter">Enter is send</string>
+    <string name="st_appearance_enter_subtitle_enable">Enter key will send your message</string>
+    <string name="st_appearance_enter_subtitle_disable">Enter key will add new line</string>
+    <string name="st_appearance_background">Wallpaper</string>
+    <string name="st_appearance_background_subtitle">Picture for conversation screen</string>
 
-    <string name="st_appearance_item_size">Style</string>
+    <string name="st_appearance_item_size">Style: {s}</string>
+    <string name="st_appearance_item_size_subtitle">Chat item size for chat list screen</string>
     <string name="st_appearance_item_size_normal">Normal</string>
     <string name="st_appearance_item_size_large">Large</string>
 
