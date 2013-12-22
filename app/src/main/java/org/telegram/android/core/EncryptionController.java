@@ -307,7 +307,11 @@ public class EncryptionController {
 
         BigInteger dhPrime = loadBigInt(prime);
 
-        byte[] key = xor(alignKeyZero(fromBigInt(gb.modPow(a, dhPrime)), 256), encryptedChat.getNonce());
+        if (!isZero(encryptedChat.getNonce())) {
+            return;
+        }
+
+        byte[] key = alignKeyZero(fromBigInt(gb.modPow(a, dhPrime)), 256);
         long keyF = readLong(substring(CryptoUtils.SHA1(key), 12, 8), 0);
 
         application.getEngine().updateEncryptedChatKey(encryptedChat, key);
@@ -326,6 +330,10 @@ public class EncryptionController {
             rawGa = StreamingUtils.readBytes(primeLen, stream);
             int aLen = StreamingUtils.readInt(stream);
             nonce = StreamingUtils.readBytes(aLen, stream);
+
+            if (!isZero(nonce)) {
+                return;
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -340,7 +348,7 @@ public class EncryptionController {
         BigInteger b = CryptoUtils.loadBigInt(Entropy.generateSeed(dhConfig.getRandom()));
         BigInteger gb = g.modPow(b, dhPrime);
 
-        byte[] key = xor(alignKeyZero(CryptoUtils.fromBigInt(ga.modPow(b, dhPrime)), 256), nonce);
+        byte[] key = alignKeyZero(CryptoUtils.fromBigInt(ga.modPow(b, dhPrime)), 256);
         long keyF = readLong(substring(CryptoUtils.SHA1(key), 12, 8), 0);
 
         Logger.d(TAG, "Confirming encryption: " + keyF);
