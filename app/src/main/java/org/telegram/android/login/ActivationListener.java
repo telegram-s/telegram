@@ -1,9 +1,8 @@
 package org.telegram.android.login;
 
 /**
- * Author: Korshakov Stepan
- * Created: 31.07.13 9:10
+ * Created by ex3ndr on 22.12.13.
  */
 public interface ActivationListener {
-    public void onCodeReceived(int code);
+    public void onStateChanged(int state);
 }

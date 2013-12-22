@@ -156,7 +156,7 @@
     <string name="st_settings_chat_subtitle">Wallpaper, send by enter, font size...</string>
     <string name="st_settings_background">Chat background</string>
     <string name="st_settings_support">Ask a Question</string>
-    <string name="st_settings_support_subtitle">Our support will help you</string>
+    <string name="st_settings_support_subtitle">Our support team will help you</string>
     <string name="st_settings_save_photo">Save incoming photos</string>
     <string name="st_settings_save_photo_subtitle">Automatically save to phone</string>
     <string name="st_settings_notifications">Notifications and sounds</string>

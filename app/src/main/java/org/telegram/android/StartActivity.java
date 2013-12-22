@@ -245,7 +245,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             if (first) {
                 transaction.add(R.id.fragmentContainer, new TourFragment(), "tourFragment");
             } else {
-                transaction.replace(R.id.fragmentContainer, new LoginFragment(), "loginFragment");
+                transaction.replace(R.id.fragmentContainer, new AuthFragment(), "loginFragment");
             }
             transaction.commit();
             setState(STATE_LOGIN);
@@ -419,11 +419,11 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     private void checkLogout() {
         if (!application.isLoggedIn()) {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-            if (!(fragment instanceof LoginFragment) && !(fragment instanceof LoginSignupFragment) &&
+            if (!(fragment instanceof AuthFragment) && !(fragment instanceof LoginFragment) && !(fragment instanceof LoginSignupFragment) &&
                     !(fragment instanceof LoginCodeFragment) && !(fragment instanceof TourFragment)) {
                 getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragmentContainer, new LoginFragment())
+                        .replace(R.id.fragmentContainer, new AuthFragment())
                         .commit();
                 getSupportFragmentManager().executePendingTransactions();
                 setState(STATE_LOGIN);
@@ -472,7 +472,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
 
     public void openApp() {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainer, new LoginFragment(), "loginFragment")
+                .replace(R.id.fragmentContainer, new AuthFragment(), "loginFragment")
                 .commit();
         setState(STATE_LOGIN);
     }

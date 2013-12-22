@@ -7,6 +7,8 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.telephony.SmsMessage;
 import org.telegram.android.log.Logger;
 import org.telegram.android.reflection.CrashHandler;
@@ -18,21 +20,23 @@ import java.util.regex.Pattern;
  * Author: Korshakov Stepan
  * Created: 31.07.13 8:35
  */
-public class ActivationReceiver {
+public class AutoActivationReceiver {
 
-    private static final String TAG = "ActivationReceiver";
+    private static final String TAG = "AutoActivationReceiver";
 
     private Context context;
 
     private BroadcastReceiver receiver;
 
-    private ActivationListener listener;
+    private AutoActivationListener listener;
 
     private int sentTime;
 
     private Thread checker = null;
 
-    public ActivationReceiver(Context context) {
+    private Handler handler = new Handler(Looper.getMainLooper());
+
+    public AutoActivationReceiver(Context context) {
         this.context = context;
         receiver = new BroadcastReceiver() {
             @Override
@@ -78,14 +82,19 @@ public class ActivationReceiver {
         return false;
     }
 
-    private void foundedCode(int code) {
-        if (listener != null) {
-            listener.onCodeReceived(code);
-            listener = null;
-        }
+    private void foundedCode(final int code) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (listener != null) {
+                    listener.onCodeReceived(code);
+                    listener = null;
+                }
+            }
+        });
     }
 
-    public void startReceivingActivation(int sentTime, ActivationListener listener) {
+    public void startReceivingActivation(int sentTime, AutoActivationListener listener) {
         try {
             this.sentTime = sentTime;
             this.listener = listener;
@@ -102,7 +111,7 @@ public class ActivationReceiver {
                     } catch (InterruptedException e) {
                         return;
                     }
-                    while (ActivationReceiver.this.listener != null && !isInterrupted()) {
+                    while (AutoActivationReceiver.this.listener != null && !isInterrupted()) {
                         check();
                         try {
                             Thread.sleep(5000);

@@ -5,6 +5,7 @@ import android.os.SystemClock;
 import com.google.android.gcm.GCMRegistrar;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
+import org.telegram.android.login.ActivationController;
 import org.telegram.android.reflection.CrashHandler;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.engine.LoggerInterface;
@@ -41,6 +42,8 @@ public class ApplicationKernel {
     private SyncKernel syncKernel;
 
     private ApiKernel apiKernel;
+
+    private ActivationController activationController;
 
     public ApplicationKernel(StelsApplication application) {
         this.application = application;
@@ -121,17 +124,17 @@ public class ApplicationKernel {
         org.telegram.mtproto.log.Logger.registerInterface(new LogInterface() {
             @Override
             public void w(String tag, String message) {
-                // Logger.w(tag, message);
+                Logger.w("MT|" + tag, message);
             }
 
             @Override
             public void d(String tag, String message) {
-                // Logger.d(tag, message);
+                Logger.d("MT|" + tag, message);
             }
 
             @Override
             public void e(String tag, Throwable t) {
-                // Logger.t(tag, t);
+                Logger.t("MT|" + tag, t);
             }
         });
     }
@@ -257,9 +260,6 @@ public class ApplicationKernel {
         settingsKernel.logOut();
         Logger.d(TAG, "LogOut: settingsKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();
-        apiKernel.updateTelegramApi();
-        Logger.d(TAG, "LogOut: apiKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
-        start = SystemClock.uptimeMillis();
         syncKernel.logOut();
         Logger.d(TAG, "LogOut: syncKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();
@@ -276,5 +276,13 @@ public class ApplicationKernel {
 
     public void sendEvent(String type, String message) {
         syncKernel.getBackgroundSync().sendLog(type, message);
+    }
+
+    public ActivationController getActivationController() {
+        return activationController;
+    }
+
+    public void setActivationController(ActivationController activationController) {
+        this.activationController = activationController;
     }
 }

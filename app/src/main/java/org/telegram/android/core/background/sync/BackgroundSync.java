@@ -149,7 +149,7 @@ public class BackgroundSync extends BaseSync {
             int[] knownDcs = application.getApiStorage().getKnownDc();
             for (int i = 0; i < knownDcs.length; i++) {
                 try {
-                    TLConfig config = application.getApi().doRpcCallToDc(new TLRequestHelpGetConfig(), knownDcs[i]);
+                    TLConfig config = application.getApi().doRpcCallNonAuth(new TLRequestHelpGetConfig(), knownDcs[i]);
                     application.getApiStorage().updateSettings(config);
                     application.getTechKernel().getSystemConfig().onConfig(config);
                     application.getApi().resetConnectionInfo();

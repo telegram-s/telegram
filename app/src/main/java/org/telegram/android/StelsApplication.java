@@ -5,7 +5,6 @@ import android.os.SystemClock;
 import com.extradea.framework.images.ImageController;
 import com.extradea.framework.images.ImageSupport;
 import org.telegram.android.core.engines.ModelEngine;
-import org.telegram.android.kernel.api.AuthController;
 import org.telegram.android.config.WallpaperHolder;
 import org.telegram.android.core.*;
 import org.telegram.android.core.background.*;
@@ -192,10 +191,6 @@ public class StelsApplication extends Application implements ImageSupport {
 
     public TelegramApi getApi() {
         return kernel.getApiKernel().getApi();
-    }
-
-    public AuthController getAuthController() {
-        return kernel.getApiKernel().getAuthController();
     }
 
     public ChatSource getChatSource() {

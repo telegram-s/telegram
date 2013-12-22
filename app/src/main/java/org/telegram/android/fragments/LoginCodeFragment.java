@@ -11,20 +11,17 @@ import android.widget.*;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
 import org.telegram.android.StelsFragment;
-import org.telegram.android.login.ActivationListener;
-import org.telegram.android.login.ActivationReceiver;
+import org.telegram.android.login.AutoActivationListener;
+import org.telegram.android.login.AutoActivationReceiver;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.tasks.ProgressInterface;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.android.ui.UiCyclic;
-import org.telegram.api.TLAbsUser;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.requests.TLRequestAuthSendCall;
 import org.telegram.api.requests.TLRequestAuthSignIn;
-
-import java.util.ArrayList;
 
 /**
  * Author: Korshakov Stepan
@@ -35,7 +32,7 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
     private String phoneHash;
     private String phoneNumber;
     private int sentTime;
-    private ActivationReceiver receiver;
+    private AutoActivationReceiver receiver;
 
     private TextView counterTextView;
     private EditText codeEditText;
@@ -89,8 +86,8 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
             codeSending = savedInstanceState.getBoolean("codeSending");
         }
 
-        receiver = new ActivationReceiver(getActivity());
-        receiver.startReceivingActivation(sentTime, new ActivationListener() {
+        receiver = new AutoActivationReceiver(getActivity());
+        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
             @Override
             public void onCodeReceived(final int code) {
                 LoginCodeFragment.this.onCodeArrived(code);
