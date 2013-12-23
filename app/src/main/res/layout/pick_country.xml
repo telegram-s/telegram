@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+    <se.emilsjolander.stickylistheaders.StickyListHeadersListView android:layout_width="fill_parent"
+                                                                  android:layout_height="fill_parent"
+                                                                  android:id="@+id/listView"
+                                                                  android:background="@android:color/white"
+                                                                  android:paddingLeft="@dimen/fast_scroll_padding_left"
+                                                                  android:paddingRight="@dimen/fast_scroll_padding_right"/>
+</FrameLayout>

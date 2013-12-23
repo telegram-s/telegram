@@ -8,6 +8,8 @@ import android.os.Looper;
 import android.telephony.TelephonyManager;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.countries.Countries;
+import org.telegram.android.countries.CountryRecord;
 import org.telegram.android.log.Logger;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.api.auth.TLAuthorization;
@@ -54,7 +56,9 @@ public class ActivationController {
 
     private StelsApplication application;
     private int currentState;
+    private CountryRecord currentCountry;
     private String phone;
+    private String manualPhone;
     private String phoneCodeHash;
     private int sentTime;
 
@@ -126,6 +130,55 @@ public class ActivationController {
             this.currentState = STATE_PHONE_EDIT;
             Logger.d(TAG, "Unable to find phone");
         }
+
+        TelephonyManager manager = (TelephonyManager) application.getSystemService(Context.TELEPHONY_SERVICE);
+        String country = null;
+        if (manager.getSimCountryIso() != null) {
+            country = manager.getSimCountryIso();
+        } else if (manager.getNetworkCountryIso() != null) {
+            country = manager.getNetworkCountryIso();
+        }
+        if (country == null) {
+            country = "us";
+        }
+
+        for (int i = 0; i < Countries.COUNTRIES.length; i++) {
+            if (!Countries.COUNTRIES[i].isSearchByName()) {
+                continue;
+            }
+            if (Countries.COUNTRIES[i].getIso().equals(country)) {
+                currentCountry = Countries.COUNTRIES[i];
+                break;
+            }
+        }
+
+        if (currentCountry == null) {
+            for (int i = 0; i < Countries.COUNTRIES.length; i++) {
+                if (!Countries.COUNTRIES[i].isSearchByName()) {
+                    continue;
+                }
+                if (Countries.COUNTRIES[i].getIso().equals("us")) {
+                    currentCountry = Countries.COUNTRIES[i];
+                    break;
+                }
+            }
+        }
+    }
+
+    public String getManualPhone() {
+        return manualPhone;
+    }
+
+    public void setManualPhone(String manualPhone) {
+        this.manualPhone = manualPhone;
+    }
+
+    public void setCurrentCountry(CountryRecord currentCountry) {
+        this.currentCountry = currentCountry;
+    }
+
+    public CountryRecord getCurrentCountry() {
+        return currentCountry;
     }
 
     public void doConfirmPhone() {
@@ -134,6 +187,15 @@ public class ActivationController {
             throw new RuntimeException("Invalid state for doConfirmPhone");
         }
         startActivation();
+    }
+
+    public void doEditPhone() {
+        Logger.d(TAG, "doConfirmPhone");
+        if (this.currentState != STATE_PHONE_CONFIRM) {
+            throw new RuntimeException("Invalid state for doEditPhone");
+        }
+
+        doChangeState(STATE_PHONE_EDIT);
     }
 
     private void startActivation() {

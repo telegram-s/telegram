@@ -111,6 +111,8 @@
                   android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
                   android:windowSoftInputMode="stateHidden|adjustNothing"/>
         <activity android:name=".CrashActivity"/>
+        <activity android:name=".activity.PickCountryActivity"
+                  android:theme="@style/AppTheme.Theme"/>
 
         <receiver
                 android:name="com.google.android.gcm.GCMBroadcastReceiver"

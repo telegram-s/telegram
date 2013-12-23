@@ -31,12 +31,16 @@ public class FilterMatcher {
         if (query == null)
             return true;
 
-        if (src.toLowerCase().contains(queryLo)) {
-            return true;
-        }
+        String[] parts = src.toLowerCase().split(" ");
 
-        if (src.toLowerCase().contains(queryLoTranslit)) {
-            return true;
+        for (String s : parts) {
+            if (s.startsWith(queryLo)) {
+                return true;
+            }
+
+            if (s.startsWith(queryLoTranslit)) {
+                return true;
+            }
         }
 
         return false;
@@ -59,7 +63,9 @@ public class FilterMatcher {
                     return;
                 }
             }
-            string.setSpan(new ForegroundColorSpan(0xff1274C9), index, index + len, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            if (index == 0 || src.charAt(index - 1) == ' ') {
+                string.setSpan(new ForegroundColorSpan(0xff1274C9), index, index + len, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            }
             offset += len;
         }
     }

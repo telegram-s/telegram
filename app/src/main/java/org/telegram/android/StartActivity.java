@@ -493,12 +493,12 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     }
 
     public void showBar() {
-        getSupportActionBar().show();
+        // getSupportActionBar().show();
         barVisible = true;
     }
 
     public void hideBar() {
-        getSupportActionBar().hide();
+        // getSupportActionBar().hide();
         barVisible = false;
     }
 
