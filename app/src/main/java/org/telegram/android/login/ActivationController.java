@@ -43,10 +43,12 @@ public class ActivationController {
     public static final int STATE_PHONE_CONFIRM = 1;
     public static final int STATE_PHONE_EDIT = 2;
     public static final int STATE_ACTIVATION = 3;
-    public static final int STATE_ACTIVATION_NETWORK = 4;
-    public static final int STATE_ACTIVATION_UNABLE = 5;
-    public static final int STATE_MANUAL_ACTIVATION = 6;
-    public static final int STATE_ACTIVATED = 7;
+    public static final int STATE_ACTIVATION_ERROR_NETWORK = 4;
+    public static final int STATE_ACTIVATION_ERROR_UNABLE = 5;
+    public static final int STATE_ACTIVATION_ERROR_WRONG_PHONE = 6;
+    public static final int STATE_MANUAL_ACTIVATION = 7;
+    public static final int STATE_SIGNUP = 8;
+    public static final int STATE_ACTIVATED = 9;
 
     private ActivationListener listener;
 
@@ -54,6 +56,7 @@ public class ActivationController {
     private int currentState;
     private String phone;
     private String phoneCodeHash;
+    private int sentTime;
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -142,6 +145,7 @@ public class ActivationController {
                 new RpcCallback<TLSentCode>() {
                     @Override
                     public void onResult(final TLSentCode result) {
+                        sentTime = (int) (System.currentTimeMillis() / 1000);
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -154,6 +158,17 @@ public class ActivationController {
 
                     @Override
                     public void onError(int errorCode, String message) {
+                        if (errorCode == 0) {
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Logger.d(TAG, "onSmsSent error");
+                                    doChangeState(STATE_ACTIVATION_ERROR_NETWORK);
+                                }
+                            });
+                            return;
+                        }
+
                         String tagError = getErrorTag(message);
 
                         if (errorCode == 303) {
@@ -169,7 +184,7 @@ public class ActivationController {
                                     @Override
                                     public void run() {
                                         Logger.d(TAG, "onSmsSent error");
-                                        doChangeState(STATE_ACTIVATION_NETWORK);
+                                        doChangeState(STATE_ACTIVATION_ERROR_NETWORK);
                                     }
                                 });
                                 return;
@@ -183,7 +198,7 @@ public class ActivationController {
                             @Override
                             public void run() {
                                 Logger.d(TAG, "onSmsSent error");
-                                doChangeState(STATE_ACTIVATION_NETWORK);
+                                doChangeState(STATE_ACTIVATION_ERROR_NETWORK);
                             }
                         });
                     }
@@ -194,7 +209,7 @@ public class ActivationController {
         Logger.d(TAG, "startCodeSearch");
         handler.postDelayed(cancelAutomatic, 30000);
         receiver = new AutoActivationReceiver(application);
-        receiver.startReceivingActivation(0, new AutoActivationListener() {
+        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
             @Override
             public void onCodeReceived(int code) {
                 performAutomatic(code);
@@ -212,6 +227,8 @@ public class ActivationController {
                     @Override
                     public void onResult(TLAuthorization result) {
                         Logger.d(TAG, "sign in completed");
+                        application.getKernel().logIn(result);
+                        doChangeState(STATE_ACTIVATED);
                     }
 
                     @Override
@@ -223,6 +240,8 @@ public class ActivationController {
 
     private void cancelAutomatic() {
         Logger.d(TAG, "cancelAutomatic");
+
+        doChangeState(STATE_ACTIVATION_ERROR_UNABLE);
     }
 
     public int getCurrentState() {

@@ -454,16 +454,16 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         hideBar();
     }
 
-    public void onSuccessAuth(TLAuthorization authorization) {
-        if (ACTION_LOGIN.equals(getIntent().getAction())) {
-            AccountAuthenticatorResponse response = getIntent().getExtras().getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
-            Bundle result = new Bundle();
-            result.putString(AccountManager.KEY_ACCOUNT_NAME, ((TLUserSelf) authorization.getUser()).getPhone());
-            result.putString(AccountManager.KEY_ACCOUNT_TYPE, "org.telegram.android.account");
-            response.onResult(result);
-            finish();
-            return;
-        }
+    public void onSuccessAuth() {
+//        if (ACTION_LOGIN.equals(getIntent().getAction())) {
+//            AccountAuthenticatorResponse response = getIntent().getExtras().getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+//            Bundle result = new Bundle();
+//            result.putString(AccountManager.KEY_ACCOUNT_NAME, ((TLUserSelf) authorization.getUser()).getPhone());
+//            result.putString(AccountManager.KEY_ACCOUNT_TYPE, "org.telegram.android.account");
+//            response.onResult(result);
+//            finish();
+//            return;
+//        }
 
         controller.openDialogs(false);
         setState(STATE_GENERAL);

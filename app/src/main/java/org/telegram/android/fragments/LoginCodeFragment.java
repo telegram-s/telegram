@@ -362,7 +362,7 @@ public class LoginCodeFragment extends StelsFragment implements ViewTreeObserver
                 codeSending = false;
                 if (authorization != null) {
                     contentView.setVisibility(View.GONE);
-                    ((StartActivity) getActivity()).onSuccessAuth(authorization);
+                    ((StartActivity) getActivity()).onSuccessAuth();
                 } else {
                     if (expired) {
                         Toast.makeText(getActivity(), R.string.st_login_code_expired, Toast.LENGTH_SHORT).show();

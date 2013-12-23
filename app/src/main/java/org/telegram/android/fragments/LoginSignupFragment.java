@@ -326,7 +326,7 @@ public class LoginSignupFragment extends MediaReceiverFragment {
                     Toast.makeText(getActivity(), R.string.st_login_code_expired, Toast.LENGTH_SHORT).show();
                     getActivity().onBackPressed();
                 } else {
-                    ((StartActivity) getActivity()).onSuccessAuth(authorization);
+                    ((StartActivity) getActivity()).onSuccessAuth();
                 }
             }
         });
