@@ -62,11 +62,6 @@ public class ApiKernel {
         });
     }
 
-    public void switchToDc(int dcId) {
-        kernel.getAuthKernel().getApiStorage().switchToPrimaryDc(dcId);
-        api.switchToDc(dcId);
-    }
-
     public TelegramApi getApi() {
         return api;
     }

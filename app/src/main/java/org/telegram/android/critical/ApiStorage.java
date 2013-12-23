@@ -65,11 +65,6 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
         return null;
     }
 
-    public synchronized void switchToPrimaryDc(int dc) {
-        getObj().setPrimaryDc(dc);
-        write();
-    }
-
     public synchronized boolean isAuthenticated() {
         return isAuthenticated(getPrimaryDc());
     }
@@ -93,6 +88,12 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
     @Override
     public synchronized int getPrimaryDc() {
         return getObj().getPrimaryDc();
+    }
+
+    @Override
+    public synchronized void setPrimaryDc(int dc) {
+        getObj().setPrimaryDc(dc);
+        write();
     }
 
     @Override

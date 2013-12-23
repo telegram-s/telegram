@@ -144,7 +144,7 @@ public class AuthKernel {
                 CompatObjectInputStream inputStream = new CompatObjectInputStream(new FileInputStream(obsoleteMainSession), Compats.KEYS_V1);
                 CompatSessionKey o = (CompatSessionKey) inputStream.readObject();
                 Logger.d(TAG, "Obsolete main session loaded. DcId: " + o.getDcId());
-                storage.switchToPrimaryDc(o.getDcId());
+                storage.setPrimaryDc(o.getDcId());
             } catch (Exception e) {
                 Logger.t(TAG, e);
                 storage.resetAuth();

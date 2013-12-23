@@ -375,7 +375,7 @@ public class LoginFragment extends StelsFragment {
                             application.getApiStorage().updateSettings(config);
                         }
 
-                        application.getKernel().getApiKernel().switchToDc(destDC);
+                        application.getKernel().getApiKernel().getApi().switchToDc(destDC);
 
                         performAttempt();
                         return;
