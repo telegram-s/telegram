@@ -234,6 +234,7 @@ public class ActivationController {
                     @Override
                     public void onError(int errorCode, String message) {
                         Logger.d(TAG, "sign in error");
+                        cancelAutomatic();
                     }
                 });
     }
@@ -242,6 +243,8 @@ public class ActivationController {
         Logger.d(TAG, "cancelAutomatic");
 
         doChangeState(STATE_ACTIVATION_ERROR_UNABLE);
+
+        handler.removeCallbacks(cancelAutomatic);
     }
 
     public int getCurrentState() {
