@@ -15,9 +15,11 @@ import org.telegram.android.tasks.AsyncException;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.auth.TLSentCode;
 import org.telegram.api.engine.RpcCallback;
+import org.telegram.api.requests.TLRequestAuthSendCall;
 import org.telegram.api.requests.TLRequestAuthSendCode;
 import org.telegram.api.requests.TLRequestAuthSignIn;
 import org.telegram.config.ApiConfig;
+import org.telegram.tl.TLBool;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,9 +50,13 @@ public class ActivationController {
     public static final int STATE_ACTIVATION_ERROR_NETWORK = 4;
     public static final int STATE_ACTIVATION_ERROR_UNABLE = 5;
     public static final int STATE_ACTIVATION_ERROR_WRONG_PHONE = 6;
-    public static final int STATE_MANUAL_ACTIVATION = 7;
+    public static final int STATE_MANUAL_ACTIVATION_REQUEST = 7;
+    public static final int STATE_MANUAL_ACTIVATION_REQUEST_NETWORK = 7;
+    public static final int STATE_MANUAL_ACTIVATION = 8;
+    public static final int STATE_MANUAL_ACTIVATION_SEND = 9;
     public static final int STATE_SIGNUP = 8;
     public static final int STATE_ACTIVATED = 9;
+    public static final int STATE_EXPIRED = 10;
 
     private ActivationListener listener;
 
@@ -58,9 +64,11 @@ public class ActivationController {
     private int currentState;
     private CountryRecord currentCountry;
     private String phone;
+    private String currentPhone;
     private String manualPhone;
     private String phoneCodeHash;
     private int sentTime;
+
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -186,6 +194,7 @@ public class ActivationController {
         if (this.currentState != STATE_PHONE_CONFIRM) {
             throw new RuntimeException("Invalid state for doConfirmPhone");
         }
+        currentPhone = phone;
         startActivation();
     }
 
@@ -198,11 +207,26 @@ public class ActivationController {
         doChangeState(STATE_PHONE_EDIT);
     }
 
+    public void doActivation(String phone) {
+        Logger.d(TAG, "doActivation");
+        manualPhone = phone;
+        currentPhone = currentCountry.getCallPrefix() + manualPhone;
+        startActivation();
+    }
+
+    public void doTryAgain() {
+        if (this.currentState != STATE_ACTIVATION_ERROR_NETWORK) {
+            return;
+        }
+
+        startActivation();
+    }
+
     private void startActivation() {
         Logger.d(TAG, "startActivation");
         doChangeState(STATE_ACTIVATION);
 
-        application.getApi().doRpcCall(new TLRequestAuthSendCode(phone, 0, ApiConfig.API_ID, ApiConfig.API_HASH,
+        application.getApi().doRpcCall(new TLRequestAuthSendCode(currentPhone, 0, ApiConfig.API_ID, ApiConfig.API_HASH,
                 application.getString(R.string.st_lang)), 15000,
                 new RpcCallback<TLSentCode>() {
                     @Override
@@ -270,16 +294,16 @@ public class ActivationController {
     private void startCodeSearch() {
         Logger.d(TAG, "startCodeSearch");
         handler.postDelayed(cancelAutomatic, 30000);
-        receiver = new AutoActivationReceiver(application);
-        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
-            @Override
-            public void onCodeReceived(int code) {
-                performAutomatic(code);
-            }
-        });
+//        receiver = new AutoActivationReceiver(application);
+//        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
+//            @Override
+//            public void onCodeReceived(int code) {
+//                performActivation(code);
+//            }
+//        });
     }
 
-    private void performAutomatic(int code) {
+    private void performActivation(int code) {
         Logger.d(TAG, "performAutomatic: " + code);
 
         handler.removeCallbacks(cancelAutomatic);
@@ -307,6 +331,30 @@ public class ActivationController {
         doChangeState(STATE_ACTIVATION_ERROR_UNABLE);
 
         handler.removeCallbacks(cancelAutomatic);
+    }
+
+    public void requestPhone() {
+        Logger.d(TAG, "requestPhone");
+
+        doChangeState(STATE_MANUAL_ACTIVATION_REQUEST);
+
+        application.getApi().doRpcCall(new TLRequestAuthSendCall(phone, phoneCodeHash), 30000,
+                new RpcCallback<TLBool>() {
+                    @Override
+                    public void onResult(TLBool result) {
+                        doChangeState(STATE_MANUAL_ACTIVATION);
+                    }
+
+                    @Override
+                    public void onError(int errorCode, String message) {
+                        doChangeState(STATE_ACTIVATION_ERROR_NETWORK);
+                    }
+                });
+    }
+
+    public void sendPhoneRequest(int code) {
+        doChangeState(STATE_MANUAL_ACTIVATION_SEND);
+        performActivation(code);
     }
 
     public int getCurrentState() {

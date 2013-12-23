@@ -39,6 +39,8 @@ import java.util.ArrayList;
  */
 public class StartActivity extends StelsSmileyActivity implements FragmentResultController, RootControllerHolder {
 
+    private static boolean isGuideShown = false;
+
     private static final String TAG = "StartActivity";
 
     private static final int STATE_GENERAL = -1;
@@ -242,7 +244,8 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             setState(STATE_GENERAL);
         } else {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            if (first) {
+            if (first && !isGuideShown) {
+                isGuideShown = true;
                 transaction.add(R.id.fragmentContainer, new TourFragment(), "tourFragment");
             } else {
                 transaction.replace(R.id.fragmentContainer, new AuthFragment(), "loginFragment");
@@ -493,12 +496,12 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     }
 
     public void showBar() {
-        // getSupportActionBar().show();
+        getSupportActionBar().show();
         barVisible = true;
     }
 
     public void hideBar() {
-        // getSupportActionBar().hide();
+        getSupportActionBar().hide();
         barVisible = false;
     }
 

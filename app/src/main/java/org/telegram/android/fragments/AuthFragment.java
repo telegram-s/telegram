@@ -1,11 +1,16 @@
 package org.telegram.android.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
 import org.telegram.android.StelsFragment;
@@ -18,10 +23,16 @@ import org.telegram.android.login.ActivationListener;
  */
 public class AuthFragment extends StelsFragment implements ActivationListener {
 
+    private int currentState = ActivationController.STATE_START;
+
     private View manual;
     private View automatic;
     private View progress;
     private View networkError;
+    private View unableError;
+    private View phoneRequest;
+    private View phoneActivation;
+    private View phoneSend;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -30,7 +41,11 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         automatic = res.findViewById(R.id.automaticInit);
         manual = res.findViewById(R.id.manualPhone);
         progress = res.findViewById(R.id.progress);
+        phoneRequest = res.findViewById(R.id.phoneRequestProgress);
+        phoneActivation = res.findViewById(R.id.phoneActivation);
         networkError = res.findViewById(R.id.networkError);
+        unableError = res.findViewById(R.id.unableError);
+        phoneSend = res.findViewById(R.id.phoneSendProgress);
 
         automatic.findViewById(R.id.confirmPhone).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,7 +63,68 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         manual.findViewById(R.id.countrySelect).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivityForResult(new Intent().setClass(getActivity(), PickCountryActivity.class), 0);
+                startActivity(new Intent().setClass(getActivity(), PickCountryActivity.class));
+            }
+        });
+        manual.findViewById(R.id.doActivation).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // getActivity().getSystemService()
+                String number = ((TextView) manual.findViewById(R.id.phoneName)).getText().toString();
+                number = "+" +
+                        application.getKernel().getActivationController().getCurrentCountry().getCallPrefix() +
+                        number;
+
+                try {
+                    final Phonenumber.PhoneNumber numberUtil = PhoneNumberUtil.getInstance().parse(number, application.getKernel().getActivationController().getCurrentCountry().getIso());
+                    if (PhoneNumberUtil.getInstance().isValidNumber(numberUtil)) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage("Is this your correct number? \n\n"
+                                + PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL) + "\n\n" +
+                                "An SMS with your access code will be sent to this number.");
+                        builder.setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                application.getKernel().getActivationController().doActivation(numberUtil.getNationalNumber() + "");
+                            }
+                        }).setNegativeButton(R.string.st_edit, null);
+                        AlertDialog dialog = builder.create();
+                        dialog.setCanceledOnTouchOutside(true);
+                        dialog.show();
+                    } else {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage("Phone number "
+                                + PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL) + " is incorrect");
+                        AlertDialog dialog = builder.create();
+                        dialog.setCanceledOnTouchOutside(true);
+                        dialog.show();
+                    }
+                } catch (NumberParseException e) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage("Phone number "
+                            + number + " is incorrect");
+                    AlertDialog dialog = builder.create();
+                    dialog.setCanceledOnTouchOutside(true);
+                    dialog.show();
+                }
+            }
+        });
+
+        networkError.findViewById(R.id.tryAgain).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getKernel().getActivationController().doTryAgain();
+            }
+        });
+        unableError.findViewById(R.id.doPhoneActivation).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getKernel().getActivationController().requestPhone();
+            }
+        });
+
+        phoneActivation.findViewById(R.id.completePhoneActivation).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int code = Integer.parseInt(((TextView) phoneActivation.findViewById(R.id.code)).getText().toString());
+                application.getKernel().getActivationController().sendPhoneRequest(code);
             }
         });
 
@@ -61,6 +137,10 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         automatic.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
         networkError.setVisibility(View.GONE);
+        unableError.setVisibility(View.GONE);
+        phoneRequest.setVisibility(View.GONE);
+        phoneActivation.setVisibility(View.GONE);
+        phoneSend.setVisibility(View.GONE);
 
         return res;
     }
@@ -85,38 +165,104 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
 
     @Override
     public void onStateChanged(int state) {
-        if (state == ActivationController.STATE_PHONE_CONFIRM) {
-            automatic.setVisibility(View.VISIBLE);
+        if (currentState == state) {
+            return;
+        }
+
+        // Progress
+        if (currentState == ActivationController.STATE_ACTIVATION) {
+            hideView(progress);
+        }
+        if (state == ActivationController.STATE_ACTIVATION) {
+            showView(progress, currentState != ActivationController.STATE_START);
+        } else {
             progress.setVisibility(View.GONE);
-            networkError.setVisibility(View.GONE);
+        }
+
+        // Confirmation
+        if (currentState == ActivationController.STATE_PHONE_CONFIRM) {
+            hideView(automatic);
+        }
+        if (state == ActivationController.STATE_PHONE_CONFIRM) {
+            showView(automatic, currentState != ActivationController.STATE_START);
+        } else {
+            automatic.setVisibility(View.GONE);
+        }
+
+        // Edit
+        if (currentState == ActivationController.STATE_PHONE_EDIT) {
+            hideView(manual);
+        }
+        if (state == ActivationController.STATE_PHONE_EDIT) {
+            showView(manual, currentState != ActivationController.STATE_START);
+        } else {
             manual.setVisibility(View.GONE);
+        }
+
+        // Network error
+        if (currentState == ActivationController.STATE_ACTIVATION_ERROR_NETWORK) {
+            hideView(networkError);
+        }
+        if (state == ActivationController.STATE_ACTIVATION_ERROR_NETWORK) {
+            showView(networkError, currentState != ActivationController.STATE_START);
+        } else {
+            networkError.setVisibility(View.GONE);
+        }
+
+        // Unable
+        if (currentState == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
+            hideView(unableError);
+        }
+        if (state == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
+            showView(unableError, currentState != ActivationController.STATE_START);
+        } else {
+            unableError.setVisibility(View.GONE);
+        }
+
+        // Manual activation request
+        if (currentState == ActivationController.STATE_MANUAL_ACTIVATION_REQUEST) {
+            hideView(phoneRequest);
+        }
+        if (state == ActivationController.STATE_MANUAL_ACTIVATION_REQUEST) {
+            showView(phoneRequest, currentState != ActivationController.STATE_START);
+        } else {
+            phoneRequest.setVisibility(View.GONE);
+        }
+
+        // Manual activation
+        if (currentState == ActivationController.STATE_MANUAL_ACTIVATION) {
+            hideView(phoneActivation);
+        }
+        if (state == ActivationController.STATE_MANUAL_ACTIVATION) {
+            showView(phoneActivation, currentState != ActivationController.STATE_START);
+        } else {
+            phoneActivation.setVisibility(View.GONE);
+        }
+
+        // Manual activation
+        if (currentState == ActivationController.STATE_MANUAL_ACTIVATION_SEND) {
+            hideView(phoneSend);
+        }
+        if (state == ActivationController.STATE_MANUAL_ACTIVATION_SEND) {
+            showView(phoneSend, currentState != ActivationController.STATE_START);
+        } else {
+            phoneSend.setVisibility(View.GONE);
+        }
+
+        if (state == ActivationController.STATE_PHONE_CONFIRM) {
             getSherlockActivity().getSupportActionBar().setTitle("Your phone");
         } else if (state == ActivationController.STATE_ACTIVATION) {
-            automatic.setVisibility(View.GONE);
-            progress.setVisibility(View.VISIBLE);
-            networkError.setVisibility(View.GONE);
-            manual.setVisibility(View.GONE);
             getSherlockActivity().getSupportActionBar().setTitle("Activating phone...");
         } else if (state == ActivationController.STATE_ACTIVATED) {
             ((StartActivity) getActivity()).onSuccessAuth();
         } else if (state == ActivationController.STATE_ACTIVATION_ERROR_NETWORK) {
-            automatic.setVisibility(View.GONE);
-            progress.setVisibility(View.GONE);
-            networkError.setVisibility(View.VISIBLE);
-            manual.setVisibility(View.GONE);
             getSherlockActivity().getSupportActionBar().setTitle("Telegram");
         } else if (state == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
-            automatic.setVisibility(View.GONE);
-            progress.setVisibility(View.GONE);
-            networkError.setVisibility(View.GONE);
-            manual.setVisibility(View.GONE);
             getSherlockActivity().getSupportActionBar().setTitle("Telegram");
         } else if (state == ActivationController.STATE_PHONE_EDIT) {
-            automatic.setVisibility(View.GONE);
-            progress.setVisibility(View.GONE);
-            networkError.setVisibility(View.GONE);
-            manual.setVisibility(View.VISIBLE);
             getSherlockActivity().getSupportActionBar().setTitle("Your phone");
         }
+
+        currentState = state;
     }
 }

@@ -8,6 +8,7 @@
                   android:layout_height="match_parent"
                   android:gravity="center"
                   android:id="@+id/automaticInit">
+
         <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
 
         <TextView android:layout_width="wrap_content"
@@ -60,11 +61,19 @@
     <LinearLayout android:orientation="vertical"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
-                  android:paddingTop="32dp"
+                  android:paddingTop="16dp"
                   android:paddingLeft="32dp"
                   android:paddingRight="32dp"
-                  android:gravity="center"
+                  android:gravity="top|center_horizontal"
                   android:id="@+id/manualPhone">
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="18sp"
+                  android:gravity="center"
+                  android:text="@string/st_login_phone_hint"
+                  android:paddingBottom="16dp"
+                  android:textColor="@color/st_black_text"/>
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="match_parent"
@@ -97,25 +106,45 @@
                       android:textSize="19sp"
                       android:inputType="phone"
                       android:imeOptions="actionDone"
+                      android:hint="Phone number"
                       android:id="@+id/phoneName"/>
         </LinearLayout>
 
-        <TextView android:layout_height="wrap_content"
-                  android:layout_width="wrap_content"
-                  android:textSize="19sp"
-                  android:text="@string/st_login_phone_hint"
-                  android:paddingTop="12dp"
-                  android:paddingBottom="8dp"
-                  android:textColor="@color/st_black_text"/>
+        <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:textColor="#ffffff"
+                android:background="@drawable/st_btn_green"
+                android:text="Continue"
+                android:id="@+id/doActivation"/>
     </LinearLayout>
 
-    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent"
-                 android:id="@+id/progress">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                  android:id="@+id/progress"
+                  android:orientation="vertical"
+                  android:gravity="center_vertical">
         <ProgressBar android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
-                     android:layout_gravity="center"
+                     android:layout_gravity="center_horizontal"
                      style="@style/Widget.Sherlock.Light.ProgressBar"/>
-    </FrameLayout>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:layout_marginTop="4dp"
+                  android:textSize="18sp"
+                  android:textColor="@color/st_black_text"
+                  android:text="Activating phone..."/>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:textSize="16sp"
+                  android:paddingLeft="32dp"
+                  android:paddingRight="32dp"
+                  android:gravity="center"
+                  android:textColor="@color/st_grey_text"
+                  android:text="This process could take up to one minute"/>
+    </LinearLayout>
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="match_parent"
                   android:gravity="center_vertical"
@@ -123,9 +152,112 @@
                   android:id="@+id/networkError">
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:text="Network error"/>
+                  android:layout_gravity="center_horizontal"
+                  android:textSize="21sp"
+                  android:paddingLeft="32dp"
+                  android:paddingRight="32dp"
+                  android:text="Unable to connect to internet"/>
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Repeat"/>
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/st_btn_green"
+                android:textColor="#ffffff"
+                android:text="Try again"
+                android:id="@+id/tryAgain"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:gravity="center_vertical"
+                  android:orientation="vertical"
+                  android:id="@+id/unableError">
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:textSize="21sp"
+                  android:paddingLeft="32dp"
+                  android:paddingRight="32dp"
+                  android:gravity="center"
+                  android:text="Unable to automatically activate phone.\nDo you want to activate by phone?"/>
+        <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/st_btn_green"
+                android:textColor="#ffffff"
+                android:text="Activate by Phone"
+                android:id="@+id/doPhoneActivation"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                  android:id="@+id/phoneRequestProgress"
+                  android:orientation="vertical"
+                  android:gravity="center_vertical">
+        <ProgressBar android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="center_horizontal"
+                     style="@style/Widget.Sherlock.Light.ProgressBar"/>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:layout_marginTop="4dp"
+                  android:textSize="18sp"
+                  android:text="Requesting phone..."/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical"
+                  android:paddingTop="16dp"
+                  android:paddingLeft="32dp"
+                  android:paddingRight="32dp"
+                  android:gravity="center"
+                  android:id="@+id/phoneActivation">
+
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:textSize="18sp"
+                  android:gravity="center"
+                  android:paddingBottom="16dp"
+                  android:text="Enter activation code and press continue"/>
+
+        <EditText android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:paddingLeft="15dp"
+                  android:paddingRight="15dp"
+                  android:paddingBottom="15dp"
+                  android:textSize="19sp"
+                  android:inputType="number"
+                  android:imeOptions="actionDone"
+                  android:gravity="center"
+                  android:hint="Code"
+                  android:id="@+id/code"/>
+
+        <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:textColor="#ffffff"
+                android:background="@drawable/st_btn_green"
+                android:text="Continue"
+                android:id="@+id/completePhoneActivation"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                  android:id="@+id/phoneSendProgress"
+                  android:orientation="vertical"
+                  android:gravity="center_vertical">
+        <ProgressBar android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="center_horizontal"
+                     style="@style/Widget.Sherlock.Light.ProgressBar"/>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:layout_marginTop="4dp"
+                  android:textSize="18sp"
+                  android:text="Activating phone..."/>
     </LinearLayout>
 </FrameLayout>

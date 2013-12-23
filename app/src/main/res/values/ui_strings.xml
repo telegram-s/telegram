@@ -7,6 +7,7 @@
     <string name="st_yes">Yes</string>
     <string name="st_repeat">Repeat</string>
     <string name="st_ok">OK</string>
+    <string name="st_edit">Edit</string>
     <string name="st_cancel">Cancel</string>
     <string name="st_cancel_caps">CANCEL</string>
     <string name="st_set">Set</string>
@@ -90,7 +91,7 @@
     <string name="st_login_next">Next</string>
 
     <string name="st_login_phone_title">Your phone</string>
-    <string name="st_login_phone_hint">Please confirm your country code and enter your phone number.</string>
+    <string name="st_login_phone_hint">Select your country, enter your phone number and click continue:</string>
 
     <string name="st_login_code_title">Your code</string>
     <string name="st_login_code_hint_code">Code</string>
