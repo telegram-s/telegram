@@ -1,10 +1,12 @@
 package org.telegram.android.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -54,12 +56,22 @@ public class PickCountryActivity extends StelsActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                hideKeyboard();
                 application.getKernel().getActivationController().setCurrentCountry(countries[i]);
                 finish();
             }
         });
 
         doFilter(null);
+    }
+
+    private void hideKeyboard() {
+        View view = findViewById(R.id.focuser);
+        if (view != null) {
+            view.requestFocus();
+            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                    .hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     @Override
@@ -120,6 +132,7 @@ public class PickCountryActivity extends StelsActivity {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem menuItem) {
                 doFilter(null);
+                hideKeyboard();
                 return true;
             }
         });
