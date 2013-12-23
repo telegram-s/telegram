@@ -348,7 +348,6 @@ public class EncryptionController {
             return;
         }
 
-
         BigInteger ga = CryptoUtils.loadBigInt(rawGa);
         BigInteger b = CryptoUtils.loadBigInt(Entropy.generateSeed(dhConfig.getRandom()));
         BigInteger gb = g.modPow(b, dhPrime);
@@ -387,6 +386,46 @@ public class EncryptionController {
 
         if (!p.subtract(new BigInteger("1").divide(new BigInteger("2"))).isProbablePrime(20)) {
             throw new IOException();
+        }
+
+        //Since g is always equal to 2, 3, 4, 5, 6 or 7, this is easily done using quadratic reciprocity law,
+        // yielding a simple condition on p mod 4g — namely,
+        // p mod 8 = 7 for g = 2,
+        // p mod 3 = 2 for g = 3,
+        // no extra condition for g = 4,
+        // p mod 5 = 1 or 4 for g = 5,
+        // p mod 24 = 11 or 23 for g = 6
+        // and p mod 7 = 2 or 3 for g = 7.
+
+        if (g == 2) {
+            int res = p.mod(new BigInteger("8")).intValue();
+            if (res != 7) {
+                throw new IOException();
+            }
+        }
+        if (g == 3) {
+            int res = p.mod(new BigInteger("3")).intValue();
+            if (res != 2) {
+                throw new IOException();
+            }
+        }
+        if (g == 5) {
+            int res = p.mod(new BigInteger("5")).intValue();
+            if (res != 1 && res != 4) {
+                throw new IOException();
+            }
+        }
+        if (g == 6) {
+            int res = p.mod(new BigInteger("24")).intValue();
+            if (res != 11 && res != 23) {
+                throw new IOException();
+            }
+        }
+        if (g == 7) {
+            int res = p.mod(new BigInteger("7")).intValue();
+            if (res != 2 && res != 3) {
+                throw new IOException();
+            }
         }
     }
 
