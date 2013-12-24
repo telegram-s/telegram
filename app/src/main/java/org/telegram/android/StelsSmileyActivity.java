@@ -135,13 +135,22 @@ public class StelsSmileyActivity extends StelsActivity implements SmileysControl
         return result;
     }
 
+    public int getActionBarHeight() {
+        TypedValue tv = new TypedValue();
+        if (getTheme().resolveAttribute(com.actionbarsherlock.R.attr.actionBarSize, tv, true)) {
+            return TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        }
+
+        return 0;
+    }
+
     private boolean isSmilesVisible = false;
 
     @Override
     public void showSmileys(EditText dest) {
         input = dest;
         View root = findViewById(R.id.fragmentContainer);
-        int heightDiff = root.getRootView().getHeight() - root.getHeight() - getStatusBarHeight();
+        int heightDiff = root.getRootView().getHeight() - root.getHeight() - getStatusBarHeight() - getActionBarHeight();
         int heightDp = (int) (heightDiff / getResources().getDisplayMetrics().density);
         if (heightDp > 100) {
             if (smileysView == null) {
@@ -165,7 +174,7 @@ public class StelsSmileyActivity extends StelsActivity implements SmileysControl
     @Override
     public void onGlobalLayout() {
         View root = findViewById(R.id.fragmentContainer);
-        int heightDiff = root.getRootView().getHeight() - root.getHeight() - getStatusBarHeight();
+        int heightDiff = root.getRootView().getHeight() - root.getHeight() - getStatusBarHeight() - getActionBarHeight();
         int heightDp = (int) (heightDiff / getResources().getDisplayMetrics().density);
         if (heightDp > 100) {
             if (isSmilesVisible) {
