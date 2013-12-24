@@ -30,6 +30,7 @@ import org.telegram.android.screens.RootControllerHolder;
 import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.api.TLUserSelf;
 import org.telegram.api.auth.TLAuthorization;
+import org.telegram.integration.TestIntegration;
 
 import java.util.ArrayList;
 
@@ -124,6 +125,8 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         });
 
         setWindowContentOverlayCompat();
+
+        TestIntegration.initActivity(this);
     }
 
     private void setWindowContentOverlayCompat() {

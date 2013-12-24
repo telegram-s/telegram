@@ -114,6 +114,8 @@
         <activity android:name=".activity.PickCountryActivity"
                   android:theme="@style/AppTheme.Theme"/>
 
+        <activity android:name="net.hockeyapp.android.UpdateActivity" />
+
         <receiver
                 android:name="com.google.android.gcm.GCMBroadcastReceiver"
                 android:permission="com.google.android.c2dm.permission.SEND">
