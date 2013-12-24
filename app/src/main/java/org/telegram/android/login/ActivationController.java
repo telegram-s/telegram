@@ -294,13 +294,13 @@ public class ActivationController {
     private void startCodeSearch() {
         Logger.d(TAG, "startCodeSearch");
         handler.postDelayed(cancelAutomatic, 30000);
-//        receiver = new AutoActivationReceiver(application);
-//        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
-//            @Override
-//            public void onCodeReceived(int code) {
-//                performActivation(code);
-//            }
-//        });
+        receiver = new AutoActivationReceiver(application);
+        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
+            @Override
+            public void onCodeReceived(int code) {
+                performActivation(code);
+            }
+        });
     }
 
     private void performActivation(int code) {
