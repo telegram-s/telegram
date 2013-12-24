@@ -140,7 +140,7 @@ public class BackgroundSync extends BaseSync {
     protected void dcSync() throws Exception {
         boolean synced = false;
         try {
-            TLConfig config = application.getApi().doRpcCall(new TLRequestHelpGetConfig());
+            TLConfig config = application.getApi().doRpcCallNonAuth(new TLRequestHelpGetConfig());
             application.getApiStorage().updateSettings(config);
             application.getTechKernel().getSystemConfig().onConfig(config);
             application.getApi().resetConnectionInfo();
@@ -315,7 +315,7 @@ public class BackgroundSync extends BaseSync {
         if (appEvents.length > 0) {
             TLVector<TLInputAppEvent> events = new TLVector<TLInputAppEvent>();
             Collections.addAll(events, appEvents);
-            application.getApi().doRpcCall(new TLRequestHelpSaveAppLog(events));
+            application.getApi().doRpcCallNonAuth(new TLRequestHelpSaveAppLog(events));
         }
     }
 }

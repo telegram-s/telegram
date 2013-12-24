@@ -160,7 +160,9 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
     @Override
     public void onPause() {
         super.onPause();
-        application.getKernel().getActivationController().setListener(null);
+        if (application.getKernel().getActivationController() != null) {
+            application.getKernel().getActivationController().setListener(null);
+        }
     }
 
     @Override
@@ -254,6 +256,7 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         } else if (state == ActivationController.STATE_ACTIVATION) {
             getSherlockActivity().getSupportActionBar().setTitle("Activating phone...");
         } else if (state == ActivationController.STATE_ACTIVATED) {
+            application.getKernel().setActivationController(null);
             ((StartActivity) getActivity()).onSuccessAuth();
         } else if (state == ActivationController.STATE_ACTIVATION_ERROR_NETWORK) {
             getSherlockActivity().getSupportActionBar().setTitle("Telegram");

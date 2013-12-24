@@ -226,7 +226,7 @@ public class ActivationController {
         Logger.d(TAG, "startActivation");
         doChangeState(STATE_ACTIVATION);
 
-        application.getApi().doRpcCall(new TLRequestAuthSendCode(currentPhone, 0, ApiConfig.API_ID, ApiConfig.API_HASH,
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSendCode(currentPhone, 0, ApiConfig.API_ID, ApiConfig.API_HASH,
                 application.getString(R.string.st_lang)), 15000,
                 new RpcCallback<TLSentCode>() {
                     @Override
@@ -308,7 +308,7 @@ public class ActivationController {
 
         handler.removeCallbacks(cancelAutomatic);
 
-        application.getApi().doRpcCall(new TLRequestAuthSignIn(phone, phoneCodeHash, "" + code), 30000,
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(phone, phoneCodeHash, "" + code), 30000,
                 new RpcCallback<TLAuthorization>() {
                     @Override
                     public void onResult(TLAuthorization result) {
@@ -338,7 +338,7 @@ public class ActivationController {
 
         doChangeState(STATE_MANUAL_ACTIVATION_REQUEST);
 
-        application.getApi().doRpcCall(new TLRequestAuthSendCall(phone, phoneCodeHash), 30000,
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSendCall(phone, phoneCodeHash), 30000,
                 new RpcCallback<TLBool>() {
                     @Override
                     public void onResult(TLBool result) {

@@ -70,6 +70,7 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
     }
 
     public synchronized void doAuth(TLAuthorization authorization) {
+        Logger.d(TAG, "doAuth1");
         TLKey key = findKey(getPrimaryDc());
         key.setAuthorised(true);
         getObj().setUid(authorization.getUser().getId());
@@ -78,6 +79,7 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
     }
 
     public synchronized void doAuth(int uid, String phone) {
+        Logger.d(TAG, "doAuth2");
         TLKey key = findKey(getPrimaryDc());
         key.setAuthorised(true);
         getObj().setUid(uid);
@@ -92,6 +94,7 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
 
     @Override
     public synchronized void setPrimaryDc(int dc) {
+        Logger.d(TAG, "setPrimaryDc dc #" + dc);
         getObj().setPrimaryDc(dc);
         write();
     }
@@ -104,6 +107,7 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
 
     @Override
     public synchronized void setAuthenticated(int dcId, boolean auth) {
+        Logger.d(TAG, "setAuthenticated dc #" + dcId + ": " + auth);
         TLKey key = findKey(dcId);
         key.setAuthorised(auth);
         write();
@@ -172,6 +176,7 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
 
     @Override
     public synchronized void putAuthKey(int dcId, byte[] authKey) {
+        Logger.d(TAG, "putAuthKey dc #" + dcId);
         TLKey key = findKey(dcId);
         if (key != null) {
             return;
@@ -326,6 +331,7 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
 
     @Override
     public synchronized void resetAuth() {
+        Logger.d(TAG, "resetAuth");
         for (TLKey key : getObj().getKeys()) {
             key.setAuthorised(false);
         }
@@ -337,6 +343,7 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
 
     @Override
     public synchronized void reset() {
+        Logger.d(TAG, "reset");
         getObj().getKeys().clear();
         getObj().setAuthorized(false);
         getObj().setPrimaryDc(1);
