@@ -311,6 +311,11 @@ public class EncryptionController {
             return;
         }
 
+        BigInteger pow2 = new BigInteger("2").pow(2048 - 64);
+        if (gb.compareTo(pow2) <= 0 || gb.compareTo(dhPrime.subtract(pow2)) >= 0) {
+            return;
+        }
+
         byte[] key = xor(alignKeyZero(fromBigInt(gb.modPow(a, dhPrime)), 256), encryptedChat.getNonce());
         long keyF = readLong(substring(CryptoUtils.SHA1(key), 12, 8), 0);
 
@@ -351,12 +356,21 @@ public class EncryptionController {
         BigInteger ga = CryptoUtils.loadBigInt(rawGa);
         BigInteger b = CryptoUtils.loadBigInt(Entropy.generateSeed(dhConfig.getRandom()));
         BigInteger gb = g.modPow(b, dhPrime);
+        BigInteger pow2 = new BigInteger("2").pow(2048 - 64);
 
         if (ga.equals(new BigInteger("1")) || ga.compareTo(dhPrime.subtract(new BigInteger("1"))) >= 0) {
             return;
         }
 
+        if (ga.compareTo(pow2) <= 0 || ga.compareTo(dhPrime.subtract(pow2)) >= 0) {
+            return;
+        }
+
         if (gb.equals(new BigInteger("1")) || gb.compareTo(dhPrime.subtract(new BigInteger("1"))) >= 0) {
+            return;
+        }
+
+        if (gb.compareTo(pow2) <= 0 || gb.compareTo(dhPrime.subtract(pow2)) >= 0) {
             return;
         }
 
@@ -444,7 +458,13 @@ public class EncryptionController {
         BigInteger a = loadBigInt(rawA);
         BigInteger ga = g.modPow(a, dhPrime);
 
+        BigInteger pow2 = new BigInteger("2").pow(2048 - 64);
+
         if (ga.equals(new BigInteger("1")) || ga.compareTo(dhPrime.subtract(new BigInteger("1"))) >= 0) {
+            throw new IOException();
+        }
+
+        if (ga.compareTo(pow2) <= 0 || ga.compareTo(dhPrime.subtract(pow2)) >= 0) {
             throw new IOException();
         }
 
