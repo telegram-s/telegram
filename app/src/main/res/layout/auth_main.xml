@@ -24,7 +24,7 @@
                   android:textColor="@color/st_black_text"
                   android:gravity="center"
                   android:textSize="26sp"
-                  android:text="+7-931-342-12-48"/>
+                  android:id="@+id/automaticPhone"/>
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -165,6 +165,16 @@
                 android:textColor="#ffffff"
                 android:text="Try again"
                 android:id="@+id/tryAgain"/>
+
+        <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/st_btn_gray"
+                android:textColor="@color/st_black_text"
+                android:textSize="16sp"
+                android:text="Cancel"
+                android:id="@+id/cancel"/>
     </LinearLayout>
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="match_parent"
@@ -187,6 +197,16 @@
                 android:textColor="#ffffff"
                 android:text="Activate by Phone"
                 android:id="@+id/doPhoneActivation"/>
+
+        <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/st_btn_gray"
+                android:textColor="@color/st_black_text"
+                android:textSize="16sp"
+                android:text="Cancel"
+                android:id="@+id/cancel"/>
     </LinearLayout>
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"

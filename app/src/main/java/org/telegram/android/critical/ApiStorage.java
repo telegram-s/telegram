@@ -336,7 +336,6 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
             key.setAuthorised(false);
         }
         getObj().setAuthorized(false);
-        getObj().setPrimaryDc(1);
         getObj().setUid(0);
         write();
     }
@@ -346,7 +345,6 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
         Logger.d(TAG, "reset");
         getObj().getKeys().clear();
         getObj().setAuthorized(false);
-        getObj().setPrimaryDc(1);
         getObj().setUid(0);
         write();
     }

@@ -11,7 +11,6 @@ import org.telegram.android.StelsApplication;
 import org.telegram.android.countries.Countries;
 import org.telegram.android.countries.CountryRecord;
 import org.telegram.android.log.Logger;
-import org.telegram.android.tasks.AsyncException;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.auth.TLSentCode;
 import org.telegram.api.engine.RpcCallback;
@@ -47,16 +46,19 @@ public class ActivationController {
     public static final int STATE_PHONE_CONFIRM = 1;
     public static final int STATE_PHONE_EDIT = 2;
     public static final int STATE_ACTIVATION = 3;
-    public static final int STATE_ACTIVATION_ERROR_NETWORK = 4;
+    public static final int STATE_ERROR_NETWORK = 4;
     public static final int STATE_ACTIVATION_ERROR_UNABLE = 5;
     public static final int STATE_ACTIVATION_ERROR_WRONG_PHONE = 6;
     public static final int STATE_MANUAL_ACTIVATION_REQUEST = 7;
-    public static final int STATE_MANUAL_ACTIVATION_REQUEST_NETWORK = 7;
     public static final int STATE_MANUAL_ACTIVATION = 8;
     public static final int STATE_MANUAL_ACTIVATION_SEND = 9;
-    public static final int STATE_SIGNUP = 8;
-    public static final int STATE_ACTIVATED = 9;
-    public static final int STATE_EXPIRED = 10;
+    public static final int STATE_SIGNUP = 10;
+    public static final int STATE_ACTIVATED = 11;
+    public static final int STATE_EXPIRED = 12;
+
+    public static final int ERROR_REQUEST_SMS = 0;
+    public static final int ERROR_REQUEST_CALL = 1;
+    public static final int ERROR_REQUEST_SEND = 2;
 
     private ActivationListener listener;
 
@@ -68,7 +70,9 @@ public class ActivationController {
     private String manualPhone;
     private String phoneCodeHash;
     private int sentTime;
-
+    private boolean isManualPhone;
+    private int networkError;
+    private int lastActivationCode;
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -173,6 +177,14 @@ public class ActivationController {
         }
     }
 
+    public int getNetworkError() {
+        return networkError;
+    }
+
+    public String getAutoPhone() {
+        return phone;
+    }
+
     public String getManualPhone() {
         return manualPhone;
     }
@@ -195,6 +207,7 @@ public class ActivationController {
             throw new RuntimeException("Invalid state for doConfirmPhone");
         }
         currentPhone = phone;
+        isManualPhone = false;
         startActivation();
     }
 
@@ -210,16 +223,40 @@ public class ActivationController {
     public void doActivation(String phone) {
         Logger.d(TAG, "doActivation");
         manualPhone = phone;
+        isManualPhone = true;
         currentPhone = currentCountry.getCallPrefix() + manualPhone;
         startActivation();
     }
 
     public void doTryAgain() {
-        if (this.currentState != STATE_ACTIVATION_ERROR_NETWORK) {
+        if (this.currentState != STATE_ERROR_NETWORK) {
             return;
         }
 
-        startActivation();
+        if (networkError == ERROR_REQUEST_SMS) {
+            startActivation();
+        } else if (networkError == ERROR_REQUEST_CALL) {
+            requestPhone();
+        } else if (networkError == ERROR_REQUEST_SEND) {
+            sendPhoneRequest(lastActivationCode);
+        }
+    }
+
+    public void cancel() {
+        if (this.currentState == STATE_ERROR_NETWORK) {
+
+            if (networkError == ERROR_REQUEST_SMS) {
+                if (isManualPhone) {
+                    doChangeState(STATE_PHONE_EDIT);
+                } else {
+                    doChangeState(STATE_PHONE_CONFIRM);
+                }
+            } else if (networkError == ERROR_REQUEST_CALL) {
+                doChangeState(STATE_MANUAL_ACTIVATION);
+            } else if (networkError == ERROR_REQUEST_SEND) {
+                doChangeState(STATE_MANUAL_ACTIVATION);
+            }
+        }
     }
 
     private void startActivation() {
@@ -249,7 +286,8 @@ public class ActivationController {
                                 @Override
                                 public void run() {
                                     Logger.d(TAG, "onSmsSent error");
-                                    doChangeState(STATE_ACTIVATION_ERROR_NETWORK);
+                                    networkError = ERROR_REQUEST_SMS;
+                                    doChangeState(STATE_ERROR_NETWORK);
                                 }
                             });
                             return;
@@ -270,7 +308,8 @@ public class ActivationController {
                                     @Override
                                     public void run() {
                                         Logger.d(TAG, "onSmsSent error");
-                                        doChangeState(STATE_ACTIVATION_ERROR_NETWORK);
+                                        networkError = ERROR_REQUEST_SMS;
+                                        doChangeState(STATE_ERROR_NETWORK);
                                     }
                                 });
                                 return;
@@ -284,7 +323,8 @@ public class ActivationController {
                             @Override
                             public void run() {
                                 Logger.d(TAG, "onSmsSent error");
-                                doChangeState(STATE_ACTIVATION_ERROR_NETWORK);
+                                networkError = ERROR_REQUEST_SMS;
+                                doChangeState(STATE_ERROR_NETWORK);
                             }
                         });
                     }
@@ -294,13 +334,13 @@ public class ActivationController {
     private void startCodeSearch() {
         Logger.d(TAG, "startCodeSearch");
         handler.postDelayed(cancelAutomatic, 30000);
-        receiver = new AutoActivationReceiver(application);
-        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
-            @Override
-            public void onCodeReceived(int code) {
-                performActivation(code);
-            }
-        });
+//        receiver = new AutoActivationReceiver(application);
+//        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
+//            @Override
+//            public void onCodeReceived(int code) {
+//                performActivation(code);
+//            }
+//        });
     }
 
     private void performActivation(int code) {
@@ -328,9 +368,13 @@ public class ActivationController {
     private void cancelAutomatic() {
         Logger.d(TAG, "cancelAutomatic");
 
-        doChangeState(STATE_ACTIVATION_ERROR_UNABLE);
+        if (receiver != null) {
+            receiver.stopReceivingActivation();
+        }
 
         handler.removeCallbacks(cancelAutomatic);
+
+        doChangeState(STATE_MANUAL_ACTIVATION);
     }
 
     public void requestPhone() {
@@ -347,14 +391,31 @@ public class ActivationController {
 
                     @Override
                     public void onError(int errorCode, String message) {
-                        doChangeState(STATE_ACTIVATION_ERROR_NETWORK);
+                        networkError = ERROR_REQUEST_CALL;
+                        doChangeState(STATE_ERROR_NETWORK);
                     }
                 });
     }
 
     public void sendPhoneRequest(int code) {
+        lastActivationCode = code;
         doChangeState(STATE_MANUAL_ACTIVATION_SEND);
-        performActivation(code);
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(phone, phoneCodeHash, "" + code), 30000,
+                new RpcCallback<TLAuthorization>() {
+                    @Override
+                    public void onResult(TLAuthorization result) {
+                        Logger.d(TAG, "sign in completed");
+                        application.getKernel().logIn(result);
+                        doChangeState(STATE_ACTIVATED);
+                    }
+
+                    @Override
+                    public void onError(int errorCode, String message) {
+                        Logger.d(TAG, "sign in error");
+                        networkError = ERROR_REQUEST_SEND;
+                        doChangeState(STATE_ERROR_NETWORK);
+                    }
+                });
     }
 
     public int getCurrentState() {

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -17,6 +18,7 @@ import org.telegram.android.StelsFragment;
 import org.telegram.android.activity.PickCountryActivity;
 import org.telegram.android.login.ActivationController;
 import org.telegram.android.login.ActivationListener;
+import org.telegram.android.ui.TextUtil;
 
 /**
  * Created by ex3ndr on 21.12.13.
@@ -37,6 +39,11 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.auth_main, container, false);
+
+
+        if (application.getKernel().getActivationController() == null) {
+            application.getKernel().setActivationController(new ActivationController(application));
+        }
 
         automatic = res.findViewById(R.id.automaticInit);
         manual = res.findViewById(R.id.manualPhone);
@@ -60,6 +67,12 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
             }
         });
 
+
+        String autoPhone = application.getKernel().getActivationController().getAutoPhone();
+        if (autoPhone != null) {
+            ((TextView) automatic.findViewById(R.id.automaticPhone)).setText(TextUtil.formatPhone(autoPhone));
+        }
+
         manual.findViewById(R.id.countrySelect).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -69,7 +82,8 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         manual.findViewById(R.id.doActivation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // getActivity().getSystemService()
+                hideKeyboard(manual.findViewById(R.id.phoneName));
+
                 String number = ((TextView) manual.findViewById(R.id.phoneName)).getText().toString();
                 number = "+" +
                         application.getKernel().getActivationController().getCurrentCountry().getCallPrefix() +
@@ -113,6 +127,13 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
                 application.getKernel().getActivationController().doTryAgain();
             }
         });
+        networkError.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getKernel().getActivationController().cancel();
+            }
+        });
+
         unableError.findViewById(R.id.doPhoneActivation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -123,15 +144,12 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         phoneActivation.findViewById(R.id.completePhoneActivation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                hideKeyboard(phoneActivation.findViewById(R.id.code));
+
                 int code = Integer.parseInt(((TextView) phoneActivation.findViewById(R.id.code)).getText().toString());
                 application.getKernel().getActivationController().sendPhoneRequest(code);
             }
         });
-
-
-        if (application.getKernel().getActivationController() == null) {
-            application.getKernel().setActivationController(new ActivationController(application));
-        }
 
         manual.setVisibility(View.GONE);
         automatic.setVisibility(View.GONE);
@@ -194,18 +212,21 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         // Edit
         if (currentState == ActivationController.STATE_PHONE_EDIT) {
             hideView(manual);
+            hideKeyboard(manual.findViewById(R.id.phoneName));
         }
         if (state == ActivationController.STATE_PHONE_EDIT) {
             showView(manual, currentState != ActivationController.STATE_START);
+            showKeyboard((EditText) manual.findViewById(R.id.phoneName));
         } else {
             manual.setVisibility(View.GONE);
+            hideKeyboard(manual.findViewById(R.id.phoneName));
         }
 
         // Network error
-        if (currentState == ActivationController.STATE_ACTIVATION_ERROR_NETWORK) {
+        if (currentState == ActivationController.STATE_ERROR_NETWORK) {
             hideView(networkError);
         }
-        if (state == ActivationController.STATE_ACTIVATION_ERROR_NETWORK) {
+        if (state == ActivationController.STATE_ERROR_NETWORK) {
             showView(networkError, currentState != ActivationController.STATE_START);
         } else {
             networkError.setVisibility(View.GONE);
@@ -234,11 +255,14 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         // Manual activation
         if (currentState == ActivationController.STATE_MANUAL_ACTIVATION) {
             hideView(phoneActivation);
+            hideKeyboard((EditText) phoneActivation.findViewById(R.id.code));
         }
         if (state == ActivationController.STATE_MANUAL_ACTIVATION) {
             showView(phoneActivation, currentState != ActivationController.STATE_START);
+            showKeyboard((EditText) phoneActivation.findViewById(R.id.code));
         } else {
             phoneActivation.setVisibility(View.GONE);
+            hideKeyboard((EditText) phoneActivation.findViewById(R.id.code));
         }
 
         // Manual activation
@@ -258,7 +282,7 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         } else if (state == ActivationController.STATE_ACTIVATED) {
             application.getKernel().setActivationController(null);
             ((StartActivity) getActivity()).onSuccessAuth();
-        } else if (state == ActivationController.STATE_ACTIVATION_ERROR_NETWORK) {
+        } else if (state == ActivationController.STATE_ERROR_NETWORK) {
             getSherlockActivity().getSupportActionBar().setTitle("Telegram");
         } else if (state == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
             getSherlockActivity().getSupportActionBar().setTitle("Telegram");

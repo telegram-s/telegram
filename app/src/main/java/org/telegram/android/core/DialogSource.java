@@ -120,7 +120,7 @@ public class DialogSource {
 
             @Override
             protected long getSortingKey(DialogWireframe obj) {
-                return obj.getDate();
+                return obj.getDate() * 1000L + Math.abs(obj.getMid()) % 1000;
             }
 
             @Override
@@ -329,6 +329,7 @@ public class DialogSource {
     protected DialogWireframe convert(DialogDescription item) {
         DialogWireframe res = new DialogWireframe(item.getDatabaseId(), item.getPeerId(), item.getPeerType());
 
+        res.setMid(item.getTopMessageId());
         res.setSenderId(item.getSenderId());
         res.setMine(res.getSenderId() == application.getCurrentUid());
         res.setSender(application.getEngine().getUser(item.getSenderId()));

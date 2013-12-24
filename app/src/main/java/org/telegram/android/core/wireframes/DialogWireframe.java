@@ -25,6 +25,7 @@ public class DialogWireframe {
 
     private boolean isOut;
     private boolean isMine;
+    private int mid;
     private int senderId;
     private int messageState;
     private User sender;
@@ -196,5 +197,13 @@ public class DialogWireframe {
 
     public void setPreparedLayout(Object preparedLayout) {
         this.preparedLayout = preparedLayout;
+    }
+
+    public int getMid() {
+        return mid;
+    }
+
+    public void setMid(int mid) {
+        this.mid = mid;
     }
 }

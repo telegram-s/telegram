@@ -58,6 +58,8 @@ public class ContactsSync extends BaseSync {
     private static final int SYNC_CONTACTS_TWO_SIDE = 4;
     private static final int SYNC_CONTACTS_TWO_SIDE_TIMEOUT = 12 * HOUR;
 
+    private static final int SYNC_UPLOAD_REQUEST_TIMEOUT = 30000;
+
     private static final int OP_LIMIT = 20;
 
     private static final boolean TWO_SIDE_SYNC = Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
@@ -333,7 +335,7 @@ public class ContactsSync extends BaseSync {
             hash = CryptoUtils.MD5(uidString.getBytes());
         }
 
-        TLAbsContacts response = application.getApi().doRpcCall(new TLRequestContactsGetContacts(hash));
+        TLAbsContacts response = application.getApi().doRpcCallSide(new TLRequestContactsGetContacts(hash), SYNC_UPLOAD_REQUEST_TIMEOUT);
         if (response instanceof TLContacts) {
             TLContacts contactsResponse = (TLContacts) response;
             application.getEngine().getUsersEngine().onContacts(contactsResponse.getUsers(), contactsResponse.getContacts());
@@ -368,7 +370,7 @@ public class ContactsSync extends BaseSync {
                 inputContacts.add(new TLInputContact(phonesForImport.baseId, phonesForImport.value, phonesForImport.firstName, phonesForImport.lastName));
             }
 
-            TLImportedContacts importedContacts = application.getApi().doRpcCallGzip(new TLRequestContactsImportContacts(inputContacts, false), 60000);
+            TLImportedContacts importedContacts = application.getApi().doRpcCallSideGzip(new TLRequestContactsImportContacts(inputContacts, false), 60000);
 
             application.getEngine().onUsers(importedContacts.getUsers());
 

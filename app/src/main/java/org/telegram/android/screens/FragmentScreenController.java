@@ -398,7 +398,7 @@ public class FragmentScreenController implements RootController {
         for (StelsFragment fragment : backStack) {
             transaction.remove(fragment);
         }
-        transaction.add(R.id.fragmentContainer, new LoginFragment(), "loginFragment")
+        transaction.add(R.id.fragmentContainer, new AuthFragment(), "loginFragment")
                 .commit();
         backStack.clear();
         activity.hideBar();
