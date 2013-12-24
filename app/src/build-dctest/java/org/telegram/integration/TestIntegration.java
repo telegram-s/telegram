@@ -8,6 +8,6 @@ import net.hockeyapp.android.UpdateManager;
  */
 public class TestIntegration {
     public static void initActivity(StelsActivity activity) {
-        UpdateManager.register(this, "112e895eb272d29e8af43ebff16f5565");
+        UpdateManager.register(activity, "112e895eb272d29e8af43ebff16f5565");
     }
 }
