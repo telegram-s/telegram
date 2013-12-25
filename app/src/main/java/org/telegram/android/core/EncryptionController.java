@@ -307,11 +307,16 @@ public class EncryptionController {
 
         BigInteger dhPrime = loadBigInt(prime);
 
-        if (!isZero(encryptedChat.getNonce())) {
+        if (gb.equals(new BigInteger("1")) || gb.compareTo(dhPrime.subtract(new BigInteger("1"))) >= 0) {
             return;
         }
 
-        byte[] key = alignKeyZero(fromBigInt(gb.modPow(a, dhPrime)), 256);
+        BigInteger pow2 = new BigInteger("2").pow(2048 - 64);
+        if (gb.compareTo(pow2) <= 0 || gb.compareTo(dhPrime.subtract(pow2)) >= 0) {
+            return;
+        }
+
+        byte[] key = xor(alignKeyZero(fromBigInt(gb.modPow(a, dhPrime)), 256), encryptedChat.getNonce());
         long keyF = readLong(substring(CryptoUtils.SHA1(key), 12, 8), 0);
 
         application.getEngine().updateEncryptedChatKey(encryptedChat, key);
@@ -330,10 +335,6 @@ public class EncryptionController {
             rawGa = StreamingUtils.readBytes(primeLen, stream);
             int aLen = StreamingUtils.readInt(stream);
             nonce = StreamingUtils.readBytes(aLen, stream);
-
-            if (!isZero(nonce)) {
-                return;
-            }
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -341,14 +342,39 @@ public class EncryptionController {
 
         TLDhConfig dhConfig = (TLDhConfig) application.getApi().doRpcCall(new TLRequestMessagesGetDhConfig(0, 256));
 
+
         BigInteger g = new BigInteger("" + dhConfig.getG());
         BigInteger dhPrime = loadBigInt(dhConfig.getP());
+
+        try {
+            checkDhConfig(dhPrime, dhConfig.getG());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
 
         BigInteger ga = CryptoUtils.loadBigInt(rawGa);
         BigInteger b = CryptoUtils.loadBigInt(Entropy.generateSeed(dhConfig.getRandom()));
         BigInteger gb = g.modPow(b, dhPrime);
+        BigInteger pow2 = new BigInteger("2").pow(2048 - 64);
 
-        byte[] key = alignKeyZero(CryptoUtils.fromBigInt(ga.modPow(b, dhPrime)), 256);
+        if (ga.equals(new BigInteger("1")) || ga.compareTo(dhPrime.subtract(new BigInteger("1"))) >= 0) {
+            return;
+        }
+
+        if (ga.compareTo(pow2) <= 0 || ga.compareTo(dhPrime.subtract(pow2)) >= 0) {
+            return;
+        }
+
+        if (gb.equals(new BigInteger("1")) || gb.compareTo(dhPrime.subtract(new BigInteger("1"))) >= 0) {
+            return;
+        }
+
+        if (gb.compareTo(pow2) <= 0 || gb.compareTo(dhPrime.subtract(pow2)) >= 0) {
+            return;
+        }
+
+        byte[] key = xor(alignKeyZero(CryptoUtils.fromBigInt(ga.modPow(b, dhPrime)), 256), nonce);
         long keyF = readLong(substring(CryptoUtils.SHA1(key), 12, 8), 0);
 
         Logger.d(TAG, "Confirming encryption: " + keyF);
@@ -360,17 +386,87 @@ public class EncryptionController {
         application.notifyUIUpdate();
     }
 
+    private void checkDhConfig(BigInteger p, int g) throws IOException {
+        if (g != 2 && g != 3 && g != 4 && g != 5 && g != 6 && g != 7) {
+            throw new IOException();
+        }
+
+        if (p.bitLength() != 2048) {
+            throw new IOException();
+        }
+        if (!p.isProbablePrime(20)) {
+            throw new IOException();
+        }
+
+        if (!p.subtract(new BigInteger("1").divide(new BigInteger("2"))).isProbablePrime(20)) {
+            throw new IOException();
+        }
+
+        //Since g is always equal to 2, 3, 4, 5, 6 or 7, this is easily done using quadratic reciprocity law,
+        // yielding a simple condition on p mod 4g — namely,
+        // p mod 8 = 7 for g = 2,
+        // p mod 3 = 2 for g = 3,
+        // no extra condition for g = 4,
+        // p mod 5 = 1 or 4 for g = 5,
+        // p mod 24 = 11 or 23 for g = 6
+        // and p mod 7 = 2 or 3 for g = 7.
+
+        if (g == 2) {
+            int res = p.mod(new BigInteger("8")).intValue();
+            if (res != 7) {
+                throw new IOException();
+            }
+        }
+        if (g == 3) {
+            int res = p.mod(new BigInteger("3")).intValue();
+            if (res != 2) {
+                throw new IOException();
+            }
+        }
+        if (g == 5) {
+            int res = p.mod(new BigInteger("5")).intValue();
+            if (res != 1 && res != 4) {
+                throw new IOException();
+            }
+        }
+        if (g == 6) {
+            int res = p.mod(new BigInteger("24")).intValue();
+            if (res != 11 && res != 23) {
+                throw new IOException();
+            }
+        }
+        if (g == 7) {
+            int res = p.mod(new BigInteger("7")).intValue();
+            if (res != 2 && res != 3) {
+                throw new IOException();
+            }
+        }
+    }
+
     public int requestEncryption(int uid) throws IOException {
         User user = application.getEngine().getUser(uid);
         TLDhConfig dhConfig = (TLDhConfig) application.getApi().doRpcCall(new TLRequestMessagesGetDhConfig(0, 256));
 
-        BigInteger g = new BigInteger("" + dhConfig.getG());
         byte[] prime = dhConfig.getP();
         BigInteger dhPrime = loadBigInt(prime);
+
+        checkDhConfig(dhPrime, dhConfig.getG());
+
+        BigInteger g = new BigInteger("" + dhConfig.getG());
 
         byte[] rawA = Entropy.generateSeed(256);
         BigInteger a = loadBigInt(rawA);
         BigInteger ga = g.modPow(a, dhPrime);
+
+        BigInteger pow2 = new BigInteger("2").pow(2048 - 64);
+
+        if (ga.equals(new BigInteger("1")) || ga.compareTo(dhPrime.subtract(new BigInteger("1"))) >= 0) {
+            throw new IOException();
+        }
+
+        if (ga.compareTo(pow2) <= 0 || ga.compareTo(dhPrime.subtract(pow2)) >= 0) {
+            throw new IOException();
+        }
 
         TLAbsEncryptedChat chat = application.getApi().doRpcCall(
                 new TLRequestMessagesRequestEncryption(
