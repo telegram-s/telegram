@@ -185,12 +185,12 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
             @Override
             public void showProgress() {
-                progress.setVisibility(View.VISIBLE);
+                showView(progress);
             }
 
             @Override
             public void hideProgress() {
-                progress.setVisibility(View.GONE);
+                hideView(progress);
             }
         });
 
