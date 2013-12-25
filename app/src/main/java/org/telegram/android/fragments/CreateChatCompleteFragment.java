@@ -123,7 +123,7 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
         mainContainer = res.findViewById(R.id.mainContainer);
 
         avatarImage = (FastWebImageView) res.findViewById(R.id.avatar);
-        avatarImage.setLoadingDrawable(R.drawable.st_group_placeholder);
+        avatarImage.setLoadingDrawable(R.drawable.st_group_placeholder_cyan);
         avatarImage.requestTask(null);
 
         chatTitleView = (EditText) res.findViewById(R.id.title);

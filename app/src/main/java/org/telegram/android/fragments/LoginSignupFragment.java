@@ -114,7 +114,7 @@ public class LoginSignupFragment extends MediaReceiverFragment {
         });
 
         avatar = ((FastWebImageView) res.findViewById(R.id.avatar));
-        avatar.setLoadingDrawable(getResources().getDrawable(R.drawable.st_user_placeholder));
+        avatar.setLoadingDrawable(getResources().getDrawable(R.drawable.st_user_placeholder_grey));
         avatar.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
         avatar.setScaleTypeEmpty(FastWebImageView.SCALE_TYPE_FIT_CROP);
 

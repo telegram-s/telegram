@@ -439,7 +439,7 @@ public abstract class BaseContactsFragment extends StelsFragment implements Cont
                     view.findViewById(R.id.shareIcon).setVisibility(View.GONE);
                 }
             } else {
-                ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(R.drawable.st_user_placeholder);
+                ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(R.drawable.st_user_placeholder_grey);
                 ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
                 onlineView.setVisibility(View.GONE);
                 if (!isMultiple) {

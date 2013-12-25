@@ -59,8 +59,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private static TextPaint counterTitlePaint;
 
-    private static Bitmap userPlaceholder;
-    private static Bitmap groupPlaceholder;
+//    private static Bitmap userPlaceholder;
+//    private static Bitmap groupPlaceholder;
 
     private Drawable statePending;
     private Drawable stateSent;
@@ -88,8 +88,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private int state;
 
-    //    private Drawable emptyDrawable;
-    private Bitmap empty;
+    // private Drawable emptyDrawable;
+    // private Bitmap empty;
     private Bitmap avatar;
     private Paint avatarBgPaint;
 
@@ -101,6 +101,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private int[] typingUids;
     private boolean userTypes;
+
+    private Drawable placeholder;
 
     // Layouting
     private DialogLayout layout;
@@ -233,13 +235,13 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             counterPaint = new Paint();
             counterPaint.setColor(0xff8ec85f);
 
-            if (IS_LARGE) {
-                userPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
-                groupPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
-            } else {
-                userPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
-                groupPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
-            }
+//            if (IS_LARGE) {
+//                userPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
+//                groupPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
+//            } else {
+//                userPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
+//                groupPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
+//            }
 
             isLoaded = true;
         }
@@ -296,18 +298,25 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             this.userTypes = application.getTypingStates().isUserTyping(description.getPeerId());
         }
 
+        if (description.getPeerType() == PeerType.PEER_CHAT) {
+            placeholder = getResources().getDrawable(Placeholders.getGroupPlaceholder(description.getPeerId()));
+        } else {
+            placeholder = getResources().getDrawable(Placeholders.getUserPlaceholder(description.getDialogUser().getUid()));
+
+        }
+
         photo = description.getDialogAvatar();
 
         if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
             EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(description.getPeerId());
             avatarBgPaint.setColor(Placeholders.getUserBgColor(encryptedChat.getUserId()));
-            empty = userPlaceholder;
+            // empty = userPlaceholder;
         } else if (description.getPeerType() == PeerType.PEER_USER) {
             avatarBgPaint.setColor(Placeholders.getUserBgColor(description.getPeerId()));
-            empty = userPlaceholder;
+            // empty = userPlaceholder;
         } else {
             avatarBgPaint.setColor(Placeholders.getGroupBgColor(description.getPeerId()));
-            empty = groupPlaceholder;
+            // empty = groupPlaceholder;
         }
 
         if (photo instanceof TLLocalAvatarPhoto) {
@@ -323,11 +332,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 }
                 task.setFillRect(true);
                 RoundedImageTask roundedImageTask = new RoundedImageTask(task);
-                if (IS_LARGE) {
-                    roundedImageTask.setRadius(getPx(2));
-                } else {
-                    roundedImageTask.setRadius(0);
-                }
+//                if (IS_LARGE) {
+//                    roundedImageTask.setRadius(getPx(2));
+//                } else {
+//                    roundedImageTask.setRadius(0);
+//                }
+                roundedImageTask.setRadius(0);
                 avatarReceiver.receiveImage(roundedImageTask);
                 avatar = avatarReceiver.getResult();
             } else {
@@ -484,8 +494,13 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         if (avatar != null) {
             canvas.drawBitmap(avatar, layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
         } else {
-            canvas.drawRoundRect(layout.avatarRect, getPx(2), getPx(2), avatarBgPaint);
-            canvas.drawBitmap(empty, layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
+//            canvas.drawRoundRect(layout.avatarRect, getPx(2), getPx(2), avatarBgPaint);
+//            canvas.drawBitmap(empty, layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
+            placeholder.setBounds(layout.layoutAvatarLeft, layout.layoutAvatarTop,
+                    layout.layoutAvatarLeft + layout.layoutAvatarWidth,
+                    layout.layoutAvatarTop + layout.layoutAvatarWidth);
+            placeholder.setAlpha(255);
+            placeholder.draw(canvas);
         }
 
         if (description.isErrorState() ||

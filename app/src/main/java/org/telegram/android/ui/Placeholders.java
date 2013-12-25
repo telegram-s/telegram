@@ -28,10 +28,6 @@ public class Placeholders {
         return USER_PLACEHOLDERS[Math.abs(index) % USER_PLACEHOLDERS.length];
     }
 
-    public static int getUserBubblePlaceholder(int index) {
-        return USER_PLACEHOLDERS_BUBBLE[Math.abs(index) % USER_PLACEHOLDERS_BUBBLE.length];
-    }
-
     public static int getGroupPlaceholder(int index) {
         return GROUP_PLACEHOLDERS[Math.abs(index) % GROUP_PLACEHOLDERS.length];
     }
@@ -53,10 +49,6 @@ public class Placeholders {
     public static final int[] USER_PLACEHOLDERS = new int[]{R.drawable.st_user_placeholder_blue, R.drawable.st_user_placeholder_cyan,
             R.drawable.st_user_placeholder_green, R.drawable.st_user_placeholder_orange, R.drawable.st_user_placeholder_pink,
             R.drawable.st_user_placeholder_purple, R.drawable.st_user_placeholder_red, R.drawable.st_user_placeholder_yellow};
-
-    public static final int[] USER_PLACEHOLDERS_BUBBLE = new int[]{R.drawable.st_bubble_user_placeholder_blue, R.drawable.st_bubble_user_placeholder_cyan,
-            R.drawable.st_bubble_user_placeholder_green, R.drawable.st_bubble_user_placeholder_orange, R.drawable.st_bubble_user_placeholder_pink,
-            R.drawable.st_bubble_user_placeholder_purple, R.drawable.st_bubble_user_placeholder_red, R.drawable.st_bubble_user_placeholder_yellow};
 
 
     public static final int[] GROUP_PLACEHOLDERS_COLOR = new int[]

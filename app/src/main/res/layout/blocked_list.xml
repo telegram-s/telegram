@@ -10,7 +10,6 @@
                                                       android:paddingLeft="16dp"
                                                       android:paddingRight="16dp"
                                                       android:scrollbarStyle="insideOverlay"
-                                                      android:paddingTop="48dp"
                                                       android:clipToPadding="false"
                                                       android:cacheColorHint="@android:color/white"
                                                       android:id="@+id/usersList"/>

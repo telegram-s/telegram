@@ -290,7 +290,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         }
 
         if (showAvatar) {
-            placeholder = getResources().getDrawable(Placeholders.getUserBubblePlaceholder(message.message.getSenderId()));
+            placeholder = getResources().getDrawable(Placeholders.getUserPlaceholder(message.message.getSenderId()));
             User user = message.senderUser;
             if (user != null) {
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {

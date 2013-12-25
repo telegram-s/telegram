@@ -30,6 +30,7 @@ import org.telegram.android.core.model.User;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
+import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
 import org.telegram.api.photos.TLPhoto;
@@ -173,7 +174,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         }
 
         avatar = (FastWebImageView) res.findViewById(R.id.avatar);
-        avatar.setLoadingDrawable(R.drawable.st_user_placeholder);
+        avatar.setLoadingDrawable(Placeholders.getUserPlaceholder(application.getCurrentUid()));
 
         nameView = (TextView) res.findViewById(R.id.userName);
         phoneView = (TextView) res.findViewById(R.id.phone);

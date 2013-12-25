@@ -255,7 +255,7 @@ public class EncryptedChatInfoFragment extends StelsFragment {
         if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
             final TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) user.getPhoto();
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                avatarView.setLoadingDrawable(R.drawable.st_user_placeholder);
+                avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(user.getUid()));
                 avatarView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
                 if (avatarPhoto.getFullLocation() instanceof TLLocalFileLocation) {
                     avatarView.setOnClickListener(new View.OnClickListener() {

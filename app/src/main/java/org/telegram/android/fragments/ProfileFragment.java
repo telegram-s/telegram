@@ -212,7 +212,7 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
 
     private void bindUi() {
         if (user.getPhoto() instanceof TLLocalAvatarPhoto && ((TLLocalAvatarPhoto) user.getPhoto()).getPreviewLocation() instanceof TLLocalFileLocation) {
-            avatarView.setLoadingDrawable(R.drawable.st_user_placeholder);
+            avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(userId));
             avatarView.requestTask(new StelsImageTask((TLLocalFileLocation) ((TLLocalAvatarPhoto) user.getPhoto()).getPreviewLocation()));
             if (((TLLocalAvatarPhoto) user.getPhoto()).getFullLocation() instanceof TLLocalFileLocation) {
                 avatarView.setOnClickListener(new View.OnClickListener() {
