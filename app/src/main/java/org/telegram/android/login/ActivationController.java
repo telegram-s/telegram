@@ -20,6 +20,7 @@ import org.telegram.api.requests.TLRequestAuthSignIn;
 import org.telegram.config.ApiConfig;
 import org.telegram.tl.TLBool;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -145,13 +146,12 @@ public class ActivationController {
 
         TelephonyManager manager = (TelephonyManager) application.getSystemService(Context.TELEPHONY_SERVICE);
         String country = null;
-        if (manager.getSimCountryIso() != null) {
+        if (manager.getSimCountryIso() != null && manager.getSimCountryIso().length() == 2) {
             country = manager.getSimCountryIso();
-        } else if (manager.getNetworkCountryIso() != null) {
+        } else if (manager.getNetworkCountryIso() != null && manager.getNetworkCountryIso().length() == 2) {
             country = manager.getNetworkCountryIso();
-        }
-        if (country == null) {
-            country = "us";
+        } else {
+            country = Locale.getDefault().getCountry();
         }
 
         for (int i = 0; i < Countries.COUNTRIES.length; i++) {

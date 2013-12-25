@@ -448,11 +448,13 @@ public class ContactsSync extends BaseSync {
             ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
             for (User u : users) {
                 if (!localContacts.containsKey(u.getUid())) {
-
+                    long startAdd = SystemClock.uptimeMillis();
                     addContact(false, application.getKernel().getAuthKernel().getAccount(), u, u.getDisplayName(), u.getPhone(), operationList);
                     //if (operationList.size() > OP_LIMIT) {
                     complete(operationList);
                     operationList.clear();
+
+                    Logger.d(TAG, "Added contact in " + (SystemClock.uptimeMillis() - startAdd) + " ms");
                     //}
                 }
             }
