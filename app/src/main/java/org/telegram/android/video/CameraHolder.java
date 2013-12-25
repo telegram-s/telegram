@@ -17,16 +17,33 @@ public class CameraHolder {
                                                   Camera.Parameters parameters) {
         Camera.Size result = null;
 
-        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
-            if (size.width <= width && size.height <= height) {
-                if (result == null) {
-                    result = size;
-                } else {
-                    int resultArea = result.width * result.height;
-                    int newArea = size.width * size.height;
-
-                    if (newArea > resultArea) {
+        if (Build.VERSION.SDK_INT >= 11) {
+            for (Camera.Size size : parameters.getSupportedVideoSizes()) {
+                if (size.width <= width && size.height <= height) {
+                    if (result == null) {
                         result = size;
+                    } else {
+                        int resultArea = result.width * result.height;
+                        int newArea = size.width * size.height;
+
+                        if (newArea > resultArea) {
+                            result = size;
+                        }
+                    }
+                }
+            }
+        } else {
+            for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
+                if (size.width <= width && size.height <= height) {
+                    if (result == null) {
+                        result = size;
+                    } else {
+                        int resultArea = result.width * result.height;
+                        int newArea = size.width * size.height;
+
+                        if (newArea > resultArea) {
+                            result = size;
+                        }
                     }
                 }
             }
