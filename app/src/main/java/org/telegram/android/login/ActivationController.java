@@ -2,11 +2,16 @@ package org.telegram.android.login;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import org.telegram.android.R;
+import org.telegram.android.StartActivity;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.countries.Countries;
 import org.telegram.android.countries.CountryRecord;
@@ -21,6 +26,7 @@ import org.telegram.config.ApiConfig;
 import org.telegram.tl.TLBool;
 
 import java.util.Locale;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +35,7 @@ import java.util.regex.Pattern;
  */
 public class ActivationController {
     private static final String TAG = "ActivationController";
+    private static final int NOTIFICATION_ID = 1001;
 
     private static final Pattern REGEXP_PATTERN = Pattern.compile("[A-Z_0-9]+");
 
@@ -48,14 +55,15 @@ public class ActivationController {
     public static final int STATE_PHONE_EDIT = 2;
     public static final int STATE_ACTIVATION = 3;
     public static final int STATE_ERROR_NETWORK = 4;
-    public static final int STATE_ACTIVATION_ERROR_UNABLE = 5;
-    public static final int STATE_ACTIVATION_ERROR_WRONG_PHONE = 6;
-    public static final int STATE_MANUAL_ACTIVATION_REQUEST = 7;
-    public static final int STATE_MANUAL_ACTIVATION = 8;
-    public static final int STATE_MANUAL_ACTIVATION_SEND = 9;
-    public static final int STATE_SIGNUP = 10;
-    public static final int STATE_ACTIVATED = 11;
-    public static final int STATE_EXPIRED = 12;
+    public static final int STATE_ERROR_UNKNOWN = 5;
+    public static final int STATE_ERROR_TOO_OFTEN = 6;
+    public static final int STATE_ERROR_WRONG_PHONE = 7;
+    public static final int STATE_ERROR_EXPIRED = 8;
+    public static final int STATE_MANUAL_ACTIVATION = 9;
+    public static final int STATE_MANUAL_ACTIVATION_SEND = 10;
+    public static final int STATE_MANUAL_ACTIVATION_REQUEST = 11;
+    public static final int STATE_SIGNUP = 12;
+    public static final int STATE_ACTIVATED = 13;
 
     public static final int ERROR_REQUEST_SMS = 0;
     public static final int ERROR_REQUEST_CALL = 1;
@@ -75,10 +83,16 @@ public class ActivationController {
     private int networkError;
     private int lastActivationCode;
 
+    private NotificationManager notificationManager;
+
     private Handler handler = new Handler(Looper.getMainLooper());
 
     private AutoActivationReceiver receiver;
     private AutoActivationListener autoListener;
+
+    private Random rnd = new Random();
+
+    private boolean isPageVisible = true;
 
     private Runnable cancelAutomatic = new Runnable() {
         @Override
@@ -150,8 +164,10 @@ public class ActivationController {
             country = manager.getSimCountryIso();
         } else if (manager.getNetworkCountryIso() != null && manager.getNetworkCountryIso().length() == 2) {
             country = manager.getNetworkCountryIso();
-        } else {
+        } else if (Locale.getDefault().getCountry() != null) {
             country = Locale.getDefault().getCountry();
+        } else {
+            country = "us";
         }
 
         for (int i = 0; i < Countries.COUNTRIES.length; i++) {
@@ -175,6 +191,57 @@ public class ActivationController {
                 }
             }
         }
+
+        notificationManager = (NotificationManager) application.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    public void onPageShown() {
+        hideNotification();
+        isPageVisible = true;
+    }
+
+    public void onPageHidden() {
+        showNotification();
+        isPageVisible = false;
+    }
+
+    private void showNotification() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(application);
+        builder.setSmallIcon(R.drawable.app_notify);
+        builder.setContentTitle("Telegram");
+        builder.setContentIntent(
+                PendingIntent.getActivity(application, 0, new Intent().setClass(application, StartActivity.class), rnd.nextInt()));
+
+        if (currentState == STATE_ACTIVATION) {
+            builder.setTicker("Activating Telegram...");
+            builder.setContentText("Activation in progress");
+            builder.setProgress(0, 0, true);
+            builder.setOngoing(true);
+        } else if (currentState == STATE_ERROR_NETWORK) {
+            builder.setTicker("Connection error");
+            builder.setContentText("Unable to activate Telegram: Connection error");
+        } else if (currentState == STATE_MANUAL_ACTIVATION) {
+            builder.setTicker("Manual activation required");
+            builder.setContentText("Unable automatically activate Telegram");
+        } else if (currentState == STATE_SIGNUP) {
+            builder.setTicker("Signup required");
+            builder.setContentText("Phone activated! Please sign up.");
+        } else if (currentState == STATE_ACTIVATED) {
+            builder.setTicker("Telegram activated");
+            builder.setContentText("Telegram activated!");
+        } else {
+            builder = null;
+        }
+
+        if (builder == null) {
+            notificationManager.cancel(NOTIFICATION_ID);
+        } else {
+            notificationManager.notify(NOTIFICATION_ID, builder.build());
+        }
+    }
+
+    private void hideNotification() {
+        notificationManager.cancel(NOTIFICATION_ID);
     }
 
     public int getNetworkError() {
@@ -243,8 +310,9 @@ public class ActivationController {
     }
 
     public void cancel() {
-        if (this.currentState == STATE_ERROR_NETWORK) {
-
+        if (this.currentState == STATE_ERROR_NETWORK || this.currentState == STATE_ERROR_TOO_OFTEN ||
+                this.currentState == STATE_ERROR_UNKNOWN ||
+                this.currentState == STATE_ERROR_WRONG_PHONE) {
             if (networkError == ERROR_REQUEST_SMS) {
                 if (isManualPhone) {
                     doChangeState(STATE_PHONE_EDIT);
@@ -309,7 +377,7 @@ public class ActivationController {
                                     public void run() {
                                         Logger.d(TAG, "onSmsSent error");
                                         networkError = ERROR_REQUEST_SMS;
-                                        doChangeState(STATE_ERROR_NETWORK);
+                                        doChangeState(STATE_ERROR_UNKNOWN);
                                     }
                                 });
                                 return;
@@ -319,12 +387,34 @@ public class ActivationController {
                             return;
                         }
 
+                        if (tagError.startsWith("PHONE_NUMBER_INVALID")) {
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    networkError = ERROR_REQUEST_SMS;
+                                    doChangeState(STATE_ERROR_WRONG_PHONE);
+                                }
+                            });
+                            return;
+                        }
+
+                        if (tagError.startsWith("FLOOD_WAIT")) {
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    networkError = ERROR_REQUEST_SMS;
+                                    doChangeState(STATE_ERROR_TOO_OFTEN);
+                                }
+                            });
+                            return;
+                        }
+
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
                                 Logger.d(TAG, "onSmsSent error");
                                 networkError = ERROR_REQUEST_SMS;
-                                doChangeState(STATE_ERROR_NETWORK);
+                                doChangeState(STATE_ERROR_UNKNOWN);
                             }
                         });
                     }
@@ -433,6 +523,9 @@ public class ActivationController {
     private void doChangeState(final int nState) {
         if (this.currentState != nState) {
             this.currentState = nState;
+            if (!isPageVisible) {
+                showNotification();
+            }
             handler.post(new Runnable() {
                 @Override
                 public void run() {

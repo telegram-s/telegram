@@ -31,10 +31,13 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
     private View automatic;
     private View progress;
     private View networkError;
-    private View unableError;
     private View phoneRequest;
     private View phoneActivation;
     private View phoneSend;
+    private View wrongPhoneError;
+    private View tooOftenError;
+    private View expiredError;
+    private View unknownError;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,8 +54,11 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         phoneRequest = res.findViewById(R.id.phoneRequestProgress);
         phoneActivation = res.findViewById(R.id.phoneActivation);
         networkError = res.findViewById(R.id.networkError);
-        unableError = res.findViewById(R.id.unableError);
         phoneSend = res.findViewById(R.id.phoneSendProgress);
+        tooOftenError = res.findViewById(R.id.tooOftenError);
+        expiredError = res.findViewById(R.id.expiredError);
+        unknownError = res.findViewById(R.id.unknownError);
+        wrongPhoneError = res.findViewById(R.id.wrongPhoneError);
 
         automatic.findViewById(R.id.confirmPhone).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +106,12 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 application.getKernel().getActivationController().doActivation(numberUtil.getNationalNumber() + "");
                             }
-                        }).setNegativeButton(R.string.st_edit, null);
+                        }).setNegativeButton(R.string.st_edit, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                showKeyboard((EditText) manual.findViewById(R.id.phoneName));
+                            }
+                        });
                         AlertDialog dialog = builder.create();
                         dialog.setCanceledOnTouchOutside(true);
                         dialog.show();
@@ -114,6 +125,12 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
                 } catch (NumberParseException e) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage("Phone number "
                             + number + " is incorrect");
+                    builder.setPositiveButton(R.string.st_edit, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            showKeyboard((EditText) manual.findViewById(R.id.phoneName));
+                        }
+                    });
                     AlertDialog dialog = builder.create();
                     dialog.setCanceledOnTouchOutside(true);
                     dialog.show();
@@ -134,10 +151,38 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
             }
         });
 
-        unableError.findViewById(R.id.doPhoneActivation).setOnClickListener(new View.OnClickListener() {
+        tooOftenError.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                application.getKernel().getActivationController().requestPhone();
+                application.getKernel().getActivationController().cancel();
+            }
+        });
+
+        unknownError.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getKernel().getActivationController().cancel();
+            }
+        });
+
+        unknownError.findViewById(R.id.tryAgain).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getKernel().getActivationController().doTryAgain();
+            }
+        });
+
+        expiredError.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getKernel().getActivationController().cancel();
+            }
+        });
+
+        wrongPhoneError.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getKernel().getActivationController().cancel();
             }
         });
 
@@ -155,10 +200,13 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         automatic.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
         networkError.setVisibility(View.GONE);
-        unableError.setVisibility(View.GONE);
         phoneRequest.setVisibility(View.GONE);
         phoneActivation.setVisibility(View.GONE);
         phoneSend.setVisibility(View.GONE);
+        tooOftenError.setVisibility(View.GONE);
+        expiredError.setVisibility(View.GONE);
+        unknownError.setVisibility(View.GONE);
+        wrongPhoneError.setVisibility(View.GONE);
 
         return res;
     }
@@ -167,20 +215,54 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
     public void onResume() {
         super.onResume();
 
-        application.getKernel().getActivationController().setListener(this);
-        onStateChanged(application.getKernel().getActivationController().getCurrentState());
+        if (application.getKernel().getActivationController() != null) {
+            application.getKernel().getActivationController().onPageShown();
+            application.getKernel().getActivationController().setListener(this);
 
-        ((TextView) manual.findViewById(R.id.countrySelect)).setText(application.getKernel().getActivationController().getCurrentCountry().getTitle());
-        ((TextView) manual.findViewById(R.id.phoneCode)).setText("+" +
-                application.getKernel().getActivationController().getCurrentCountry().getCallPrefix());
+            ((TextView) manual.findViewById(R.id.countrySelect)).setText(application.getKernel().getActivationController().getCurrentCountry().getTitle());
+            ((TextView) manual.findViewById(R.id.phoneCode)).setText("+" +
+                    application.getKernel().getActivationController().getCurrentCountry().getCallPrefix());
+
+            onStateChanged(application.getKernel().getActivationController().getCurrentState());
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         if (application.getKernel().getActivationController() != null) {
+            application.getKernel().getActivationController().onPageHidden();
             application.getKernel().getActivationController().setListener(null);
         }
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (currentState == ActivationController.STATE_ERROR_NETWORK) {
+            application.getKernel().getActivationController().cancel();
+            return true;
+        }
+
+        if (currentState == ActivationController.STATE_ERROR_UNKNOWN) {
+            application.getKernel().getActivationController().cancel();
+            return true;
+        }
+
+        if (currentState == ActivationController.STATE_ERROR_TOO_OFTEN) {
+            application.getKernel().getActivationController().cancel();
+            return true;
+        }
+
+        if (currentState == ActivationController.STATE_ERROR_WRONG_PHONE) {
+            application.getKernel().getActivationController().cancel();
+            return true;
+        }
+
+        if (currentState == ActivationController.STATE_ERROR_EXPIRED) {
+            application.getKernel().getActivationController().cancel();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -232,15 +314,55 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
             networkError.setVisibility(View.GONE);
         }
 
-        // Unable
-        if (currentState == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
-            hideView(unableError);
+        // Unknown error
+        if (currentState == ActivationController.STATE_ERROR_UNKNOWN) {
+            hideView(unknownError);
         }
-        if (state == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
-            showView(unableError, currentState != ActivationController.STATE_START);
+        if (state == ActivationController.STATE_ERROR_UNKNOWN) {
+            showView(unknownError, currentState != ActivationController.STATE_START);
         } else {
-            unableError.setVisibility(View.GONE);
+            unknownError.setVisibility(View.GONE);
         }
+
+        // Too often error
+        if (currentState == ActivationController.STATE_ERROR_TOO_OFTEN) {
+            hideView(tooOftenError);
+        }
+        if (state == ActivationController.STATE_ERROR_TOO_OFTEN) {
+            showView(tooOftenError, currentState != ActivationController.STATE_START);
+        } else {
+            tooOftenError.setVisibility(View.GONE);
+        }
+
+        // wrong phone error
+        if (currentState == ActivationController.STATE_ERROR_WRONG_PHONE) {
+            hideView(wrongPhoneError);
+        }
+        if (state == ActivationController.STATE_ERROR_WRONG_PHONE) {
+            showView(wrongPhoneError, currentState != ActivationController.STATE_START);
+        } else {
+            wrongPhoneError.setVisibility(View.GONE);
+        }
+
+        // wrong phone error
+        if (currentState == ActivationController.STATE_ERROR_EXPIRED) {
+            hideView(expiredError);
+        }
+        if (state == ActivationController.STATE_ERROR_EXPIRED) {
+            showView(expiredError, currentState != ActivationController.STATE_START);
+        } else {
+            expiredError.setVisibility(View.GONE);
+        }
+
+        // Unable
+//        if (currentState == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
+//            hideView(unableError);
+//        }
+//        if (state == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
+//            showView(unableError, currentState != ActivationController.STATE_START);
+//        } else {
+//            unableError.setVisibility(View.GONE);
+//        }
 
         // Manual activation request
         if (currentState == ActivationController.STATE_MANUAL_ACTIVATION_REQUEST) {
@@ -275,19 +397,9 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
             phoneSend.setVisibility(View.GONE);
         }
 
-        if (state == ActivationController.STATE_PHONE_CONFIRM) {
-            getSherlockActivity().getSupportActionBar().setTitle("Your phone");
-        } else if (state == ActivationController.STATE_ACTIVATION) {
-            getSherlockActivity().getSupportActionBar().setTitle("Activating phone...");
-        } else if (state == ActivationController.STATE_ACTIVATED) {
+        if (state == ActivationController.STATE_ACTIVATED) {
             application.getKernel().setActivationController(null);
             ((StartActivity) getActivity()).onSuccessAuth();
-        } else if (state == ActivationController.STATE_ERROR_NETWORK) {
-            getSherlockActivity().getSupportActionBar().setTitle("Telegram");
-        } else if (state == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
-            getSherlockActivity().getSupportActionBar().setTitle("Telegram");
-        } else if (state == ActivationController.STATE_PHONE_EDIT) {
-            getSherlockActivity().getSupportActionBar().setTitle("Your phone");
         }
 
         currentState = state;

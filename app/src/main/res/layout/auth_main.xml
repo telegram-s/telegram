@@ -145,6 +145,7 @@
                   android:textColor="@color/st_grey_text"
                   android:text="This process could take up to one minute"/>
     </LinearLayout>
+
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="match_parent"
                   android:gravity="center_vertical"
@@ -176,27 +177,27 @@
                 android:text="Cancel"
                 android:id="@+id/cancel"/>
     </LinearLayout>
+
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="match_parent"
                   android:gravity="center_vertical"
                   android:orientation="vertical"
-                  android:id="@+id/unableError">
+                  android:id="@+id/unknownError">
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_gravity="center_horizontal"
                   android:textSize="21sp"
                   android:paddingLeft="32dp"
                   android:paddingRight="32dp"
-                  android:gravity="center"
-                  android:text="Unable to automatically activate phone.\nDo you want to activate by phone?"/>
+                  android:text="Unknown application error :-("/>
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@drawable/st_btn_green"
                 android:textColor="#ffffff"
-                android:text="Activate by Phone"
-                android:id="@+id/doPhoneActivation"/>
+                android:text="Try again"
+                android:id="@+id/tryAgain"/>
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -207,6 +208,79 @@
                 android:textSize="16sp"
                 android:text="Cancel"
                 android:id="@+id/cancel"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:gravity="center_vertical"
+                  android:orientation="vertical"
+                  android:id="@+id/tooOftenError">
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:textSize="21sp"
+                  android:paddingLeft="32dp"
+                  android:paddingRight="32dp"
+                  android:text="Too often attempts. Try again later."/>
+
+        <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/st_btn_gray"
+                android:textColor="@color/st_black_text"
+                android:textSize="16sp"
+                android:text="Back"
+                android:id="@+id/back"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:gravity="center_vertical"
+                  android:orientation="vertical"
+                  android:id="@+id/expiredError">
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:textSize="21sp"
+                  android:paddingLeft="32dp"
+                  android:paddingRight="32dp"
+                  android:text="Activation code expired"/>
+
+        <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/st_btn_green"
+                android:textColor="@color/st_black_text"
+                android:textSize="16sp"
+                android:text="Start again"
+                android:id="@+id/back"/>
+    </LinearLayout>
+
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:gravity="center_vertical"
+                  android:orientation="vertical"
+                  android:id="@+id/wrongPhoneError">
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:textSize="21sp"
+                  android:paddingLeft="32dp"
+                  android:paddingRight="32dp"
+                  android:text="You entered incorrect phone."/>
+
+        <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/st_btn_gray"
+                android:textColor="@color/st_black_text"
+                android:textSize="16sp"
+                android:text="Back"
+                android:id="@+id/back"/>
     </LinearLayout>
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
