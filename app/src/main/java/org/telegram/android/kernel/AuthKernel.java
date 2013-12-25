@@ -223,6 +223,7 @@ public class AuthKernel {
         Logger.d(TAG, "Current Auth state");
         Logger.d(TAG, "Authenticated: " + storage.isAuthenticated());
         Logger.d(TAG, "Uid: " + storage.getObj().getUid());
+        Logger.d(TAG, "PrimaryDC: " + storage.getObj().getPrimaryDc());
         Logger.d(TAG, "Phone: " + storage.getObj().getPhone());
         for (TLKey key : storage.getObj().getKeys()) {
             Logger.d(TAG, "Key: " + key.getDcId() + ":" + key.isAuthorised());
