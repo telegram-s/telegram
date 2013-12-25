@@ -112,7 +112,7 @@ android {
         }
 
         hockeytest {
-            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
+            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/dc-test/res']
             assets.srcDirs = ['src/res-common/assets']
             java.srcDirs = ['src/dc-test/java', 'src/keys-prime/java', 'src/res-common/java', 'src/build-dctest/java']
         }
@@ -120,7 +120,7 @@ android {
         dev {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res']
             assets.srcDirs = ['src/res-common/assets']
-            java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java', 'src/res-common/java', 'src/build-release/java']
+            java.srcDirs = ['src/dc-test/java', 'src/keys-prime/java', 'src/res-common/java', 'src/build-release/java']
         }
 
         beta {
