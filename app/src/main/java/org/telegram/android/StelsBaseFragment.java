@@ -325,11 +325,11 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
 
                                 @Override
                                 public void run() {
+                                    action.afterExecute();
                                     if (taskProgressInterface != null) {
                                         taskProgressInterface.showContent();
                                         taskProgressInterface.hideProgress();
                                     }
-                                    action.afterExecute();
                                 }
                             });
                         } catch (final Exception e) {
@@ -348,9 +348,6 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
 
                                     @Override
                                     public void run() {
-                                        if (taskProgressInterface != null) {
-                                            taskProgressInterface.hideProgress();
-                                        }
                                         recoverCallback.onError(asyncException, new Runnable() {
 
                                                     @Override
@@ -386,6 +383,9 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
                                                     }
                                                 }
                                         );
+                                        if (taskProgressInterface != null) {
+                                            taskProgressInterface.hideProgress();
+                                        }
                                     }
                                 });
                             } else {

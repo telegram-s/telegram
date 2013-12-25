@@ -266,7 +266,7 @@
     <FrameLayout android:layout_height="fill_parent"
                  android:layout_width="fill_parent"
                  android:id="@+id/progress"
-                 android:background="@android:color/white">
+                 android:background="@color/st_settings_bg">
         <ProgressBar android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
                      android:paddingTop="24dp"

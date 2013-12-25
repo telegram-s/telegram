@@ -165,12 +165,12 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
 
             @Override
             public void showProgress() {
-                progress.setVisibility(View.VISIBLE);
+                showView(progress);
             }
 
             @Override
             public void hideProgress() {
-                progress.setVisibility(View.GONE);
+                goneView(progress);
             }
         });
         progress.setVisibility(View.GONE);
@@ -407,7 +407,7 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
             final long[] contacts = application.getEngine().getUsersEngine().getContactsForUid(userId);
             if (contacts.length == 1) {
                 startActivity(new Intent(Intent.ACTION_VIEW)
-                        .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[0]+ "")));
+                        .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[0] + "")));
             } else {
                 CharSequence[] sequences = new CharSequence[contacts.length];
                 for (int i = 0; i < contacts.length; i++) {

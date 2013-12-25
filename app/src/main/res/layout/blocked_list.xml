@@ -4,14 +4,14 @@
              android:orientation="vertical"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             android:background="@android:color/white">
+             android:background="@color/st_settings_bg">
     <com.extradea.framework.images.ui.ImagingListView android:layout_height="fill_parent"
                                                       android:layout_width="fill_parent"
                                                       android:paddingLeft="16dp"
                                                       android:paddingRight="16dp"
                                                       android:scrollbarStyle="insideOverlay"
                                                       android:clipToPadding="false"
-                                                      android:cacheColorHint="@android:color/white"
+                                                      android:cacheColorHint="@color/st_settings_bg"
                                                       android:id="@+id/usersList"/>
 
     <TextView android:layout_width="wrap_content"
@@ -26,10 +26,14 @@
               android:id="@+id/empty"
               android:text="@string/st_blocked_empty"/>
 
-    <ProgressBar android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_gravity="center"
-                 android:layout_marginTop="24dp"
+    <FrameLayout android:layout_width="fill_parent"
+                 android:layout_height="fill_parent"
                  android:id="@+id/loading"
-                 style="@style/Widget.Sherlock.Light.ProgressBar"/>
+                 android:background="@color/st_settings_bg">
+        <ProgressBar android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="center"
+                     style="@style/Widget.Sherlock.Light.ProgressBar"/>
+    </FrameLayout>
+
 </FrameLayout>

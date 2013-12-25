@@ -86,12 +86,12 @@ public class BlockedFragment extends StelsFragment {
 
             @Override
             public void showProgress() {
-                loading.setVisibility(View.VISIBLE);
+                showView(loading, false);
             }
 
             @Override
             public void hideProgress() {
-                loading.setVisibility(View.GONE);
+                goneView(loading, false);
             }
         });
         check();
