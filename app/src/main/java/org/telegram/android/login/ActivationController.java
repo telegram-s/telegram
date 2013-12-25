@@ -65,7 +65,7 @@ public class ActivationController {
     private StelsApplication application;
     private int currentState;
     private CountryRecord currentCountry;
-    private String phone;
+    private String autoPhone;
     private String currentPhone;
     private String manualPhone;
     private String phoneCodeHash;
@@ -134,10 +134,10 @@ public class ActivationController {
 
     public ActivationController(StelsApplication application) {
         this.application = application;
-        this.phone = findPhone(application);
-        if (this.phone != null) {
+        this.autoPhone = findPhone(application);
+        if (this.autoPhone != null) {
             this.currentState = STATE_PHONE_CONFIRM;
-            Logger.d(TAG, "Founded phone: " + phone);
+            Logger.d(TAG, "Founded phone: " + autoPhone);
         } else {
             this.currentState = STATE_PHONE_EDIT;
             Logger.d(TAG, "Unable to find phone");
@@ -182,7 +182,7 @@ public class ActivationController {
     }
 
     public String getAutoPhone() {
-        return phone;
+        return autoPhone;
     }
 
     public String getManualPhone() {
@@ -206,7 +206,7 @@ public class ActivationController {
         if (this.currentState != STATE_PHONE_CONFIRM) {
             throw new RuntimeException("Invalid state for doConfirmPhone");
         }
-        currentPhone = phone;
+        currentPhone = autoPhone;
         isManualPhone = false;
         startActivation();
     }
@@ -348,7 +348,7 @@ public class ActivationController {
 
         handler.removeCallbacks(cancelAutomatic);
 
-        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(phone, phoneCodeHash, "" + code), 30000,
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(currentPhone, phoneCodeHash, "" + code), 30000,
                 new RpcCallback<TLAuthorization>() {
                     @Override
                     public void onResult(TLAuthorization result) {
@@ -382,7 +382,7 @@ public class ActivationController {
 
         doChangeState(STATE_MANUAL_ACTIVATION_REQUEST);
 
-        application.getApi().doRpcCallNonAuth(new TLRequestAuthSendCall(phone, phoneCodeHash), 30000,
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSendCall(currentPhone, phoneCodeHash), 30000,
                 new RpcCallback<TLBool>() {
                     @Override
                     public void onResult(TLBool result) {
@@ -400,7 +400,7 @@ public class ActivationController {
     public void sendPhoneRequest(int code) {
         lastActivationCode = code;
         doChangeState(STATE_MANUAL_ACTIVATION_SEND);
-        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(phone, phoneCodeHash, "" + code), 30000,
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(currentPhone, phoneCodeHash, "" + code), 30000,
                 new RpcCallback<TLAuthorization>() {
                     @Override
                     public void onResult(TLAuthorization result) {
