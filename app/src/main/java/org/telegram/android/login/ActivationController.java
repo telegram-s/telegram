@@ -58,16 +58,20 @@ public class ActivationController {
     public static final int STATE_ERROR_UNKNOWN = 5;
     public static final int STATE_ERROR_TOO_OFTEN = 6;
     public static final int STATE_ERROR_WRONG_PHONE = 7;
-    public static final int STATE_ERROR_EXPIRED = 8;
-    public static final int STATE_MANUAL_ACTIVATION = 9;
-    public static final int STATE_MANUAL_ACTIVATION_SEND = 10;
-    public static final int STATE_MANUAL_ACTIVATION_REQUEST = 11;
-    public static final int STATE_SIGNUP = 12;
-    public static final int STATE_ACTIVATED = 13;
+    public static final int STATE_ERROR_WRONG_CODE = 8;
+    public static final int STATE_ERROR_EXPIRED = 9;
+    public static final int STATE_MANUAL_ACTIVATION = 10;
+    public static final int STATE_MANUAL_ACTIVATION_SEND = 11;
+    public static final int STATE_MANUAL_ACTIVATION_REQUEST = 12;
+    public static final int STATE_SIGNUP = 13;
+    public static final int STATE_ACTIVATED = 14;
 
     public static final int ERROR_REQUEST_SMS = 0;
     public static final int ERROR_REQUEST_CALL = 1;
     public static final int ERROR_REQUEST_SEND = 2;
+
+    private static final int REQUEST_TIMEOUT = 30000;
+    private static final int AUTO_TIMEOUT = 60000;
 
     private ActivationListener listener;
 
@@ -296,7 +300,7 @@ public class ActivationController {
     }
 
     public void doTryAgain() {
-        if (this.currentState != STATE_ERROR_NETWORK) {
+        if (this.currentState != STATE_ERROR_NETWORK && this.currentState != STATE_ERROR_UNKNOWN) {
             return;
         }
 
@@ -305,7 +309,7 @@ public class ActivationController {
         } else if (networkError == ERROR_REQUEST_CALL) {
             requestPhone();
         } else if (networkError == ERROR_REQUEST_SEND) {
-            sendPhoneRequest(lastActivationCode);
+            doSendCode(lastActivationCode);
         }
     }
 
@@ -324,6 +328,14 @@ public class ActivationController {
             } else if (networkError == ERROR_REQUEST_SEND) {
                 doChangeState(STATE_MANUAL_ACTIVATION);
             }
+        } else if (this.currentState == STATE_ERROR_EXPIRED) {
+            if (isManualPhone) {
+                doChangeState(STATE_PHONE_EDIT);
+            } else {
+                doChangeState(STATE_PHONE_CONFIRM);
+            }
+        } else if (this.currentState == STATE_ERROR_WRONG_CODE) {
+            doChangeState(STATE_MANUAL_ACTIVATION);
         }
     }
 
@@ -332,7 +344,7 @@ public class ActivationController {
         doChangeState(STATE_ACTIVATION);
 
         application.getApi().doRpcCallNonAuth(new TLRequestAuthSendCode(currentPhone, 0, ApiConfig.API_ID, ApiConfig.API_HASH,
-                application.getString(R.string.st_lang)), 15000,
+                application.getString(R.string.st_lang)), REQUEST_TIMEOUT,
                 new RpcCallback<TLSentCode>() {
                     @Override
                     public void onResult(final TLSentCode result) {
@@ -350,14 +362,8 @@ public class ActivationController {
                     @Override
                     public void onError(int errorCode, String message) {
                         if (errorCode == 0) {
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Logger.d(TAG, "onSmsSent error");
-                                    networkError = ERROR_REQUEST_SMS;
-                                    doChangeState(STATE_ERROR_NETWORK);
-                                }
-                            });
+                            networkError = ERROR_REQUEST_SMS;
+                            doChangeState(STATE_ERROR_NETWORK);
                             return;
                         }
 
@@ -372,14 +378,8 @@ public class ActivationController {
                             } else if (tagError.startsWith("USER_MIGRATE_")) {
                                 destDC = Integer.parseInt(tagError.substring("USER_MIGRATE_".length()));
                             } else {
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Logger.d(TAG, "onSmsSent error");
-                                        networkError = ERROR_REQUEST_SMS;
-                                        doChangeState(STATE_ERROR_UNKNOWN);
-                                    }
-                                });
+                                networkError = ERROR_REQUEST_SMS;
+                                doChangeState(STATE_ERROR_UNKNOWN);
                                 return;
                             }
                             application.getApi().switchToDc(destDC);
@@ -388,68 +388,51 @@ public class ActivationController {
                         }
 
                         if (tagError.startsWith("PHONE_NUMBER_INVALID")) {
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    networkError = ERROR_REQUEST_SMS;
-                                    doChangeState(STATE_ERROR_WRONG_PHONE);
-                                }
-                            });
+                            networkError = ERROR_REQUEST_SMS;
+                            doChangeState(STATE_ERROR_WRONG_PHONE);
                             return;
                         }
 
                         if (tagError.startsWith("FLOOD_WAIT")) {
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    networkError = ERROR_REQUEST_SMS;
-                                    doChangeState(STATE_ERROR_TOO_OFTEN);
-                                }
-                            });
+                            networkError = ERROR_REQUEST_SMS;
+                            doChangeState(STATE_ERROR_TOO_OFTEN);
                             return;
                         }
 
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Logger.d(TAG, "onSmsSent error");
-                                networkError = ERROR_REQUEST_SMS;
-                                doChangeState(STATE_ERROR_UNKNOWN);
-                            }
-                        });
+                        Logger.d(TAG, "onSmsSent error");
+                        networkError = ERROR_REQUEST_SMS;
+                        doChangeState(STATE_ERROR_UNKNOWN);
                     }
                 });
     }
 
     private void startCodeSearch() {
         Logger.d(TAG, "startCodeSearch");
-        handler.postDelayed(cancelAutomatic, 30000);
-        receiver = new AutoActivationReceiver(application);
-        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
-            @Override
-            public void onCodeReceived(int code) {
-                performActivation(code);
-            }
-        });
+        handler.postDelayed(cancelAutomatic, AUTO_TIMEOUT);
+//        receiver = new AutoActivationReceiver(application);
+//        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
+//            @Override
+//            public void onCodeReceived(int code) {
+//                performAutoActivation(code);
+//            }
+//        });
     }
 
-    private void performActivation(int code) {
+    private void performAutoActivation(int code) {
         Logger.d(TAG, "performAutomatic: " + code);
 
         handler.removeCallbacks(cancelAutomatic);
 
-        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(currentPhone, phoneCodeHash, "" + code), 30000,
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(currentPhone, phoneCodeHash, "" + code), REQUEST_TIMEOUT,
                 new RpcCallback<TLAuthorization>() {
                     @Override
                     public void onResult(TLAuthorization result) {
-                        Logger.d(TAG, "sign in completed");
                         application.getKernel().logIn(result);
                         doChangeState(STATE_ACTIVATED);
                     }
 
                     @Override
                     public void onError(int errorCode, String message) {
-                        Logger.d(TAG, "sign in error");
                         cancelAutomatic();
                     }
                 });
@@ -472,7 +455,7 @@ public class ActivationController {
 
         doChangeState(STATE_MANUAL_ACTIVATION_REQUEST);
 
-        application.getApi().doRpcCallNonAuth(new TLRequestAuthSendCall(currentPhone, phoneCodeHash), 30000,
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSendCall(currentPhone, phoneCodeHash), REQUEST_TIMEOUT,
                 new RpcCallback<TLBool>() {
                     @Override
                     public void onResult(TLBool result) {
@@ -481,29 +464,77 @@ public class ActivationController {
 
                     @Override
                     public void onError(int errorCode, String message) {
+                        if (errorCode == 0) {
+                            networkError = ERROR_REQUEST_CALL;
+                            doChangeState(STATE_ERROR_NETWORK);
+                        }
+
+                        String tagError = getErrorTag(message);
+
+                        if (tagError.equals("PHONE_CODE_EXPIRED")) {
+                            doChangeState(STATE_ERROR_EXPIRED);
+                            return;
+                        }
+
+                        if (tagError.equals("PHONE_NUMBER_INVALID")) {
+                            doChangeState(STATE_ERROR_WRONG_PHONE);
+                            return;
+                        }
+
+                        if (tagError.equals("PHONE_CODE_INVALID")) {
+                            doChangeState(STATE_ERROR_WRONG_CODE);
+                            return;
+                        }
+
                         networkError = ERROR_REQUEST_CALL;
-                        doChangeState(STATE_ERROR_NETWORK);
+                        doChangeState(STATE_ERROR_UNKNOWN);
                     }
                 });
     }
 
-    public void sendPhoneRequest(int code) {
+    public void doSendCode(int code) {
         lastActivationCode = code;
         doChangeState(STATE_MANUAL_ACTIVATION_SEND);
-        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(currentPhone, phoneCodeHash, "" + code), 30000,
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(currentPhone, phoneCodeHash, "" + code), REQUEST_TIMEOUT,
                 new RpcCallback<TLAuthorization>() {
                     @Override
                     public void onResult(TLAuthorization result) {
-                        Logger.d(TAG, "sign in completed");
                         application.getKernel().logIn(result);
                         doChangeState(STATE_ACTIVATED);
                     }
 
                     @Override
                     public void onError(int errorCode, String message) {
-                        Logger.d(TAG, "sign in error");
+
+                        if (errorCode == 0) {
+                            networkError = ERROR_REQUEST_SEND;
+                            doChangeState(STATE_ERROR_NETWORK);
+                        }
+
+                        String tagError = getErrorTag(message);
+
+                        if (tagError.equals("PHONE_CODE_EXPIRED")) {
+                            doChangeState(STATE_ERROR_EXPIRED);
+                            return;
+                        }
+
+                        if (tagError.equals("PHONE_CODE_INVALID")) {
+                            doChangeState(STATE_ERROR_WRONG_CODE);
+                            return;
+                        }
+
+                        if (tagError.equals("PHONE_NUMBER_INVALID")) {
+                            doChangeState(STATE_ERROR_WRONG_PHONE);
+                            return;
+                        }
+
+                        if (tagError.equals("PHONE_NUMBER_UNOCCUPIED")) {
+                            doChangeState(STATE_SIGNUP);
+                            return;
+                        }
+
                         networkError = ERROR_REQUEST_SEND;
-                        doChangeState(STATE_ERROR_NETWORK);
+                        doChangeState(STATE_ERROR_UNKNOWN);
                     }
                 });
     }

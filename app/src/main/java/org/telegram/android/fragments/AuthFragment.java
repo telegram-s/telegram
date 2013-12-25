@@ -38,6 +38,7 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
     private View tooOftenError;
     private View expiredError;
     private View unknownError;
+    private View wrongCodeError;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -59,6 +60,7 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         expiredError = res.findViewById(R.id.expiredError);
         unknownError = res.findViewById(R.id.unknownError);
         wrongPhoneError = res.findViewById(R.id.wrongPhoneError);
+        wrongCodeError = res.findViewById(R.id.wrongCodeError);
 
         automatic.findViewById(R.id.confirmPhone).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -192,7 +194,14 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
                 hideKeyboard(phoneActivation.findViewById(R.id.code));
 
                 int code = Integer.parseInt(((TextView) phoneActivation.findViewById(R.id.code)).getText().toString());
-                application.getKernel().getActivationController().sendPhoneRequest(code);
+                application.getKernel().getActivationController().doSendCode(code);
+            }
+        });
+
+        wrongCodeError.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                application.getKernel().getActivationController().cancel();
             }
         });
 
@@ -207,6 +216,7 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         expiredError.setVisibility(View.GONE);
         unknownError.setVisibility(View.GONE);
         wrongPhoneError.setVisibility(View.GONE);
+        wrongCodeError.setVisibility(View.GONE);
 
         return res;
     }
@@ -262,6 +272,12 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
             application.getKernel().getActivationController().cancel();
             return true;
         }
+
+        if (currentState == ActivationController.STATE_ERROR_WRONG_CODE) {
+            application.getKernel().getActivationController().cancel();
+            return true;
+        }
+
         return false;
     }
 
@@ -352,6 +368,16 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
             showView(expiredError, currentState != ActivationController.STATE_START);
         } else {
             expiredError.setVisibility(View.GONE);
+        }
+
+        // Wrong code error
+        if (currentState == ActivationController.STATE_ERROR_WRONG_CODE) {
+            hideView(wrongCodeError);
+        }
+        if (state == ActivationController.STATE_ERROR_WRONG_CODE) {
+            showView(wrongCodeError, currentState != ActivationController.STATE_START);
+        } else {
+            wrongCodeError.setVisibility(View.GONE);
         }
 
         // Unable
