@@ -195,7 +195,7 @@ public class MediaReceiverFragment extends StelsFragment {
             intent.setClass(getActivity(), VideoRecorderActivity.class);
             intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(videoFileName)));
 
-            startActivityForResult(intent, requestId);
+            startActivityForResult(intent, requestId * REQ_M + REQUEST_BASE);
 //            PackageManager pm = application.getPackageManager();
 //
 //            List<ResolveInfo> rList = application.getPackageManager().queryIntentActivities(
