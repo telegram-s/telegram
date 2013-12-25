@@ -6,8 +6,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.ContactsContract;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import org.telegram.android.R;
@@ -22,6 +25,7 @@ import org.telegram.api.engine.RpcCallback;
 import org.telegram.api.requests.TLRequestAuthSendCall;
 import org.telegram.api.requests.TLRequestAuthSendCode;
 import org.telegram.api.requests.TLRequestAuthSignIn;
+import org.telegram.api.requests.TLRequestAuthSignUp;
 import org.telegram.config.ApiConfig;
 import org.telegram.tl.TLBool;
 
@@ -64,11 +68,13 @@ public class ActivationController {
     public static final int STATE_MANUAL_ACTIVATION_SEND = 11;
     public static final int STATE_MANUAL_ACTIVATION_REQUEST = 12;
     public static final int STATE_SIGNUP = 13;
-    public static final int STATE_ACTIVATED = 14;
+    public static final int STATE_SIGNUP_REQUEST = 14;
+    public static final int STATE_ACTIVATED = 15;
 
     public static final int ERROR_REQUEST_SMS = 0;
     public static final int ERROR_REQUEST_CALL = 1;
     public static final int ERROR_REQUEST_SEND = 2;
+    public static final int ERROR_REQUEST_SIGNUP = 3;
 
     private static final int REQUEST_TIMEOUT = 30000;
     private static final int AUTO_TIMEOUT = 60000;
@@ -82,6 +88,13 @@ public class ActivationController {
     private String currentPhone;
     private String manualPhone;
     private String phoneCodeHash;
+    private String autoFirstname;
+    private String autoLastname;
+
+    private String manualFirstname;
+    private String manualLastname;
+    private String manualAvatarUri;
+
     private int sentTime;
     private boolean isManualPhone;
     private int networkError;
@@ -92,7 +105,6 @@ public class ActivationController {
     private Handler handler = new Handler(Looper.getMainLooper());
 
     private AutoActivationReceiver receiver;
-    private AutoActivationListener autoListener;
 
     private Random rnd = new Random();
 
@@ -197,6 +209,34 @@ public class ActivationController {
         }
 
         notificationManager = (NotificationManager) application.getSystemService(Context.NOTIFICATION_SERVICE);
+
+
+        if (Build.VERSION.SDK_INT >= 14) {
+            Cursor c = application.getContentResolver().query(ContactsContract.Profile.CONTENT_URI, new String[]
+                    {
+                            "display_name_alt", "photo_uri"
+                    }, null, null, null);
+            if (c.moveToFirst()) {
+                String displayNameAlt = c.getString(0);
+                String pUri = c.getString(1);
+
+                if (displayNameAlt != null) {
+                    String[] names = displayNameAlt.split(",", 2);
+                    String lName = names[0].trim();
+                    String fName = names[1].trim();
+
+                    if (names.length == 2) {
+                        autoFirstname = fName.trim();
+                        autoLastname = lName.trim();
+                    }
+                }
+
+                if (pUri != null && pUri.length() > 0) {
+                    manualAvatarUri = pUri;
+                }
+            }
+            c.close();
+        }
     }
 
     public void onPageShown() {
@@ -246,6 +286,38 @@ public class ActivationController {
 
     private void hideNotification() {
         notificationManager.cancel(NOTIFICATION_ID);
+    }
+
+    public String getAutoFirstname() {
+        return autoFirstname;
+    }
+
+    public String getAutoLastname() {
+        return autoLastname;
+    }
+
+    public String getManualFirstname() {
+        return manualFirstname;
+    }
+
+    public void setManualFirstname(String manualFirstname) {
+        this.manualFirstname = manualFirstname;
+    }
+
+    public String getManualLastname() {
+        return manualLastname;
+    }
+
+    public void setManualLastname(String manualLastname) {
+        this.manualLastname = manualLastname;
+    }
+
+    public String getManualAvatarUri() {
+        return manualAvatarUri;
+    }
+
+    public void setManualAvatarUri(String manualAvatarUri) {
+        this.manualAvatarUri = manualAvatarUri;
     }
 
     public int getNetworkError() {
@@ -387,7 +459,7 @@ public class ActivationController {
                             return;
                         }
 
-                        if (tagError.startsWith("PHONE_NUMBER_INVALID")) {
+                        if (tagError.equals("PHONE_NUMBER_INVALID")) {
                             networkError = ERROR_REQUEST_SMS;
                             doChangeState(STATE_ERROR_WRONG_PHONE);
                             return;
@@ -409,17 +481,19 @@ public class ActivationController {
     private void startCodeSearch() {
         Logger.d(TAG, "startCodeSearch");
         handler.postDelayed(cancelAutomatic, AUTO_TIMEOUT);
-//        receiver = new AutoActivationReceiver(application);
-//        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
-//            @Override
-//            public void onCodeReceived(int code) {
-//                performAutoActivation(code);
-//            }
-//        });
+        receiver = new AutoActivationReceiver(application);
+        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
+            @Override
+            public void onCodeReceived(int code) {
+                performAutoActivation(code);
+            }
+        });
     }
 
     private void performAutoActivation(int code) {
         Logger.d(TAG, "performAutomatic: " + code);
+
+        lastActivationCode = code;
 
         handler.removeCallbacks(cancelAutomatic);
 
@@ -429,6 +503,7 @@ public class ActivationController {
                     public void onResult(TLAuthorization result) {
                         application.getKernel().logIn(result);
                         doChangeState(STATE_ACTIVATED);
+                        // doChangeState(STATE_SIGNUP);
                     }
 
                     @Override
@@ -467,6 +542,7 @@ public class ActivationController {
                         if (errorCode == 0) {
                             networkError = ERROR_REQUEST_CALL;
                             doChangeState(STATE_ERROR_NETWORK);
+                            return;
                         }
 
                         String tagError = getErrorTag(message);
@@ -481,7 +557,7 @@ public class ActivationController {
                             return;
                         }
 
-                        if (tagError.equals("PHONE_CODE_INVALID")) {
+                        if (tagError.equals("PHONE_CODE_INVALID") || tagError.equals("PHONE_CODE_EMPTY")) {
                             doChangeState(STATE_ERROR_WRONG_CODE);
                             return;
                         }
@@ -490,6 +566,47 @@ public class ActivationController {
                         doChangeState(STATE_ERROR_UNKNOWN);
                     }
                 });
+    }
+
+    public void doCompleteSignUp(String firstName, String lastName, String uri) {
+        manualAvatarUri = uri;
+        manualFirstname = firstName;
+        manualLastname = lastName;
+
+        doChangeState(STATE_SIGNUP_REQUEST);
+
+        application.getApi().doRpcCallNonAuth(new TLRequestAuthSignUp(currentPhone, phoneCodeHash, lastActivationCode + "", firstName, lastName),
+                REQUEST_TIMEOUT, new RpcCallback<TLAuthorization>() {
+            @Override
+            public void onResult(TLAuthorization result) {
+                application.getKernel().logIn(result);
+                doChangeState(STATE_ACTIVATED);
+            }
+
+            @Override
+            public void onError(int errorCode, String message) {
+                if (errorCode == 0) {
+                    networkError = ERROR_REQUEST_SIGNUP;
+                    doChangeState(STATE_ERROR_NETWORK);
+                    return;
+                }
+
+                String tagError = getErrorTag(message);
+
+                if (tagError.equals("PHONE_NUMBER_OCCUPIED")) {
+                    doSendCode(lastActivationCode);
+                    return;
+                }
+
+                if (tagError.equals("PHONE_CODE_INVALID") || tagError.equals("PHONE_CODE_EMPTY")) {
+                    doChangeState(STATE_ERROR_WRONG_CODE);
+                    return;
+                }
+
+                networkError = ERROR_REQUEST_SIGNUP;
+                doChangeState(STATE_ERROR_UNKNOWN);
+            }
+        });
     }
 
     public void doSendCode(int code) {
@@ -505,15 +622,15 @@ public class ActivationController {
 
                     @Override
                     public void onError(int errorCode, String message) {
-
                         if (errorCode == 0) {
                             networkError = ERROR_REQUEST_SEND;
                             doChangeState(STATE_ERROR_NETWORK);
+                            return;
                         }
 
                         String tagError = getErrorTag(message);
 
-                        if (tagError.equals("PHONE_CODE_EXPIRED")) {
+                        if (tagError.equals("PHONE_CODE_INVALID") || tagError.equals("PHONE_CODE_EMPTY")) {
                             doChangeState(STATE_ERROR_EXPIRED);
                             return;
                         }

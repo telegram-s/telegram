@@ -3,15 +3,20 @@ package org.telegram.android.fragments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+import com.extradea.framework.images.tasks.UriImageTask;
+import com.extradea.framework.images.ui.FastWebImageView;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
+import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
 import org.telegram.android.StelsFragment;
@@ -20,10 +25,12 @@ import org.telegram.android.login.ActivationController;
 import org.telegram.android.login.ActivationListener;
 import org.telegram.android.ui.TextUtil;
 
+import java.io.File;
+
 /**
  * Created by ex3ndr on 21.12.13.
  */
-public class AuthFragment extends StelsFragment implements ActivationListener {
+public class AuthFragment extends MediaReceiverFragment implements ActivationListener {
 
     private int currentState = ActivationController.STATE_START;
 
@@ -39,6 +46,8 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
     private View expiredError;
     private View unknownError;
     private View wrongCodeError;
+    private View signupPage;
+    private View signupPageProgress;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -61,6 +70,8 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         unknownError = res.findViewById(R.id.unknownError);
         wrongPhoneError = res.findViewById(R.id.wrongPhoneError);
         wrongCodeError = res.findViewById(R.id.wrongCodeError);
+        signupPage = res.findViewById(R.id.signupPage);
+        signupPageProgress = res.findViewById(R.id.completeSignupProgress);
 
         automatic.findViewById(R.id.confirmPhone).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,6 +216,47 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
             }
         });
 
+        FastWebImageView avatar = ((FastWebImageView) signupPage.findViewById(R.id.avatar));
+        avatar.setLoadingDrawable(getResources().getDrawable(R.drawable.st_user_placeholder_grey));
+        avatar.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
+        avatar.setScaleTypeEmpty(FastWebImageView.SCALE_TYPE_FIT_CROP);
+
+        signupPage.findViewById(R.id.changeAvatarButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (application.getKernel().getActivationController().getManualAvatarUri() != null) {
+                    requestPhotoChooserWithDelete(0);
+                } else {
+                    requestPhotoChooser(0);
+                }
+            }
+        });
+
+        signupPage.findViewById(R.id.completeSignup).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                String firstName = ((EditText) signupPage.findViewById(R.id.firstName)).getText().toString();
+                String lastName = ((EditText) signupPage.findViewById(R.id.lastName)).getText().toString();
+
+                application.getKernel().getActivationController().setManualFirstname(firstName);
+                application.getKernel().getActivationController().setManualLastname(lastName);
+
+
+                if (firstName == null || firstName.trim().length() == 0) {
+                    Toast.makeText(getActivity(), R.string.st_error_first_name_incorrect, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (lastName == null || lastName.trim().length() == 0) {
+                    Toast.makeText(getActivity(), R.string.st_error_first_name_incorrect, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                application.getKernel().getActivationController().doCompleteSignUp(firstName, lastName, application.getKernel().getActivationController().getManualAvatarUri());
+            }
+        });
+
         manual.setVisibility(View.GONE);
         automatic.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
@@ -217,8 +269,30 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         unknownError.setVisibility(View.GONE);
         wrongPhoneError.setVisibility(View.GONE);
         wrongCodeError.setVisibility(View.GONE);
+        signupPage.setVisibility(View.GONE);
+        signupPageProgress.setVisibility(View.GONE);
 
         return res;
+    }
+
+    @Override
+    protected void onPhotoArrived(String fileName, int width, int height, int requestId) {
+        Uri uri = Uri.fromFile(new File(fileName));
+
+        application.getKernel().getActivationController().setManualAvatarUri(uri.toString());
+        ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(new UriImageTask(uri.toString()));
+    }
+
+    @Override
+    protected void onPhotoArrived(Uri uri, int width, int height, int requestId) {
+        application.getKernel().getActivationController().setManualAvatarUri(uri.toString());
+        ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(new UriImageTask(uri.toString()));
+    }
+
+    @Override
+    protected void onPhotoDeleted(int requestId) {
+        application.getKernel().getActivationController().setManualAvatarUri(null);
+        ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(null);
     }
 
     @Override
@@ -243,6 +317,15 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
         if (application.getKernel().getActivationController() != null) {
             application.getKernel().getActivationController().onPageHidden();
             application.getKernel().getActivationController().setListener(null);
+
+            if (currentState == ActivationController.STATE_SIGNUP) {
+                application.getKernel().getActivationController().setManualFirstname(((EditText) signupPage.findViewById(R.id.firstName)).getText().toString());
+                application.getKernel().getActivationController().setManualLastname(((EditText) signupPage.findViewById(R.id.lastName)).getText().toString());
+            }
+
+            if (currentState == ActivationController.STATE_PHONE_EDIT) {
+                application.getKernel().getActivationController().setManualPhone(((EditText) manual.findViewById(R.id.phoneName)).getText().toString());
+            }
         }
     }
 
@@ -295,6 +378,16 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
             showView(progress, currentState != ActivationController.STATE_START);
         } else {
             progress.setVisibility(View.GONE);
+        }
+
+        // Progress signup
+        if (currentState == ActivationController.STATE_SIGNUP_REQUEST) {
+            hideView(signupPageProgress);
+        }
+        if (state == ActivationController.STATE_SIGNUP_REQUEST) {
+            showView(signupPageProgress, currentState != ActivationController.STATE_START);
+        } else {
+            signupPageProgress.setVisibility(View.GONE);
         }
 
         // Confirmation
@@ -421,6 +514,42 @@ public class AuthFragment extends StelsFragment implements ActivationListener {
             showView(phoneSend, currentState != ActivationController.STATE_START);
         } else {
             phoneSend.setVisibility(View.GONE);
+        }
+
+        // Signup
+        if (currentState == ActivationController.STATE_SIGNUP) {
+            application.getKernel().getActivationController().setManualFirstname(((EditText) signupPage.findViewById(R.id.firstName)).getText().toString());
+            application.getKernel().getActivationController().setManualLastname(((EditText) signupPage.findViewById(R.id.lastName)).getText().toString());
+            hideView(signupPage);
+        }
+        if (state == ActivationController.STATE_SIGNUP) {
+            if (application.getKernel().getActivationController().getManualFirstname() != null ||
+                    application.getKernel().getActivationController().getManualLastname() != null) {
+                ((EditText) signupPage.findViewById(R.id.firstName)).setText(application.getKernel().getActivationController().getManualFirstname());
+                ((EditText) signupPage.findViewById(R.id.lastName)).setText(application.getKernel().getActivationController().getManualLastname());
+            } else {
+                ((EditText) signupPage.findViewById(R.id.firstName)).setText(application.getKernel().getActivationController().getAutoFirstname());
+                ((EditText) signupPage.findViewById(R.id.lastName)).setText(application.getKernel().getActivationController().getAutoLastname());
+            }
+
+            if (application.getKernel().getActivationController().getManualAvatarUri() != null) {
+                ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(new UriImageTask(application.getKernel().getActivationController().getManualAvatarUri()));
+            } else {
+                ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(null);
+            }
+
+            showView(signupPage, currentState != ActivationController.STATE_START);
+        } else {
+            signupPage.setVisibility(View.GONE);
+        }
+
+        if (currentState == ActivationController.STATE_PHONE_EDIT) {
+            application.getKernel().getActivationController().setManualPhone(((EditText) manual.findViewById(R.id.phoneName)).getText().toString());
+        }
+        if (state == ActivationController.STATE_PHONE_EDIT) {
+            if (application.getKernel().getActivationController().getManualPhone() != null) {
+                ((EditText) manual.findViewById(R.id.phoneName)).setText(application.getKernel().getActivationController().getManualPhone());
+            }
         }
 
         if (state == ActivationController.STATE_ACTIVATED) {
