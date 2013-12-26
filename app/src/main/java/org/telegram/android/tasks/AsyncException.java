@@ -111,6 +111,13 @@ public class AsyncException extends Exception {
             return "Photo is too small.";
         }
 
+        if (errorType.equals("USER_IS_BLOCKED")) {
+            if (application != null) {
+                return application.getString(R.string.st_error_blocked);
+            }
+            return "User added you to black list.";
+        }
+
         return null;
     }
 

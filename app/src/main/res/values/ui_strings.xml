@@ -58,6 +58,7 @@
     <string name="st_error_already_participant">User is already a member of the group.</string>
     <string name="st_error_participant_outdated">User has unsupported version of Telegram.</string>
     <string name="st_error_photo_small">Photo is too small.</string>
+    <string name="st_error_blocked">User added you to black list.</string>
 
     <string name="st_tour_start_messaging">Start Messaging</string>
     <string name="st_tour_page1_title">Telegram</string>
