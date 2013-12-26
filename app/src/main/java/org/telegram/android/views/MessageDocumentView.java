@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import org.telegram.android.R;
 import org.telegram.android.core.background.MediaSender;
@@ -34,7 +35,11 @@ public class MessageDocumentView extends BaseMsgView {
     private Paint downloadBgPaint;
     private Paint iconBgPaint;
     private TextPaint clockOutPaint;
+    private TextPaint fileNamePaint;
+    private TextPaint fileDeskPaint;
     private Paint clockIconPaint;
+    private Drawable documentIconOut;
+    private Drawable documentIconIn;
     private Drawable documentIcon;
 
     private TextPaint senderPaint;
@@ -64,6 +69,7 @@ public class MessageDocumentView extends BaseMsgView {
     private int databaseId;
 
     private String fileName;
+    private String fileNameMeasured;
     private String fileSize;
 
     private boolean isDownloaded;
@@ -86,7 +92,8 @@ public class MessageDocumentView extends BaseMsgView {
     protected void init() {
         super.init();
 
-        documentIcon = getResources().getDrawable(R.drawable.st_bar_ic_attach);
+        documentIconOut = getResources().getDrawable(R.drawable.st_bubble_ic_doc_out);
+        documentIconIn = getResources().getDrawable(R.drawable.st_bubble_ic_doc_in);
 
         progressPaint = new Paint();
         progressPaint.setStyle(Paint.Style.FILL);
@@ -112,6 +119,25 @@ public class MessageDocumentView extends BaseMsgView {
         clockOutPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         clockOutPaint.setTextSize(getSp(12f));
         clockOutPaint.setColor(0xff70B15C);
+
+        if (FontController.USE_SUBPIXEL) {
+            fileNamePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            fileNamePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
+        fileNamePaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
+        fileNamePaint.setTextSize(getSp(18f));
+        fileNamePaint.setColor(0xff000000);
+
+        if (FontController.USE_SUBPIXEL) {
+            fileDeskPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            fileDeskPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
+        fileDeskPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
+        fileDeskPaint.setTextSize(getSp(14f));
+        fileDeskPaint.setColor(0xff000000);
+
 
         clockIconPaint = new Paint();
         clockIconPaint.setStyle(Paint.Style.STROKE);
@@ -207,9 +233,13 @@ public class MessageDocumentView extends BaseMsgView {
         downloadProgress = 0;
 
         if (message.message.isOut()) {
-            senderPaint.setColor(0xff739f53);
+            iconBgPaint.setColor(0xffdef3bd);
+            documentIcon = documentIconOut;
+            fileDeskPaint.setColor(0xff97bb7c);
         } else {
-            senderPaint.setColor(0xff4884cf);
+            iconBgPaint.setColor(0xfff1f4f6);
+            documentIcon = documentIconIn;
+            fileDeskPaint.setColor(0xffafb7c3);
         }
 
         requestLayout();
@@ -246,7 +276,16 @@ public class MessageDocumentView extends BaseMsgView {
         } else if (message.message.getExtras() instanceof TLLocalDocument) {
             TLLocalDocument doc = (TLLocalDocument) message.message.getExtras();
             fileName = doc.getFileName();
-            fileSize = TextUtil.formatFileSize(((TLLocalFileDocument) doc.getFileLocation()).getSize());
+            int index = fileName.lastIndexOf('.');
+            if (index > 0) {
+                String ext = fileName.substring(index + 1).trim();
+                if (ext.length() > 3) {
+                    ext = ext.substring(0, 3) + "\u2026";
+                }
+                fileSize = TextUtil.formatFileSize(((TLLocalFileDocument) doc.getFileLocation()).getSize()) + " " + ext.toUpperCase();
+            } else {
+                fileSize = TextUtil.formatFileSize(((TLLocalFileDocument) doc.getFileLocation()).getSize());
+            }
             key = DownloadManager.getDocumentKey(doc);
 
             if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
@@ -258,6 +297,9 @@ public class MessageDocumentView extends BaseMsgView {
                     downloadStateTime = SystemClock.uptimeMillis();
                 }
             }
+        } else {
+            fileSize = "";
+            fileName = "unknown";
         }
 
         if (message.message.isOut()) {
@@ -272,9 +314,10 @@ public class MessageDocumentView extends BaseMsgView {
 
     @Override
     protected void measureBubbleContent(int width) {
-        contentW = getPx(200);
+        contentW = getPx(220);
         contentH = getPx(56);
         timeWidth = (int) clockOutPaint.measureText(date) + getPx((showState ? 23 : 0) + 6);
+        fileNameMeasured = TextUtils.ellipsize(fileName, fileNamePaint, getPx(160), TextUtils.TruncateAt.END).toString();
         setBubbleMeasuredContent(contentW, contentH);
     }
 
@@ -319,16 +362,13 @@ public class MessageDocumentView extends BaseMsgView {
 
         canvas.drawRect(new RectF(0, 0, contentW, contentH), downloadBgPaint);
 
+        canvas.drawText(fileNameMeasured, getPx(60), getPx(26), fileNamePaint);
+        canvas.drawText(fileSize, getPx(60), getPx(46), fileDeskPaint);
+
         canvas.drawRect(new Rect(getPx(4), getPx(4), getPx(4 + 48), getPx(4 + 48)), iconBgPaint);
 
-        documentIcon.setBounds(new Rect(getPx(4), getPx(4), getPx(4 + 48), getPx(4 + 48)));
+        documentIcon.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 32), getPx(12 + 32)));
         documentIcon.draw(canvas);
-
-        if (!isDownloaded) {
-            int visibleProgress = (downloadProgress * (contentW + getPx(6))) / 100;
-            canvas.drawRect(new RectF(-getPx(3), -getPx(3), visibleProgress - getPx(3), contentH), progressBgPaint);
-            canvas.drawRect(new RectF(-getPx(3), contentH, visibleProgress - getPx(3), contentH + getPx(3)), progressPaint);
-        }
 
         int layoutHeight = getPx(56);
         int layoutWidth = contentW - getPx(4);
@@ -398,6 +438,12 @@ public class MessageDocumentView extends BaseMsgView {
         }
 
         canvas.drawText(date, layoutWidth - timeWidth + getPx(6), getPx(52), clockOutPaint);
+
+        if (!isDownloaded) {
+            int visibleProgress = (downloadProgress * (contentW + getPx(6))) / 100;
+            canvas.drawRect(new RectF(-getPx(3), -getPx(3), visibleProgress - getPx(3), contentH), progressBgPaint);
+            canvas.drawRect(new RectF(-getPx(3), contentH, visibleProgress - getPx(3), contentH + getPx(3)), progressPaint);
+        }
 
         return isAnimated;
     }

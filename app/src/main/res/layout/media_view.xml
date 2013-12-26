@@ -20,7 +20,7 @@
     <TextView android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_gravity="top|center_horizontal"
-              android:layout_marginTop="80dp"
+              android:layout_marginTop="24dp"
               android:textColor="@color/st_empty_text"
               android:textSize="19sp"
               android:id="@+id/empty"

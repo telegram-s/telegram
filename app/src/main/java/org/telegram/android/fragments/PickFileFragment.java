@@ -5,10 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 
@@ -23,7 +20,7 @@ public class PickFileFragment extends StelsFragment {
     private String currentPath = "/";
     private ArrayList<String> history = new ArrayList<String>();
 
-    private Object[] currentFolder = new Object[0];
+    private Record[] currentFolder = new Record[0];
     private boolean noAccess = false;
     private BaseAdapter adapter;
 
@@ -40,7 +37,7 @@ public class PickFileFragment extends StelsFragment {
             }
 
             @Override
-            public Object getItem(int i) {
+            public Record getItem(int i) {
                 return currentFolder[i];
             }
 
@@ -55,12 +52,24 @@ public class PickFileFragment extends StelsFragment {
                     view = inflater.inflate(R.layout.file_item, viewGroup, false);
                 }
 
-                Object item = getItem(i);
+                Record item = getItem(i);
 
-                if (item instanceof Directory) {
-                    ((TextView) view.findViewById(R.id.fileName)).setText(((Directory) getItem(i)).getPath());
-                } else {
-                    ((TextView) view.findViewById(R.id.fileName)).setText(((DFile) getItem(i)).getPath());
+                ((TextView) view.findViewById(R.id.fileName)).setText(item.getPath());
+
+                switch (item.getType()) {
+                    default:
+                    case RECORD_FILE:
+                        ((ImageView) view.findViewById(R.id.icon)).setImageDrawable(null);
+                        break;
+                    case RECORD_DIRECTORY:
+                        ((ImageView) view.findViewById(R.id.icon)).setImageResource(R.drawable.st_ic_directory);
+                        break;
+                    case RECORD_STORAGE:
+                        ((ImageView) view.findViewById(R.id.icon)).setImageResource(R.drawable.st_ic_storage);
+                        break;
+                    case RECORD_STORAGE_EX:
+                        ((ImageView) view.findViewById(R.id.icon)).setImageResource(R.drawable.st_ic_external_storage);
+                        break;
                 }
 
                 return view;
@@ -73,11 +82,11 @@ public class PickFileFragment extends StelsFragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Object o = adapterView.getItemAtPosition(i);
-                if (o instanceof Directory) {
-                    gotoFolder(currentPath + "/" + ((Directory) o).getPath());
-                } else if (o instanceof DFile) {
-                    setResult(Activity.RESULT_OK, currentPath + "/" + ((DFile) o).getPath());
+                Record o = (Record) adapterView.getItemAtPosition(i);
+                if (o.getType() == RECORD_DIRECTORY) {
+                    gotoFolder(currentPath + "/" + o.getPath());
+                } else if (o.getType() == RECORD_FILE) {
+                    setResult(Activity.RESULT_OK, currentPath + "/" + o.getPath());
                     history.clear();
                     getRootController().doBack();
                 }
@@ -93,35 +102,39 @@ public class PickFileFragment extends StelsFragment {
     }
 
     private void updatePath() {
-        ArrayList<Object> items = new ArrayList<Object>();
+        ArrayList<Record> items = new ArrayList<Record>();
 
-        File file = new File(currentPath);
+        if (currentPath.length() == 0) {
 
-        if (file.list() != null) {
-            noAccess = false;
-
-            for (String f : file.list(new FilenameFilter() {
-                @Override
-                public boolean accept(java.io.File file, String s) {
-                    return new File(file, s).isDirectory();
-                }
-            })) {
-                items.add(new Directory(f));
-            }
-
-            for (String f : file.list(new FilenameFilter() {
-                @Override
-                public boolean accept(java.io.File file, String s) {
-                    return !(new File(file, s).isDirectory());
-                }
-            })) {
-                items.add(new DFile(f));
-            }
         } else {
-            noAccess = true;
+            File file = new File(currentPath);
+
+            if (file.list() != null) {
+                noAccess = false;
+
+                for (String f : file.list(new FilenameFilter() {
+                    @Override
+                    public boolean accept(java.io.File file, String s) {
+                        return new File(file, s).isDirectory();
+                    }
+                })) {
+                    items.add(new Record(f, RECORD_DIRECTORY));
+                }
+
+                for (String f : file.list(new FilenameFilter() {
+                    @Override
+                    public boolean accept(java.io.File file, String s) {
+                        return !(new File(file, s).isDirectory());
+                    }
+                })) {
+                    items.add(new Record(f, RECORD_FILE));
+                }
+            } else {
+                noAccess = true;
+            }
         }
 
-        currentFolder = items.toArray();
+        currentFolder = items.toArray(new Record[0]);
 
         adapter.notifyDataSetInvalidated();
     }
@@ -138,37 +151,27 @@ public class PickFileFragment extends StelsFragment {
         return false;
     }
 
-    private class Directory {
+    private static final int RECORD_FILE = 0;
+    private static final int RECORD_DIRECTORY = 1;
+    private static final int RECORD_STORAGE = 2;
+    private static final int RECORD_STORAGE_EX = 3;
+
+    private class Record {
         private String path;
 
-        private Directory(String path) {
+        private int type;
+
+        private Record(String path, int type) {
             this.path = path;
+            this.type = type;
         }
 
         public String getPath() {
             return path;
         }
 
-        @Override
-        public String toString() {
-            return "<" + path + ">";
-        }
-    }
-
-    private class DFile {
-        private String path;
-
-        private DFile(String path) {
-            this.path = path;
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        @Override
-        public String toString() {
-            return path;
+        public int getType() {
+            return type;
         }
     }
 }

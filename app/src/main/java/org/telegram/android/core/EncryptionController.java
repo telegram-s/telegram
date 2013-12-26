@@ -231,6 +231,8 @@ public class EncryptionController {
                         application.getEngine().onNewVideoEncMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localVideo);
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessageVideo(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
+                    } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaDocument) {
+                        // TODO
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaEmpty) {
                         application.getEngine().onNewShortEncMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), decryptedMessage.getMessage());
                         User u = application.getEngine().getUser(chat.getUserId());

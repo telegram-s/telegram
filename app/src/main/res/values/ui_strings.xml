@@ -483,12 +483,14 @@
     <string name="st_notification_sent_video">{name} sent you a video</string>
     <string name="st_notification_sent_photo">{name} sent you a photo</string>
     <string name="st_notification_sent_message">{name} sent you a message</string>
+    <string name="st_notification_sent_document">{name} sent you a document</string>
     <string name="st_notification_joined">{name} joined the App!</string>
 
     <string name="st_notification_group_sent_map">{name} sent a map to the chat {chat}</string>
     <string name="st_notification_group_sent_contact">{name} shared a contact to the chat {chat}</string>
     <string name="st_notification_group_sent_video">{name} sent a video to the chat {chat}</string>
     <string name="st_notification_group_sent_photo">{name} sent a photo to the chat {chat}</string>
+    <string name="st_notification_group_sent_document">{name} sent a document to the chat {chat}</string>
 
     <string name="st_notification_secret_requested">Requested new secret chat</string>
     <string name="st_notification_secret_created">Secret chat chat created</string>
@@ -498,6 +500,7 @@
     <string name="st_notification_secret_sent_photo">Sent a photo to the secret chat</string>
     <string name="st_notification_secret_sent_video">Sent a video to the secret chat</string>
     <string name="st_notification_secret_sent_map">Sent a map to the secret chat</string>
+    <string name="st_notification_secret_sent_doc">Sent a document to the secret chat</string>
 
     <string name="st_notification_new_login">New login from unrecognized device {device}</string>
     <string name="st_notification_new_login_location">New login from unrecognized device {device} from {location}
