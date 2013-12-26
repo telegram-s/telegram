@@ -283,6 +283,8 @@
     <string name="st_profile_added">Contact added to contacts</string>
     <string name="st_profile_secret">Create Secret Chat</string>
 
+    <string name="st_pick_file_title">Select a file</string>
+
     <string name="st_pick_user_title">Select a contact</string>
     <string name="st_pick_user_filter">Filter users</string>
 

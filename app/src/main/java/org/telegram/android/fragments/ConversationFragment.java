@@ -27,6 +27,7 @@ import android.text.util.Linkify;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.MimeTypeMap;
 import android.widget.*;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
@@ -710,7 +711,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (message.message.getState() == MessageState.FAILURE && (
                 message.message.getRawContentType() == ContentType.MESSAGE_TEXT ||
                         message.message.getRawContentType() == ContentType.MESSAGE_GEO ||
-                        message.message.getRawContentType() == ContentType.MESSAGE_CONTACT ||
                         message.message.isForwarded())) {
             items.add(getStringSafe(R.string.st_conv_action_try_again));
             actions.add(new Runnable() {
@@ -722,8 +722,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             });
         }
 
-        if (message.message.getState() == MessageState.FAILURE && (message.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
-                message.message.getRawContentType() == ContentType.MESSAGE_PHOTO) && !(message.message.isForwarded())) {
+        if (message.message.getState() == MessageState.FAILURE &&
+                (message.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
+                        message.message.getRawContentType() == ContentType.MESSAGE_PHOTO ||
+                        message.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT) && !(message.message.isForwarded())) {
             items.add(getStringSafe(R.string.st_conv_action_try_again));
             actions.add(new Runnable() {
                 @Override
@@ -1001,14 +1003,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             requestPhotoChooser(0);
             return true;
         }
-//        if (item.getItemId() == R.id.attachGallery) {
-//            if (!isEnabledInput) {
-//                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
-//                return true;
-//            }
-//            requestPhotoFromGallery(1);
-//            return true;
-//        }
         if (item.getItemId() == R.id.attachVideo) {
             if (!isEnabledInput) {
                 Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
@@ -1016,14 +1010,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
 
             requestVideo(2);
-
-//            PickIntentDialog.PickIntentItem[] items = new PickIntentDialog.PickIntentItem[1];
-//            for (int i = 0; i < items.length; i++) {
-//                items[i] = new PickIntentDialog.PickIntentItem(R.drawable.app_icon, "Test");
-//            }
-//
-//            new PickIntentDialog(getActivity(), items).show();
-            // startActivity(new Intent().setClass(getActivity(), PickIntentActivity.class));
             return true;
         }
 
@@ -1046,7 +1032,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             return true;
         }
 
-        // return super.onOptionsItemSelected(item);
         return false;
     }
 
@@ -1821,11 +1806,38 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 }
                             } else if (object.message.getExtras() instanceof TLLocalDocument) {
                                 final String key = DownloadManager.getDocumentKey((TLLocalDocument) object.message.getExtras());
+                                final TLLocalDocument doc = (TLLocalDocument) object.message.getExtras();
                                 DownloadState state = application.getDownloadManager().getState(key);
                                 if (state == DownloadState.COMPLETED) {
                                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
-                                    startActivity(intent);
+
+                                    String mimeType = null;
+                                    if (doc.getFileName().indexOf('.') > -1) {
+                                        String ext = doc.getFileName().substring(doc.getFileName().lastIndexOf('.') + 1);
+                                        mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+                                    }
+
+                                    if (mimeType != null) {
+                                        intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), mimeType);
+                                    } else {
+                                        intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
+                                    }
+
+                                    try {
+                                        startActivity(intent);
+                                    } catch (android.content.ActivityNotFoundException e) {
+                                        if (mimeType != null) {
+                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
+                                            try {
+                                                startActivity(intent);
+                                            } catch (android.content.ActivityNotFoundException e2) {
+                                                Toast.makeText(getActivity(), "Unable to open file", Toast.LENGTH_SHORT).show();
+                                            }
+                                        } else {
+                                            Toast.makeText(getActivity(), "Unable to open file", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+
                                 } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
                                     // CANCEL
                                     application.getDownloadManager().abortDownload(key);

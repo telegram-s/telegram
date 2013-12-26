@@ -255,7 +255,16 @@ public class MessageDocumentView extends BaseMsgView {
         if (message.message.getExtras() instanceof TLUploadingDocument) {
             TLUploadingDocument doc = (TLUploadingDocument) message.message.getExtras();
             fileName = doc.getFileName();
-            fileSize = "???";
+            int index = fileName.lastIndexOf('.');
+            if (index > 0) {
+                String ext = fileName.substring(index + 1).trim();
+                if (ext.length() > 4) {
+                    ext = ext.substring(0, 3) + "\u2026";
+                }
+                fileSize = TextUtil.formatFileSize(doc.getFileSize()) + " " + ext.toUpperCase();
+            } else {
+                fileSize = TextUtil.formatFileSize(doc.getFileSize());
+            }
             isDownloaded = false;
 
             MediaSender.SendState state = application.getMediaSender().getSendState(databaseId);
@@ -279,7 +288,7 @@ public class MessageDocumentView extends BaseMsgView {
             int index = fileName.lastIndexOf('.');
             if (index > 0) {
                 String ext = fileName.substring(index + 1).trim();
-                if (ext.length() > 3) {
+                if (ext.length() > 4) {
                     ext = ext.substring(0, 3) + "\u2026";
                 }
                 fileSize = TextUtil.formatFileSize(((TLLocalFileDocument) doc.getFileLocation()).getSize()) + " " + ext.toUpperCase();

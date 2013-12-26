@@ -1121,6 +1121,8 @@ public class ModelEngine {
             msg.setContentType(ContentType.MESSAGE_CONTACT | ContentType.MESSAGE_FORWARDED);
         } else if (src.getRawContentType() == ContentType.MESSAGE_GEO) {
             msg.setContentType(ContentType.MESSAGE_GEO | ContentType.MESSAGE_FORWARDED);
+        } else if (src.getRawContentType() == ContentType.MESSAGE_GEO) {
+            msg.setContentType(ContentType.MESSAGE_DOCUMENT | ContentType.MESSAGE_FORWARDED);
         } else {
             msg.setContentType(ContentType.MESSAGE_TEXT | ContentType.MESSAGE_FORWARDED);
         }

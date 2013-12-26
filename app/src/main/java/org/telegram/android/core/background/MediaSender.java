@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.os.*;
 import android.provider.MediaStore;
+import android.webkit.MimeTypeMap;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.ChatMessage;
@@ -126,9 +127,9 @@ public class MediaSender {
 
     private void uploadDocument(ChatMessage message) throws Exception {
         TLUploadingDocument document = (TLUploadingDocument) message.getExtras();
-        Uploader.UploadResult result = uploadFile(document.getFileName(), message.getDatabaseId());
+        Uploader.UploadResult result = uploadFile(document.getFilePath(), message.getDatabaseId());
         TLAbsStatedMessage sent = doSendDoc(result, document, message);
-        saveUploadedDocument(sent, document.getFileName());
+        saveUploadedDocument(sent, document.getFilePath());
         completeDocSending(sent, message);
     }
 
@@ -205,13 +206,28 @@ public class MediaSender {
 
         TLAbsInputFile inputFile;
         if (result.isUsedBigFile()) {
-            inputFile = new TLInputFileBig(result.getFileId(), result.getPartsCount(), "file.jpg");
+            inputFile = new TLInputFileBig(result.getFileId(), result.getPartsCount(), document.getFileName());
         } else {
-            inputFile = new TLInputFile(result.getFileId(), result.getPartsCount(), "file.jpg", result.getHash());
+            inputFile = new TLInputFile(result.getFileId(), result.getPartsCount(), document.getFileName(), result.getHash());
+        }
+
+
+        String mimeType = "application/octet-stream";
+
+        String ext = null;
+        if (document.getFileName().indexOf('.') > -1) {
+            ext = document.getFileName().substring(document.getFileName().lastIndexOf('.') + 1);
+        }
+
+        if (ext != null && ext.length() > 0) {
+            String nMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+            if (nMimeType != null) {
+                mimeType = nMimeType;
+            }
         }
 
         return application.getApi().doRpcCall(
-                new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedDocument(inputFile, "file.bin", "octet-stream/bin"), message.getRandomId()), TIMEOUT);
+                new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedDocument(inputFile, document.getFileName(), mimeType), message.getRandomId()), TIMEOUT);
     }
 
     private TLAbsStatedMessage doSendPhoto(Uploader.UploadResult result, ChatMessage message) throws Exception {

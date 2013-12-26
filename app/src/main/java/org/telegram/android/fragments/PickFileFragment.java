@@ -95,6 +95,15 @@ public class PickFileFragment extends StelsFragment {
         return res;
     }
 
+    @Override
+    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_pick_file_title));
+        getSherlockActivity().getSupportActionBar().setSubtitle(null);
+    }
+
     private void gotoFolder(String path) {
         history.add(currentPath);
         currentPath = path;
