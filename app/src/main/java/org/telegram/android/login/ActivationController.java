@@ -130,14 +130,14 @@ public class ActivationController {
             String actype = ac.type;
 
             if (actype.equals("com.whatsapp")) {
-                foundedWaPhone = acname;
+                foundedWaPhone = acname.replaceAll("[^\\d]", "");
                 break;
             }
         }
 
         String telephonyNum = manager.getLine1Number();
         if (telephonyNum != null && telephonyNum.trim().length() > 0) {
-            foundedSysPhone = telephonyNum;
+            foundedSysPhone = telephonyNum.replaceAll("[^\\d]", "");
         }
 
         if (foundedSysPhone != null && foundedWaPhone != null) {
