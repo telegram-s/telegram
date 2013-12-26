@@ -17,12 +17,18 @@ public class TLUploadingDocument extends TLObject {
     public static final int CLASS_ID = 0x45dfcbb9;
 
     private String fileName;
+    private int fileSize;
 
-    public TLUploadingDocument(String fileName) {
+    public TLUploadingDocument(String fileName, int fileSize) {
         this.fileName = fileName;
+        this.fileSize = fileSize;
     }
 
     public TLUploadingDocument() {
+    }
+
+    public int getFileSize() {
+        return fileSize;
     }
 
     public String getFileName() {

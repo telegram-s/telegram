@@ -99,7 +99,7 @@ public class MessageView extends BaseMsgView {
         bodyPaint.setColor(0xff000000);
 
         clockOutPaint = initTextPaint();
-        clockOutPaint.setTypeface(FontController.loadTypeface(context, "italic"));
+        clockOutPaint.setTypeface(FontController.loadTypeface(context, "regular"));
         clockOutPaint.setTextSize(sp(fontSizeClock));
         clockOutPaint.setColor(0xff70B15C);
 
@@ -109,7 +109,7 @@ public class MessageView extends BaseMsgView {
         senderPaintBase.setColor(0xff000000);
 
         forwardingPaintBase = initTextPaint();
-        forwardingPaintBase.setTypeface(FontController.loadTypeface(context, "light"));
+        forwardingPaintBase.setTypeface(FontController.loadTypeface(context, "regular"));
         forwardingPaintBase.setTextSize(sp(fontSize));
         forwardingPaintBase.setColor(0xff000000);
 

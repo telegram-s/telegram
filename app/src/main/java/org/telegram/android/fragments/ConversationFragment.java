@@ -1046,7 +1046,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             return true;
         }
 
-        return super.onOptionsItemSelected(item);
+        // return super.onOptionsItemSelected(item);
+        return false;
     }
 
     @Override

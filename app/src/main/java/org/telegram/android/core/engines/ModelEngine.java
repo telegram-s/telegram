@@ -23,6 +23,7 @@ import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
 import org.telegram.tl.StreamingUtils;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -1025,7 +1026,7 @@ public class ModelEngine {
     }
 
     public int sendDocument(int peerType, int peerId, String fileName) {
-        TLUploadingDocument document = new TLUploadingDocument(fileName);
+        TLUploadingDocument document = new TLUploadingDocument(fileName, (int) new File(fileName).length());
         return sendDocument(peerType, peerId, document);
     }
 

@@ -106,7 +106,7 @@ public class MessageContactView extends BaseMsgView {
         } else {
             clockOutPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         }
-        clockOutPaint.setTypeface(FontController.loadTypeface(getContext(), "italic"));
+        clockOutPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         clockOutPaint.setTextSize(getSp(12f));
         clockOutPaint.setColor(0xff70B15C);
 

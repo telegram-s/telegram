@@ -118,7 +118,7 @@ public class MessageMediaView extends BaseMsgView {
             videoDurationPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         }
         videoDurationPaint.setTextSize(getSp(15));
-        videoDurationPaint.setTypeface(FontController.loadTypeface(getContext(), "light"));
+        videoDurationPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         videoDurationPaint.setColor(0xE6FFFFFF);
 
         if (FontController.USE_SUBPIXEL) {
@@ -127,7 +127,7 @@ public class MessageMediaView extends BaseMsgView {
             downloadPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         }
         downloadPaint.setTextSize(getSp(15));
-        downloadPaint.setTypeface(FontController.loadTypeface(getContext(), "light"));
+        downloadPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         downloadPaint.setColor(0xE6FFFFFF);
 
         if (FontController.USE_SUBPIXEL) {
@@ -136,7 +136,7 @@ public class MessageMediaView extends BaseMsgView {
             timePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         }
         timePaint.setTextSize(getSp(13));
-        timePaint.setTypeface(FontController.loadTypeface(getContext(), "italic"));
+        timePaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         timePaint.setColor(0xB6FFFFFF);
 
         bitmapPaint = new Paint(/*Paint.ANTI_ALIAS_FLAG*/);
@@ -550,7 +550,7 @@ public class MessageMediaView extends BaseMsgView {
         this.date = TextUtil.formatTime(message.message.getDate(), getContext());
         this.isGroup = message.message.getPeerType() == PeerType.PEER_CHAT && !isOut;
         if (isOut) {
-            placeholderPaint.setColor(0xffD9FFB9);
+            placeholderPaint.setColor(0xffe6ffd1);
         } else {
             placeholderPaint.setColor(Color.WHITE);
         }
