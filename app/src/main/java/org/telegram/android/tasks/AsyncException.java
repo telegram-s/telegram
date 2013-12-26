@@ -118,6 +118,13 @@ public class AsyncException extends Exception {
             return "User added you to black list.";
         }
 
+        if (errorType.equals("USER_ID_INVALID")) {
+            if (application != null) {
+                return application.getString(R.string.st_error_incorrect);
+            }
+            return "User is incorrect for this action.";
+        }
+
         return null;
     }
 
