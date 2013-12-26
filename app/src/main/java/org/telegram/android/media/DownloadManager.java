@@ -51,8 +51,7 @@ public class DownloadManager {
         if (document.getFileLocation() instanceof TLLocalFileDocument) {
             return ((TLLocalFileDocument) document.getFileLocation()).getDcId() + "_" +
                     ((TLLocalFileDocument) document.getFileLocation()).getId() + "_" + document.getFileName();
-        }
-        else if (document.getFileLocation() instanceof TLLocalEncryptedFileLocation) {
+        } else if (document.getFileLocation() instanceof TLLocalEncryptedFileLocation) {
             return ((TLLocalEncryptedFileLocation) document.getFileLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) document.getFileLocation()).getId();
         }
         return null;
@@ -396,7 +395,7 @@ public class DownloadManager {
     }
 
     public void saveDownloadDoc(String key, String fileName) throws IOException {
-        IOUtils.copy(new File(fileName), new File(getDownloadImageFile(key)));
+        IOUtils.copy(new File(fileName), new File(getDownloadDocFile(key)));
         downloadPersistence.markDownloaded(key);
     }
 
