@@ -10,6 +10,7 @@ import org.telegram.android.kernel.compat.v3.CompatAuthCredentials3;
 import org.telegram.android.kernel.compat.v4.*;
 import org.telegram.android.kernel.compat.v6.CompatDownload;
 import org.telegram.android.kernel.compat.v6.CompatVersionHolder;
+import org.telegram.android.kernel.compat.v7.CompatUpdateState;
 
 import java.util.HashMap;
 
@@ -32,6 +33,8 @@ public class Compats {
     public static HashMap<String, String> VERSION_HOLDER = new HashMap<String, String>();
 
     public static HashMap<String, String> DOWNLOADER = new HashMap<String, String>();
+
+    public static HashMap<String, String> UPDATE_PROCESSOR = new HashMap<String, String>();
 
     static {
         VER1.put("com.extradea.framework.persistence.PersistenceObject", CompatPersistence.class.getCanonicalName());
@@ -131,5 +134,10 @@ public class Compats {
         DOWNLOADER.put("com.extradea.framework.persistence.PersistenceObject", CompatPersistence.class.getCanonicalName());
         DOWNLOADER.put("com.extradea.framework.persistence.ContextPersistence", CompatContextPersistence.class.getCanonicalName());
         DOWNLOADER.put("org.telegram.android.media.DownloadPersistence", CompatDownload.class.getCanonicalName());
+
+        //////////////////////////////////////////////////////////
+        UPDATE_PROCESSOR.put("com.extradea.framework.persistence.PersistenceObject", CompatPersistence.class.getCanonicalName());
+        UPDATE_PROCESSOR.put("com.extradea.framework.persistence.ContextPersistence", CompatContextPersistence.class.getCanonicalName());
+        UPDATE_PROCESSOR.put("org.telegram.android.core.background.UpdateState", CompatUpdateState.class.getCanonicalName());
     }
 }

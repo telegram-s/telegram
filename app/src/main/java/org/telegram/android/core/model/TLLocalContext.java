@@ -81,6 +81,9 @@ public class TLLocalContext extends TLContext {
         // PhoneBook
         registerClass(TLLocalBook.CLASS_ID, TLLocalBook.class);
         registerClass(TLLocalImportedPhone.CLASS_ID, TLLocalImportedPhone.class);
+
+        // UpdateState
+        registerClass(TLUpdateState.CLASS_ID, TLUpdateState.class);
     }
 
     @Override
