@@ -129,6 +129,25 @@ public class UsersEngine {
         return new User[0];
     }
 
+    public User[] getUsersByIdUncached(Object[] uid) {
+        try {
+            ArrayList<User> users = new ArrayList<User>();
+            long start = System.currentTimeMillis();
+            QueryBuilder<User, Long> queryBuilder = userDao.queryBuilder();
+            queryBuilder.where().in("uid", uid);
+            User[] res = queryBuilder.query().toArray(new User[0]);
+            Logger.d(TAG, "Loaded users in " + (System.currentTimeMillis() - start) + " ms");
+            for (int i = 0; i < res.length; i++) {
+                users.add(res[i]);
+            }
+            return users.toArray(new User[0]);
+        } catch (SQLException e) {
+            Logger.t(TAG, e);
+        }
+
+        return new User[0];
+    }
+
     public User cacheUser(User src) {
         userCache.putIfAbsent(src.getUid(), src);
         return userCache.get(src.getUid());
@@ -140,7 +159,7 @@ public class UsersEngine {
             return;
         }
         user.setLinkType(link);
-        onUsers(user);
+        forceUpdateUser(user);
     }
 
     public void onUserNameChanges(int uid, String firstName, String lastName) {
@@ -148,7 +167,7 @@ public class UsersEngine {
         if (u != null) {
             u.setFirstName(firstName);
             u.setLastName(lastName);
-            onUsers(u);
+            forceUpdateUser(u);
         }
     }
 
@@ -156,7 +175,7 @@ public class UsersEngine {
         User u = getUser(uid);
         if (u != null) {
             u.setPhoto(photo);
-            onUsers(u);
+            forceUpdateUser(u);
         }
     }
 
@@ -164,27 +183,39 @@ public class UsersEngine {
         User u = getUser(uid);
         if (u != null) {
             u.setStatus(EngineUtils.convertStatus(status));
-            onUsers(u);
+            forceUpdateUser(u);
         }
     }
 
-    public void onUsers(User... converted) {
+    private void forceUpdateUser(User u) {
+        Logger.d(TAG, "forceUpdateUser");
         long start = SystemClock.uptimeMillis();
+        userDao.update(u);
+        if (application.getUserSource() != null) {
+            application.getUserSource().notifyUserChanged(u.getUid());
+        }
+        Logger.d(TAG, "forceUpdateUser in " + (SystemClock.uptimeMillis() - start) + " ms");
+    }
+
+    private void onUsers(User... converted) {
+
+        final ArrayList<Pair<User, User>> diff = new ArrayList<Pair<User, User>>();
+        int changed = 0;
+
+        long start = SystemClock.uptimeMillis();
+
         Logger.d(TAG, "onUsers: " + converted.length);
 
         Integer[] ids = new Integer[converted.length];
         for (int i = 0; i < ids.length; i++) {
             ids[i] = converted[i].getUid();
         }
-        User[] original = getUsersById(ids);
+        User[] original = getUsersByIdUncached(ids);
 
         Logger.d(TAG, "onUsers original in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         start = SystemClock.uptimeMillis();
 
-        final ArrayList<Pair<User, User>> diff = new ArrayList<Pair<User, User>>();
-
-        int changed = 0;
 
         for (User m : converted) {
             User orig = EngineUtils.searchUser(original, m.getUid());
@@ -363,11 +394,8 @@ public class UsersEngine {
                     if (u.getLinkType() != LinkType.CONTACT) {
                         u.setLinkType(LinkType.CONTACT);
                         updated.add(u);
-
+                        forceUpdateUser(u);
                     }
-                }
-                if (updated.size() > 0) {
-                    onUsers(updated.toArray(new User[updated.size()]));
                 }
                 return null;
             }

@@ -637,9 +637,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
             @Override
             public void afterExecute() {
                 if (fileName != null || content != null) {
-                    Toast.makeText(getActivity(), R.string.st_avatar_changed, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), R.string.st_avatar_group_changed, Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getActivity(), R.string.st_avatar_removed, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), R.string.st_avatar_group_removed, Toast.LENGTH_SHORT).show();
                 }
             }
         });

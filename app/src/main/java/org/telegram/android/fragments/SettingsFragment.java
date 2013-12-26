@@ -314,10 +314,22 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                             profilePhoto.setPreviewLocation(new TLLocalFileLocation(smallLocation.getDcId(), smallLocation.getVolumeId(), smallLocation.getLocalId(), smallLocation.getSecret(), smallPhotoSize.getSize()));
                             profilePhoto.setFullLocation(new TLLocalFileLocation(largeLocation.getDcId(), largeLocation.getVolumeId(), largeLocation.getLocalId(), largeLocation.getSecret(), largePhotoSize.getSize()));
                             application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), profilePhoto);
+                        } else {
+                            application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), new TLLocalAvatarEmpty());
                         }
                     } else {
-                        rpc(new TLRequestPhotosUpdateProfilePhoto(new TLInputPhotoEmpty(), new TLInputPhotoCropAuto()));
-                        application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), new TLLocalAvatarEmpty());
+                        TLAbsUserProfilePhoto photo = rpc(new TLRequestPhotosUpdateProfilePhoto(new TLInputPhotoEmpty(), new TLInputPhotoCropAuto()));
+                        if (photo instanceof TLUserProfilePhoto) {
+                            TLUserProfilePhoto profilePhoto = (TLUserProfilePhoto) photo;
+                            TLFileLocation smallLocation = (TLFileLocation) profilePhoto.getPhotoSmall();
+                            TLFileLocation largeLocation = (TLFileLocation) profilePhoto.getPhotoBig();
+                            TLLocalAvatarPhoto localProfilePhoto = new TLLocalAvatarPhoto();
+                            localProfilePhoto.setPreviewLocation(new TLLocalFileLocation(smallLocation.getDcId(), smallLocation.getVolumeId(), smallLocation.getLocalId(), smallLocation.getSecret(), 0));
+                            localProfilePhoto.setFullLocation(new TLLocalFileLocation(largeLocation.getDcId(), largeLocation.getVolumeId(), largeLocation.getLocalId(), largeLocation.getSecret(), 0));
+                            application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), localProfilePhoto);
+                        } else {
+                            application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), new TLLocalAvatarEmpty());
+                        }
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();

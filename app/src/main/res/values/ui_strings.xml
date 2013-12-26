@@ -25,8 +25,11 @@
     <string name="st_receiver_photo">Take photo</string>
     <string name="st_receiver_delete">Delete photo</string>
 
-    <string name="st_avatar_changed">Group avatar changed</string>
-    <string name="st_avatar_removed">Group avatar removed</string>
+    <string name="st_avatar_changed">Your avatar changed</string>
+    <string name="st_avatar_removed">Your avatar removed</string>
+
+    <string name="st_avatar_group_changed">Group avatar changed</string>
+    <string name="st_avatar_group_removed">Group avatar removed</string>
 
     <string name="st_first_name">First name</string>
     <string name="st_last_name">Last name</string>
