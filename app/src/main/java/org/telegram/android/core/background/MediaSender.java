@@ -156,7 +156,7 @@ public class MediaSender {
         VideoMetadata metadata = getVideoMetadata(srcVideo.getFileName());
         String fullPreview = writeTempFile(metadata.img);
         Optimizer.FastPreviewResult previewResult = Optimizer.buildPreview(metadata.getImg());
-        Uploader.UploadResult thumbResult = uploadFileSilent(writeTempFile(previewResult.getData()));
+        Uploader.UploadResult thumbResult = uploadFileSilent(writeTempFile(previewResult.getData()), message.getDatabaseId());
         Uploader.UploadResult mainResult = uploadFile(srcVideo.getFileName(), message.getDatabaseId());
         TLAbsStatedMessage sent = doSendVideo(mainResult, thumbResult, metadata, message);
         saveUploadedVideo(srcVideo.getFileName(), fullPreview, sent);
@@ -497,6 +497,7 @@ public class MediaSender {
             if (state != null) {
                 if (!state.isUploaded) {
                     state.isCanceled = true;
+                    application.getApi().getUploader().cancelTask(state.currentUploadId);
                     application.getEngine().cancelMediaSend(databaseId);
                     application.getKernel().getDataSourceKernel().notifyUIUpdate();
                     return true;
@@ -545,6 +546,8 @@ public class MediaSender {
                 updateState(localId, state);
             }
         });
+        SendState state = states.get(localId);
+        state.currentUploadId = taskId;
         application.getApi().getUploader().waitForTask(taskId);
         Uploader.UploadResult result = application.getApi().getUploader().getUploadResult(taskId);
         if (result == null) {
@@ -554,13 +557,15 @@ public class MediaSender {
         return result;
     }
 
-    private Uploader.UploadResult uploadFileSilent(String fileName) throws Exception {
+    private Uploader.UploadResult uploadFileSilent(String fileName, int localId) throws Exception {
         int taskId = application.getApi().getUploader().requestTask(fileName, new UploadListener() {
             @Override
             public void onPartUploaded(int percent, int downloadedSize) {
 
             }
         });
+        SendState state = states.get(localId);
+        state.currentUploadId = taskId;
         application.getApi().getUploader().waitForTask(taskId);
         Uploader.UploadResult result = application.getApi().getUploader().getUploadResult(taskId);
         if (result == null) {
@@ -645,6 +650,7 @@ public class MediaSender {
         private boolean isUploaded;
         private int uploadProgress;
         private boolean isCanceled;
+        private int currentUploadId;
 
         public boolean isCanceled() {
             return isCanceled;

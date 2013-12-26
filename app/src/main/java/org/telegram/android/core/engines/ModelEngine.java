@@ -6,6 +6,7 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
+import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.StelsDatabase;
@@ -1598,6 +1599,9 @@ public class ModelEngine {
     }
 
     public synchronized void onMessageFailure(ChatMessage msg) {
+        if (getMessageByDbId(msg.getDatabaseId()) == null) {
+            return;
+        }
         msg.setState(MessageState.FAILURE);
         getMessagesDao().update(msg);
         if (application.getDataSourceKernel() != null) {
@@ -1617,7 +1621,7 @@ public class ModelEngine {
         }
     }
 
-    public void cancelMediaSend(int databaseId) {
+    public synchronized void cancelMediaSend(int databaseId) {
         deleteUnsentMessage(databaseId);
     }
 
