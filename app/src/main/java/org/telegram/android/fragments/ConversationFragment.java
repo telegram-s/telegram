@@ -279,6 +279,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     doSend();
                     return true;
                 }
+                if (i == EditorInfo.IME_ACTION_DONE) {
+                    doSend();
+                    return true;
+                }
                 if (application.getUserSettings().isSendByEnter()) {
                     if (keyEvent != null && i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
                         doSend();
@@ -367,7 +371,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private void updateImeConfig() {
         if (application.getUserSettings().isSendByEnter()) {
-            editText.setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT);
+            editText.setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
             editText.setImeOptions(EditorInfo.IME_ACTION_SEND);
         } else {
             editText.setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
