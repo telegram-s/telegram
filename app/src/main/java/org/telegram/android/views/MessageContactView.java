@@ -121,7 +121,7 @@ public class MessageContactView extends BaseMsgView {
         stateSent = getResources().getDrawable(R.drawable.st_bubble_ic_check);
         stateHalfCheck = getResources().getDrawable(R.drawable.st_bubble_ic_halfcheck);
         stateFailure = getResources().getDrawable(R.drawable.st_bubble_ic_warning);
-        addContactResource = getResources().getDrawable(R.drawable.st_bar_ic_add_member);
+        addContactResource = getResources().getDrawable(R.drawable.st_bubble_ic_contact);
 
         receiver = new ImageReceiver() {
             @Override
