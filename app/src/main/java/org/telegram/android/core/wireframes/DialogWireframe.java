@@ -60,7 +60,11 @@ public class DialogWireframe {
             return "Telegram";
         } else if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
             if (dialogUser.getLinkType() == LinkType.REQUEST) {
-                return TextUtil.formatPhone(dialogUser.getPhone());
+                if (dialogUser.getPhone() != null && !dialogUser.getPhone().equals("null")) {
+                    return TextUtil.formatPhone(dialogUser.getPhone());
+                } else {
+                    return dialogUser.getDisplayName();
+                }
             } else {
                 return dialogUser.getDisplayName();
             }
