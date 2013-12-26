@@ -985,6 +985,31 @@ public class ModelEngine {
         return true;
     }
 
+    public boolean onNewDocEncMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, TLLocalDocument doc) {
+        List<ChatMessage> msgs = getMessagesDao().queryForEq("randomId", randomId);
+        if (msgs.size() != 0) {
+            return false;
+        }
+        ChatMessage nmsg = new ChatMessage();
+        nmsg.setMid(getMinMid() - 1);
+        nmsg.setDate(date);
+        nmsg.setMessage("Document");
+        nmsg.setContentType(ContentType.MESSAGE_DOCUMENT);
+        nmsg.setPeerId(peerId);
+        nmsg.setPeerType(peerType);
+        nmsg.setState(MessageState.SENT);
+        nmsg.setSenderId(senderId);
+        nmsg.setExtras(doc);
+        nmsg.setRandomId(randomId);
+        nmsg.setMessageTimeout(timeout);
+        getMessagesDao().create(nmsg);
+        application.getDataSourceKernel().onSourceAddMessage(nmsg);
+        mediaEngine.saveMedia(nmsg.getMid(), nmsg);
+        updateDescriptorShortEnc(nmsg);
+        updateMaxDate(nmsg);
+        return true;
+    }
+
     public void onNewInternalServiceMessage(int peerType, int peerId, int senderId, int date, TLAbsLocalAction action) {
         ChatMessage nmsg = new ChatMessage();
         nmsg.setMid(getMinMid() - 1);
@@ -1522,6 +1547,27 @@ public class ModelEngine {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
         msg.setExtras(photo);
+        getMessagesDao().update(msg);
+        updateMaxDate(msg);
+        application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        mediaEngine.saveMedia(msg.getMid(), msg);
+        DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
+        if (description != null) {
+            if (description.getTopMessageId() == -msg.getDatabaseId()) {
+                description.setMessageState(MessageState.SENT);
+                description.setDate(msg.getDate());
+                description.setTopMessageId(msg.getMid());
+                getDialogsDao().update(description);
+                application.getDialogSource().getViewSource().updateItem(description);
+                application.getDialogSource().getViewSource().invalidateData();
+            }
+        }
+    }
+
+    public synchronized void onMessageEncDocSent(ChatMessage msg, int date, TLLocalDocument doc) {
+        msg.setState(MessageState.SENT);
+        msg.setDate(date);
+        msg.setExtras(doc);
         getMessagesDao().update(msg);
         updateMaxDate(msg);
         application.getDataSourceKernel().onSourceUpdateMessage(msg);

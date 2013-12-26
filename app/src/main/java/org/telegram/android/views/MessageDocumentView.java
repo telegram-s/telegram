@@ -13,6 +13,7 @@ import org.telegram.android.core.background.MediaSender;
 import org.telegram.android.core.background.SenderListener;
 import org.telegram.android.core.model.MessageState;
 import org.telegram.android.core.model.media.TLLocalDocument;
+import org.telegram.android.core.model.media.TLLocalEncryptedFileLocation;
 import org.telegram.android.core.model.media.TLLocalFileDocument;
 import org.telegram.android.core.model.media.TLUploadingDocument;
 import org.telegram.android.core.wireframes.MessageWireframe;
@@ -291,9 +292,22 @@ public class MessageDocumentView extends BaseMsgView {
                 if (ext.length() > 4) {
                     ext = ext.substring(0, 3) + "\u2026";
                 }
-                fileSize = TextUtil.formatFileSize(((TLLocalFileDocument) doc.getFileLocation()).getSize()) + " " + ext.toUpperCase();
+                if (doc.getFileLocation() instanceof TLLocalFileDocument) {
+                    fileSize = TextUtil.formatFileSize(((TLLocalFileDocument) doc.getFileLocation()).getSize()) + " " + ext.toUpperCase();
+                } else if (doc.getFileLocation() instanceof TLLocalEncryptedFileLocation) {
+                    fileSize = TextUtil.formatFileSize(((TLLocalEncryptedFileLocation) doc.getFileLocation()).getSize()) + " " + ext.toUpperCase();
+                } else {
+                    fileSize = ext.toUpperCase();
+                }
+
             } else {
-                fileSize = TextUtil.formatFileSize(((TLLocalFileDocument) doc.getFileLocation()).getSize());
+                if (doc.getFileLocation() instanceof TLLocalFileDocument) {
+                    fileSize = TextUtil.formatFileSize(((TLLocalFileDocument) doc.getFileLocation()).getSize());
+                } else if (doc.getFileLocation() instanceof TLLocalEncryptedFileLocation) {
+                    fileSize = TextUtil.formatFileSize(((TLLocalEncryptedFileLocation) doc.getFileLocation()).getSize());
+                } else {
+                    fileSize = "";
+                }
             }
             key = DownloadManager.getDocumentKey(doc);
 

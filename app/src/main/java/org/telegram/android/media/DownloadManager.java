@@ -52,6 +52,9 @@ public class DownloadManager {
             return ((TLLocalFileDocument) document.getFileLocation()).getDcId() + "_" +
                     ((TLLocalFileDocument) document.getFileLocation()).getId() + "_" + document.getFileName();
         }
+        else if (document.getFileLocation() instanceof TLLocalEncryptedFileLocation) {
+            return ((TLLocalEncryptedFileLocation) document.getFileLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) document.getFileLocation()).getId();
+        }
         return null;
     }
 

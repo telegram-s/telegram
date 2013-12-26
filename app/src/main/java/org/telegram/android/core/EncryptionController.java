@@ -7,10 +7,7 @@ import android.graphics.Paint;
 import android.os.SystemClock;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.*;
-import org.telegram.android.core.model.media.TLLocalEncryptedFileLocation;
-import org.telegram.android.core.model.media.TLLocalFileEmpty;
-import org.telegram.android.core.model.media.TLLocalPhoto;
-import org.telegram.android.core.model.media.TLLocalVideo;
+import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.TLLocalActionEncryptedTtl;
 import org.telegram.android.log.Logger;
 import org.telegram.api.*;
@@ -232,7 +229,39 @@ public class EncryptionController {
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessageVideo(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaDocument) {
-                        // TODO
+                        TLDecryptedMessageMediaDocument mediaDocument = (TLDecryptedMessageMediaDocument) decryptedMessage.getMedia();
+                        TLLocalDocument localDocument = new TLLocalDocument();
+                        if (encMsg.getFile() instanceof TLEncryptedFile) {
+                            TLEncryptedFile file = (TLEncryptedFile) encMsg.getFile();
+                            byte[] digest = MD5Raw(concat(mediaDocument.getKey(), mediaDocument.getIv()));
+                            int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)));
+                            if (file.getKeyFingerprint() != fingerprint) {
+                                Logger.w(TAG, "Ignoring message: attach fingerprint mismatched");
+                                return;
+                            }
+                            localDocument.setFileLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), file.getSize(), file.getDcId(), mediaDocument.getKey(), mediaDocument.getIv()));
+                        } else {
+                            localDocument.setFileLocation(new TLLocalFileEmpty());
+                        }
+
+                        if (mediaDocument.getThumbH() != 0 && mediaDocument.getThumbW() != 0 && mediaDocument.getThumb().length > 0) {
+                            Bitmap src = BitmapFactory.decodeByteArray(mediaDocument.getThumb(), 0, mediaDocument.getThumb().length);
+                            if (src != null && src.getHeight() > 0 && src.getWidth() > 0) {
+                                if (src.getWidth() < 90 && src.getHeight() < 90) {
+                                    Bitmap dest = Bitmap.createBitmap(90, 90, Bitmap.Config.ARGB_8888);
+                                    Canvas canvas = new Canvas(dest);
+                                    canvas.drawBitmap(dest, 0, 0, new Paint());
+                                }
+                                localDocument.setFastPreview(mediaDocument.getThumb(), src.getWidth(), src.getHeight());
+                            }
+                        }
+
+                        localDocument.setFileName(mediaDocument.getFileName());
+                        localDocument.setMimeType(mediaDocument.getMimeType());
+
+                        application.getEngine().onNewDocEncMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localDocument);
+                        User u = application.getEngine().getUser(chat.getUserId());
+                        application.getNotifications().onNewSecretMessageDoc(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaEmpty) {
                         application.getEngine().onNewShortEncMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), decryptedMessage.getMessage());
                         User u = application.getEngine().getUser(chat.getUserId());

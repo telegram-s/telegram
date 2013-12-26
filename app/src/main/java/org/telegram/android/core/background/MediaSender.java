@@ -100,7 +100,11 @@ public class MediaSender {
                                 uploadVideo(message);
                             }
                         } else if (message.getExtras() instanceof TLUploadingDocument) {
-                            uploadDocument(message);
+                            if (message.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                                uploadEncDocument(message);
+                            } else {
+                                uploadDocument(message);
+                            }
                         }
 
                         synchronized (states) {
@@ -131,6 +135,16 @@ public class MediaSender {
         TLAbsStatedMessage sent = doSendDoc(result, document, message);
         saveUploadedDocument(sent, document.getFilePath());
         completeDocSending(sent, message);
+    }
+
+    private void uploadEncDocument(ChatMessage message) throws Exception {
+        EncryptedChat chat = application.getEngine().getEncryptedChat(message.getPeerId());
+        TLUploadingDocument document = (TLUploadingDocument) message.getExtras();
+        EncryptedFile encryptedFile = encryptFile(document.getFilePath());
+        Uploader.UploadResult result = uploadFile(encryptedFile.getFileName(), message.getDatabaseId());
+        EncryptedDocSent sent = doSendEncDoc(result, document, encryptedFile, message, chat);
+        saveUploadedEncDocument(sent, document.getFilePath());
+        completeEncDocSending(sent, message, chat);
     }
 
     private void uploadPhoto(ChatMessage message) throws Exception {
@@ -228,6 +242,64 @@ public class MediaSender {
 
         return application.getApi().doRpcCall(
                 new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedDocument(inputFile, document.getFileName(), mimeType), message.getRandomId()), TIMEOUT);
+    }
+
+    private EncryptedDocSent doSendEncDoc(Uploader.UploadResult result, TLUploadingDocument document, EncryptedFile encryptedFile, ChatMessage message, EncryptedChat chat) throws Exception {
+        String mimeType = "application/octet-stream";
+
+        String ext = null;
+        if (document.getFileName().indexOf('.') > -1) {
+            ext = document.getFileName().substring(document.getFileName().lastIndexOf('.') + 1);
+        }
+
+        if (ext != null && ext.length() > 0) {
+            String nMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+            if (nMimeType != null) {
+                mimeType = nMimeType;
+            }
+        }
+
+        TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
+        decryptedMessage.setRandomId(message.getRandomId());
+        decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
+        decryptedMessage.setMessage("");
+
+        decryptedMessage.setMedia(new TLDecryptedMessageMediaDocument(new byte[0], 0, 0,
+                document.getFileName(), mimeType, document.getFileSize(), encryptedFile.getKey(), encryptedFile.getIv()));
+
+        byte[] digest = MD5Raw(concat(encryptedFile.getKey(), encryptedFile.getIv()));
+        int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)), 0);
+
+        byte[] bundle = application.getEncryptionController().encryptMessage(decryptedMessage, chat.getId());
+
+        TLAbsInputEncryptedFile inputEncryptedFile;
+        if (result.isUsedBigFile()) {
+            inputEncryptedFile = new TLInputEncryptedFileBigUploaded(result.getFileId(), result.getPartsCount(), fingerprint);
+        } else {
+            inputEncryptedFile = new TLInputEncryptedFileUploaded(result.getFileId(), result.getPartsCount(), result.getHash(), fingerprint);
+        }
+
+        TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(
+                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle,
+                inputEncryptedFile), TIMEOUT);
+
+        TLLocalDocument localDocument = new TLLocalDocument();
+        if (encryptedMessage instanceof TLSentEncryptedFile) {
+            TLSentEncryptedFile file = (TLSentEncryptedFile) encryptedMessage;
+            if (file.getFile() instanceof TLEncryptedFile) {
+                TLEncryptedFile file1 = (TLEncryptedFile) file.getFile();
+                localDocument.setFileLocation(new TLLocalEncryptedFileLocation(file1.getId(), file1.getAccessHash(), file1.getSize(), file1.getDcId(), encryptedFile.getKey(), encryptedFile.getIv()));
+            } else {
+                localDocument.setFileLocation(new TLLocalFileEmpty());
+            }
+        } else {
+            localDocument.setFileLocation(new TLLocalFileEmpty());
+        }
+
+        localDocument.setFileName(document.getFileName());
+        localDocument.setMimeType(mimeType);
+
+        return new EncryptedDocSent(encryptedMessage, localDocument);
     }
 
     private TLAbsStatedMessage doSendPhoto(Uploader.UploadResult result, ChatMessage message) throws Exception {
@@ -407,6 +479,13 @@ public class MediaSender {
         }
     }
 
+    private void saveUploadedEncDocument(EncryptedDocSent sent, String uploadFileName) throws Exception {
+        if (sent.getDocument().getFileLocation() instanceof TLLocalEncryptedFileLocation) {
+            String downloadKey = DownloadManager.getDocumentKey(sent.getDocument());
+            application.getDownloadManager().saveDownloadDoc(downloadKey, uploadFileName);
+        }
+    }
+
     private void saveUploadedEncPhoto(EncryptedPhotoSent encryptedMessage, String uploadFileName) throws Exception {
         if (encryptedMessage.getPhoto().getFullLocation() instanceof TLLocalEncryptedFileLocation) {
             String downloadKey = DownloadManager.getPhotoKey(encryptedMessage.getPhoto());
@@ -455,6 +534,11 @@ public class MediaSender {
 
     private void completeDocSending(TLAbsStatedMessage sent, ChatMessage message) {
         application.getUpdateProcessor().onMessage(new TLLocalMessageSentStated(sent, message));
+    }
+
+    private void completeEncDocSending(EncryptedDocSent encryptedMessage, ChatMessage message, EncryptedChat chat) {
+        message.setMessageTimeout(chat.getSelfDestructTime());
+        application.getEngine().onMessageEncDocSent(message, encryptedMessage.getEncryptedMessage().getDate(), encryptedMessage.getDocument());
     }
 
     private void completeEncPhotoSending(EncryptedPhotoSent encryptedMessage, ChatMessage message, EncryptedChat chat) {
@@ -682,6 +766,24 @@ public class MediaSender {
 
         public int getUploadProgress() {
             return uploadProgress;
+        }
+    }
+
+    private class EncryptedDocSent {
+        private TLAbsSentEncryptedMessage encryptedMessage;
+        private TLLocalDocument document;
+
+        private EncryptedDocSent(TLAbsSentEncryptedMessage encryptedMessage, TLLocalDocument document) {
+            this.encryptedMessage = encryptedMessage;
+            this.document = document;
+        }
+
+        public TLAbsSentEncryptedMessage getEncryptedMessage() {
+            return encryptedMessage;
+        }
+
+        public TLLocalDocument getDocument() {
+            return document;
         }
     }
 

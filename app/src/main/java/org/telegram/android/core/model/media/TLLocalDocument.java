@@ -52,21 +52,17 @@ public class TLLocalDocument extends TLObject {
         fastPreview = new byte[0];
     }
 
-    public boolean isAvailable() {
-        return isAvailable;
-    }
-
     public TLAbsLocalFileLocation getFileLocation() {
         return fileLocation;
     }
 
-    public int getUid() {
-        return uid;
-    }
+//    public int getUid() {
+//        return uid;
+//    }
 
-    public int getDate() {
-        return date;
-    }
+//    public int getDate() {
+//        return date;
+//    }
 
     public String getFileName() {
         return fileName;
@@ -90,6 +86,46 @@ public class TLLocalDocument extends TLObject {
 
     public TLAbsLocalFileLocation getPreview() {
         return previewLocation;
+    }
+
+    public void setFileLocation(TLAbsLocalFileLocation fileLocation) {
+        this.fileLocation = fileLocation;
+    }
+
+//    public void setUid(int uid) {
+//        this.uid = uid;
+//    }
+
+//    public void setDate(int date) {
+//        this.date = date;
+//    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public void setFastPreview(byte[] fastPreview) {
+        this.fastPreview = fastPreview;
+    }
+
+    public void setPreviewW(int previewW) {
+        this.previewW = previewW;
+    }
+
+    public void setPreviewH(int previewH) {
+        this.previewH = previewH;
+    }
+
+    public TLAbsLocalFileLocation getPreviewLocation() {
+        return previewLocation;
+    }
+
+    public void setPreviewLocation(TLAbsLocalFileLocation previewLocation) {
+        this.previewLocation = previewLocation;
     }
 
     public TLLocalDocument() {
