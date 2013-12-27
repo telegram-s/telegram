@@ -377,6 +377,8 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         getSherlockActivity().getSupportActionBar().setHomeButtonEnabled(false);
+        getSherlockActivity().getSupportActionBar().setDisplayUseLogoEnabled(true);
+        getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(true);
         switch (currentState) {
             default:
             case ActivationController.STATE_MANUAL_ACTIVATION:
