@@ -408,10 +408,10 @@ public class FragmentScreenController implements RootController {
         for (StelsFragment fragment : backStack) {
             transaction.remove(fragment);
         }
-        transaction.add(R.id.fragmentContainer, new AuthFragment(), "loginFragment")
+        StartActivity.isGuideShown = false;
+        transaction.add(R.id.fragmentContainer, new TourFragment(), "tourFragment")
                 .commit();
         backStack.clear();
-        activity.hideBar();
     }
 
     @Override

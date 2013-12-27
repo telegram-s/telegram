@@ -40,7 +40,7 @@ import java.util.ArrayList;
  */
 public class StartActivity extends StelsSmileyActivity implements FragmentResultController, RootControllerHolder {
 
-    private static boolean isGuideShown = false;
+    public static boolean isGuideShown = false;
 
     private static final String TAG = "StartActivity";
 
