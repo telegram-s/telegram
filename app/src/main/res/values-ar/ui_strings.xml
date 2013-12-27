@@ -83,27 +83,7 @@
     <string name="st_tour_page6_title">مرتبط بالسحاب</string>
     <string name="st_tour_page6">
         <![CDATA[<b>تيليجرام</b> يمكنك من الوصول إلى الرسائل الخاصة بك من أجهزة متعددة.]]></string>
-    <string name="st_login_back">عودة</string>
-    <string name="st_login_next">التالي</string>
-    <string name="st_login_phone_title">رقم هاتفك المحمول</string>
-    <string name="st_login_phone_hint">يرجى التحقق من صحة رمز بلدك وإدخال رقم هاتفك المحمول.</string>
-    <string name="st_login_code_title">رمز التفعيل</string>
-    <string name="st_login_code_hint_code">رمز التفعيل</string>
-    <string name="st_login_code_hint">تم إرسال رسالة قصيرة تحتوي على رمز التفعيل الخاص بك {0}ـ</string>
-    <string name="st_login_code_expired">انتهت صلاحية الرمز الخاص بك، يرجى تسجيل الدخول مرة أخرى!</string>
-    <string name="st_login_code_timer">ستنصل بك خلال {0}ـ</string>
-    <string name="st_login_code_call_manual">التفعيل من خلال الهاتف</string>
-    <string name="st_login_code_call_sent">جاري الاتصال</string>
-    <string name="st_login_code_call_in_progress">جاري الاتصال بك...</string>
-    <string name="st_login_code_call_header">هل ترغب بالتفعيل من خلال الهاتف؟</string>
-    <string name="st_login_code_call_message">لم نستطع تسجيل الدخول باستخدام رسال قصيرة، هل ترغب بالتفعيل من خلال اتصال
-        هاتفي؟
-    </string>
-    <string name="st_login_signup_title">اسمك</string>
-    <string name="st_login_signup_hint">قم بإدخال اسمك وصورتك</string>
-    <string name="st_login_signup_avatar_error">لقد تم تسجيلك بنجاح، لكن لم نستطع تحميل صورتك. هل ترغب في المحاولة مرة
-        أخرى؟
-    </string>
+
     <string name="st_dialogs_pick_title">اختر محادثة</string>
     <string name="st_dialogs_delete_header">هل ترغب في حذف المحادثة؟</string>
     <string name="st_dialogs_delete_history">هل أنت متأكد من رغبتك في حذف جميع الرسائل؟</string>

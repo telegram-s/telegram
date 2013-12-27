@@ -111,9 +111,10 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                 try {
                     final Phonenumber.PhoneNumber numberUtil = PhoneNumberUtil.getInstance().parse(number, application.getKernel().getActivationController().getCurrentCountry().getIso());
                     if (PhoneNumberUtil.getInstance().isValidNumber(numberUtil)) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage("Is this your correct number? \n\n"
-                                + PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL) + "\n\n" +
-                                "An SMS with your access code will be sent to this number.");
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
+                                getStringSafe(R.string.st_auth_confirm_phone)
+                                        .replace("\\n", "\n")
+                                        .replace("{0}", PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)));
                         builder.setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -129,15 +130,17 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                         dialog.setCanceledOnTouchOutside(true);
                         dialog.show();
                     } else {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage("Phone number "
-                                + PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL) + " is incorrect");
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
+                                getStringSafe(R.string.st_auth_incorrect_phone)
+                                        .replace("{0}", PhoneNumberUtil.getInstance()
+                                                .format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)));
                         AlertDialog dialog = builder.create();
                         dialog.setCanceledOnTouchOutside(true);
                         dialog.show();
                     }
                 } catch (NumberParseException e) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage("Phone number "
-                            + number + " is incorrect");
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                            .setMessage(getStringSafe(R.string.st_auth_incorrect_phone).replace("{0}", number));
                     builder.setPositiveButton(R.string.st_edit, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {

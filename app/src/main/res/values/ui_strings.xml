@@ -21,6 +21,10 @@
     <string name="st_select_tone">Select tone</string>
     <string name="st_none">None</string>
 
+    <string name="st_continue">Continue</string>
+    <string name="st_back">Back</string>
+    <string name="st_start_again">Start again</string>
+
     <string name="st_receiver_gallery">From gallery</string>
     <string name="st_receiver_photo">Take photo</string>
     <string name="st_receiver_delete">Delete photo</string>
@@ -51,6 +55,7 @@
 
     <string name="st_error_code_empty">Activation code empty.</string>
     <string name="st_error_code_incorrect">Activation code incorrect.</string>
+    <string name="st_error_expired">Activation code expired</string>
     <string name="st_error_invalid_phone">Invalid phone number</string>
     <string name="st_error_first_name_incorrect">Incorrect first name.</string>
     <string name="st_error_last_name_incorrect">Incorrect last name.</string>
@@ -63,6 +68,7 @@
     <string name="st_error_photo_small">Photo is too small.</string>
     <string name="st_error_blocked">User added you to black list.</string>
     <string name="st_error_incorrect">User is incorrect for this action.</string>
+    <string name="st_error_many_attempts">Too many attempts. Try again later.</string>
 
     <string name="st_tour_start_messaging">Start Messaging</string>
     <string name="st_tour_page1_title">Telegram</string>
@@ -92,30 +98,29 @@
         <![CDATA[<b>Telegram</b> lets you access your messages from multiple devices.]]>
     </string>
 
-    <string name="st_login_back">Back</string>
-    <string name="st_login_next">Next</string>
+    <string name="st_auth_confirm_number">Is this your number?</string>
+    <string name="st_auth_confirm_yes">Yes, activate account</string>
+    <string name="st_auth_confirm_no">No, change number</string>
+    <string name="st_auth_confirm_sms">We will send completely free SMS for activating your account.</string>
 
-    <string name="st_login_phone_title">Your phone</string>
-    <string name="st_login_phone_hint">Select your country, enter your phone number and click continue:</string>
+    <string name="st_auth_phone_title">Select your country, enter your phone number and click continue:</string>
+    <string name="st_auth_phone_hint">Phone number</string>
 
-    <string name="st_login_code_title">Your code</string>
-    <string name="st_login_code_hint_code">Code</string>
-    <string name="st_login_code_hint">We have sent an SMS with an activation code to your phone {0}</string>
-    <string name="st_login_code_expired">Code expired, please login again!</string>
-    <string name="st_login_code_timer">We will call you in {0}</string>
-    <string name="st_login_code_call_manual">Activate via phone</string>
-    <string name="st_login_code_call_sent">Call starting</string>
-    <string name="st_login_code_call_in_progress">Calling you...</string>
-    <string name="st_login_code_call_header">Activate via phone?</string>
-    <string name="st_login_code_call_message">We couldn\'t log you in via SMS, would you like to log in via a phone
-        call?
+    <string name="st_auth_activating_title">Activating phone…</string>
+    <string name="st_auth_activating_subtitle">This process could take up to one minute</string>
+
+    <string name="st_auth_phone_call">Requesting phone call…</string>
+    <string name="st_auth_creating">Creating your profile…</string>
+
+    <string name="st_auth_code_title">Enter activation code and press continue</string>
+    <string name="st_auth_code">Code</string>
+
+    <string name="st_auth_signup_title">You successfully activated your phone! Enter your name, add your picture and
+        press continue:
     </string>
 
-    <string name="st_login_signup_title">Your name</string>
-    <string name="st_login_signup_hint">Enter your name and add a profile picture</string>
-    <string name="st_login_signup_avatar_error">You have successfully registered, but we couldn\'t upload your avatar.
-        Retry?
-    </string>
+    <string name="st_auth_incorrect_phone">Phone number {0} is incorrect</string>
+    <string name="st_auth_confirm_phone">Is this your correct number? \n\n{0} \n\nAn SMS with your access code will be sent to this number.</string>
 
     <string name="st_dialogs_pick_title">Select a conversation</string>
 

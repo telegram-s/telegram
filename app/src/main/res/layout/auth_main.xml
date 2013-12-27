@@ -17,7 +17,7 @@
                   android:textColor="@color/st_black_text"
                   android:gravity="center"
                   android:textSize="22sp"
-                  android:text="Is this your number?"/>
+                  android:text="@string/st_auth_confirm_number"/>
 
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
                 android:background="@drawable/st_btn_green"
                 android:textColor="@android:color/white"
                 android:textSize="19sp"
-                android:text="Yes, activate account"
+                android:text="@string/st_auth_confirm_yes"
                 android:id="@+id/confirmPhone"/>
 
         <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
@@ -43,7 +43,7 @@
                 android:background="@drawable/st_btn_gray"
                 android:textColor="@color/st_black_text"
                 android:textSize="16sp"
-                android:text="No, change number"
+                android:text="@string/st_auth_confirm_no"
                 android:id="@+id/editPhone"/>
 
         <TextView android:layout_width="wrap_content"
@@ -55,7 +55,7 @@
                   android:gravity="center"
                   android:textColor="@color/st_black_text"
                   android:textSize="16sp"
-                  android:text="We will send completely free SMS for activating your account."/>
+                  android:text="@string/st_auth_confirm_sms"/>
 
     </LinearLayout>
 
@@ -72,7 +72,7 @@
                   android:layout_width="wrap_content"
                   android:textSize="18sp"
                   android:gravity="center"
-                  android:text="@string/st_login_phone_hint"
+                  android:text="@string/st_auth_phone_title"
                   android:paddingBottom="16dp"
                   android:textColor="@color/st_black_text"/>
 
@@ -107,7 +107,7 @@
                       android:textSize="19sp"
                       android:inputType="phone"
                       android:imeOptions="actionDone"
-                      android:hint="Phone number"
+                      android:hint="@string/st_auth_phone_hint"
                       android:id="@+id/phoneName"/>
         </LinearLayout>
 
@@ -117,7 +117,7 @@
                 android:layout_marginBottom="16dp"
                 android:textColor="#ffffff"
                 android:background="@drawable/st_btn_green"
-                android:text="Continue"
+                android:text="@string/st_continue"
                 android:id="@+id/doActivation"/>
     </LinearLayout>
 
@@ -135,7 +135,7 @@
                   android:layout_marginTop="4dp"
                   android:textSize="18sp"
                   android:textColor="@color/st_black_text"
-                  android:text="Activating phone..."/>
+                  android:text="@string/st_auth_activating_title"/>
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_gravity="center_horizontal"
@@ -144,7 +144,7 @@
                   android:paddingRight="32dp"
                   android:gravity="center"
                   android:textColor="@color/st_grey_text"
-                  android:text="This process could take up to one minute"/>
+                  android:text="@string/st_auth_activating_subtitle"/>
     </LinearLayout>
 
     <LinearLayout android:layout_width="match_parent"
@@ -158,14 +158,14 @@
                   android:textSize="21sp"
                   android:paddingLeft="32dp"
                   android:paddingRight="32dp"
-                  android:text="Unable to connect to internet"/>
+                  android:text="@string/st_error_connection"/>
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@drawable/st_btn_green"
                 android:textColor="#ffffff"
-                android:text="Try again"
+                android:text="@string/st_try_again"
                 android:id="@+id/tryAgain"/>
 
         <Button android:layout_width="wrap_content"
@@ -175,7 +175,7 @@
                 android:background="@drawable/st_btn_gray"
                 android:textColor="@color/st_black_text"
                 android:textSize="16sp"
-                android:text="Cancel"
+                android:text="@string/st_cancel"
                 android:id="@+id/cancel"/>
     </LinearLayout>
 
@@ -190,14 +190,14 @@
                   android:textSize="21sp"
                   android:paddingLeft="32dp"
                   android:paddingRight="32dp"
-                  android:text="Unknown application error :-("/>
+                  android:text="@string/st_error_unknown"/>
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_gravity="center_horizontal"
                 android:background="@drawable/st_btn_green"
                 android:textColor="#ffffff"
-                android:text="Try again"
+                android:text="@string/st_try_again"
                 android:id="@+id/tryAgain"/>
 
         <Button android:layout_width="wrap_content"
@@ -207,7 +207,7 @@
                 android:background="@drawable/st_btn_gray"
                 android:textColor="@color/st_black_text"
                 android:textSize="16sp"
-                android:text="Cancel"
+                android:text="@string/st_cancel"
                 android:id="@+id/cancel"/>
     </LinearLayout>
 
@@ -222,7 +222,7 @@
                   android:textSize="21sp"
                   android:paddingLeft="32dp"
                   android:paddingRight="32dp"
-                  android:text="Too often attempts. Try again later."/>
+                  android:text="@string/st_error_many_attempts"/>
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -231,7 +231,7 @@
                 android:background="@drawable/st_btn_green"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
-                android:text="Back"
+                android:text="@string/st_back"
                 android:id="@+id/back"/>
     </LinearLayout>
 
@@ -246,7 +246,7 @@
                   android:textSize="21sp"
                   android:paddingLeft="32dp"
                   android:paddingRight="32dp"
-                  android:text="Activation code expired"/>
+                  android:text="@string/st_error_expired"/>
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -255,7 +255,7 @@
                 android:background="@drawable/st_btn_green"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
-                android:text="Start again"
+                android:text="@string/st_start_again"
                 android:id="@+id/back"/>
     </LinearLayout>
 
@@ -280,7 +280,7 @@
                 android:background="@drawable/st_btn_green"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
-                android:text="Back"
+                android:text="@string/st_back"
                 android:id="@+id/back"/>
     </LinearLayout>
 
@@ -295,7 +295,7 @@
                   android:textSize="21sp"
                   android:paddingLeft="32dp"
                   android:paddingRight="32dp"
-                  android:text="Activation code is incorrect."/>
+                  android:text="@string/st_error_code_incorrect"/>
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -304,7 +304,7 @@
                 android:background="@drawable/st_btn_green"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
-                android:text="Back"
+                android:text="@string/st_back"
                 android:id="@+id/back"/>
     </LinearLayout>
 
@@ -322,7 +322,7 @@
                   android:layout_gravity="center_horizontal"
                   android:layout_marginTop="4dp"
                   android:textSize="18sp"
-                  android:text="Requesting phone..."/>
+                  android:text="@string/st_auth_phone_call"/>
     </LinearLayout>
 
     <LinearLayout android:layout_width="match_parent"
@@ -339,7 +339,7 @@
                   android:layout_gravity="center_horizontal"
                   android:layout_marginTop="4dp"
                   android:textSize="18sp"
-                  android:text="Creating your profile..."/>
+                  android:text="@string/st_auth_creating"/>
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
@@ -357,7 +357,7 @@
                   android:textSize="18sp"
                   android:gravity="center"
                   android:paddingBottom="16dp"
-                  android:text="Enter activation code and press continue"/>
+                  android:text="@string/st_auth_code_title"/>
 
         <EditText android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
@@ -368,7 +368,7 @@
                   android:inputType="number"
                   android:imeOptions="actionDone"
                   android:gravity="center"
-                  android:hint="Code"
+                  android:hint="@string/st_auth_code"
                   android:id="@+id/code"/>
 
         <Button android:layout_width="wrap_content"
@@ -378,7 +378,7 @@
                 android:layout_marginBottom="16dp"
                 android:textColor="#ffffff"
                 android:background="@drawable/st_btn_green"
-                android:text="Continue"
+                android:text="@string/st_continue"
                 android:id="@+id/completePhoneActivation"/>
     </LinearLayout>
 
@@ -395,7 +395,7 @@
                   android:layout_gravity="center_horizontal"
                   android:layout_marginTop="4dp"
                   android:textSize="18sp"
-                  android:text="Activating phone..."/>
+                  android:text="@string/st_auth_activating_title"/>
     </LinearLayout>
 
     <LinearLayout android:layout_width="wrap_content"
@@ -413,7 +413,7 @@
                   android:textSize="18sp"
                   android:gravity="center"
                   android:paddingBottom="16dp"
-                  android:text="You successfully activated your phone! Enter your name, add your picture and press continue:"/>
+                  android:text="@string/st_auth_signup_title"/>
 
         <org.telegram.android.ui.RtlLinearLayout android:layout_height="wrap_content"
                                                  android:layout_width="fill_parent"
@@ -474,7 +474,7 @@
                 android:layout_marginBottom="16dp"
                 android:textColor="#ffffff"
                 android:background="@drawable/st_btn_green"
-                android:text="Continue"
+                android:text="@string/st_continue"
                 android:id="@+id/completeSignup"/>
     </LinearLayout>
 

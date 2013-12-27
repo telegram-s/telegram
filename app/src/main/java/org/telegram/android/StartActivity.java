@@ -47,8 +47,6 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     private static final int STATE_GENERAL = -1;
     private static final int STATE_TOUR = 0;
     private static final int STATE_LOGIN = 1;
-    private static final int STATE_LOGIN_CODE = 2;
-    private static final int STATE_SIGNUP = 3;
 
     private static final int REQUEST_OPEN_IMAGE = 300;
 
@@ -159,10 +157,6 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             application.getKernel().sendEvent("app_state", "general");
         } else if (stateId == STATE_LOGIN) {
             application.getKernel().sendEvent("app_state", "login");
-        } else if (stateId == STATE_LOGIN_CODE) {
-            application.getKernel().sendEvent("app_state", "login_code");
-        } else if (stateId == STATE_SIGNUP) {
-            application.getKernel().sendEvent("app_state", "signup");
         } else if (stateId == STATE_TOUR) {
             application.getKernel().sendEvent("app_state", "tour");
         }
@@ -314,36 +308,6 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             getRootController().openSettings();
         }
 
-        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            if (intent.getData() != null) {
-                if ("http".equals(intent.getData().getScheme())) {
-                    if (currentState == STATE_LOGIN_CODE) {
-                        try {
-                            String segment = intent.getData().getLastPathSegment();
-                            if (segment != null) {
-                                int code = Integer.parseInt(segment);
-                                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-                                if (fragment instanceof LoginCodeFragment) {
-                                    ((LoginCodeFragment) fragment).onCodeArrived(code);
-                                }
-                            }
-                        } catch (Throwable t) {
-                            t.printStackTrace();
-                        }
-                    }
-                } else {
-                    try {
-                        Cursor c1 = getContentResolver().query(intent.getData(), null, null, null, null);
-                        if (c1.moveToFirst()) {
-                            int uid = c1.getInt(c1.getColumnIndex("DATA4"));
-                            getRootController().openDialog(PeerType.PEER_USER, uid);
-                        }
-                    } catch (Throwable t) {
-                        t.printStackTrace();
-                    }
-                }
-            }
-        }
         if (Intent.ACTION_SEND.equals(intent.getAction())) {
             if (intent.getType() != null) {
                 if (intent.getType().startsWith("image/")) {
@@ -450,8 +414,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     private void checkLogout() {
         if (!application.isLoggedIn()) {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-            if (!(fragment instanceof AuthFragment) && !(fragment instanceof LoginFragment) && !(fragment instanceof LoginSignupFragment) &&
-                    !(fragment instanceof LoginCodeFragment) && !(fragment instanceof TourFragment)) {
+            if (!(fragment instanceof AuthFragment)) {
                 getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragmentContainer, new AuthFragment())
@@ -463,39 +426,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         }
     }
 
-    public void doShowCode(String phone, String phoneHash) {
-        prepareTransaction()
-                .replace(R.id.fragmentContainer, new LoginCodeFragment(phone, phoneHash))
-                .commit();
-        getSupportFragmentManager().executePendingTransactions();
-        setState(STATE_LOGIN_CODE);
-        hideBar();
-    }
-
-    public void doPerformSignup(String phone, String phoneHash, String code) {
-        Fragment loginCodeFragment = getSupportFragmentManager().findFragmentByTag("loginCodeFragment");
-
-        FragmentTransaction transaction = prepareTransaction();
-        if (loginCodeFragment != null) {
-            transaction.remove(loginCodeFragment);
-        }
-        transaction.replace(R.id.fragmentContainer, new LoginSignupFragment(phone, phoneHash, code));
-        transaction.commit();
-        setState(STATE_SIGNUP);
-        hideBar();
-    }
-
     public void onSuccessAuth() {
-//        if (ACTION_LOGIN.equals(getIntent().getAction())) {
-//            AccountAuthenticatorResponse response = getIntent().getExtras().getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
-//            Bundle result = new Bundle();
-//            result.putString(AccountManager.KEY_ACCOUNT_NAME, ((TLUserSelf) authorization.getUser()).getPhone());
-//            result.putString(AccountManager.KEY_ACCOUNT_TYPE, "org.telegram.android.account");
-//            response.onResult(result);
-//            finish();
-//            return;
-//        }
-
         controller.openDialogs(false);
         setState(STATE_GENERAL);
         showBar();
@@ -511,15 +442,9 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     @Override
     public void onBackPressed() {
         application.getKernel().sendEvent("app_back");
-        if (currentState == STATE_LOGIN_CODE || currentState == STATE_SIGNUP) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, new LoginFragment())
-                    .commit();
-            setState(STATE_LOGIN);
-        } else {
-            if (!controller.doSystemBack()) {
-                finish();
-            }
+
+        if (!controller.doSystemBack()) {
+            finish();
         }
     }
 
