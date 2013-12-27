@@ -77,7 +77,6 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         if (savedInstanceState != null && savedInstanceState.containsKey("screen_controller")) {
             savedState = savedInstanceState.getBundle("screen_controller");
         }
-        controller = new FragmentScreenController(this, savedState);
 
         getWindow().setBackgroundDrawableResource(R.drawable.transparent);
 
@@ -85,7 +84,10 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         getSupportActionBar().setLogo(R.drawable.st_bar_logo);
         getSupportActionBar().setIcon(R.drawable.st_bar_logo);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
+
         setContentView(R.layout.dialogs_container);
+        controller = new FragmentScreenController(this, savedState);
+
         updateHeaderHeight();
 
         if (savedInstanceState == null) {
