@@ -504,13 +504,13 @@ public class ActivationController {
     private void startCodeSearch() {
         Logger.d(TAG, "startCodeSearch");
         handler.postDelayed(cancelAutomatic, AUTO_TIMEOUT);
-//        receiver = new AutoActivationReceiver(application);
-//        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
-//            @Override
-//            public void onCodeReceived(int code) {
-//                performAutoActivation(code);
-//            }
-//        });
+        receiver = new AutoActivationReceiver(application);
+        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
+            @Override
+            public void onCodeReceived(int code) {
+                performAutoActivation(code);
+            }
+        });
     }
 
     private void performAutoActivation(int code) {
