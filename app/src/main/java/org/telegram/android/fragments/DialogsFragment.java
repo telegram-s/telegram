@@ -291,7 +291,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                 Object item = adapterView.getItemAtPosition(i);
                 if (item instanceof DialogWireframe) {
                     DialogWireframe description = (DialogWireframe) item;
-                    onItemClicked(description);
+                    onItemClicked(description.getPeerType(), description.getPeerId(), description.getDialogTitle());
                 }
             }
         });
@@ -454,7 +454,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 SearchWireframe wireframe = (SearchWireframe) adapterView.getItemAtPosition(i);
-                getRootController().openDialog(wireframe.getPeerType(), wireframe.getPeerId());
+                onItemClicked(wireframe.getPeerType(), wireframe.getPeerId(), wireframe.getTitle());
             }
         });
 
@@ -481,21 +481,21 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
         return res;
     }
 
-    private void onItemClicked(final DialogWireframe description) {
+    private void onItemClicked(final int peerType, final int peerId, final String title) {
         if (ACTION_SEND_CONTACT.equals(action)) {
-            if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+            if (peerType == PeerType.PEER_USER_ENCRYPTED) {
                 Toast.makeText(getActivity(), R.string.st_dialogs_share_to_secret, Toast.LENGTH_SHORT).show();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_contact).replace("{0}", description.getDialogTitle()))
+                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_contact).replace("{0}", title))
                         .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                application.getEngine().shareContact(description.getPeerType(), description.getPeerId(), actionUid);
+                                application.getEngine().shareContact(peerType, peerId, actionUid);
                                 application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                                 application.notifyUIUpdate();
                                 action = null;
-                                getRootController().openDialog(description.getPeerType(), description.getPeerId());
+                                getRootController().openDialog(peerType, peerId);
                             }
                         }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
                             @Override
@@ -508,15 +508,15 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             }
         } else if (ACTION_SEND_TEXT.equals(action)) {
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                    .setMessage(getStringSafe(R.string.st_dialogs_confirm_send).replace("{0}", description.getDialogTitle()))
+                    .setMessage(getStringSafe(R.string.st_dialogs_confirm_send).replace("{0}", title))
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            application.getEngine().sendMessage(description.getPeerType(), description.getPeerId(), actionText);
+                            application.getEngine().sendMessage(peerType, peerId, actionText);
                             application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                             application.notifyUIUpdate();
                             action = null;
-                            getRootController().openDialog(description.getPeerType(), description.getPeerId());
+                            getRootController().openDialog(peerType, peerId);
                         }
                     })
                     .setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
@@ -528,21 +528,21 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
         } else if (ACTION_FORWARD_MULTIPLE.equals(action)) {
-            if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+            if (peerType == PeerType.PEER_USER_ENCRYPTED) {
                 Toast.makeText(getActivity(), R.string.st_dialogs_forward_to_secret, Toast.LENGTH_SHORT).show();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward_multiple).replace("{0}", description.getDialogTitle()))
+                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward_multiple).replace("{0}", title))
                         .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 for (Integer mid : actionMids) {
-                                    application.getEngine().forwardMessage(description.getPeerType(), description.getPeerId(), mid);
+                                    application.getEngine().forwardMessage(peerType, peerId, mid);
                                 }
                                 application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                                 application.notifyUIUpdate();
                                 action = null;
-                                getRootController().openDialog(description.getPeerType(), description.getPeerId());
+                                getRootController().openDialog(peerType, peerId);
                             }
                         }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
                             @Override
@@ -554,19 +554,19 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                 dialog.show();
             }
         } else if (ACTION_FORWARD.equals(action)) {
-            if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+            if (peerType == PeerType.PEER_USER_ENCRYPTED) {
                 Toast.makeText(getActivity(), R.string.st_dialogs_forward_to_secret, Toast.LENGTH_SHORT).show();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward).replace("{0}", description.getDialogTitle()))
+                        .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward).replace("{0}", title))
                         .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                application.getEngine().forwardMessage(description.getPeerType(), description.getPeerId(), actionMid);
+                                application.getEngine().forwardMessage(peerType, peerId, actionMid);
                                 application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                                 application.notifyUIUpdate();
                                 action = null;
-                                getRootController().openDialog(description.getPeerType(), description.getPeerId());
+                                getRootController().openDialog(peerType, peerId);
                             }
                         }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
                             @Override
@@ -587,7 +587,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                 textId = R.string.st_dialogs_confirm_doc;
             }
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                    .setMessage(getStringSafe(textId).replace("{0}", description.getDialogTitle()))
+                    .setMessage(getStringSafe(textId).replace("{0}", title))
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -604,14 +604,14 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                             getRootController().doBack();
                                             return;
                                         }
-                                        application.getEngine().sendPhotoUri(description.getPeerType(), description.getPeerId(), actionUri, size.x, size.y);
+                                        application.getEngine().sendPhotoUri(peerType, peerId, actionUri, size.x, size.y);
                                         application.notifyUIUpdate();
                                     }
 
                                     @Override
                                     public void afterExecute() {
                                         action = null;
-                                        getRootController().openDialog(description.getPeerType(), description.getPeerId());
+                                        getRootController().openDialog(peerType, peerId);
                                     }
                                 });
                             } else if (ACTION_SEND_VIDEO.equals(action)) {
@@ -626,7 +626,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                             w = res.getWidth();
                                             h = res.getHeight();
                                         }
-                                        application.getEngine().sendVideo(description.getPeerType(), description.getPeerId(), fileName, w, h);
+                                        application.getEngine().sendVideo(peerType, peerId, fileName, w, h);
                                         application.notifyUIUpdate();
 
                                     }
@@ -635,7 +635,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                     public void afterExecute() {
                                         action = null;
                                         getRootController().doBack();
-                                        getRootController().openDialog(description.getPeerType(), description.getPeerId());
+                                        getRootController().openDialog(peerType, peerId);
                                     }
                                 });
 
@@ -644,14 +644,14 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                     @Override
                                     public void execute() throws AsyncException {
                                         String fileName = getRealPathFromURI(Uri.parse(actionUri));
-                                        application.getEngine().sendDocument(description.getPeerType(), description.getPeerId(), fileName);
+                                        application.getEngine().sendDocument(peerType, peerId, fileName);
                                     }
 
                                     @Override
                                     public void afterExecute() {
                                         action = null;
                                         getRootController().doBack();
-                                        getRootController().openDialog(description.getPeerType(), description.getPeerId());
+                                        getRootController().openDialog(peerType, peerId);
                                     }
                                 });
                             }
@@ -673,7 +673,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                 textId = R.string.st_dialogs_confirm_docs;
             }
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                    .setMessage(getStringSafe(textId).replace("{0}", description.getDialogTitle()))
+                    .setMessage(getStringSafe(textId).replace("{0}", title))
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -692,12 +692,12 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                                 getRootController().doBack();
                                                 return;
                                             }
-                                            application.getEngine().sendPhotoUri(description.getPeerType(), description.getPeerId(), uri, size.x, size.y);
+                                            application.getEngine().sendPhotoUri(peerType, peerId, uri, size.x, size.y);
                                         }
                                     } else {
                                         for (String uri : actionUris) {
                                             String fileName = getRealPathFromURI(Uri.parse(uri));
-                                            application.getEngine().sendDocument(description.getPeerType(), description.getPeerId(), fileName);
+                                            application.getEngine().sendDocument(peerType, peerId, fileName);
                                         }
                                     }
                                     application.notifyUIUpdate();
@@ -706,7 +706,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                 @Override
                                 public void afterExecute() {
                                     action = null;
-                                    getRootController().openDialog(description.getPeerType(), description.getPeerId());
+                                    getRootController().openDialog(peerType, peerId);
                                 }
                             });
                         }
@@ -720,7 +720,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
         } else {
-            getRootController().openDialog(description.getPeerType(), description.getPeerId());
+            getRootController().openDialog(peerType, peerId);
         }
     }
 
@@ -770,78 +770,84 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
     @Override
     public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.main_menu, menu);
         if (action != null) {
             getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_dialogs_pick_title));
             getSherlockActivity().getSupportActionBar().setSubtitle(null);
             getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
             getSherlockActivity().getSupportActionBar().setHomeButtonEnabled(true);
+
+            menu.findItem(R.id.contactsMenu).setVisible(false);
+            menu.findItem(R.id.settingsMenu).setVisible(false);
+            menu.findItem(R.id.newSecretMenu).setVisible(false);
+            menu.findItem(R.id.newGroupMenu).setVisible(false);
+            menu.findItem(R.id.writeToContact).setVisible(false);
         } else {
-            inflater.inflate(R.menu.main_menu, menu);
             menu.findItem(R.id.contactsMenu).setTitle(highlightMenuText(R.string.st_dialogs_menu_contacts));
             menu.findItem(R.id.settingsMenu).setTitle(highlightMenuText(R.string.st_dialogs_menu_settings));
             menu.findItem(R.id.newSecretMenu).setTitle(highlightMenuText(R.string.st_dialogs_menu_secret));
             menu.findItem(R.id.newGroupMenu).setTitle(highlightMenuText(R.string.st_dialogs_menu_group));
             menu.findItem(R.id.writeToContact).setTitle(R.string.st_dialogs_menu_write_contact);
+
             getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSherlockActivity().getSupportActionBar().setHomeButtonEnabled(false);
             getSherlockActivity().getSupportActionBar().setTitle(highlightTitleDisabledText(R.string.st_app_name));
             getSherlockActivity().getSupportActionBar().setSubtitle(null);
+        }
 
+        MenuItem searchItem = menu.findItem(R.id.searchMenu);
+        com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) searchItem.getActionView();
+        //searchView.setQueryHint(getStringSafe(R.string.st_dialogs_search_hint));
+        searchView.setQueryHint("");
 
-            MenuItem searchItem = menu.findItem(R.id.searchMenu);
-            com.actionbarsherlock.widget.SearchView searchView = (com.actionbarsherlock.widget.SearchView) searchItem.getActionView();
-            //searchView.setQueryHint(getStringSafe(R.string.st_dialogs_search_hint));
-            searchView.setQueryHint("");
-
-            ((ImageView) searchView.findViewById(R.id.abs__search_button)).setImageResource(R.drawable.st_bar_logo);
+        ((ImageView) searchView.findViewById(R.id.abs__search_button)).setImageResource(R.drawable.st_bar_logo);
 
 //            AutoCompleteTextView searchText = (AutoCompleteTextView) searchView.findViewById(R.id.abs__search_src_text);
 //            searchText.setHintTextColor(0xccB8B8B8);
 //            searchText.setTextColor(0xff010101);
 
-            searchView.setOnSuggestionListener(new com.actionbarsherlock.widget.SearchView.OnSuggestionListener() {
-                @Override
-                public boolean onSuggestionSelect(int position) {
-                    return false;
-                }
+        searchView.setOnSuggestionListener(new com.actionbarsherlock.widget.SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
 
-                @Override
-                public boolean onSuggestionClick(int position) {
-                    return false;
-                }
-            });
+            @Override
+            public boolean onSuggestionClick(int position) {
+                return false;
+            }
+        });
 
-            searchView.setOnQueryTextListener(new com.actionbarsherlock.widget.SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    return true;
-                }
+        searchView.setOnQueryTextListener(new com.actionbarsherlock.widget.SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return true;
+            }
 
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    doSearch(newText.trim());
-                    return true;
-                }
-            });
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                doSearch(newText.trim());
+                return true;
+            }
+        });
 
-            searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-                @Override
-                public boolean onMenuItemActionExpand(MenuItem item) {
-                    isInSearchMode = true;
-                    updateSearchMode();
-                    return true;
-                }
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                isInSearchMode = true;
+                updateSearchMode();
+                return true;
+            }
 
-                @Override
-                public boolean onMenuItemActionCollapse(MenuItem item) {
-                    isInSearchMode = false;
-                    updateSearchMode();
-                    return true;
-                }
-            });
-        }
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                isInSearchMode = false;
+                updateSearchMode();
+                return true;
+            }
+        });
         isInSearchMode = false;
         updateSearchMode();
     }
