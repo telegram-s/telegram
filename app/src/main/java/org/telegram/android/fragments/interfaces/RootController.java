@@ -26,6 +26,10 @@ public interface RootController {
 
     public void sendVideo(String uri);
 
+    public void sendDoc(String uri);
+
+    public void sendDocs(String[] uri);
+
     /* General */
 
     public void doBack();

@@ -354,10 +354,18 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                 } else if (intent.getType().startsWith("video/")) {
                     getRootController().sendVideo(intent.getParcelableExtra(Intent.EXTRA_STREAM).toString());
                 } else {
-                    Toast.makeText(this, "Unsupported content", Toast.LENGTH_SHORT).show();
+                    if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+                        getRootController().sendDoc(intent.getParcelableExtra(Intent.EXTRA_STREAM).toString());
+                    } else {
+                        Toast.makeText(this, "Unsupported content", Toast.LENGTH_SHORT).show();
+                    }
                 }
             } else {
-                Toast.makeText(this, "Unsupported content", Toast.LENGTH_SHORT).show();
+                if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+                    getRootController().sendDoc(intent.getParcelableExtra(Intent.EXTRA_STREAM).toString());
+                } else {
+                    Toast.makeText(this, "Unsupported content", Toast.LENGTH_SHORT).show();
+                }
             }
         }
         if (Intent.ACTION_SEND_MULTIPLE.equals(intent.getAction())) {
@@ -370,10 +378,28 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                     }
                     getRootController().sendImages(uris2);
                 } else {
-                    Toast.makeText(this, "Unsupported content", Toast.LENGTH_SHORT).show();
+                    if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+                        ArrayList<Parcelable> uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                        String[] uris2 = new String[uris.size()];
+                        for (int i = 0; i < uris2.length; i++) {
+                            uris2[i] = uris.get(i).toString();
+                        }
+                        getRootController().sendDocs(uris2);
+                    } else {
+                        Toast.makeText(this, "Unsupported content", Toast.LENGTH_SHORT).show();
+                    }
                 }
             } else {
-                Toast.makeText(this, "Unsupported content", Toast.LENGTH_SHORT).show();
+                if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+                    ArrayList<Parcelable> uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                    String[] uris2 = new String[uris.size()];
+                    for (int i = 0; i < uris2.length; i++) {
+                        uris2[i] = uris.get(i).toString();
+                    }
+                    getRootController().sendDocs(uris2);
+                } else {
+                    Toast.makeText(this, "Unsupported content", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }

@@ -222,6 +222,16 @@ public class FragmentScreenController implements RootController {
     }
 
     @Override
+    public void sendDoc(String uri) {
+        openScreen(DialogsFragment.buildSendDoc(uri));
+    }
+
+    @Override
+    public void sendDocs(String[] uri) {
+        openScreen(DialogsFragment.buildSendDocs(uri));
+    }
+
+    @Override
     public void doBack() {
         doSystemBack();
     }

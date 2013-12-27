@@ -77,10 +77,20 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
     public static final String ACTION_SEND_IMAGES = "action_send_images";
     public static final String ACTION_SEND_TEXT = "action_send_text";
     public static final String ACTION_SEND_CONTACT = "action_send_contact";
+    public static final String ACTION_SEND_DOC = "action_send_doc";
+    public static final String ACTION_SEND_DOCS = "action_send_docs";
 
     public static DialogsFragment buildSendImages(String[] uris) {
         DialogsFragment res = new DialogsFragment();
         res.action = ACTION_SEND_IMAGES;
+        res.actionUris = uris;
+        res.setSaveInStack(false);
+        return res;
+    }
+
+    public static DialogsFragment buildSendDocs(String[] uris) {
+        DialogsFragment res = new DialogsFragment();
+        res.action = ACTION_SEND_DOCS;
         res.actionUris = uris;
         res.setSaveInStack(false);
         return res;
@@ -97,6 +107,14 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
     public static DialogsFragment buildSendImage(String uri) {
         DialogsFragment res = new DialogsFragment();
         res.action = ACTION_SEND_IMAGE;
+        res.actionUri = uri;
+        res.setSaveInStack(false);
+        return res;
+    }
+
+    public static DialogsFragment buildSendDoc(String uri) {
+        DialogsFragment res = new DialogsFragment();
+        res.action = ACTION_SEND_DOC;
         res.actionUri = uri;
         res.setSaveInStack(false);
         return res;
@@ -559,16 +577,21 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
-        } else if (ACTION_SEND_IMAGE.equals(action) || ACTION_SEND_VIDEO.equals(action)) {
-            final boolean sendImage = ACTION_SEND_IMAGE.equals(action);
-
-            int textId = sendImage ? R.string.st_dialogs_confirm_image : R.string.st_dialogs_confirm_video;
+        } else if (ACTION_SEND_IMAGE.equals(action) || ACTION_SEND_VIDEO.equals(action) || ACTION_SEND_DOC.equals(action)) {
+            int textId;
+            if (ACTION_SEND_IMAGE.equals(action)) {
+                textId = R.string.st_dialogs_confirm_image;
+            } else if (ACTION_SEND_VIDEO.equals(action)) {
+                textId = R.string.st_dialogs_confirm_video;
+            } else {
+                textId = R.string.st_dialogs_confirm_doc;
+            }
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
                     .setMessage(getStringSafe(textId).replace("{0}", description.getDialogTitle()))
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            if (sendImage) {
+                            if (ACTION_SEND_IMAGE.equals(action)) {
                                 runUiTask(new AsyncAction() {
                                     @Override
                                     public void execute() throws AsyncException {
@@ -591,7 +614,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                         getRootController().openDialog(description.getPeerType(), description.getPeerId());
                                     }
                                 });
-                            } else {
+                            } else if (ACTION_SEND_VIDEO.equals(action)) {
                                 runUiTask(new AsyncAction() {
                                     @Override
                                     public void execute() throws AsyncException {
@@ -616,6 +639,21 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                     }
                                 });
 
+                            } else {
+                                runUiTask(new AsyncAction() {
+                                    @Override
+                                    public void execute() throws AsyncException {
+                                        String fileName = getRealPathFromURI(Uri.parse(actionUri));
+                                        application.getEngine().sendDocument(description.getPeerType(), description.getPeerId(), fileName);
+                                    }
+
+                                    @Override
+                                    public void afterExecute() {
+                                        action = null;
+                                        getRootController().doBack();
+                                        getRootController().openDialog(description.getPeerType(), description.getPeerId());
+                                    }
+                                });
                             }
                         }
                     })
@@ -627,26 +665,40 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                     }).create();
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
-        } else if (ACTION_SEND_IMAGES.equals(action)) {
+        } else if (ACTION_SEND_IMAGES.equals(action) || ACTION_SEND_DOCS.equals(action)) {
+            int textId;
+            if (ACTION_SEND_IMAGES.equals(action)) {
+                textId = R.string.st_dialogs_confirm_images;
+            } else {
+                textId = R.string.st_dialogs_confirm_docs;
+            }
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
-                    .setMessage(getStringSafe(R.string.st_dialogs_confirm_images).replace("{0}", description.getDialogTitle()))
+                    .setMessage(getStringSafe(textId).replace("{0}", description.getDialogTitle()))
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             runUiTask(new AsyncAction() {
                                 @Override
                                 public void execute() throws AsyncException {
-                                    for (String uri : actionUris) {
-                                        Point size;
-                                        try {
-                                            size = Optimizer.getSize(Uri.parse(uri), getActivity());
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                            Toast.makeText(getActivity(), R.string.st_error_file_open, Toast.LENGTH_SHORT).show();
-                                            getRootController().doBack();
-                                            return;
+                                    if (ACTION_SEND_IMAGES.equals(action)) {
+                                        for (String uri : actionUris) {
+
+                                            Point size;
+                                            try {
+                                                size = Optimizer.getSize(Uri.parse(uri), getActivity());
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                                Toast.makeText(getActivity(), R.string.st_error_file_open, Toast.LENGTH_SHORT).show();
+                                                getRootController().doBack();
+                                                return;
+                                            }
+                                            application.getEngine().sendPhotoUri(description.getPeerType(), description.getPeerId(), uri, size.x, size.y);
                                         }
-                                        application.getEngine().sendPhotoUri(description.getPeerType(), description.getPeerId(), uri, size.x, size.y);
+                                    } else {
+                                        for (String uri : actionUris) {
+                                            String fileName = getRealPathFromURI(Uri.parse(uri));
+                                            application.getEngine().sendDocument(description.getPeerType(), description.getPeerId(), fileName);
+                                        }
                                     }
                                     application.notifyUIUpdate();
                                 }

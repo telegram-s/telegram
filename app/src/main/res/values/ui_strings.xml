@@ -129,7 +129,9 @@
     <string name="st_dialogs_confirm_forward_multiple">Forward messages to "{0}"?</string>
     <string name="st_dialogs_confirm_image">Send photo to "{0}"?</string>
     <string name="st_dialogs_confirm_video">Send video to "{0}"?</string>
+    <string name="st_dialogs_confirm_doc">Send document to "{0}"?</string>
     <string name="st_dialogs_confirm_images">Send images to "{0}"?</string>
+    <string name="st_dialogs_confirm_docs">Send documents to "{0}"?</string>
     <string name="st_dialogs_confirm_contact">Send contact to "{0}"?</string>
 
     <string name="st_dialogs_search_hint">Quick search</string>
