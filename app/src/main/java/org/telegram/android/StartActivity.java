@@ -125,9 +125,8 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         });
 
         setWindowContentOverlayCompat();
-
-        TestIntegration.initActivity(this);
     }
+
 
     private void setWindowContentOverlayCompat() {
         if (Build.VERSION.SDK_INT == 18) {
@@ -563,6 +562,8 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         };
         registerReceiver(logoutReceiver, intentFilter);
         checkLogout();
+
+        TestIntegration.initActivity(this);
         // getWindow().setBackgroundDrawableResource(R.drawable.transparent);
     }
 
