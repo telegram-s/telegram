@@ -2,7 +2,11 @@ package org.telegram.android.screens;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -32,12 +36,33 @@ import java.util.List;
 public class FragmentScreenController implements RootController {
     private StartActivity activity;
     private StelsApplication application;
+    private View container;
 
     private ArrayList<StelsFragment> backStack = new ArrayList<StelsFragment>();
+
+    private Runnable removeBg = new Runnable() {
+        @Override
+        public void run() {
+            container.setBackgroundColor(Color.TRANSPARENT);
+        }
+    };
+
+    private Runnable addBg = new Runnable() {
+        @Override
+        public void run() {
+            container.setBackgroundColor(Color.WHITE);
+            handler.removeCallbacks(removeBg);
+            handler.postDelayed(removeBg, 400);
+        }
+    };
+
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     public FragmentScreenController(StartActivity activity, Bundle savedState) {
         this.activity = activity;
         this.application = (StelsApplication) activity.getApplicationContext();
+        container = activity.findViewById(R.id.fragmentContainer);
+
         if (savedState != null && savedState.containsKey("backstack")) {
             String[] keys = savedState.getStringArray("backstack");
             for (int i = 0; i < keys.length; i++) {
@@ -47,6 +72,10 @@ public class FragmentScreenController implements RootController {
                 backStack.get(backStack.size() - 1).setHasOptionsMenu(true);
             }
         }
+    }
+
+    private void onStartTransaction() {
+        handler.post(addBg);
     }
 
     public Bundle saveState() {
@@ -60,21 +89,21 @@ public class FragmentScreenController implements RootController {
     }
 
     private FragmentTransaction prepareTransaction() {
-//        if (application.getScreenLogicType() == ScreenLogicType.SINGLE_ANIMATED) {
-//            application.getResponsibility().doPause(300);
-//            application.getImageController().doPause(300);
-//            return activity.getSupportFragmentManager().beginTransaction()
-//                    .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit);
-//        } else {
-//            return activity.getSupportFragmentManager().beginTransaction();
-//        }
-//        return activity.getSupportFragmentManager().beginTransaction()
-//                .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit);
-
-        return activity.getSupportFragmentManager().beginTransaction();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            return activity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit);
+        } else {
+            return activity.getSupportFragmentManager().beginTransaction();
+        }
     }
 
     private FragmentTransaction prepareBackTransaction() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            return activity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.anim.fragment_close_enter, R.anim.fragment_close_exit);
+        } else {
+            return activity.getSupportFragmentManager().beginTransaction();
+        }
 //        if (application.getScreenLogicType() == ScreenLogicType.SINGLE_ANIMATED) {
 //            application.getResponsibility().doPause(300);
 //            application.getImageController().doPause(300);
@@ -85,7 +114,7 @@ public class FragmentScreenController implements RootController {
 //        }
 //        return activity.getSupportFragmentManager().beginTransaction()
 //                .setCustomAnimations(R.anim.fragment_close_enter, R.anim.fragment_close_exit);
-        return activity.getSupportFragmentManager().beginTransaction();
+
     }
 
     public void doUp() {
@@ -127,6 +156,7 @@ public class FragmentScreenController implements RootController {
                         .remove(currentFragment)
                         .attach(prevFragment)
                         .commit();
+                onStartTransaction();
             }
             return true;
         } else {
@@ -161,6 +191,9 @@ public class FragmentScreenController implements RootController {
         }
 
         transaction.commit();
+
+        onStartTransaction();
+
         backStack.add(fragment);
     }
 
@@ -179,6 +212,8 @@ public class FragmentScreenController implements RootController {
                     .remove(currentFragment)
                     .attach(prevFragment)
                     .commit();
+
+            onStartTransaction();
         }
     }
 
@@ -411,6 +446,7 @@ public class FragmentScreenController implements RootController {
         StartActivity.isGuideShown = false;
         transaction.add(R.id.fragmentContainer, new TourFragment(), "tourFragment")
                 .commit();
+        onStartTransaction();
         hidePanel();
         backStack.clear();
     }
