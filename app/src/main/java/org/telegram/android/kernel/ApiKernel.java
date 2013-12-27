@@ -1,8 +1,14 @@
 package org.telegram.android.kernel;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import org.telegram.android.R;
 import org.telegram.android.core.background.UpdateProcessor;
+import org.telegram.android.log.Logger;
 import org.telegram.api.TLAbsUpdates;
 import org.telegram.api.engine.ApiCallback;
 import org.telegram.api.engine.AppInfo;
@@ -12,6 +18,7 @@ import org.telegram.api.engine.TelegramApi;
  * Created by ex3ndr on 16.11.13.
  */
 public class ApiKernel {
+    private static final String TAG = "ApiKernel";
     private ApplicationKernel kernel;
 
     private TelegramApi api;
@@ -60,6 +67,17 @@ public class ApiKernel {
                 }
             }
         });
+
+        BroadcastReceiver networkStateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Logger.w(TAG, "Network Type Changed");
+                api.resetNetworkBackoff();
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        kernel.getApplication().registerReceiver(networkStateReceiver, filter);
     }
 
     public TelegramApi getApi() {

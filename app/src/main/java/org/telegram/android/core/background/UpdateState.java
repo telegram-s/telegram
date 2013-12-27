@@ -1,14 +1,11 @@
 package org.telegram.android.core.background;
 
 import android.content.Context;
-import com.extradea.framework.persistence.ContextPersistence;
 import org.telegram.android.core.model.TLLocalContext;
-import org.telegram.android.core.model.storage.TLStorage;
 import org.telegram.android.core.model.storage.TLUpdateState;
 import org.telegram.android.critical.TLPersistence;
 import org.telegram.android.kernel.compat.CompatObjectInputStream;
 import org.telegram.android.kernel.compat.Compats;
-import org.telegram.android.kernel.compat.v6.CompatDownload;
 import org.telegram.android.kernel.compat.v7.CompatUpdateState;
 
 import java.io.File;

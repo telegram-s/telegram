@@ -2,7 +2,6 @@ package org.telegram.android.config;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.extradea.framework.persistence.ContextPersistence;
 
 /**
  * Created with IntelliJ IDEA.
