@@ -224,8 +224,6 @@
     <string name="st_conv_delete_chat">DELETE THIS CHAT</string>
     <string name="st_conv_hint">Enter message</string>
     <string name="st_conv_removed">you have left the group</string>
-    <string name="st_conv_action_add_header">Add contact</string>
-    <string name="st_conv_action_add">Add contact to your contact list?</string>
     <string name="st_conv_action_title">Message</string>
     <string name="st_conv_action_delete">Delete</string>
     <string name="st_conv_action_forward">Forward</string>
@@ -435,13 +433,13 @@
     <string name="st_dialog_document">Document</string>
     <string name="st_dialog_unknown">Unsupported content</string>
 
-    <string name="st_dialog_user_add_avatar">Added new profile photo</string>
-    <string name="st_dialog_user_joined_app">Joined telegram</string>
+    <string name="st_dialog_user_add_avatar">{sender} added new profile photo</string>
+    <string name="st_dialog_user_joined_app">{sender} joined telegram</string>
 
-    <string name="st_dialog_encrypted_switched_off_you">You turned off self-destruct timer</string>
-    <string name="st_dialog_encrypted_switched_off">Turned off self-destruct timer</string>
-    <string name="st_dialog_encrypted_switched_you">You set self-destruct timer to {time}</string>
-    <string name="st_dialog_encrypted_switched">Set self-destruct timer to {time}</string>
+    <string name="st_dialog_encrypted_switched_off">{sender} turned off self-destruct timer</string>
+    <string name="st_dialog_encrypted_switched_off_you">@string/st_dialog_encrypted_switched_off</string>
+    <string name="st_dialog_encrypted_switched">{sender} set self-destruct timer to {time}</string>
+    <string name="st_dialog_encrypted_switched_you">@string/st_dialog_encrypted_switched</string>
 
     <string name="st_dialog_encrypted_selfdestructed">Last message self-destructed</string>
     <string name="st_dialog_encrypted_requested">Exchanging encryption keys…</string>
@@ -449,31 +447,31 @@
     <string name="st_dialog_encrypted_cancelled">Secret chat cancelled</string>
     <string name="st_dialog_encrypted_created">Secret chat created</string>
 
-    <string name="st_dialog_created_group">Created group</string>
+    <string name="st_dialog_created_group">{sender} created group</string>
     <string name="st_dialog_created_group_you">@string/st_dialog_created_group</string>
 
-    <string name="st_dialog_changed_photo">Changed group photo</string>
+    <string name="st_dialog_changed_photo">{sender} changed group photo</string>
     <string name="st_dialog_changed_photo_you">@string/st_dialog_changed_photo</string>
 
-    <string name="st_dialog_removed_photo">Removed group photo</string>
+    <string name="st_dialog_removed_photo">{sender} removed group photo</string>
     <string name="st_dialog_removed_photo_you">@string/st_dialog_removed_photo</string>
 
-    <string name="st_dialog_changed_name">Changed group name</string>
+    <string name="st_dialog_changed_name">{sender} changed group name</string>
     <string name="st_dialog_changed_name_you">@string/st_dialog_changed_name</string>
 
-    <string name="st_dialog_added_user">Added {0} to the group</string>
+    <string name="st_dialog_added_user">{1} added {0} to the group</string>
     <string name="st_dialog_added_user_you">@string/st_dialog_added_user</string>
     <string name="st_dialog_added_user_of_you">@string/st_dialog_added_user</string>
 
-    <string name="st_dialog_enter_user">Joined the group</string>
+    <string name="st_dialog_enter_user">{sender} joined the group</string>
     <string name="st_dialog_enter_user_you">@string/st_dialog_enter_user</string>
 
-    <string name="st_dialog_left_user">Left the group</string>
+    <string name="st_dialog_left_user">{sender} left the group</string>
     <string name="st_dialog_left_user_you">@string/st_dialog_left_user</string>
 
-    <string name="st_dialog_kicked_user">Kicked {0} from the group</string>
-    <string name="st_dialog_kicked_user_you">@string/st_dialog_left_user</string>
-    <string name="st_dialog_kicked_user_of_you">@string/st_dialog_left_user</string>
+    <string name="st_dialog_kicked_user">{sender} kicked {0} from the group</string>
+    <string name="st_dialog_kicked_user_you">@string/st_dialog_kicked_user</string>
+    <string name="st_dialog_kicked_user_of_you">@string/st_dialog_kicked_user</string>
 
     <string name="st_dialog_system">System message</string>
 

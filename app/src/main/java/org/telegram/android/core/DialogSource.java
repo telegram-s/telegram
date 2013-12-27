@@ -365,57 +365,74 @@ public class DialogSource {
             TLObject object = item.getExtras();
             if (object != null && object instanceof TLAbsLocalAction) {
                 boolean isMyself = res.isMine();
+                String senderName = res.isMine() ? getString(R.string.st_dialog_you) : res.getSender() != null ? res.getSender().getFirstName() : "???";
                 if (object instanceof TLLocalActionChatCreate) {
-                    body = getString(isMyself ? R.string.st_dialog_created_group_you : R.string.st_dialog_created_group);
+                    body = getString(isMyself ? R.string.st_dialog_created_group_you : R.string.st_dialog_created_group)
+                            .replace("{sender}", senderName);
                 } else if (object instanceof TLLocalActionChatDeleteUser) {
                     int uid = ((TLLocalActionChatDeleteUser) object).getUserId();
                     if (uid == res.getSenderId()) {
-                        body = getString(isMyself ? R.string.st_dialog_left_user_you : R.string.st_dialog_left_user);
+                        body = getString(isMyself ? R.string.st_dialog_left_user_you : R.string.st_dialog_left_user)
+                                .replace("{sender}", senderName);
                     } else {
                         if (uid == application.getCurrentUid()) {
-                            body = getString(R.string.st_dialog_kicked_user_of_you).replace("{0}", getString(R.string.st_dialog_you_r));
+                            body = getString(R.string.st_dialog_kicked_user_of_you).replace("{0}", getString(R.string.st_dialog_you_r))
+                                    .replace("{sender}", senderName);
                         } else {
                             User usr = application.getEngine().getUserRuntime(uid);
-                            body = getString(isMyself ? R.string.st_dialog_kicked_user_you : R.string.st_dialog_kicked_user).replace("{0}", usr.getDisplayName());
+                            body = getString(isMyself ? R.string.st_dialog_kicked_user_you : R.string.st_dialog_kicked_user).replace("{0}", usr.getDisplayName())
+                                    .replace("{sender}", senderName);
                         }
                     }
                 } else if (object instanceof TLLocalActionChatAddUser) {
                     int uid = ((TLLocalActionChatAddUser) object).getUserId();
                     if (uid == res.getSenderId()) {
-                        body = getString(isMyself ? R.string.st_dialog_enter_user_you : R.string.st_dialog_enter_user);
+                        body = getString(isMyself ? R.string.st_dialog_enter_user_you : R.string.st_dialog_enter_user)
+                                .replace("{sender}", senderName);
                     } else {
                         if (uid == application.getCurrentUid()) {
-                            body = getString(R.string.st_dialog_added_user_of_you).replace("{0}", getString(R.string.st_dialog_you_r));
+                            body = getString(R.string.st_dialog_added_user_of_you).replace("{0}", getString(R.string.st_dialog_you_r))
+                                    .replace("{sender}", senderName);
                         } else {
                             User usr = application.getEngine().getUserRuntime(uid);
-                            body = getString(isMyself ? R.string.st_dialog_added_user_you : R.string.st_dialog_added_user).replace("{0}", usr.getDisplayName());
+                            body = getString(isMyself ? R.string.st_dialog_added_user_you : R.string.st_dialog_added_user).replace("{0}", usr.getDisplayName())
+                                    .replace("{sender}", senderName);
                         }
                     }
                 } else if (object instanceof TLLocalActionChatDeletePhoto) {
-                    body = getString(isMyself ? R.string.st_dialog_removed_photo_you : R.string.st_dialog_removed_photo);
+                    body = getString(isMyself ? R.string.st_dialog_removed_photo_you : R.string.st_dialog_removed_photo)
+                            .replace("{sender}", senderName);
                 } else if (object instanceof TLLocalActionChatEditPhoto) {
-                    body = getString(isMyself ? R.string.st_dialog_changed_photo_you : R.string.st_dialog_changed_photo);
+                    body = getString(isMyself ? R.string.st_dialog_changed_photo_you : R.string.st_dialog_changed_photo)
+                            .replace("{sender}", senderName);
                 } else if (object instanceof TLLocalActionChatEditTitle) {
-                    body = getString(isMyself ? R.string.st_dialog_changed_name_you : R.string.st_dialog_changed_name);
+                    body = getString(isMyself ? R.string.st_dialog_changed_name_you : R.string.st_dialog_changed_name)
+                            .replace("{sender}", senderName);
                 } else if (object instanceof TLLocalActionUserRegistered) {
-                    body = getString(R.string.st_dialog_user_joined_app);
+                    body = getString(R.string.st_dialog_user_joined_app)
+                            .replace("{sender}", senderName);
                 } else if (object instanceof TLLocalActionUserEditPhoto) {
-                    body = getString(R.string.st_dialog_user_add_avatar);
+                    body = getString(R.string.st_dialog_user_add_avatar)
+                            .replace("{sender}", senderName);
                 } else if (object instanceof TLLocalActionEncryptedTtl) {
                     TLLocalActionEncryptedTtl ttl = (TLLocalActionEncryptedTtl) object;
                     if (res.isMine()) {
                         if (ttl.getTtlSeconds() > 0) {
                             body = getString(R.string.st_dialog_encrypted_switched_you).replace(
-                                    "{time}", TextUtil.formatHumanReadableDuration(ttl.getTtlSeconds()));
+                                    "{time}", TextUtil.formatHumanReadableDuration(ttl.getTtlSeconds()))
+                                    .replace("{sender}", senderName);
                         } else {
-                            body = getString(R.string.st_dialog_encrypted_switched_off_you);
+                            body = getString(R.string.st_dialog_encrypted_switched_off_you)
+                                    .replace("{sender}", senderName);
                         }
                     } else {
                         if (ttl.getTtlSeconds() > 0) {
                             body = getString(R.string.st_dialog_encrypted_switched).replace(
-                                    "{time}", TextUtil.formatHumanReadableDuration(ttl.getTtlSeconds()));
+                                    "{time}", TextUtil.formatHumanReadableDuration(ttl.getTtlSeconds()))
+                                    .replace("{sender}", senderName);
                         } else {
-                            body = getString(R.string.st_dialog_encrypted_switched_off);
+                            body = getString(R.string.st_dialog_encrypted_switched_off)
+                                    .replace("{sender}", senderName);
                         }
                     }
                 } else if (object instanceof TLLocalActionEncryptedCancelled) {

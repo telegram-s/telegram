@@ -1,27 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <!-- 
-     NEW STRINGS: 
-     st_settings_play
-     st_invite_short
-     st_invite_big
-     st_contacts_action_view
-     st_contacts_action_share
-     st_contacts_action_delete
-     st_contacts_action_block
-     st_contacts_action_block_and_delete
-     
-     st_contacts_delete
-     st_contacts_block
-     st_contacts_block_delete
-     
-     st_contacts_menu_only_t
-     st_contacts_menu_all_contacts
-     st_contacts_menu_add_contact
-     st_contacts_menu_book
-     -->
-    
     <string name="st_lang">ar</string>
     <string name="st_app_name">تيليجرام</string>
 
@@ -154,8 +133,6 @@
     <string name="st_conv_delete_chat">احذف هذه المحادثة</string>
     <string name="st_conv_hint">قم بإدخال رسالة</string>
     <string name="st_conv_removed">لقد قمت بمغادرة المجموعة</string>
-    <string name="st_conv_action_add_header">أضف جهة اتصال</string>
-    <string name="st_conv_action_add">هل ترغب بإضافة جهة الاتصال للقائمة؟</string>
     <string name="st_conv_action_title">أرسل</string>
     <string name="st_conv_action_delete">احذف</string>
     <string name="st_conv_action_forward">أعد التوجيه</string>
