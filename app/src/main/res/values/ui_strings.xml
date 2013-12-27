@@ -12,7 +12,7 @@
     <string name="st_cancel_caps">CANCEL</string>
     <string name="st_set">Set</string>
     <string name="st_set_caps">SET</string>
-    <string name="st_no_contacts">No contacts.</string>
+    <string name="st_no_contacts">No contacts yet.</string>
     <string name="st_title">Title</string>
     <string name="st_loading_more">Loading more items...</string>
     <string name="st_loading">Loading...</string>
@@ -29,11 +29,11 @@
     <string name="st_receiver_photo">Take photo</string>
     <string name="st_receiver_delete">Delete photo</string>
 
-    <string name="st_avatar_changed">Your avatar changed</string>
-    <string name="st_avatar_removed">Your avatar removed</string>
+    <string name="st_avatar_changed">Profile photo updated</string>
+    <string name="st_avatar_removed">Profile photo removed</string>
 
-    <string name="st_avatar_group_changed">Group avatar changed</string>
-    <string name="st_avatar_group_removed">Group avatar removed</string>
+    <string name="st_avatar_group_changed">Group photo updated</string>
+    <string name="st_avatar_group_removed">Group photo removed</string>
 
     <string name="st_first_name">First name</string>
     <string name="st_last_name">Last name</string>
@@ -44,7 +44,7 @@
     <string name="st_support_hint">Nice to meet you</string>
 
     <string name="st_error_file_open">Couldn\'t open file</string>
-    <string name="st_error_unable_sms">Unable to send sms</string>
+    <string name="st_error_unable_sms">Unable to send SMS</string>
 
     <string name="st_error_title">Error</string>
 
@@ -62,13 +62,13 @@
     <string name="st_error_too_few_users">Too few users.</string>
     <string name="st_error_too_much_users">Too many users.</string>
     <string name="st_error_name_not_modified">Name not modified.</string>
-    <string name="st_error_title_not_modified">Chat title not modified.</string>
-    <string name="st_error_already_participant">User is already a member of the group.</string>
-    <string name="st_error_participant_outdated">User has unsupported version of Telegram.</string>
+    <string name="st_error_title_not_modified">Group name not modified.</string>
+    <string name="st_error_already_participant">This user is already a member of the group.</string>
+    <string name="st_error_participant_outdated">This user version of Telegram is not supported.</string>
     <string name="st_error_photo_small">Photo is too small.</string>
-    <string name="st_error_blocked">User added you to black list.</string>
-    <string name="st_error_incorrect">User is incorrect for this action.</string>
-    <string name="st_error_many_attempts">Too many attempts. Try again later.</string>
+    <string name="st_error_blocked">User added you to their blacklist.</string>
+    <string name="st_error_incorrect">Cannot complete action.</string>
+    <string name="st_error_many_attempts">Too many attempts. Please try again later.</string>
 
     <string name="st_tour_start_messaging">Start Messaging</string>
     <string name="st_tour_page1_title">Telegram</string>
@@ -101,28 +101,26 @@
     <string name="st_auth_confirm_number">Is this your number?</string>
     <string name="st_auth_confirm_yes">Yes, activate account</string>
     <string name="st_auth_confirm_no">No, change number</string>
-    <string name="st_auth_confirm_sms">We will send completely free SMS for activating your account.</string>
+    <string name="st_auth_confirm_sms">We will send a free SMS with an activation code.</string>
 
-    <string name="st_auth_phone_title">Select your country, enter your phone number and click continue:</string>
+    <string name="st_auth_phone_title">Select your country, enter your phone number and tap continue:</string>
     <string name="st_auth_phone_hint">Phone number</string>
 
     <string name="st_auth_activating_title">Activating phone…</string>
-    <string name="st_auth_activating_subtitle">This process could take up to one minute</string>
+    <string name="st_auth_activating_subtitle">This may take up to a minute. Please wait.</string>
 
     <string name="st_auth_phone_call">Requesting phone call…</string>
     <string name="st_auth_creating">Creating your profile…</string>
 
-    <string name="st_auth_code_title">Enter activation code and press continue</string>
+    <string name="st_auth_code_title">Enter your activation code and press continue</string>
     <string name="st_auth_code">Code</string>
 
-    <string name="st_auth_signup_title">You successfully activated your phone! Enter your name, add your picture and
+    <string name="st_auth_signup_title">Your phone number is now confirmed! Please enter your name, add your picture and
         press continue:
     </string>
 
     <string name="st_auth_incorrect_phone">Phone number {0} is incorrect</string>
-    <string name="st_auth_confirm_phone">Is this your correct number? \n\n{0} \n\nAn SMS with your access code will be
-        sent to this number.
-    </string>
+    <string name="st_auth_confirm_phone">Is this your correct number? \n\n{0} \n\nAn SMS with your access code will be sent to this number.</string>
 
     <string name="st_dialogs_pick_title">Select a conversation</string>
 
@@ -148,8 +146,8 @@
     <string name="st_dialogs_write_to_friend">Write to a friend</string>
     <string name="st_dialogs_empty">No messages yet...</string>
 
-    <string name="st_dialogs_share_to_secret">Unable to share contact to secure chat</string>
-    <string name="st_dialogs_forward_to_secret">Unable to forward message to secure chat</string>
+    <string name="st_dialogs_share_to_secret">Unable to share contact to a secret chat</string>
+    <string name="st_dialogs_forward_to_secret">Unable to forward message to a secret chat</string>
 
     <string name="st_dialogs_menu_contacts">Contacts</string>
     <string name="st_dialogs_menu_settings">Settings</string>
@@ -164,16 +162,16 @@
     <string name="st_settings_header_about">ABOUT</string>
     <string name="st_settings_version">App version</string>
     <string name="st_settings_play">Google Play</string>
-    <string name="st_settings_play_subtitle">Please, rate our app</string>
+    <string name="st_settings_play_subtitle">Please rate our app</string>
     <string name="st_settings_blocked">Blocked users</string>
-    <string name="st_settings_blocked_subtitle">List of contacts that you have blocked</string>
+    <string name="st_settings_blocked_subtitle">List of blocked contacts</string>
     <string name="st_settings_chat">Chat settings</string>
     <string name="st_settings_chat_subtitle">Wallpaper, send by enter, font size...</string>
     <string name="st_settings_background">Chat background</string>
     <string name="st_settings_support">Ask a Question</string>
-    <string name="st_settings_support_subtitle">Our support team will help you</string>
+    <string name="st_settings_support_subtitle">Our support team will be glad to help</string>
     <string name="st_settings_save_photo">Save incoming photos</string>
-    <string name="st_settings_save_photo_subtitle">Automatically save to phone</string>
+    <string name="st_settings_save_photo_subtitle">Automatically save to gallery</string>
     <string name="st_settings_notifications">Notifications and sounds</string>
     <string name="st_settings_log_out">Log Out</string>
 
@@ -185,31 +183,30 @@
     <string name="st_settings_name_title">YOUR FIRST AND LAST NAME</string>
     <string name="st_settings_name_changed">Name changed</string>
     <string name="st_settings_name_not_changed">Name not changed</string>
-    <string name="st_settings_name_empty_first">First name couldn\'t be empty</string>
-    <string name="st_settings_name_empty_last">Last name couldn\'t be empty</string>
+    <string name="st_settings_name_empty_first">Please add a first name</string>
+    <string name="st_settings_name_empty_last">Please add a last name</string>
 
     <string name="st_new_group_title">New group</string>
-    <string name="st_new_group_hint">Send message to...</string>
+    <string name="st_new_group_hint">Add memebers...</string>
     <string name="st_new_group_maximum">This group is full</string>
     <string name="st_new_group_next">NEXT</string>
 
-    <string name="st_new_group_complete_title">GROUP NAME AND IMAGE</string>
-    <string name="st_new_group_complete_avatar">You have successfully created the group, but we couldn\'t upload the
-        avatar. Retry?
+    <string name="st_new_group_complete_title">GROUP NAME AND PHOTO</string>
+    <string name="st_new_group_complete_avatar">You have successfully created the group, but we couldn\'t upload the group photo. Retry?
     </string>
     <string name="st_new_group_complete_done">DONE</string>
 
     <string name="st_conv_empty">No messages here yet…</string>
     <string name="st_conv_empty_support">Got a question about Telegram?</string>
 
-    <string name="st_conv_chat_closed_title">Chat is closed</string>
+    <string name="st_conv_chat_closed_title">You no longer have access to this chat</string>
     <string name="st_conv_enc_exchanging_keys">Exchanging encryption keys...</string>
     <string name="st_conv_enc_waiting">Waiting for {name} to get online...</string>
     <string name="st_conv_enc_cancelled">Secret chat cancelled</string>
 
     <string name="st_conv_enc_invite_out_title">You have invited {name} to join a secret chat.</string>
 
-    <string name="st_conv_enc_invite_in_title">{name} have invited you to join a secret chat.</string>
+    <string name="st_conv_enc_invite_in_title">{name} has invited you to join a secret chat.</string>
 
     <string name="st_conv_enc_info_title">Secret chats:</string>
     <string name="st_conv_enc_info_info1">Use end-to-end encryption</string>
@@ -222,8 +219,10 @@
     <string name="st_conv_share_info">SHARE MY CONTACT INFO</string>
     <string name="st_conv_add_contact">ADD TO CONTACTS</string>
     <string name="st_conv_delete_chat">DELETE THIS CHAT</string>
-    <string name="st_conv_hint">Enter message</string>
+    <string name="st_conv_hint">Type message</string>
     <string name="st_conv_removed">you have left the group</string>
+    <string name="st_conv_action_add_header">Add contact</string>
+    <string name="st_conv_action_add">Add this user as a contact?</string>
     <string name="st_conv_action_title">Message</string>
     <string name="st_conv_action_delete">Delete</string>
     <string name="st_conv_action_forward">Forward</string>
@@ -244,7 +243,7 @@
     <string name="st_contacts_add_name_title">EDIT FIRST AND LAST NAME</string>
     <string name="st_contacts_add_toast">Contact added</string>
     <string name="st_contacts_edit_name_title">EDIT FIRST AND LAST NAME</string>
-    <string name="st_contacts_edit_toast">Contact name changed</string>
+    <string name="st_contacts_edit_toast">Contact name updated</string>
 
     <string name="st_contacts_title">Contacts</string>
     <string name="st_contacts_filter">Filter users</string>
@@ -253,11 +252,11 @@
     <string name="st_contacts_not_registered_message">{0} is not registered in Telegram. Send an invitation?
     </string>
 
-    <string name="st_contacts_delete">Are you sure want to delete contact \'{0}\'?
+    <string name="st_contacts_delete">Are you sure want to delete the contact \'{0}\'?
     </string>
-    <string name="st_contacts_block">Are you sure want to block contact \'{0}\'?
+    <string name="st_contacts_block">Are you sure want to block the contact \'{0}\'?
     </string>
-    <string name="st_contacts_block_delete">Are you sure want to block contact \'{0}\' and delete contact history?
+    <string name="st_contacts_block_delete">Are you sure want to block the contact \'{0}\' and delete contact history?
     </string>
 
     <string name="st_contacts_action_view">View in address book</string>
@@ -266,7 +265,7 @@
     <string name="st_contacts_action_block">Block contact</string>
     <string name="st_contacts_action_block_and_delete">Block and delete contact</string>
 
-    <string name="st_contacts_menu_only_t">Only Telegram contacts</string>
+    <string name="st_contacts_menu_only_t">Telegram contacts only</string>
     <string name="st_contacts_menu_all_contacts">All contacts</string>
     <string name="st_contacts_menu_add_contact">Add contact</string>
     <string name="st_contacts_menu_book">Phone address book</string>
@@ -279,7 +278,7 @@
     <string name="st_profile_phone_mobile">MOBILE</string>
 
     <string name="st_profile_notifications">Notifications</string>
-    <string name="st_profile_notifications_sound">Customize sound</string>
+    <string name="st_profile_notifications_sound">Customize tone</string>
     <string name="st_profile_media">Media shared with user</string>
 
     <string name="st_profile_phone_hidden">hidden</string>
@@ -290,8 +289,8 @@
     <string name="st_profile_menu_edit_name">Edit name</string>
     <string name="st_profile_menu_view">View in Contacts App</string>
     <string name="st_profile_blocked">User blocked</string>
-    <string name="st_profile_added">Contact added to contacts</string>
-    <string name="st_profile_secret">Create Secret Chat</string>
+    <string name="st_profile_added">Contact added</string>
+    <string name="st_profile_secret">Start Secret Chat</string>
 
     <string name="st_pick_file_title">Select a file</string>
 
@@ -306,10 +305,10 @@
     <string name="st_edit_dialog_header_settings">SETTINGS</string>
     <string name="st_edit_dialog_header_media">SHARED MEDIA</string>
     <string name="st_edit_dialog_notifications">Notifications</string>
-    <string name="st_edit_dialog_notifications_sound">Custom sound</string>
+    <string name="st_edit_dialog_notifications_sound">Customize tone</string>
     <string name="st_edit_dialog_media">Media in group</string>
     <string name="st_edit_dialog_add_member">Add member</string>
-    <string name="st_edit_dialog_delete">Leave group and delete</string>
+    <string name="st_edit_dialog_delete">Leave group</string>
     <string name="st_edit_dialog_delete_title">Are you sure?</string>
     <string name="st_edit_dialog_delete_message">Leave this group and delete all messages?
     </string>
@@ -361,14 +360,14 @@
     <string name="st_appearance_font_size_normal">Normal</string>
     <string name="st_appearance_font_size_large">Large</string>
     <string name="st_appearance_font_size_huge">Huge</string>
-    <string name="st_appearance_enter">Enter is send</string>
-    <string name="st_appearance_enter_subtitle_enable">Enter key will send your message</string>
-    <string name="st_appearance_enter_subtitle_disable">Enter key will add new line</string>
+    <string name="st_appearance_enter">Send by enter</string>
+    <string name="st_appearance_enter_subtitle_enable">Enter sends the message</string>
+    <string name="st_appearance_enter_subtitle_disable">Enter adds a new line</string>
     <string name="st_appearance_background">Wallpaper</string>
-    <string name="st_appearance_background_subtitle">Picture for conversation screen</string>
+    <string name="st_appearance_background_subtitle">Chat background</string>
 
     <string name="st_appearance_item_size">Style: {s}</string>
-    <string name="st_appearance_item_size_subtitle">Chat item size for chat list screen</string>
+    <string name="st_appearance_item_size_subtitle">Chat size on messages screen</string>
     <string name="st_appearance_item_size_normal">Normal</string>
     <string name="st_appearance_item_size_large">Large</string>
 
@@ -380,45 +379,45 @@
     <string name="st_notifications_alert">Alert</string>
     <string name="st_notifications_vibrate">Vibrate</string>
     <string name="st_notifications_sound">Sound</string>
-    <string name="st_notifications_sound_custom">Custom sound</string>
-    <string name="st_notifications_in_app_sound">In-App sounds</string>
-    <string name="st_notifications_in_app_vibrate">In-App vibrate</string>
-    <string name="st_notifications_in_app_preview">In-App preview</string>
-    <string name="st_notifications_reset">Reset All Notifications</string>
+    <string name="st_notifications_sound_custom">Custom tone</string>
+    <string name="st_notifications_in_app_sound">In-app sounds</string>
+    <string name="st_notifications_in_app_vibrate">In-app vibrate</string>
+    <string name="st_notifications_in_app_preview">In-app preview</string>
+    <string name="st_notifications_reset">Reset all notifications</string>
     <string name="st_notifications_reset_hint">Undo all custom notification settings for all your contacts and groups
     </string>
-    <string name="st_notifications_reset_success">Settings reset successful</string>
+    <string name="st_notifications_reset_success">Settings successfully reset</string>
 
     <string name="st_message_by_you">You</string>
     <string name="st_message_you">You</string>
 
     <string name="st_message_enc_self_destruct">{0} set the self-destruct timer to {1}</string>
-    <string name="st_message_enc_self_destruct_off">{0} turned off self-destruct timer</string>
+    <string name="st_message_enc_self_destruct_off">{0} disabled the self-destruct timer</string>
 
-    <string name="st_message_user_photo_change">{0} added new profile photo</string>
+    <string name="st_message_user_photo_change">{0} added a new profile photo</string>
     <string name="st_message_user_joined_app">{0} joined Telegram</string>
 
     <string name="st_message_create_group">{0} created the group</string>
     <string name="st_message_create_group_you">@string/st_message_create_group</string>
 
-    <string name="st_message_photo_change">{0} changed the group avatar</string>
+    <string name="st_message_photo_change">{0} updated the group photo</string>
     <string name="st_message_photo_change_you">@string/st_message_photo_change</string>
 
-    <string name="st_message_photo_remove">{0} removed the group avatar</string>
+    <string name="st_message_photo_remove">{0} removed the group photo</string>
     <string name="st_message_photo_remove_you">@string/st_message_photo_remove</string>
 
-    <string name="st_message_name_change">{0} changed group name to {1}</string>
+    <string name="st_message_name_change">{0} changed the group name to {1}</string>
     <string name="st_message_name_change_you">@string/st_message_name_change</string>
 
-    <string name="st_message_added_user">{0} added {1} to group</string>
+    <string name="st_message_added_user">{0} added {1} to the group</string>
     <string name="st_message_added_user_you">@string/st_message_added_user</string>
     <string name="st_message_added_user_of_you">@string/st_message_added_user</string>
 
-    <string name="st_message_kicked_user">{0} kicked {1} from group</string>
+    <string name="st_message_kicked_user">{0} kicked {1} from the group</string>
     <string name="st_message_kicked_user_you">@string/st_message_kicked_user</string>
     <string name="st_message_kicked_user_of_you">@string/st_message_kicked_user</string>
 
-    <string name="st_message_left_user">{0} left group</string>
+    <string name="st_message_left_user">{0} left the group</string>
     <string name="st_message_left_user_you">@string/st_message_left_user</string>
 
     <string name="st_message_service">Unknown service message</string>
@@ -430,48 +429,47 @@
     <string name="st_dialog_video">Video</string>
     <string name="st_dialog_geo">Location</string>
     <string name="st_dialog_contact">Shared contact</string>
-    <string name="st_dialog_document">Document</string>
     <string name="st_dialog_unknown">Unsupported content</string>
 
-    <string name="st_dialog_user_add_avatar">{sender} added new profile photo</string>
-    <string name="st_dialog_user_joined_app">{sender} joined telegram</string>
+    <string name="st_dialog_user_add_avatar">Added a new profile photo</string>
+    <string name="st_dialog_user_joined_app">Joined telegram</string>
 
-    <string name="st_dialog_encrypted_switched_off">{sender} turned off self-destruct timer</string>
-    <string name="st_dialog_encrypted_switched_off_you">@string/st_dialog_encrypted_switched_off</string>
-    <string name="st_dialog_encrypted_switched">{sender} set self-destruct timer to {time}</string>
-    <string name="st_dialog_encrypted_switched_you">@string/st_dialog_encrypted_switched</string>
+    <string name="st_dialog_encrypted_switched_off_you">You disabled the self-destruct timer</string>
+    <string name="st_dialog_encrypted_switched_off">Turned off the self-destruct timer</string>
+    <string name="st_dialog_encrypted_switched_you">You set the self-destruct timer to {time}</string>
+    <string name="st_dialog_encrypted_switched">Set the self-destruct timer to {time}</string>
 
     <string name="st_dialog_encrypted_selfdestructed">Last message self-destructed</string>
     <string name="st_dialog_encrypted_requested">Exchanging encryption keys…</string>
     <string name="st_dialog_encrypted_waiting">Waiting for {name} to get online…</string>
     <string name="st_dialog_encrypted_cancelled">Secret chat cancelled</string>
-    <string name="st_dialog_encrypted_created">Secret chat created</string>
+    <string name="st_dialog_encrypted_created">Secret chat started</string>
 
-    <string name="st_dialog_created_group">{sender} created group</string>
+    <string name="st_dialog_created_group">Created the group</string>
     <string name="st_dialog_created_group_you">@string/st_dialog_created_group</string>
 
-    <string name="st_dialog_changed_photo">{sender} changed group photo</string>
+    <string name="st_dialog_changed_photo">Updated group photo</string>
     <string name="st_dialog_changed_photo_you">@string/st_dialog_changed_photo</string>
 
-    <string name="st_dialog_removed_photo">{sender} removed group photo</string>
+    <string name="st_dialog_removed_photo">Removed group photo</string>
     <string name="st_dialog_removed_photo_you">@string/st_dialog_removed_photo</string>
 
-    <string name="st_dialog_changed_name">{sender} changed group name</string>
+    <string name="st_dialog_changed_name">Updated group name</string>
     <string name="st_dialog_changed_name_you">@string/st_dialog_changed_name</string>
 
-    <string name="st_dialog_added_user">{1} added {0} to the group</string>
+    <string name="st_dialog_added_user">Added {0} to the group</string>
     <string name="st_dialog_added_user_you">@string/st_dialog_added_user</string>
     <string name="st_dialog_added_user_of_you">@string/st_dialog_added_user</string>
 
-    <string name="st_dialog_enter_user">{sender} joined the group</string>
+    <string name="st_dialog_enter_user">Joined the group</string>
     <string name="st_dialog_enter_user_you">@string/st_dialog_enter_user</string>
 
-    <string name="st_dialog_left_user">{sender} left the group</string>
+    <string name="st_dialog_left_user">Left the group</string>
     <string name="st_dialog_left_user_you">@string/st_dialog_left_user</string>
 
-    <string name="st_dialog_kicked_user">{sender} kicked {0} from the group</string>
-    <string name="st_dialog_kicked_user_you">@string/st_dialog_kicked_user</string>
-    <string name="st_dialog_kicked_user_of_you">@string/st_dialog_kicked_user</string>
+    <string name="st_dialog_kicked_user">Kicked {0} from the group</string>
+    <string name="st_dialog_kicked_user_you">@string/st_dialog_left_user</string>
+    <string name="st_dialog_kicked_user_of_you">@string/st_dialog_left_user</string>
 
     <string name="st_dialog_system">System message</string>
 
@@ -481,13 +479,13 @@
     <string name="st_secret_header_chat">CHAT</string>
 
     <string name="st_secret_key_title">Encryption Key</string>
-    <string name="st_secret_key_info1">This image is a visualisation of encryption keys for secret chat with {name}.
+    <string name="st_secret_key_info1">This image is a visualisation of your encryption key for this secret chat with {name}.
     </string>
-    <string name="st_secret_key_info2">If this image looks same on {name}\'s phone your chat is 200% secure."
+    <string name="st_secret_key_info2">If this image looks same on {name}\'s phone, your chat is 200% secure."
     </string>
 
     <string name="st_bubble_media_cancelled">cancelled</string>
-    <string name="st_bubble_media_try_again">try again?</string>
+    <string name="st_bubble_media_try_again">retry?</string>
     <string name="st_bubble_media_download">download</string>
     <string name="st_bubble_media_in_progress">in progress</string>
 
@@ -497,7 +495,7 @@
     <string name="st_notification_sent_photo">{name} sent you a photo</string>
     <string name="st_notification_sent_message">{name} sent you a message</string>
     <string name="st_notification_sent_document">{name} sent you a document</string>
-    <string name="st_notification_joined">{name} joined the App!</string>
+    <string name="st_notification_joined">{name} joined Telegram!</string>
 
     <string name="st_notification_group_sent_map">{name} sent a map to the chat {chat}</string>
     <string name="st_notification_group_sent_contact">{name} shared a contact to the chat {chat}</string>
@@ -506,7 +504,7 @@
     <string name="st_notification_group_sent_document">{name} sent a document to the chat {chat}</string>
 
     <string name="st_notification_secret_requested">Requested new secret chat</string>
-    <string name="st_notification_secret_created">Secret chat chat created</string>
+    <string name="st_notification_secret_created">Secret chat started</string>
     <string name="st_notification_secret_cancelled">Secret chat cancelled</string>
 
     <string name="st_notification_secret_sent_message">Sent a message to the secret chat</string>
@@ -531,8 +529,7 @@
 
         I just downloaded Telegram Messenger on my Android.
 
-        It is a smartphone messenger which replaces SMS. This app even lets me send pictures, video and other
-        multimedia!
+        It is a fast, secure and free messenger that replaces SMS. With this app you can create groups for up to 200 people, send messages, photos and large videos!
 
         Telegram Messenger is available for Android and iPhone. There is no PIN or username to remember - it works just
         like SMS and uses your internet data plan.
