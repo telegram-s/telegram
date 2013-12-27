@@ -98,6 +98,24 @@
         <![CDATA[<b>Telegram</b> lets you access your messages from multiple devices.]]>
     </string>
 
+    <string name="st_auth_not_activating_ticker">Activating Telegram...</string>
+    <string name="st_auth_not_activating_content">Activation in progress</string>
+
+    <string name="st_auth_not_connection_error_ticker">Connection error</string>
+    <string name="st_auth_not_connection_error_content">Unable to activate Telegram: Connection error</string>
+
+    <string name="st_auth_not_error_ticker">Error during activation</string>
+    <string name="st_auth_not_error_content">Unable to activate Telegram</string>
+
+    <string name="st_auth_not_activating_code_ticker">Manual activation required</string>
+    <string name="st_auth_not_activating_code_content">Please, enter activation code</string>
+
+    <string name="st_auth_not_activating_signup_ticker">Signup required</string>
+    <string name="st_auth_not_activating_signup_content">Phone activated! Please sign up.</string>
+
+    <string name="st_auth_not_activating_complete_ticker">Telegram activated</string>
+    <string name="st_auth_not_activating_complete_content">Telegram activated!</string>
+
     <string name="st_auth_confirm_number">Is this your number?</string>
     <string name="st_auth_confirm_yes">Yes, activate account</string>
     <string name="st_auth_confirm_no">No, change number</string>

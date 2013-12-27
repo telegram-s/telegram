@@ -260,27 +260,30 @@ public class ActivationController {
     private void showNotification() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(application);
         builder.setSmallIcon(R.drawable.app_notify);
-        builder.setContentTitle("Telegram");
-        builder.setContentIntent(
-                PendingIntent.getActivity(application, 0, new Intent().setClass(application, StartActivity.class), rnd.nextInt()));
+        builder.setContentTitle(application.getString(R.string.st_app_name));
 
         if (currentState == STATE_ACTIVATION) {
-            builder.setTicker("Activating Telegram...");
-            builder.setContentText("Activation in progress");
+            builder.setTicker(application.getString(R.string.st_auth_not_activating_ticker));
+            builder.setContentText(application.getString(R.string.st_auth_not_activating_content));
             builder.setProgress(0, 0, true);
             builder.setOngoing(true);
         } else if (currentState == STATE_ERROR_NETWORK) {
-            builder.setTicker("Connection error");
-            builder.setContentText("Unable to activate Telegram: Connection error");
+            builder.setTicker(application.getString(R.string.st_auth_not_connection_error_ticker));
+            builder.setContentText(application.getString(R.string.st_auth_not_connection_error_content));
+        } else if (currentState == STATE_ERROR_EXPIRED || currentState == STATE_ERROR_WRONG_CODE ||
+                currentState == STATE_ERROR_UNKNOWN || currentState == STATE_ERROR_WRONG_PHONE ||
+                currentState == STATE_ERROR_TOO_OFTEN) {
+            builder.setTicker(application.getString(R.string.st_auth_not_error_ticker));
+            builder.setContentText(application.getString(R.string.st_auth_not_error_content));
         } else if (currentState == STATE_MANUAL_ACTIVATION) {
-            builder.setTicker("Manual activation required");
-            builder.setContentText("Unable automatically activate Telegram");
+            builder.setTicker(application.getString(R.string.st_auth_not_activating_code_ticker));
+            builder.setContentText(application.getString(R.string.st_auth_not_activating_code_content));
         } else if (currentState == STATE_SIGNUP) {
-            builder.setTicker("Signup required");
-            builder.setContentText("Phone activated! Please sign up.");
+            builder.setTicker(application.getString(R.string.st_auth_not_activating_signup_ticker));
+            builder.setContentText(application.getString(R.string.st_auth_not_activating_signup_content));
         } else if (currentState == STATE_ACTIVATED) {
-            builder.setTicker("Telegram activated");
-            builder.setContentText("Telegram activated!");
+            builder.setTicker(application.getString(R.string.st_auth_not_activating_complete_ticker));
+            builder.setContentText(application.getString(R.string.st_auth_not_activating_complete_content));
         } else {
             builder = null;
         }
@@ -288,6 +291,8 @@ public class ActivationController {
         if (builder == null) {
             notificationManager.cancel(NOTIFICATION_ID);
         } else {
+            builder.setContentIntent(
+                    PendingIntent.getActivity(application, 0, new Intent().setClass(application, StartActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT));
             notificationManager.notify(NOTIFICATION_ID, builder.build());
         }
     }

@@ -50,7 +50,7 @@ public class UserSettings {
         isSaveToGalleryEnabled = preferences.getBoolean("save_to_gallery", isSaveToGalleryEnabled);
         showOnlyTelegramContacts = preferences.getBoolean("only_telegram", showOnlyTelegramContacts);
         bubbleFontSize = preferences.getInt("bubbleFontSize", bubbleFontSize);
-        sendByEnter = preferences.getBoolean("only_telegram", sendByEnter);
+        sendByEnter = preferences.getBoolean("sendByEnter", sendByEnter);
         dialogItemSize = preferences.getInt("bubbleFontSize", dialogItemSize);
     }
 
