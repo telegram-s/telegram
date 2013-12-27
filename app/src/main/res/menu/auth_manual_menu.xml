@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="@string/st_auth_activating_manual"
-          android:id="@+id/enterCode"
+    <item android:title="@string/st_auth_code_call"
+          android:id="@+id/requestCall"
           android:showAsAction="always"/>
 </menu>

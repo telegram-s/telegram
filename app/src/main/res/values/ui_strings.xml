@@ -106,13 +106,16 @@
     <string name="st_auth_phone_title">Select your country, enter your phone number and tap continue:</string>
     <string name="st_auth_phone_hint">Phone number</string>
 
+    <string name="st_auth_activating_manual">Enter code</string>
     <string name="st_auth_activating_title">Activating phone…</string>
     <string name="st_auth_activating_subtitle">This may take up to a minute. Please wait.</string>
 
+    <string name="st_auth_request_call">Request call</string>
     <string name="st_auth_phone_call">Requesting phone call…</string>
     <string name="st_auth_creating">Creating your profile…</string>
 
-    <string name="st_auth_code_title">Enter your activation code and press continue</string>
+    <string name="st_auth_code_title">Enter your activation code and press continue:</string>
+    <string name="st_auth_code_call">Request call</string>
     <string name="st_auth_code">Code</string>
 
     <string name="st_auth_signup_title">Your phone number is now confirmed! Please enter your name, add your picture and
@@ -120,7 +123,9 @@
     </string>
 
     <string name="st_auth_incorrect_phone">Phone number {0} is incorrect</string>
-    <string name="st_auth_confirm_phone">Is this your correct number? \n\n{0} \n\nAn SMS with your access code will be sent to this number.</string>
+    <string name="st_auth_confirm_phone">Is this your correct number? \n\n{0} \n\nAn SMS with your access code will be
+        sent to this number.
+    </string>
 
     <string name="st_dialogs_pick_title">Select a conversation</string>
 
@@ -192,7 +197,8 @@
     <string name="st_new_group_next">NEXT</string>
 
     <string name="st_new_group_complete_title">GROUP NAME AND PHOTO</string>
-    <string name="st_new_group_complete_avatar">You have successfully created the group, but we couldn\'t upload the group photo. Retry?
+    <string name="st_new_group_complete_avatar">You have successfully created the group, but we couldn\'t upload the
+        group photo. Retry?
     </string>
     <string name="st_new_group_complete_done">DONE</string>
 
@@ -478,7 +484,8 @@
     <string name="st_secret_header_chat">CHAT</string>
 
     <string name="st_secret_key_title">Encryption Key</string>
-    <string name="st_secret_key_info1">This image is a visualisation of your encryption key for this secret chat with {name}.
+    <string name="st_secret_key_info1">This image is a visualisation of your encryption key for this secret chat with
+        {name}.
     </string>
     <string name="st_secret_key_info2">If this image looks same on {name}\'s phone, your chat is 200% secure."
     </string>
@@ -528,7 +535,8 @@
 
         I just downloaded Telegram Messenger on my Android.
 
-        It is a fast, secure and free messenger that replaces SMS. With this app you can create groups for up to 200 people, send messages, photos and large videos!
+        It is a fast, secure and free messenger that replaces SMS. With this app you can create groups for up to 200
+        people, send messages, photos and large videos!
 
         Telegram Messenger is available for Android and iPhone. There is no PIN or username to remember - it works just
         like SMS and uses your internet data plan.

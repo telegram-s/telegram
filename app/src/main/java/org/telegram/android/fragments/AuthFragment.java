@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -336,6 +337,7 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                 break;
             case ActivationController.STATE_MANUAL_ACTIVATION_SEND:
             case ActivationController.STATE_ACTIVATION:
+            case ActivationController.STATE_REQUEST_CODE:
                 getSherlockActivity().getSupportActionBar().setTitle("Activation in progress...");
                 break;
         }
@@ -343,10 +345,34 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         if (currentState == ActivationController.STATE_ACTIVATION) {
             inflater.inflate(R.menu.auth_menu, menu);
         }
+        if (currentState == ActivationController.STATE_MANUAL_ACTIVATION) {
+            if (application.getKernel().getActivationController() != null) {
+                if (application.getKernel().getActivationController().isManualActivation()) {
+                    inflater.inflate(R.menu.auth_manual_menu, menu);
+                }
+            }
+        }
     }
 
     private void updateBarTitle() {
         getSherlockActivity().invalidateOptionsMenu();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.enterCode) {
+            if (application.getKernel().getActivationController() != null) {
+                application.getKernel().getActivationController().manualCodeEnter();
+            }
+            return true;
+        }
+        if (item.getItemId() == R.id.requestCall) {
+            if (application.getKernel().getActivationController() != null) {
+                application.getKernel().getActivationController().requestPhone();
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -381,6 +407,10 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
             ((TextView) manual.findViewById(R.id.phoneCode)).setText("+" +
                     application.getKernel().getActivationController().getCurrentCountry().getCallPrefix());
 
+            if (application.getKernel().getActivationController().getManualCode() != null) {
+                ((EditText) phoneActivation.findViewById(R.id.code)).setText(application.getKernel().getActivationController().getManualCode());
+            }
+
             onStateChanged(application.getKernel().getActivationController().getCurrentState());
         }
     }
@@ -399,6 +429,11 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
 
             if (currentState == ActivationController.STATE_PHONE_EDIT) {
                 application.getKernel().getActivationController().setManualPhone(((EditText) manual.findViewById(R.id.phoneName)).getText().toString());
+            }
+
+            if (currentState == ActivationController.STATE_MANUAL_ACTIVATION) {
+                application.getKernel().getActivationController().setManualCode(
+                        ((EditText) phoneActivation.findViewById(R.id.code)).getText().toString());
             }
         }
     }
@@ -445,10 +480,14 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         }
 
         // Progress
-        if (currentState == ActivationController.STATE_ACTIVATION) {
+        if ((currentState == ActivationController.STATE_ACTIVATION ||
+                currentState == ActivationController.STATE_REQUEST_CODE) &&
+                (state == ActivationController.STATE_ACTIVATION ||
+                        state == ActivationController.STATE_REQUEST_CODE)) {
             hideView(progress);
         }
-        if (state == ActivationController.STATE_ACTIVATION) {
+        if (state == ActivationController.STATE_ACTIVATION ||
+                state == ActivationController.STATE_REQUEST_CODE) {
             showView(progress, currentState != ActivationController.STATE_START);
         } else {
             progress.setVisibility(View.GONE);
@@ -546,16 +585,6 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         } else {
             wrongCodeError.setVisibility(View.GONE);
         }
-
-        // Unable
-//        if (currentState == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
-//            hideView(unableError);
-//        }
-//        if (state == ActivationController.STATE_ACTIVATION_ERROR_UNABLE) {
-//            showView(unableError, currentState != ActivationController.STATE_START);
-//        } else {
-//            unableError.setVisibility(View.GONE);
-//        }
 
         // Manual activation request
         if (currentState == ActivationController.STATE_MANUAL_ACTIVATION_REQUEST) {

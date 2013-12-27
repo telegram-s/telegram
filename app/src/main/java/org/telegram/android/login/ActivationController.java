@@ -57,19 +57,20 @@ public class ActivationController {
     public static final int STATE_START = 0;
     public static final int STATE_PHONE_CONFIRM = 1;
     public static final int STATE_PHONE_EDIT = 2;
-    public static final int STATE_ACTIVATION = 3;
-    public static final int STATE_ERROR_NETWORK = 4;
-    public static final int STATE_ERROR_UNKNOWN = 5;
-    public static final int STATE_ERROR_TOO_OFTEN = 6;
-    public static final int STATE_ERROR_WRONG_PHONE = 7;
-    public static final int STATE_ERROR_WRONG_CODE = 8;
-    public static final int STATE_ERROR_EXPIRED = 9;
-    public static final int STATE_MANUAL_ACTIVATION = 10;
-    public static final int STATE_MANUAL_ACTIVATION_SEND = 11;
-    public static final int STATE_MANUAL_ACTIVATION_REQUEST = 12;
-    public static final int STATE_SIGNUP = 13;
-    public static final int STATE_SIGNUP_REQUEST = 14;
-    public static final int STATE_ACTIVATED = 15;
+    public static final int STATE_REQUEST_CODE = 4;
+    public static final int STATE_ACTIVATION = 5;
+    public static final int STATE_ERROR_NETWORK = 6;
+    public static final int STATE_ERROR_UNKNOWN = 7;
+    public static final int STATE_ERROR_TOO_OFTEN = 8;
+    public static final int STATE_ERROR_WRONG_PHONE = 9;
+    public static final int STATE_ERROR_WRONG_CODE = 10;
+    public static final int STATE_ERROR_EXPIRED = 11;
+    public static final int STATE_MANUAL_ACTIVATION = 12;
+    public static final int STATE_MANUAL_ACTIVATION_SEND = 13;
+    public static final int STATE_MANUAL_ACTIVATION_REQUEST = 14;
+    public static final int STATE_SIGNUP = 15;
+    public static final int STATE_SIGNUP_REQUEST = 16;
+    public static final int STATE_ACTIVATED = 17;
 
     public static final int ERROR_REQUEST_SMS = 0;
     public static final int ERROR_REQUEST_CALL = 1;
@@ -94,9 +95,11 @@ public class ActivationController {
     private String manualFirstname;
     private String manualLastname;
     private String manualAvatarUri;
+    private String manualCode;
 
     private int sentTime;
     private boolean isManualPhone;
+    private boolean isManualActivation;
     private int networkError;
     private int lastActivationCode;
 
@@ -240,6 +243,10 @@ public class ActivationController {
         }
     }
 
+    public boolean isManualActivation() {
+        return isManualActivation;
+    }
+
     public void onPageShown() {
         hideNotification();
         isPageVisible = true;
@@ -287,6 +294,14 @@ public class ActivationController {
 
     private void hideNotification() {
         notificationManager.cancel(NOTIFICATION_ID);
+    }
+
+    public String getManualCode() {
+        return manualCode;
+    }
+
+    public void setManualCode(String manualCode) {
+        this.manualCode = manualCode;
     }
 
     public String getAutoFirstname() {
@@ -414,13 +429,14 @@ public class ActivationController {
 
     private void startActivation() {
         Logger.d(TAG, "startActivation");
-        doChangeState(STATE_ACTIVATION);
+        doChangeState(STATE_REQUEST_CODE);
 
         application.getApi().doRpcCallNonAuth(new TLRequestAuthSendCode(currentPhone, 0, ApiConfig.API_ID, ApiConfig.API_HASH,
                 application.getString(R.string.st_lang)), REQUEST_TIMEOUT,
                 new RpcCallback<TLSentCode>() {
                     @Override
                     public void onResult(final TLSentCode result) {
+                        doChangeState(STATE_ACTIVATION);
                         sentTime = (int) (System.currentTimeMillis() / 1000);
                         handler.post(new Runnable() {
                             @Override
@@ -479,16 +495,22 @@ public class ActivationController {
                 });
     }
 
+    public void manualCodeEnter() {
+        cancelAutomatic();
+        doChangeState(STATE_MANUAL_ACTIVATION);
+        isManualActivation = true;
+    }
+
     private void startCodeSearch() {
         Logger.d(TAG, "startCodeSearch");
         handler.postDelayed(cancelAutomatic, AUTO_TIMEOUT);
-        receiver = new AutoActivationReceiver(application);
-        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
-            @Override
-            public void onCodeReceived(int code) {
-                performAutoActivation(code);
-            }
-        });
+//        receiver = new AutoActivationReceiver(application);
+//        receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
+//            @Override
+//            public void onCodeReceived(int code) {
+//                performAutoActivation(code);
+//            }
+//        });
     }
 
     private void performAutoActivation(int code) {
@@ -510,6 +532,7 @@ public class ActivationController {
                     @Override
                     public void onError(int errorCode, String message) {
                         cancelAutomatic();
+                        requestPhone();
                     }
                 });
     }
@@ -523,7 +546,12 @@ public class ActivationController {
 
         handler.removeCallbacks(cancelAutomatic);
 
-        doChangeState(STATE_MANUAL_ACTIVATION);
+//        if (currentState == STATE_ACTIVATION) {
+//            requestPhone();
+//        }
+//        } else {
+//            doChangeState(STATE_MANUAL_ACTIVATION);
+//        }
     }
 
     public void requestPhone() {

@@ -40,7 +40,7 @@
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/st_btn_gray"
+                android:background="@drawable/st_btn_grey"
                 android:textColor="@color/st_black_text"
                 android:textSize="16sp"
                 android:text="@string/st_auth_confirm_no"
@@ -163,7 +163,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/st_btn_green"
+                android:background="@drawable/st_btn_blue"
                 android:textColor="#ffffff"
                 android:text="@string/st_try_again"
                 android:id="@+id/tryAgain"/>
@@ -172,7 +172,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/st_btn_gray"
+                android:background="@drawable/st_btn_grey"
                 android:textColor="@color/st_black_text"
                 android:textSize="16sp"
                 android:text="@string/st_cancel"
@@ -195,7 +195,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/st_btn_green"
+                android:background="@drawable/st_btn_blue"
                 android:textColor="#ffffff"
                 android:text="@string/st_try_again"
                 android:id="@+id/tryAgain"/>
@@ -204,7 +204,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/st_btn_gray"
+                android:background="@drawable/st_btn_grey"
                 android:textColor="@color/st_black_text"
                 android:textSize="16sp"
                 android:text="@string/st_cancel"
@@ -229,7 +229,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/st_btn_green"
+                android:background="@drawable/st_btn_blue"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:text="@string/st_back"
@@ -253,7 +253,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/st_btn_green"
+                android:background="@drawable/st_btn_blue"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:text="@string/st_start_again"
@@ -278,7 +278,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/st_btn_green"
+                android:background="@drawable/st_btn_blue"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:text="@string/st_back"
@@ -302,7 +302,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/st_btn_green"
+                android:background="@drawable/st_btn_blue"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:text="@string/st_back"
@@ -358,6 +358,7 @@
                   android:textSize="18sp"
                   android:gravity="center"
                   android:paddingBottom="16dp"
+                  android:textColor="@color/st_auth_text"
                   android:text="@string/st_auth_code_title"/>
 
         <EditText android:layout_width="fill_parent"
@@ -374,13 +375,13 @@
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="16dp"
                 android:textColor="#ffffff"
-                android:background="@drawable/st_btn_green"
+                android:background="@drawable/st_btn_blue"
                 android:text="@string/st_continue"
                 android:id="@+id/completePhoneActivation"/>
+
     </LinearLayout>
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
@@ -414,13 +415,15 @@
                   android:textSize="18sp"
                   android:gravity="center"
                   android:paddingBottom="16dp"
+                  android:textColor="@color/st_auth_text"
                   android:text="@string/st_auth_signup_title"/>
 
         <org.telegram.android.ui.RtlLinearLayout android:layout_height="wrap_content"
                                                  android:layout_width="fill_parent"
                                                  android:baselineAligned="false">
             <FrameLayout android:layout_width="108dp"
-                         android:layout_height="108dp">
+                         android:layout_height="108dp"
+                         android:visibility="gone">
                 <com.extradea.framework.images.ui.FastWebImageView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
@@ -474,7 +477,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:textColor="#ffffff"
-                android:background="@drawable/st_btn_green"
+                android:background="@drawable/st_btn_blue"
                 android:text="@string/st_continue"
                 android:id="@+id/completeSignup"/>
     </LinearLayout>
