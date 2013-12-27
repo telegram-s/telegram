@@ -120,7 +120,9 @@
     </string>
 
     <string name="st_auth_incorrect_phone">Phone number {0} is incorrect</string>
-    <string name="st_auth_confirm_phone">Is this your correct number? \n\n{0} \n\nAn SMS with your access code will be sent to this number.</string>
+    <string name="st_auth_confirm_phone">Is this your correct number? \n\n{0} \n\nAn SMS with your access code will be
+        sent to this number.
+    </string>
 
     <string name="st_dialogs_pick_title">Select a conversation</string>
 
@@ -430,6 +432,7 @@
     <string name="st_dialog_video">Video</string>
     <string name="st_dialog_geo">Location</string>
     <string name="st_dialog_contact">Shared contact</string>
+    <string name="st_dialog_document">Document</string>
     <string name="st_dialog_unknown">Unsupported content</string>
 
     <string name="st_dialog_user_add_avatar">Added new profile photo</string>
