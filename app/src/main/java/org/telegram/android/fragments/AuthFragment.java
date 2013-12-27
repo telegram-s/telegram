@@ -7,9 +7,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -124,6 +126,19 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                 }
             }
         });
+        ((EditText) manual.findViewById(R.id.phoneName)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i == EditorInfo.IME_ACTION_DONE) {
+                    if (textView.getText().toString().trim().length() > 0) {
+                        doActivation();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
         if (((EditText) manual.findViewById(R.id.phoneName)).getText().toString().trim().length() > 0) {
             manual.findViewById(R.id.doActivation).setEnabled(true);
         } else {
@@ -133,56 +148,7 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         manual.findViewById(R.id.doActivation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                hideKeyboard(manual.findViewById(R.id.phoneName));
-
-                String number = ((TextView) manual.findViewById(R.id.phoneName)).getText().toString();
-                number = "+" +
-                        application.getKernel().getActivationController().getCurrentCountry().getCallPrefix() +
-                        number;
-
-                try {
-                    final Phonenumber.PhoneNumber numberUtil = PhoneNumberUtil.getInstance().parse(number, application.getKernel().getActivationController().getCurrentCountry().getIso());
-                    if (PhoneNumberUtil.getInstance().isValidNumber(numberUtil)) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
-                                getStringSafe(R.string.st_auth_confirm_phone)
-                                        .replace("\\n", "\n")
-                                        .replace("{0}", PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)));
-                        builder.setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                application.getKernel().getActivationController().doActivation(numberUtil.getNationalNumber() + "");
-                            }
-                        }).setNegativeButton(R.string.st_edit, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                showKeyboard((EditText) manual.findViewById(R.id.phoneName));
-                            }
-                        });
-                        AlertDialog dialog = builder.create();
-                        dialog.setCanceledOnTouchOutside(true);
-                        dialog.show();
-                    } else {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
-                                getStringSafe(R.string.st_auth_incorrect_phone)
-                                        .replace("{0}", PhoneNumberUtil.getInstance()
-                                                .format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)));
-                        AlertDialog dialog = builder.create();
-                        dialog.setCanceledOnTouchOutside(true);
-                        dialog.show();
-                    }
-                } catch (NumberParseException e) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                            .setMessage(getStringSafe(R.string.st_auth_incorrect_phone).replace("{0}", number));
-                    builder.setPositiveButton(R.string.st_edit, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            showKeyboard((EditText) manual.findViewById(R.id.phoneName));
-                        }
-                    });
-                    AlertDialog dialog = builder.create();
-                    dialog.setCanceledOnTouchOutside(true);
-                    dialog.show();
-                }
+                doActivation();
             }
         });
 
@@ -237,12 +203,49 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         phoneActivation.findViewById(R.id.completePhoneActivation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                hideKeyboard(phoneActivation.findViewById(R.id.code));
-
-                int code = Integer.parseInt(((TextView) phoneActivation.findViewById(R.id.code)).getText().toString());
-                application.getKernel().getActivationController().doSendCode(code);
+                doSendCode();
             }
         });
+
+        ((EditText) phoneActivation.findViewById(R.id.code)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i == EditorInfo.IME_ACTION_DONE) {
+                    if (textView.getText().toString().trim().length() > 0) {
+                        doSendCode();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        ((EditText) phoneActivation.findViewById(R.id.code)).addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.toString().trim().length() > 0) {
+                    phoneActivation.findViewById(R.id.completePhoneActivation).setEnabled(true);
+                } else {
+                    phoneActivation.findViewById(R.id.completePhoneActivation).setEnabled(false);
+                }
+            }
+        });
+
+        if (((EditText) phoneActivation.findViewById(R.id.code)).getText().toString().trim().length() > 0) {
+            phoneActivation.findViewById(R.id.completePhoneActivation).setEnabled(true);
+        } else {
+            phoneActivation.findViewById(R.id.completePhoneActivation).setEnabled(false);
+        }
 
         wrongCodeError.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -308,6 +311,66 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         signupPageProgress.setVisibility(View.GONE);
 
         return res;
+    }
+
+    private void doSendCode() {
+        hideKeyboard(phoneActivation.findViewById(R.id.code));
+
+        int code = Integer.parseInt(((TextView) phoneActivation.findViewById(R.id.code)).getText().toString());
+        application.getKernel().getActivationController().doSendCode(code);
+    }
+
+    private void doActivation() {
+        hideKeyboard(manual.findViewById(R.id.phoneName));
+
+        String number = ((TextView) manual.findViewById(R.id.phoneName)).getText().toString();
+        number = "+" +
+                application.getKernel().getActivationController().getCurrentCountry().getCallPrefix() +
+                number;
+
+        try {
+            final Phonenumber.PhoneNumber numberUtil = PhoneNumberUtil.getInstance().parse(number, application.getKernel().getActivationController().getCurrentCountry().getIso());
+            if (PhoneNumberUtil.getInstance().isValidNumber(numberUtil)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
+                        getStringSafe(R.string.st_auth_confirm_phone)
+                                .replace("\\n", "\n")
+                                .replace("{0}", PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)));
+                builder.setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        application.getKernel().getActivationController().doActivation(numberUtil.getNationalNumber() + "");
+                    }
+                }).setNegativeButton(R.string.st_edit, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        showKeyboard((EditText) manual.findViewById(R.id.phoneName));
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
+                        getStringSafe(R.string.st_auth_incorrect_phone)
+                                .replace("{0}", PhoneNumberUtil.getInstance()
+                                        .format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)));
+                AlertDialog dialog = builder.create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
+            }
+        } catch (NumberParseException e) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                    .setMessage(getStringSafe(R.string.st_auth_incorrect_phone).replace("{0}", number));
+            builder.setPositiveButton(R.string.st_edit, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    showKeyboard((EditText) manual.findViewById(R.id.phoneName));
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.show();
+        }
     }
 
     @Override

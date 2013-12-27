@@ -411,6 +411,7 @@ public class FragmentScreenController implements RootController {
         StartActivity.isGuideShown = false;
         transaction.add(R.id.fragmentContainer, new TourFragment(), "tourFragment")
                 .commit();
+        hidePanel();
         backStack.clear();
     }
 
