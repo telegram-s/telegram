@@ -216,7 +216,8 @@ public class ActivationController {
                     {
                             "display_name_alt", "photo_uri"
                     }, null, null, null);
-            if (c.moveToFirst()) {
+
+            if (c != null && c.moveToFirst()) {
                 String displayNameAlt = c.getString(0);
                 String pUri = c.getString(1);
 
