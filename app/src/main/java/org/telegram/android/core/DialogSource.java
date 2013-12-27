@@ -380,7 +380,7 @@ public class DialogSource {
                                     .replace("{sender}", senderName);
                         } else {
                             User usr = application.getEngine().getUserRuntime(uid);
-                            body = getString(isMyself ? R.string.st_dialog_kicked_user_you : R.string.st_dialog_kicked_user).replace("{0}", usr.getDisplayName())
+                            body = getString(isMyself ? R.string.st_dialog_kicked_user_you : R.string.st_dialog_kicked_user).replace("{0}", usr.getFirstName())
                                     .replace("{sender}", senderName);
                         }
                     }
@@ -395,7 +395,7 @@ public class DialogSource {
                                     .replace("{sender}", senderName);
                         } else {
                             User usr = application.getEngine().getUserRuntime(uid);
-                            body = getString(isMyself ? R.string.st_dialog_added_user_you : R.string.st_dialog_added_user).replace("{0}", usr.getDisplayName())
+                            body = getString(isMyself ? R.string.st_dialog_added_user_you : R.string.st_dialog_added_user).replace("{0}", usr.getFirstName())
                                     .replace("{sender}", senderName);
                         }
                     }
