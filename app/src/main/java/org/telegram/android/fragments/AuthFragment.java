@@ -5,12 +5,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -98,6 +102,33 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                 startActivity(new Intent().setClass(getActivity(), PickCountryActivity.class));
             }
         });
+
+        ((EditText) manual.findViewById(R.id.phoneName)).addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.toString().trim().length() > 0) {
+                    manual.findViewById(R.id.doActivation).setEnabled(true);
+                } else {
+                    manual.findViewById(R.id.doActivation).setEnabled(false);
+                }
+            }
+        });
+        if (((EditText) manual.findViewById(R.id.phoneName)).getText().toString().trim().length() > 0) {
+            manual.findViewById(R.id.doActivation).setEnabled(true);
+        } else {
+            manual.findViewById(R.id.doActivation).setEnabled(false);
+        }
+
         manual.findViewById(R.id.doActivation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -276,6 +307,46 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         signupPageProgress.setVisibility(View.GONE);
 
         return res;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        switch (currentState) {
+            default:
+            case ActivationController.STATE_MANUAL_ACTIVATION:
+            case ActivationController.STATE_MANUAL_ACTIVATION_REQUEST:
+                getSherlockActivity().getSupportActionBar().setTitle("Phone activation");
+                break;
+            case ActivationController.STATE_PHONE_CONFIRM:
+            case ActivationController.STATE_PHONE_EDIT:
+            case ActivationController.STATE_ERROR_WRONG_PHONE:
+                getSherlockActivity().getSupportActionBar().setTitle("Your phone");
+                break;
+            case ActivationController.STATE_ERROR_NETWORK:
+                getSherlockActivity().getSupportActionBar().setTitle("Connection error...");
+                break;
+            case ActivationController.STATE_ERROR_EXPIRED:
+            case ActivationController.STATE_ERROR_TOO_OFTEN:
+            case ActivationController.STATE_ERROR_UNKNOWN:
+                getSherlockActivity().getSupportActionBar().setTitle("Activation error");
+                break;
+            case ActivationController.STATE_SIGNUP:
+            case ActivationController.STATE_SIGNUP_REQUEST:
+                getSherlockActivity().getSupportActionBar().setTitle("Creating account");
+                break;
+            case ActivationController.STATE_MANUAL_ACTIVATION_SEND:
+            case ActivationController.STATE_ACTIVATION:
+                getSherlockActivity().getSupportActionBar().setTitle("Activation in progress...");
+                break;
+        }
+
+        if (currentState == ActivationController.STATE_ACTIVATION) {
+            inflater.inflate(R.menu.auth_menu, menu);
+        }
+    }
+
+    private void updateBarTitle() {
+        getSherlockActivity().invalidateOptionsMenu();
     }
 
     @Override
@@ -561,5 +632,7 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         }
 
         currentState = state;
+
+        updateBarTitle();
     }
 }

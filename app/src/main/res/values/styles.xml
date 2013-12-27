@@ -120,6 +120,9 @@
 
         <item name="android:fastScrollTrackDrawable">@drawable/holo_fastscroll_normal_track</item>
         <item name="android:fastScrollThumbDrawable">@drawable/holo_fastscroll_thumb</item>
+
+        <item name="actionMenuTextColor">#ffffff</item>
+        <item name="android:actionMenuTextColor">#ffffff</item>
     </style>
     <style name="AppTheme.Photo" parent="Theme.Sherlock">
         <item name="android:windowBackground">@android:color/black</item>

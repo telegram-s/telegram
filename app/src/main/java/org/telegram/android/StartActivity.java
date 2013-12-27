@@ -243,12 +243,13 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             if (first && !isGuideShown) {
                 isGuideShown = true;
                 transaction.add(R.id.fragmentContainer, new TourFragment(), "tourFragment");
+                hideBar();
             } else {
                 transaction.replace(R.id.fragmentContainer, new AuthFragment(), "loginFragment");
+                showBar();
             }
             transaction.commit();
             setState(STATE_LOGIN);
-            hideBar();
         }
     }
 
@@ -414,13 +415,13 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     private void checkLogout() {
         if (!application.isLoggedIn()) {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-            if (!(fragment instanceof AuthFragment)) {
+            if (!(fragment instanceof AuthFragment) && !(fragment instanceof TourFragment)) {
                 getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragmentContainer, new AuthFragment())
+                        .replace(R.id.fragmentContainer, new TourFragment())
                         .commit();
                 getSupportFragmentManager().executePendingTransactions();
-                setState(STATE_LOGIN);
+                setState(STATE_TOUR);
                 hideBar();
             }
         }
@@ -437,6 +438,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                 .replace(R.id.fragmentContainer, new AuthFragment(), "loginFragment")
                 .commit();
         setState(STATE_LOGIN);
+        showBar();
     }
 
     @Override

@@ -223,7 +223,11 @@ public class PickCountryActivity extends StelsActivity {
                     return i - 1;
                 }
             }
-            return 0;
+            if (sectionStart.length > 0) {
+                return sectionStart.length - 1;
+            } else {
+                return 0;
+            }
         }
 
         @Override

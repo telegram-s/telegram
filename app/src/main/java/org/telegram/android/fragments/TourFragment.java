@@ -1,5 +1,7 @@
 package org.telegram.android.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -12,12 +14,17 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import com.viewpagerindicator.UnderlinePageIndicator;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
+import org.telegram.android.login.ActivationController;
 import org.telegram.android.ui.PhotoViewPager;
 
 /**
@@ -95,7 +102,41 @@ public class TourFragment extends StelsFragment {
         openAppButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getRootController().openApp();
+                if (application.getKernel().getActivationController() == null) {
+                    application.getKernel().setActivationController(new ActivationController(application));
+                }
+                if (application.getKernel().getActivationController().getCurrentState() == ActivationController.STATE_PHONE_CONFIRM) {
+                    try {
+                        final Phonenumber.PhoneNumber numberUtil = PhoneNumberUtil.getInstance().parse(
+                                "+" + application.getKernel().getActivationController().getAutoPhone(), "us");
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
+                                getStringSafe(R.string.st_auth_confirm_phone)
+                                        .replace("\\n", "\n")
+                                        .replace("{0}", PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)));
+                        builder.setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                application.getKernel().getActivationController().doConfirmPhone();
+                                getRootController().openApp();
+                            }
+                        }).setNegativeButton(R.string.st_edit, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                application.getKernel().getActivationController().doEditPhone();
+                                getRootController().openApp();
+                            }
+                        });
+                        AlertDialog dialog = builder.create();
+                        dialog.setCanceledOnTouchOutside(true);
+                        dialog.show();
+                    } catch (NumberParseException e) {
+                        application.getKernel().getActivationController().doEditPhone();
+                        getRootController().openApp();
+                    }
+                } else {
+                    getRootController().openApp();
+                }
             }
         });
         // dynamicBg = res.findViewById(R.id.dynamicBg);

@@ -14,7 +14,7 @@
 
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:textColor="@color/st_black_text"
+                  android:textColor="@color/st_auth_text"
                   android:gravity="center"
                   android:textSize="22sp"
                   android:text="@string/st_auth_confirm_number"/>
@@ -73,8 +73,8 @@
                   android:textSize="18sp"
                   android:gravity="center"
                   android:text="@string/st_auth_phone_title"
-                  android:paddingBottom="16dp"
-                  android:textColor="@color/st_black_text"/>
+                  android:paddingBottom="12dp"
+                  android:textColor="@color/st_auth_text"/>
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="match_parent"
@@ -113,10 +113,10 @@
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:textColor="#ffffff"
-                android:background="@drawable/st_btn_green"
+                android:background="@drawable/st_btn_blue"
                 android:text="@string/st_continue"
                 android:id="@+id/doActivation"/>
     </LinearLayout>
@@ -219,6 +219,7 @@
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_gravity="center_horizontal"
+                  android:gravity="center"
                   android:textSize="21sp"
                   android:paddingLeft="32dp"
                   android:paddingRight="32dp"
