@@ -36,7 +36,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     public StelsDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
-        getWritableDatabase().execSQL("PRAGMA synchronous = OFF;PRAGMA journal_mode = MEMORY;");
+        getWritableDatabase().execSQL("PRAGMA synchronous = OFF;PRAGMA journal_mode = TRUNCATE;");
     }
 
     @Override
