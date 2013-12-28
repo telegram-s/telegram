@@ -19,11 +19,20 @@
     <string name="st_default">الوضع الإفتراضي</string>
     <string name="st_select_tone">اختر نغمة</string>
     <string name="st_none">بدون</string>
+
+    <string name="st_continue">Continue</string>
+    <string name="st_back">Back</string>
+    <string name="st_start_again">Start again</string>
+
     <string name="st_receiver_gallery">الأستوديو</string>
     <string name="st_receiver_photo">التقط صورة</string>
     <string name="st_receiver_delete">احذف صورة</string>
-    <string name="st_avatar_changed">تم تغيير صورة المجموعة</string>
-    <string name="st_avatar_removed">تم حذف صورة المجموعة</string>
+
+    <string name="st_avatar_changed">Your avatar changed</string>
+    <string name="st_avatar_removed">Your avatar removed</string>
+    <string name="st_avatar_group_changed">Group avatar changed</string>
+    <string name="st_avatar_group_removed">Group avatar removed</string>
+
     <string name="st_first_name">الاسم الأول</string>
     <string name="st_last_name">اسم العائلة</string>
     <string name="st_unknown">غير معروف</string>
@@ -39,6 +48,7 @@
     <string name="st_error_server">خطأ داخلي في الخادم. يرجى المحاولة مرة أخرى.</string>
     <string name="st_error_code_empty">رمز التفعيل خالي.</string>
     <string name="st_error_code_incorrect">رمز التفعيل غير صحيح.</string>
+    <string name="st_error_expired">Activation code expired</string>
     <string name="st_error_invalid_phone">رقم الهاتف غير صحيح</string>
     <string name="st_error_first_name_incorrect">الاسم الأول غير صحيح.</string>
     <string name="st_error_last_name_incorrect">اسم العائلة غير صحيح.</string>
@@ -48,6 +58,7 @@
     <string name="st_error_title_not_modified">لم يتم تعديل المحادثة.</string>
     <string name="st_error_already_participant">جهة الاتصال عضو في هذه المجموعة مسبقًا.</string>
     <string name="st_error_participant_outdated">جهة الاتصال لديها إصدار غير مدعوم من تيليجرام</string>
+    <string name="st_error_many_attempts">Too many attempts. Try again later.</string>
     <string name="st_tour_start_messaging">إبدأ المراسلة</string>
     <string name="st_tour_page1_title">تيليجرام</string>
     <string name="st_tour_page1">مرحبًا بك في عصر جديد من المراسلة.</string>
@@ -63,6 +74,53 @@
     <string name="st_tour_page6">
         <![CDATA[<b>تيليجرام</b> يمكنك من الوصول إلى الرسائل الخاصة بك من أجهزة متعددة.]]></string>
 
+    <string name="st_auth_not_activating_ticker">Activating Telegram...</string>
+    <string name="st_auth_not_activating_content">Activation in progress</string>
+
+    <string name="st_auth_not_connection_error_ticker">Connection error</string>
+    <string name="st_auth_not_connection_error_content">Unable to activate Telegram: Connection error</string>
+
+    <string name="st_auth_not_error_ticker">Error during activation</string>
+    <string name="st_auth_not_error_content">Unable to activate Telegram</string>
+
+    <string name="st_auth_not_activating_code_ticker">Manual activation required</string>
+    <string name="st_auth_not_activating_code_content">Please, enter activation code</string>
+
+    <string name="st_auth_not_activating_signup_ticker">Signup required</string>
+    <string name="st_auth_not_activating_signup_content">Phone activated! Please sign up.</string>
+
+    <string name="st_auth_not_activating_complete_ticker">Telegram activated</string>
+    <string name="st_auth_not_activating_complete_content">Telegram activated!</string>
+
+    <string name="st_auth_confirm_number">Is this your number?</string>
+    <string name="st_auth_confirm_yes">Yes, activate account</string>
+    <string name="st_auth_confirm_no">No, change number</string>
+    <string name="st_auth_confirm_sms">We will send a free SMS with an activation code.</string>
+
+    <string name="st_auth_phone_title">Select your country, enter your phone number and tap continue:</string>
+    <string name="st_auth_phone_hint">Phone number</string>
+
+    <string name="st_auth_activating_manual">Enter code</string>
+    <string name="st_auth_activating_title">Activating phone…</string>
+    <string name="st_auth_activating_subtitle">This may take up to a minute. Please wait.</string>
+
+    <string name="st_auth_request_call">Request call</string>
+    <string name="st_auth_phone_call">Requesting phone call…</string>
+    <string name="st_auth_creating">Creating your profile…</string>
+
+    <string name="st_auth_code_title">Enter your activation code and press continue:</string>
+    <string name="st_auth_code_call">Request call</string>
+    <string name="st_auth_code">Code</string>
+
+    <string name="st_auth_signup_title">Your phone number is now confirmed! Please enter your name, add your picture and
+        press continue:
+    </string>
+
+    <string name="st_auth_incorrect_phone">Phone number {0} is incorrect</string>
+    <string name="st_auth_confirm_phone">Is this your correct number? \n\n{0} \n\nAn SMS with your access code will be
+        sent to this number.
+    </string>
+
     <string name="st_dialogs_pick_title">اختر محادثة</string>
     <string name="st_dialogs_delete_header">هل ترغب في حذف المحادثة؟</string>
     <string name="st_dialogs_delete_history">هل أنت متأكد من رغبتك في حذف جميع الرسائل؟</string>
@@ -75,6 +133,8 @@
     <string name="st_dialogs_confirm_video">هل ترغب في إرسال المقطع المرئي إلى "{0}"؟</string>
     <string name="st_dialogs_confirm_images">هل ترغب في إرسال الصور إلى "{0}"؟</string>
     <string name="st_dialogs_confirm_contact">هل ترغب في إرسال جهة الاتصال إلى "{0}"؟</string>
+    <string name="st_dialogs_confirm_doc">Send document to "{0}"?</string>
+    <string name="st_dialogs_confirm_docs">Send documents to "{0}"?</string>
     <string name="st_dialogs_search_hint">بحث سريع</string>
     <string name="st_dialogs_search_hint_full">أدخل اسم المجموعة أو جهة الاتصال.</string>
     <string name="st_dialogs_search_empty">لا توجد نتائج.</string>
@@ -195,6 +255,7 @@
     <string name="st_profile_blocked">جهة الاتصال محظورة</string>
     <string name="st_profile_added">تم إضافة جهة الاتصال</string>
     <string name="st_profile_secret">إبدأ محادثة سرية</string>
+    <string name="st_pick_file_title">Select a file</string>
     <string name="st_pick_user_title">اختر جهة اتصال</string>
     <string name="st_pick_user_filter">تصفية المستخدمين</string>
     <string name="st_edit_dialog_title">معلومات المجموعة</string>
@@ -282,9 +343,12 @@
     <string name="st_dialog_you_r">أنت</string>
     <string name="st_dialog_photo">صورة</string>
     <string name="st_dialog_video">مقطع مرئي</string>
+    <string name="st_dialog_document">Document</string>
     <string name="st_dialog_geo">موقع</string>
     <string name="st_dialog_contact">مشاركة جهة اتصال</string>
     <string name="st_dialog_unknown">المحتوى غير مدعوم</string>
+
+
     <string name="st_dialog_user_add_avatar">قام بإضافة صورة شخصية جديدة</string>
     <string name="st_dialog_user_joined_app">قام بالتسجيل في تيليجرام</string>
     <string name="st_dialog_encrypted_switched_off_you">لقد قمت بإيقاف عداد التدمير الذاتي</string>
@@ -314,6 +378,48 @@
     <string name="st_dialog_kicked_user">تم إخراج {0} من المجموعة</string>
     <string name="st_dialog_kicked_user_you">لقد قمت بإخراج {0} من المجموعة</string>
     <string name="st_dialog_kicked_user_of_you">تم إخراجك من المجموعة</string>
+
+    <!--<string name="st_dialog_user_add_avatar">{sender} added new profile photo</string>-->
+    <!--<string name="st_dialog_user_joined_app">{sender} joined telegram</string>-->
+
+    <!--<string name="st_dialog_encrypted_switched_off">{sender} turned off self-destruct timer</string>-->
+    <!--<string name="st_dialog_encrypted_switched_off_you">@string/st_dialog_encrypted_switched_off</string>-->
+    <!--<string name="st_dialog_encrypted_switched">{sender} set self-destruct timer to {time}</string>-->
+    <!--<string name="st_dialog_encrypted_switched_you">@string/st_dialog_encrypted_switched</string>-->
+
+    <!--<string name="st_dialog_encrypted_selfdestructed">Last message self-destructed</string>-->
+    <!--<string name="st_dialog_encrypted_requested">Exchanging encryption keys…</string>-->
+    <!--<string name="st_dialog_encrypted_waiting">Waiting for {name} to get online…</string>-->
+    <!--<string name="st_dialog_encrypted_cancelled">Secret chat cancelled</string>-->
+    <!--<string name="st_dialog_encrypted_created">Secret chat created</string>-->
+
+    <!--<string name="st_dialog_created_group">{sender} created group</string>-->
+    <!--<string name="st_dialog_created_group_you">@string/st_dialog_created_group</string>-->
+
+    <!--<string name="st_dialog_changed_photo">{sender} changed group photo</string>-->
+    <!--<string name="st_dialog_changed_photo_you">@string/st_dialog_changed_photo</string>-->
+
+    <!--<string name="st_dialog_removed_photo">{sender} removed group photo</string>-->
+    <!--<string name="st_dialog_removed_photo_you">@string/st_dialog_removed_photo</string>-->
+
+    <!--<string name="st_dialog_changed_name">{sender} changed group name</string>-->
+    <!--<string name="st_dialog_changed_name_you">@string/st_dialog_changed_name</string>-->
+
+    <!--<string name="st_dialog_added_user">{1} added {0} to the group</string>-->
+    <!--<string name="st_dialog_added_user_you">@string/st_dialog_added_user</string>-->
+    <!--<string name="st_dialog_added_user_of_you">@string/st_dialog_added_user</string>-->
+
+    <!--<string name="st_dialog_enter_user">{sender} joined the group</string>-->
+    <!--<string name="st_dialog_enter_user_you">@string/st_dialog_enter_user</string>-->
+
+    <!--<string name="st_dialog_left_user">{sender} left the group</string>-->
+    <!--<string name="st_dialog_left_user_you">@string/st_dialog_left_user</string>-->
+
+    <!--<string name="st_dialog_kicked_user">{sender} kicked {0} from the group</string>-->
+    <!--<string name="st_dialog_kicked_user_you">@string/st_dialog_kicked_user</string>-->
+    <!--<string name="st_dialog_kicked_user_of_you">@string/st_dialog_kicked_user</string>-->
+
+
     <string name="st_dialog_system">رسالة النظام</string>
     <string name="st_secret_title">محادثة سرية</string>
     <string name="st_secret_key">مفتاح تشفير</string>
