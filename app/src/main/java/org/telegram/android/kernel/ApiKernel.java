@@ -50,7 +50,10 @@ public class ApiKernel {
                 if (!kernel.getAuthKernel().isLoggedIn()) {
                     return;
                 }
-                kernel.getSyncKernel().getUpdateProcessor().invalidateUpdates();
+                UpdateProcessor processor = kernel.getSyncKernel().getUpdateProcessor();
+                if (processor != null) {
+                    processor.invalidateUpdates();
+                }
             }
 
             @Override

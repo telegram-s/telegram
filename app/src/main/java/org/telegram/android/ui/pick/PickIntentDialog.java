@@ -91,7 +91,7 @@ public class PickIntentDialog extends Dialog {
         WindowManager manager = (WindowManager) getContext().getSystemService(Activity.WINDOW_SERVICE);
         int width, height;
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
             width = manager.getDefaultDisplay().getWidth();
             height = manager.getDefaultDisplay().getHeight() - getStatusBarHeight();
         } else {

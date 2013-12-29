@@ -226,12 +226,12 @@ public class ActivationController {
 
                 if (displayNameAlt != null) {
                     String[] names = displayNameAlt.split(",", 2);
-                    String lName = names[0].trim();
-                    String fName = names[1].trim();
-
-                    if (names.length == 2) {
-                        autoFirstname = fName.trim();
-                        autoLastname = lName.trim();
+                    if (names.length == 1) {
+                        autoFirstname = displayNameAlt.trim();
+                        autoLastname = "";
+                    } else if (names.length == 2) {
+                        autoFirstname = names[0].trim();
+                        autoLastname = names[1].trim();
                     }
                 }
 
