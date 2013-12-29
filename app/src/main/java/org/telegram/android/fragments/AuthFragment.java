@@ -316,7 +316,13 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
     private void doSendCode() {
         hideKeyboard(phoneActivation.findViewById(R.id.code));
 
-        int code = Integer.parseInt(((TextView) phoneActivation.findViewById(R.id.code)).getText().toString());
+        int code;
+        try {
+            code = Integer.parseInt(((TextView) phoneActivation.findViewById(R.id.code)).getText().toString());
+        } catch (Exception e) {
+            Toast.makeText(getActivity(), "Wrong activation code", Toast.LENGTH_SHORT).show();
+            return;
+        }
         application.getKernel().getActivationController().doSendCode(code);
     }
 
