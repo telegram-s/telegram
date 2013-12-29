@@ -551,6 +551,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     }
 
     protected void doSend() {
+        if (editText == null) {
+            return;
+        }
         String message = editText.getText().toString().trim();
         if (message.length() == 0) {
             return;
