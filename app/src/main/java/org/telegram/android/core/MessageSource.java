@@ -389,13 +389,17 @@ public class MessageSource {
         } else {
             peer = new TLInputPeerChat(peerId);
         }
-
+        long startRequest = SystemClock.uptimeMillis();
         TLAbsMessages messagesEx = application.getApi().doRpcCall(new TLRequestMessagesGetHistory(peer, offset, 0, PAGE_SIZE));
+        Logger.d(TAG, "Requested in " + (SystemClock.uptimeMillis() - startRequest) + " ms");
 
+        long start = SystemClock.uptimeMillis();
         application.getEngine().onLoadMoreMessages(
                 messagesEx.getMessages(),
                 messagesEx.getUsers(),
                 messagesEx.getChats());
+
+        Logger.d(TAG, "Save to database in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         messagesSource.invalidateDataIfRequired();
 

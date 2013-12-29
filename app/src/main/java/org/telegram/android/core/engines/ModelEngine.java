@@ -1736,17 +1736,17 @@ public class ModelEngine {
         updateDescriptorDeleteUnsent(msg.getPeerType(), msg.getPeerId(), msg.getDatabaseId());
     }
 
-    public synchronized void onLoadMoreMessages(final List<TLAbsMessage> messages, final List<TLAbsUser> users, final List<TLAbsChat> chats) {
+    public void onLoadMoreMessages(final List<TLAbsMessage> messages, final List<TLAbsUser> users, final List<TLAbsChat> chats) {
         onNewMessages(messages, users, chats, new ArrayList<TLDialog>());
     }
 
-    public synchronized void onLoadMoreDialogs(final List<TLAbsMessage> messages, final List<TLAbsUser> users, final List<TLAbsChat> chats,
-                                               final List<TLDialog> dialogs) {
+    public void onLoadMoreDialogs(final List<TLAbsMessage> messages, final List<TLAbsUser> users, final List<TLAbsChat> chats,
+                                  final List<TLDialog> dialogs) {
         onNewMessages(messages, users, chats, dialogs);
     }
 
-    public synchronized HashSet<Integer> onNewMessages(final List<TLAbsMessage> messages, final List<TLAbsUser> users, final List<TLAbsChat> chats,
-                                                       final List<TLDialog> dialogs) {
+    public HashSet<Integer> onNewMessages(final List<TLAbsMessage> messages, final List<TLAbsUser> users, final List<TLAbsChat> chats,
+                                          final List<TLDialog> dialogs) {
         final HashSet<Integer> newUnread = new HashSet<Integer>();
         onUsers(users);
         long start = SystemClock.uptimeMillis();
@@ -1780,7 +1780,7 @@ public class ModelEngine {
             @Override
             public Void call() throws Exception {
                 for (Pair<ChatMessage, ChatMessage> msgs : diff) {
-                    Logger.d(TAG, "newMessages: " + msgs.second.getMid());
+                    // Logger.d(TAG, "newMessages: " + msgs.second.getMid());
                     ChatMessage orig = msgs.first;
                     ChatMessage changed = msgs.second;
 
