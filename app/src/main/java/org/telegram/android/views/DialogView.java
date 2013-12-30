@@ -813,12 +813,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 if (description.getContentType() != ContentType.MESSAGE_SYSTEM) {
                     if (description.isMine()) {
                         String name = application.getResources().getString(R.string.st_dialog_you);
-                        nameLength = name.length();
+                        nameLength = BidiFormatter.getInstance().unicodeWrap(name).length();
                         message = BidiFormatter.getInstance().unicodeWrap(name) + ": " + BidiFormatter.getInstance().unicodeWrap(message);
                     } else {
                         if (isGroup) {
                             User user = description.getSender();
-                            nameLength = user.getFirstName().length();
+                            nameLength = BidiFormatter.getInstance().unicodeWrap(user.getFirstName()).length();
                             message = BidiFormatter.getInstance().unicodeWrap(user.getFirstName()) + ": " + BidiFormatter.getInstance().unicodeWrap(message);
                         }
                     }
