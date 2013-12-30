@@ -90,6 +90,13 @@
     <string name="st_tour_page6">
         <![CDATA[<b>تيليجرام</b> يمكنك من الوصول إلى الرسائل الخاصة بك من أجهزة متعددة.]]></string>
 
+    <string name="st_auth_state_activation"> جاري عملية التفعيل ...</string>
+    <string name="st_auth_state_creating">إنشاء حساب</string>
+    <string name="st_auth_state_error">خطأ في التفعيل</string>
+    <string name="st_auth_state_error_connection">خطأ في الاتصال ...</string>
+    <string name="st_auth_state_phone"> هاتفك</string>
+    <string name="st_auth_state_common">تفعيل الهاتف</string>
+
     <string name="st_auth_not_activating_ticker">جاري تفعيل تيليجرام...</string>
     <string name="st_auth_not_activating_content">جاري عملية التفعيل</string>
 
