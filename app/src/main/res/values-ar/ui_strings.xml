@@ -341,7 +341,7 @@
     <string name="st_dialog_you_r">أنت</string>
     <string name="st_dialog_photo">صورة</string>
     <string name="st_dialog_video">مقطع مرئي</string>
-    <string name="st_dialog_document">Document</string>
+    <string name="st_dialog_document">مستند</string>
     <string name="st_dialog_geo">موقع</string>
     <string name="st_dialog_contact">مشاركة جهة اتصال</string>
     <string name="st_dialog_unknown">المحتوى غير مدعوم</string>
