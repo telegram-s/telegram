@@ -2,6 +2,7 @@ package org.telegram.android.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.view.View;
@@ -50,7 +51,9 @@ public class PickCountryActivity extends StelsActivity {
         adapter = new CountriesAdapter();
         listView.setAdapter(adapter);
         listView.setFastScrollEnabled(true);
-        listView.setFastScrollAlwaysVisible(true);
+        if (Build.VERSION.SDK_INT >= 11) {
+            listView.setFastScrollAlwaysVisible(true);
+        }
         listView.setPadding((int) getResources().getDimension(R.dimen.fast_scroll_padding_left), 0,
                 (int) getResources().getDimension(R.dimen.fast_scroll_padding_right), 0);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
