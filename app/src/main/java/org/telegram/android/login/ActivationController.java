@@ -436,13 +436,13 @@ public class ActivationController {
         Logger.d(TAG, "startActivation");
         doChangeState(STATE_REQUEST_CODE);
 
+        sentTime = (int) (System.currentTimeMillis() / 1000);
         application.getApi().doRpcCallNonAuth(new TLRequestAuthSendCode(currentPhone, 0, ApiConfig.API_ID, ApiConfig.API_HASH,
                 application.getString(R.string.st_lang)), REQUEST_TIMEOUT,
                 new RpcCallback<TLSentCode>() {
                     @Override
                     public void onResult(final TLSentCode result) {
                         doChangeState(STATE_ACTIVATION);
-                        sentTime = (int) (System.currentTimeMillis() / 1000);
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
