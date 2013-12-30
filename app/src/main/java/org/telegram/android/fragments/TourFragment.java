@@ -117,13 +117,17 @@ public class TourFragment extends StelsFragment {
                         builder.setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                application.getKernel().getActivationController().doConfirmPhone();
+                                if (application.getKernel().getActivationController().getCurrentState() == ActivationController.STATE_PHONE_CONFIRM) {
+                                    application.getKernel().getActivationController().doConfirmPhone();
+                                }
                                 getRootController().openApp();
                             }
                         }).setNegativeButton(R.string.st_edit, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                application.getKernel().getActivationController().doEditPhone();
+                                if (application.getKernel().getActivationController().getCurrentState() == ActivationController.STATE_PHONE_EDIT) {
+                                    application.getKernel().getActivationController().doEditPhone();
+                                }
                                 getRootController().openApp();
                             }
                         });
