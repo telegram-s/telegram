@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v4.text.BidiFormatter;
 import android.text.*;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
@@ -676,7 +677,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             }
 
             if (isRtl) {
-                layoutAvatarLeft = w - layoutPadding + layoutAvatarWidth;
+                layoutAvatarLeft = w - layoutPadding - layoutAvatarWidth;
             } else {
                 layoutAvatarLeft = layoutPadding;
             }
@@ -813,12 +814,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                     if (description.isMine()) {
                         String name = application.getResources().getString(R.string.st_dialog_you);
                         nameLength = name.length();
-                        message = name + ": " + message;
+                        message = BidiFormatter.getInstance().unicodeWrap(name) + ": " + BidiFormatter.getInstance().unicodeWrap(message);
                     } else {
                         if (isGroup) {
                             User user = description.getSender();
                             nameLength = user.getFirstName().length();
-                            message = user.getFirstName() + ": " + message;
+                            message = BidiFormatter.getInstance().unicodeWrap(user.getFirstName()) + ": " + BidiFormatter.getInstance().unicodeWrap(message);
                         }
                     }
                 }

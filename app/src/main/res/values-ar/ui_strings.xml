@@ -465,7 +465,7 @@
 
     <string name="st_dialog_added_user">{0} قام بإضافة {sender} للمجموعة</string>
     <string name="st_dialog_added_user_you">لقد قمت بإضافة {0} للمجموعة</string>
-    <string name="st_dialog_added_user_of_you”>{sender} قام بإضافتك للمجموعة</string>
+    <string name="st_dialog_added_user_of_you">{sender} قام بإضافتك للمجموعة</string>
 
     <string name="st_dialog_enter_user">{sender} قام بالدخول للمجموعة</string>
     <string name="st_dialog_enter_user_you">لقد قمت بالدخول للمجموعة</string>
@@ -475,48 +475,7 @@
 
     <string name="st_dialog_kicked_user">تم إخراج {0} من المجموعة</string>
     <string name="st_dialog_kicked_user_you">لقد قمت بإخراج {0} من المجموعة</string>
-    <string name="st_dialog_kicked_user_of_you”>{sender} قام بإخراجك من</string>
-    
-    <!--<string name="st_dialog_user_add_avatar">{sender} قام بإضافة صورة شخصية</string>-->
-    <!--<string name="st_dialog_user_joined_app">{sender} قام بالتسجيل في تيليجرام</string>-->
-
-    <!--<string name="st_dialog_encrypted_switched_off">{sender} قام بإيقاف عداد التدمير الذاتي</string>-->
-    <!--<string name="st_dialog_encrypted_switched_off_you">@string/st_dialog_encrypted_switched_off</string>-->
-    <!--<string name="st_dialog_encrypted_switched">{sender} قام بتعيين عداد التدمير الذاتي إلى {time}</string>-->
-    <!--<string name="st_dialog_encrypted_switched_you">@string/st_dialog_encrypted_switched</string>-->
-
-    <!--<string name="st_dialog_encrypted_selfdestructed">تم تدمير الرسالة الأخيرة ذاتيًا</string>-->
-    <!--<string name="st_dialog_encrypted_requested">جاري مبادلة مفاتيح التشفير...</string>-->
-    <!--<string name="st_dialog_encrypted_waiting">في انتظار {name} ليصبح متصل…</string>-->
-    <!--<string name="st_dialog_encrypted_cancelled">تم إلغاء المحادثة السرية</string>-->
-    <!--<string name="st_dialog_encrypted_created">تم إنشاء المحادثة السرية</string>-->
-
-    <!--<string name="st_dialog_created_group">{sender} قام بإنشاء مجموعة</string>-->
-    <!--<string name="st_dialog_created_group_you">@string/st_dialog_created_group</string>-->
-
-    <!--<string name="st_dialog_changed_photo">{sender} قام بتغيير صورة المجموعة</string>-->
-    <!--<string name="st_dialog_changed_photo_you">@string/st_dialog_changed_photo</string>-->
-
-    <!--<string name="st_dialog_removed_photo">{sender} قام بإزالة صورة المجموعة</string>-->
-    <!--<string name="st_dialog_removed_photo_you">@string/st_dialog_removed_photo</string>-->
-
-    <!--<string name="st_dialog_changed_name">{sender} قام بتغيير اسم المجموعة</string>-->
-    <!--<string name="st_dialog_changed_name_you">@string/st_dialog_changed_name</string>-->
-
-    <!--<string name="st_dialog_added_user”>{sender} قام بإضافة {0} للمجموعة</string>-->
-    <!--<string name="st_dialog_added_user_you">@string/st_dialog_added_user</string>-->
-    <!--<string name="st_dialog_added_user_of_you">@string/st_dialog_added_user</string>-->
-
-    <!--<string name="st_dialog_enter_user">{sender} قام بالدخول للمجموعة</string>-->
-    <!--<string name="st_dialog_enter_user_you">@string/st_dialog_enter_user</string>-->
-
-    <!--<string name="st_dialog_left_user">{sender} قام بمغادرة المجموعة</string>-->
-    <!--<string name="st_dialog_left_user_you">@string/st_dialog_left_user</string>-->
-
-    <!--<string name="st_dialog_kicked_user">{sender} قام بإخراج {0} من المجموعة</string>-->
-    <!--<string name="st_dialog_kicked_user_you">@string/st_dialog_kicked_user</string>-->
-    <!--<string name="st_dialog_kicked_user_of_you">@string/st_dialog_kicked_user</string>-->
-
+    <string name="st_dialog_kicked_user_of_you">{sender} قام بإخراجك من</string>
 
     <string name="st_dialog_system">رسالة النظام</string>
 

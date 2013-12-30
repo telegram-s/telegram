@@ -98,6 +98,13 @@
         <![CDATA[<b>Telegram</b> lets you access your messages from multiple devices.]]>
     </string>
 
+    <string name="st_auth_state_activation">Activation in progress...</string>
+    <string name="st_auth_state_creating">Creating account</string>
+    <string name="st_auth_state_error">Activation error</string>
+    <string name="st_auth_state_error_connection">Connection error...</string>
+    <string name="st_auth_state_phone">Your phone</string>
+    <string name="st_auth_state_common">Phone activation</string>
+
     <string name="st_auth_not_activating_ticker">Activating Telegram...</string>
     <string name="st_auth_not_activating_content">Activation in progress</string>
 

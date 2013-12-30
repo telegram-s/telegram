@@ -389,29 +389,29 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
             default:
             case ActivationController.STATE_MANUAL_ACTIVATION:
             case ActivationController.STATE_MANUAL_ACTIVATION_REQUEST:
-                getSherlockActivity().getSupportActionBar().setTitle("Phone activation");
+                getSherlockActivity().getSupportActionBar().setTitle(getStringSafe(R.string.st_auth_state_common));
                 break;
             case ActivationController.STATE_PHONE_CONFIRM:
             case ActivationController.STATE_PHONE_EDIT:
             case ActivationController.STATE_ERROR_WRONG_PHONE:
-                getSherlockActivity().getSupportActionBar().setTitle("Your phone");
+                getSherlockActivity().getSupportActionBar().setTitle(getStringSafe(R.string.st_auth_state_phone));
                 break;
             case ActivationController.STATE_ERROR_NETWORK:
-                getSherlockActivity().getSupportActionBar().setTitle("Connection error...");
+                getSherlockActivity().getSupportActionBar().setTitle(getStringSafe(R.string.st_auth_state_error_connection));
                 break;
             case ActivationController.STATE_ERROR_EXPIRED:
             case ActivationController.STATE_ERROR_TOO_OFTEN:
             case ActivationController.STATE_ERROR_UNKNOWN:
-                getSherlockActivity().getSupportActionBar().setTitle("Activation error");
+                getSherlockActivity().getSupportActionBar().setTitle(getStringSafe(R.string.st_auth_state_error));
                 break;
             case ActivationController.STATE_SIGNUP:
             case ActivationController.STATE_SIGNUP_REQUEST:
-                getSherlockActivity().getSupportActionBar().setTitle("Creating account");
+                getSherlockActivity().getSupportActionBar().setTitle(getStringSafe(R.string.st_auth_state_creating));
                 break;
             case ActivationController.STATE_MANUAL_ACTIVATION_SEND:
             case ActivationController.STATE_ACTIVATION:
             case ActivationController.STATE_REQUEST_CODE:
-                getSherlockActivity().getSupportActionBar().setTitle("Activation in progress...");
+                getSherlockActivity().getSupportActionBar().setTitle(getStringSafe(R.string.st_auth_state_activation));
                 break;
         }
 
