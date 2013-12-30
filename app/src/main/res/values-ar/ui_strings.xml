@@ -115,8 +115,8 @@
     <string name="st_auth_signup_title">تم التحقق من رقم هاتفك! يرجى ادخال اسمك وإضافة صورتك الشخصية والضغط على استمرار:
     </string>
 
-    <string name="st_auth_incorrect_phone">رقم الهاتف غير صحيحrect</string>
-    <string name="st_auth_confirm_phone">هل هذا رقمك الصحيح؟ \n\n{0سيتم إرسال رسالة قصيرة برمز التفعيل لهذا الرق
+    <string name="st_auth_incorrect_phone">رقم الهاتف غير صحيح! </string>
+    <string name="st_auth_confirm_phone">هل هذا رقمك الصحيح؟ \n\n{0}سيتم إرسال رسالة قصيرة برمز التفعيل لهذا الرق
     </string>
 
     <string name="st_dialogs_pick_title">اختر محادثة</string>
@@ -366,16 +366,16 @@
     <string name="st_dialog_removed_photo_you">لقد قمت بإزالة صورة المجموعة</string>
     <string name="st_dialog_changed_name">{sender} قام بتغيير اسم المجموعة</string>
     <string name="st_dialog_changed_name_you">لقد قمت بتغيير اسم المجموعة</string>
-    <string name="st_dialog_added_user">لقد تمت إضافة {0} للمجموعة</string>
+    <string name="st_dialog_added_user">{0} قام بإضافة {sender} للمجموعة</string>
     <string name="st_dialog_added_user_you">لقد قمت بإضافة {0} للمجموعة</string>
-    <string name="st_dialog_added_user_of_you">تمت إضافتك للمجموعة</string>
+    <string name="st_dialog_added_user_of_you">{sender} قام بإضافتك للمجموعة</string>
     <string name="st_dialog_enter_user">{sender} قام بالدخول للمجموعة</string>
     <string name="st_dialog_enter_user_you">لقد قمت بالدخول للمجموعة</string>
     <string name="st_dialog_left_user">{sender} قام بمغادرة المجموعة</string>
     <string name="st_dialog_left_user_you">لقد قمت بمغادرة المجموعة</string>
-    <string name="st_dialog_kicked_user">تم إخراج {0} من المجموعة</string>
+    <string name="st_dialog_kicked_user">{0} قام بإخراج {sender} من المجموعة</string>
     <string name="st_dialog_kicked_user_you">لقد قمت بإخراج {0} من المجموعة</string>
-    <string name="st_dialog_kicked_user_of_you">تم إخراجك من المجموعة</string>
+    <string name="st_dialog_kicked_user_of_you">{sender} قام بإخراجك من المجموعة</string>
 
     <!--<string name="st_dialog_user_add_avatar">{sender} قام بإضافة صورة شخصية</string>-->
     <!--<string name="st_dialog_user_joined_app">{sender} قام بالتسجيل في تيليجرام</string>-->
