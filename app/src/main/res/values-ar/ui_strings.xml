@@ -139,7 +139,7 @@
     </string>
 
     <string name="st_auth_incorrect_phone">رقم الهاتف غير صحيح!</string>
-    <string name="st_auth_confirm_phone">هل هذا رقمك الصحيح؟ \n\n{0}سيتم إرسال رسالة قصيرة برمز التفعيل لهذا الرقم
+    <string name="st_auth_confirm_phone">هل هذا رقمك الصحيح؟ \n\n{0}\n\nسيتم إرسال رسالة قصيرة برمز التفعيل لهذا الرقم
     </string>
 
     <string name="st_dialogs_pick_title">اختر محادثة</string>

@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.text.BidiFormatter;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -340,7 +341,7 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
                         getStringSafe(R.string.st_auth_confirm_phone)
                                 .replace("\\n", "\n")
-                                .replace("{0}", PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)));
+                                .replace("{0}", BidiFormatter.getInstance().unicodeWrap(PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL))));
                 builder.setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
