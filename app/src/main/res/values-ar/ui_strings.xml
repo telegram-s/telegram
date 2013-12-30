@@ -8,6 +8,7 @@
     <string name="st_yes">نعم</string>
     <string name="st_repeat">إعادة</string>
     <string name="st_ok">موافق</string>
+    <string name="st_edit">تعديل</string>
     <string name="st_cancel">إلغاء</string>
     <string name="st_cancel_caps">إلغاء</string>
     <string name="st_set">ضبط</string>
