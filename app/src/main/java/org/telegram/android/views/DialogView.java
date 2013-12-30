@@ -327,8 +327,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                     task.setMaxHeight(getPx(64));
                     task.setMaxWidth(getPx(64));
                 } else {
-                    task.setMaxHeight(getPx(56));
-                    task.setMaxWidth(getPx(56));
+                    task.setMaxHeight(getPx(52));
+                    task.setMaxWidth(getPx(52));
                 }
                 task.setFillRect(true);
                 RoundedImageTask roundedImageTask = new RoundedImageTask(task);
@@ -660,10 +660,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 layoutMarkBottom = layoutMarkTop + px(22);
                 layoutMarkTextTop = layoutMarkTop + px(18);
             } else {
-                layoutAvatarWidth = px(56);
+                layoutAvatarWidth = px(52);
                 layoutPadding = px(8);
                 layoutBodyPadding = layoutAvatarWidth + layoutPadding + px(10);
-                layoutAvatarTop = px(6);
+                layoutAvatarTop = px(8);
                 layoutTitleTop = px(12);
                 layoutMainTop = px(38);
                 layoutTimeTop = px(28);
