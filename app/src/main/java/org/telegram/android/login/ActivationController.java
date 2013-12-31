@@ -215,31 +215,36 @@ public class ActivationController {
 
 
         if (Build.VERSION.SDK_INT >= 14) {
-            Cursor c = application.getContentResolver().query(ContactsContract.Profile.CONTENT_URI, new String[]
-                    {
-                            "display_name_alt", "photo_uri"
-                    }, null, null, null);
+            try {
+                Cursor c = application.getContentResolver().query(ContactsContract.Profile.CONTENT_URI, new String[]
+                        {
+                                "display_name_alt", "photo_uri"
+                        }, null, null, null);
 
-            if (c != null && c.moveToFirst()) {
-                String displayNameAlt = c.getString(0);
-                String pUri = c.getString(1);
+                if (c != null && c.moveToFirst()) {
+                    String displayNameAlt = c.getString(0);
+                    String pUri = c.getString(1);
 
-                if (displayNameAlt != null) {
-                    String[] names = displayNameAlt.split(",", 2);
-                    if (names.length == 1) {
-                        autoFirstname = displayNameAlt.trim();
-                        autoLastname = "";
-                    } else if (names.length == 2) {
-                        autoFirstname = names[0].trim();
-                        autoLastname = names[1].trim();
+                    if (displayNameAlt != null) {
+                        String[] names = displayNameAlt.split(",", 2);
+                        if (names.length == 1) {
+                            autoFirstname = displayNameAlt.trim();
+                            autoLastname = "";
+                        } else if (names.length == 2) {
+                            autoFirstname = names[0].trim();
+                            autoLastname = names[1].trim();
+                        }
+                    }
+
+                    if (pUri != null && pUri.length() > 0) {
+                        manualAvatarUri = pUri;
                     }
                 }
-
-                if (pUri != null && pUri.length() > 0) {
-                    manualAvatarUri = pUri;
-                }
+                c.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            c.close();
+
         }
     }
 
