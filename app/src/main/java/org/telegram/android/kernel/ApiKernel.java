@@ -35,7 +35,7 @@ public class ApiKernel {
         api = new TelegramApi(kernel.getAuthKernel().getApiStorage(), new AppInfo(5, Build.MODEL, Build.VERSION.RELEASE, kernel.getTechKernel().getTechReflection().getAppVersion(),
                 kernel.getApplication().getString(R.string.st_lang)), new ApiCallback() {
             @Override
-            public void onApiDies(TelegramApi api) {
+            public void onAuthCancelled(TelegramApi api) {
                 if (api != ApiKernel.this.api) {
                     return;
                 }

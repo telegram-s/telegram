@@ -195,6 +195,9 @@
     <string name="st_settings_play_subtitle">Please rate our app</string>
     <string name="st_settings_blocked">Blocked users</string>
     <string name="st_settings_blocked_subtitle">List of blocked contacts</string>
+    <string name="st_settings_reset">Revoke sessions</string>
+    <string name="st_settings_reset_subtitle">Logout on all other devices</string>
+    <string name="st_settings_reset_toast">Sessions deleted</string>
     <string name="st_settings_chat">Chat settings</string>
     <string name="st_settings_chat_subtitle">Wallpaper, send by enter, font size...</string>
     <string name="st_settings_background">Chat background</string>

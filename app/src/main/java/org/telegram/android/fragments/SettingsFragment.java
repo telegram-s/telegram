@@ -35,6 +35,7 @@ import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
 import org.telegram.api.photos.TLPhoto;
 import org.telegram.api.requests.TLRequestAuthLogOut;
+import org.telegram.api.requests.TLRequestAuthResetAuthorizations;
 import org.telegram.api.requests.TLRequestPhotosUpdateProfilePhoto;
 import org.telegram.api.requests.TLRequestPhotosUploadProfilePhoto;
 
@@ -125,6 +126,22 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
             @Override
             public void onClick(View view) {
                 getRootController().openChatSettings();
+            }
+        });
+        res.findViewById(R.id.resetSessions).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                runUiTask(new AsyncAction() {
+                    @Override
+                    public void execute() throws AsyncException {
+                        rpc(new TLRequestAuthResetAuthorizations());
+                    }
+
+                    @Override
+                    public void afterExecute() {
+                        Toast.makeText(getActivity(), R.string.st_settings_reset_toast, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
         res.findViewById(R.id.support).setOnClickListener(new View.OnClickListener() {

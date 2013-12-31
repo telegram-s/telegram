@@ -1,5 +1,6 @@
 package org.telegram.android.kernel;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -276,6 +277,7 @@ public class UiKernel {
 
     public void logOut() {
         clearState();
+        application.sendBroadcast(new Intent("org.telegram.android.ACTION_LOGOUT"));
     }
 
     private void clearState() {
