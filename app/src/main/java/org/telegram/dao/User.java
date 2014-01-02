@@ -6,25 +6,25 @@ package org.telegram.dao;
  */
 public class User {
 
-    private Long id;
+    private long id;
     private Long accessHash;
     /** Not-null value. */
     private String firstName;
     /** Not-null value. */
     private String lastName;
     private String phone;
-    private Integer linkType;
+    private int linkType;
     private byte[] avatar;
     private byte[] status;
 
     public User() {
     }
 
-    public User(Long id) {
+    public User(long id) {
         this.id = id;
     }
 
-    public User(Long id, Long accessHash, String firstName, String lastName, String phone, Integer linkType, byte[] avatar, byte[] status) {
+    public User(long id, Long accessHash, String firstName, String lastName, String phone, int linkType, byte[] avatar, byte[] status) {
         this.id = id;
         this.accessHash = accessHash;
         this.firstName = firstName;
@@ -35,11 +35,11 @@ public class User {
         this.status = status;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -79,11 +79,11 @@ public class User {
         this.phone = phone;
     }
 
-    public Integer getLinkType() {
+    public int getLinkType() {
         return linkType;
     }
 
-    public void setLinkType(Integer linkType) {
+    public void setLinkType(int linkType) {
         this.linkType = linkType;
     }
 

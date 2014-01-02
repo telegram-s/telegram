@@ -1,10 +1,11 @@
 package org.telegram.android.core.engines;
 
 import android.os.SystemClock;
-import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.log.Logger;
+import org.telegram.dao.Dialog;
+import org.telegram.dao.DialogDao;
 import org.telegram.ormlite.OrmDialog;
 
 import java.util.List;
@@ -16,29 +17,26 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DialogsDatabase {
     private static final String TAG = "DialogsDatabase";
 
-    private RuntimeExceptionDao<OrmDialog, Long> dialogsDao;
+    private DialogDao dialogsDao;
 
-    private ConcurrentHashMap<Long, OrmDialog> dialogsDbCache;
     private ConcurrentHashMap<Long, DialogDescription> dialogsCache;
 
     public DialogsDatabase(ModelEngine engine) {
-        dialogsDao = engine.getDatabase().getDialogsDao();
-        dialogsDbCache = new ConcurrentHashMap<Long, OrmDialog>();
+        dialogsDao = engine.getDaoSession().getDialogDao();
         dialogsCache = new ConcurrentHashMap<Long, DialogDescription>();
     }
 
     public DialogDescription[] getItems(int offset, int limit) {
         try {
             long start = SystemClock.uptimeMillis();
-            QueryBuilder<OrmDialog, Long> queryBuilder = dialogsDao.queryBuilder();
-            Logger.d(TAG, "Builder created in " + (SystemClock.uptimeMillis() - start) + " ms");
-            queryBuilder.orderBy("date", false);
-            queryBuilder.where().ne("date", 0);
-            queryBuilder.offset(offset);
-            queryBuilder.limit(limit);
-            List<OrmDialog> dialogDescriptions = dialogsDao.query(queryBuilder.prepare());
+            List<Dialog> dialogDescriptions = dialogsDao.queryBuilder()
+                    .where(DialogDao.Properties.Date.gt(0))
+                    .orderDesc(DialogDao.Properties.Date)
+                    .offset(offset)
+                    .limit(limit)
+                    .list();
             Logger.d(TAG, "Queried (" + offset + ") in " + (SystemClock.uptimeMillis() - start) + " ms");
-            OrmDialog[] res = dialogDescriptions.toArray(new OrmDialog[dialogDescriptions.size()]);
+            Dialog[] res = dialogDescriptions.toArray(new Dialog[dialogDescriptions.size()]);
             Logger.d(TAG, "Loaded items in " + (SystemClock.uptimeMillis() - start) + " ms");
             DialogDescription[] dRes = new DialogDescription[res.length];
             for (int i = 0; i < dRes.length; i++) {
@@ -54,12 +52,9 @@ public class DialogsDatabase {
     public DialogDescription[] getAll() {
         try {
             long start = SystemClock.uptimeMillis();
-            QueryBuilder<OrmDialog, Long> queryBuilder = dialogsDao.queryBuilder();
-            Logger.d(TAG, "Builder created in " + (SystemClock.uptimeMillis() - start) + " ms");
-            queryBuilder.where().ne("date", 0);
-            List<OrmDialog> dialogDescriptions = dialogsDao.query(queryBuilder.prepare());
+            List<Dialog> dialogs = dialogsDao.queryBuilder().where(DialogDao.Properties.Date.notEq(0)).list();
             Logger.d(TAG, "Queried in " + (SystemClock.uptimeMillis() - start) + " ms");
-            OrmDialog[] res = dialogDescriptions.toArray(new OrmDialog[dialogDescriptions.size()]);
+            Dialog[] res = dialogs.toArray(new Dialog[dialogs.size()]);
             Logger.d(TAG, "Loaded items in " + (SystemClock.uptimeMillis() - start) + " ms");
             DialogDescription[] dRes = new DialogDescription[res.length];
             for (int i = 0; i < dRes.length; i++) {
@@ -76,8 +71,8 @@ public class DialogsDatabase {
         return new DialogDescription[0];
     }
 
-    public OrmDialog loadDialogDb(int peerType, int peerId) {
-        return dialogsDao.queryForId(peerType + peerId * 10L);
+    public Dialog loadDialogDb(int peerType, int peerId) {
+        return dialogsDao.load(peerType + peerId * 10L);
     }
 
     public DialogDescription loadDialog(int peerType, int peerId) {
@@ -90,24 +85,24 @@ public class DialogsDatabase {
     }
 
     public void createDialog(DialogDescription description) {
-        OrmDialog dialog = new OrmDialog();
+        Dialog dialog = new Dialog();
         applyChanges(description, dialog);
-        dialogsDao.create(dialog);
+        dialogsDao.insertOrReplace(dialog);
     }
 
     public void updateDialog(DialogDescription description) {
-        OrmDialog dialog = loadDialogDb(description.getPeerType(), description.getPeerId());
+        Dialog dialog = loadDialogDb(description.getPeerType(), description.getPeerId());
         applyChanges(description, dialog);
         dialogsDao.update(dialog);
     }
 
     public void deleteDialog(DialogDescription description) {
-        OrmDialog dialog = loadDialogDb(description.getPeerType(), description.getPeerId());
+        Dialog dialog = loadDialogDb(description.getPeerType(), description.getPeerId());
         dialog.setDate(0);
         dialogsDao.update(dialog);
     }
 
-    private DialogDescription convertCached(OrmDialog dialog) {
+    private DialogDescription convertCached(Dialog dialog) {
         if (dialog == null) {
             return null;
         }
@@ -121,12 +116,11 @@ public class DialogsDatabase {
                 res = dialogsCache.get(id);
             }
 
-            res.setPeerType(dialog.getPeerType());
-            res.setPeerId(dialog.getPeerId());
+            res.setPeerType((int) (dialog.getId() % 10));
+            res.setPeerId((int) (dialog.getId() / 10));
             res.setContentType(dialog.getContentType());
             res.setDate(dialog.getDate());
-            // res.setExtras(dialog.getExtras());
-            res.setFailure(dialog.isFailure());
+            res.setFailure(dialog.getFailure());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
             res.setLastLocalViewedMessage(dialog.getLastLocalViewedMessage());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
@@ -142,11 +136,10 @@ public class DialogsDatabase {
         return dialogsCache.get(id);
     }
 
-    private void applyChanges(DialogDescription src, OrmDialog dest) {
-        dest.setPeer(src.getPeerType(), src.getPeerId());
+    private void applyChanges(DialogDescription src, Dialog dest) {
+        dest.setId(uniqId(src));
         dest.setContentType(src.getContentType());
         dest.setDate(src.getDate());
-        // dest.setExtras(src.getExtras());
         dest.setFailure(src.isFailure());
         dest.setFirstUnreadMessage(src.getFirstUnreadMessage());
         dest.setLastLocalViewedMessage(src.getLastLocalViewedMessage());
@@ -166,6 +159,10 @@ public class DialogsDatabase {
 
     private long uniqId(OrmDialog description) {
         return description.getPeerType() + description.getPeerId() * 10L;
+    }
+
+    private long uniqId(Dialog description) {
+        return description.getId();
     }
 
     private long uniqId(int peerType, int peerId) {

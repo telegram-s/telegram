@@ -23,12 +23,12 @@ public class UserDao extends AbstractDao<User, Long> {
      * Can be used for QueryBuilder and for referencing column names.
     */
     public static class Properties {
-        public final static Property Id = new Property(0, Long.class, "id", true, "_id");
+        public final static Property Id = new Property(0, long.class, "id", true, "_id");
         public final static Property AccessHash = new Property(1, Long.class, "accessHash", false, "ACCESS_HASH");
         public final static Property FirstName = new Property(2, String.class, "firstName", false, "FIRST_NAME");
         public final static Property LastName = new Property(3, String.class, "lastName", false, "LAST_NAME");
         public final static Property Phone = new Property(4, String.class, "phone", false, "PHONE");
-        public final static Property LinkType = new Property(5, Integer.class, "linkType", false, "LINK_TYPE");
+        public final static Property LinkType = new Property(5, int.class, "linkType", false, "LINK_TYPE");
         public final static Property Avatar = new Property(6, byte[].class, "avatar", false, "AVATAR");
         public final static Property Status = new Property(7, byte[].class, "status", false, "STATUS");
     };
@@ -46,12 +46,12 @@ public class UserDao extends AbstractDao<User, Long> {
     public static void createTable(SQLiteDatabase db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'USER' (" + //
-                "'_id' INTEGER PRIMARY KEY ," + // 0: id
+                "'_id' INTEGER PRIMARY KEY NOT NULL ," + // 0: id
                 "'ACCESS_HASH' INTEGER," + // 1: accessHash
                 "'FIRST_NAME' TEXT NOT NULL ," + // 2: firstName
                 "'LAST_NAME' TEXT NOT NULL ," + // 3: lastName
                 "'PHONE' TEXT," + // 4: phone
-                "'LINK_TYPE' INTEGER," + // 5: linkType
+                "'LINK_TYPE' INTEGER NOT NULL ," + // 5: linkType
                 "'AVATAR' BLOB," + // 6: avatar
                 "'STATUS' BLOB);"); // 7: status
     }
@@ -66,11 +66,7 @@ public class UserDao extends AbstractDao<User, Long> {
     @Override
     protected void bindValues(SQLiteStatement stmt, User entity) {
         stmt.clearBindings();
- 
-        Long id = entity.getId();
-        if (id != null) {
-            stmt.bindLong(1, id);
-        }
+        stmt.bindLong(1, entity.getId());
  
         Long accessHash = entity.getAccessHash();
         if (accessHash != null) {
@@ -83,11 +79,7 @@ public class UserDao extends AbstractDao<User, Long> {
         if (phone != null) {
             stmt.bindString(5, phone);
         }
- 
-        Integer linkType = entity.getLinkType();
-        if (linkType != null) {
-            stmt.bindLong(6, linkType);
-        }
+        stmt.bindLong(6, entity.getLinkType());
  
         byte[] avatar = entity.getAvatar();
         if (avatar != null) {
@@ -103,19 +95,19 @@ public class UserDao extends AbstractDao<User, Long> {
     /** @inheritdoc */
     @Override
     public Long readKey(Cursor cursor, int offset) {
-        return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
+        return cursor.getLong(offset + 0);
     }    
 
     /** @inheritdoc */
     @Override
     public User readEntity(Cursor cursor, int offset) {
         User entity = new User( //
-            cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
+            cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getLong(offset + 1), // accessHash
             cursor.getString(offset + 2), // firstName
             cursor.getString(offset + 3), // lastName
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // phone
-            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // linkType
+            cursor.getInt(offset + 5), // linkType
             cursor.isNull(offset + 6) ? null : cursor.getBlob(offset + 6), // avatar
             cursor.isNull(offset + 7) ? null : cursor.getBlob(offset + 7) // status
         );
@@ -125,12 +117,12 @@ public class UserDao extends AbstractDao<User, Long> {
     /** @inheritdoc */
     @Override
     public void readEntity(Cursor cursor, User entity, int offset) {
-        entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
+        entity.setId(cursor.getLong(offset + 0));
         entity.setAccessHash(cursor.isNull(offset + 1) ? null : cursor.getLong(offset + 1));
         entity.setFirstName(cursor.getString(offset + 2));
         entity.setLastName(cursor.getString(offset + 3));
         entity.setPhone(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setLinkType(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
+        entity.setLinkType(cursor.getInt(offset + 5));
         entity.setAvatar(cursor.isNull(offset + 6) ? null : cursor.getBlob(offset + 6));
         entity.setStatus(cursor.isNull(offset + 7) ? null : cursor.getBlob(offset + 7));
      }
