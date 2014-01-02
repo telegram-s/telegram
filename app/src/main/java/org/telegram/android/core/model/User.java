@@ -12,40 +12,14 @@ import org.telegram.api.TLAbsUserStatus;
  */
 
 public class User {
-    @DatabaseField(generatedId = true, version = false)
-    private int _id;
-
-    @DatabaseField(index = true, version = false)
     private int uid;
-
-    @DatabaseField(index = true, version = false)
     private String firstName;
-
-    @DatabaseField(index = true, version = false)
     private String lastName;
-
-    @DatabaseField(index = true, version = false)
     private long accessHash;
-
-    @DatabaseField(index = true, version = false)
     private String phone;
-
-    @DatabaseField(index = true, version = false, persisterClass = TlDataType.class)
     private TLAbsLocalAvatarPhoto photo;
-
-    @DatabaseField(index = true, version = false, persisterClass = TlDataType.class)
     private TLAbsLocalUserStatus status;
-
-    @DatabaseField(index = true, version = false)
     private int linkType;
-
-    public int getDatabaseId() {
-        return _id;
-    }
-
-    public void setDatabaseId(int _id) {
-        this._id = _id;
-    }
 
     public int getUid() {
         return uid;

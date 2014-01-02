@@ -16,9 +16,6 @@ public class Contact {
     @DatabaseField(index = true, version = false)
     private long localId;
 
-    @DatabaseField(version = false, foreign = true, foreignAutoRefresh = false)
-    private User user;
-
     @DatabaseField(version = false)
     private boolean isMutual;
 
@@ -26,9 +23,8 @@ public class Contact {
 
     }
 
-    public Contact(int uid, long localId, User user, boolean mutual) {
+    public Contact(int uid, long localId, boolean mutual) {
         this.uid = uid;
-        this.user = user;
         this.localId = localId;
         isMutual = mutual;
     }
@@ -55,14 +51,6 @@ public class Contact {
 
     public void setMutual(boolean mutual) {
         isMutual = mutual;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public long getLocalId() {

@@ -323,9 +323,7 @@ public class ContactsFragment extends BaseContactsFragment {
                                     rpc(new TLRequestContactsDeleteContacts(inputUsers));
 
                                     for (Contact c : contacts) {
-                                        User u = application.getEngine().getUser(c.getUid());
-                                        u.setLinkType(LinkType.REQUEST);
-                                        application.getEngine().getUsersDao().update(u);
+                                        application.getEngine().getUsersEngine().onUserLinkChanged(c.getUid(),LinkType.REQUEST);
                                     }
 
                                     application.getContentResolver().delete(uri, null, null);
@@ -392,9 +390,7 @@ public class ContactsFragment extends BaseContactsFragment {
                                 rpc(new TLRequestContactsDeleteContacts(inputUsers));
 
                                 for (Contact c : contacts) {
-                                    User u = application.getEngine().getUser(c.getUid());
-                                    u.setLinkType(LinkType.REQUEST);
-                                    application.getEngine().getUsersDao().update(u);
+                                    application.getEngine().getUsersEngine().onUserLinkChanged(c.getUid(),LinkType.REQUEST);
                                 }
 
                                 final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.lookupKey);

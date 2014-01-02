@@ -21,22 +21,8 @@ public class UserSource {
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    private PreparedQuery<User> usersPreparedQuery;
-
     public UserSource(StelsApplication application) {
         this.application = application;
-    }
-
-    public PreparedQuery<User> getUiQuery() {
-        if (usersPreparedQuery == null) {
-            try {
-                QueryBuilder<User, Long> userQuery = application.getEngine().getUsersDao().queryBuilder();
-                usersPreparedQuery = userQuery.orderBy("lastName", true).prepare();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return usersPreparedQuery;
     }
 
     public void registerListener(UserSourceListener listener) {

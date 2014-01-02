@@ -126,10 +126,6 @@ public class ModelEngine {
         return database.getMessagesDao();
     }
 
-    public RuntimeExceptionDao<User, Long> getUsersDao() {
-        return database.getUsersDao();
-    }
-
     public RuntimeExceptionDao<Contact, Long> getContactsDao() {
         return database.getContactsDao();
     }

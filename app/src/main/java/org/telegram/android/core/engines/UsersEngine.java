@@ -26,13 +26,7 @@ public class UsersEngine {
 
     private static final String TAG = "UsersEngine";
 
-    private ConcurrentHashMap<Integer, User> userCache;
-
-    private RuntimeExceptionDao<User, Long> userDao;
     private RuntimeExceptionDao<Contact, Long> contactsDao;
-
-    private PreparedQuery<User> getUserQuery;
-    private SelectArg getUserIdArg;
 
     private StelsApplication application;
 
@@ -40,25 +34,18 @@ public class UsersEngine {
     private final Object contactsCacheLock = new Object();
     private final CopyOnWriteArrayList<Contact> cachedContacts = new CopyOnWriteArrayList<Contact>();
 
+    private UsersDatabase usersDatabase;
+
 
     public UsersEngine(ModelEngine modelEngine) {
         this.application = modelEngine.getApplication();
-        this.userCache = new ConcurrentHashMap<Integer, User>();
-        this.userDao = modelEngine.getUsersDao();
         this.contactsDao = modelEngine.getContactsDao();
 
-        try {
-            QueryBuilder<User, Long> queryBuilder = userDao.queryBuilder();
-            getUserIdArg = new SelectArg();
-            queryBuilder.where().eq("uid", getUserIdArg);
-            getUserQuery = queryBuilder.prepare();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        this.usersDatabase = new UsersDatabase(application, modelEngine);
     }
 
     public void clearCache() {
-        userCache.clear();
+        this.usersDatabase.clearCache();
         synchronized (contactsCacheLock) {
             isContactsLoaded = false;
             cachedContacts.clear();
@@ -66,91 +53,21 @@ public class UsersEngine {
     }
 
     public User getUserRuntime(int id) {
-        User res = userCache.get(id);
-        if (res != null)
-            return res;
+        User res = getUser(id);
 
-        synchronized (getUserQuery) {
-            getUserIdArg.setValue(id);
-            List<User> users = userDao.query(getUserQuery);
-            if (users.size() > 0) {
-                userCache.putIfAbsent(id, users.get(0));
-                return userCache.get(id);
-            }
+        if (res == null) {
+            throw new RuntimeException("Unknown user #" + id);
         }
 
-        throw new RuntimeException("Unknown user #" + id);
+        return res;
     }
 
     public User getUser(int id) {
-        User res = userCache.get(id);
-        if (res != null)
-            return res;
-
-        synchronized (getUserQuery) {
-            getUserIdArg.setValue(id);
-            List<User> users = userDao.query(getUserQuery);
-            if (users.size() > 0) {
-                userCache.putIfAbsent(id, users.get(0));
-                return userCache.get(id);
-            }
-        }
-
-        return null;
+        return usersDatabase.getUser(id);
     }
 
     public User[] getUsersById(Object[] uid) {
-        try {
-            ArrayList<Object> missedMids = new ArrayList<Object>();
-            ArrayList<User> users = new ArrayList<User>();
-            for (Object o : uid) {
-                User u = userCache.get(o);
-                if (u != null) {
-                    users.add(u);
-                } else {
-                    missedMids.add(o);
-                }
-            }
-            if (missedMids.size() > 0) {
-                long start = System.currentTimeMillis();
-                QueryBuilder<User, Long> queryBuilder = userDao.queryBuilder();
-                queryBuilder.where().in("uid", missedMids.toArray(new Object[0]));
-                User[] res = queryBuilder.query().toArray(new User[0]);
-                Logger.d(TAG, "Loaded users in " + (System.currentTimeMillis() - start) + " ms");
-                for (int i = 0; i < res.length; i++) {
-                    users.add(cacheUser(res[i]));
-                }
-            }
-            return users.toArray(new User[0]);
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
-        }
-
-        return new User[0];
-    }
-
-    public User[] getUsersByIdUncached(Object[] uid) {
-        try {
-            ArrayList<User> users = new ArrayList<User>();
-            long start = System.currentTimeMillis();
-            QueryBuilder<User, Long> queryBuilder = userDao.queryBuilder();
-            queryBuilder.where().in("uid", uid);
-            User[] res = queryBuilder.query().toArray(new User[0]);
-            Logger.d(TAG, "Loaded users in " + (System.currentTimeMillis() - start) + " ms");
-            for (int i = 0; i < res.length; i++) {
-                users.add(res[i]);
-            }
-            return users.toArray(new User[0]);
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
-        }
-
-        return new User[0];
-    }
-
-    public User cacheUser(User src) {
-        userCache.putIfAbsent(src.getUid(), src);
-        return userCache.get(src.getUid());
+        return usersDatabase.getUsersById(uid);
     }
 
     public void onUserLinkChanged(int uid, int link) {
@@ -190,131 +107,12 @@ public class UsersEngine {
     private void forceUpdateUser(User u) {
         Logger.d(TAG, "forceUpdateUser");
         long start = SystemClock.uptimeMillis();
-        userDao.update(u);
-        if (application.getUserSource() != null) {
-            application.getUserSource().notifyUserChanged(u.getUid());
-        }
+        usersDatabase.updateUsers(u);
         Logger.d(TAG, "forceUpdateUser in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     private void onUsers(User... converted) {
-
-        final ArrayList<Pair<User, User>> diff = new ArrayList<Pair<User, User>>();
-        int changed = 0;
-
-        long start = SystemClock.uptimeMillis();
-
-        Logger.d(TAG, "onUsers: " + converted.length);
-
-        Integer[] ids = new Integer[converted.length];
-        for (int i = 0; i < ids.length; i++) {
-            ids[i] = converted[i].getUid();
-        }
-        User[] original = getUsersByIdUncached(ids);
-
-        Logger.d(TAG, "onUsers original in " + (SystemClock.uptimeMillis() - start) + " ms");
-
-        start = SystemClock.uptimeMillis();
-
-
-        for (User m : converted) {
-            User orig = EngineUtils.searchUser(original, m.getUid());
-
-            boolean isChanged = false;
-
-            if (orig != null) {
-                if (!orig.equals(m)) {
-                    isChanged = true;
-                    changed++;
-                }
-            } else {
-                isChanged = true;
-                changed++;
-            }
-
-            if (isChanged) {
-                diff.add(new Pair<User, User>(orig, m));
-            }
-
-        }
-
-        Logger.d(TAG, "onUsers changed " + changed + " of " + converted.length);
-
-        if (changed == 0) {
-            return;
-        }
-
-        Logger.d(TAG, "onUsers prepared in " + (SystemClock.uptimeMillis() - start));
-        start = SystemClock.uptimeMillis();
-        userDao.callBatchTasks(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                int changedColumns = 0;
-                for (Pair<User, User> user : diff) {
-                    User orig = user.first;
-                    User changed = user.second;
-
-                    if (orig == null) {
-                        userDao.create(changed);
-                        userCache.putIfAbsent(changed.getUid(), changed);
-                    } else {
-                        UpdateBuilder<User, Long> updateBuilder = userDao.updateBuilder();
-                        updateBuilder.where().eq("_id", orig.getDatabaseId());
-
-                        if (orig.getAccessHash() != changed.getAccessHash()) {
-                            updateBuilder.updateColumnValue("accessHash", changed.getAccessHash());
-                            orig.setAccessHash(changed.getAccessHash());
-                            changedColumns++;
-                        }
-
-                        if (orig.getLinkType() != changed.getLinkType()) {
-                            updateBuilder.updateColumnValue("linkType", changed.getLinkType());
-                            orig.setLinkType(changed.getLinkType());
-                            changedColumns++;
-                        }
-
-                        if (!orig.getFirstName().equals(changed.getFirstName())) {
-                            updateBuilder.updateColumnValue("firstName", changed.getFirstName());
-                            orig.setFirstName(changed.getFirstName());
-                            changedColumns++;
-                        }
-
-                        if (!orig.getLastName().equals(changed.getLastName())) {
-                            updateBuilder.updateColumnValue("lastName", changed.getLastName());
-                            orig.setLastName(changed.getLastName());
-                            changedColumns++;
-                        }
-
-                        if (!orig.getStatus().equals(changed.getStatus())) {
-                            updateBuilder.updateColumnValue("status", changed.getStatus());
-                            orig.setStatus(changed.getStatus());
-                            changedColumns++;
-                        }
-
-                        if (!orig.getPhoto().equals(changed.getPhoto())) {
-                            updateBuilder.updateColumnValue("photo", changed.getPhoto());
-                            orig.setPhoto(changed.getPhoto());
-                            changedColumns++;
-                        }
-
-                        userDao.update(orig);
-                    }
-                }
-                Logger.d(TAG, "Updated columns: " + changedColumns);
-                return null;
-            }
-        });
-
-        Logger.d(TAG, "onUsers updated in " + (SystemClock.uptimeMillis() - start));
-
-        if (application.getUserSource() != null) {
-            for (Pair<User, User> user : diff) {
-                application.getUserSource().notifyUserChanged(user.second.getUid());
-            }
-        }
-
-        start = SystemClock.uptimeMillis();
-        Logger.d(TAG, "onUsers notified in " + (SystemClock.uptimeMillis() - start) + " ms");
+        usersDatabase.updateUsers(converted);
     }
 
     public void onUsers(List<TLAbsUser> users) {
@@ -341,11 +139,7 @@ public class UsersEngine {
     }
 
     public User[] getContacts() {
-        User[] res = userDao.queryForEq("linkType", LinkType.CONTACT).toArray(new User[0]);
-        for (int i = 0; i < res.length; i++) {
-            res[i] = cacheUser(res[i]);
-        }
-        return res;
+        return usersDatabase.getContacts();
     }
 
     public void onImportedContacts(final HashMap<Long, HashSet<Integer>> importedContacts) {
@@ -367,7 +161,7 @@ public class UsersEngine {
                         }
 
                         if (!contains) {
-                            Contact contact = new Contact(uid, localId, getUser(uid), false);
+                            Contact contact = new Contact(uid, localId, false);
                             cachedContacts.add(contact);
                             contactsDao.create(contact);
                         }
