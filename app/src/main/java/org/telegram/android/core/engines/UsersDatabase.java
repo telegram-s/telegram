@@ -127,6 +127,7 @@ public class UsersDatabase {
             converted[i].setFirstName(users[i].getFirstName());
             converted[i].setLastName(users[i].getLastName());
             converted[i].setPhone(users[i].getPhone());
+            converted[i].setPhoto(users[i].getPhoto());
             converted[i].setStatus(users[i].getStatus());
             converted[i].setLinkType(users[i].getLinkType());
         }
@@ -253,12 +254,16 @@ public class UsersDatabase {
     }
 
     private User cachedConvert(org.telegram.ormlite.User user) {
-        user = cache(user);
+        if (user == null) {
+            return null;
+        }
 
+        user = cache(user);
         synchronized (user) {
             User res = userCache.get(user.getUid());
             if (res == null) {
                 res = new User();
+                res = userCache.putIfAbsent(res.getUid(), res);
             }
             res.setUid(user.getUid());
             res.setAccessHash(user.getAccessHash());
@@ -268,7 +273,7 @@ public class UsersDatabase {
             res.setPhone(user.getPhone());
             res.setStatus(user.getStatus());
             res.setLinkType(user.getLinkType());
-            userCache.putIfAbsent(res.getUid(), res);
+
         }
 
         return userCache.get(user.getUid());
