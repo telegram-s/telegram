@@ -99,24 +99,7 @@ public class DialogSource {
                     offset -= PAGE_OVERLAP;
                 }
 
-                try {
-                    QueryBuilder<DialogDescription, Long> queryBuilder = application.getEngine().getDialogsDao().queryBuilder();
-                    Logger.d(TAG, "Builder created in " + (SystemClock.uptimeMillis() - start) + " ms");
-                    queryBuilder.orderBy("date", false);
-                    queryBuilder.where().ne("date", 0);
-                    queryBuilder.offset(offset);
-                    queryBuilder.limit(PAGE_SIZE);
-                    // queryBuilder.selectColumns("_id", "peerType", "peerId", "title", "date", "senderTitle", "message", "messageState", "senderId", "photo", "extras");
-                    List<DialogDescription> dialogDescriptions = application.getEngine().getDialogsDao().query(queryBuilder.prepare());
-                    Logger.d(TAG, "Queried in " + (SystemClock.uptimeMillis() - start) + " ms");
-                    DialogDescription[] res = dialogDescriptions.toArray(new DialogDescription[dialogDescriptions.size()]);
-                    Logger.d(TAG, "Loaded items in " + (SystemClock.uptimeMillis() - start) + " ms");
-                    return res;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                return new DialogDescription[0];
+                return application.getEngine().getDialogsEngine().getItems(offset, PAGE_SIZE);
             }
 
             @Override
@@ -131,7 +114,7 @@ public class DialogSource {
 
             @Override
             protected long getItemKeyV(DialogDescription obj) {
-                return obj.getDatabaseId();
+                return obj.getUniqId();
             }
 
             @Override
@@ -328,7 +311,7 @@ public class DialogSource {
     }
 
     protected DialogWireframe convert(DialogDescription item) {
-        DialogWireframe res = new DialogWireframe(item.getDatabaseId(), item.getPeerId(), item.getPeerType());
+        DialogWireframe res = new DialogWireframe(item.getUniqId(), item.getPeerId(), item.getPeerType());
 
         res.setMid(item.getTopMessageId());
         res.setSenderId(item.getSenderId());

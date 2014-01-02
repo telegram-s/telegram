@@ -25,7 +25,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private static final String DATABASE_NAME = "stels.db";
     private static final int DATABASE_VERSION = 56;
 
-    private RuntimeExceptionDao<DialogDescription, Long> dialogsDao;
+    private RuntimeExceptionDao<OrmDialog, Long> dialogsDao;
     private RuntimeExceptionDao<FullChatInfo, Long> fullChatInfoDao;
     private RuntimeExceptionDao<EncryptedChat, Long> encryptedChats;
     private RuntimeExceptionDao<ChatMessage, Long> messagesDao;
@@ -44,7 +44,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
         try {
-            TableUtils.createTable(connectionSource, DialogDescription.class);
+            TableUtils.createTable(connectionSource, OrmDialog.class);
             TableUtils.createTable(connectionSource, ChatMessage.class);
             TableUtils.createTable(connectionSource, org.telegram.ormlite.User.class);
             TableUtils.createTable(connectionSource, Contact.class);
@@ -66,7 +66,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     public void onUpgrade(SQLiteDatabase database, ConnectionSource connectionSource, int oldVersion, int newVersion) {
         wasUpgraded = true;
         try {
-            TableUtils.dropTable(connectionSource, DialogDescription.class, true);
+            TableUtils.dropTable(connectionSource, OrmDialog.class, true);
             TableUtils.dropTable(connectionSource, ChatMessage.class, true);
             TableUtils.dropTable(connectionSource, User.class, true);
             TableUtils.dropTable(connectionSource, Contact.class, true);
@@ -74,7 +74,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             TableUtils.dropTable(connectionSource, MediaRecord.class, true);
             TableUtils.dropTable(connectionSource, EncryptedChat.class, true);
 
-            TableUtils.createTable(connectionSource, DialogDescription.class);
+            TableUtils.createTable(connectionSource, OrmDialog.class);
             TableUtils.createTable(connectionSource, ChatMessage.class);
             TableUtils.createTable(connectionSource, User.class);
             TableUtils.createTable(connectionSource, Contact.class);
@@ -127,7 +127,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             TransactionManager.callInTransaction(connectionSource,
                     new Callable<Void>() {
                         public Void call() throws Exception {
-                            TableUtils.clearTable(connectionSource, DialogDescription.class);
+                            TableUtils.clearTable(connectionSource, OrmDialog.class);
                             TableUtils.clearTable(connectionSource, ChatMessage.class);
                             TableUtils.clearTable(connectionSource, org.telegram.ormlite.User.class);
                             TableUtils.clearTable(connectionSource, Contact.class);
@@ -160,9 +160,9 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
         return usersDao;
     }
 
-    public RuntimeExceptionDao<DialogDescription, Long> getDialogsDao() {
+    public RuntimeExceptionDao<OrmDialog, Long> getDialogsDao() {
         if (dialogsDao == null) {
-            dialogsDao = getRuntimeExceptionDao(DialogDescription.class);
+            dialogsDao = getRuntimeExceptionDao(OrmDialog.class);
         }
         return dialogsDao;
     }

@@ -14,74 +14,30 @@ import java.io.Serializable;
  * Created: 28.07.13 18:19
  */
 public class DialogDescription implements Serializable {
-    @DatabaseField(generatedId = true, version = false)
-    private int _id;
-
-    @DatabaseField(index = true, version = false)
     private int peerType;
-
-    @DatabaseField(index = true, version = false)
     private int peerId;
-
-    @DatabaseField(version = false)
     private String title;
-
-    @DatabaseField(version = false, persisterClass = TlDataType.class)
     private TLAbsLocalAvatarPhoto photo;
-
-    @DatabaseField(version = false)
     private int unreadCount;
-
-    @DatabaseField(version = false)
     private int participantsCount;
 
     // Last message content
-
-    @DatabaseField(version = false)
     private int date;
-
-    @DatabaseField(version = false)
     private String senderTitle;
-
-    @DatabaseField(version = false)
     private int senderId;
-
-    @DatabaseField(version = false)
     private int topMessageId;
-
-    @DatabaseField(version = false)
     private int contentType;
-
-    @DatabaseField(version = false)
     private String message;
-
-    @DatabaseField(version = false)
     private int messageState;
-
-    @DatabaseField(version = false)
     private boolean messageHasSmileys;
-
-    @DatabaseField(version = false)
     private int lastLocalViewedMessage;
-
-    @DatabaseField(version = false)
     private int lastRemoteViewedMessage;
-
-    @DatabaseField(version = false)
     private boolean failure;
-
-    @DatabaseField(version = false, persisterClass = TlDataType.class)
     private TLObject extras;
-
-    @DatabaseField(version = false)
     private long firstUnreadMessage;
 
-    public int getDatabaseId() {
-        return _id;
-    }
-
-    public void setDatabaseId(int _id) {
-        this._id = _id;
+    public int getUniqId() {
+        return peerId * 10 + peerType;
     }
 
     public int getPeerType() {

@@ -27,7 +27,7 @@ public class SearchKernel {
 
     public SearchWireframe[] doSearch(FilterMatcher matcher) {
         if (descriptions == null) {
-            descriptions = application.getEngine().getDialogsDao().queryForAll().toArray(new DialogDescription[0]);
+            descriptions = application.getEngine().getDialogsEngine().getAll();
         }
 
         HashSet<Long> founded = new HashSet<Long>();

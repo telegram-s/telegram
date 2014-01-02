@@ -23,6 +23,7 @@ import org.telegram.dao.DaoSession;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
+import org.telegram.ormlite.OrmDialog;
 import org.telegram.tl.StreamingUtils;
 
 import java.io.File;
@@ -48,7 +49,7 @@ public class ModelEngine {
     private Object minMidSync = new Object();
 
     private UsersEngine usersEngine;
-
+    private DialogsEngine dialogsEngine;
     private MediaEngine mediaEngine;
 
     public ModelEngine(StelsDatabase database, StelsApplication application) {
@@ -60,6 +61,7 @@ public class ModelEngine {
         this.application = application;
         this.usersEngine = new UsersEngine(this);
         this.mediaEngine = new MediaEngine(this);
+        this.dialogsEngine = new DialogsEngine(application, this);
     }
 
     public DaoMaster getDaoMaster() {
@@ -84,6 +86,10 @@ public class ModelEngine {
 
     public MediaEngine getMediaEngine() {
         return mediaEngine;
+    }
+
+    public DialogsEngine getDialogsEngine() {
+        return dialogsEngine;
     }
 
     public User[] getUsersById(Object[] uids) {
@@ -132,10 +138,6 @@ public class ModelEngine {
 
     public RuntimeExceptionDao<MediaRecord, Long> getMediasDao() {
         return database.getMediaDao();
-    }
-
-    public RuntimeExceptionDao<DialogDescription, Long> getDialogsDao() {
-        return database.getDialogsDao();
     }
 
     public RuntimeExceptionDao<ChatMessage, Long> getMessagesDao() {
@@ -236,8 +238,7 @@ public class ModelEngine {
                     break;
             }
             description.setContentType(ContentType.MESSAGE_SYSTEM);
-            getDialogsDao().create(description);
-            application.getDialogSource().getViewSource().addItem(description);
+            dialogsEngine.createDialog(description);
 
             if (encryptedChat.getState() == EncryptedChatState.REQUESTED) {
                 User user = application.getEngine().getUser(encryptedChat.getUserId());
@@ -268,8 +269,7 @@ public class ModelEngine {
                     break;
             }
             description.setContentType(ContentType.MESSAGE_SYSTEM);
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
 
             if (encryptedChat.getState() == EncryptedChatState.NORMAL) {
                 User user = application.getEngine().getUser(encryptedChat.getUserId());
@@ -326,8 +326,7 @@ public class ModelEngine {
         DialogDescription description = getDescriptionForPeer(peerType, peerId);
         if (description != null) {
             description.setFailure(false);
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -452,27 +451,11 @@ public class ModelEngine {
     }
 
     public DialogDescription getDescriptionForPeer(int peerType, int peerId) {
-        try {
-            QueryBuilder<DialogDescription, Long> builder = getDialogsDao().queryBuilder();
-            builder.where().eq("peerType", peerType).and().eq("peerId", peerId).and();
-            return getDialogsDao().queryForFirst(builder.prepare());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return dialogsEngine.loadDialog(peerType, peerId);
     }
 
-    public List<DialogDescription> getUnreadedRemotelyDescriptions() {
-        try {
-            QueryBuilder<DialogDescription, Long> builder = getDialogsDao().queryBuilder();
-            builder.where().raw("lastLocalViewedMessage > lastRemoteViewedMessage");
-            return getDialogsDao().query(builder.prepare());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return new ArrayList<DialogDescription>();
+    public DialogDescription[] getUnreadedRemotelyDescriptions() {
+        return dialogsEngine.getUnreadedRemotelyDescriptions();
     }
 
     public void onNewUnreadMessageId(int peerType, int peerId, int mid) {
@@ -484,8 +467,7 @@ public class ModelEngine {
                     Logger.d(TAG, "Setting first unread message: " + mid + " (" + peerType + ":" + peerId + ")");
                 }
                 description.setUnreadCount(description.getUnreadCount() + 1);
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -495,8 +477,7 @@ public class ModelEngine {
         if (description != null) {
             if (description.getLastLocalViewedMessage() < date) {
                 description.setUnreadCount(description.getUnreadCount() + 1);
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -506,8 +487,7 @@ public class ModelEngine {
         if (description != null) {
             description.setLastLocalViewedMessage(maxId);
             description.setUnreadCount(0);
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -516,8 +496,7 @@ public class ModelEngine {
         if (description != null) {
             description.setFirstUnreadMessage(0);
             description.setUnreadCount(0);
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -525,8 +504,7 @@ public class ModelEngine {
         DialogDescription description = getDescriptionForPeer(peerType, peerId);
         if (description != null) {
             description.setLastRemoteViewedMessage(maxId);
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -534,8 +512,7 @@ public class ModelEngine {
         DialogDescription description = getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
         if (description != null) {
             description.setTitle(title);
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -576,8 +553,7 @@ public class ModelEngine {
         DialogDescription description = getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
         if (description != null) {
             description.setPhoto(EngineUtils.convertAvatarPhoto(photo));
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -629,8 +605,7 @@ public class ModelEngine {
         DialogDescription description = getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
         if (description != null) {
             description.setParticipantsCount(description.getParticipantsCount() + 1);
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -681,12 +656,10 @@ public class ModelEngine {
         if (description != null) {
             if (uid == application.getCurrentUid()) {
                 description.setParticipantsCount(0);
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             } else {
                 description.setParticipantsCount(description.getParticipantsCount() - 1);
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -758,8 +731,7 @@ public class ModelEngine {
             } else {
                 description.setParticipantsCount(info.getUids().length);
             }
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -846,8 +818,7 @@ public class ModelEngine {
             DialogDescription description = getDescriptionForPeer(peerType, peerId);
             if (description != null) {
                 description.setFirstUnreadMessage(0);
-                getDialogsDao().update(description);
-                application.getDataSourceKernel().getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -857,16 +828,14 @@ public class ModelEngine {
             DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
             if (description != null) {
                 description.setUnreadCount(Math.max(0, description.getUnreadCount() - 1));
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
         if (msg.isOut()) {
             DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
             if (description != null && description.getTopMessageId() == msg.getMid()) {
                 description.setMessageState(MessageState.READED);
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
         if (msg.getState() != MessageState.READED) {
@@ -1338,14 +1307,12 @@ public class ModelEngine {
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
             applyDescriptor(description, msg);
-            getDialogsDao().update(description);
-            application.getDialogSource().getViewSource().updateItem(description);
+            dialogsEngine.updateDialog(description);
         } else {
             if (msg.getPeerType() == PeerType.PEER_USER) {
                 description = createDescriptionForUser(msg.getPeerId());
                 applyDescriptor(description, msg);
-                getDialogsDao().create(description);
-                application.getDialogSource().getViewSource().addItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1355,15 +1322,13 @@ public class ModelEngine {
         if (description != null) {
             if (description.getDate() <= msg.getDate()) {
                 applyDescriptor(description, msg);
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         } else {
             if (msg.getPeerType() == PeerType.PEER_USER) {
                 description = createDescriptionForUser(msg.getPeerId());
                 applyDescriptor(description, msg);
-                getDialogsDao().create(description);
-                application.getDialogSource().getViewSource().addItem(description);
+                dialogsEngine.createDialog(description);
             }
         }
     }
@@ -1378,8 +1343,7 @@ public class ModelEngine {
                 }
 
                 applyDescriptor(description, msg);
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1410,8 +1374,7 @@ public class ModelEngine {
                 description.setContentType(ContentType.MESSAGE_SYSTEM);
                 description.setMessage("");
                 description.setExtras(new TLLocalActionEncryptedMessageDestructed());
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1433,12 +1396,10 @@ public class ModelEngine {
                     description.setParticipantsCount(0);
                     description.setSenderId(0);
                     description.setSenderTitle(null);
-                    getDialogsDao().update(description);
-                    application.getDialogSource().getViewSource().removeItem(description);
+                    dialogsEngine.updateDialog(description);
                 } else {
                     applyDescriptor(description, msg);
-                    getDialogsDao().update(description);
-                    application.getDialogSource().getViewSource().updateItem(description);
+                    dialogsEngine.updateDialog(description);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1457,8 +1418,7 @@ public class ModelEngine {
                 if (description.getTopMessageId() == -msg.getDatabaseId()) {
                     description.setMessageState(MessageState.SENT);
                     description.setDate(msg.getDate());
-                    getDialogsDao().update(description);
-                    application.getDialogSource().getViewSource().updateItem(description);
+                    dialogsEngine.updateDialog(description);
                 }
             }
         }
@@ -1491,8 +1451,7 @@ public class ModelEngine {
                 description.setMessageState(MessageState.SENT);
                 description.setDate(msg.getDate());
                 description.setTopMessageId(msg.getMid());
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1521,9 +1480,7 @@ public class ModelEngine {
                 description.setMessageState(MessageState.SENT);
                 description.setDate(msg.getDate());
                 description.setTopMessageId(msg.getMid());
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
-                application.getDialogSource().getViewSource().invalidateData();
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1548,9 +1505,7 @@ public class ModelEngine {
                 description.setMessageState(MessageState.SENT);
                 description.setDate(msg.getDate());
                 description.setTopMessageId(msg.getMid());
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
-                application.getDialogSource().getViewSource().invalidateData();
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1569,9 +1524,7 @@ public class ModelEngine {
                 description.setMessageState(MessageState.SENT);
                 description.setDate(msg.getDate());
                 description.setTopMessageId(msg.getMid());
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
-                application.getDialogSource().getViewSource().invalidateData();
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1590,9 +1543,7 @@ public class ModelEngine {
                 description.setMessageState(MessageState.SENT);
                 description.setDate(msg.getDate());
                 description.setTopMessageId(msg.getMid());
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
-                application.getDialogSource().getViewSource().invalidateData();
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1612,9 +1563,7 @@ public class ModelEngine {
                 description.setMessageState(MessageState.SENT);
                 description.setDate(msg.getDate());
                 description.setTopMessageId(msg.getMid());
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
-                application.getDialogSource().getViewSource().invalidateData();
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1633,9 +1582,7 @@ public class ModelEngine {
                 description.setMessageState(MessageState.SENT);
                 description.setDate(msg.getDate());
                 description.setTopMessageId(msg.getMid());
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
-                application.getDialogSource().getViewSource().invalidateData();
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1652,9 +1599,7 @@ public class ModelEngine {
                 description.setMessageState(MessageState.SENT);
                 description.setDate(msg.getDate());
                 description.setTopMessageId(msg.getMid());
-                getDialogsDao().update(description);
-                application.getDialogSource().getViewSource().updateItem(description);
-                application.getDialogSource().getViewSource().invalidateData();
+                dialogsEngine.updateDialog(description);
             }
         }
     }
@@ -1674,11 +1619,7 @@ public class ModelEngine {
             if (description.getTopMessageId() == -msg.getDatabaseId()) {
                 description.setMessageState(MessageState.FAILURE);
             }
-            getDialogsDao().update(description);
-            if (application.getDataSourceKernel() != null) {
-                application.getDialogSource().getViewSource().updateItem(description);
-                application.getDialogSource().getViewSource().invalidateData();
-            }
+            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -1838,13 +1779,11 @@ public class ModelEngine {
                             description.setUnreadCount(dialog.getUnreadCount());
                         }
 
-                        getDialogsDao().create(description);
-                        application.getDialogSource().getViewSource().addItem(description);
+                        dialogsEngine.createDialog(description);
                     } else {
                         if (description.getDate() <= changed.getDate()) {
                             applyDescriptor(description, changed);
-                            getDialogsDao().update(description);
-                            application.getDialogSource().getViewSource().updateItem(description);
+                            dialogsEngine.updateDialog(description);
                         }
                     }
                 }
@@ -1861,8 +1800,7 @@ public class ModelEngine {
     public void deleteHistory(int peerType, int peerId) {
         DialogDescription description = getDescriptionForPeer(peerType, peerId);
         if (description != null) {
-            getDialogsDao().delete(description);
-            application.getDialogSource().getViewSource().removeItem(description);
+            dialogsEngine.deleteDialog(description);
         }
 
         application.getDataSourceKernel().removeMessageSource(peerType, peerId);

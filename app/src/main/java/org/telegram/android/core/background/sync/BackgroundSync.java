@@ -252,8 +252,8 @@ public class BackgroundSync extends BaseSync {
 
     protected void historyReadSync() throws Exception {
         while (true) {
-            List<DialogDescription> descriptionList = application.getEngine().getUnreadedRemotelyDescriptions();
-            if (descriptionList.size() == 0) {
+            DialogDescription[] descriptionList = application.getEngine().getUnreadedRemotelyDescriptions();
+            if (descriptionList.length == 0) {
                 return;
             }
             for (DialogDescription description : descriptionList) {
