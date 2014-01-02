@@ -35,8 +35,7 @@ public class UserSource {
         listeners.remove(listener);
     }
 
-    public void notifyUserChanged(final int uid) {
-        final User u = application.getEngine().getUser(uid);
+    public void notifyUserChanged(final int uid, final User u) {
         if (u != null) {
             handler.post(new Runnable() {
                 @Override

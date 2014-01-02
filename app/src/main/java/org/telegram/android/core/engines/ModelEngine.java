@@ -18,6 +18,8 @@ import org.telegram.api.*;
 import org.telegram.api.messages.TLAbsSentMessage;
 import org.telegram.api.messages.TLAbsStatedMessage;
 import org.telegram.api.messages.TLAbsStatedMessages;
+import org.telegram.dao.DaoMaster;
+import org.telegram.dao.DaoSession;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
@@ -37,6 +39,8 @@ public class ModelEngine {
     private static final String TAG = "ModelEngine";
 
     private StelsDatabase database;
+    private DaoMaster daoMaster;
+    private DaoSession daoSession;
     private StelsApplication application;
 
     private int maxDate = 0;
@@ -48,10 +52,21 @@ public class ModelEngine {
     private MediaEngine mediaEngine;
 
     public ModelEngine(StelsDatabase database, StelsApplication application) {
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "users-db", null);
+        this.daoMaster = new DaoMaster(helper.getWritableDatabase());
+        this.daoSession = daoMaster.newSession();
         this.database = database;
         this.application = application;
         this.usersEngine = new UsersEngine(this);
         this.mediaEngine = new MediaEngine(this);
+    }
+
+    public DaoMaster getDaoMaster() {
+        return daoMaster;
+    }
+
+    public DaoSession getDaoSession() {
+        return daoSession;
     }
 
     public StelsApplication getApplication() {
