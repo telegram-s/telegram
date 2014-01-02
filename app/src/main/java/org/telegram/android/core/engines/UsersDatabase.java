@@ -275,6 +275,9 @@ public class UsersDatabase {
     }
 
     private org.telegram.ormlite.User cache(org.telegram.ormlite.User user) {
+        if (user == null) {
+            return null;
+        }
         userDbCache.putIfAbsent(user.getUid(), user);
         return userDbCache.get(user.getUid());
     }
