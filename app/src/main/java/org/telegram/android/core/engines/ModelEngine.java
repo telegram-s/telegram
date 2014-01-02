@@ -1299,8 +1299,6 @@ public class ModelEngine {
         }
         description.setSenderId(msg.getSenderId());
         description.setExtras(msg.getExtras());
-        User senderUser = getUser(msg.getSenderId());
-        description.setSenderTitle(senderUser.getDisplayName());
     }
 
     private void updateDescriptorPending(ChatMessage msg) {
@@ -1395,7 +1393,6 @@ public class ModelEngine {
                     description.setPhoto(null);
                     description.setParticipantsCount(0);
                     description.setSenderId(0);
-                    description.setSenderTitle(null);
                     dialogsEngine.updateDialog(description);
                 } else {
                     applyDescriptor(description, msg);

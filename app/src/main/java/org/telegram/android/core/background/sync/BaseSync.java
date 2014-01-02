@@ -85,7 +85,7 @@ public abstract class BaseSync {
             }
             long delta = Math.min(Math.max(0, entity.syncInterval * 1000L - (System.currentTimeMillis() - syncTime)),
                     entity.syncInterval * 1000L);
-            requestSyncDelayed(entity.id, delta);
+            requestSyncDelayed(entity.id, Math.max(delta, 1500));
         }
     }
 

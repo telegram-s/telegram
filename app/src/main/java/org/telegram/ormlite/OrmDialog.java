@@ -13,20 +13,11 @@ import org.telegram.tl.TLObject;
  */
 @DatabaseTable(tableName = "dialogdescription")
 public class OrmDialog {
-    @DatabaseField(generatedId = true, version = false)
-    private int _id;
-
-    @DatabaseField(index = true, version = false)
-    private int peerType;
-
-    @DatabaseField(index = true, version = false)
-    private int peerId;
+    @DatabaseField(id = true, version = false)
+    private long _id;
 
     @DatabaseField(version = false)
     private String title;
-
-    @DatabaseField(version = false, persisterClass = TlDataType.class)
-    private TLAbsLocalAvatarPhoto photo;
 
     @DatabaseField(version = false)
     private int unreadCount;
@@ -36,11 +27,8 @@ public class OrmDialog {
 
     // Last message content
 
-    @DatabaseField(version = false)
+    @DatabaseField(version = false, index = true)
     private int date;
-
-    @DatabaseField(version = false)
-    private String senderTitle;
 
     @DatabaseField(version = false)
     private int senderId;
@@ -69,34 +57,26 @@ public class OrmDialog {
     @DatabaseField(version = false)
     private boolean failure;
 
-    @DatabaseField(version = false, persisterClass = TlDataType.class)
-    private TLObject extras;
+//    @DatabaseField(version = false, persisterClass = TlDataType.class)
+//    private TLObject extras;
 
     @DatabaseField(version = false)
     private long firstUnreadMessage;
 
-    public int getDatabaseId() {
+    public long getUniqId() {
         return _id;
     }
 
-    public void setDatabaseId(int _id) {
-        this._id = _id;
+    public void setPeer(int peerType, int peerId) {
+        this._id = peerId * 10L + peerType;
     }
 
     public int getPeerType() {
-        return peerType;
-    }
-
-    public void setPeerType(int peerType) {
-        this.peerType = peerType;
+        return (int) (_id % 10L);
     }
 
     public int getPeerId() {
-        return peerId;
-    }
-
-    public void setPeerId(int peerId) {
-        this.peerId = peerId;
+        return (int) (_id / 10L);
     }
 
     public String getTitle() {
@@ -105,14 +85,6 @@ public class OrmDialog {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public TLAbsLocalAvatarPhoto getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(TLAbsLocalAvatarPhoto photo) {
-        this.photo = photo;
     }
 
     public int getUnreadCount() {
@@ -129,14 +101,6 @@ public class OrmDialog {
 
     public void setDate(int date) {
         this.date = date;
-    }
-
-    public String getSenderTitle() {
-        return senderTitle;
-    }
-
-    public void setSenderTitle(String senderTitle) {
-        this.senderTitle = senderTitle;
     }
 
     public int getSenderId() {
@@ -228,13 +192,13 @@ public class OrmDialog {
         this.failure = failure;
     }
 
-    public TLObject getExtras() {
-        return extras;
-    }
-
-    public void setExtras(TLObject extras) {
-        this.extras = extras;
-    }
+//    public TLObject getExtras() {
+//        return extras;
+//    }
+//
+//    public void setExtras(TLObject extras) {
+//        this.extras = extras;
+//    }
 
     public long getFirstUnreadMessage() {
         return firstUnreadMessage;

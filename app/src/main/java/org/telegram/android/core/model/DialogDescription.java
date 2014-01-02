@@ -20,16 +20,12 @@ public class DialogDescription implements Serializable {
     private TLAbsLocalAvatarPhoto photo;
     private int unreadCount;
     private int participantsCount;
-
-    // Last message content
     private int date;
-    private String senderTitle;
     private int senderId;
     private int topMessageId;
     private int contentType;
     private String message;
     private int messageState;
-    private boolean messageHasSmileys;
     private int lastLocalViewedMessage;
     private int lastRemoteViewedMessage;
     private boolean failure;
@@ -88,14 +84,6 @@ public class DialogDescription implements Serializable {
         this.date = date;
     }
 
-    public String getSenderTitle() {
-        return senderTitle;
-    }
-
-    public void setSenderTitle(String senderTitle) {
-        this.senderTitle = senderTitle;
-    }
-
     public int getSenderId() {
         return senderId;
     }
@@ -126,7 +114,6 @@ public class DialogDescription implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
-        messageHasSmileys = EmojiProcessor.containsEmoji(message);
     }
 
     public int getTopMessageId() {
@@ -135,14 +122,6 @@ public class DialogDescription implements Serializable {
 
     public void setTopMessageId(int topMessageId) {
         this.topMessageId = topMessageId;
-    }
-
-    public boolean isMessageHasSmileys() {
-        return messageHasSmileys;
-    }
-
-    public void setMessageHasSmileys(boolean messageHasSmileys) {
-        this.messageHasSmileys = messageHasSmileys;
     }
 
     public int getMessageState() {

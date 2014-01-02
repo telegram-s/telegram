@@ -4,7 +4,6 @@ import android.os.SystemClock;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.core.model.DialogDescription;
-import org.telegram.android.core.model.User;
 import org.telegram.android.log.Logger;
 import org.telegram.ormlite.OrmDialog;
 
@@ -38,7 +37,7 @@ public class DialogsDatabase {
             queryBuilder.offset(offset);
             queryBuilder.limit(limit);
             List<OrmDialog> dialogDescriptions = dialogsDao.query(queryBuilder.prepare());
-            Logger.d(TAG, "Queried in " + (SystemClock.uptimeMillis() - start) + " ms");
+            Logger.d(TAG, "Queried (" + offset + ") in " + (SystemClock.uptimeMillis() - start) + " ms");
             OrmDialog[] res = dialogDescriptions.toArray(new OrmDialog[dialogDescriptions.size()]);
             Logger.d(TAG, "Loaded items in " + (SystemClock.uptimeMillis() - start) + " ms");
             DialogDescription[] dRes = new DialogDescription[res.length];
@@ -78,14 +77,7 @@ public class DialogsDatabase {
     }
 
     public OrmDialog loadDialogDb(int peerType, int peerId) {
-        try {
-            QueryBuilder<OrmDialog, Long> queryBuilder = dialogsDao.queryBuilder();
-            queryBuilder.where().eq("peerType", peerType).and().eq("peerId", peerId);
-            return dialogsDao.queryForFirst(queryBuilder.prepare());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return dialogsDao.queryForId(peerType + peerId * 10L);
     }
 
     public DialogDescription loadDialog(int peerType, int peerId) {
@@ -133,7 +125,7 @@ public class DialogsDatabase {
             res.setPeerId(dialog.getPeerId());
             res.setContentType(dialog.getContentType());
             res.setDate(dialog.getDate());
-            res.setExtras(dialog.getExtras());
+            // res.setExtras(dialog.getExtras());
             res.setFailure(dialog.isFailure());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
             res.setLastLocalViewedMessage(dialog.getLastLocalViewedMessage());
@@ -141,23 +133,20 @@ public class DialogsDatabase {
             res.setMessage(dialog.getMessage());
             res.setMessageState(dialog.getMessageState());
             res.setSenderId(dialog.getSenderId());
-            res.setSenderTitle(dialog.getSenderTitle());
-            res.setPhoto(dialog.getPhoto());
             res.setTopMessageId(dialog.getTopMessageId());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
             res.setTitle(dialog.getTitle());
-            res.setSenderTitle(dialog.getSenderTitle());
+            res.setUnreadCount(dialog.getUnreadCount());
         }
 
         return dialogsCache.get(id);
     }
 
     private void applyChanges(DialogDescription src, OrmDialog dest) {
-        dest.setPeerType(src.getPeerType());
-        dest.setPeerId(src.getPeerId());
+        dest.setPeer(src.getPeerType(), src.getPeerId());
         dest.setContentType(src.getContentType());
         dest.setDate(src.getDate());
-        dest.setExtras(src.getExtras());
+        // dest.setExtras(src.getExtras());
         dest.setFailure(src.isFailure());
         dest.setFirstUnreadMessage(src.getFirstUnreadMessage());
         dest.setLastLocalViewedMessage(src.getLastLocalViewedMessage());
@@ -165,11 +154,10 @@ public class DialogsDatabase {
         dest.setMessage(src.getMessage());
         dest.setMessageState(src.getMessageState());
         dest.setSenderId(src.getSenderId());
-        dest.setSenderTitle(src.getSenderTitle());
-        dest.setPhoto(src.getPhoto());
         dest.setTopMessageId(src.getTopMessageId());
         dest.setFirstUnreadMessage(src.getFirstUnreadMessage());
         dest.setTitle(src.getTitle());
+        dest.setUnreadCount(src.getUnreadCount());
     }
 
     private long uniqId(DialogDescription description) {

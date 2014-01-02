@@ -23,7 +23,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private static final String TAG = "Database";
 
     private static final String DATABASE_NAME = "stels.db";
-    private static final int DATABASE_VERSION = 56;
+    private static final int DATABASE_VERSION = 57;
 
     private RuntimeExceptionDao<OrmDialog, Long> dialogsDao;
     private RuntimeExceptionDao<FullChatInfo, Long> fullChatInfoDao;
@@ -54,8 +54,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
 
             //User
             database.execSQL("CREATE UNIQUE INDEX mytest_id_idx ON ChatMessage(mid);\n");
-            // database.execSQL("CREATE UNIQUE INDEX user_uid_idx ON user(uid);\n");
-            database.execSQL("CREATE INDEX dlg_date_idx ON dialogdescription(date);\n");
         } catch (SQLException e) {
             Logger.e(TAG, "Can't create database", e);
             throw new RuntimeException(e);
