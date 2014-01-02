@@ -464,7 +464,7 @@ public class DialogSource {
 
         res.setUnreadCount(item.getUnreadCount());
 
-        res.setPreparedLayout(DialogView.prepareLayoutCache(res, application));
+        // res.setPreparedLayout(DialogView.prepareLayoutCache(res, application));
 
         return res;
     }

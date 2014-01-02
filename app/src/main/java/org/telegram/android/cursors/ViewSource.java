@@ -176,12 +176,14 @@ public abstract class ViewSource<T, V> {
                 int offset = items.size();
                 V[] res = loadItems(offset);
                 Logger.w(TAG, "loadingMore loaded " + res.length + " in " + (SystemClock.uptimeMillis() - start) + " ms");
+                start = SystemClock.uptimeMillis();
                 boolean hasAdded = false;
                 for (V re : res) {
                     if (!addItem(re)) {
                         hasAdded = true;
                     }
                 }
+                Logger.w(TAG, "loadingMore added " + res.length + " in " + (SystemClock.uptimeMillis() - start) + " ms");
                 if (!hasAdded) {
                     Logger.w(TAG, "Completed loading");
                     invalidateDataAndState(InternalSourceState.COMPLETED);
