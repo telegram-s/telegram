@@ -54,6 +54,7 @@ public class ModelEngine {
     public ModelEngine(StelsDatabase database, StelsApplication application) {
         DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "users-db", null);
         this.daoMaster = new DaoMaster(helper.getWritableDatabase());
+        this.daoMaster.getDatabase().execSQL("PRAGMA synchronous = OFF;");
         this.daoSession = daoMaster.newSession();
         this.database = database;
         this.application = application;
