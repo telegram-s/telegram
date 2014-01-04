@@ -4,9 +4,7 @@ import android.os.SystemClock;
 import android.util.Pair;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.DeleteBuilder;
-import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
-import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.StelsDatabase;
@@ -23,7 +21,6 @@ import org.telegram.dao.DaoSession;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
-import org.telegram.ormlite.OrmDialog;
 import org.telegram.tl.StreamingUtils;
 
 import java.io.File;
@@ -51,6 +48,7 @@ public class ModelEngine {
     private UsersEngine usersEngine;
     private DialogsEngine dialogsEngine;
     private MediaEngine mediaEngine;
+    private SecretEngine secretEngine;
 
     public ModelEngine(StelsDatabase database, StelsApplication application) {
         DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "users-db", null);
@@ -62,6 +60,7 @@ public class ModelEngine {
         this.usersEngine = new UsersEngine(this);
         this.mediaEngine = new MediaEngine(this);
         this.dialogsEngine = new DialogsEngine(application, this);
+        this.secretEngine = new SecretEngine(application, this);
     }
 
     public DaoMaster getDaoMaster() {
@@ -92,6 +91,10 @@ public class ModelEngine {
         return dialogsEngine;
     }
 
+    public SecretEngine getSecretEngine() {
+        return secretEngine;
+    }
+
     public User[] getUsersById(Object[] uids) {
         return usersEngine.getUsersById(uids);
     }
@@ -120,16 +123,16 @@ public class ModelEngine {
      * End users actions
      */
 
+    public EncryptedChat getEncryptedChat(int chatId) {
+        return secretEngine.getEncryptedChat(chatId);
+    }
+
     public int getMediaCount(int peerType, int peerId) {
         return mediaEngine.getMediaCount(peerType, peerId);
     }
 
     public MediaRecord findMedia(int mid) {
         return mediaEngine.findMedia(mid);
-    }
-
-    public int getCurrentTime() {
-        return (int) (TimeOverlord.getInstance().getServerTime() / 1000);
     }
 
     public StelsDatabase getDatabase() {
@@ -150,176 +153,6 @@ public class ModelEngine {
 
     public RuntimeExceptionDao<FullChatInfo, Long> getFullChatInfoDao() {
         return database.getFullChatInfoDao();
-    }
-
-    public void updateEncryptedChatKey(TLAbsEncryptedChat chat, byte[] key) {
-        int id = chat.getId();
-        EncryptedChat encryptedChat = database.getEncryptedChatDao().queryForId((long) id);
-        if (encryptedChat != null) {
-            encryptedChat.setKey(key);
-            database.getEncryptedChatDao().update(encryptedChat);
-        }
-    }
-
-    public EncryptedChat[] getPendingEncryptedChats() {
-        QueryBuilder<EncryptedChat, Long> queryBuilder = database.getEncryptedChatDao().queryBuilder();
-        try {
-            queryBuilder.where().eq("state", EncryptedChatState.REQUESTED);
-            return database.getEncryptedChatDao().query(queryBuilder.prepare()).toArray(new EncryptedChat[0]);
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
-        }
-        return new EncryptedChat[0];
-    }
-
-    public void updateEncryptedChat(TLAbsEncryptedChat chat) {
-        int id = chat.getId();
-
-        if (id == 0) {
-            Logger.w(TAG, "Ignoring encrypted chat");
-            return;
-        }
-
-        int date = getCurrentTime();
-
-        if (chat instanceof TLEncryptedChat) {
-            date = ((TLEncryptedChat) chat).getDate();
-        } else if (chat instanceof TLEncryptedChatRequested) {
-            date = ((TLEncryptedChatRequested) chat).getDate();
-        } else if (chat instanceof TLEncryptedChatWaiting) {
-            date = ((TLEncryptedChatWaiting) chat).getDate();
-        }
-
-        EncryptedChat encryptedChat = database.getEncryptedChatDao().queryForId((long) id);
-        if (encryptedChat != null) {
-            if (!(chat instanceof TLEncryptedChat) && !(chat instanceof TLEncryptedChatDiscarded)) {
-                return;
-            }
-            writeEncryptedChatInfo(encryptedChat, chat);
-            database.getEncryptedChatDao().update(encryptedChat);
-        } else {
-            if (!(chat instanceof TLEncryptedChatWaiting) && !(chat instanceof TLEncryptedChatRequested)) {
-                return;
-            }
-            encryptedChat = new EncryptedChat();
-            encryptedChat.setId(id);
-            writeEncryptedChatInfo(encryptedChat, chat);
-            database.getEncryptedChatDao().create(encryptedChat);
-        }
-        application.getEncryptedChatSource().notifyChatChanged(id);
-
-        DialogDescription description = getDescriptionForPeer(PeerType.PEER_USER_ENCRYPTED, encryptedChat.getId());
-//        if (encryptedChat.getState() == EncryptedChatState.DISCARDED) {
-//            if (description != null) {
-//                description.setDate(0);
-//                getDialogsDao().update(description);
-//                application.getDialogSource().getViewSource().removeItem(description);
-//            }
-//        } else {
-        if (description == null) {
-            description = createDescriptionForEncryptedUser(encryptedChat.getId(), encryptedChat.getUserId());
-            description.setDate(date);
-            switch (encryptedChat.getState()) {
-                default:
-                case EncryptedChatState.EMPTY:
-                    description.setMessage("Encrypted chat");
-                    break;
-                case EncryptedChatState.REQUESTED:
-                    description.setMessage("Requested new chat");
-                    description.setExtras(new TLLocalActionEncryptedRequested());
-                    break;
-                case EncryptedChatState.WAITING:
-                    description.setMessage("Waiting to approve");
-                    description.setExtras(new TLLocalActionEncryptedWaiting());
-                    break;
-                case EncryptedChatState.NORMAL:
-                    description.setMessage("Chat established");
-                    description.setExtras(new TLLocalActionEncryptedCreated());
-                    break;
-            }
-            description.setContentType(ContentType.MESSAGE_SYSTEM);
-            dialogsEngine.createDialog(description);
-
-            if (encryptedChat.getState() == EncryptedChatState.REQUESTED) {
-                User user = application.getEngine().getUser(encryptedChat.getUserId());
-                application.getNotifications().onNewSecretChatRequested(user.getDisplayName(), user.getUid(), encryptedChat.getId(), user.getPhoto());
-            }
-        } else {
-            description.setDate(date);
-            switch (encryptedChat.getState()) {
-                default:
-                case EncryptedChatState.EMPTY:
-                    description.setMessage("Encrypted chat");
-                    break;
-                case EncryptedChatState.REQUESTED:
-                    description.setMessage("Requested new chat");
-                    description.setExtras(new TLLocalActionEncryptedRequested());
-                    break;
-                case EncryptedChatState.WAITING:
-                    description.setMessage("Waiting to approve");
-                    description.setExtras(new TLLocalActionEncryptedWaiting());
-                    break;
-                case EncryptedChatState.DISCARDED:
-                    description.setMessage("Chat discarded");
-                    description.setExtras(new TLLocalActionEncryptedCancelled());
-                    break;
-                case EncryptedChatState.NORMAL:
-                    description.setMessage("Chat established");
-                    description.setExtras(new TLLocalActionEncryptedCreated());
-                    break;
-            }
-            description.setContentType(ContentType.MESSAGE_SYSTEM);
-            dialogsEngine.updateDialog(description);
-
-            if (encryptedChat.getState() == EncryptedChatState.NORMAL) {
-                User user = application.getEngine().getUser(encryptedChat.getUserId());
-                application.getNotifications().onNewSecretChatEstablished(user.getDisplayName(), user.getUid(), encryptedChat.getId(), user.getPhoto());
-            } else if (encryptedChat.getState() == EncryptedChatState.DISCARDED) {
-                User user = application.getEngine().getUser(encryptedChat.getUserId());
-                application.getNotifications().onNewSecretChatCancelled(user.getDisplayName(), user.getUid(), encryptedChat.getId(), user.getPhoto());
-            }
-        }
-        //}
-    }
-
-    private void writeEncryptedChatInfo(EncryptedChat chat, TLAbsEncryptedChat rawChat) {
-        if (rawChat instanceof TLEncryptedChatRequested) {
-            TLEncryptedChatRequested requested = (TLEncryptedChatRequested) rawChat;
-            chat.setAccessHash(requested.getAccessHash());
-            chat.setUserId(requested.getAdminId());
-            byte[] tmpKey = CryptoUtils.concat(
-                    StreamingUtils.intToBytes(requested.getGA().length),
-                    requested.getGA(),
-                    StreamingUtils.intToBytes(requested.getNonce().length),
-                    requested.getNonce());
-            chat.setKey(tmpKey);
-            chat.setState(EncryptedChatState.REQUESTED);
-            chat.setOut(false);
-        } else if (rawChat instanceof TLEncryptedChatWaiting) {
-            TLEncryptedChatWaiting waiting = (TLEncryptedChatWaiting) rawChat;
-            chat.setAccessHash(waiting.getAccessHash());
-            chat.setUserId(waiting.getParticipantId());
-            chat.setState(EncryptedChatState.WAITING);
-            chat.setOut(true);
-        } else if (rawChat instanceof TLEncryptedChatDiscarded) {
-            chat.setState(EncryptedChatState.DISCARDED);
-        } else if (rawChat instanceof TLEncryptedChat) {
-            chat.setState(EncryptedChatState.NORMAL);
-        }
-    }
-
-    public void deleteEncryptedChat(int chatId) {
-        database.getEncryptedChatDao().deleteById((long) chatId);
-    }
-
-    public EncryptedChat getEncryptedChat(int chatId) {
-        return database.getEncryptedChatDao().queryForId((long) chatId);
-    }
-
-    public void setSelfDestructTimer(int chatId, int time) {
-        EncryptedChat chat = getEncryptedChat(chatId);
-        chat.setSelfDestructTime(time);
-        database.getEncryptedChatDao().update(chat);
     }
 
     public void markDialogAsNonFailed(int peerType, int peerId) {
@@ -1326,7 +1159,7 @@ public class ModelEngine {
             if (msg.getPeerType() == PeerType.PEER_USER) {
                 description = createDescriptionForUser(msg.getPeerId());
                 applyDescriptor(description, msg);
-                dialogsEngine.createDialog(description);
+                dialogsEngine.updateOrCreateDialog(description);
             }
         }
     }
@@ -1776,7 +1609,7 @@ public class ModelEngine {
                             description.setUnreadCount(dialog.getUnreadCount());
                         }
 
-                        dialogsEngine.createDialog(description);
+                        dialogsEngine.updateOrCreateDialog(description);
                     } else {
                         if (description.getDate() <= changed.getDate()) {
                             applyDescriptor(description, changed);

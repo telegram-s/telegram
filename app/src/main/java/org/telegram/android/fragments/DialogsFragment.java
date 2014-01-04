@@ -319,7 +319,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
 //                                                    throw new AsyncException(e);
 //                                                }
                                             }
-                                            getEngine().deleteEncryptedChat(description.getPeerId());
+                                            getEngine().getSecretEngine().deleteEncryptedChat(description.getPeerId());
                                             getEngine().deleteHistory(description.getPeerType(), description.getPeerId());
                                         } else {
 

@@ -10,6 +10,7 @@ import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.log.Logger;
 import org.telegram.dao.DaoSession;
 import org.telegram.dao.UserDao;
+import org.telegram.ormlite.OrmUser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,15 +90,23 @@ public class UsersDatabase {
             converted[i].setFirstName(users[i].getFirstName());
             converted[i].setLastName(users[i].getLastName());
             converted[i].setPhone(users[i].getPhone());
-            try {
-                converted[i].setAvatar(users[i].getPhoto().serialize());
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (users[i].getPhoto() == null) {
+                converted[i].setAvatar(null);
+            } else {
+                try {
+                    converted[i].setAvatar(users[i].getPhoto().serialize());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            try {
-                converted[i].setStatus(users[i].getStatus().serialize());
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (users[i].getStatus() == null) {
+                converted[i].setStatus(null);
+            } else {
+                try {
+                    converted[i].setStatus(users[i].getStatus().serialize());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             converted[i].setLinkType(users[i].getLinkType());
         }
@@ -134,16 +143,20 @@ public class UsersDatabase {
             res.setAccessHash(user.getAccessHash());
             res.setFirstName(user.getFirstName());
             res.setLastName(user.getLastName());
-            try {
-                res.setPhoto((TLAbsLocalAvatarPhoto) TLLocalContext.getInstance().deserializeMessage(user.getAvatar()));
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (user.getAvatar() != null) {
+                try {
+                    res.setPhoto((TLAbsLocalAvatarPhoto) TLLocalContext.getInstance().deserializeMessage(user.getAvatar()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             res.setPhone(user.getPhone());
-            try {
-                res.setStatus((TLAbsLocalUserStatus) TLLocalContext.getInstance().deserializeMessage(user.getStatus()));
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (user.getStatus() != null) {
+                try {
+                    res.setStatus((TLAbsLocalUserStatus) TLLocalContext.getInstance().deserializeMessage(user.getStatus()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             res.setLinkType(user.getLinkType());
 
@@ -161,8 +174,8 @@ public class UsersDatabase {
         return null;
     }
 
-    public static org.telegram.ormlite.User searchUser(org.telegram.ormlite.User[] users, long id) {
-        for (org.telegram.ormlite.User user : users) {
+    public static OrmUser searchUser(OrmUser[] users, long id) {
+        for (OrmUser user : users) {
             if (user.getUid() == id)
                 return user;
         }

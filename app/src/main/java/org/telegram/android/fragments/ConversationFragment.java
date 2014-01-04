@@ -400,7 +400,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 //                                        }
                                     }
                                     getEngine().deleteHistory(peerType, peerId);
-                                    getEngine().deleteEncryptedChat(peerId);
+                                    getEngine().getSecretEngine().deleteEncryptedChat(peerId);
                                 } else {
                                     final TLAbsInputPeer peer;
                                     if (peerType == PeerType.PEER_CHAT) {

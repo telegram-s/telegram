@@ -1,6 +1,7 @@
 package org.telegram.ormlite;
 
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 import org.telegram.android.core.model.TlDataType;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
@@ -8,7 +9,8 @@ import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 /**
  * Created by ex3ndr on 02.01.14.
  */
-public class User {
+@DatabaseTable(tableName = "user")
+public class OrmUser {
     @DatabaseField(id = true, generatedId = false, allowGeneratedIdInsert = false, version = false)
     private int uid;
 
@@ -133,14 +135,14 @@ public class User {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof User)) {
+        if (!(o instanceof OrmUser)) {
             return false;
         }
 
-        return equals((User) o);
+        return equals((OrmUser) o);
     }
 
-    public boolean equals(User u) {
+    public boolean equals(OrmUser u) {
         if (uid != u.uid) {
             return false;
         }

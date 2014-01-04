@@ -72,10 +72,14 @@ public abstract class ViewSource<T, V> {
     };
 
     public ViewSource() {
-        this(null);
+        this(false);
     }
 
-    public ViewSource(UiResponsibility responsibility) {
+    public ViewSource(boolean preload) {
+        this(null, preload);
+    }
+
+    public ViewSource(UiResponsibility responsibility, boolean preload) {
         TAG = "ViewSource:" + getClass().getSimpleName() + "#" + hashCode();
         this.responsibility = responsibility;
         items = new HashMap<Long, T>();
@@ -95,7 +99,15 @@ public abstract class ViewSource<T, V> {
             }
         };
         workingSet = new ArrayList<T>();
-        state = InternalSourceState.UNSYNCED;
+        if (preload) {
+            if (!loadMore()) {
+                state = InternalSourceState.COMPLETED;
+            } else {
+                state = InternalSourceState.SYNCED;
+            }
+        } else {
+            state = InternalSourceState.UNSYNCED;
+        }
     }
 
     public ArrayList<T> getCurrentWorkingSet() {
@@ -172,19 +184,7 @@ public abstract class ViewSource<T, V> {
             @Override
             public void run() {
                 Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-                long start = SystemClock.uptimeMillis();
-                int offset = items.size();
-                V[] res = loadItems(offset);
-                Logger.w(TAG, "loadingMore loaded " + res.length + " in " + (SystemClock.uptimeMillis() - start) + " ms");
-                start = SystemClock.uptimeMillis();
-                boolean hasAdded = false;
-                for (V re : res) {
-                    if (!addItem(re)) {
-                        hasAdded = true;
-                    }
-                }
-                Logger.w(TAG, "loadingMore added " + res.length + " in " + (SystemClock.uptimeMillis() - start) + " ms");
-                if (!hasAdded) {
+                if (!loadMore()) {
                     Logger.w(TAG, "Completed loading");
                     invalidateDataAndState(InternalSourceState.COMPLETED);
                 } else {
@@ -192,6 +192,22 @@ public abstract class ViewSource<T, V> {
                 }
             }
         });
+    }
+
+    private boolean loadMore() {
+        long start = SystemClock.uptimeMillis();
+        int offset = items.size();
+        V[] res = loadItems(offset);
+        Logger.w(TAG, "loadingMore loaded " + res.length + " in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
+        boolean hasAdded = false;
+        for (V re : res) {
+            if (!addItem(re)) {
+                hasAdded = true;
+            }
+        }
+        Logger.w(TAG, "loadingMore added " + res.length + " in " + (SystemClock.uptimeMillis() - start) + " ms");
+        return hasAdded;
     }
 
     public int getItemsCount() {

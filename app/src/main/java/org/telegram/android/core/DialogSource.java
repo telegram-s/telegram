@@ -47,11 +47,11 @@ public class DialogSource {
         preferences.edit().remove("state").commit();
     }
 
-    public static final int PAGE_SIZE = 10;
+    public static final int PAGE_SIZE = 20;
 
     public static final int PAGE_OVERLAP = 3;
 
-    public static final int PAGE_REQUEST_PADDING = 10;
+    public static final int PAGE_REQUEST_PADDING = 5;
 
     private ExecutorService service = Executors.newSingleThreadExecutor(new ThreadFactory() {
         @Override
@@ -86,7 +86,7 @@ public class DialogSource {
             this.state = DialogSourceState.SYNCED;
         }
 
-        this.dialogsSource = new ViewSource<DialogWireframe, DialogDescription>() {
+        this.dialogsSource = new ViewSource<DialogWireframe, DialogDescription>(true) {
             @Override
             protected DialogDescription[] loadItems(int offset) {
                 long start = SystemClock.uptimeMillis();

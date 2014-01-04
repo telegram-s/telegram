@@ -29,8 +29,8 @@ public class UserDao extends AbstractDao<User, Long> {
         public final static Property LastName = new Property(3, String.class, "lastName", false, "LAST_NAME");
         public final static Property Phone = new Property(4, String.class, "phone", false, "PHONE");
         public final static Property LinkType = new Property(5, int.class, "linkType", false, "LINK_TYPE");
-        public final static Property Avatar = new Property(6, byte[].class, "avatar", false, "AVATAR");
-        public final static Property Status = new Property(7, byte[].class, "status", false, "STATUS");
+        public final static Property Status = new Property(6, byte[].class, "status", false, "STATUS");
+        public final static Property Avatar = new Property(7, byte[].class, "avatar", false, "AVATAR");
     };
 
 
@@ -52,8 +52,11 @@ public class UserDao extends AbstractDao<User, Long> {
                 "'LAST_NAME' TEXT NOT NULL ," + // 3: lastName
                 "'PHONE' TEXT," + // 4: phone
                 "'LINK_TYPE' INTEGER NOT NULL ," + // 5: linkType
-                "'AVATAR' BLOB," + // 6: avatar
-                "'STATUS' BLOB);"); // 7: status
+                "'STATUS' BLOB," + // 6: status
+                "'AVATAR' BLOB);"); // 7: avatar
+        // Add Indexes
+        db.execSQL("CREATE INDEX " + constraint + "IDX_USER_LINK_TYPE ON USER" +
+                " (LINK_TYPE);");
     }
 
     /** Drops the underlying database table. */
@@ -81,14 +84,14 @@ public class UserDao extends AbstractDao<User, Long> {
         }
         stmt.bindLong(6, entity.getLinkType());
  
-        byte[] avatar = entity.getAvatar();
-        if (avatar != null) {
-            stmt.bindBlob(7, avatar);
-        }
- 
         byte[] status = entity.getStatus();
         if (status != null) {
-            stmt.bindBlob(8, status);
+            stmt.bindBlob(7, status);
+        }
+ 
+        byte[] avatar = entity.getAvatar();
+        if (avatar != null) {
+            stmt.bindBlob(8, avatar);
         }
     }
 
@@ -108,8 +111,8 @@ public class UserDao extends AbstractDao<User, Long> {
             cursor.getString(offset + 3), // lastName
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // phone
             cursor.getInt(offset + 5), // linkType
-            cursor.isNull(offset + 6) ? null : cursor.getBlob(offset + 6), // avatar
-            cursor.isNull(offset + 7) ? null : cursor.getBlob(offset + 7) // status
+            cursor.isNull(offset + 6) ? null : cursor.getBlob(offset + 6), // status
+            cursor.isNull(offset + 7) ? null : cursor.getBlob(offset + 7) // avatar
         );
         return entity;
     }
@@ -123,8 +126,8 @@ public class UserDao extends AbstractDao<User, Long> {
         entity.setLastName(cursor.getString(offset + 3));
         entity.setPhone(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setLinkType(cursor.getInt(offset + 5));
-        entity.setAvatar(cursor.isNull(offset + 6) ? null : cursor.getBlob(offset + 6));
-        entity.setStatus(cursor.isNull(offset + 7) ? null : cursor.getBlob(offset + 7));
+        entity.setStatus(cursor.isNull(offset + 6) ? null : cursor.getBlob(offset + 6));
+        entity.setAvatar(cursor.isNull(offset + 7) ? null : cursor.getBlob(offset + 7));
      }
     
     /** @inheritdoc */

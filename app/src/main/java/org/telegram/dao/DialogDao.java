@@ -67,7 +67,7 @@ public class DialogDao extends AbstractDao<Dialog, Long> {
                 "'FAILURE' INTEGER NOT NULL ," + // 12: failure
                 "'FIRST_UNREAD_MESSAGE' INTEGER NOT NULL );"); // 13: firstUnreadMessage
         // Add Indexes
-        db.execSQL("CREATE INDEX " + constraint + "IDX_DIALOG_DATE_DESC ON DIALOG" +
+        db.execSQL("CREATE INDEX " + constraint + "IDX_DIALOG_DATE ON DIALOG" +
                 " (DATE);");
     }
 

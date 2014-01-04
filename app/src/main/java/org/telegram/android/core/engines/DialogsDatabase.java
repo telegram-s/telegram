@@ -52,7 +52,7 @@ public class DialogsDatabase {
     public DialogDescription[] getAll() {
         try {
             long start = SystemClock.uptimeMillis();
-            List<Dialog> dialogs = dialogsDao.queryBuilder().where(DialogDao.Properties.Date.notEq(0)).list();
+            List<Dialog> dialogs = dialogsDao.queryBuilder().where(DialogDao.Properties.Date.gt(0)).list();
             Logger.d(TAG, "Queried in " + (SystemClock.uptimeMillis() - start) + " ms");
             Dialog[] res = dialogs.toArray(new Dialog[dialogs.size()]);
             Logger.d(TAG, "Loaded items in " + (SystemClock.uptimeMillis() - start) + " ms");
@@ -86,6 +86,15 @@ public class DialogsDatabase {
 
     public void createDialog(DialogDescription description) {
         Dialog dialog = new Dialog();
+        applyChanges(description, dialog);
+        dialogsDao.insertOrReplace(dialog);
+    }
+
+    public void updateOrCreateDialog(DialogDescription description) {
+        Dialog dialog = loadDialogDb(description.getPeerType(), description.getPeerId());
+        if (dialog == null) {
+            dialog = new Dialog();
+        }
         applyChanges(description, dialog);
         dialogsDao.insertOrReplace(dialog);
     }
@@ -131,6 +140,7 @@ public class DialogsDatabase {
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
             res.setTitle(dialog.getTitle());
             res.setUnreadCount(dialog.getUnreadCount());
+            res.setParticipantsCount(dialog.getParticipantsCount());
         }
 
         return dialogsCache.get(id);
@@ -151,6 +161,7 @@ public class DialogsDatabase {
         dest.setFirstUnreadMessage(src.getFirstUnreadMessage());
         dest.setTitle(src.getTitle());
         dest.setUnreadCount(src.getUnreadCount());
+        dest.setParticipantsCount(src.getParticipantsCount());
     }
 
     private long uniqId(DialogDescription description) {

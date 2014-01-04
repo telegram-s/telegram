@@ -197,7 +197,7 @@ public class EncryptedChatInfoFragment extends StelsFragment {
                 rpc(new TLRequestMessagesSendEncryptedService(
                         new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), randomId, msg));
 
-                application.getEngine().setSelfDestructTimer(chatId, sec);
+                application.getEngine().getSecretEngine().setSelfDestructTimer(chatId, sec);
                 application.getEngine().onNewInternalServiceMessage(
                         PeerType.PEER_USER_ENCRYPTED, chatId,
                         application.getCurrentUid(),

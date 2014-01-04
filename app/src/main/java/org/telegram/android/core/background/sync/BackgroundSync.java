@@ -294,7 +294,7 @@ public class BackgroundSync extends BaseSync {
         if (!application.getUiKernel().isAppActive()) {
             return;
         }
-        EncryptedChat[] chats = application.getEngine().getPendingEncryptedChats();
+        EncryptedChat[] chats = application.getEngine().getSecretEngine().getPendingEncryptedChats();
         for (EncryptedChat chat : chats) {
             application.getEncryptionController().confirmEncryption(chat.getId());
         }

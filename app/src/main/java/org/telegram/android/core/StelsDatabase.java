@@ -26,10 +26,11 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private static final int DATABASE_VERSION = 57;
 
     private RuntimeExceptionDao<OrmDialog, Long> dialogsDao;
+    private RuntimeExceptionDao<OrmUser, Integer> usersDao;
+    private RuntimeExceptionDao<OrmEncryptedChat, Integer> encryptedChats;
+
     private RuntimeExceptionDao<FullChatInfo, Long> fullChatInfoDao;
-    private RuntimeExceptionDao<EncryptedChat, Long> encryptedChats;
     private RuntimeExceptionDao<ChatMessage, Long> messagesDao;
-    private RuntimeExceptionDao<org.telegram.ormlite.User, Integer> usersDao;
     private RuntimeExceptionDao<Contact, Long> contactsDao;
     private RuntimeExceptionDao<MediaRecord, Long> mediaDao;
 
@@ -46,11 +47,11 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
         try {
             TableUtils.createTable(connectionSource, OrmDialog.class);
             TableUtils.createTable(connectionSource, ChatMessage.class);
-            TableUtils.createTable(connectionSource, org.telegram.ormlite.User.class);
+            TableUtils.createTable(connectionSource, OrmUser.class);
             TableUtils.createTable(connectionSource, Contact.class);
             TableUtils.createTable(connectionSource, FullChatInfo.class);
             TableUtils.createTable(connectionSource, MediaRecord.class);
-            TableUtils.createTable(connectionSource, EncryptedChat.class);
+            TableUtils.createTable(connectionSource, OrmEncryptedChat.class);
 
             //User
             database.execSQL("CREATE UNIQUE INDEX mytest_id_idx ON ChatMessage(mid);\n");
@@ -70,7 +71,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             TableUtils.dropTable(connectionSource, Contact.class, true);
             TableUtils.dropTable(connectionSource, FullChatInfo.class, true);
             TableUtils.dropTable(connectionSource, MediaRecord.class, true);
-            TableUtils.dropTable(connectionSource, EncryptedChat.class, true);
+            TableUtils.dropTable(connectionSource, OrmEncryptedChat.class, true);
 
             TableUtils.createTable(connectionSource, OrmDialog.class);
             TableUtils.createTable(connectionSource, ChatMessage.class);
@@ -78,7 +79,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             TableUtils.createTable(connectionSource, Contact.class);
             TableUtils.createTable(connectionSource, FullChatInfo.class);
             TableUtils.createTable(connectionSource, MediaRecord.class);
-            TableUtils.createTable(connectionSource, EncryptedChat.class);
+            TableUtils.createTable(connectionSource, OrmEncryptedChat.class);
             database.execSQL("CREATE UNIQUE INDEX mytest_id_idx ON ChatMessage(mid);\n");
         } catch (SQLException e) {
             Logger.e(TAG, "Can't upgrade databases", e);
@@ -127,11 +128,11 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
                         public Void call() throws Exception {
                             TableUtils.clearTable(connectionSource, OrmDialog.class);
                             TableUtils.clearTable(connectionSource, ChatMessage.class);
-                            TableUtils.clearTable(connectionSource, org.telegram.ormlite.User.class);
+                            TableUtils.clearTable(connectionSource, OrmUser.class);
                             TableUtils.clearTable(connectionSource, Contact.class);
                             TableUtils.clearTable(connectionSource, FullChatInfo.class);
                             TableUtils.clearTable(connectionSource, MediaRecord.class);
-                            TableUtils.clearTable(connectionSource, EncryptedChat.class);
+                            TableUtils.clearTable(connectionSource, OrmEncryptedChat.class);
                             return null;
                         }
                     });
@@ -151,9 +152,9 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
         return mediaDao;
     }
 
-    public RuntimeExceptionDao<org.telegram.ormlite.User, Integer> getUsersDao() {
+    public RuntimeExceptionDao<OrmUser, Integer> getUsersDao() {
         if (usersDao == null) {
-            usersDao = getRuntimeExceptionDao(org.telegram.ormlite.User.class);
+            usersDao = getRuntimeExceptionDao(OrmUser.class);
         }
         return usersDao;
     }
@@ -187,9 +188,9 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
         return fullChatInfoDao;
     }
 
-    public RuntimeExceptionDao<EncryptedChat, Long> getEncryptedChatDao() {
+    public RuntimeExceptionDao<OrmEncryptedChat, Integer> getEncryptedChatDao() {
         if (encryptedChats == null) {
-            encryptedChats = getRuntimeExceptionDao(EncryptedChat.class);
+            encryptedChats = getRuntimeExceptionDao(OrmEncryptedChat.class);
         }
         return encryptedChats;
     }

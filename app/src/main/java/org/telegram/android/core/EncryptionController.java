@@ -53,7 +53,7 @@ public class EncryptionController {
         if (encChat != null && encChat.getState() == EncryptedChatState.WAITING && chat instanceof TLEncryptedChat) {
             enableEncryption(encChat, (TLEncryptedChat) chat);
         }
-        application.getEngine().updateEncryptedChat(chat);
+        application.getEngine().getSecretEngine().updateEncryptedChat(chat);
         application.getSyncKernel().getBackgroundSync().resetEncAcceptorSync();
     }
 
@@ -305,7 +305,7 @@ public class EncryptionController {
                     TLDecryptedMessageService tlDecryptedMessageService = (TLDecryptedMessageService) object;
                     if (tlDecryptedMessageService.getAction() instanceof TLDecryptedMessageActionSetMessageTTL) {
                         TLDecryptedMessageActionSetMessageTTL ttlAction = (TLDecryptedMessageActionSetMessageTTL) tlDecryptedMessageService.getAction();
-                        application.getEngine().setSelfDestructTimer(chat.getId(), ttlAction.getTtlSeconds());
+                        application.getEngine().getSecretEngine().setSelfDestructTimer(chat.getId(), ttlAction.getTtlSeconds());
                         application.getEngine().onNewInternalServiceMessage(PeerType.PEER_USER_ENCRYPTED, chat.getId(),
                                 chat.getUserId(),
                                 service.getDate(),
@@ -356,8 +356,7 @@ public class EncryptionController {
         byte[] key = xor(alignKeyZero(fromBigInt(gb.modPow(a, dhPrime)), 256), encryptedChat.getNonce());
         long keyF = readLong(substring(CryptoUtils.SHA1(key), 12, 8), 0);
 
-        application.getEngine().updateEncryptedChatKey(encryptedChat, key);
-        User user = application.getEngine().getUser(encChat.getUserId());
+        application.getEngine().getSecretEngine().updateEncryptedChatKey(encryptedChat, key);
         Logger.d(TAG, "Complete encryption: " + keyF);
     }
 
@@ -418,8 +417,8 @@ public class EncryptionController {
 
         TLAbsEncryptedChat encryptedChat = application.getApi().doRpcCall(new TLRequestMessagesAcceptEncryption(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), gb.toByteArray(), keyF));
 
-        application.getEngine().updateEncryptedChat(encryptedChat);
-        application.getEngine().updateEncryptedChatKey(encryptedChat, key);
+        application.getEngine().getSecretEngine().updateEncryptedChat(encryptedChat);
+        application.getEngine().getSecretEngine().updateEncryptedChatKey(encryptedChat, key);
         application.notifyUIUpdate();
     }
 
@@ -523,7 +522,7 @@ public class EncryptionController {
         onUpdateEncryption(chat);
 
         byte[] tmpData = concat(StreamingUtils.intToBytes(prime.length), prime, StreamingUtils.intToBytes(rawA.length), rawA);
-        application.getEngine().updateEncryptedChatKey(chat, tmpData);
+        application.getEngine().getSecretEngine().updateEncryptedChatKey(chat, tmpData);
         application.notifyUIUpdate();
         return chat.getId();
     }

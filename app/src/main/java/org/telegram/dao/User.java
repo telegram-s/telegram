@@ -14,8 +14,8 @@ public class User {
     private String lastName;
     private String phone;
     private int linkType;
-    private byte[] avatar;
     private byte[] status;
+    private byte[] avatar;
 
     public User() {
     }
@@ -24,15 +24,15 @@ public class User {
         this.id = id;
     }
 
-    public User(long id, Long accessHash, String firstName, String lastName, String phone, int linkType, byte[] avatar, byte[] status) {
+    public User(long id, Long accessHash, String firstName, String lastName, String phone, int linkType, byte[] status, byte[] avatar) {
         this.id = id;
         this.accessHash = accessHash;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
         this.linkType = linkType;
-        this.avatar = avatar;
         this.status = status;
+        this.avatar = avatar;
     }
 
     public long getId() {
@@ -87,20 +87,20 @@ public class User {
         this.linkType = linkType;
     }
 
-    public byte[] getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(byte[] avatar) {
-        this.avatar = avatar;
-    }
-
     public byte[] getStatus() {
         return status;
     }
 
     public void setStatus(byte[] status) {
         this.status = status;
+    }
+
+    public byte[] getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(byte[] avatar) {
+        this.avatar = avatar;
     }
 
 }

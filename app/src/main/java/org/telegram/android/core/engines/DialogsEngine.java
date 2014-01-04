@@ -31,14 +31,14 @@ public class DialogsEngine {
         return database.loadDialog(peerType, peerId);
     }
 
-    public void updateDialog(DialogDescription description) {
-        database.updateDialog(description);
+    public void updateOrCreateDialog(DialogDescription description) {
+        database.updateOrCreateDialog(description);
         application.getDialogSource().getViewSource().updateItem(description);
     }
 
-    public void createDialog(DialogDescription description) {
-        database.createDialog(description);
-        application.getDialogSource().getViewSource().addItem(description);
+    public void updateDialog(DialogDescription description) {
+        database.updateOrCreateDialog(description);
+        application.getDialogSource().getViewSource().updateItem(description);
     }
 
     public void deleteDialog(DialogDescription description) {
