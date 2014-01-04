@@ -2,10 +2,9 @@ package org.telegram.android.core.engines;
 
 import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.TLLocalContext;
-import org.telegram.android.core.model.User;
-import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
-import org.telegram.dao.GroupDao;
+import org.telegram.dao.GroupChat;
+import org.telegram.dao.GroupChatDao;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,10 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GroupsDatabase {
     private ConcurrentHashMap<Integer, Group> groupCache;
-    private GroupDao groupDao;
+    private GroupChatDao groupDao;
 
     public GroupsDatabase(ModelEngine engine) {
-        groupDao = engine.getDaoSession().getGroupDao();
+        groupDao = engine.getDaoSession().getGroupChatDao();
         groupCache = new ConcurrentHashMap<Integer, Group>();
     }
 
@@ -34,10 +33,12 @@ public class GroupsDatabase {
         if (groups.length == 0) {
             return;
         }
-        org.telegram.dao.Group[] converted = new org.telegram.dao.Group[groups.length];
+        org.telegram.dao.GroupChat[] converted = new org.telegram.dao.GroupChat[groups.length];
         for (int i = 0; i < converted.length; i++) {
-            converted[i] = new org.telegram.dao.Group();
+            converted[i] = new org.telegram.dao.GroupChat();
             converted[i].setId(groups[i].getChatId());
+            converted[i].setIsForbidden(groups[i].isForbidden());
+            converted[i].setUsersCount(groups[i].getUsersCount());
             if (groups[i].getAvatar() != null) {
                 try {
                     converted[i].setAvatar(groups[i].getAvatar().serialize());
@@ -51,11 +52,11 @@ public class GroupsDatabase {
         updateGroups(converted);
     }
 
-    private void updateGroups(org.telegram.dao.Group... groups) {
+    private void updateGroups(org.telegram.dao.GroupChat... groups) {
         groupDao.insertOrReplaceInTx(groups);
     }
 
-    private Group cachedConvert(org.telegram.dao.Group group) {
+    private Group cachedConvert(GroupChat group) {
         if (group == null) {
             return null;
         }
@@ -70,6 +71,8 @@ public class GroupsDatabase {
             }
             res.setChatId((int) group.getId());
             res.setTitle(group.getTitle());
+            res.setForbidden(group.getIsForbidden());
+            res.setUsersCount(group.getUsersCount());
             if (group.getAvatar() != null) {
                 try {
                     res.setAvatar((TLAbsLocalAvatarPhoto) TLLocalContext.getInstance().deserializeMessage(group.getAvatar()));

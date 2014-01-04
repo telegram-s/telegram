@@ -17,7 +17,6 @@ public class DialogDescription implements Serializable {
     private int peerType;
     private int peerId;
     private int unreadCount;
-    private int participantsCount;
     private int date;
     private int senderId;
     private int topMessageId;
@@ -112,14 +111,6 @@ public class DialogDescription implements Serializable {
 
     public void setMessageState(int messageState) {
         this.messageState = messageState;
-    }
-
-    public int getParticipantsCount() {
-        return participantsCount;
-    }
-
-    public void setParticipantsCount(int participantsCount) {
-        this.participantsCount = participantsCount;
     }
 
     public int getLastLocalViewedMessage() {

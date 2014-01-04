@@ -7,12 +7,10 @@ package org.telegram.dao;
 public class Dialog {
 
     private long id;
-    private String title;
     private int unreadCount;
-    private int participantsCount;
-    private int date;
-    private int senderId;
     private int topMessageId;
+    private int senderId;
+    private int date;
     private int contentType;
     private String message;
     private int messageState;
@@ -28,14 +26,12 @@ public class Dialog {
         this.id = id;
     }
 
-    public Dialog(long id, String title, int unreadCount, int participantsCount, int date, int senderId, int topMessageId, int contentType, String message, int messageState, int lastLocalViewedMessage, int lastRemoteViewedMessage, boolean failure, long firstUnreadMessage) {
+    public Dialog(long id, int unreadCount, int topMessageId, int senderId, int date, int contentType, String message, int messageState, int lastLocalViewedMessage, int lastRemoteViewedMessage, boolean failure, long firstUnreadMessage) {
         this.id = id;
-        this.title = title;
         this.unreadCount = unreadCount;
-        this.participantsCount = participantsCount;
-        this.date = date;
-        this.senderId = senderId;
         this.topMessageId = topMessageId;
+        this.senderId = senderId;
+        this.date = date;
         this.contentType = contentType;
         this.message = message;
         this.messageState = messageState;
@@ -53,14 +49,6 @@ public class Dialog {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public int getUnreadCount() {
         return unreadCount;
     }
@@ -69,20 +57,12 @@ public class Dialog {
         this.unreadCount = unreadCount;
     }
 
-    public int getParticipantsCount() {
-        return participantsCount;
+    public int getTopMessageId() {
+        return topMessageId;
     }
 
-    public void setParticipantsCount(int participantsCount) {
-        this.participantsCount = participantsCount;
-    }
-
-    public int getDate() {
-        return date;
-    }
-
-    public void setDate(int date) {
-        this.date = date;
+    public void setTopMessageId(int topMessageId) {
+        this.topMessageId = topMessageId;
     }
 
     public int getSenderId() {
@@ -93,12 +73,12 @@ public class Dialog {
         this.senderId = senderId;
     }
 
-    public int getTopMessageId() {
-        return topMessageId;
+    public int getDate() {
+        return date;
     }
 
-    public void setTopMessageId(int topMessageId) {
-        this.topMessageId = topMessageId;
+    public void setDate(int date) {
+        this.date = date;
     }
 
     public int getContentType() {

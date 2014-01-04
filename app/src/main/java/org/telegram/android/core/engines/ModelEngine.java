@@ -412,10 +412,10 @@ public class ModelEngine {
             }
         }
 
-        DialogDescription description = getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
-        if (description != null) {
-            description.setParticipantsCount(description.getParticipantsCount() + 1);
-            dialogsEngine.updateDialog(description);
+        Group group = getGroupsEngine().getGroup(chatId);
+        if (group != null) {
+            group.setUsersCount(group.getUsersCount() + 1);
+            getGroupsEngine().onGroupsUpdated(group);
         }
     }
 
@@ -461,15 +461,15 @@ public class ModelEngine {
             }
         }
 
-        DialogDescription description = getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
-        if (description != null) {
+        Group group = getGroupsEngine().getGroup(chatId);
+        if (group != null) {
             if (uid == application.getCurrentUid()) {
-                description.setParticipantsCount(0);
-                dialogsEngine.updateDialog(description);
+                group.setUsersCount(0);
+                group.setForbidden(true);
             } else {
-                description.setParticipantsCount(description.getParticipantsCount() - 1);
-                dialogsEngine.updateDialog(description);
+                group.setUsersCount(group.getUsersCount() - 1);
             }
+            getGroupsEngine().onGroupsUpdated(group);
         }
     }
 
@@ -533,14 +533,16 @@ public class ModelEngine {
             }
         }
 
-        DialogDescription description = getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
-        if (description != null) {
+        Group group = getGroupsEngine().getGroup(chatId);
+        if (group != null) {
             if (info.isForbidden()) {
-                description.setParticipantsCount(0);
+                group.setUsersCount(0);
+                group.setForbidden(true);
             } else {
-                description.setParticipantsCount(info.getUids().length);
+                group.setUsersCount(info.getUids().length);
+                group.setForbidden(false);
             }
-            dialogsEngine.updateDialog(description);
+            getGroupsEngine().onGroupsUpdated(group);
         }
     }
 
@@ -1154,7 +1156,6 @@ public class ModelEngine {
                     description.setTopMessageId(0);
                     description.setMessage("");
                     description.setContentType(0);
-                    description.setParticipantsCount(0);
                     description.setSenderId(0);
                     dialogsEngine.updateDialog(description);
                 } else {

@@ -24,19 +24,17 @@ public class DialogDao extends AbstractDao<Dialog, Long> {
     */
     public static class Properties {
         public final static Property Id = new Property(0, long.class, "id", true, "_id");
-        public final static Property Title = new Property(1, String.class, "title", false, "TITLE");
-        public final static Property UnreadCount = new Property(2, int.class, "unreadCount", false, "UNREAD_COUNT");
-        public final static Property ParticipantsCount = new Property(3, int.class, "participantsCount", false, "PARTICIPANTS_COUNT");
+        public final static Property UnreadCount = new Property(1, int.class, "unreadCount", false, "UNREAD_COUNT");
+        public final static Property TopMessageId = new Property(2, int.class, "topMessageId", false, "TOP_MESSAGE_ID");
+        public final static Property SenderId = new Property(3, int.class, "senderId", false, "SENDER_ID");
         public final static Property Date = new Property(4, int.class, "date", false, "DATE");
-        public final static Property SenderId = new Property(5, int.class, "senderId", false, "SENDER_ID");
-        public final static Property TopMessageId = new Property(6, int.class, "topMessageId", false, "TOP_MESSAGE_ID");
-        public final static Property ContentType = new Property(7, int.class, "contentType", false, "CONTENT_TYPE");
-        public final static Property Message = new Property(8, String.class, "message", false, "MESSAGE");
-        public final static Property MessageState = new Property(9, int.class, "messageState", false, "MESSAGE_STATE");
-        public final static Property LastLocalViewedMessage = new Property(10, int.class, "lastLocalViewedMessage", false, "LAST_LOCAL_VIEWED_MESSAGE");
-        public final static Property LastRemoteViewedMessage = new Property(11, int.class, "lastRemoteViewedMessage", false, "LAST_REMOTE_VIEWED_MESSAGE");
-        public final static Property Failure = new Property(12, boolean.class, "failure", false, "FAILURE");
-        public final static Property FirstUnreadMessage = new Property(13, long.class, "firstUnreadMessage", false, "FIRST_UNREAD_MESSAGE");
+        public final static Property ContentType = new Property(5, int.class, "contentType", false, "CONTENT_TYPE");
+        public final static Property Message = new Property(6, String.class, "message", false, "MESSAGE");
+        public final static Property MessageState = new Property(7, int.class, "messageState", false, "MESSAGE_STATE");
+        public final static Property LastLocalViewedMessage = new Property(8, int.class, "lastLocalViewedMessage", false, "LAST_LOCAL_VIEWED_MESSAGE");
+        public final static Property LastRemoteViewedMessage = new Property(9, int.class, "lastRemoteViewedMessage", false, "LAST_REMOTE_VIEWED_MESSAGE");
+        public final static Property Failure = new Property(10, boolean.class, "failure", false, "FAILURE");
+        public final static Property FirstUnreadMessage = new Property(11, long.class, "firstUnreadMessage", false, "FIRST_UNREAD_MESSAGE");
     };
 
 
@@ -53,19 +51,17 @@ public class DialogDao extends AbstractDao<Dialog, Long> {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "'DIALOG' (" + //
                 "'_id' INTEGER PRIMARY KEY NOT NULL ," + // 0: id
-                "'TITLE' TEXT," + // 1: title
-                "'UNREAD_COUNT' INTEGER NOT NULL ," + // 2: unreadCount
-                "'PARTICIPANTS_COUNT' INTEGER NOT NULL ," + // 3: participantsCount
+                "'UNREAD_COUNT' INTEGER NOT NULL ," + // 1: unreadCount
+                "'TOP_MESSAGE_ID' INTEGER NOT NULL ," + // 2: topMessageId
+                "'SENDER_ID' INTEGER NOT NULL ," + // 3: senderId
                 "'DATE' INTEGER NOT NULL ," + // 4: date
-                "'SENDER_ID' INTEGER NOT NULL ," + // 5: senderId
-                "'TOP_MESSAGE_ID' INTEGER NOT NULL ," + // 6: topMessageId
-                "'CONTENT_TYPE' INTEGER NOT NULL ," + // 7: contentType
-                "'MESSAGE' TEXT," + // 8: message
-                "'MESSAGE_STATE' INTEGER NOT NULL ," + // 9: messageState
-                "'LAST_LOCAL_VIEWED_MESSAGE' INTEGER NOT NULL ," + // 10: lastLocalViewedMessage
-                "'LAST_REMOTE_VIEWED_MESSAGE' INTEGER NOT NULL ," + // 11: lastRemoteViewedMessage
-                "'FAILURE' INTEGER NOT NULL ," + // 12: failure
-                "'FIRST_UNREAD_MESSAGE' INTEGER NOT NULL );"); // 13: firstUnreadMessage
+                "'CONTENT_TYPE' INTEGER NOT NULL ," + // 5: contentType
+                "'MESSAGE' TEXT," + // 6: message
+                "'MESSAGE_STATE' INTEGER NOT NULL ," + // 7: messageState
+                "'LAST_LOCAL_VIEWED_MESSAGE' INTEGER NOT NULL ," + // 8: lastLocalViewedMessage
+                "'LAST_REMOTE_VIEWED_MESSAGE' INTEGER NOT NULL ," + // 9: lastRemoteViewedMessage
+                "'FAILURE' INTEGER NOT NULL ," + // 10: failure
+                "'FIRST_UNREAD_MESSAGE' INTEGER NOT NULL );"); // 11: firstUnreadMessage
         // Add Indexes
         db.execSQL("CREATE INDEX " + constraint + "IDX_DIALOG_DATE ON DIALOG" +
                 " (DATE);");
@@ -82,27 +78,21 @@ public class DialogDao extends AbstractDao<Dialog, Long> {
     protected void bindValues(SQLiteStatement stmt, Dialog entity) {
         stmt.clearBindings();
         stmt.bindLong(1, entity.getId());
- 
-        String title = entity.getTitle();
-        if (title != null) {
-            stmt.bindString(2, title);
-        }
-        stmt.bindLong(3, entity.getUnreadCount());
-        stmt.bindLong(4, entity.getParticipantsCount());
+        stmt.bindLong(2, entity.getUnreadCount());
+        stmt.bindLong(3, entity.getTopMessageId());
+        stmt.bindLong(4, entity.getSenderId());
         stmt.bindLong(5, entity.getDate());
-        stmt.bindLong(6, entity.getSenderId());
-        stmt.bindLong(7, entity.getTopMessageId());
-        stmt.bindLong(8, entity.getContentType());
+        stmt.bindLong(6, entity.getContentType());
  
         String message = entity.getMessage();
         if (message != null) {
-            stmt.bindString(9, message);
+            stmt.bindString(7, message);
         }
-        stmt.bindLong(10, entity.getMessageState());
-        stmt.bindLong(11, entity.getLastLocalViewedMessage());
-        stmt.bindLong(12, entity.getLastRemoteViewedMessage());
-        stmt.bindLong(13, entity.getFailure() ? 1l: 0l);
-        stmt.bindLong(14, entity.getFirstUnreadMessage());
+        stmt.bindLong(8, entity.getMessageState());
+        stmt.bindLong(9, entity.getLastLocalViewedMessage());
+        stmt.bindLong(10, entity.getLastRemoteViewedMessage());
+        stmt.bindLong(11, entity.getFailure() ? 1l: 0l);
+        stmt.bindLong(12, entity.getFirstUnreadMessage());
     }
 
     /** @inheritdoc */
@@ -116,19 +106,17 @@ public class DialogDao extends AbstractDao<Dialog, Long> {
     public Dialog readEntity(Cursor cursor, int offset) {
         Dialog entity = new Dialog( //
             cursor.getLong(offset + 0), // id
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // title
-            cursor.getInt(offset + 2), // unreadCount
-            cursor.getInt(offset + 3), // participantsCount
+            cursor.getInt(offset + 1), // unreadCount
+            cursor.getInt(offset + 2), // topMessageId
+            cursor.getInt(offset + 3), // senderId
             cursor.getInt(offset + 4), // date
-            cursor.getInt(offset + 5), // senderId
-            cursor.getInt(offset + 6), // topMessageId
-            cursor.getInt(offset + 7), // contentType
-            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // message
-            cursor.getInt(offset + 9), // messageState
-            cursor.getInt(offset + 10), // lastLocalViewedMessage
-            cursor.getInt(offset + 11), // lastRemoteViewedMessage
-            cursor.getShort(offset + 12) != 0, // failure
-            cursor.getLong(offset + 13) // firstUnreadMessage
+            cursor.getInt(offset + 5), // contentType
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // message
+            cursor.getInt(offset + 7), // messageState
+            cursor.getInt(offset + 8), // lastLocalViewedMessage
+            cursor.getInt(offset + 9), // lastRemoteViewedMessage
+            cursor.getShort(offset + 10) != 0, // failure
+            cursor.getLong(offset + 11) // firstUnreadMessage
         );
         return entity;
     }
@@ -137,19 +125,17 @@ public class DialogDao extends AbstractDao<Dialog, Long> {
     @Override
     public void readEntity(Cursor cursor, Dialog entity, int offset) {
         entity.setId(cursor.getLong(offset + 0));
-        entity.setTitle(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setUnreadCount(cursor.getInt(offset + 2));
-        entity.setParticipantsCount(cursor.getInt(offset + 3));
+        entity.setUnreadCount(cursor.getInt(offset + 1));
+        entity.setTopMessageId(cursor.getInt(offset + 2));
+        entity.setSenderId(cursor.getInt(offset + 3));
         entity.setDate(cursor.getInt(offset + 4));
-        entity.setSenderId(cursor.getInt(offset + 5));
-        entity.setTopMessageId(cursor.getInt(offset + 6));
-        entity.setContentType(cursor.getInt(offset + 7));
-        entity.setMessage(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setMessageState(cursor.getInt(offset + 9));
-        entity.setLastLocalViewedMessage(cursor.getInt(offset + 10));
-        entity.setLastRemoteViewedMessage(cursor.getInt(offset + 11));
-        entity.setFailure(cursor.getShort(offset + 12) != 0);
-        entity.setFirstUnreadMessage(cursor.getLong(offset + 13));
+        entity.setContentType(cursor.getInt(offset + 5));
+        entity.setMessage(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setMessageState(cursor.getInt(offset + 7));
+        entity.setLastLocalViewedMessage(cursor.getInt(offset + 8));
+        entity.setLastRemoteViewedMessage(cursor.getInt(offset + 9));
+        entity.setFailure(cursor.getShort(offset + 10) != 0);
+        entity.setFirstUnreadMessage(cursor.getLong(offset + 11));
      }
     
     /** @inheritdoc */

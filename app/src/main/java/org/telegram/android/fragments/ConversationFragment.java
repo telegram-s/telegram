@@ -1077,9 +1077,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private void updateOverlayPanel() {
         if (peerType == PeerType.PEER_CHAT) {
-            DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, peerId);
+            Group group = application.getEngine().getGroupsEngine().getGroup(peerId);
             FullChatInfo chatInfo = application.getChatSource().getChatInfo(peerId);
-            if ((chatInfo != null && chatInfo.isForbidden()) || (description != null && description.getParticipantsCount() == 0)) {
+            if ((chatInfo != null && chatInfo.isForbidden()) || (group != null && group.isForbidden())) {
                 showOverlayPanel();
                 deleteButton.setVisibility(View.VISIBLE);
                 waitMessageView.setVisibility(View.GONE);
@@ -1175,13 +1175,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
             }
         } else {
-            DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, peerId);
             Group group = application.getEngine().getGroupsEngine().getGroup(peerId);
-            if (description == null)
+            if (group == null)
                 return;
             getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(group.getTitle()));
             FullChatInfo chatInfo = application.getChatSource().getChatInfo(peerId);
-            if (description.getParticipantsCount() == 0 || (chatInfo != null && chatInfo.isForbidden())) {
+            if (group.isForbidden() || (chatInfo != null && chatInfo.isForbidden())) {
                 getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_conv_removed));
             } else {
                 int[] typing = application.getTypingStates().getChatTypes(peerId);
@@ -1195,8 +1194,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         }
                         if (onlineCount != 0) {
                             String title = "<light>" + getQuantityString(R.plurals.st_members,
-                                    description.getParticipantsCount()).replace("{d}", "" +
-                                    I18nUtil.getInstance().correctFormatNumber(description.getParticipantsCount()));
+                                    group.getUsersCount()).replace("{d}", "" +
+                                    I18nUtil.getInstance().correctFormatNumber(group.getUsersCount()));
                             title += ",</light> " + I18nUtil.getInstance().correctFormatNumber(onlineCount) + " " + getStringSafe(R.string.st_online);
                             getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(title));
                         } else {
@@ -1204,16 +1203,16 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     highlightSubtitleText(
                                             "<light>" +
                                                     getQuantityString(R.plurals.st_members,
-                                                            description.getParticipantsCount())
-                                                            .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(description.getParticipantsCount())) + "</light>"));
+                                                            group.getUsersCount())
+                                                            .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount())) + "</light>"));
                         }
                     } else {
                         getSherlockActivity().getSupportActionBar().setSubtitle(
                                 highlightSubtitleText(
                                         "<light>" +
                                                 getQuantityString(R.plurals.st_members,
-                                                        description.getParticipantsCount())
-                                                        .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(description.getParticipantsCount())) + "</light>"));
+                                                        group.getUsersCount())
+                                                        .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount())) + "</light>"));
                     }
                 } else {
                     String[] names = new String[typing.length];

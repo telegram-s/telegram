@@ -139,7 +139,6 @@ public class DialogsDatabase {
             res.setTopMessageId(dialog.getTopMessageId());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
             res.setUnreadCount(dialog.getUnreadCount());
-            res.setParticipantsCount(dialog.getParticipantsCount());
         }
 
         return dialogsCache.get(id);
@@ -159,7 +158,6 @@ public class DialogsDatabase {
         dest.setTopMessageId(src.getTopMessageId());
         dest.setFirstUnreadMessage(src.getFirstUnreadMessage());
         dest.setUnreadCount(src.getUnreadCount());
-        dest.setParticipantsCount(src.getParticipantsCount());
     }
 
     private long uniqId(DialogDescription description) {

@@ -24,24 +24,36 @@ public class GroupsEngine {
         return database.getGroup(groupId);
     }
 
+    public void onGroupsUpdated(Group... chats) {
+        database.updateGroups(chats);
+    }
+
     public void onGroupsUpdated(List<TLAbsChat> chats) {
         Group[] groups = new Group[chats.size()];
         for (int i = 0; i < groups.length; i++) {
-            TLAbsChat chat = chats.get(0);
+            TLAbsChat chat = chats.get(i);
             groups[i] = new Group();
             groups[i].setChatId(chat.getId());
             if (chat instanceof TLChat) {
                 groups[i].setTitle(((TLChat) chat).getTitle());
                 groups[i].setAvatar(EngineUtils.convertAvatarPhoto(((TLChat) chat).getPhoto()));
+                groups[i].setForbidden(((TLChat) chat).getLeft());
+                groups[i].setUsersCount(((TLChat) chat).getParticipantsCount());
             } else if (chat instanceof TLChatEmpty) {
                 groups[i].setTitle("Unknown");
                 groups[i].setAvatar(new TLLocalAvatarEmpty());
+                groups[i].setUsersCount(0);
+                groups[i].setForbidden(true);
             } else if (chat instanceof TLChatForbidden) {
                 groups[i].setTitle(((TLChatForbidden) chat).getTitle());
                 groups[i].setAvatar(new TLLocalAvatarEmpty());
+                groups[i].setUsersCount(0);
+                groups[i].setForbidden(true);
             } else if (chat instanceof TLGeoChat) {
                 groups[i].setTitle(((TLGeoChat) chat).getTitle());
                 groups[i].setAvatar(EngineUtils.convertAvatarPhoto(((TLGeoChat) chat).getPhoto()));
+                groups[i].setUsersCount(0);
+                groups[i].setForbidden(true);
             } else {
                 throw new RuntimeException("Unknown chat type");
             }

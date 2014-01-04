@@ -9,6 +9,8 @@ public class Group {
     private int chatId;
     private String title;
     private TLAbsLocalAvatarPhoto avatar;
+    private int usersCount;
+    private boolean isForbidden;
 
     public Group(int chatId, String title, TLAbsLocalAvatarPhoto avatar) {
         this.chatId = chatId;
@@ -42,5 +44,21 @@ public class Group {
 
     public void setAvatar(TLAbsLocalAvatarPhoto avatar) {
         this.avatar = avatar;
+    }
+
+    public int getUsersCount() {
+        return usersCount;
+    }
+
+    public void setUsersCount(int usersCount) {
+        this.usersCount = usersCount;
+    }
+
+    public boolean isForbidden() {
+        return isForbidden;
+    }
+
+    public void setForbidden(boolean isForbidden) {
+        this.isForbidden = isForbidden;
     }
 }
