@@ -24,6 +24,14 @@ public class GroupsEngine {
         return database.getGroup(groupId);
     }
 
+    public Group[] getGroups(int[] ids) {
+        return database.getGroups(ids);
+    }
+
+    public Group[] getGroups(Integer[] ids) {
+        return database.getGroups(ids);
+    }
+
     public void onGroupsUpdated(Group... chats) {
         database.updateGroups(chats);
     }

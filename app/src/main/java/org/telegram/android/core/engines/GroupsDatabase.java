@@ -1,12 +1,17 @@
 package org.telegram.android.core.engines;
 
+import org.telegram.android.R;
 import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.TLLocalContext;
+import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
+import org.telegram.android.log.Logger;
 import org.telegram.dao.GroupChat;
 import org.telegram.dao.GroupChatDao;
+import org.telegram.dao.UserDao;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,6 +32,33 @@ public class GroupsDatabase {
             return res;
 
         return cachedConvert(groupDao.load((long) groupId));
+    }
+
+    public Group[] getGroups(int[] ids) {
+        if (ids.length == 0) {
+            return new Group[0];
+        }
+
+        Integer[] bids = new Integer[ids.length];
+        for (int i = 0; i < bids.length; i++) {
+            bids[i] = ids[i];
+        }
+
+        return getGroups(bids);
+    }
+
+    public Group[] getGroups(Integer[] ids) {
+        if (ids.length == 0) {
+            return new Group[0];
+        }
+
+        GroupChat[] dbRes = groupDao.queryBuilder().where(GroupChatDao.Properties.Id.in(ids)).list().toArray(new GroupChat[0]);
+        Group[] res = new Group[dbRes.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = cachedConvert(dbRes[i]);
+        }
+
+        return res;
     }
 
     public void updateGroups(Group... groups) {

@@ -26,6 +26,7 @@ import org.telegram.api.messages.TLAbsDialogs;
 import org.telegram.api.messages.TLDialogs;
 import org.telegram.api.messages.TLDialogsSlice;
 import org.telegram.api.requests.TLRequestMessagesGetDialogs;
+import org.telegram.dao.Dialog;
 import org.telegram.tl.TLObject;
 
 import java.util.HashSet;
@@ -40,7 +41,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public class DialogSource {
 
-    private static final String TAG = "DialogsSource";
+    private static final String TAG = "DialogSource";
 
     public static void clearData(StelsApplication application) {
         SharedPreferences preferences = application.getSharedPreferences("org.telegram.android.Dialogs", Context.MODE_PRIVATE);
@@ -89,9 +90,6 @@ public class DialogSource {
         this.dialogsSource = new ViewSource<DialogWireframe, DialogDescription>(true) {
             @Override
             protected DialogDescription[] loadItems(int offset) {
-                long start = SystemClock.uptimeMillis();
-                TLLocalContext.getInstance();
-                Logger.d(TAG, "Context created in " + (SystemClock.uptimeMillis() - start) + " ms");
 
                 if (offset < PAGE_OVERLAP) {
                     offset = 0;
@@ -99,7 +97,40 @@ public class DialogSource {
                     offset -= PAGE_OVERLAP;
                 }
 
-                return application.getEngine().getDialogsEngine().getItems(offset, PAGE_SIZE);
+                long start = SystemClock.uptimeMillis();
+                DialogDescription[] res = application.getEngine().getDialogsEngine().getItems(offset, PAGE_SIZE);
+                Logger.d(TAG, "Items loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+                HashSet<Integer> users = new HashSet<Integer>();
+                HashSet<Integer> secretChats = new HashSet<Integer>();
+                HashSet<Integer> groups = new HashSet<Integer>();
+                for (DialogDescription description : res) {
+                    if (description.getSenderId() > 0) {
+                        users.add(description.getSenderId());
+                    }
+
+                    if (description.getPeerType() == PeerType.PEER_USER) {
+                        users.add(description.getPeerId());
+                    } else if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                        secretChats.add(description.getPeerId());
+                    } else if (description.getPeerType() == PeerType.PEER_CHAT) {
+                        groups.add(description.getPeerId());
+                    }
+                }
+
+                start = SystemClock.uptimeMillis();
+                application.getEngine().getGroupsEngine().getGroups(groups.toArray(new Integer[0]));
+                Logger.d(TAG, "Groups loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+                start = SystemClock.uptimeMillis();
+                EncryptedChat[] chats = application.getEngine().getSecretEngine().getEncryptedChats(secretChats.toArray(new Integer[0]));
+                for (int i = 0; i < chats.length; i++) {
+                    users.add(chats[i].getUserId());
+                }
+                Logger.d(TAG, "Secret chats loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+                start = SystemClock.uptimeMillis();
+                application.getEngine().getUsersEngine().getUsersById(users.toArray());
+                Logger.d(TAG, "Users loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+                return res;
             }
 
             @Override

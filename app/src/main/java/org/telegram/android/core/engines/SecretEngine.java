@@ -41,6 +41,14 @@ public class SecretEngine {
         return secretDatabase.loadChat(chatId);
     }
 
+    public EncryptedChat[] getEncryptedChats(int[] chatIds) {
+        return secretDatabase.loadChats(chatIds);
+    }
+
+    public EncryptedChat[] getEncryptedChats(Integer[] chatIds) {
+        return secretDatabase.loadChats(chatIds);
+    }
+
     public void setSelfDestructTimer(int chatId, int time) {
         EncryptedChat chat = getEncryptedChat(chatId);
         chat.setSelfDestructTime(time);
