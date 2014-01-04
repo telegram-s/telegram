@@ -16,6 +16,10 @@ public class Group {
         this.avatar = avatar;
     }
 
+    public Group() {
+
+    }
+
     public int getChatId() {
         return chatId;
     }

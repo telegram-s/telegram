@@ -10,8 +10,8 @@ public class DialogsEngine {
     private DialogsDatabase database;
     private StelsApplication application;
 
-    public DialogsEngine(StelsApplication application, ModelEngine engine) {
-        this.application = application;
+    public DialogsEngine(ModelEngine engine) {
+        this.application = engine.getApplication();
         this.database = new DialogsDatabase(engine);
     }
 

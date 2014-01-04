@@ -196,7 +196,7 @@ public class BackgroundSync extends BaseSync {
                 mids.add(message.getMid());
             }
             TLIntVector res = application.getApi().doRpcCall(new TLRequestMessagesDeleteMessages(mids));
-            application.getEngine().onDeletedOnServer(res.toArray(new Integer[0]));
+            application.getEngine().onDeletedOnServer(res.toIntArray());
         }
 
         messages = application.getEngine().getUnsyncedRestoredMessages();
@@ -206,7 +206,7 @@ public class BackgroundSync extends BaseSync {
                 mids.add(message.getMid());
             }
             TLIntVector res = application.getApi().doRpcCall(new TLRequestMessagesRestoreMessages(mids));
-            application.getEngine().onRestoredOnServer(res.toArray(new Integer[0]));
+            application.getEngine().onRestoredOnServer(res.toIntArray());
         }
 
         application.notifyUIUpdate();

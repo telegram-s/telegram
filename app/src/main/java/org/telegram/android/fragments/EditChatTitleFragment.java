@@ -9,6 +9,7 @@ import com.actionbarsherlock.view.MenuItem;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.core.model.DialogDescription;
+import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.update.TLLocalEditChatTitle;
 import org.telegram.android.tasks.AsyncAction;
@@ -46,7 +47,7 @@ public class EditChatTitleFragment extends StelsFragment {
         chatTitleView = (EditText) res.findViewById(R.id.title);
         fixEditText(chatTitleView);
         if (savedInstanceState == null) {
-            DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
+            Group description = application.getEngine().getGroupsEngine().getGroup(chatId);
             if (description != null) {
                 chatTitleView.setText(description.getTitle());
             }
@@ -98,7 +99,9 @@ public class EditChatTitleFragment extends StelsFragment {
                         TLMessageActionChatEditTitle editTitle = (TLMessageActionChatEditTitle) service.getAction();
                         ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                         messages.add(message.getMessage());
-                        application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
+                        application.getEngine().onUsers(message.getUsers());
+                        application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
+                        application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
                         application.getEngine().onChatTitleChanges(chatId, editTitle.getTitle());
                         application.getUpdateProcessor().onMessage(new TLLocalEditChatTitle(message));
                         application.notifyUIUpdate();

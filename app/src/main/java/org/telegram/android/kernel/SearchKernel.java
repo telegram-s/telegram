@@ -51,22 +51,22 @@ public class SearchKernel {
             }
         }
 
-        for (DialogDescription description : descriptions) {
-            long id = description.getPeerId() * 2 + description.getPeerType();
-            if (founded.contains(id)) {
-                continue;
-            }
-            if (matcher.isMatched(description.getTitle())) {
-                founded.add(id);
-                SpannableString spannableString = new SpannableString(description.getTitle());
-                if (description.getPeerType() == PeerType.PEER_USER) {
-                    User usr = application.getEngine().getUser(description.getPeerId());
-                    wireframes.add(new SearchWireframe(description.getPeerId(), description.getPeerType(), description.getTitle(), spannableString, description.getPhoto(), usr.getStatus(), 0));
-                } else {
-                    wireframes.add(new SearchWireframe(description.getPeerId(), description.getPeerType(), description.getTitle(), spannableString, description.getPhoto(), null, description.getParticipantsCount()));
-                }
-            }
-        }
+//        for (DialogDescription description : descriptions) {
+//            long id = description.getPeerId() * 2 + description.getPeerType();
+//            if (founded.contains(id)) {
+//                continue;
+//            }
+//            if (matcher.isMatched(description.getTitle())) {
+//                founded.add(id);
+//                SpannableString spannableString = new SpannableString(description.getTitle());
+//                if (description.getPeerType() == PeerType.PEER_USER) {
+//                    User usr = application.getEngine().getUser(description.getPeerId());
+//                    wireframes.add(new SearchWireframe(description.getPeerId(), description.getPeerType(), description.getTitle(), spannableString, description.getPhoto(), usr.getStatus(), 0));
+//                } else {
+//                    wireframes.add(new SearchWireframe(description.getPeerId(), description.getPeerType(), description.getTitle(), spannableString, description.getPhoto(), null, description.getParticipantsCount()));
+//                }
+//            }
+//        }
 
         ContactsSource.LocalContact[] contacts = application.getContactsSource().getTelegramContacts();
 

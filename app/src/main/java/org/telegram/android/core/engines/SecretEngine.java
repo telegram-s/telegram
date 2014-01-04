@@ -1,7 +1,5 @@
 package org.telegram.android.core.engines;
 
-import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.service.TLLocalActionEncryptedCancelled;
@@ -12,7 +10,6 @@ import org.telegram.android.log.Logger;
 import org.telegram.api.*;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.time.TimeOverlord;
-import org.telegram.ormlite.OrmEncryptedChat;
 import org.telegram.tl.StreamingUtils;
 
 import java.sql.SQLException;
@@ -27,8 +24,8 @@ public class SecretEngine {
     private ModelEngine engine;
     private StelsApplication application;
 
-    public SecretEngine(StelsApplication application, ModelEngine engine) {
-        this.application = application;
+    public SecretEngine(ModelEngine engine) {
+        this.application = engine.getApplication();
         this.secretDatabase = new SecretDatabase(engine);
     }
 
@@ -196,9 +193,6 @@ public class SecretEngine {
         DialogDescription res = new DialogDescription();
         res.setPeerType(PeerType.PEER_USER_ENCRYPTED);
         res.setPeerId(chatId);
-        User user = engine.getUserRuntime(uid);
-        res.setTitle(user.getDisplayName());
-        res.setPhoto(user.getPhoto());
         return res;
     }
 }

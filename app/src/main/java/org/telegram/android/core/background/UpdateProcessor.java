@@ -7,6 +7,7 @@ import org.telegram.android.StelsApplication;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.DialogDescription;
+import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
@@ -598,16 +599,17 @@ public class UpdateProcessor {
 
     private void onUpdates(TLUpdates updates, PackageIdentity identity) {
         application.getEngine().onUsers(updates.getUsers());
+        application.getEngine().getGroupsEngine().onGroupsUpdated(updates.getChats());
         for (TLAbsUpdate u : updates.getUpdates()) {
-            onUpdate(updates.getDate(), u, updates.getUsers(), updates.getChats(), identity);
+            onUpdate(updates.getDate(), u, identity);
         }
     }
 
     private void onUpdateShort(TLUpdateShort updateShort, PackageIdentity identity) {
-        onUpdate(updateShort.getDate(), updateShort.getUpdate(), new ArrayList<TLAbsUser>(), new ArrayList<TLAbsChat>(), identity);
+        onUpdate(updateShort.getDate(), updateShort.getUpdate(), identity);
     }
 
-    private void onUpdate(int date, TLAbsUpdate update, List<TLAbsUser> users, List<TLAbsChat> chats, PackageIdentity identity) {
+    private void onUpdate(int date, TLAbsUpdate update, PackageIdentity identity) {
         Logger.d(TAG, "#### | Update: " + update);
 
         if (update instanceof TLUpdateUserTyping) {
@@ -618,20 +620,24 @@ public class UpdateProcessor {
             application.getTypingStates().onUserChatTyping(userTyping.getUserId(), userTyping.getChatId(), date);
         } else if (update instanceof TLUpdateUserStatus) {
             TLUpdateUserStatus updateUserStatus = (TLUpdateUserStatus) update;
-            if (!EngineUtils.hasUser(users, updateUserStatus.getUserId())) {
-                application.getEngine().getUsersEngine().onUserStatus(updateUserStatus.getUserId(), updateUserStatus.getStatus());
-            }
+//            if (!EngineUtils.hasUser(users, updateUserStatus.getUserId())) {
+//                application.getEngine().getUsersEngine().onUserStatus(updateUserStatus.getUserId(), updateUserStatus.getStatus());
+//            }
+            application.getEngine().getUsersEngine().onUserStatus(updateUserStatus.getUserId(), updateUserStatus.getStatus());
         } else if (update instanceof TLUpdateUserName) {
             TLUpdateUserName updateUserName = (TLUpdateUserName) update;
-            if (!EngineUtils.hasUser(users, updateUserName.getUserId())) {
-                application.getEngine().getUsersEngine().onUserNameChanges(updateUserName.getUserId(), updateUserName.getFirstName(), updateUserName.getLastName());
-            }
+//            if (!EngineUtils.hasUser(users, updateUserName.getUserId())) {
+//                application.getEngine().getUsersEngine().onUserNameChanges(updateUserName.getUserId(), updateUserName.getFirstName(), updateUserName.getLastName());
+//            }
+            application.getEngine().getUsersEngine().onUserNameChanges(updateUserName.getUserId(), updateUserName.getFirstName(), updateUserName.getLastName());
         } else if (update instanceof TLUpdateUserPhoto) {
             TLUpdateUserPhoto updateUserPhoto = (TLUpdateUserPhoto) update;
-            if (!EngineUtils.hasUser(users, updateUserPhoto.getUserId())) {
-                TLAbsLocalAvatarPhoto photo = EngineUtils.convertAvatarPhoto(updateUserPhoto.getPhoto());
-                application.getEngine().getUsersEngine().onUserPhotoChanges(updateUserPhoto.getUserId(), photo);
-            }
+//            if (!EngineUtils.hasUser(users, updateUserPhoto.getUserId())) {
+//                TLAbsLocalAvatarPhoto photo = EngineUtils.convertAvatarPhoto(updateUserPhoto.getPhoto());
+//                application.getEngine().getUsersEngine().onUserPhotoChanges(updateUserPhoto.getUserId(), photo);
+//            }
+            TLAbsLocalAvatarPhoto photo = EngineUtils.convertAvatarPhoto(updateUserPhoto.getPhoto());
+            application.getEngine().getUsersEngine().onUserPhotoChanges(updateUserPhoto.getUserId(), photo);
         } else if (update instanceof TLUpdateContactRegistered) {
             User src = application.getEngine().getUser(((TLUpdateContactRegistered) update).getUserId());
             application.getEngine().onNewInternalServiceMessage(
@@ -645,9 +651,9 @@ public class UpdateProcessor {
             application.getSyncKernel().getContactsSync().invalidateContactsSync();
         } else if (update instanceof TLUpdateContactLink) {
             TLUpdateContactLink link = (TLUpdateContactLink) update;
-            if (!EngineUtils.hasUser(users, link.getUserId())) {
-                // TODO: Implement link update
-            }
+//            if (!EngineUtils.hasUser(users, link.getUserId())) {
+//                // TODO: Implement link update
+//            }
         } else if (update instanceof TLUpdateChatParticipants) {
             TLUpdateChatParticipants participants = (TLUpdateChatParticipants) update;
             application.getEngine().onChatParticipants(participants.getParticipants());
@@ -659,15 +665,14 @@ public class UpdateProcessor {
             application.getEngine().onChatUserShortRemoved(deleteUser.getChatId(), deleteUser.getUserId());
         } else if (update instanceof TLUpdateReadMessages) {
             TLUpdateReadMessages readMessages = (TLUpdateReadMessages) update;
-            Integer[] ids = readMessages.getMessages().toArray(new Integer[0]);
-            application.getEngine().onMessagesReaded(ids);
+            application.getEngine().onMessagesReaded(readMessages.getMessages().toIntArray());
             application.notifyUIUpdate();
         } else if (update instanceof TLUpdateDeleteMessages) {
             TLUpdateDeleteMessages deleteMessages = (TLUpdateDeleteMessages) update;
-            application.getEngine().onDeletedOnServer(deleteMessages.getMessages().toArray(new Integer[0]));
+            application.getEngine().onDeletedOnServer(deleteMessages.getMessages().toIntArray());
         } else if (update instanceof TLUpdateRestoreMessages) {
             TLUpdateRestoreMessages restoreMessages = (TLUpdateRestoreMessages) update;
-            application.getEngine().onRestoredOnServer(restoreMessages.getMessages().toArray(new Integer[0]));
+            application.getEngine().onRestoredOnServer(restoreMessages.getMessages().toIntArray());
         } else if (update instanceof TLUpdateEncryption) {
             application.getEncryptionController().onUpdateEncryption(((TLUpdateEncryption) update).getChat());
         } else if (update instanceof TLUpdateEncryptedChatTyping) {
@@ -679,7 +684,7 @@ public class UpdateProcessor {
             TLUpdateEncryptedMessagesRead read = (TLUpdateEncryptedMessagesRead) update;
             application.getEngine().onEncryptedReaded(read.getChatId(), read.getDate(), read.getMaxDate());
         } else if (update instanceof TLUpdateNewMessage) {
-            onUpdateNewMessage((TLUpdateNewMessage) update, users, chats);
+            onUpdateNewMessage((TLUpdateNewMessage) update);
         } else if (update instanceof TLUpdateNewAuthorization) {
             TLUpdateNewAuthorization authorization = (TLUpdateNewAuthorization) update;
             if (authorization.getLocation().length() > 0) {
@@ -692,10 +697,10 @@ public class UpdateProcessor {
         }
     }
 
-    private void onUpdateNewMessage(TLUpdateNewMessage newMessage, List<TLAbsUser> users, List<TLAbsChat> chats) {
+    private void onUpdateNewMessage(TLUpdateNewMessage newMessage) {
         ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
         messages.add(newMessage.getMessage());
-        applyMessages(messages, users, chats);
+        applyMessages(messages);
     }
 
     private void onUpdateShortChatMessage(TLUpdateShortChatMessage message) {
@@ -710,13 +715,14 @@ public class UpdateProcessor {
                 onInMessageArrived(PeerType.PEER_CHAT, message.getChatId(), message.getId());
                 DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, message.getChatId());
                 User sender = application.getEngine().getUser(message.getFromId());
+                Group group = application.getEngine().getGroupsEngine().getGroup(message.getChatId());
                 if (description != null && sender != null) {
                     application.getNotifications().onNewChatMessage(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(), message.getMessage(),
+                            group.getTitle(), message.getMessage(),
                             message.getChatId(), message.getId(),
-                            description.getPhoto());
+                            group.getAvatar());
                 }
                 application.getTypingStates().resetUserTyping(message.getFromId(), message.getChatId());
             }
@@ -757,10 +763,12 @@ public class UpdateProcessor {
             }
         }
 
-        applyMessages(messages, combined.getUsers(), combined.getChats());
+        application.getEngine().onUsers(combined.getUsers());
+        application.getEngine().getGroupsEngine().onGroupsUpdated(combined.getChats());
+        applyMessages(messages);
 
         for (TLAbsUpdate update : another) {
-            onUpdate(combined.getDate(), update, combined.getUsers(), combined.getChats(), identity);
+            onUpdate(combined.getDate(), update, identity);
         }
 
         application.notifyUIUpdate();
@@ -776,9 +784,9 @@ public class UpdateProcessor {
         }
 
 
-        applyMessages(difference.getNewMessages(),
-                difference.getUsers(),
-                difference.getChats());
+        application.getEngine().onUsers(difference.getUsers());
+        application.getEngine().getGroupsEngine().onGroupsUpdated(difference.getChats());
+        applyMessages(difference.getNewMessages());
 
         List<TLAbsEncryptedMessage> messages = difference.getNewEncryptedMessages();
         for (TLAbsEncryptedMessage encryptedMessage : messages) {
@@ -789,8 +797,7 @@ public class UpdateProcessor {
             if (update instanceof TLUpdateMessageID) {
                 continue;
             }
-            onUpdate(difference.getState().getDate(), update,
-                    difference.getUsers(), difference.getChats(), null);
+            onUpdate(difference.getState().getDate(), update, null);
         }
         application.notifyUIUpdate();
 
@@ -814,7 +821,9 @@ public class UpdateProcessor {
             }
         }
 
-        applyMessages(slice.getNewMessages(), slice.getUsers(), slice.getChats());
+        application.getEngine().onUsers(slice.getUsers());
+        application.getEngine().getGroupsEngine().onGroupsUpdated(slice.getChats());
+        applyMessages(slice.getNewMessages());
 
         List<TLAbsEncryptedMessage> messages = slice.getNewEncryptedMessages();
         for (TLAbsEncryptedMessage encryptedMessage : messages) {
@@ -825,8 +834,7 @@ public class UpdateProcessor {
             if (update instanceof TLUpdateMessageID) {
                 continue;
             }
-            onUpdate(slice.getIntermediateState().getDate(), update,
-                    slice.getUsers(), slice.getChats(), null);
+            onUpdate(slice.getIntermediateState().getDate(), update, null);
         }
         application.notifyUIUpdate();
 
@@ -838,8 +846,8 @@ public class UpdateProcessor {
         dumpState();
     }
 
-    private void applyMessages(List<TLAbsMessage> messages, List<TLAbsUser> users, List<TLAbsChat> chats) {
-        HashSet<Integer> newUnreaded = application.getEngine().onNewMessages(messages, users, chats, new ArrayList<TLDialog>());
+    private void applyMessages(List<TLAbsMessage> messages) {
+        HashSet<Integer> newUnreaded = application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
 
         for (TLAbsMessage newMessage : messages) {
             if (newMessage instanceof TLMessage) {
@@ -929,12 +937,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessage(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             msg.getMessage(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
@@ -949,12 +957,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessageContact(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
                 }
@@ -968,12 +976,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessageGeo(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
                 }
@@ -987,12 +995,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessagePhoto(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
                 }
@@ -1006,12 +1014,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessageVideo(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
                 }
@@ -1030,12 +1038,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessage(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             msg.getMessage(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
@@ -1050,12 +1058,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessageContact(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
                 }
@@ -1069,12 +1077,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessageGeo(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
                 }
@@ -1088,12 +1096,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessagePhoto(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
                 }
@@ -1107,12 +1115,12 @@ public class UpdateProcessor {
                         sender.getPhoto());
             } else {
                 TLPeerChat chat = (TLPeerChat) msg.getToId();
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chat.getChatId());
-                if (description != null) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+                if (group != null) {
                     application.getNotifications().onNewChatMessageVideo(
                             sender.getDisplayName(),
                             sender.getUid(),
-                            description.getTitle(),
+                            group.getTitle(),
                             chat.getChatId(), msg.getId(),
                             sender.getPhoto());
                 }

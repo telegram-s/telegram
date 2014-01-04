@@ -22,6 +22,7 @@ import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.ChatSourceListener;
 import org.telegram.android.core.files.UploadResult;
+import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
@@ -32,10 +33,6 @@ import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.model.update.TLLocalRemoveChatUser;
 import org.telegram.android.core.model.update.TLLocalUpdateChatPhoto;
 import org.telegram.android.media.Optimizer;
-import org.telegram.android.core.model.DialogDescription;
-import org.telegram.android.core.model.FullChatInfo;
-import org.telegram.android.core.model.PeerType;
-import org.telegram.android.core.model.User;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
@@ -70,6 +67,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     private boolean loadingStarted;
     private FullChatInfo fullChatInfo;
     private DialogDescription dialogDescription;
+    private Group group;
 
     private View headerView;
     private TextView titleView;
@@ -199,6 +197,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
         fullChatInfo = getEngine().getFullChatInfo(chatId);
         dialogDescription = getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
+        group = getEngine().getGroupsEngine().getGroup(chatId);
         if (fullChatInfo == null) {
             if (!loadingStarted) {
                 loadingStarted = true;
@@ -210,6 +209,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                         getEngine().onChatParticipants(fullChat.getFullChat().getParticipants());
                         fullChatInfo = getEngine().getFullChatInfo(chatId);
                         dialogDescription = getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
+                        group = getEngine().getGroupsEngine().getGroup(chatId);
                     }
 
                     @Override
@@ -255,8 +255,8 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         forbidden.setVisibility(View.GONE);
 
         avatarView.setLoadingDrawable(Placeholders.getGroupPlaceholder(chatId));
-        if (dialogDescription.getPhoto() instanceof TLLocalAvatarPhoto) {
-            TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) dialogDescription.getPhoto();
+        if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
+            TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) group.getAvatar();
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
                 avatarView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
             } else {
@@ -269,7 +269,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         changeAvatarView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (dialogDescription.getPhoto() instanceof TLLocalAvatarPhoto) {
+                if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
                     requestPhotoChooserWithDelete(0);
                 } else {
                     requestPhotoChooser(0);
@@ -277,7 +277,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
             }
         });
 
-        titleView.setText(dialogDescription.getTitle());
+        titleView.setText(group.getTitle());
         if (application.getNotificationSettings().isEnabledForChat(chatId)) {
             enabledView.setImageResource(R.drawable.holo_btn_check_on);
         } else {
@@ -532,7 +532,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 TLMessageActionChatDeleteUser removeUser = (TLMessageActionChatDeleteUser) service.getAction();
                 ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                 messages.add(message.getMessage());
-                application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
+                application.getEngine().onUsers(message.getUsers());
+                application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
+                application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
                 application.getEngine().onChatUserRemoved(chatId, removeUser.getUserId());
                 application.getUpdateProcessor().onMessage(new TLLocalRemoveChatUser(message));
             }
@@ -602,14 +604,18 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
                         ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                         messages.add(message.getMessage());
-                        application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
+                        application.getEngine().onUsers(message.getUsers());
+                        application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
+                        application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
                         application.getEngine().onChatAvatarChanges(chatId, editPhoto.getPhoto());
                         application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                     } else {
                         TLAbsStatedMessage message = rpc(new TLRequestMessagesEditChatPhoto(chatId, new TLInputChatPhotoEmpty()));
                         ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                         messages.add(message.getMessage());
-                        application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
+                        application.getEngine().onUsers(message.getUsers());
+                        application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
+                        application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
                         application.getEngine().onChatAvatarChanges(chatId, null);
                         application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                     }
@@ -679,7 +685,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     TLMessageActionChatAddUser addUser = (TLMessageActionChatAddUser) service.getAction();
                     ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                     messages.add(message.getMessage());
-                    application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
+                    application.getEngine().onUsers(message.getUsers());
+                    application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
+                    application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
                     application.getEngine().onChatUserAdded(chatId, service.getFromId(), addUser.getUserId());
                     application.getUpdateProcessor().onMessage(new TLLocalAddChatUser(message));
                 }
@@ -728,7 +736,8 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         if (chatId == this.chatId) {
             fullChatInfo = getEngine().getFullChatInfo(chatId);
             dialogDescription = getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
-            if (fullChatInfo != null && dialogDescription != null) {
+            group = getEngine().getGroupsEngine().getGroup(chatId);
+            if (fullChatInfo != null && dialogDescription != null && group != null) {
                 bindView();
             }
         }

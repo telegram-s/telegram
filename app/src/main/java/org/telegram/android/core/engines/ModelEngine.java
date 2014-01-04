@@ -18,10 +18,8 @@ import org.telegram.api.messages.TLAbsStatedMessage;
 import org.telegram.api.messages.TLAbsStatedMessages;
 import org.telegram.dao.DaoMaster;
 import org.telegram.dao.DaoSession;
-import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
-import org.telegram.tl.StreamingUtils;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -46,9 +44,12 @@ public class ModelEngine {
     private Object minMidSync = new Object();
 
     private UsersEngine usersEngine;
-    private DialogsEngine dialogsEngine;
-    private MediaEngine mediaEngine;
+    private GroupsEngine groupsEngine;
     private SecretEngine secretEngine;
+
+    private DialogsEngine dialogsEngine;
+    private MessagesEngine messagesEngine;
+    private MediaEngine mediaEngine;
 
     public ModelEngine(StelsDatabase database, StelsApplication application) {
         DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "users-db", null);
@@ -58,9 +59,11 @@ public class ModelEngine {
         this.database = database;
         this.application = application;
         this.usersEngine = new UsersEngine(this);
+        this.secretEngine = new SecretEngine(this);
+        this.groupsEngine = new GroupsEngine(this);
         this.mediaEngine = new MediaEngine(this);
-        this.dialogsEngine = new DialogsEngine(application, this);
-        this.secretEngine = new SecretEngine(application, this);
+        this.dialogsEngine = new DialogsEngine(this);
+        this.messagesEngine = new MessagesEngine(this);
     }
 
     public DaoMaster getDaoMaster() {
@@ -93,6 +96,10 @@ public class ModelEngine {
 
     public SecretEngine getSecretEngine() {
         return secretEngine;
+    }
+
+    public GroupsEngine getGroupsEngine() {
+        return groupsEngine;
     }
 
     public User[] getUsersById(Object[] uids) {
@@ -155,6 +162,18 @@ public class ModelEngine {
         return database.getFullChatInfoDao();
     }
 
+    public ChatMessage getMessageByDbId(int localId) {
+        return messagesEngine.getMessageById(localId);
+    }
+
+    public ChatMessage getMessageById(int mid) {
+        return messagesEngine.getMessageByMid(mid);
+    }
+
+    public ChatMessage getMessageByRandomId(long rid) {
+        return messagesEngine.getMessageByRandomId(rid);
+    }
+
     public void markDialogAsNonFailed(int peerType, int peerId) {
         DialogDescription description = getDescriptionForPeer(peerType, peerId);
         if (description != null) {
@@ -197,22 +216,6 @@ public class ModelEngine {
         return new ChatMessage[0];
     }
 
-    private ChatMessage[] getMessagesById(Object[] mid) {
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = getMessagesDao().queryBuilder();
-            queryBuilder.where().in("mid", mid);
-            return queryBuilder.query().toArray(new ChatMessage[0]);
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
-        }
-
-        return new ChatMessage[0];
-    }
-
-    public ChatMessage getMessageByDbId(int localId) {
-        return getMessagesDao().queryForId((long) localId);
-    }
-
     public int getMaxMsgInId(int peerType, int peerId) {
         try {
             QueryBuilder<ChatMessage, Long> builder = getMessagesDao().queryBuilder();
@@ -243,15 +246,6 @@ public class ModelEngine {
         return 0;
     }
 
-    public ChatMessage getMessageById(int mid) {
-        List<ChatMessage> res = getMessagesDao().queryForEq("mid", mid);
-        if (res.size() == 0) {
-            return null;
-        } else {
-            return res.get(0);
-        }
-    }
-
     public void onUpdateMessageId(long rid, int mid) {
         ChatMessage message = getMessageByRandomId(rid);
         if (message == null) {
@@ -268,15 +262,6 @@ public class ModelEngine {
         getMessagesDao().delete(message);
         application.getDataSourceKernel().onSourceRemoveMessage(message);
         updateDescriptorDeleteUnsent(message.getPeerType(), message.getPeerId(), message.getDatabaseId());
-    }
-
-    public ChatMessage getMessageByRandomId(long rid) {
-        List<ChatMessage> res = getMessagesDao().queryForEq("randomId", rid);
-        if (res.size() == 0) {
-            return null;
-        } else {
-            return res.get(0);
-        }
     }
 
     public FullChatInfo getFullChatInfo(int chatId) {
@@ -342,11 +327,11 @@ public class ModelEngine {
     }
 
     public void onChatTitleChanges(int chatId, String title) {
-        DialogDescription description = getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
-        if (description != null) {
-            description.setTitle(title);
-            dialogsEngine.updateDialog(description);
-        }
+        groupsEngine.onGroupNameChanged(chatId, title);
+    }
+
+    public void onChatAvatarChanges(int chatId, TLAbsPhoto photo) {
+        groupsEngine.onGroupAvatarChanged(chatId, EngineUtils.convertAvatarPhoto(photo));
     }
 
     public ChatMessage[] findDiedMessages(int currentTime) {
@@ -380,14 +365,6 @@ public class ModelEngine {
             Logger.t(TAG, e);
         }
         return new ChatMessage[0];
-    }
-
-    public void onChatAvatarChanges(int chatId, TLAbsPhoto photo) {
-        DialogDescription description = getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
-        if (description != null) {
-            description.setPhoto(EngineUtils.convertAvatarPhoto(photo));
-            dialogsEngine.updateDialog(description);
-        }
     }
 
     public void onChatUserShortAdded(int chatId, int inviter, int uid) {
@@ -443,7 +420,6 @@ public class ModelEngine {
     }
 
     public void onChatUserShortRemoved(int chatId, int uid) {
-
         onChatUserRemoved(chatId, uid);
     }
 
@@ -629,8 +605,8 @@ public class ModelEngine {
         }
     }
 
-    public void onMessagesReaded(Integer[] mids) {
-        ChatMessage[] saved = getMessagesById(mids);
+    public void onMessagesReaded(int[] mids) {
+        ChatMessage[] saved = messagesEngine.getMessagesByMid(mids);
         for (int mid : mids) {
             ChatMessage msg = EngineUtils.searchMessage(saved, mid);
             if (msg != null) {
@@ -677,8 +653,7 @@ public class ModelEngine {
             Logger.w(TAG, "Already readed: " + msg.getMid());
         }
         msg.setState(MessageState.READED);
-        getMessagesDao().update(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        messagesEngine.update(msg);
     }
 
     public boolean onNewShortMessage(int peerType, int peerId, int mid, int date, int senderId, String message) {
@@ -695,8 +670,7 @@ public class ModelEngine {
         nmsg.setPeerType(peerType);
         nmsg.setState(MessageState.SENT);
         nmsg.setSenderId(senderId);
-        getMessagesDao().create(nmsg);
-        application.getDataSourceKernel().onSourceAddMessage(nmsg);
+        messagesEngine.create(nmsg);
         updateDescriptorShort(nmsg);
         updateMaxDate(nmsg);
         return true;
@@ -718,8 +692,7 @@ public class ModelEngine {
         nmsg.setSenderId(senderId);
         nmsg.setRandomId(randomId);
         nmsg.setMessageTimeout(timeout);
-        getMessagesDao().create(nmsg);
-        application.getDataSourceKernel().onSourceAddMessage(nmsg);
+        messagesEngine.create(nmsg);
         updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
         return true;
@@ -742,8 +715,7 @@ public class ModelEngine {
         nmsg.setExtras(new TLLocalGeo(latitude, longitude));
         nmsg.setRandomId(randomId);
         nmsg.setMessageTimeout(timeout);
-        getMessagesDao().create(nmsg);
-        application.getDataSourceKernel().onSourceAddMessage(nmsg);
+        messagesEngine.create(nmsg);
         updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
         return true;
@@ -766,8 +738,7 @@ public class ModelEngine {
         nmsg.setExtras(photo);
         nmsg.setRandomId(randomId);
         nmsg.setMessageTimeout(timeout);
-        getMessagesDao().create(nmsg);
-        application.getDataSourceKernel().onSourceAddMessage(nmsg);
+        messagesEngine.create(nmsg);
         mediaEngine.saveMedia(nmsg.getMid(), nmsg);
         updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
@@ -791,8 +762,7 @@ public class ModelEngine {
         nmsg.setExtras(video);
         nmsg.setRandomId(randomId);
         nmsg.setMessageTimeout(timeout);
-        getMessagesDao().create(nmsg);
-        application.getDataSourceKernel().onSourceAddMessage(nmsg);
+        messagesEngine.create(nmsg);
         mediaEngine.saveMedia(nmsg.getMid(), nmsg);
         updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
@@ -816,8 +786,7 @@ public class ModelEngine {
         nmsg.setExtras(doc);
         nmsg.setRandomId(randomId);
         nmsg.setMessageTimeout(timeout);
-        getMessagesDao().create(nmsg);
-        application.getDataSourceKernel().onSourceAddMessage(nmsg);
+        messagesEngine.create(nmsg);
         mediaEngine.saveMedia(nmsg.getMid(), nmsg);
         updateDescriptorShortEnc(nmsg);
         updateMaxDate(nmsg);
@@ -836,8 +805,7 @@ public class ModelEngine {
         nmsg.setSenderId(senderId);
         nmsg.setExtras(action);
         nmsg.setOut(senderId == application.getCurrentUid());
-        getMessagesDao().create(nmsg);
-        application.getDataSourceKernel().onSourceAddMessage(nmsg);
+        messagesEngine.create(nmsg);
         updateDescriptorShort(nmsg);
         updateMaxDate(nmsg);
     }
@@ -911,8 +879,7 @@ public class ModelEngine {
         msg.setMessage("Document");
         msg.setContentType(ContentType.MESSAGE_DOCUMENT);
         msg.setExtras(doc);
-        getMessagesDao().create(msg);
-        application.getDataSourceKernel().onSourceAddMessage(msg);
+        messagesEngine.create(msg);
         application.getMediaSender().sendMedia(msg);
         updateDescriptorPending(msg);
         return msg.getDatabaseId();
@@ -923,8 +890,7 @@ public class ModelEngine {
         msg.setMessage("Photo");
         msg.setContentType(ContentType.MESSAGE_PHOTO);
         msg.setExtras(photo);
-        getMessagesDao().create(msg);
-        application.getDataSourceKernel().onSourceAddMessage(msg);
+        messagesEngine.create(msg);
         application.getMediaSender().sendMedia(msg);
         updateDescriptorPending(msg);
         return msg.getDatabaseId();
@@ -935,8 +901,7 @@ public class ModelEngine {
         msg.setMessage("Video");
         msg.setContentType(ContentType.MESSAGE_VIDEO);
         msg.setExtras(video);
-        getMessagesDao().create(msg);
-        application.getDataSourceKernel().onSourceAddMessage(msg);
+        messagesEngine.create(msg);
         application.getMediaSender().sendMedia(msg);
         updateDescriptorPending(msg);
         return msg.getDatabaseId();
@@ -975,8 +940,7 @@ public class ModelEngine {
         }
 
         msg.setExtras(src.getExtras());
-        getMessagesDao().create(msg);
-        application.getDataSourceKernel().onSourceAddMessage(msg);
+        messagesEngine.create(msg);
         application.getMessageSender().sendMessage(msg);
 
         updateDescriptorPending(msg);
@@ -994,8 +958,7 @@ public class ModelEngine {
         msg.setMessage("");
         msg.setExtras(new TLLocalContact(src.getPhone(), src.getFirstName(), src.getLastName(), src.getUid()));
 
-        getMessagesDao().create(msg);
-        application.getDataSourceKernel().onSourceAddMessage(msg);
+        messagesEngine.create(msg);
         application.getMessageSender().sendMessage(msg);
 
         updateDescriptorPending(msg);
@@ -1007,8 +970,7 @@ public class ModelEngine {
         msg.setMessage("");
         msg.setContentType(ContentType.MESSAGE_GEO);
         msg.setExtras(point);
-        getMessagesDao().create(msg);
-        application.getDataSourceKernel().onSourceAddMessage(msg);
+        messagesEngine.create(msg);
         application.getMessageSender().sendMessage(msg);
         updateDescriptorPending(msg);
         return msg.getDatabaseId();
@@ -1026,8 +988,7 @@ public class ModelEngine {
     public void offThreadSendMessage(ChatMessage msg) {
         msg.setMid(getMinMid() - 1);
         application.getDataSourceKernel().onSourceRemoveMessage(msg);
-        getMessagesDao().create(msg);
-        application.getDataSourceKernel().onSourceAddMessage(msg);
+        messagesEngine.create(msg);
         updateDescriptorPending(msg);
     }
 
@@ -1035,9 +996,7 @@ public class ModelEngine {
         ChatMessage msg = prepareSendMessage(peerType, peerId);
         msg.setMessage(message);
         msg.setContentType(ContentType.MESSAGE_TEXT);
-        getMessagesDao().create(msg);
-        application.getDataSourceKernel().onSourceAddMessage(msg);
-        application.getMessageSender().sendMessage(msg);
+        messagesEngine.create(msg);
         updateDescriptorPending(msg);
         return msg.getDatabaseId();
     }
@@ -1053,8 +1012,7 @@ public class ModelEngine {
         msg.setDate(date);
         msg.setState(MessageState.PENDING);
         msg.setRandomId(Entropy.generateRandomId());
-        getMessagesDao().update(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        messagesEngine.update(msg);
         application.getMediaSender().sendMedia(msg);
         updateDescriptorPending(msg);
     }
@@ -1070,8 +1028,7 @@ public class ModelEngine {
         msg.setDate(date);
         msg.setState(MessageState.PENDING);
         msg.setRandomId(Entropy.generateRandomId());
-        getMessagesDao().update(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        messagesEngine.update(msg);
         application.getMessageSender().sendMessage(msg);
         updateDescriptorPending(msg);
     }
@@ -1080,39 +1037,13 @@ public class ModelEngine {
         DialogDescription res = new DialogDescription();
         res.setPeerType(PeerType.PEER_USER);
         res.setPeerId(uid);
-        User user = getUser(uid);
-        res.setTitle(user.getDisplayName());
-        res.setPhoto(user.getPhoto());
         return res;
     }
 
-    private DialogDescription createDescriptionForEncryptedUser(int chatId, int uid) {
-        DialogDescription res = new DialogDescription();
-        res.setPeerType(PeerType.PEER_USER_ENCRYPTED);
-        res.setPeerId(chatId);
-        User user = getUserRuntime(uid);
-        res.setTitle(user.getDisplayName());
-        res.setPhoto(user.getPhoto());
-        return res;
-    }
-
-    private DialogDescription createDescriptionForChat(int chatId, TLAbsChat chat, TLDialog dialog) {
+    private DialogDescription createDescriptionForChat(int chatId) {
         DialogDescription res = new DialogDescription();
         res.setPeerType(PeerType.PEER_CHAT);
         res.setPeerId(chatId);
-        if (chat instanceof TLChat) {
-            res.setTitle(((TLChat) chat).getTitle());
-            res.setPhoto(EngineUtils.convertAvatarPhoto(((TLChat) chat).getPhoto()));
-            res.setParticipantsCount(((TLChat) chat).getParticipantsCount());
-        } else if (chat instanceof TLChatForbidden) {
-            res.setTitle(((TLChatForbidden) chat).getTitle());
-            res.setPhoto(null);
-            res.setParticipantsCount(0);
-        } else /*if (chat instanceof TLChatEmpty)*/ {
-            res.setTitle("Unknown chat");
-            res.setPhoto(null);
-            res.setParticipantsCount(0);
-        }
         return res;
     }
 
@@ -1223,7 +1154,6 @@ public class ModelEngine {
                     description.setTopMessageId(0);
                     description.setMessage("");
                     description.setContentType(0);
-                    description.setPhoto(null);
                     description.setParticipantsCount(0);
                     description.setSenderId(0);
                     dialogsEngine.updateDialog(description);
@@ -1240,8 +1170,7 @@ public class ModelEngine {
     public synchronized void onConfirmed(ChatMessage msg) {
         if (msg.getState() == MessageState.PENDING) {
             msg.setState(MessageState.SENT);
-            application.getDataSourceKernel().onSourceUpdateMessage(msg);
-            getMessagesDao().update(msg);
+            messagesEngine.update(msg);
 
             DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
             if (description != null) {
@@ -1271,10 +1200,12 @@ public class ModelEngine {
 //            saveMedia(mid, msg);
 //        }
 
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
-        getMessagesDao().update(msg);
-        onNewMessages(statedMessages.getMessages(), statedMessages.getUsers(),
-                statedMessages.getChats(), new ArrayList<TLDialog>());
+        messagesEngine.update(msg);
+        onUsers(statedMessages.getUsers());
+        groupsEngine.onGroupsUpdated(statedMessages.getChats());
+
+        onNewMessages(statedMessages.getMessages(), new ArrayList<TLDialog>());
+
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
             if (description.getTopMessageId() == -msg.getDatabaseId()) {
@@ -1297,12 +1228,13 @@ public class ModelEngine {
 
         msg.setState(MessageState.SENT);
         msg.setMid(mid);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
         updateMaxDate(msg);
-        getMessagesDao().update(msg);
+        messagesEngine.update(msg);
         List<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
         messages.add(statedMessage.getMessage());
-        onNewMessages(messages, statedMessage.getUsers(), statedMessage.getChats(), new ArrayList<TLDialog>());
+        onUsers(statedMessage.getUsers());
+        groupsEngine.onGroupsUpdated(statedMessage.getChats());
+        onNewMessages(messages, new ArrayList<TLDialog>());
 
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
@@ -1326,9 +1258,8 @@ public class ModelEngine {
         msg.setState(MessageState.SENT);
         msg.setMid(tl.getId());
         msg.setDate(tl.getDate());
-        getMessagesDao().update(msg);
+        messagesEngine.update(msg);
         updateMaxDate(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
             if (description.getTopMessageId() == -msg.getDatabaseId()) {
@@ -1344,9 +1275,8 @@ public class ModelEngine {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
         msg.setExtras(photo);
-        getMessagesDao().update(msg);
+        messagesEngine.update(msg);
         updateMaxDate(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
         mediaEngine.saveMedia(msg.getMid(), msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
@@ -1363,9 +1293,8 @@ public class ModelEngine {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
         msg.setExtras(doc);
-        getMessagesDao().update(msg);
+        messagesEngine.update(msg);
         updateMaxDate(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
         mediaEngine.saveMedia(msg.getMid(), msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
@@ -1383,9 +1312,8 @@ public class ModelEngine {
         msg.setDate(date);
         msg.setMid(mid);
         msg.setExtras(photo);
-        getMessagesDao().update(msg);
+        messagesEngine.update(msg);
         updateMaxDate(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
         mediaEngine.saveMedia(msg.getMid(), msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
@@ -1402,9 +1330,8 @@ public class ModelEngine {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
         msg.setExtras(video);
-        getMessagesDao().update(msg);
+        messagesEngine.update(msg);
         updateMaxDate(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
         mediaEngine.saveMedia(msg.getMid(), msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
@@ -1420,9 +1347,8 @@ public class ModelEngine {
     public synchronized void onMessageSent(ChatMessage msg, int date) {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
-        getMessagesDao().update(msg);
+        messagesEngine.update(msg);
         updateMaxDate(msg);
-        application.getDataSourceKernel().onSourceUpdateMessage(msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
             if (description.getTopMessageId() == -msg.getDatabaseId()) {
@@ -1439,10 +1365,7 @@ public class ModelEngine {
             return;
         }
         msg.setState(MessageState.FAILURE);
-        getMessagesDao().update(msg);
-        if (application.getDataSourceKernel() != null) {
-            application.getDataSourceKernel().onSourceUpdateMessage(msg);
-        }
+        messagesEngine.update(msg);
         DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
         if (description != null) {
             description.setFailure(true);
@@ -1457,8 +1380,8 @@ public class ModelEngine {
         deleteUnsentMessage(databaseId);
     }
 
-    public synchronized void onDeletedOnServer(Integer[] mids) {
-        ChatMessage[] messages = getMessagesById(mids);
+    public synchronized void onDeletedOnServer(int[] mids) {
+        ChatMessage[] messages = messagesEngine.getMessagesByMid(mids);
         for (ChatMessage msg : messages) {
             msg.setDeletedServer(true);
             msg.setDeletedLocal(true);
@@ -1471,8 +1394,8 @@ public class ModelEngine {
         }
     }
 
-    public synchronized void onRestoredOnServer(Integer[] mids) {
-        ChatMessage[] messages = getMessagesById(mids);
+    public synchronized void onRestoredOnServer(int[] mids) {
+        ChatMessage[] messages = messagesEngine.getMessagesByMid(mids);
         for (ChatMessage msg : messages) {
             msg.setDeletedServer(false);
             msg.setDeletedLocal(false);
@@ -1519,21 +1442,19 @@ public class ModelEngine {
         updateDescriptorDeleteUnsent(msg.getPeerType(), msg.getPeerId(), msg.getDatabaseId());
     }
 
-    public void onLoadMoreMessages(final List<TLAbsMessage> messages, final List<TLAbsUser> users, final List<TLAbsChat> chats) {
-        onNewMessages(messages, users, chats, new ArrayList<TLDialog>());
+    public void onLoadMoreMessages(final List<TLAbsMessage> messages) {
+        onNewMessages(messages, new ArrayList<TLDialog>());
     }
 
-    public void onLoadMoreDialogs(final List<TLAbsMessage> messages, final List<TLAbsUser> users, final List<TLAbsChat> chats,
-                                  final List<TLDialog> dialogs) {
-        onNewMessages(messages, users, chats, dialogs);
+    public void onLoadMoreDialogs(final List<TLAbsMessage> messages, final List<TLDialog> dialogs) {
+        onNewMessages(messages, dialogs);
     }
 
-    public HashSet<Integer> onNewMessages(final List<TLAbsMessage> messages, final List<TLAbsUser> users, final List<TLAbsChat> chats,
+    public HashSet<Integer> onNewMessages(final List<TLAbsMessage> messages,
                                           final List<TLDialog> dialogs) {
         final HashSet<Integer> newUnread = new HashSet<Integer>();
-        onUsers(users);
         long start = SystemClock.uptimeMillis();
-        Integer[] ids = new Integer[messages.size()];
+        int[] ids = new int[messages.size()];
         ChatMessage[] converted = new ChatMessage[messages.size()];
         for (int i = 0; i < ids.length; i++) {
             converted[i] = EngineUtils.fromTlMessage(messages.get(i), application);
@@ -1541,7 +1462,7 @@ public class ModelEngine {
             updateMaxDate(converted[i]);
         }
 
-        ChatMessage[] original = getMessagesById(ids);
+        ChatMessage[] original = messagesEngine.getMessagesByMid(ids);
 
         final ArrayList<Pair<ChatMessage, ChatMessage>> diff = new ArrayList<Pair<ChatMessage, ChatMessage>>();
 
@@ -1568,15 +1489,13 @@ public class ModelEngine {
                     ChatMessage changed = msgs.second;
 
                     if (orig == null) {
-                        getMessagesDao().create(changed);
+                        messagesEngine.create(changed);
                         if (!changed.isOut() && changed.getState() == MessageState.SENT) {
                             newUnread.add(changed.getMid());
                         }
-                        application.getDataSourceKernel().onSourceAddMessage(changed);
                     } else {
                         changed.setDatabaseId(orig.getDatabaseId());
-                        getMessagesDao().update(changed);
-                        application.getDataSourceKernel().onSourceUpdateMessage(changed);
+                        messagesEngine.update(changed);
                     }
 
                     if (changed.getRawContentType() == ContentType.MESSAGE_PHOTO) {
@@ -1599,8 +1518,7 @@ public class ModelEngine {
                         if (changed.getPeerType() == PeerType.PEER_USER) {
                             description = createDescriptionForUser(changed.getPeerId());
                         } else {
-                            TLAbsChat chat = EngineUtils.findChat(chats, changed.getPeerId());
-                            description = createDescriptionForChat(changed.getPeerId(), chat, null);
+                            description = createDescriptionForChat(changed.getPeerId());
                         }
                         applyDescriptor(description, changed);
 

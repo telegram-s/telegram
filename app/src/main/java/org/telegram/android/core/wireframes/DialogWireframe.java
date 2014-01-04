@@ -1,5 +1,6 @@
 package org.telegram.android.core.wireframes;
 
+import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
@@ -19,9 +20,7 @@ public class DialogWireframe {
     private int peerId;
     private int peerType;
     private User dialogUser;
-
-    private TLAbsLocalAvatarPhoto chatAvatar;
-    private String chatTitle;
+    private Group dialogGroup;
 
     private boolean isOut;
     private boolean isMine;
@@ -69,7 +68,7 @@ public class DialogWireframe {
                 return dialogUser.getDisplayName();
             }
         } else if (peerType == PeerType.PEER_CHAT) {
-            return chatTitle;
+            return dialogGroup.getTitle();
         } else {
             throw new RuntimeException("Unknown peer type: " + peerType);
         }
@@ -79,7 +78,7 @@ public class DialogWireframe {
         if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
             return dialogUser.getPhoto();
         } else {
-            return chatAvatar;
+            return dialogGroup.getAvatar();
         }
     }
 
@@ -97,14 +96,6 @@ public class DialogWireframe {
 
     public void setSenderId(int senderId) {
         this.senderId = senderId;
-    }
-
-    public String getChatTitle() {
-        return chatTitle;
-    }
-
-    public void setChatTitle(String chatTitle) {
-        this.chatTitle = chatTitle;
     }
 
     public boolean isErrorState() {
@@ -137,14 +128,6 @@ public class DialogWireframe {
 
     public void setDialogUser(User dialogUser) {
         this.dialogUser = dialogUser;
-    }
-
-    public TLAbsLocalAvatarPhoto getChatAvatar() {
-        return chatAvatar;
-    }
-
-    public void setChatAvatar(TLAbsLocalAvatarPhoto chatAvatar) {
-        this.chatAvatar = chatAvatar;
     }
 
     public boolean isOut() {
@@ -209,5 +192,13 @@ public class DialogWireframe {
 
     public void setMid(int mid) {
         this.mid = mid;
+    }
+
+    public Group getDialogGroup() {
+        return dialogGroup;
+    }
+
+    public void setDialogGroup(Group dialogGroup) {
+        this.dialogGroup = dialogGroup;
     }
 }

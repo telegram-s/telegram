@@ -138,7 +138,6 @@ public class DialogsDatabase {
             res.setSenderId(dialog.getSenderId());
             res.setTopMessageId(dialog.getTopMessageId());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
-            res.setTitle(dialog.getTitle());
             res.setUnreadCount(dialog.getUnreadCount());
             res.setParticipantsCount(dialog.getParticipantsCount());
         }
@@ -159,7 +158,6 @@ public class DialogsDatabase {
         dest.setSenderId(src.getSenderId());
         dest.setTopMessageId(src.getTopMessageId());
         dest.setFirstUnreadMessage(src.getFirstUnreadMessage());
-        dest.setTitle(src.getTitle());
         dest.setUnreadCount(src.getUnreadCount());
         dest.setParticipantsCount(src.getParticipantsCount());
     }

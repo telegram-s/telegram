@@ -290,11 +290,9 @@ public class DialogSource {
         }
 
         long start = SystemClock.uptimeMillis();
-        application.getEngine().onLoadMoreDialogs(
-                dialogs.getMessages(),
-                dialogs.getUsers(),
-                dialogs.getChats(),
-                dialogs.getDialogs());
+        application.getEngine().onUsers(dialogs.getUsers());
+        application.getEngine().getGroupsEngine().onGroupsUpdated(dialogs.getChats());
+        application.getEngine().onLoadMoreDialogs(dialogs.getMessages(), dialogs.getDialogs());
         Logger.d(TAG, "Dialog apply time: " + (SystemClock.uptimeMillis() - start) + " ms");
 
         if (dialogs instanceof TLDialogs) {
@@ -321,8 +319,7 @@ public class DialogSource {
         if (res.getPeerType() == PeerType.PEER_USER) {
             res.setDialogUser(application.getEngine().getUser(res.getPeerId()));
         } else if (res.getPeerType() == PeerType.PEER_CHAT) {
-            res.setChatAvatar(item.getPhoto());
-            res.setChatTitle(item.getTitle());
+            res.setDialogGroup(application.getEngine().getGroupsEngine().getGroup(res.getPeerId()));
         } else if (res.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
             EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(res.getPeerId());
             res.setDialogUser(application.getEngine().getUser(encryptedChat.getUserId()));

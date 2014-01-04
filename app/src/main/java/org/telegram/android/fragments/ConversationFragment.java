@@ -944,10 +944,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
         } else if (peerType == PeerType.PEER_CHAT) {
             imageView.setLoadingDrawable(Placeholders.GROUP_PLACEHOLDERS[peerId % Placeholders.GROUP_PLACEHOLDERS.length]);
-            DialogDescription description = getEngine().getDescriptionForPeer(peerType, peerId);
-            if (description != null) {
-                if (description.getPhoto() instanceof TLLocalAvatarPhoto) {
-                    TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) description.getPhoto();
+            Group group = getEngine().getGroupsEngine().getGroup(peerId);
+            if (group != null) {
+                if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
+                    TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) group.getAvatar();
                     if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
                         imageView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
                     } else {
@@ -1176,9 +1176,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
         } else {
             DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, peerId);
+            Group group = application.getEngine().getGroupsEngine().getGroup(peerId);
             if (description == null)
                 return;
-            getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(description.getTitle()));
+            getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(group.getTitle()));
             FullChatInfo chatInfo = application.getChatSource().getChatInfo(peerId);
             if (description.getParticipantsCount() == 0 || (chatInfo != null && chatInfo.isForbidden())) {
                 getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_conv_removed));

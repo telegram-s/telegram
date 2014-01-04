@@ -394,10 +394,9 @@ public class MessageSource {
         Logger.d(TAG, "Requested in " + (SystemClock.uptimeMillis() - startRequest) + " ms");
 
         long start = SystemClock.uptimeMillis();
-        application.getEngine().onLoadMoreMessages(
-                messagesEx.getMessages(),
-                messagesEx.getUsers(),
-                messagesEx.getChats());
+        application.getEngine().onUsers(messagesEx.getUsers());
+        application.getEngine().getGroupsEngine().onGroupsUpdated(messagesEx.getChats());
+        application.getEngine().onLoadMoreMessages(messagesEx.getMessages());
 
         Logger.d(TAG, "Save to database in " + (SystemClock.uptimeMillis() - start) + " ms");
 

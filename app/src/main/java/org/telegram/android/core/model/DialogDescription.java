@@ -16,8 +16,6 @@ import java.io.Serializable;
 public class DialogDescription implements Serializable {
     private int peerType;
     private int peerId;
-    private String title;
-    private TLAbsLocalAvatarPhoto photo;
     private int unreadCount;
     private int participantsCount;
     private int date;
@@ -50,22 +48,6 @@ public class DialogDescription implements Serializable {
 
     public void setPeerId(int peerId) {
         this.peerId = peerId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public TLAbsLocalAvatarPhoto getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(TLAbsLocalAvatarPhoto photo) {
-        this.photo = photo;
     }
 
     public int getUnreadCount() {

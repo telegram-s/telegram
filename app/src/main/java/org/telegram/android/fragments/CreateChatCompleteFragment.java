@@ -185,8 +185,9 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
                     TLStatedMessage msg = (TLStatedMessage) message;
                     List<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                     messages.add(msg.getMessage());
-                    getEngine().onNewMessages(messages, msg.getUsers(),
-                            msg.getChats(), new ArrayList<TLDialog>());
+                    getEngine().onUsers(msg.getUsers());
+                    getEngine().getGroupsEngine().onGroupsUpdated(msg.getChats());
+                    getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
                     chatId = ((TLPeerChat) ((TLMessageService) msg.getMessage()).getToId()).getChatId();
                 }
 
@@ -218,7 +219,9 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
                         ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
                         messages.add(message.getMessage());
 
-                        application.getEngine().onNewMessages(messages, message.getUsers(), message.getChats(), new ArrayList<TLDialog>());
+                        getEngine().onUsers(message.getUsers());
+                        getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
+                        application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
                         application.getEngine().onChatAvatarChanges(chatId, editPhoto.getPhoto());
 
                         application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
