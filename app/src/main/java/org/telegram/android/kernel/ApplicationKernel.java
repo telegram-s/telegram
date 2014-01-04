@@ -124,17 +124,17 @@ public class ApplicationKernel {
         org.telegram.mtproto.log.Logger.registerInterface(new LogInterface() {
             @Override
             public void w(String tag, String message) {
-                Logger.w("MT|" + tag, message);
+                // Logger.w("MT|" + tag, message);
             }
 
             @Override
             public void d(String tag, String message) {
-                Logger.d("MT|" + tag, message);
+                // Logger.d("MT|" + tag, message);
             }
 
             @Override
             public void e(String tag, Throwable t) {
-                Logger.t("MT|" + tag, t);
+                // Logger.t("MT|" + tag, t);
             }
         });
     }

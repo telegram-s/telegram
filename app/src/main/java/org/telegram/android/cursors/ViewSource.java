@@ -98,14 +98,15 @@ public abstract class ViewSource<T, V> {
                 }
             }
         };
-        workingSet = new ArrayList<T>();
         if (preload) {
             if (!loadMore()) {
                 state = InternalSourceState.COMPLETED;
             } else {
                 state = InternalSourceState.SYNCED;
             }
+            workingSet = buildNewWorkingSet();
         } else {
+            workingSet = new ArrayList<T>();
             state = InternalSourceState.UNSYNCED;
         }
     }
