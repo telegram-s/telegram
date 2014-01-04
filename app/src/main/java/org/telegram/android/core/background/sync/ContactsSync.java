@@ -335,7 +335,7 @@ public class ContactsSync extends BaseSync {
             hash = CryptoUtils.MD5(uidString.getBytes());
         }
 
-        TLAbsContacts response = application.getApi().doRpcCallSide(new TLRequestContactsGetContacts(hash), SYNC_UPLOAD_REQUEST_TIMEOUT);
+        TLAbsContacts response = application.getApi().doRpcCall(new TLRequestContactsGetContacts(hash), SYNC_UPLOAD_REQUEST_TIMEOUT);
         if (response instanceof TLContacts) {
             TLContacts contactsResponse = (TLContacts) response;
             application.getEngine().getUsersEngine().onContacts(contactsResponse.getUsers(), contactsResponse.getContacts());
@@ -365,44 +365,52 @@ public class ContactsSync extends BaseSync {
         Logger.d(TAG, "Diff phones count: " + resultImports.length);
 
         if (resultImports.length > 0) {
-            TLVector<TLInputContact> inputContacts = new TLVector<TLInputContact>();
-            for (PhonesForImport phonesForImport : resultImports) {
-                inputContacts.add(new TLInputContact(phonesForImport.baseId, phonesForImport.value, phonesForImport.firstName, phonesForImport.lastName));
-            }
 
-            TLImportedContacts importedContacts = application.getApi().doRpcCallSideGzip(new TLRequestContactsImportContacts(inputContacts, false), 60000);
+            int offset = 0;
 
-            application.getEngine().onUsers(importedContacts.getUsers());
+            while (offset < resultImports.length) {
+                TLVector<TLInputContact> inputContacts = new TLVector<TLInputContact>();
+                for (int i = 0; i < 30 && (i + offset < resultImports.length); i++) {
+                    PhonesForImport phone = resultImports[i + offset];
+                    inputContacts.add(new TLInputContact(phone.baseId, phone.value, phone.firstName, phone.lastName));
 
-            Logger.d(TAG, "Imported phones count: " + importedContacts.getImported().size());
-
-            outer:
-            for (PhonesForImport phonesForImport : resultImports) {
-                int uid = 0;
-                for (TLImportedContact contact : importedContacts.getImported()) {
-                    if (phonesForImport.baseId == contact.getClientId()) {
-                        uid = contact.getUserId();
-                        break;
-                    }
                 }
+                offset += 30;
 
-                for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
-                    if (importedPhone.getPhone().equals(phonesForImport.value)) {
-                        if (!importedPhone.isImported()) {
-                            bookPersistence.getObj().getImportedPhones().remove(importedPhone);
+                TLImportedContacts importedContacts = application.getApi().doRpcCallGzip(new TLRequestContactsImportContacts(inputContacts, false), 60000);
+
+                application.getEngine().onUsers(importedContacts.getUsers());
+
+                Logger.d(TAG, "Imported phones count: " + importedContacts.getImported().size());
+
+                outer:
+                for (PhonesForImport phonesForImport : resultImports) {
+                    int uid = 0;
+                    for (TLImportedContact contact : importedContacts.getImported()) {
+                        if (phonesForImport.baseId == contact.getClientId()) {
+                            uid = contact.getUserId();
                             break;
-                        } else {
-                            continue outer;
                         }
                     }
-                }
 
-                bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phonesForImport.value, uid, true));
+                    for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
+                        if (importedPhone.getPhone().equals(phonesForImport.value)) {
+                            if (!importedPhone.isImported()) {
+                                bookPersistence.getObj().getImportedPhones().remove(importedPhone);
+                                break;
+                            } else {
+                                continue outer;
+                            }
+                        }
+                    }
+
+                    bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phonesForImport.value, uid, true));
+                }
+                updateMapping();
+                notifyChanged();
             }
-            updateMapping();
             isSynced = true;
             preferences.edit().putBoolean("is_synced", true).commit();
-            notifyChanged();
             invalidateIntegration();
             bookPersistence.write();
         } else {
