@@ -61,6 +61,11 @@ public class GroupsDatabase {
         return res;
     }
 
+    public void deleteGroup(int id) {
+        groupCache.remove(id);
+        groupDao.deleteByKey((long) id);
+    }
+
     public void updateGroups(Group... groups) {
         if (groups.length == 0) {
             return;

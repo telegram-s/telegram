@@ -25,10 +25,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private static final String DATABASE_NAME = "stels.db";
     private static final int DATABASE_VERSION = 57;
 
-    private RuntimeExceptionDao<OrmDialog, Long> dialogsDao;
-    private RuntimeExceptionDao<OrmUser, Integer> usersDao;
-    private RuntimeExceptionDao<OrmEncryptedChat, Integer> encryptedChats;
-
     private RuntimeExceptionDao<FullChatInfo, Long> fullChatInfoDao;
     private RuntimeExceptionDao<ChatMessage, Long> messagesDao;
     private RuntimeExceptionDao<Contact, Long> contactsDao;
@@ -152,20 +148,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
         return mediaDao;
     }
 
-    public RuntimeExceptionDao<OrmUser, Integer> getUsersDao() {
-        if (usersDao == null) {
-            usersDao = getRuntimeExceptionDao(OrmUser.class);
-        }
-        return usersDao;
-    }
-
-    public RuntimeExceptionDao<OrmDialog, Long> getDialogsDao() {
-        if (dialogsDao == null) {
-            dialogsDao = getRuntimeExceptionDao(OrmDialog.class);
-        }
-        return dialogsDao;
-    }
-
     public RuntimeExceptionDao<ChatMessage, Long> getMessagesDao() {
         if (messagesDao == null) {
             messagesDao = getRuntimeExceptionDao(ChatMessage.class);
@@ -186,12 +168,5 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
         }
 
         return fullChatInfoDao;
-    }
-
-    public RuntimeExceptionDao<OrmEncryptedChat, Integer> getEncryptedChatDao() {
-        if (encryptedChats == null) {
-            encryptedChats = getRuntimeExceptionDao(OrmEncryptedChat.class);
-        }
-        return encryptedChats;
     }
 }

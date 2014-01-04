@@ -250,6 +250,11 @@ public abstract class ViewSource<T, V> {
         invalidated = true;
     }
 
+    public synchronized void removeItemByKey(long itm) {
+        items.remove(itm);
+        invalidated = true;
+    }
+
     public synchronized void updateItem(V itm) {
         T dest = convert(itm);
         Logger.d(TAG, "updateItem: " + itm);

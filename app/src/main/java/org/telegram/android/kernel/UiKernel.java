@@ -174,13 +174,13 @@ public class UiKernel {
     public void onOpenedChat(int peerType, int peerId) {
         this.openedChatPeerType = peerType;
         this.openedChatPeerId = peerId;
-        application.getEngine().markDialogAsNonFailed(peerType, peerId);
+        application.getEngine().getDialogsEngine().markDialogAsNonFailed(peerType, peerId);
 
         if (peerType != PeerType.PEER_USER_ENCRYPTED) {
-            int maxMid = application.getEngine().getMaxMsgInId(peerType, peerId);
+            int maxMid = application.getEngine().getMessagesEngine().getMaxMidInDialog(peerType, peerId);
             application.getEngine().onMaxLocalViewed(peerType, peerId, maxMid);
         } else {
-            int maxDate = application.getEngine().getMaxDateInDialog(peerType, peerId);
+            int maxDate = application.getEngine().getMessagesEngine().getMaxDateInDialog(peerType, peerId);
             application.getEngine().onMaxLocalViewed(peerType, peerId, maxDate);
         }
 

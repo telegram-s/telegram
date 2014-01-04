@@ -8,6 +8,7 @@ import org.telegram.dao.Dialog;
 import org.telegram.dao.DialogDao;
 import org.telegram.ormlite.OrmDialog;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -68,7 +69,14 @@ public class DialogsDatabase {
     }
 
     public DialogDescription[] getUnreadedRemotelyDescriptions() {
-        return new DialogDescription[0];
+        List<Dialog> dbRes = dialogsDao.queryBuilder()
+                .where(DialogDao.Properties.LastLocalViewedMessage.gt(DialogDao.Properties.LastRemoteViewedMessage))
+                .list();
+        DialogDescription[] res = new DialogDescription[dbRes.size()];
+        for (int i = 0; i < dbRes.size(); i++) {
+            res[i] = convertCached(dbRes.get(i));
+        }
+        return res;
     }
 
     public Dialog loadDialogDb(int peerType, int peerId) {
@@ -105,8 +113,8 @@ public class DialogsDatabase {
         dialogsDao.update(dialog);
     }
 
-    public void deleteDialog(DialogDescription description) {
-        Dialog dialog = loadDialogDb(description.getPeerType(), description.getPeerId());
+    public void deleteDialog(int peerType, int peerId) {
+        Dialog dialog = loadDialogDb(peerType, peerId);
         dialog.setDate(0);
         dialogsDao.update(dialog);
     }

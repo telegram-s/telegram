@@ -84,4 +84,8 @@ public class GroupsEngine {
             database.updateGroups(group);
         }
     }
+
+    public void deleteGroup(int id) {
+        database.deleteGroup(id);
+    }
 }

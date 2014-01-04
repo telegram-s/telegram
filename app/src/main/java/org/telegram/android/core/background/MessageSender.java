@@ -78,7 +78,7 @@ public class MessageSender {
             EncryptedChat chat = application.getEngine().getEncryptedChat(message.getPeerId());
 
             message.setMessageTimeout(chat.getSelfDestructTime());
-            application.getEngine().getMessagesDao().update(message);
+            application.getEngine().getMessagesEngine().update(message);
             application.getDataSourceKernel().onSourceUpdateMessage(message);
 
             TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();

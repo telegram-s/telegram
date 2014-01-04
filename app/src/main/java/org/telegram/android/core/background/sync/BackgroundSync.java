@@ -274,11 +274,11 @@ public class BackgroundSync extends BaseSync {
                     if (chat == null) {
                         return;
                     }
-                    ChatMessage[] messages = application.getEngine().findUnreadedSelfDestructMessages(description.getPeerType(), description.getPeerId());
+                    ChatMessage[] messages = application.getEngine().getMessagesEngine().findUnreadedSelfDestructMessages(description.getPeerType(), description.getPeerId());
                     for (ChatMessage message : messages) {
                         message.setMessageDieTime((int) (System.currentTimeMillis() / 1000 + message.getMessageTimeout()));
                         application.getSelfDestructProcessor().performSelfDestruct(message.getDatabaseId(), message.getMessageDieTime());
-                        application.getEngine().getMessagesDao().update(message);
+                        application.getEngine().getMessagesEngine().update(message);
                         application.getDataSourceKernel().onSourceUpdateMessage(message);
                         application.notifyUIUpdate();
                     }

@@ -478,7 +478,7 @@ public class Notifications {
             return;
         }
 
-        ChatMessage msg = application.getEngine().getMessageById(mid);
+        ChatMessage msg = application.getEngine().getMessagesEngine().getMessageByMid(mid);
         if (msg != null) {
             if (msg.isOut()) {
                 Logger.d(TAG, "Ignoring out message");

@@ -269,7 +269,7 @@ public class EncryptionController {
                     }
 
                     if (application.getUiKernel().getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getUiKernel().getOpenedChatPeerId() == chat.getId()) {
-                        int date = application.getEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
+                        int date = application.getEngine().getMessagesEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
                         application.getEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, encMsg.getDate()));
                         application.getSyncKernel().getBackgroundSync().resetHistorySync();
                     } else {
@@ -313,7 +313,7 @@ public class EncryptionController {
                     }
 
                     if (application.getUiKernel().getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getUiKernel().getOpenedChatPeerId() == chat.getId()) {
-                        int date = application.getEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
+                        int date = application.getEngine().getMessagesEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
                         application.getEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, service.getDate()));
                         application.getSyncKernel().getBackgroundSync().resetHistorySync();
                     } else {

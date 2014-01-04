@@ -29,6 +29,15 @@ public class DialogDescription implements Serializable {
     private TLObject extras;
     private long firstUnreadMessage;
 
+    public DialogDescription(int peerType, int peerId) {
+        this.peerType = peerType;
+        this.peerId = peerId;
+    }
+
+    public DialogDescription() {
+
+    }
+
     public int getUniqId() {
         return peerId * 10 + peerType;
     }

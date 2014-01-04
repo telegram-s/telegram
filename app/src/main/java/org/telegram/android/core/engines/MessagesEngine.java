@@ -1,15 +1,39 @@
 package org.telegram.android.core.engines;
 
+import android.os.SystemClock;
+import android.util.Pair;
+import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.StelsApplication;
-import org.telegram.android.core.model.ChatMessage;
+import org.telegram.android.core.EngineUtils;
+import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.media.TLLocalPhoto;
+import org.telegram.android.core.model.media.TLLocalVideo;
+import org.telegram.android.core.model.service.TLLocalActionChatDeleteUser;
+import org.telegram.android.log.Logger;
+import org.telegram.api.TLAbsMessage;
+import org.telegram.api.TLDialog;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by ex3ndr on 02.01.14.
  */
 public class MessagesEngine {
+
+    private static final String TAG = "MessagesEngine";
+
     private ModelEngine engine;
     private MessagesDatabase database;
     private StelsApplication application;
+
+    private int maxDate = 0;
+    private AtomicInteger minMid = null;
+    private Object minMidSync = new Object();
 
     public MessagesEngine(ModelEngine engine) {
         this.engine = engine;
@@ -36,10 +60,145 @@ public class MessagesEngine {
     public void create(ChatMessage message) {
         database.create(message);
         application.getDataSourceKernel().onSourceAddMessage(message);
+        updateMaxDate(message);
+    }
+
+    public void delete(ChatMessage message) {
+        database.delete(message);
+        application.getDataSourceKernel().onSourceRemoveMessage(message);
+        updateMaxDate(message);
     }
 
     public void update(ChatMessage message) {
         database.update(message);
         application.getDataSourceKernel().onSourceUpdateMessage(message);
+        updateMaxDate(message);
+    }
+
+    public void deleteHistory(int peerType, int peerId) {
+        database.deleteHistory(peerType, peerId);
+        application.getDataSourceKernel().removeMessageSource(peerType, peerId);
+    }
+
+    public ChatMessage findTopMessage(int peerType, int peerId) {
+        return database.findTopMessage(peerType, peerId);
+    }
+
+    public ChatMessage[] findDiedMessages(int currentTime) {
+        return database.findDiedMessages(currentTime);
+    }
+
+    public ChatMessage[] findPendingSelfDestructMessages(int currentTime) {
+        return database.findPendingSelfDestructMessages(currentTime);
+    }
+
+    public ChatMessage[] findUnreadedSelfDestructMessages(int peerType, int peerId) {
+        return database.findUnreadedSelfDestructMessages(peerType, peerId);
+    }
+
+    public int getMaxDateInDialog(int peerType, int peerId) {
+        return database.getMaxDateInDialog(peerType, peerId);
+    }
+
+    public int getMaxMidInDialog(int peerType, int peerId) {
+        return database.getMaxMidInDialog(peerType, peerId);
+    }
+
+    public synchronized void onDeletedOnServer(int[] mids) {
+        ChatMessage[] messages = getMessagesByMid(mids);
+        for (ChatMessage msg : messages) {
+            msg.setDeletedServer(true);
+            msg.setDeletedLocal(true);
+            database.update(msg);
+            application.getDataSourceKernel().onSourceRemoveMessage(msg);
+        }
+    }
+
+    public synchronized void onRestoredOnServer(int[] mids) {
+        ChatMessage[] messages = getMessagesByMid(mids);
+        for (ChatMessage msg : messages) {
+            msg.setDeletedServer(false);
+            msg.setDeletedLocal(false);
+            database.update(msg);
+            application.getDataSourceKernel().onSourceAddMessage(msg);
+        }
+    }
+
+    private void updateMaxDate(ChatMessage msg) {
+        if (msg.getDate() > maxDate) {
+            maxDate = msg.getDate();
+        }
+    }
+
+    public int getMaxDate() {
+        if (maxDate == 0) {
+            maxDate = database.getMaxDate();
+        }
+        return maxDate;
+    }
+
+    public int generateMid() {
+        if (minMid == null) {
+            synchronized (minMidSync) {
+                minMid = new AtomicInteger(database.getMinMid());
+            }
+        }
+        return minMid.decrementAndGet();
+    }
+
+    public void onMessageRead(ChatMessage[] messages) {
+        for (ChatMessage msg : messages) {
+            msg.setState(MessageState.READED);
+        }
+        database.updateInTx(messages);
+    }
+
+    public void onLoadMoreMessages(List<TLAbsMessage> messages) {
+        final HashSet<Integer> newUnread = new HashSet<Integer>();
+        long start = SystemClock.uptimeMillis();
+        int[] ids = new int[messages.size()];
+        ChatMessage[] converted = new ChatMessage[messages.size()];
+        for (int i = 0; i < ids.length; i++) {
+            converted[i] = EngineUtils.fromTlMessage(messages.get(i), application);
+            ids[i] = converted[i].getMid();
+        }
+
+        ChatMessage[] original = getMessagesByMid(ids);
+
+        ArrayList<ChatMessage> newMessages = new ArrayList<ChatMessage>();
+        ArrayList<ChatMessage> updatedMessages = new ArrayList<ChatMessage>();
+
+        for (ChatMessage m : converted) {
+            ChatMessage orig = EngineUtils.searchMessage(original, m.getMid());
+            if (orig != null) {
+                m.setDatabaseId(orig.getDatabaseId());
+                updatedMessages.add(m);
+            } else {
+                newMessages.add(m);
+            }
+        }
+
+        Logger.d(TAG, "newMessages:prepare time: " + (SystemClock.uptimeMillis() - start));
+        start = SystemClock.uptimeMillis();
+        database.updateInTx(updatedMessages);
+        for (ChatMessage msg : newMessages) {
+            application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        }
+        Logger.d(TAG, "newMessages:update time: " + (SystemClock.uptimeMillis() - start));
+        start = SystemClock.uptimeMillis();
+        database.createInTx(newMessages);
+        for (ChatMessage msg : newMessages) {
+            application.getDataSourceKernel().onSourceAddMessage(msg);
+        }
+        Logger.d(TAG, "newMessages:create time: " + (SystemClock.uptimeMillis() - start));
+        start = SystemClock.uptimeMillis();
+        Logger.d(TAG, "newMessages:complete time: " + (SystemClock.uptimeMillis() - start));
+        for (ChatMessage message : newMessages) {
+            if (message.getRawContentType() == ContentType.MESSAGE_PHOTO) {
+                engine.getMediaEngine().saveMedia(message.getMid(), message);
+            } else if (message.getRawContentType() == ContentType.MESSAGE_VIDEO) {
+                engine.getMediaEngine().saveMedia(message.getMid(), message);
+            }
+        }
     }
 }

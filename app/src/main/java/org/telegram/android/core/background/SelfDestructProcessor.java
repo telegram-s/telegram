@@ -56,11 +56,11 @@ public class SelfDestructProcessor {
 
     private void checkInitialDeletions() {
         int currentTime = (int) (System.currentTimeMillis() / 1000);
-        ChatMessage[] messages = application.getEngine().findDiedMessages(currentTime);
+        ChatMessage[] messages = application.getEngine().getMessagesEngine().findDiedMessages(currentTime);
         for (ChatMessage msg : messages) {
             application.getEngine().selfDestructMessage(msg.getDatabaseId());
         }
-        ChatMessage[] pending = application.getEngine().findPendingSelfDestructMessages(currentTime);
+        ChatMessage[] pending = application.getEngine().getMessagesEngine().findPendingSelfDestructMessages(currentTime);
         for (ChatMessage msg : pending) {
             performSelfDestruct(msg.getDatabaseId(), msg.getMessageDieTime());
         }

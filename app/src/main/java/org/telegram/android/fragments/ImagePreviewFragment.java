@@ -457,7 +457,7 @@ public class ImagePreviewFragment extends StelsFragment {
         } else {
             record = mainRecord;
         }
-        application.getEngine().deleteSentMessage(application.getEngine().getMessageById(record.getMid()).getDatabaseId());
+        application.getEngine().deleteSentMessage(application.getEngine().getMessagesEngine().getMessageByMid(record.getMid()).getDatabaseId());
         application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
         application.notifyUIUpdate();
 

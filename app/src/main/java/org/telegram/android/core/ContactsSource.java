@@ -132,7 +132,7 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
         for (Contact c : netContacts) {
             ids.add(c.getUid());
         }
-        application.getEngine().getUsersById(ids.toArray());
+        application.getEngine().getUsersEngine().getUsersById(ids.toArray());
 
         ArrayList<LocalContact> tContacts = new ArrayList<LocalContact>();
 

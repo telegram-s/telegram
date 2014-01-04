@@ -1,12 +1,14 @@
 package org.telegram.android.core.engines;
 
 import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.ContentType;
 import org.telegram.android.core.model.MediaRecord;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -71,5 +73,15 @@ public class MediaEngine {
         if (record == null)
             return;
         mediaDao.delete(record);
+    }
+
+    public void deleteMediaFromChat(int peerType, int peerId) {
+        try {
+            DeleteBuilder<MediaRecord, Long> deleteBuilder = mediaDao.deleteBuilder();
+            deleteBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType);
+            mediaDao.delete(deleteBuilder.prepare());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

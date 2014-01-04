@@ -109,7 +109,7 @@ public class MessageSource {
                         long unreadMid = description.getFirstUnreadMessage();
                         if (unreadMid != 0) {
                             if (peerType != PeerType.PEER_USER_ENCRYPTED) {
-                                ChatMessage message = application.getEngine().getMessageById((int) unreadMid);
+                                ChatMessage message = application.getEngine().getMessagesEngine().getMessageByMid((int) unreadMid);
                                 if (message != null) {
                                     PreparedQuery<ChatMessage> query;
                                     try {
