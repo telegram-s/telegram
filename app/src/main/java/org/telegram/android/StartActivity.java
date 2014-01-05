@@ -523,7 +523,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(false);
-            getSupportActionBar().setTitle("App is locked");
+            getSupportActionBar().setTitle(getString(R.string.st_app_locked));
             getSupportActionBar().setSubtitle(null);
         } else {
             if (getSupportFragmentManager().findFragmentById(R.id.lockContainer) != null) {

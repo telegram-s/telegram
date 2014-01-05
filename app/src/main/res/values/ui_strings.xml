@@ -27,6 +27,8 @@
     <string name="st_back">Back</string>
     <string name="st_start_again">Start again</string>
 
+    <string name="st_app_locked">App is locked</string>
+
     <string name="st_receiver_gallery">From gallery</string>
     <string name="st_receiver_photo">Take photo</string>
     <string name="st_receiver_delete">Delete photo</string>
