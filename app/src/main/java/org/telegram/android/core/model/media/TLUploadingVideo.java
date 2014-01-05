@@ -21,28 +21,26 @@ public class TLUploadingVideo extends TLObject {
     private int previewWidth;
     private int previewHeight;
 
-    public String getFileName() {
-        return fileName;
+    public TLUploadingVideo(String fileName, int previewWidth, int previewHeight) {
+        this.fileName = fileName;
+        this.previewWidth = previewWidth;
+        this.previewHeight = previewHeight;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public TLUploadingVideo() {
+
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
     public int getPreviewWidth() {
         return previewWidth;
     }
 
-    public void setPreviewWidth(int previewWidth) {
-        this.previewWidth = previewWidth;
-    }
-
     public int getPreviewHeight() {
         return previewHeight;
-    }
-
-    public void setPreviewHeight(int previewHeight) {
-        this.previewHeight = previewHeight;
     }
 
     @Override

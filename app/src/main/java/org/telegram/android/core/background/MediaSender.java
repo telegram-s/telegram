@@ -538,12 +538,12 @@ public class MediaSender {
 
     private void completeEncDocSending(EncryptedDocSent encryptedMessage, ChatMessage message, EncryptedChat chat) {
         message.setMessageTimeout(chat.getSelfDestructTime());
-        application.getEngine().onMessageEncDocSent(message, encryptedMessage.getEncryptedMessage().getDate(), encryptedMessage.getDocument());
+        application.getEngine().onMessageSecretMediaSent(message, encryptedMessage.getEncryptedMessage().getDate(), encryptedMessage.getDocument());
     }
 
     private void completeEncPhotoSending(EncryptedPhotoSent encryptedMessage, ChatMessage message, EncryptedChat chat) {
         message.setMessageTimeout(chat.getSelfDestructTime());
-        application.getEngine().onMessageEncPhotoSent(message, encryptedMessage.getEncryptedMessage().getDate(), encryptedMessage.getPhoto());
+        application.getEngine().onMessageSecretMediaSent(message, encryptedMessage.getEncryptedMessage().getDate(), encryptedMessage.getPhoto());
     }
 
     private void completeVideoSending(TLAbsStatedMessage sent, ChatMessage message) {
@@ -552,7 +552,7 @@ public class MediaSender {
 
     private void completeEncVideoSending(EncryptedVideoSent sent, ChatMessage message, EncryptedChat chat) {
         message.setMessageTimeout(chat.getSelfDestructTime());
-        application.getEngine().onMessageVideoSent(message, sent.getEncryptedMessage().getDate(), sent.getVideo());
+        application.getEngine().onMessageSecretMediaSent(message, sent.getEncryptedMessage().getDate(), sent.getVideo());
     }
 
     private synchronized void updateState(final int localId, final SendState state) {

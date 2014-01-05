@@ -146,7 +146,7 @@ public class EncryptionController {
                     TLDecryptedMessage decryptedMessage = (TLDecryptedMessage) object;
                     if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaGeoPoint) {
                         TLDecryptedMessageMediaGeoPoint geoPoint = (TLDecryptedMessageMediaGeoPoint) decryptedMessage.getMedia();
-                        application.getEngine().onNewLocationEncMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), geoPoint.getLon(), geoPoint.getLat());
+                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), new TLLocalGeo(geoPoint.getLon(), geoPoint.getLat()));
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessageGeo(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaPhoto) {
@@ -181,7 +181,7 @@ public class EncryptionController {
                             localPhoto.setFullLocation(new TLLocalFileEmpty());
                         }
 
-                        application.getEngine().onNewPhotoEncMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localPhoto);
+                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localPhoto);
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessagePhoto(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaVideo) {
@@ -225,7 +225,7 @@ public class EncryptionController {
                         }
                         localVideo.setPreviewKey(decryptedMessage.getRandomId() + "_video");
                         localVideo.setPreviewLocation(new TLLocalFileEmpty());
-                        application.getEngine().onNewVideoEncMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localVideo);
+                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localVideo);
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessageVideo(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaDocument) {
@@ -259,18 +259,18 @@ public class EncryptionController {
                         localDocument.setFileName(mediaDocument.getFileName());
                         localDocument.setMimeType(mediaDocument.getMimeType());
 
-                        application.getEngine().onNewDocEncMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localDocument);
+                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localDocument);
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessageDoc(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaEmpty) {
-                        application.getEngine().onNewShortEncMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), decryptedMessage.getMessage());
+                        application.getEngine().onNewSecretMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), decryptedMessage.getMessage());
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessage(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     }
 
                     if (application.getUiKernel().getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getUiKernel().getOpenedChatPeerId() == chat.getId()) {
                         int date = application.getEngine().getMessagesEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
-                        application.getEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, encMsg.getDate()));
+                        application.getEngine().getDialogsEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, encMsg.getDate()));
                         application.getSyncKernel().getBackgroundSync().resetHistorySync();
                     } else {
                         application.getEngine().onNewUnreadEncMessage(chat.getId(), encMsg.getDate());
@@ -314,7 +314,7 @@ public class EncryptionController {
 
                     if (application.getUiKernel().getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getUiKernel().getOpenedChatPeerId() == chat.getId()) {
                         int date = application.getEngine().getMessagesEngine().getMaxDateInDialog(PeerType.PEER_USER_ENCRYPTED, chat.getId());
-                        application.getEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, service.getDate()));
+                        application.getEngine().getDialogsEngine().onMaxLocalViewed(PeerType.PEER_USER_ENCRYPTED, chat.getId(), Math.max(date, service.getDate()));
                         application.getSyncKernel().getBackgroundSync().resetHistorySync();
                     } else {
                         application.getEngine().onNewUnreadEncMessage(chat.getId(), service.getDate());

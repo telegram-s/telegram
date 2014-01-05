@@ -77,6 +77,21 @@ public class MessagesDatabase {
         messageDao.update(message);
     }
 
+    public void diffInTx(final Iterable<ChatMessage> newMessages, final Iterable<ChatMessage> updatedMessages) {
+        messageDao.callBatchTasks(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                for (ChatMessage msg : updatedMessages) {
+                    messageDao.update(msg);
+                }
+                for (ChatMessage msg : newMessages) {
+                    messageDao.update(msg);
+                }
+                return null;
+            }
+        });
+    }
+
     public void updateInTx(final Iterable<ChatMessage> messages) {
         messageDao.callBatchTasks(new Callable<Object>() {
             @Override

@@ -21,10 +21,11 @@ public class TLUploadingDocument extends TLObject {
     private String filePath;
     private int fileSize;
 
-    public TLUploadingDocument(String filePath, int fileSize) {
+    public TLUploadingDocument(String filePath) {
         this.filePath = filePath;
-        this.fileName = new File(filePath).getName();
-        this.fileSize = fileSize;
+        File file = new File(filePath);
+        this.fileName = file.getName();
+        this.fileSize = (int) file.length();
     }
 
     public TLUploadingDocument() {

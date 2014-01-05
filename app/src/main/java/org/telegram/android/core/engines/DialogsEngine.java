@@ -152,6 +152,32 @@ public class DialogsEngine {
         }
     }
 
+    public void onMaxLocalViewed(int peerType, int peerId, int maxId) {
+        DialogDescription description = loadDialog(peerType, peerId);
+        if (description != null) {
+            description.setLastLocalViewedMessage(maxId);
+            description.setUnreadCount(0);
+            updateDialog(description);
+        }
+    }
+
+    public void clearFirstUnreadMessage(int peerType, int peerId) {
+        DialogDescription description = loadDialog(peerType, peerId);
+        if (description != null) {
+            description.setFirstUnreadMessage(0);
+            description.setUnreadCount(0);
+            updateDialog(description);
+        }
+    }
+
+    public void onMaxRemoteViewed(int peerType, int peerId, int maxId) {
+        DialogDescription description = loadDialog(peerType, peerId);
+        if (description != null) {
+            description.setLastRemoteViewedMessage(maxId);
+            updateDialog(description);
+        }
+    }
+
     public void updateDescriptorEncSent(int peerType, int peerId, int date, int databaseId) {
         DialogDescription description = loadDialog(peerType, peerId);
         if (description != null) {

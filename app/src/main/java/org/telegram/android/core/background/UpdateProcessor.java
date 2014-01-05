@@ -11,7 +11,6 @@ import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
-import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.service.TLLocalActionUserRegistered;
 import org.telegram.android.core.model.update.*;
@@ -20,13 +19,11 @@ import org.telegram.android.reflection.CrashHandler;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
 import org.telegram.api.TLMessage;
-import org.telegram.api.contacts.TLMyLinkContact;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.messages.*;
 import org.telegram.api.requests.TLRequestUpdatesGetDifference;
 import org.telegram.api.requests.TLRequestUpdatesGetState;
 import org.telegram.api.updates.*;
-import org.telegram.tl.TLObject;
 
 import java.io.IOException;
 import java.util.*;
@@ -708,7 +705,7 @@ public class UpdateProcessor {
             throw new IllegalStateException();
         }
 
-        boolean isAdded = application.getEngine().onNewShortMessage(PeerType.PEER_CHAT, message.getChatId(), message.getId(),
+        boolean isAdded = application.getEngine().onNewMessage(PeerType.PEER_CHAT, message.getChatId(), message.getId(),
                 message.getDate(), message.getFromId(), message.getMessage());
         if (message.getFromId() != application.getCurrentUid()) {
             if (isAdded) {
@@ -731,7 +728,7 @@ public class UpdateProcessor {
     }
 
     private void onUpdateShortMessage(TLUpdateShortMessage message) {
-        boolean isAdded = application.getEngine().onNewShortMessage(PeerType.PEER_USER, message.getFromId(), message.getId(),
+        boolean isAdded = application.getEngine().onNewMessage(PeerType.PEER_USER, message.getFromId(), message.getId(),
                 message.getDate(), message.getFromId(), message.getMessage());
 
         if (message.getFromId() != application.getCurrentUid()) {
@@ -1131,7 +1128,7 @@ public class UpdateProcessor {
     private void onInMessageArrived(int peerType, int peerId, int mid) {
         if (application.getUiKernel().getOpenedChatPeerType() == peerType && application.getUiKernel().getOpenedChatPeerId() == peerId) {
             int maxMid = application.getEngine().getMessagesEngine().getMaxMidInDialog(peerType, peerId);
-            application.getEngine().onMaxLocalViewed(peerType, peerId, Math.max(maxMid, mid));
+            application.getEngine().getDialogsEngine().onMaxLocalViewed(peerType, peerId, Math.max(maxMid, mid));
             application.getSyncKernel().getBackgroundSync().resetHistorySync();
         } else {
             application.getEngine().onNewUnreadMessageId(peerType, peerId, mid);

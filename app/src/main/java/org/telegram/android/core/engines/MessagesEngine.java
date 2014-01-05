@@ -153,22 +153,46 @@ public class MessagesEngine {
         database.updateInTx(messages);
     }
 
-    public void onLoadMoreMessages(List<TLAbsMessage> messages) {
-        final HashSet<Integer> newUnread = new HashSet<Integer>();
+    public ChatMessage[] onLoadMoreMessages(List<TLAbsMessage> messages) {
         long start = SystemClock.uptimeMillis();
-        int[] ids = new int[messages.size()];
-        ChatMessage[] converted = new ChatMessage[messages.size()];
-        for (int i = 0; i < ids.length; i++) {
-            converted[i] = EngineUtils.fromTlMessage(messages.get(i), application);
-            ids[i] = converted[i].getMid();
+        ChatMessage[] converted = convert(messages);
+        ArrayList<ChatMessage>[] diff = buildDiff(converted);
+        Logger.d(TAG, "onLoadMoreMessages:prepare time: " + (SystemClock.uptimeMillis() - start));
+        start = SystemClock.uptimeMillis();
+        database.diffInTx(diff[0], diff[1]);
+        Logger.d(TAG, "onLoadMoreMessages:update time: " + (SystemClock.uptimeMillis() - start));
+        start = SystemClock.uptimeMillis();
+        for (ChatMessage msg : diff[0]) {
+            application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        }
+        for (ChatMessage msg : diff[1]) {
+            application.getDataSourceKernel().onSourceAddMessage(msg);
+        }
+        Logger.d(TAG, "onLoadMoreMessages:datasource time: " + (SystemClock.uptimeMillis() - start));
+        start = SystemClock.uptimeMillis();
+        Logger.d(TAG, "onLoadMoreMessages:complete time: " + (SystemClock.uptimeMillis() - start));
+        for (ChatMessage message : diff[0]) {
+            if (message.getRawContentType() == ContentType.MESSAGE_PHOTO) {
+                engine.getMediaEngine().saveMedia(message.getMid(), message);
+            } else if (message.getRawContentType() == ContentType.MESSAGE_VIDEO) {
+                engine.getMediaEngine().saveMedia(message.getMid(), message);
+            }
         }
 
+        return converted;
+    }
+
+    private ArrayList<ChatMessage>[] buildDiff(ChatMessage[] src) {
+        int[] ids = new int[src.length];
+        for (int i = 0; i < ids.length; i++) {
+            ids[i] = src[i].getMid();
+        }
         ChatMessage[] original = getMessagesByMid(ids);
 
         ArrayList<ChatMessage> newMessages = new ArrayList<ChatMessage>();
         ArrayList<ChatMessage> updatedMessages = new ArrayList<ChatMessage>();
 
-        for (ChatMessage m : converted) {
+        for (ChatMessage m : src) {
             ChatMessage orig = EngineUtils.searchMessage(original, m.getMid());
             if (orig != null) {
                 m.setDatabaseId(orig.getDatabaseId());
@@ -177,28 +201,14 @@ public class MessagesEngine {
                 newMessages.add(m);
             }
         }
+        return new ArrayList[]{newMessages, updatedMessages};
+    }
 
-        Logger.d(TAG, "newMessages:prepare time: " + (SystemClock.uptimeMillis() - start));
-        start = SystemClock.uptimeMillis();
-        database.updateInTx(updatedMessages);
-        for (ChatMessage msg : newMessages) {
-            application.getDataSourceKernel().onSourceUpdateMessage(msg);
+    private ChatMessage[] convert(List<TLAbsMessage> messages) {
+        ChatMessage[] converted = new ChatMessage[messages.size()];
+        for (int i = 0; i < converted.length; i++) {
+            converted[i] = EngineUtils.fromTlMessage(messages.get(i), application);
         }
-        Logger.d(TAG, "newMessages:update time: " + (SystemClock.uptimeMillis() - start));
-        start = SystemClock.uptimeMillis();
-        database.createInTx(newMessages);
-        for (ChatMessage msg : newMessages) {
-            application.getDataSourceKernel().onSourceAddMessage(msg);
-        }
-        Logger.d(TAG, "newMessages:create time: " + (SystemClock.uptimeMillis() - start));
-        start = SystemClock.uptimeMillis();
-        Logger.d(TAG, "newMessages:complete time: " + (SystemClock.uptimeMillis() - start));
-        for (ChatMessage message : newMessages) {
-            if (message.getRawContentType() == ContentType.MESSAGE_PHOTO) {
-                engine.getMediaEngine().saveMedia(message.getMid(), message);
-            } else if (message.getRawContentType() == ContentType.MESSAGE_VIDEO) {
-                engine.getMediaEngine().saveMedia(message.getMid(), message);
-            }
-        }
+        return converted;
     }
 }

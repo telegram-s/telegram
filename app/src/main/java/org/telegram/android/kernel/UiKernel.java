@@ -178,10 +178,10 @@ public class UiKernel {
 
         if (peerType != PeerType.PEER_USER_ENCRYPTED) {
             int maxMid = application.getEngine().getMessagesEngine().getMaxMidInDialog(peerType, peerId);
-            application.getEngine().onMaxLocalViewed(peerType, peerId, maxMid);
+            application.getEngine().getDialogsEngine().onMaxLocalViewed(peerType, peerId, maxMid);
         } else {
             int maxDate = application.getEngine().getMessagesEngine().getMaxDateInDialog(peerType, peerId);
-            application.getEngine().onMaxLocalViewed(peerType, peerId, maxDate);
+            application.getEngine().getDialogsEngine().onMaxLocalViewed(peerType, peerId, maxDate);
         }
 
         application.getSyncKernel().getBackgroundSync().resetHistorySync();

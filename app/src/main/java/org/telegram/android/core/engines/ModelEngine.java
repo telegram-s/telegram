@@ -1,5 +1,6 @@
 package org.telegram.android.core.engines;
 
+import android.net.Uri;
 import android.os.SystemClock;
 import android.util.Pair;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -19,8 +20,8 @@ import org.telegram.dao.DaoMaster;
 import org.telegram.dao.DaoSession;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
+import org.telegram.tl.TLObject;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -68,10 +69,6 @@ public class ModelEngine {
         return application;
     }
 
-    /**
-     * Users actions
-     */
-
     public UsersEngine getUsersEngine() {
         return usersEngine;
     }
@@ -95,6 +92,30 @@ public class ModelEngine {
     public MessagesEngine getMessagesEngine() {
         return messagesEngine;
     }
+
+    public StelsDatabase getDatabase() {
+        return database;
+    }
+
+    public RuntimeExceptionDao<MediaRecord, Long> getMediasDao() {
+        return database.getMediaDao();
+    }
+
+    public RuntimeExceptionDao<ChatMessage, Long> getMessagesDao() {
+        return database.getMessagesDao();
+    }
+
+    public RuntimeExceptionDao<Contact, Long> getContactsDao() {
+        return database.getContactsDao();
+    }
+
+    public RuntimeExceptionDao<FullChatInfo, Long> getFullChatInfoDao() {
+        return database.getFullChatInfoDao();
+    }
+
+    /**
+     * Users actions
+     */
 
     public void onUsers(List<TLAbsUser> users) {
         usersEngine.onUsers(users);
@@ -126,26 +147,6 @@ public class ModelEngine {
 
     public MediaRecord findMedia(int mid) {
         return mediaEngine.findMedia(mid);
-    }
-
-    public StelsDatabase getDatabase() {
-        return database;
-    }
-
-    public RuntimeExceptionDao<MediaRecord, Long> getMediasDao() {
-        return database.getMediaDao();
-    }
-
-    public RuntimeExceptionDao<ChatMessage, Long> getMessagesDao() {
-        return database.getMessagesDao();
-    }
-
-    public RuntimeExceptionDao<Contact, Long> getContactsDao() {
-        return database.getContactsDao();
-    }
-
-    public RuntimeExceptionDao<FullChatInfo, Long> getFullChatInfoDao() {
-        return database.getFullChatInfoDao();
     }
 
     public ChatMessage getMessageByDbId(int localId) {
@@ -236,32 +237,6 @@ public class ModelEngine {
                 description.setUnreadCount(description.getUnreadCount() + 1);
                 dialogsEngine.updateDialog(description);
             }
-        }
-    }
-
-    public void onMaxLocalViewed(int peerType, int peerId, int maxId) {
-        DialogDescription description = getDescriptionForPeer(peerType, peerId);
-        if (description != null) {
-            description.setLastLocalViewedMessage(maxId);
-            description.setUnreadCount(0);
-            dialogsEngine.updateDialog(description);
-        }
-    }
-
-    public void clearFirstUnreadMessage(int peerType, int peerId) {
-        DialogDescription description = getDescriptionForPeer(peerType, peerId);
-        if (description != null) {
-            description.setFirstUnreadMessage(0);
-            description.setUnreadCount(0);
-            dialogsEngine.updateDialog(description);
-        }
-    }
-
-    public void onMaxRemoteViewed(int peerType, int peerId, int maxId) {
-        DialogDescription description = getDescriptionForPeer(peerType, peerId);
-        if (description != null) {
-            description.setLastRemoteViewedMessage(maxId);
-            dialogsEngine.updateDialog(description);
         }
     }
 
@@ -549,7 +524,64 @@ public class ModelEngine {
         messagesEngine.update(msg);
     }
 
-    public boolean onNewShortMessage(int peerType, int peerId, int mid, int date, int senderId, String message) {
+    public boolean onNewSecretMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, String message) {
+        if (messagesEngine.getMessageByRandomId(randomId) != null) {
+            return false;
+        }
+        ChatMessage nmsg = new ChatMessage();
+        nmsg.setMid(messagesEngine.generateMid());
+        nmsg.setDate(date);
+        nmsg.setMessage(message);
+        nmsg.setContentType(ContentType.MESSAGE_TEXT);
+        nmsg.setPeerId(peerId);
+        nmsg.setPeerType(peerType);
+        nmsg.setState(MessageState.SENT);
+        nmsg.setSenderId(senderId);
+        nmsg.setRandomId(randomId);
+        nmsg.setMessageTimeout(timeout);
+        messagesEngine.create(nmsg);
+        dialogsEngine.updateDescriptorShortEnc(nmsg);
+        return true;
+    }
+
+    public boolean onNewSecretMediaMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, TLObject media) {
+        if (messagesEngine.getMessageByRandomId(randomId) != null) {
+            return false;
+        }
+
+        ChatMessage nmsg = new ChatMessage();
+        nmsg.setMid(messagesEngine.generateMid());
+        nmsg.setDate(date);
+        nmsg.setExtras(media);
+        nmsg.setPeerId(peerId);
+        nmsg.setPeerType(peerType);
+        if (media instanceof TLLocalGeo) {
+            nmsg.setMessage("Geo");
+            nmsg.setContentType(ContentType.MESSAGE_GEO);
+        } else if (media instanceof TLLocalPhoto) {
+            nmsg.setMessage("Photo");
+            nmsg.setContentType(ContentType.MESSAGE_PHOTO);
+        } else if (media instanceof TLLocalVideo) {
+            nmsg.setMessage("Video");
+            nmsg.setContentType(ContentType.MESSAGE_VIDEO);
+        } else if (media instanceof TLLocalDocument) {
+            nmsg.setMessage("Document");
+            nmsg.setContentType(ContentType.MESSAGE_DOCUMENT);
+        } else {
+            nmsg.setMessage("Unknown");
+            nmsg.setContentType(ContentType.MESSAGE_UNKNOWN);
+        }
+
+        nmsg.setState(MessageState.SENT);
+        nmsg.setSenderId(senderId);
+        nmsg.setRandomId(randomId);
+        nmsg.setMessageTimeout(timeout);
+        messagesEngine.create(nmsg);
+        dialogsEngine.updateDescriptorShortEnc(nmsg);
+        return true;
+    }
+
+    public boolean onNewMessage(int peerType, int peerId, int mid, int date, int senderId, String message) {
         if (messagesEngine.getMessageByMid(mid) != null) {
             return false;
         }
@@ -565,113 +597,6 @@ public class ModelEngine {
         nmsg.setSenderId(senderId);
         messagesEngine.create(nmsg);
         dialogsEngine.updateDescriptorShort(nmsg);
-        return true;
-    }
-
-    public boolean onNewShortEncMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, String message) {
-        if (messagesEngine.getMessageByRandomId(randomId) != null) {
-            return false;
-        }
-        ChatMessage nmsg = new ChatMessage();
-        nmsg.setMid(messagesEngine.generateMid());
-        nmsg.setDate(date);
-        nmsg.setMessage(message);
-        nmsg.setContentType(ContentType.MESSAGE_TEXT);
-        nmsg.setPeerId(peerId);
-        nmsg.setPeerType(peerType);
-        nmsg.setState(MessageState.SENT);
-        nmsg.setSenderId(senderId);
-        nmsg.setRandomId(randomId);
-        nmsg.setMessageTimeout(timeout);
-        messagesEngine.create(nmsg);
-        dialogsEngine.updateDescriptorShortEnc(nmsg);
-        return true;
-    }
-
-    public boolean onNewLocationEncMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, double longitude, double latitude) {
-        if (messagesEngine.getMessageByRandomId(randomId) != null) {
-            return false;
-        }
-        ChatMessage nmsg = new ChatMessage();
-        nmsg.setMid(messagesEngine.generateMid());
-        nmsg.setDate(date);
-        nmsg.setMessage("Geo");
-        nmsg.setContentType(ContentType.MESSAGE_GEO);
-        nmsg.setPeerId(peerId);
-        nmsg.setPeerType(peerType);
-        nmsg.setState(MessageState.SENT);
-        nmsg.setSenderId(senderId);
-        nmsg.setExtras(new TLLocalGeo(latitude, longitude));
-        nmsg.setRandomId(randomId);
-        nmsg.setMessageTimeout(timeout);
-        messagesEngine.create(nmsg);
-        dialogsEngine.updateDescriptorShortEnc(nmsg);
-        return true;
-    }
-
-    public boolean onNewPhotoEncMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, TLLocalPhoto photo) {
-        if (messagesEngine.getMessageByRandomId(randomId) != null) {
-            return false;
-        }
-        ChatMessage nmsg = new ChatMessage();
-        nmsg.setMid(messagesEngine.generateMid());
-        nmsg.setDate(date);
-        nmsg.setMessage("Photo");
-        nmsg.setContentType(ContentType.MESSAGE_PHOTO);
-        nmsg.setPeerId(peerId);
-        nmsg.setPeerType(peerType);
-        nmsg.setState(MessageState.SENT);
-        nmsg.setSenderId(senderId);
-        nmsg.setExtras(photo);
-        nmsg.setRandomId(randomId);
-        nmsg.setMessageTimeout(timeout);
-        messagesEngine.create(nmsg);
-        mediaEngine.saveMedia(nmsg.getMid(), nmsg);
-        dialogsEngine.updateDescriptorShortEnc(nmsg);
-        return true;
-    }
-
-    public boolean onNewVideoEncMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, TLLocalVideo video) {
-        if (messagesEngine.getMessageByRandomId(randomId) != null) {
-            return false;
-        }
-        ChatMessage nmsg = new ChatMessage();
-        nmsg.setMid(messagesEngine.generateMid());
-        nmsg.setDate(date);
-        nmsg.setMessage("Video");
-        nmsg.setContentType(ContentType.MESSAGE_VIDEO);
-        nmsg.setPeerId(peerId);
-        nmsg.setPeerType(peerType);
-        nmsg.setState(MessageState.SENT);
-        nmsg.setSenderId(senderId);
-        nmsg.setExtras(video);
-        nmsg.setRandomId(randomId);
-        nmsg.setMessageTimeout(timeout);
-        messagesEngine.create(nmsg);
-        mediaEngine.saveMedia(nmsg.getMid(), nmsg);
-        dialogsEngine.updateDescriptorShortEnc(nmsg);
-        return true;
-    }
-
-    public boolean onNewDocEncMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, TLLocalDocument doc) {
-        if (messagesEngine.getMessageByRandomId(randomId) != null) {
-            return false;
-        }
-        ChatMessage nmsg = new ChatMessage();
-        nmsg.setMid(messagesEngine.generateMid());
-        nmsg.setDate(date);
-        nmsg.setMessage("Document");
-        nmsg.setContentType(ContentType.MESSAGE_DOCUMENT);
-        nmsg.setPeerId(peerId);
-        nmsg.setPeerType(peerType);
-        nmsg.setState(MessageState.SENT);
-        nmsg.setSenderId(senderId);
-        nmsg.setExtras(doc);
-        nmsg.setRandomId(randomId);
-        nmsg.setMessageTimeout(timeout);
-        messagesEngine.create(nmsg);
-        mediaEngine.saveMedia(nmsg.getMid(), nmsg);
-        dialogsEngine.updateDescriptorShortEnc(nmsg);
         return true;
     }
 
@@ -711,47 +636,23 @@ public class ModelEngine {
         return msg;
     }
 
-    private ChatMessage prepareSendMessageAsync(int peerType, int peerId) {
-        ChatMessage msg = new ChatMessage();
-        msg.setPeerId(peerId);
-        msg.setPeerType(peerType);
-        msg.setOut(true);
-        int date = (int) (TimeOverlord.getInstance().getServerTime() / 1000);
-        int maxDate = messagesEngine.getMaxDate();
-        if (date < maxDate) {
-            date = maxDate + 1;
-        }
-        msg.setDate(date);
-        msg.setSenderId(application.getCurrentUid());
-        msg.setState(MessageState.PENDING);
-        msg.setRandomId(Entropy.generateRandomId());
-        return msg;
-    }
-
     public int sendVideo(int peerType, int peerId, String fileName, int previewW, int previewH) {
-        TLUploadingVideo video = new TLUploadingVideo();
-        video.setFileName(fileName);
-        video.setPreviewWidth(previewW);
-        video.setPreviewHeight(previewH);
+        TLUploadingVideo video = new TLUploadingVideo(fileName, previewW, previewH);
         return sendVideo(peerType, peerId, video);
     }
 
     public int sendPhotoUri(int peerType, int peerId, String uri, int width, int height) {
-        TLUploadingPhoto photo = new TLUploadingPhoto(width, height);
-        photo.setFileUri(uri);
-        photo.setFileName("");
+        TLUploadingPhoto photo = new TLUploadingPhoto(width, height, Uri.parse(uri));
         return sendPhoto(peerType, peerId, photo);
     }
 
     public int sendPhoto(int peerType, int peerId, String fileName, int width, int height) {
-        TLUploadingPhoto photo = new TLUploadingPhoto(width, height);
-        photo.setFileName(fileName);
-        photo.setFileUri("");
+        TLUploadingPhoto photo = new TLUploadingPhoto(width, height, fileName);
         return sendPhoto(peerType, peerId, photo);
     }
 
     public int sendDocument(int peerType, int peerId, String fileName) {
-        TLUploadingDocument document = new TLUploadingDocument(fileName, (int) new File(fileName).length());
+        TLUploadingDocument document = new TLUploadingDocument(fileName);
         return sendDocument(peerType, peerId, document);
     }
 
@@ -806,7 +707,7 @@ public class ModelEngine {
             msg.setContentType(ContentType.MESSAGE_CONTACT | ContentType.MESSAGE_FORWARDED);
         } else if (src.getRawContentType() == ContentType.MESSAGE_GEO) {
             msg.setContentType(ContentType.MESSAGE_GEO | ContentType.MESSAGE_FORWARDED);
-        } else if (src.getRawContentType() == ContentType.MESSAGE_GEO) {
+        } else if (src.getRawContentType() == ContentType.MESSAGE_DOCUMENT) {
             msg.setContentType(ContentType.MESSAGE_DOCUMENT | ContentType.MESSAGE_FORWARDED);
         } else {
             msg.setContentType(ContentType.MESSAGE_TEXT | ContentType.MESSAGE_FORWARDED);
@@ -858,7 +759,7 @@ public class ModelEngine {
     }
 
     public ChatMessage prepareAsyncSendMessage(int peerType, int peerId, String message) {
-        ChatMessage msg = prepareSendMessageAsync(peerType, peerId);
+        ChatMessage msg = prepareSendMessage(peerType, peerId);
         msg.setMessage(message);
         msg.setContentType(ContentType.MESSAGE_TEXT);
         msg.setDatabaseId(Entropy.randomInt());
@@ -982,38 +883,21 @@ public class ModelEngine {
         dialogsEngine.updateDescriptorSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), tl.getId(), msg.getDatabaseId());
     }
 
-    public synchronized void onMessageEncPhotoSent(ChatMessage msg, int date, TLLocalPhoto photo) {
+    public synchronized void onMessageSecretMediaSent(ChatMessage msg, int date, TLObject media) {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
-        msg.setExtras(photo);
+        msg.setExtras(media);
         messagesEngine.update(msg);
         mediaEngine.saveMedia(msg.getMid(), msg);
         dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
     }
 
-    public synchronized void onMessageEncDocSent(ChatMessage msg, int date, TLLocalDocument doc) {
-        msg.setState(MessageState.SENT);
-        msg.setDate(date);
-        msg.setExtras(doc);
-        messagesEngine.update(msg);
-        mediaEngine.saveMedia(msg.getMid(), msg);
-        dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
-    }
 
     public synchronized void onMessagePhotoSent(ChatMessage msg, int date, int mid, TLLocalPhoto photo) {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
         msg.setMid(mid);
         msg.setExtras(photo);
-        messagesEngine.update(msg);
-        mediaEngine.saveMedia(msg.getMid(), msg);
-        dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
-    }
-
-    public synchronized void onMessageVideoSent(ChatMessage msg, int date, TLLocalVideo video) {
-        msg.setState(MessageState.SENT);
-        msg.setDate(date);
-        msg.setExtras(video);
         messagesEngine.update(msg);
         mediaEngine.saveMedia(msg.getMid(), msg);
         dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
@@ -1107,6 +991,10 @@ public class ModelEngine {
 
     public void onLoadMoreDialogs(final List<TLAbsMessage> messages, final List<TLDialog> dialogs) {
         onNewMessages(messages, dialogs);
+    }
+
+    public void onUpdatedMessages(final List<TLAbsMessage> messages) {
+        messagesEngine.onLoadMoreMessages(messages);
     }
 
     public HashSet<Integer> onNewMessages(final List<TLAbsMessage> messages,

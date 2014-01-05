@@ -262,12 +262,12 @@ public class BackgroundSync extends BaseSync {
                     User user = application.getEngine().getUser(description.getPeerId());
                     TLInputPeerForeign peer = new TLInputPeerForeign(user.getUid(), user.getAccessHash());
                     TLAffectedHistory history = application.getApi().doRpcCall(new TLRequestMessagesReadHistory(peer, mid, 0));
-                    application.getEngine().onMaxRemoteViewed(description.getPeerType(), description.getPeerId(), mid);
+                    application.getEngine().getDialogsEngine().onMaxRemoteViewed(description.getPeerType(), description.getPeerId(), mid);
                     application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(history));
                 } else if (description.getPeerType() == PeerType.PEER_CHAT) {
                     int mid = description.getLastLocalViewedMessage();
                     TLAffectedHistory history = application.getApi().doRpcCall(new TLRequestMessagesReadHistory(new TLInputPeerChat(description.getPeerId()), mid, 0));
-                    application.getEngine().onMaxRemoteViewed(description.getPeerType(), description.getPeerId(), mid);
+                    application.getEngine().getDialogsEngine().onMaxRemoteViewed(description.getPeerType(), description.getPeerId(), mid);
                     application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(history));
                 } else if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
                     EncryptedChat chat = application.getEngine().getEncryptedChat(description.getPeerId());
@@ -284,7 +284,7 @@ public class BackgroundSync extends BaseSync {
                     }
                     int mid = description.getLastLocalViewedMessage();
                     application.getApi().doRpcCall(new TLRequestMessagesReadEncryptedHistory(new TLInputEncryptedChat(description.getPeerId(), chat.getAccessHash()), mid));
-                    application.getEngine().onMaxRemoteViewed(description.getPeerType(), description.getPeerId(), mid);
+                    application.getEngine().getDialogsEngine().onMaxRemoteViewed(description.getPeerType(), description.getPeerId(), mid);
                 }
             }
         }

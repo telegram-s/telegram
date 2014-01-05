@@ -1,5 +1,6 @@
 package org.telegram.android.core.model.media;
 
+import android.net.Uri;
 import org.telegram.tl.TLContext;
 import org.telegram.tl.TLObject;
 
@@ -26,21 +27,22 @@ public class TLUploadingPhoto extends TLObject {
 
     }
 
-    public TLUploadingPhoto(int width, int height) {
+    public TLUploadingPhoto(int width, int height, String fileName) {
         this.width = width;
         this.height = height;
+        this.fileName = fileName;
+        this.fileUri = "";
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public TLUploadingPhoto(int width, int height, Uri uri) {
+        this.width = width;
+        this.height = height;
+        this.fileName = "";
+        this.fileUri = uri.toString();
     }
 
     public String getFileUri() {
         return fileUri;
-    }
-
-    public void setFileUri(String fileUri) {
-        this.fileUri = fileUri;
     }
 
     public String getFileName() {

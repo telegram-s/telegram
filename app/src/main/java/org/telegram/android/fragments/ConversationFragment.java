@@ -1417,7 +1417,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             DialogDescription description = application.getEngine().getDescriptionForPeer(peerType, peerId);
             if (description != null && description.getFirstUnreadMessage() != 0 && nWorkingSet.size() > 0) {
                 long unreadMessage = description.getFirstUnreadMessage();
-                application.getEngine().clearFirstUnreadMessage(peerType, peerId);
+                application.getEngine().getDialogsEngine().clearFirstUnreadMessage(peerType, peerId);
                 Logger.d(TAG, "Founded first unread message: " + unreadMessage);
                 int index = -1;
                 for (int i = 0; i < nWorkingSet.size(); i++) {
