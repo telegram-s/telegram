@@ -557,7 +557,7 @@ public class Notifications {
 
         boolean isConversationVisible = false;
 
-        if (application.getUiKernel().isAppVisible() && !LockState.isLocked) {
+        if (application.getUiKernel().isAppVisible() && !application.getUiKernel().getLockState().isLocked()) {
             config.useSound = config.useSound & settings.isInAppSoundsEnabled();
             config.useVibration = config.useVibration & settings.isInAppVibrateEnabled();
             if (application.getUiKernel().getOpenedChatPeerType() == peerType && application.getUiKernel().getOpenedChatPeerId() == peerId || application.getUiKernel().isDialogsVisible()) {

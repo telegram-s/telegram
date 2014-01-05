@@ -11,10 +11,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.extradea.framework.images.ui.FastWebImageView;
@@ -33,6 +30,7 @@ import org.telegram.android.core.model.User;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
+import org.telegram.android.tasks.ProgressInterface;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
@@ -54,17 +52,43 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     private FastWebImageView avatar;
     private TextView nameView;
     private TextView phoneView;
-    private View mainContainer;
+    private ScrollView mainContainer;
     private Switch switchView;
+    private View progressView;
 
     private int debugClickCount = 0;
     private long lastDebugClickTime = 0;
 
+    private int scrollOffset = -1;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_main, container, false);
-        mainContainer = res.findViewById(R.id.mainContainer);
+        mainContainer = (ScrollView) res.findViewById(R.id.mainContainer);
         switchView = (Switch) res.findViewById(R.id.notificationsSwitch);
+        progressView = res.findViewById(R.id.progress);
+
+        setDefaultProgressInterface(new ProgressInterface() {
+            @Override
+            public void showContent() {
+
+            }
+
+            @Override
+            public void hideContent() {
+
+            }
+
+            @Override
+            public void showProgress() {
+                showView(progressView);
+            }
+
+            @Override
+            public void hideProgress() {
+                hideView(progressView);
+            }
+        });
 
         TextView textView = (TextView) res.findViewById(R.id.version);
         PackageInfo pInfo = null;
@@ -223,6 +247,19 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     @Override
     public void onResume() {
         super.onResume();
+
+        if (scrollOffset != -1) {
+            if (mainContainer != null) {
+                mainContainer.scrollTo(0, scrollOffset);
+                mainContainer.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainContainer.scrollTo(0, scrollOffset);
+                    }
+                });
+            }
+        }
+
         application.getUserSource().registerListener(this);
         updateUser();
 
@@ -273,6 +310,9 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     public void onPause() {
         super.onPause();
         application.getUserSource().unregisterListener(this);
+        if (mainContainer != null) {
+            scrollOffset = mainContainer.getScrollY();
+        }
     }
 
     @Override

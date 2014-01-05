@@ -210,7 +210,7 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
     @Override
     public final void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        if (!LockState.isLocked) {
+        if (!application.getUiKernel().getLockState().isLocked()) {
             onCreateOptionsMenuChecked(menu, inflater);
         }
     }

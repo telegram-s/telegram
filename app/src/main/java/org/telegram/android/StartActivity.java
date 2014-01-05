@@ -498,7 +498,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     }
 
     public void unlock() {
-        LockState.isLocked = false;
+        application.getKernel().getUiKernel().getLockState().unlock();
         updateLockState();
     }
 
@@ -506,7 +506,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         boolean isLocked = false;
         if (application.isLoggedIn()) {
             if (application.getEngine().getUser(application.getCurrentUid()) != null) {
-                if (LockState.isLocked) {
+                if (application.getKernel().getUiKernel().getLockState().isLocked()) {
                     isLocked = true;
                 }
             }
@@ -520,7 +520,11 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             secContainer.setVisibility(View.VISIBLE);
             contentContainer.setVisibility(View.GONE);
 
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(false);
             getSupportActionBar().setTitle("App is locked");
+            getSupportActionBar().setSubtitle(null);
         } else {
             if (getSupportFragmentManager().findFragmentById(R.id.lockContainer) != null) {
                 getSupportFragmentManager().beginTransaction()

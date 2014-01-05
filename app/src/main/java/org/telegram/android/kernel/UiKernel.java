@@ -17,6 +17,7 @@ import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.Notifications;
 import org.telegram.android.core.TextSaver;
 import org.telegram.android.core.model.PeerType;
+import org.telegram.android.core.sec.LockState;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.CachedImageWorker;
 import org.telegram.android.media.StelsImageWorker;
@@ -41,6 +42,8 @@ public class UiKernel {
             }
         }
     };
+
+    private LockState lockState;
 
     private ApplicationKernel kernel;
 
@@ -125,6 +128,11 @@ public class UiKernel {
         ApiUtils.init(application, kernel.getTechKernel().getTechReflection().getScreenSize());
         Logger.d(TAG, "Misc UI4 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
+        lockState = new LockState(kernel);
+    }
+
+    public LockState getLockState() {
+        return lockState;
     }
 
     public UiResponsibility getResponsibility() {
@@ -262,12 +270,14 @@ public class UiKernel {
         emojiProcessor.loadEmoji();
         application.getKernel().getSyncKernel().getBackgroundSync().onAppVisibilityChanged();
         kernel.getLifeKernel().onAppVisible();
+        lockState.onApplicationVisible();
         application.getKernel().sendEvent("app_state", "foreground");
     }
 
     private void onAppGoesBackground() {
         application.getKernel().getSyncKernel().getBackgroundSync().onAppVisibilityChanged();
         kernel.getLifeKernel().onAppHidden();
+        lockState.onApplicationHidden();
         application.getKernel().sendEvent("app_state", "background");
     }
 
