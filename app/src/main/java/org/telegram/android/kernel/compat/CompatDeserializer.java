@@ -1,5 +1,6 @@
 package org.telegram.android.kernel.compat;
 
+import android.net.Uri;
 import org.telegram.android.core.model.TLLocalContext;
 import org.telegram.android.core.model.local.TLLocalUserStatusEmpty;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
@@ -83,16 +84,14 @@ public class CompatDeserializer {
             return res;
         } else if (object instanceof CompatTLUploadingPhoto) {
             CompatTLUploadingPhoto photo = (CompatTLUploadingPhoto) object;
-            TLUploadingPhoto res = new TLUploadingPhoto(photo.getWidth(), photo.getHeight());
-            res.setFileName(photo.getFileName());
-            res.setFileUri(photo.getFileUri());
-            return res;
+            if (photo.getFileName() != null && photo.getFileName().length() > 0) {
+                return new TLUploadingPhoto(photo.getWidth(), photo.getHeight(), photo.getFileName());
+            } else {
+                return new TLUploadingPhoto(photo.getWidth(), photo.getHeight(), Uri.parse(photo.getFileUri()));
+            }
         } else if (object instanceof CompatTLUploadingVideo) {
             CompatTLUploadingVideo video = (CompatTLUploadingVideo) object;
-            TLUploadingVideo res = new TLUploadingVideo();
-            res.setFileName(video.getFileName());
-            res.setPreviewHeight(video.getPreviewHeight());
-            res.setPreviewWidth(video.getPreviewWidth());
+            TLUploadingVideo res = new TLUploadingVideo(video.getFileName(), video.getPreviewWidth(), video.getPreviewHeight());
             return res;
         } else if (object == null) {
             return null;
