@@ -533,10 +533,17 @@ public class ActivationController {
         application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(currentPhone, phoneCodeHash, "" + code), REQUEST_TIMEOUT,
                 new RpcCallback<TLAuthorization>() {
                     @Override
-                    public void onResult(TLAuthorization result) {
-                        application.getKernel().logIn(result);
-                        doChangeState(STATE_ACTIVATED);
-                        // doChangeState(STATE_SIGNUP);
+                    public void onResult(final TLAuthorization result) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (currentState != STATE_REQUEST_CODE) {
+                                    return;
+                                }
+                                application.getKernel().logIn(result);
+                                doChangeState(STATE_ACTIVATED);
+                            }
+                        });
                     }
 
                     @Override
@@ -654,9 +661,17 @@ public class ActivationController {
         application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(currentPhone, phoneCodeHash, "" + code), REQUEST_TIMEOUT,
                 new RpcCallback<TLAuthorization>() {
                     @Override
-                    public void onResult(TLAuthorization result) {
-                        application.getKernel().logIn(result);
-                        doChangeState(STATE_ACTIVATED);
+                    public void onResult(final TLAuthorization result) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (currentState != STATE_MANUAL_ACTIVATION_SEND) {
+                                    return;
+                                }
+                                application.getKernel().logIn(result);
+                                doChangeState(STATE_ACTIVATED);
+                            }
+                        });
                     }
 
                     @Override
@@ -708,6 +723,9 @@ public class ActivationController {
     }
 
     private void doChangeState(final int nState) {
+        if (this.currentState == STATE_ACTIVATED) {
+            return;
+        }
         if (this.currentState != nState) {
             this.currentState = nState;
             if (!isPageVisible) {
