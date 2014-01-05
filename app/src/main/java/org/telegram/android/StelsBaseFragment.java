@@ -19,6 +19,9 @@ import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import org.telegram.android.core.sec.LockState;
 import org.telegram.android.fragments.interfaces.RootController;
 import org.telegram.android.fragments.interfaces.SmileysController;
 import org.telegram.android.screens.RootControllerHolder;
@@ -202,6 +205,31 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
         } else {
             return pluralResources.getQuantityString(id, quantity);
         }
+    }
+
+    @Override
+    public final void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        if (!LockState.isLocked) {
+            onCreateOptionsMenuChecked(menu, inflater);
+        }
+    }
+
+    protected void onCreateOptionsMenuChecked(Menu menu, MenuInflater inflater) {
+    }
+
+    protected void setSimpleTitle(CharSequence title) {
+        getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSherlockActivity().getSupportActionBar().setTitle(title);
+        getSherlockActivity().getSupportActionBar().setSubtitle(null);
+    }
+
+    protected void setSimpleTitle(int title) {
+        getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSherlockActivity().getSupportActionBar().setTitle(title);
+        getSherlockActivity().getSupportActionBar().setSubtitle(null);
     }
 
     @Override

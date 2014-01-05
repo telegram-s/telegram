@@ -513,7 +513,7 @@ public class ImagePreviewFragment extends StelsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenuChecked(Menu menu, MenuInflater inflater) {
         if (peerType != PeerType.PEER_USER_ENCRYPTED) {
             inflater.inflate(R.menu.image_menu, menu);
         }

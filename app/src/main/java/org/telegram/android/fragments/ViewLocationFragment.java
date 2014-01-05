@@ -19,6 +19,7 @@ import org.telegram.android.R;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.core.sec.LockState;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
@@ -126,8 +127,7 @@ public class ViewLocationFragment extends MapStelsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_location_title));

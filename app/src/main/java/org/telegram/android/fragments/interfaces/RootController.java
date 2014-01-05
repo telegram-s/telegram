@@ -68,6 +68,8 @@ public interface RootController {
 
     public void openChatSettings();
 
+    public void openSecuritySettings();
+
     public void openBlocked();
 
     public void onLogout();

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingLeft="8dp"
+              android:paddingRight="8dp"
+              android:background="@color/st_settings_bg">
+
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="12dp"
+              android:layout_marginLeft="8dp"
+              android:layout_marginRight="8dp"
+              android:layout_marginBottom="2dp"
+              android:textColor="@color/st_section_text"
+              android:textSize="@dimen/section_header_text"
+              android:textStyle="bold"
+              android:text="@string/st_settings_security_lock_title"/>
+    <View android:layout_width="fill_parent"
+          android:layout_height="@dimen/st_section_h"
+          android:layout_marginRight="8dp"
+          android:layout_marginLeft="8dp"
+          android:background="@color/st_section_line"/>
+
+    <LinearLayout android:layout_width="fill_parent"
+                  android:layout_height="64dp"
+                  android:layout_marginRight="8dp"
+                  android:layout_marginLeft="8dp"
+                  android:clickable="true"
+                  android:id="@+id/changeLock"
+                  android:orientation="vertical"
+                  android:gravity="center_vertical"
+                  android:background="@drawable/st_list_selector">
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_vertical"
+                  android:paddingLeft="8dp"
+                  android:paddingRight="8dp"
+                  android:textSize="19sp"
+                  android:textColor="@color/st_section_title"
+                  android:text="@string/st_settings_security_lock"/>
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_vertical"
+                  android:paddingLeft="8dp"
+                  android:paddingRight="8dp"
+                  android:textSize="15sp"
+                  android:textColor="@color/st_section_subtitle"
+                  android:text="@string/st_settings_security_lock_disabled"/>
+    </LinearLayout>
+
+</LinearLayout>

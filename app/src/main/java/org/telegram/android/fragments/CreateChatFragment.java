@@ -252,13 +252,9 @@ public class CreateChatFragment extends BaseContactsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
+        setSimpleTitle(highlightTitleText(R.string.st_new_group_title));
 
-        getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
-        getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_new_group_title));
-        getSherlockActivity().getSupportActionBar().setSubtitle(null);
 
         if (!isLoaded()) {
             return;

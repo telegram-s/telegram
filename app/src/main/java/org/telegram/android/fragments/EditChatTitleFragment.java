@@ -55,8 +55,7 @@ public class EditChatTitleFragment extends StelsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         inflater.inflate(R.menu.create_chat_complete_menu, menu);
         menu.findItem(R.id.done).setTitle(highlightMenuText(R.string.st_edit_title_done));
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);

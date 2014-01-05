@@ -71,8 +71,7 @@ public class PickUserFragment extends BaseContactsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_pick_user_title));

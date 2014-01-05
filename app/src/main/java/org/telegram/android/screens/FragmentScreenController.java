@@ -433,6 +433,11 @@ public class FragmentScreenController implements RootController {
     }
 
     @Override
+    public void openSecuritySettings() {
+        openScreen(new SettingsSecurityFragment());
+    }
+
+    @Override
     public void openBlocked() {
         openScreen(new BlockedFragment());
     }

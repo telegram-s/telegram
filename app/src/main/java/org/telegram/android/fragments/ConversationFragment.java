@@ -892,9 +892,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     }
 
     @Override
-    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater
+    public void onCreateOptionsMenuChecked(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater
             inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
 
         inflater.inflate(R.menu.conv_menu, menu);
         menu.findItem(R.id.attachCamera).setTitle(highlightMenuText(R.string.st_conv_menu_photo));

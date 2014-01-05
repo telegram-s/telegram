@@ -380,8 +380,7 @@ public class EncryptedChatInfoFragment extends StelsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_secret_title));
         getSherlockActivity().getSupportActionBar().setSubtitle(null);
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);

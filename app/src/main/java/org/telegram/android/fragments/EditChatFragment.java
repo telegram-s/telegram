@@ -646,8 +646,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     }
 
     @Override
-    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         if (fullChatInfo != null && !fullChatInfo.isForbidden()) {
             inflater.inflate(R.menu.edit_chat, menu);
         }

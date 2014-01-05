@@ -346,8 +346,7 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
     }
 
     @Override
-    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         inflater.inflate(R.menu.user_menu, menu);
         menu.findItem(R.id.blockUserMenu).setTitle(highlightMenuText(R.string.st_profile_menu_block));
         menu.findItem(R.id.addContact).setTitle(highlightMenuText(R.string.st_profile_menu_add));

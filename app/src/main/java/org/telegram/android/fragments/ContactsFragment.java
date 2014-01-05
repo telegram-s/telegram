@@ -63,12 +63,8 @@ public class ContactsFragment extends BaseContactsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
-        getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_contacts_title));
-        getSherlockActivity().getSupportActionBar().setSubtitle(null);
+    public void onCreateOptionsMenuChecked(Menu menu, MenuInflater inflater) {
+        setSimpleTitle(highlightTitleText(R.string.st_contacts_title));
 
         if (!isLoaded()) {
             return;

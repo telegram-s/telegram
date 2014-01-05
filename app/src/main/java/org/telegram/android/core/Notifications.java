@@ -30,6 +30,7 @@ import org.telegram.android.core.model.MessageState;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.core.sec.LockState;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.screens.RootControllerHolder;
@@ -556,7 +557,7 @@ public class Notifications {
 
         boolean isConversationVisible = false;
 
-        if (application.getUiKernel().isAppVisible()) {
+        if (application.getUiKernel().isAppVisible() && !LockState.isLocked) {
             config.useSound = config.useSound & settings.isInAppSoundsEnabled();
             config.useVibration = config.useVibration & settings.isInAppVibrateEnabled();
             if (application.getUiKernel().getOpenedChatPeerType() == peerType && application.getUiKernel().getOpenedChatPeerId() == peerId || application.getUiKernel().isDialogsVisible()) {

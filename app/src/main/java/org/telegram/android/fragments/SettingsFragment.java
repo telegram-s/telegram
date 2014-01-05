@@ -179,6 +179,12 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 getRootController().openNameSettings();
             }
         });
+        res.findViewById(R.id.securitySettings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getRootController().openSecuritySettings();
+            }
+        });
 
         res.findViewById(R.id.developmentButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -386,8 +392,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(Menu menu, MenuInflater inflater) {
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_settings_title));

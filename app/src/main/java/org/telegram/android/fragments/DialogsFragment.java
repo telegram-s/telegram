@@ -768,8 +768,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
     }
 
     @Override
-    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         inflater.inflate(R.menu.main_menu, menu);
         if (action != null) {
             getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_dialogs_pick_title));

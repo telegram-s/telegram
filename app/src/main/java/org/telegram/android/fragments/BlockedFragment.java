@@ -99,8 +99,7 @@ public class BlockedFragment extends StelsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.blocked_menu, menu);
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);

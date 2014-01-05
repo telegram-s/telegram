@@ -27,12 +27,8 @@ import java.io.*;
 public class DebugFragment extends StelsFragment {
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText("Debug"));
-        getSherlockActivity().getSupportActionBar().setSubtitle(null);
-        getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
+    public void onCreateOptionsMenuChecked(Menu menu, MenuInflater inflater) {
+        setSimpleTitle(highlightTitleText("Debug"));
     }
 
     @Override

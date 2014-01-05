@@ -259,8 +259,7 @@ public class SettingsChatFragment extends MediaReceiverFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(Menu menu, MenuInflater inflater) {
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_appearance_title));

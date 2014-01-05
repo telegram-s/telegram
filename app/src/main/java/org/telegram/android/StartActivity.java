@@ -1,13 +1,10 @@
 package org.telegram.android;
 
-import android.accounts.AccountAuthenticatorResponse;
-import android.accounts.AccountManager;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.*;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.os.*;
@@ -19,17 +16,16 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
-import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.core.sec.LockState;
 import org.telegram.android.fragments.*;
 import org.telegram.android.fragments.interfaces.FragmentResultController;
 import org.telegram.android.fragments.interfaces.RootController;
+import org.telegram.android.fragments.sec.PinFragment;
 import org.telegram.android.log.Logger;
 import org.telegram.android.screens.FragmentScreenController;
 import org.telegram.android.screens.RootControllerHolder;
 import org.telegram.android.screens.ScreenLogicType;
-import org.telegram.api.TLUserSelf;
-import org.telegram.api.auth.TLAuthorization;
 import org.telegram.integration.TestIntegration;
 
 import java.util.ArrayList;
@@ -65,6 +61,9 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
 
     private int currentState = STATE_LOGIN;
 
+    private View contentContainer;
+    private View secContainer;
+
     @Override
     public RootController getRootController() {
         return controller;
@@ -85,7 +84,10 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         getSupportActionBar().setIcon(R.drawable.st_bar_logo);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
 
-        setContentView(R.layout.dialogs_container);
+        setContentView(R.layout.main);
+        contentContainer = findViewById(R.id.fragmentContainer);
+        secContainer = findViewById(R.id.lockContainer);
+
         controller = new FragmentScreenController(this, savedState);
 
         updateHeaderHeight();
@@ -165,6 +167,9 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     }
 
     private void onInitUpdated() {
+        secContainer.setVisibility(View.GONE);
+        contentContainer.setVisibility(View.VISIBLE);
+
         ArrayList<WhatsNewFragment.Definition> definitions = new ArrayList<WhatsNewFragment.Definition>();
 
         int prevVersionCode = application.getVersionHolder().getPrevVersionInstalled();
@@ -239,6 +244,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                 controller.openDialogs(true);
                 showBar();
             }
+
             setState(STATE_GENERAL);
         } else {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -253,6 +259,8 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             transaction.commit();
             setState(STATE_LOGIN);
         }
+
+        updateLockState();
     }
 
     @Override
@@ -405,15 +413,6 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         }
     }
 
-    private FragmentTransaction prepareTransaction() {
-        if (application.getScreenLogicType() == ScreenLogicType.SINGLE_ANIMATED) {
-            return getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit, R.anim.fragment_close_enter, R.anim.fragment_close_exit);
-        } else {
-            return getSupportFragmentManager().beginTransaction();
-        }
-    }
-
     private void checkLogout() {
         if (!application.isLoggedIn()) {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
@@ -424,6 +423,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
                         .commit();
                 getSupportFragmentManager().executePendingTransactions();
                 setState(STATE_TOUR);
+                updateLockState();
                 hideBar();
             }
         }
@@ -493,7 +493,44 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         checkLogout();
 
         TestIntegration.initActivity(this);
+        updateLockState();
         // getWindow().setBackgroundDrawableResource(R.drawable.transparent);
+    }
+
+    public void unlock() {
+        LockState.isLocked = false;
+        updateLockState();
+    }
+
+    public void updateLockState() {
+        boolean isLocked = false;
+        if (application.isLoggedIn()) {
+            if (application.getEngine().getUser(application.getCurrentUid()) != null) {
+                if (LockState.isLocked) {
+                    isLocked = true;
+                }
+            }
+        }
+        if (isLocked) {
+            if (getSupportFragmentManager().findFragmentById(R.id.lockContainer) == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.lockContainer, PinFragment.buildUnlock())
+                        .commit();
+            }
+            secContainer.setVisibility(View.VISIBLE);
+            contentContainer.setVisibility(View.GONE);
+
+            getSupportActionBar().setTitle("App is locked");
+        } else {
+            if (getSupportFragmentManager().findFragmentById(R.id.lockContainer) != null) {
+                getSupportFragmentManager().beginTransaction()
+                        .remove(getSupportFragmentManager().findFragmentById(R.id.lockContainer))
+                        .commit();
+            }
+            secContainer.setVisibility(View.GONE);
+            contentContainer.setVisibility(View.VISIBLE);
+        }
+        invalidateOptionsMenu();
     }
 
     @Override

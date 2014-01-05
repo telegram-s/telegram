@@ -122,8 +122,7 @@ public abstract class MapStelsFragment extends StelsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    public void onCreateOptionsMenuChecked(Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         inflater.inflate(R.menu.map_menu, menu);
         menu.findItem(R.id.hybridMap).setTitle(highlightMenuText(R.string.st_map_hybrid));
         menu.findItem(R.id.generalMap).setTitle(highlightMenuText(R.string.st_map_normal));

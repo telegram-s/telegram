@@ -161,9 +161,7 @@ public class MediaFragment extends StelsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-
+    public void onCreateOptionsMenuChecked(Menu menu, MenuInflater inflater) {
         if (peerType == PeerType.PEER_CHAT) {
             getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_media_title_group));
         } else if (peerType == PeerType.PEER_USER) {

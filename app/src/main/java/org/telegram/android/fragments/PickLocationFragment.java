@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.*;
 import org.telegram.android.MapStelsFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.model.media.TLLocalGeo;
+import org.telegram.android.core.sec.LockState;
 
 import java.util.List;
 
@@ -131,9 +132,7 @@ public class PickLocationFragment extends MapStelsFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-
+    public void onCreateOptionsMenuChecked(Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_location_pick_title));

@@ -224,8 +224,8 @@ public class StelsFragment extends StelsBaseFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+    protected void onCreateOptionsMenuChecked(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenuChecked(menu, inflater);
         getSherlockActivity().getSupportActionBar().setDisplayShowCustomEnabled(false);
     }
 

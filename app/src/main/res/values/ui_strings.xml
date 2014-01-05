@@ -212,6 +212,14 @@
     <string name="st_settings_notifications">Notifications</string>
     <string name="st_settings_log_out">Log Out</string>
 
+    <string name="st_settings_security_title">Security</string>
+    <string name="st_settings_security_lock_title">APP LOCK</string>
+    <string name="st_settings_security_lock">Change application lock</string>
+    <string name="st_settings_security_lock_disabled">Lock disabled</string>
+    <string name="st_settings_security_lock_pattern">Pattern lock enabled</string>
+    <string name="st_settings_security_lock_pin">PIN lock enabled</string>
+    <string name="st_settings_security_lock_password">Password lock enabled</string>
+
     <string name="st_settings_advanced_title">Advanced</string>
     <string name="st_settings_advanced_background">BACKGROUND</string>
     <string name="st_settings_advanced_send_time">Message send time</string>
