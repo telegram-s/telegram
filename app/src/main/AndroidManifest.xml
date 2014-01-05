@@ -48,7 +48,7 @@
     <uses-feature android:name="android.hardware.location" android:required="false"/>
     <uses-feature android:name="android.hardware.microphone" android:required="false"/>
 
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="18"/>
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19"/>
     <application android:label="@string/st_app_name"
                  android:icon="@drawable/app_icon"
                  android:name=".StelsApplication"
