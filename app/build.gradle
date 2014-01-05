@@ -176,6 +176,8 @@ dependencies {
     compile project(':telegram-api')
 
     // Ui dependencies
+    compile project(':ui:lock')
+    compile project(':ui:switch')
     compile "org.telegram:android-images:1.0.+"
     compile "org.telegram:viewpageindicator:1.2.2"
     compile 'org.telegram:photoview:1.2.2'

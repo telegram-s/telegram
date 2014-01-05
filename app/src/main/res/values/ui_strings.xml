@@ -198,6 +198,8 @@
     <string name="st_settings_reset">Revoke sessions</string>
     <string name="st_settings_reset_subtitle">Logout on all other devices</string>
     <string name="st_settings_reset_toast">Sessions deleted</string>
+    <string name="st_settings_security">Security</string>
+    <string name="st_settings_security_subtitle">Keep your conversation safe</string>
     <string name="st_settings_chat">Chat settings</string>
     <string name="st_settings_chat_subtitle">Wallpaper, send by enter, font size...</string>
     <string name="st_settings_background">Chat background</string>
@@ -205,7 +207,7 @@
     <string name="st_settings_support_subtitle">Our support team will be glad to help</string>
     <string name="st_settings_save_photo">Save incoming photos</string>
     <string name="st_settings_save_photo_subtitle">Automatically save to gallery</string>
-    <string name="st_settings_notifications">Notifications and sounds</string>
+    <string name="st_settings_notifications">Notifications</string>
     <string name="st_settings_log_out">Log Out</string>
 
     <string name="st_settings_advanced_title">Advanced</string>

@@ -10,12 +10,14 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.extradea.framework.images.ui.FastWebImageView;
+import org.jraf.android.backport.switchwidget.Switch;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.UserSourceListener;
@@ -52,6 +54,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     private TextView nameView;
     private TextView phoneView;
     private View mainContainer;
+    private Switch switchView;
 
     private int debugClickCount = 0;
     private long lastDebugClickTime = 0;
@@ -60,6 +63,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_main, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
+        switchView = (Switch) res.findViewById(R.id.notificationsSwitch);
 
         TextView textView = (TextView) res.findViewById(R.id.version);
         PackageInfo pInfo = null;
@@ -204,6 +208,8 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
             phoneView.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         }
 
+        switchView.setChecked(application.getNotificationSettings().isEnabled());
+
         return res;
     }
 
@@ -212,6 +218,17 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         super.onResume();
         application.getUserSource().registerListener(this);
         updateUser();
+
+        switchView.setOnCheckedChangeListener(null);
+        switchView.setChecked(application.getNotificationSettings().isEnabled());
+        switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (application.getNotificationSettings().isEnabled() != b) {
+                    application.getNotificationSettings().setEnabled(b);
+                }
+            }
+        });
     }
 
     @Override

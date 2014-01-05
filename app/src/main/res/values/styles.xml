@@ -123,6 +123,8 @@
 
         <item name="actionMenuTextColor">#ffffff</item>
         <item name="android:actionMenuTextColor">#ffffff</item>
+
+        <item name="switchStyle">@style/Widget.Holo.Light.CompoundButton.Switch</item>
     </style>
     <style name="AppTheme.Photo" parent="Theme.Sherlock">
         <item name="android:windowBackground">@android:color/black</item>

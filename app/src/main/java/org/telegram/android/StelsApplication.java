@@ -95,7 +95,7 @@ public class StelsApplication extends Application implements ImageSupport {
     }
 
     public boolean isLoggedIn() {
-        return kernel.getAuthKernel().getApiStorage().isAuthenticated();
+        return kernel.getAuthKernel().isLoggedIn();
     }
 
     public int getCurrentUid() {
