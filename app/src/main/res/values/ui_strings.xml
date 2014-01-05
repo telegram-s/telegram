@@ -20,6 +20,8 @@
     <string name="st_default">Default</string>
     <string name="st_select_tone">Select tone</string>
     <string name="st_none">None</string>
+    <string name="st_switch_on">On</string>
+    <string name="st_switch_off">Off</string>
 
     <string name="st_continue">Continue</string>
     <string name="st_back">Back</string>

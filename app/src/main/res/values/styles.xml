@@ -71,6 +71,19 @@
         <item name="android:textColorHint">@android:color/white</item>
     </style>
 
+    <style name="AppSwitch" parent="Widget.Holo.Light.CompoundButton.Switch">
+        <item name="track">@drawable/holo_switch_track_holo_light</item>
+        <item name="thumb">@drawable/holo_switch_inner_holo_light</item>
+        <item name="switchTextAppearance">@style/AppSwitch.Text</item>
+        <item name="textOn">@string/st_switch_on</item>
+        <item name="textOff">@string/st_switch_off</item>
+    </style>
+
+    <style name="AppSwitch.Text" parent="android:TextAppearance.Small">
+        <!-- Switch thumb asset presents a dark background. -->
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
     <style name="AppTheme.Theme" parent="Theme.Sherlock.Light">
 
         <item name="android:listViewStyle">@style/AppListView</item>
@@ -124,7 +137,7 @@
         <item name="actionMenuTextColor">#ffffff</item>
         <item name="android:actionMenuTextColor">#ffffff</item>
 
-        <item name="switchStyle">@style/Widget.Holo.Light.CompoundButton.Switch</item>
+        <item name="switchStyle">@style/AppSwitch</item>
     </style>
     <style name="AppTheme.Photo" parent="Theme.Sherlock">
         <item name="android:windowBackground">@android:color/black</item>
