@@ -5,17 +5,20 @@ import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
-import org.telegram.android.core.model.ChatMessage;
-import org.telegram.android.core.model.MessageState;
-import org.telegram.android.core.model.PeerType;
+import de.greenrobot.dao.query.WhereCondition;
+import org.telegram.android.core.model.*;
 import org.telegram.android.log.Logger;
+import org.telegram.dao.Message;
+import org.telegram.dao.MessageDao;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -25,10 +28,10 @@ public class MessagesDatabase {
 
     private static final String TAG = "MessagesDatabase";
 
-    private RuntimeExceptionDao<ChatMessage, Long> messageDao;
+    private MessageDao messageDao;
 
     public MessagesDatabase(ModelEngine engine) {
-        this.messageDao = engine.getDatabase().getMessagesDao();
+        this.messageDao = engine.getDaoSession().getMessageDao();
     }
 
     private long uniq(int peerType, int peerId) {
@@ -36,19 +39,21 @@ public class MessagesDatabase {
     }
 
     public ChatMessage[] queryMessages(int peerType, int peerId, int pageSize, int offset) {
-        PreparedQuery<ChatMessage> query;
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
-            queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
-            queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false);
-            queryBuilder.offset(offset);
-            queryBuilder.limit(pageSize);
-            query = queryBuilder.prepare();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ChatMessage[0];
+        List<Message> dbres = messageDao.queryBuilder()
+                .where(
+                        MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId)),
+                        MessageDao.Properties.DeletedLocal.eq(false))
+                .orderRaw("-(date * 1000000 + abs(mid))")
+                .offset(offset)
+                .limit(pageSize)
+                .list();
+
+        ChatMessage[] res = new ChatMessage[dbres.size()];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = convert(dbres.get(i));
         }
-        return messageDao.query(query).toArray(new ChatMessage[0]);
+
+        return res;
     }
 
     public ChatMessage[] queryUnreadedMessages(int peerType, int peerId, int pageSize, int mid) {
@@ -56,31 +61,29 @@ public class MessagesDatabase {
         if (peerType != PeerType.PEER_USER_ENCRYPTED) {
             ChatMessage message = getMessageByMid(mid);
             if (message != null) {
-                PreparedQuery<ChatMessage> query;
-                try {
-                    QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
-                    queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
-                    queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
-                            .and().raw("(date * 1000000 + abs(mid)) >= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
-                    query = queryBuilder.prepare();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return new ChatMessage[0];
-                }
-                resultMessages.addAll(messageDao.query(query));
+                List<Message> msgs = messageDao.queryBuilder()
+                        .where(MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId)),
+                                MessageDao.Properties.DeletedLocal.eq(false),
+                                new WhereCondition.StringCondition(
+                                        "(date * 1000000 + abs(mid)) >= " + (message.getDate() * 1000000L + Math.abs(message.getMid()))))
+                        .orderRaw("-(date * 1000000 + abs(mid))")
+                        .list();
 
-                try {
-                    QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
-                    queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
-                    queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
-                            .and().raw("(date * 1000000 + abs(mid)) <= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
-                    queryBuilder.limit(pageSize);
-                    query = queryBuilder.prepare();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return new ChatMessage[0];
+                for (Message m : msgs) {
+                    resultMessages.add(convert(m));
                 }
-                resultMessages.addAll(messageDao.query(query));
+
+                msgs = messageDao.queryBuilder()
+                        .where(MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId)),
+                                MessageDao.Properties.DeletedLocal.eq(false),
+                                new WhereCondition.StringCondition("(date * 1000000 + abs(mid)) <= " + (message.getDate() * 1000000L + Math.abs(message.getMid()))))
+                        .orderRaw("-(date * 1000000 + abs(mid))")
+                        .limit(pageSize)
+                        .list();
+
+                for (Message m : msgs) {
+                    resultMessages.add(convert(m));
+                }
 
                 return resultMessages.toArray(new ChatMessage[0]);
             }
@@ -90,245 +93,251 @@ public class MessagesDatabase {
     }
 
     public ChatMessage[] getUnreadSecret(int chatId, int maxDate) {
-        QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
-        try {
-            queryBuilder.where()
-                    .eq("peerType", PeerType.PEER_USER_ENCRYPTED).and()
-                    .eq("peerId", chatId).and()
-                    .eq("isOut", true).and()
-                    .eq("state", MessageState.SENT).and()
-                    .gt("messageTimeout", 0)
-                    .le("date", maxDate);
+        List<Message> msg = messageDao.queryBuilder()
+                .where(MessageDao.Properties.PeerUniqId.eq(uniq(PeerType.PEER_USER_ENCRYPTED, chatId)),
+                        MessageDao.Properties.IsOut.eq(true),
+                        MessageDao.Properties.State.eq(MessageState.SENT),
+                        MessageDao.Properties.MessageTimeout.gt(0),
+                        MessageDao.Properties.Date.le(maxDate))
+                .list();
 
-            return messageDao.query(queryBuilder.prepare()).toArray(new ChatMessage[0]);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        ChatMessage[] res = new ChatMessage[msg.size()];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = convert(msg.get(i));
         }
-
-        return new ChatMessage[0];
+        return res;
     }
 
     public ChatMessage[] getMessagesByMid(int[] mid) {
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
-            Object[] mids = new Object[mid.length];
-            for (int i = 0; i < mids.length; i++) {
-                mids[i] = mid[i];
-            }
-            queryBuilder.where().in("mid", mids);
-            return queryBuilder.query().toArray(new ChatMessage[0]);
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
+        Object[] mids = new Object[mid.length];
+        for (int i = 0; i < mids.length; i++) {
+            mids[i] = mid[i];
+        }
+        Message[] dbRes = messageDao.queryBuilder().where(MessageDao.Properties.Mid.in((Object[]) mids)).list().toArray(new Message[0]);
+        ChatMessage[] res = new ChatMessage[dbRes.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = convert(dbRes[i]);
         }
 
-        return new ChatMessage[0];
+        return res;
     }
 
     public ChatMessage getMessageById(int localId) {
-        return messageDao.queryForId((long) localId);
+        return convert(messageDao.load((long) localId));
     }
 
     public ChatMessage getMessageByMid(int mid) {
-        List<ChatMessage> res = messageDao.queryForEq("mid", mid);
+        List<Message> res = messageDao.queryBuilder().where(MessageDao.Properties.Mid.eq(mid)).list();
         if (res.size() == 0) {
             return null;
         } else {
-            return res.get(0);
+            return convert(res.get(0));
         }
     }
 
     public ChatMessage getMessageByRid(long rid) {
-        List<ChatMessage> res = messageDao.queryForEq("randomId", rid);
+        List<Message> res = messageDao.queryBuilder().where(MessageDao.Properties.Rid.eq(rid)).list();
         if (res.size() == 0) {
             return null;
         } else {
-            return res.get(0);
+            return convert(res.get(0));
         }
     }
 
     public void create(ChatMessage message) {
-        messageDao.create(message);
+        messageDao.insert(convert(message));
     }
 
     public void delete(ChatMessage message) {
-        messageDao.create(message);
+        messageDao.delete(convert(message));
     }
 
     public void update(ChatMessage message) {
-        messageDao.update(message);
+        messageDao.update(convert(message));
     }
 
-    public void diffInTx(final Iterable<ChatMessage> newMessages, final Iterable<ChatMessage> updatedMessages) {
-        messageDao.callBatchTasks(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                for (ChatMessage msg : updatedMessages) {
-                    messageDao.update(msg);
-                }
-                for (ChatMessage msg : newMessages) {
-                    messageDao.create(msg);
-                }
-                return null;
+    public void diffInTx(final List<ChatMessage> newMessages, final List<ChatMessage> updatedMessages) {
+        if (newMessages.size() > 0) {
+            Message[] nMessages = new Message[newMessages.size()];
+            for (int i = 0; i < nMessages.length; i++) {
+                nMessages[i] = convert(newMessages.get(i));
+                nMessages[i].setId(null);
             }
-        });
-    }
-
-    public void updateInTx(final Iterable<ChatMessage> messages) {
-        messageDao.callBatchTasks(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                for (ChatMessage msg : messages) {
-                    messageDao.update(msg);
-                }
-                return null;
+            messageDao.insertInTx(nMessages);
+        }
+        if (updatedMessages.size() > 0) {
+            Message[] nMessages = new Message[updatedMessages.size()];
+            for (int i = 0; i < nMessages.length; i++) {
+                nMessages[i] = convert(updatedMessages.get(i));
             }
-        });
+            messageDao.updateInTx(nMessages);
+        }
     }
 
     public void updateInTx(final ChatMessage... messages) {
-        messageDao.callBatchTasks(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                for (ChatMessage msg : messages) {
-                    messageDao.update(msg);
-                }
-                return null;
-            }
-        });
-    }
-
-    public void createInTx(final ChatMessage... messages) {
-        messageDao.callBatchTasks(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                for (ChatMessage msg : messages) {
-                    messageDao.create(msg);
-                }
-                return null;
-            }
-        });
-    }
-
-    public void createInTx(final Iterable<ChatMessage> messages) {
-        messageDao.callBatchTasks(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                for (ChatMessage msg : messages) {
-                    messageDao.create(msg);
-                }
-                return null;
-            }
-        });
+        Message[] nMessages = new Message[messages.length];
+        for (int i = 0; i < nMessages.length; i++) {
+            nMessages[i] = convert(messages[i]);
+        }
+        messageDao.updateInTx(nMessages);
     }
 
     public void deleteHistory(int peerType, int peerId) {
-        try {
-            DeleteBuilder<ChatMessage, Long> deleteBuilder = messageDao.deleteBuilder();
-            deleteBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType);
-            messageDao.delete(deleteBuilder.prepare());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        messageDao.queryBuilder().where(MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId))).buildDelete().executeDeleteWithoutDetachingEntities();
     }
 
     public ChatMessage findTopMessage(int peerType, int peerId) {
-        try {
-            QueryBuilder<ChatMessage, Long> builder = messageDao.queryBuilder();
-            builder.where().eq("deletedLocal", false).and().eq("peerType", peerType).and().eq("peerId", peerId);
-            builder.orderBy("date", false);
-            return messageDao.queryForFirst(builder.prepare());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        List<Message> res = messageDao.queryBuilder().where(MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId)))
+                .orderDesc(MessageDao.Properties.Date)
+                .limit(1)
+                .list();
 
-        return null;
+        if (res.size() > 0) {
+            return convert(res.get(0));
+        } else {
+            return null;
+        }
     }
 
     public ChatMessage[] findDiedMessages(int currentTime) {
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
-            queryBuilder.where().le("messageDieTime", currentTime).and().ne("messageDieTime", 0);
-            return messageDao.query(queryBuilder.prepare()).toArray(new ChatMessage[0]);
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
-        }
-        return new ChatMessage[0];
+        return convert(messageDao.queryBuilder().where(
+                MessageDao.Properties.MessageDieTime.le(currentTime),
+                MessageDao.Properties.MessageTimeout.notEq(0))
+                .list());
     }
 
     public ChatMessage[] findPendingSelfDestructMessages(int currentTime) {
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
-            queryBuilder.where().gt("messageDieTime", currentTime).and().ne("messageDieTime", 0);
-            return messageDao.query(queryBuilder.prepare()).toArray(new ChatMessage[0]);
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
-        }
-        return new ChatMessage[0];
+        return convert(messageDao.queryBuilder().where(
+                MessageDao.Properties.MessageDieTime.gt(currentTime),
+                MessageDao.Properties.MessageTimeout.notEq(0))
+                .list());
     }
 
     public ChatMessage[] findUnreadedSelfDestructMessages(int peerType, int peerId) {
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
-            queryBuilder.where().ne("messageTimeout", 0).and().eq("messageDieTime", 0).and().eq("peerType", peerType).and().eq("peerId", peerId);
-            return messageDao.query(queryBuilder.prepare()).toArray(new ChatMessage[0]);
-        } catch (SQLException e) {
-            Logger.t(TAG, e);
-        }
-        return new ChatMessage[0];
+        return convert(messageDao.queryBuilder().where(
+                MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId)),
+                MessageDao.Properties.MessageDieTime.eq(0),
+                MessageDao.Properties.MessageTimeout.notEq(0))
+                .list());
     }
 
     public int getMaxDateInDialog(int peerType, int peerId) {
-        try {
-            QueryBuilder<ChatMessage, Long> builder = messageDao.queryBuilder();
-            builder.where().eq("peerType", peerType).and().eq("peerId", peerId).and().eq("isOut", false);
-            builder.orderBy("date", false);
-            ChatMessage message = messageDao.queryForFirst(builder.prepare());
-            if (message != null) {
-                return message.getDate();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        List<Message> messages = messageDao.queryBuilder()
+                .where(
+                        MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId)),
+                        MessageDao.Properties.IsOut.eq(false))
+                .orderDesc(MessageDao.Properties.Date)
+                .limit(1)
+                .list();
+
+        if (messages.size() > 0) {
+            return messages.get(0).getDate();
+        } else {
+            return 0;
         }
-        return 0;
     }
 
     public int getMaxMidInDialog(int peerType, int peerId) {
-        try {
-            QueryBuilder<ChatMessage, Long> builder = messageDao.queryBuilder();
-            builder.where().eq("peerType", peerType).and().eq("peerId", peerId).and().eq("isOut", false);
-            builder.orderBy("mid", false);
-            ChatMessage message = messageDao.queryForFirst(builder.prepare());
-            if (message != null) {
-                return message.getMid();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        List<Message> messages = messageDao.queryBuilder()
+                .where(
+                        MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId)),
+                        MessageDao.Properties.IsOut.eq(false))
+                .orderDesc(MessageDao.Properties.Mid)
+                .limit(1)
+                .list();
+
+        if (messages.size() > 0) {
+            return messages.get(0).getMid();
+        } else {
+            return 0;
         }
-        return 0;
     }
 
     public int getMinMid() {
-        try {
-            ChatMessage msg = messageDao.queryForFirst(messageDao.queryBuilder().orderBy("mid", true).prepare());
-            if (msg != null) {
-                return Math.min(msg.getMid(), 0);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        List<Message> res = messageDao.queryBuilder().orderAsc(MessageDao.Properties.Mid).limit(1).list();
+        if (res.size() > 0) {
+            return Math.min(res.get(0).getMid(), 0);
+        } else {
+            return 0;
         }
-        return 0;
     }
 
     public int getMaxDate() {
-        try {
-            ChatMessage msg = messageDao.queryForFirst(messageDao.queryBuilder().orderBy("date", false).prepare());
-            if (msg != null) {
-                return msg.getDate();
+        List<Message> res = messageDao.queryBuilder().orderAsc(MessageDao.Properties.Date).limit(1).list();
+        if (res.size() > 0) {
+            return res.get(0).getDate();
+        } else {
+            return 0;
+        }
+    }
+
+    private ChatMessage convert(Message src) {
+        ChatMessage res = new ChatMessage();
+        res.setDatabaseId((int) (long) src.getId());
+        res.setPeerId((int) (src.getPeerUniqId() / 10L));
+        res.setPeerType((int) (src.getPeerUniqId() % 10L));
+        res.setMid(src.getMid());
+        res.setRandomId(src.getRid());
+        res.setDate(src.getDate());
+        res.setState(src.getState());
+        res.setSenderId(src.getSenderId());
+        res.setContentType(src.getContentType());
+        res.setMessage(src.getMessage());
+        res.setOut(src.getIsOut());
+        if (src.getExtras() != null) {
+            try {
+                res.setExtras(TLLocalContext.getInstance().deserializeMessage(src.getExtras()));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
-        return 0;
+        res.setDeletedLocal(src.getDeletedLocal());
+        res.setDeletedServer(src.getDeletedServer());
+        res.setForwardMid(src.getForwardMid());
+        res.setForwardDate(src.getForwardDate());
+        res.setForwardSenderId(src.getForwardSenderId());
+        res.setMessageDieTime(src.getMessageDieTime());
+        res.setMessageTimeout(src.getMessageTimeout());
+        return res;
+    }
+
+
+    private Message convert(ChatMessage src) {
+        Message res = new Message();
+        res.setId((long) src.getDatabaseId());
+        res.setPeerUniqId(uniq(src.getPeerType(), src.getPeerId()));
+        res.setMid(src.getMid());
+        res.setRid(src.getRandomId());
+        res.setDate(src.getDate());
+        res.setState(src.getState());
+        res.setSenderId(src.getSenderId());
+        res.setContentType(src.getContentType());
+        res.setMessage(src.getMessage());
+        res.setIsOut(src.isOut());
+        if (src.getExtras() != null) {
+            try {
+                res.setExtras(src.getExtras().serialize());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        res.setDeletedLocal(src.isDeletedLocal());
+        res.setDeletedServer(src.isDeletedServer());
+        res.setForwardMid(src.getForwardMid());
+        res.setForwardDate(src.getForwardDate());
+        res.setForwardSenderId(src.getForwardSenderId());
+        res.setMessageDieTime(src.getMessageDieTime());
+        res.setMessageTimeout(src.getMessageTimeout());
+        return res;
+    }
+
+    private ChatMessage[] convert(List<Message> dbRes) {
+        ChatMessage[] res = new ChatMessage[dbRes.size()];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = convert(dbRes.get(i));
+        }
+        return res;
     }
 }

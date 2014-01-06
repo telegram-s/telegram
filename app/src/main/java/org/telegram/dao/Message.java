@@ -6,7 +6,7 @@ package org.telegram.dao;
  */
 public class Message {
 
-    private long id;
+    private Long id;
     private long peerUniqId;
     private int mid;
     private long rid;
@@ -18,6 +18,7 @@ public class Message {
     private String message;
     /** Not-null value. */
     private byte[] extras;
+    private Boolean isOut;
     private Integer forwardDate;
     private Integer forwardSenderId;
     private Integer forwardMid;
@@ -29,11 +30,11 @@ public class Message {
     public Message() {
     }
 
-    public Message(long id) {
+    public Message(Long id) {
         this.id = id;
     }
 
-    public Message(long id, long peerUniqId, int mid, long rid, int date, int state, Integer senderId, int contentType, String message, byte[] extras, Integer forwardDate, Integer forwardSenderId, Integer forwardMid, boolean deletedLocal, boolean deletedServer, Integer messageTimeout, Integer messageDieTime) {
+    public Message(Long id, long peerUniqId, int mid, long rid, int date, int state, Integer senderId, int contentType, String message, byte[] extras, Boolean isOut, Integer forwardDate, Integer forwardSenderId, Integer forwardMid, boolean deletedLocal, boolean deletedServer, Integer messageTimeout, Integer messageDieTime) {
         this.id = id;
         this.peerUniqId = peerUniqId;
         this.mid = mid;
@@ -44,6 +45,7 @@ public class Message {
         this.contentType = contentType;
         this.message = message;
         this.extras = extras;
+        this.isOut = isOut;
         this.forwardDate = forwardDate;
         this.forwardSenderId = forwardSenderId;
         this.forwardMid = forwardMid;
@@ -53,11 +55,11 @@ public class Message {
         this.messageDieTime = messageDieTime;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -135,6 +137,14 @@ public class Message {
     /** Not-null value; ensure this value is available before it is saved to the database. */
     public void setExtras(byte[] extras) {
         this.extras = extras;
+    }
+
+    public Boolean getIsOut() {
+        return isOut;
+    }
+
+    public void setIsOut(Boolean isOut) {
+        this.isOut = isOut;
     }
 
     public Integer getForwardDate() {
