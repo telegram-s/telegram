@@ -36,6 +36,10 @@ public class DialogsEngine {
         return database.loadDialog(peerType, peerId);
     }
 
+    public DialogDescription[] loadDialogs(Long[] uniqIds) {
+        return database.loadDialogs(uniqIds);
+    }
+
     public void updateOrCreateDialog(DialogDescription description) {
         database.updateOrCreateDialog(description);
         application.getDialogSource().getViewSource().updateItem(description);

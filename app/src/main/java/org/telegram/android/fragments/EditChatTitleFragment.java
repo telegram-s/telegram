@@ -97,11 +97,9 @@ public class EditChatTitleFragment extends StelsFragment {
                         TLAbsStatedMessage message = rpcRaw(new TLRequestMessagesEditChatTitle(chatId, title));
                         TLMessageService service = (TLMessageService) message.getMessage();
                         TLMessageActionChatEditTitle editTitle = (TLMessageActionChatEditTitle) service.getAction();
-                        ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-                        messages.add(message.getMessage());
                         application.getEngine().onUsers(message.getUsers());
                         application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                        application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
+                        application.getEngine().onUpdatedMessage(message.getMessage());
                         application.getEngine().onChatTitleChanges(chatId, editTitle.getTitle());
                         application.getUpdateProcessor().onMessage(new TLLocalEditChatTitle(message));
                         application.notifyUIUpdate();

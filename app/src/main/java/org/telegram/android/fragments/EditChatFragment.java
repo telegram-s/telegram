@@ -21,6 +21,7 @@ import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.ChatSourceListener;
+import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.files.UploadResult;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
@@ -530,11 +531,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 TLAbsStatedMessage message = rpc(new TLRequestMessagesDeleteChatUser(chatId, new TLInputUserContact(uid)));
                 TLMessageService service = (TLMessageService) message.getMessage();
                 TLMessageActionChatDeleteUser removeUser = (TLMessageActionChatDeleteUser) service.getAction();
-                ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-                messages.add(message.getMessage());
                 application.getEngine().onUsers(message.getUsers());
                 application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
+                application.getEngine().onUpdatedMessage(message.getMessage());
                 application.getEngine().onChatUserRemoved(chatId, removeUser.getUserId());
                 application.getUpdateProcessor().onMessage(new TLLocalRemoveChatUser(message));
             }
@@ -602,20 +601,16 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                         TLMessageService service = (TLMessageService) message.getMessage();
                         TLMessageActionChatEditPhoto editPhoto = (TLMessageActionChatEditPhoto) service.getAction();
 
-                        ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-                        messages.add(message.getMessage());
                         application.getEngine().onUsers(message.getUsers());
                         application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                        application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
-                        application.getEngine().onChatAvatarChanges(chatId, editPhoto.getPhoto());
+                        application.getEngine().onUpdatedMessage(message.getMessage());
+                        application.getEngine().onChatAvatarChanges(chatId, EngineUtils.convertAvatarPhoto(editPhoto.getPhoto()));
                         application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                     } else {
                         TLAbsStatedMessage message = rpc(new TLRequestMessagesEditChatPhoto(chatId, new TLInputChatPhotoEmpty()));
-                        ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-                        messages.add(message.getMessage());
                         application.getEngine().onUsers(message.getUsers());
                         application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                        application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
+                        application.getEngine().onUpdatedMessage(message.getMessage());
                         application.getEngine().onChatAvatarChanges(chatId, null);
                         application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                     }
@@ -683,11 +678,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     TLAbsStatedMessage message = rpc(new TLRequestMessagesAddChatUser(chatId, new TLInputUserContact(user.getUid()), 10));
                     TLMessageService service = (TLMessageService) message.getMessage();
                     TLMessageActionChatAddUser addUser = (TLMessageActionChatAddUser) service.getAction();
-                    ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-                    messages.add(message.getMessage());
                     application.getEngine().onUsers(message.getUsers());
                     application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                    application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
+                    application.getEngine().onUpdatedMessage(message.getMessage());
                     application.getEngine().onChatUserAdded(chatId, service.getFromId(), addUser.getUserId());
                     application.getUpdateProcessor().onMessage(new TLLocalAddChatUser(message));
                 }

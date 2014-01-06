@@ -16,6 +16,7 @@ import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
+import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.files.UploadResult;
 import org.telegram.android.core.model.update.TLLocalCreateChat;
 import org.telegram.android.core.model.update.TLLocalUpdateChatPhoto;
@@ -183,11 +184,9 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
                     application.getUpdateProcessor().onMessage(new TLLocalCreateChat(message));
 
                     TLStatedMessage msg = (TLStatedMessage) message;
-                    List<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-                    messages.add(msg.getMessage());
                     getEngine().onUsers(msg.getUsers());
                     getEngine().getGroupsEngine().onGroupsUpdated(msg.getChats());
-                    getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
+                    getEngine().onUpdatedMessage(msg.getMessage());
                     chatId = ((TLPeerChat) ((TLMessageService) msg.getMessage()).getToId()).getChatId();
                 }
 
@@ -216,13 +215,10 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
                         TLMessageService service = (TLMessageService) message.getMessage();
                         TLMessageActionChatEditPhoto editPhoto = (TLMessageActionChatEditPhoto) service.getAction();
 
-                        ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-                        messages.add(message.getMessage());
-
                         getEngine().onUsers(message.getUsers());
                         getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                        application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
-                        application.getEngine().onChatAvatarChanges(chatId, editPhoto.getPhoto());
+                        application.getEngine().onUpdatedMessage(message.getMessage());
+                        application.getEngine().onChatAvatarChanges(chatId, EngineUtils.convertAvatarPhoto(editPhoto.getPhoto()));
 
                         application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
                     } catch (Exception e) {

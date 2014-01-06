@@ -85,7 +85,7 @@ public class MessagesDatabase {
                     messageDao.update(msg);
                 }
                 for (ChatMessage msg : newMessages) {
-                    messageDao.update(msg);
+                    messageDao.create(msg);
                 }
                 return null;
             }

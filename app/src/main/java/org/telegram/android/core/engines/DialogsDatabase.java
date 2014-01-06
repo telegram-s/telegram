@@ -92,6 +92,18 @@ public class DialogsDatabase {
         return convertCached(loadDialogDb(peerType, peerId));
     }
 
+    public DialogDescription[] loadDialogs(Long[] uniqIds) {
+        Dialog[] dialogs = dialogsDao.queryBuilder()
+                .where(DialogDao.Properties.Id.in((Object[]) uniqIds))
+                .list()
+                .toArray(new Dialog[0]);
+        DialogDescription[] res = new DialogDescription[dialogs.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = convertCached(dialogs[i]);
+        }
+        return res;
+    }
+
     public void createDialog(DialogDescription description) {
         Dialog dialog = new Dialog();
         applyChanges(description, dialog);

@@ -6,10 +6,7 @@ import android.os.Message;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.EngineUtils;
-import org.telegram.android.core.model.DialogDescription;
-import org.telegram.android.core.model.Group;
-import org.telegram.android.core.model.PeerType;
-import org.telegram.android.core.model.User;
+import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.service.TLLocalActionUserRegistered;
@@ -844,281 +841,125 @@ public class UpdateProcessor {
     }
 
     private void applyMessages(List<TLAbsMessage> messages) {
-        HashSet<Integer> newUnreaded = application.getEngine().onNewMessages(messages, new ArrayList<TLDialog>());
+        ChatMessage[] resultMessages = application.getEngine().onUpdatedMessages(messages);
 
-        for (TLAbsMessage newMessage : messages) {
-            if (newMessage instanceof TLMessage) {
-                TLMessage msg = (TLMessage) newMessage;
-                if (!newUnreaded.contains(msg.getId())) {
-                    return;
-                }
-                if (!msg.getOut() && msg.getUnread()) {
-                    if (msg.getToId() instanceof TLPeerChat) {
-                        TLPeerChat chat = (TLPeerChat) msg.getToId();
-                        onInMessageArrived(PeerType.PEER_CHAT, chat.getChatId(), msg.getId());
-                        application.getTypingStates().resetUserTyping(msg.getFromId(), chat.getChatId());
-                    } else {
-                        onInMessageArrived(PeerType.PEER_USER, msg.getFromId(), msg.getId());
-                        application.getTypingStates().resetUserTyping(msg.getFromId());
-                    }
+        for (int i = 0; i < resultMessages.length; i++) {
+            if (!resultMessages[i].isOut() && resultMessages[i].getState() == MessageState.SENT) {
+                onInMessageArrived(resultMessages[i].getPeerType(), resultMessages[i].getPeerId(), resultMessages[i].getMid());
+            }
+        }
 
-                    notifyAboutMessage(msg);
-                }
-            } else if (newMessage instanceof TLMessageForwarded) {
-                TLMessageForwarded msg = (TLMessageForwarded) newMessage;
-                if (!newUnreaded.contains(msg.getId())) {
-                    return;
-                }
-                if (!msg.getOut() && msg.getUnread()) {
-                    if (msg.getToId() instanceof TLPeerChat) {
-                        TLPeerChat chat = (TLPeerChat) msg.getToId();
-                        onInMessageArrived(PeerType.PEER_CHAT, chat.getChatId(), msg.getId());
-                        application.getTypingStates().resetUserTyping(msg.getFromId(), chat.getChatId());
-                    } else {
-                        onInMessageArrived(PeerType.PEER_USER, msg.getFromId(), msg.getId());
-                        application.getTypingStates().resetUserTyping(msg.getFromId());
-                    }
+        ChatMessage lastMessage = null;
 
-                    notifyAboutMessage(msg);
-                }
-            } else if (newMessage instanceof TLMessageService) {
-                TLMessageService service = (TLMessageService) newMessage;
-                if (newUnreaded.contains(service.getId())) {
-                    if (!service.getOut() && service.getUnread()) {
-                        if (service.getToId() instanceof TLPeerChat) {
-                            TLPeerChat chat = (TLPeerChat) service.getToId();
-                            onInMessageArrived(PeerType.PEER_CHAT, chat.getChatId(), service.getId());
-                        } else {
-                            onInMessageArrived(PeerType.PEER_USER, service.getFromId(), service.getId());
-                        }
-                    }
-                }
-                if (service.getAction() instanceof TLMessageActionChatEditPhoto) {
-                    int chatId = ((TLPeerChat) service.getToId()).getChatId();
-                    application.getEngine().onChatAvatarChanges(chatId,
-                            ((TLMessageActionChatEditPhoto) service.getAction()).getPhoto());
-                    application.getChatSource().notifyChatChanged(chatId);
-                } else if (service.getAction() instanceof TLMessageActionChatDeletePhoto) {
-                    int chatId = ((TLPeerChat) service.getToId()).getChatId();
-                    application.getEngine().onChatAvatarChanges(chatId, null);
-                    application.getChatSource().notifyChatChanged(chatId);
-                } else if (service.getAction() instanceof TLMessageActionChatEditTitle) {
-                    int chatId = ((TLPeerChat) service.getToId()).getChatId();
-                    application.getEngine().onChatTitleChanges(chatId,
-                            ((TLMessageActionChatEditTitle) service.getAction()).getTitle());
-                    application.getChatSource().notifyChatChanged(chatId);
-                } else if (service.getAction() instanceof TLMessageActionChatAddUser) {
-                    int chatId = ((TLPeerChat) service.getToId()).getChatId();
-                    application.getEngine().onChatUserAdded(chatId, service.getFromId(),
-                            ((TLMessageActionChatAddUser) service.getAction()).getUserId());
-                    application.getChatSource().notifyChatChanged(chatId);
-                } else if (service.getAction() instanceof TLMessageActionChatDeleteUser) {
-                    TLMessageActionChatDeleteUser actionChatDeleteUser = (TLMessageActionChatDeleteUser) service.getAction();
-                    int chatId = ((TLPeerChat) service.getToId()).getChatId();
-                    application.getEngine().onChatUserRemoved(chatId, actionChatDeleteUser.getUserId());
-                    application.getChatSource().notifyChatChanged(chatId);
+        for (int i = 0; i < resultMessages.length; i++) {
+            if (!resultMessages[i].isOut() && resultMessages[i].getState() == MessageState.SENT) {
+                if (lastMessage == null) {
+                    lastMessage = resultMessages[i];
+                } else if (lastMessage.getDate() < resultMessages[i].getDate()) {
+                    lastMessage = resultMessages[i];
                 }
             }
         }
+
+        if (lastMessage != null) {
+            notifyAboutMessage(lastMessage);
+        }
     }
 
-    private void notifyAboutMessage(TLMessageForwarded msg) {
-        if (msg.getMedia() instanceof TLMessageMediaEmpty) {
-            // Forwarded message!111
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
+    private void notifyAboutMessage(ChatMessage msg) {
+        if (msg.getPeerType() != PeerType.PEER_USER && msg.getPeerType() != PeerType.PEER_CHAT) {
+            return;
+        }
+
+        if (msg.getRawContentType() == ContentType.MESSAGE_TEXT) {
+            User sender = application.getEngine().getUser(msg.getSenderId());
+            if (msg.getPeerType() == PeerType.PEER_USER) {
                 application.getNotifications().onNewMessage(
                         sender.getFirstName() + " " + sender.getLastName(),
                         msg.getMessage(),
-                        msg.getFromId(), msg.getId(),
+                        msg.getSenderId(), msg.getMid(),
                         sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+            } else if (msg.getPeerType() == PeerType.PEER_CHAT) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
                 if (group != null) {
                     application.getNotifications().onNewChatMessage(
                             sender.getDisplayName(),
                             sender.getUid(),
                             group.getTitle(),
                             msg.getMessage(),
-                            chat.getChatId(), msg.getId(),
+                            msg.getPeerId(), msg.getMid(),
                             sender.getPhoto());
                 }
             }
-        } else if (msg.getMedia() instanceof TLMessageMediaContact) {
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
+        } else if (msg.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+            User sender = application.getEngine().getUser(msg.getSenderId());
+            if (msg.getPeerType() == PeerType.PEER_USER) {
                 application.getNotifications().onNewMessageContact(
                         sender.getFirstName() + " " + sender.getLastName(),
-                        msg.getFromId(), msg.getId(),
+                        msg.getSenderId(), msg.getMid(),
                         sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
                 if (group != null) {
                     application.getNotifications().onNewChatMessageContact(
                             sender.getDisplayName(),
                             sender.getUid(),
                             group.getTitle(),
-                            chat.getChatId(), msg.getId(),
+                            msg.getPeerId(), msg.getMid(),
                             sender.getPhoto());
                 }
             }
-        } else if (msg.getMedia() instanceof TLMessageMediaGeo) {
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
+        } else if (msg.getRawContentType() == ContentType.MESSAGE_GEO) {
+            User sender = application.getEngine().getUser(msg.getSenderId());
+            if (msg.getPeerType() == PeerType.PEER_USER) {
                 application.getNotifications().onNewMessageGeo(
                         sender.getDisplayName(),
-                        msg.getFromId(), msg.getId(),
+                        msg.getSenderId(), msg.getMid(),
                         sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
                 if (group != null) {
                     application.getNotifications().onNewChatMessageGeo(
                             sender.getDisplayName(),
                             sender.getUid(),
                             group.getTitle(),
-                            chat.getChatId(), msg.getId(),
+                            msg.getPeerId(), msg.getMid(),
                             sender.getPhoto());
                 }
             }
-        } else if (msg.getMedia() instanceof TLMessageMediaPhoto) {
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
+        } else if (msg.getRawContentType() == ContentType.MESSAGE_PHOTO) {
+            User sender = application.getEngine().getUser(msg.getSenderId());
+            if (msg.getPeerType() == PeerType.PEER_USER) {
                 application.getNotifications().onNewMessagePhoto(
                         sender.getDisplayName(),
-                        msg.getFromId(), msg.getId(),
+                        msg.getSenderId(), msg.getMid(),
                         sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
                 if (group != null) {
                     application.getNotifications().onNewChatMessagePhoto(
                             sender.getDisplayName(),
                             sender.getUid(),
                             group.getTitle(),
-                            chat.getChatId(), msg.getId(),
+                            msg.getPeerId(), msg.getMid(),
                             sender.getPhoto());
                 }
             }
-        } else if (msg.getMedia() instanceof TLMessageMediaVideo) {
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
+        } else if (msg.getRawContentType() == ContentType.MESSAGE_VIDEO) {
+            User sender = application.getEngine().getUser(msg.getSenderId());
+            if (msg.getPeerType() == PeerType.PEER_USER) {
                 application.getNotifications().onNewMessageVideo(
                         sender.getDisplayName(),
-                        msg.getFromId(), msg.getId(),
+                        msg.getSenderId(), msg.getMid(),
                         sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
+            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
                 if (group != null) {
                     application.getNotifications().onNewChatMessageVideo(
                             sender.getDisplayName(),
                             sender.getUid(),
                             group.getTitle(),
-                            chat.getChatId(), msg.getId(),
-                            sender.getPhoto());
-                }
-            }
-        }
-    }
-
-    private void notifyAboutMessage(TLMessage msg) {
-        if (msg.getMedia() instanceof TLMessageMediaEmpty) {
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
-                application.getNotifications().onNewMessage(
-                        sender.getFirstName() + " " + sender.getLastName(),
-                        msg.getMessage(),
-                        msg.getFromId(), msg.getId(),
-                        sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessage(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            msg.getMessage(),
-                            chat.getChatId(), msg.getId(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getMedia() instanceof TLMessageMediaContact) {
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
-                application.getNotifications().onNewMessageContact(
-                        sender.getFirstName() + " " + sender.getLastName(),
-                        msg.getFromId(), msg.getId(),
-                        sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessageContact(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            chat.getChatId(), msg.getId(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getMedia() instanceof TLMessageMediaGeo) {
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
-                application.getNotifications().onNewMessageGeo(
-                        sender.getDisplayName(),
-                        msg.getFromId(), msg.getId(),
-                        sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessageGeo(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            chat.getChatId(), msg.getId(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getMedia() instanceof TLMessageMediaPhoto) {
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
-                application.getNotifications().onNewMessagePhoto(
-                        sender.getDisplayName(),
-                        msg.getFromId(), msg.getId(),
-                        sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessagePhoto(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            chat.getChatId(), msg.getId(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getMedia() instanceof TLMessageMediaVideo) {
-            User sender = application.getEngine().getUser(msg.getFromId());
-            if (msg.getToId() instanceof TLPeerUser) {
-                application.getNotifications().onNewMessageVideo(
-                        sender.getDisplayName(),
-                        msg.getFromId(), msg.getId(),
-                        sender.getPhoto());
-            } else {
-                TLPeerChat chat = (TLPeerChat) msg.getToId();
-                Group group = application.getEngine().getGroupsEngine().getGroup(chat.getChatId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessageVideo(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            chat.getChatId(), msg.getId(),
+                            msg.getPeerId(), msg.getMid(),
                             sender.getPhoto());
                 }
             }

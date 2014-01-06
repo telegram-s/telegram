@@ -1,15 +1,9 @@
 package org.telegram.android.core.engines;
 
-import com.actionbarsherlock.R;
-import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.core.model.*;
-import org.telegram.android.log.Logger;
 import org.telegram.dao.SecretChat;
 import org.telegram.dao.SecretChatDao;
-import org.telegram.ormlite.OrmEncryptedChat;
 
-import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -55,7 +49,7 @@ public class SecretDatabase {
             return new EncryptedChat[0];
         }
         SecretChat[] chats = secretDao.queryBuilder()
-                .where(SecretChatDao.Properties.Id.in(ids))
+                .where(SecretChatDao.Properties.Id.in((Object[]) ids))
                 .list()
                 .toArray(new SecretChat[0]);
         EncryptedChat[] res = new EncryptedChat[chats.length];

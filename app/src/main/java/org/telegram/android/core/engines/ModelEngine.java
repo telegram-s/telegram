@@ -244,9 +244,12 @@ public class ModelEngine {
         groupsEngine.onGroupNameChanged(chatId, title);
     }
 
-    public void onChatAvatarChanges(int chatId, TLAbsPhoto photo) {
-        groupsEngine.onGroupAvatarChanged(chatId, EngineUtils.convertAvatarPhoto(photo));
+    public void onChatAvatarChanges(int chatId, TLAbsLocalAvatarPhoto photo) {
+        groupsEngine.onGroupAvatarChanged(chatId, photo);
     }
+//    public void onChatAvatarChanges(int chatId, TLAbsPhoto photo) {
+//        groupsEngine.onGroupAvatarChanged(chatId, EngineUtils.convertAvatarPhoto(photo));
+//    }
 
     public void onChatUserShortAdded(int chatId, int inviter, int uid) {
         onChatUserAdded(chatId, inviter, uid);
@@ -844,10 +847,9 @@ public class ModelEngine {
         msg.setMid(mid);
 
         messagesEngine.update(msg);
-        onUsers(statedMessages.getUsers());
+        usersEngine.onUsers(statedMessages.getUsers());
         groupsEngine.onGroupsUpdated(statedMessages.getChats());
-
-        onNewMessages(statedMessages.getMessages(), new ArrayList<TLDialog>());
+        onUpdatedMessages(statedMessages.getMessages());
 
         dialogsEngine.updateDescriptorSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), mid, msg.getDatabaseId());
     }
@@ -862,11 +864,9 @@ public class ModelEngine {
         msg.setState(MessageState.SENT);
         msg.setMid(mid);
         messagesEngine.update(msg);
-        List<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
-        messages.add(statedMessage.getMessage());
-        onUsers(statedMessage.getUsers());
+        usersEngine.onUsers(statedMessage.getUsers());
         groupsEngine.onGroupsUpdated(statedMessage.getChats());
-        onNewMessages(messages, new ArrayList<TLDialog>());
+        onUpdatedMessage(statedMessage.getMessage());
         dialogsEngine.updateDescriptorSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), mid, msg.getDatabaseId());
     }
 
@@ -990,104 +990,77 @@ public class ModelEngine {
     }
 
     public void onLoadMoreDialogs(final List<TLAbsMessage> messages, final List<TLDialog> dialogs) {
-        onNewMessages(messages, dialogs);
-    }
-
-    public void onUpdatedMessages(final List<TLAbsMessage> messages) {
-        messagesEngine.onLoadMoreMessages(messages);
-    }
-
-    public HashSet<Integer> onNewMessages(final List<TLAbsMessage> messages,
-                                          final List<TLDialog> dialogs) {
-        final HashSet<Integer> newUnread = new HashSet<Integer>();
-        long start = SystemClock.uptimeMillis();
-        int[] ids = new int[messages.size()];
-        ChatMessage[] converted = new ChatMessage[messages.size()];
-        for (int i = 0; i < ids.length; i++) {
-            converted[i] = EngineUtils.fromTlMessage(messages.get(i), application);
-            ids[i] = converted[i].getMid();
+        ChatMessage[] res = messagesEngine.onLoadMoreMessages(messages);
+        HashSet<Long> dialogKeys = new HashSet<Long>();
+        for (ChatMessage msg : res) {
+            dialogKeys.add(msg.getPeerType() + msg.getPeerId() * 10L);
         }
+        DialogDescription[] descriptions = dialogsEngine.loadDialogs(dialogKeys.toArray(new Long[0]));
+        HashSet<DialogDescription> all = new HashSet<DialogDescription>();
+        Collections.addAll(all, descriptions);
+        HashSet<DialogDescription> changed = new HashSet<DialogDescription>();
+        HashSet<DialogDescription> created = new HashSet<DialogDescription>();
 
-        ChatMessage[] original = messagesEngine.getMessagesByMid(ids);
-
-        final ArrayList<Pair<ChatMessage, ChatMessage>> diff = new ArrayList<Pair<ChatMessage, ChatMessage>>();
-
-        for (ChatMessage m : converted) {
-            ChatMessage orig = EngineUtils.searchMessage(original, m.getMid());
-            diff.add(new Pair<ChatMessage, ChatMessage>(orig, m));
-            /*if (orig == null || m.getMessageId() <= 0) {
-                changed.add(m);
-                original.add(null);
-            } else if (isChatMessagesChanged(orig, m)) {
-                changed.add(m);
-                original.add(orig);
-            }*/
-        }
-
-        Logger.d(TAG, "newMessages:prepare time: " + (SystemClock.uptimeMillis() - start));
-        start = SystemClock.uptimeMillis();
-        getMessagesDao().callBatchTasks(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                for (Pair<ChatMessage, ChatMessage> msgs : diff) {
-                    // Logger.d(TAG, "newMessages: " + msgs.second.getMid());
-                    ChatMessage orig = msgs.first;
-                    ChatMessage changed = msgs.second;
-
-                    if (orig == null) {
-                        messagesEngine.create(changed);
-                        if (!changed.isOut() && changed.getState() == MessageState.SENT) {
-                            newUnread.add(changed.getMid());
-                        }
-                    } else {
-                        changed.setDatabaseId(orig.getDatabaseId());
-                        messagesEngine.update(changed);
-                    }
-
-                    if (changed.getRawContentType() == ContentType.MESSAGE_PHOTO) {
-                        mediaEngine.saveMedia(changed.getMid(), changed);
-                    } else if (changed.getRawContentType() == ContentType.MESSAGE_VIDEO) {
-                        mediaEngine.saveMedia(changed.getMid(), changed);
-                    }
-
-                    DialogDescription description = getDescriptionForPeer(changed.getPeerType(), changed.getPeerId());
-                    if (description == null) {
-                        if (changed.getPeerType() == PeerType.PEER_CHAT) {
-                            if (changed.getContentType() == ContentType.MESSAGE_SYSTEM && changed.getExtras() instanceof TLLocalActionChatDeleteUser) {
-                                TLLocalActionChatDeleteUser user = (TLLocalActionChatDeleteUser) changed.getExtras();
-                                if (user.getUserId() == application.getCurrentUid() && changed.getSenderId() == application.getCurrentUid()) {
-                                    continue;
-                                }
-                            }
-                        }
-
-                        if (changed.getPeerType() == PeerType.PEER_USER) {
-                            description = new DialogDescription(PeerType.PEER_USER, changed.getPeerId());
-                        } else {
-                            description = new DialogDescription(PeerType.PEER_CHAT, changed.getPeerId());
-                        }
-                        dialogsEngine.applyDescriptor(description, changed);
-
-                        TLDialog dialog = EngineUtils.findDialog(dialogs, description.getPeerType(), description.getPeerId());
-                        if (dialog != null) {
-                            description.setUnreadCount(dialog.getUnreadCount());
-                        }
-
-                        dialogsEngine.updateOrCreateDialog(description);
-                    } else {
-                        if (description.getDate() <= changed.getDate()) {
-                            dialogsEngine.applyDescriptor(description, changed);
-                            dialogsEngine.updateDialog(description);
+        for (ChatMessage msg : res) {
+            if (msg.getPeerType() != PeerType.PEER_USER && msg.getPeerType() != PeerType.PEER_CHAT) {
+                continue;
+            }
+            DialogDescription description = findDescription(msg.getPeerType(), msg.getPeerId(), all);
+            if (description == null) {
+                // Hack to avoid recreating dialog when leaving group
+                if (msg.getPeerType() == PeerType.PEER_CHAT) {
+                    if (msg.getContentType() == ContentType.MESSAGE_SYSTEM && msg.getExtras() instanceof TLLocalActionChatDeleteUser) {
+                        TLLocalActionChatDeleteUser user = (TLLocalActionChatDeleteUser) msg.getExtras();
+                        if (user.getUserId() == application.getCurrentUid() && msg.getSenderId() == application.getCurrentUid()) {
+                            continue;
                         }
                     }
                 }
-                Logger.d(TAG, "newMessages:ended");
-                return null;
-            }
-        });
 
-        Logger.d(TAG, "newMessages:update time: " + (SystemClock.uptimeMillis() - start));
-        return newUnread;
+                description = new DialogDescription(msg.getPeerType(), msg.getPeerId());
+                dialogsEngine.applyDescriptor(description, msg);
+                TLDialog dialog = EngineUtils.findDialog(dialogs, description.getPeerType(), description.getPeerId());
+                if (dialog != null) {
+                    description.setUnreadCount(dialog.getUnreadCount());
+                }
+                created.add(description);
+                all.add(description);
+            } else {
+                if (description.getDate() <= msg.getDate()) {
+                    dialogsEngine.applyDescriptor(description, msg);
+                    dialogsEngine.updateDialog(description);
+                    changed.add(description);
+                }
+            }
+        }
+
+        for (DialogDescription description : changed) {
+            dialogsEngine.updateDialog(description);
+        }
+
+        for (DialogDescription description : created) {
+            dialogsEngine.updateOrCreateDialog(description);
+        }
+    }
+
+    private DialogDescription findDescription(int peerType, int peerId, HashSet<DialogDescription> descriptions) {
+        for (DialogDescription description : descriptions) {
+            if (description.getPeerType() == peerType && description.getPeerId() == peerId) {
+                return description;
+            }
+        }
+
+        return null;
+    }
+
+    public void onUpdatedMessage(TLAbsMessage message) {
+        ArrayList<TLAbsMessage> messages = new ArrayList<TLAbsMessage>();
+        messages.add(message);
+        onUpdatedMessages(messages);
+    }
+
+    public ChatMessage[] onUpdatedMessages(final List<TLAbsMessage> messages) {
+        return messagesEngine.onLoadMoreMessages(messages);
     }
 
     public void deleteHistory(int peerType, int peerId) {

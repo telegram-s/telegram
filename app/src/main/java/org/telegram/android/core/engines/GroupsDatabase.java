@@ -52,7 +52,10 @@ public class GroupsDatabase {
             return new Group[0];
         }
 
-        GroupChat[] dbRes = groupDao.queryBuilder().where(GroupChatDao.Properties.Id.in(ids)).list().toArray(new GroupChat[0]);
+        GroupChat[] dbRes = groupDao.queryBuilder()
+                .where(GroupChatDao.Properties.Id.in((Object[])ids))
+                .list()
+                .toArray(new GroupChat[0]);
         Group[] res = new Group[dbRes.length];
         for (int i = 0; i < res.length; i++) {
             res[i] = cachedConvert(dbRes[i]);
