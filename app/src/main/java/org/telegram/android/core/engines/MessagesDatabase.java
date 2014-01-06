@@ -31,6 +31,10 @@ public class MessagesDatabase {
         this.messageDao = engine.getDatabase().getMessagesDao();
     }
 
+    private long uniq(int peerType, int peerId) {
+        return peerId * 10L + peerType;
+    }
+
     public ChatMessage[] queryMessages(int peerType, int peerId, int pageSize, int offset) {
         PreparedQuery<ChatMessage> query;
         try {

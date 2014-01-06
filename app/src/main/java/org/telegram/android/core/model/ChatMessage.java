@@ -151,7 +151,6 @@ public class ChatMessage implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
-        this.bodyHasSmileys = EmojiProcessor.containsEmoji(message);
     }
 
     public TLObject getExtras() {
@@ -192,10 +191,6 @@ public class ChatMessage implements Serializable {
 
     public void setForwardMid(int forwardMid) {
         this.forwardMid = forwardMid;
-    }
-
-    public boolean isBodyHasSmileys() {
-        return bodyHasSmileys;
     }
 
     public boolean isDeletedLocal() {
