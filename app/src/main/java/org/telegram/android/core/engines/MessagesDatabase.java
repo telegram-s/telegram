@@ -3,11 +3,15 @@ package org.telegram.android.core.engines;
 import android.util.Pair;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.DeleteBuilder;
+import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.core.model.ChatMessage;
+import org.telegram.android.core.model.MessageState;
+import org.telegram.android.core.model.PeerType;
 import org.telegram.android.log.Logger;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +28,80 @@ public class MessagesDatabase {
     private RuntimeExceptionDao<ChatMessage, Long> messageDao;
 
     public MessagesDatabase(ModelEngine engine) {
-        this.messageDao = engine.getMessagesDao();
+        this.messageDao = engine.getDatabase().getMessagesDao();
+    }
+
+    public ChatMessage[] queryMessages(int peerType, int peerId, int pageSize, int offset) {
+        PreparedQuery<ChatMessage> query;
+        try {
+            QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
+            queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
+            queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false);
+            queryBuilder.offset(offset);
+            queryBuilder.limit(pageSize);
+            query = queryBuilder.prepare();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ChatMessage[0];
+        }
+        return messageDao.query(query).toArray(new ChatMessage[0]);
+    }
+
+    public ChatMessage[] queryUnreadedMessages(int peerType, int peerId, int pageSize, int mid) {
+        ArrayList<ChatMessage> resultMessages = new ArrayList<ChatMessage>();
+        if (peerType != PeerType.PEER_USER_ENCRYPTED) {
+            ChatMessage message = getMessageByMid(mid);
+            if (message != null) {
+                PreparedQuery<ChatMessage> query;
+                try {
+                    QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
+                    queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
+                    queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
+                            .and().raw("(date * 1000000 + abs(mid)) >= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
+                    query = queryBuilder.prepare();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return new ChatMessage[0];
+                }
+                resultMessages.addAll(messageDao.query(query));
+
+                try {
+                    QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
+                    queryBuilder.orderByRaw("-(date * 1000000 + abs(mid))");
+                    queryBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType).and().eq("deletedLocal", false)
+                            .and().raw("(date * 1000000 + abs(mid)) <= " + (message.getDate() * 1000000L + Math.abs(message.getMid())));
+                    queryBuilder.limit(pageSize);
+                    query = queryBuilder.prepare();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return new ChatMessage[0];
+                }
+                resultMessages.addAll(messageDao.query(query));
+
+                return resultMessages.toArray(new ChatMessage[0]);
+            }
+        }
+
+        return null;
+    }
+
+    public ChatMessage[] getUnreadSecret(int chatId, int maxDate) {
+        QueryBuilder<ChatMessage, Long> queryBuilder = messageDao.queryBuilder();
+        try {
+            queryBuilder.where()
+                    .eq("peerType", PeerType.PEER_USER_ENCRYPTED).and()
+                    .eq("peerId", chatId).and()
+                    .eq("isOut", true).and()
+                    .eq("state", MessageState.SENT).and()
+                    .gt("messageTimeout", 0)
+                    .le("date", maxDate);
+
+            return messageDao.query(queryBuilder.prepare()).toArray(new ChatMessage[0]);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new ChatMessage[0];
     }
 
     public ChatMessage[] getMessagesByMid(int[] mid) {

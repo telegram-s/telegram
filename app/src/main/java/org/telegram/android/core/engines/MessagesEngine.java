@@ -42,6 +42,14 @@ public class MessagesEngine {
         this.application = engine.getApplication();
     }
 
+    public ChatMessage[] queryMessages(int peerType, int peerId, int pageSize, int offset) {
+        return database.queryMessages(peerType, peerId, pageSize, offset);
+    }
+
+    public ChatMessage[] queryUnreadedMessages(int peerType, int peerId, int pageSize, int mid) {
+        return database.queryUnreadedMessages(peerType, peerId, pageSize, mid);
+    }
+
     public ChatMessage getMessageByMid(int mid) {
         return database.getMessageByMid(mid);
     }
@@ -103,6 +111,10 @@ public class MessagesEngine {
 
     public int getMaxMidInDialog(int peerType, int peerId) {
         return database.getMaxMidInDialog(peerType, peerId);
+    }
+
+    public ChatMessage[] getUnreadSecret(int chatId, int maxDate) {
+        return database.getUnreadSecret(chatId, maxDate);
     }
 
     public synchronized void onDeletedOnServer(int[] mids) {

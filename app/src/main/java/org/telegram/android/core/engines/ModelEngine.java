@@ -1,7 +1,6 @@
 package org.telegram.android.core.engines;
 
 import android.net.Uri;
-import android.os.SystemClock;
 import android.util.Pair;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -24,7 +23,6 @@ import org.telegram.tl.TLObject;
 
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * Author: Korshakov Stepan
@@ -99,10 +97,6 @@ public class ModelEngine {
 
     public RuntimeExceptionDao<MediaRecord, Long> getMediasDao() {
         return database.getMediaDao();
-    }
-
-    public RuntimeExceptionDao<ChatMessage, Long> getMessagesDao() {
-        return database.getMessagesDao();
     }
 
     public RuntimeExceptionDao<Contact, Long> getContactsDao() {
@@ -247,9 +241,6 @@ public class ModelEngine {
     public void onChatAvatarChanges(int chatId, TLAbsLocalAvatarPhoto photo) {
         groupsEngine.onGroupAvatarChanged(chatId, photo);
     }
-//    public void onChatAvatarChanges(int chatId, TLAbsPhoto photo) {
-//        groupsEngine.onGroupAvatarChanged(chatId, EngineUtils.convertAvatarPhoto(photo));
-//    }
 
     public void onChatUserShortAdded(int chatId, int inviter, int uid) {
         onChatUserAdded(chatId, inviter, uid);
@@ -431,24 +422,12 @@ public class ModelEngine {
     }
 
     public void onEncryptedReaded(int chatId, int readDate, int maxDate) {
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = getMessagesDao().queryBuilder();
-            queryBuilder.where()
-                    .eq("peerType", PeerType.PEER_USER_ENCRYPTED).and()
-                    .eq("peerId", chatId).and()
-                    .eq("isOut", true).and()
-                    .eq("state", MessageState.SENT).and()
-                    .gt("messageTimeout", 0)
-                    .le("date", maxDate);
-
-            int localReadDate = (int) (readDate - TimeOverlord.getInstance().getTimeDelta() / 1000);
-            for (ChatMessage msg : getMessagesDao().query(queryBuilder.prepare())) {
-                msg.setMessageDieTime(localReadDate + msg.getMessageTimeout());
-                application.getSelfDestructProcessor().performSelfDestruct(msg.getDatabaseId(), msg.getMessageDieTime());
-                markReaded(msg);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        ChatMessage[] unreadMessage = messagesEngine.getUnreadSecret(chatId, maxDate);
+        int localReadDate = (int) (readDate - TimeOverlord.getInstance().getTimeDelta() / 1000);
+        for (ChatMessage msg : unreadMessage) {
+            msg.setMessageDieTime(localReadDate + msg.getMessageTimeout());
+            application.getSelfDestructProcessor().performSelfDestruct(msg.getDatabaseId(), msg.getMessageDieTime());
+            markReaded(msg);
         }
     }
 
