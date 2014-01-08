@@ -187,12 +187,8 @@ public class MessagesEngine {
         database.diffInTx(diff[0], diff[1]);
         Logger.d(TAG, "updateMessages:update time: " + (SystemClock.uptimeMillis() - start));
         start = SystemClock.uptimeMillis();
-        for (ChatMessage msg : diff[0]) {
-            application.getDataSourceKernel().onSourceUpdateMessage(msg);
-        }
-        for (ChatMessage msg : diff[1]) {
-            application.getDataSourceKernel().onSourceAddMessage(msg);
-        }
+        application.getDataSourceKernel().onSourceUpdateMessages(diff[0].toArray(new ChatMessage[0]));
+        application.getDataSourceKernel().onSourceAddMessages(diff[1].toArray(new ChatMessage[0]));
         Logger.d(TAG, "updateMessages:datasource time: " + (SystemClock.uptimeMillis() - start));
         start = SystemClock.uptimeMillis();
         Logger.d(TAG, "updateMessages:complete time: " + (SystemClock.uptimeMillis() - start));

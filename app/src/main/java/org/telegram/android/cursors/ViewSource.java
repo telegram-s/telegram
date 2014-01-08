@@ -126,6 +126,7 @@ public abstract class ViewSource<T, V> {
         long start = SystemClock.uptimeMillis();
         ArrayList<T> res = new ArrayList<T>(items.values());
         Collections.sort(res, comparator);
+        Logger.d(TAG, "Building new working set in " + (SystemClock.uptimeMillis() - start) + " ms");
         return res;
     }
 
@@ -143,6 +144,7 @@ public abstract class ViewSource<T, V> {
     }
 
     public synchronized void invalidateData() {
+        Logger.d(TAG, "invalidateData");
         nextWorkingSet = buildNewWorkingSet();
         if (responsibility != null) {
             responsibility.waitForResume();
@@ -152,6 +154,7 @@ public abstract class ViewSource<T, V> {
     }
 
     private synchronized void invalidateDataAndState(InternalSourceState state) {
+        Logger.d(TAG, "invalidateDataAndState");
         this.state = state;
         nextWorkingSet = buildNewWorkingSet();
         if (responsibility != null) {
@@ -164,6 +167,7 @@ public abstract class ViewSource<T, V> {
     }
 
     public synchronized void invalidateDataIfRequired() {
+        Logger.d(TAG, "invalidateDataIfRequired");
         if (invalidated) {
             invalidated = false;
             invalidateData();
@@ -201,12 +205,7 @@ public abstract class ViewSource<T, V> {
         V[] res = loadItems(offset);
         Logger.w(TAG, "loadingMore loaded " + res.length + " in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();
-        boolean hasAdded = false;
-        for (V re : res) {
-            if (!addItem(re)) {
-                hasAdded = true;
-            }
-        }
+        boolean hasAdded = addItems(res);
         Logger.w(TAG, "loadingMore added " + res.length + " in " + (SystemClock.uptimeMillis() - start) + " ms");
         return hasAdded;
     }
@@ -231,6 +230,18 @@ public abstract class ViewSource<T, V> {
         long key = getItemKey(dest);
         boolean res = items.containsKey(key);
         items.put(key, dest);
+        invalidated = true;
+        return res;
+    }
+
+    public synchronized boolean addItems(V... itm) {
+        boolean res = false;
+        for (V v : itm) {
+            T dest = convert(v);
+            long key = getItemKey(dest);
+            res = items.containsKey(key) | res;
+            items.put(key, dest);
+        }
         invalidated = true;
         return res;
     }
@@ -264,6 +275,20 @@ public abstract class ViewSource<T, V> {
 //            return;
 //        }
         items.put(key, dest);
+        invalidated = true;
+    }
+
+    public synchronized void updateItems(V... itm) {
+        for (V v : itm) {
+            T dest = convert(v);
+            Logger.d(TAG, "updateItem: " + itm);
+            long key = getItemKey(dest);
+            Logger.d(TAG, "item key: " + key);
+//        if (!items.containsKey(key)) {
+//            return;
+//        }
+            items.put(key, dest);
+        }
         invalidated = true;
     }
 

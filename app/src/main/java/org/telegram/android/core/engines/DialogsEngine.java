@@ -59,16 +59,12 @@ public class DialogsEngine {
 
     public synchronized void updateDialogs(DialogDescription[] description) {
         database.updateOrCreateDialogs(description);
-        for (DialogDescription d : description) {
-            application.getDialogSource().getViewSource().updateItem(d);
-        }
+        application.getDialogSource().getViewSource().updateItems(description);
     }
 
     public synchronized void updateOrCreateDialog(DialogDescription[] description) {
         database.updateOrCreateDialogs(description);
-        for (DialogDescription d : description) {
-            application.getDialogSource().getViewSource().updateItem(d);
-        }
+        application.getDialogSource().getViewSource().updateItems(description);
     }
 
     public synchronized void deleteDialog(int peerType, int peerId) {

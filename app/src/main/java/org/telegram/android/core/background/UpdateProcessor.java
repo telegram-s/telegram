@@ -641,7 +641,6 @@ public class UpdateProcessor {
                     ((TLUpdateContactRegistered) update).getDate(),
                     new TLLocalActionUserRegistered());
             application.getNotifications().onNewMessageJoined(src.getDisplayName(), src.getUid(), 0, src.getPhoto());
-            application.notifyUIUpdate();
             application.getSyncKernel().getContactsSync().invalidateContactsSync();
         } else if (update instanceof TLUpdateContactLink) {
             TLUpdateContactLink link = (TLUpdateContactLink) update;
@@ -660,7 +659,6 @@ public class UpdateProcessor {
         } else if (update instanceof TLUpdateReadMessages) {
             TLUpdateReadMessages readMessages = (TLUpdateReadMessages) update;
             application.getEngine().onMessagesReaded(readMessages.getMessages().toIntArray());
-            application.notifyUIUpdate();
         } else if (update instanceof TLUpdateDeleteMessages) {
             TLUpdateDeleteMessages deleteMessages = (TLUpdateDeleteMessages) update;
             application.getEngine().onDeletedOnServer(deleteMessages.getMessages().toIntArray());
@@ -721,7 +719,6 @@ public class UpdateProcessor {
                 application.getTypingStates().resetUserTyping(message.getFromId(), message.getChatId());
             }
         }
-        application.notifyUIUpdate();
     }
 
     private void onUpdateShortMessage(TLUpdateShortMessage message) {
@@ -741,7 +738,6 @@ public class UpdateProcessor {
                 application.getTypingStates().resetUserTyping(message.getFromId());
             }
         }
-        application.notifyUIUpdate();
     }
 
 

@@ -6,7 +6,9 @@ import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.log.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Created by ex3ndr on 16.11.13.
@@ -118,6 +120,56 @@ public class DataSourceKernel {
         if (res == null)
             return;
         res.addItem(message);
+    }
+
+    public void onSourceAddMessages(ChatMessage[] message) {
+        HashSet<Long> ids = new HashSet<Long>();
+        for (ChatMessage msg : message) {
+            ids.add(msg.getPeerId() * 10L + msg.getPeerType());
+        }
+
+        for (Long id : ids) {
+            int peerType = (int) (id % 10);
+            int peerId = (int) (id / 10);
+
+            ViewSource<MessageWireframe, ChatMessage> res = getMessagesViewSource(peerType, peerId);
+            if (res == null)
+                continue;
+
+            ArrayList<ChatMessage> msgs = new ArrayList<ChatMessage>();
+            for (ChatMessage msg : message) {
+                if (msg.getPeerId() == peerId && msg.getPeerType() == peerType) {
+                    msgs.add(msg);
+                }
+            }
+            res.addItems(msgs.toArray(new ChatMessage[msgs.size()]));
+        }
+
+    }
+
+    public void onSourceUpdateMessages(ChatMessage[] message) {
+        HashSet<Long> ids = new HashSet<Long>();
+        for (ChatMessage msg : message) {
+            ids.add(msg.getPeerId() * 10L + msg.getPeerType());
+        }
+
+        for (Long id : ids) {
+            int peerType = (int) (id % 10);
+            int peerId = (int) (id / 10);
+
+            ViewSource<MessageWireframe, ChatMessage> res = getMessagesViewSource(peerType, peerId);
+            if (res == null)
+                continue;
+
+            ArrayList<ChatMessage> msgs = new ArrayList<ChatMessage>();
+            for (ChatMessage msg : message) {
+                if (msg.getPeerId() == peerId && msg.getPeerType() == peerType) {
+                    msgs.add(msg);
+                }
+            }
+            res.updateItems(msgs.toArray(new ChatMessage[msgs.size()]));
+        }
+
     }
 
     public void onSourceAddMessageHacky(ChatMessage message) {
