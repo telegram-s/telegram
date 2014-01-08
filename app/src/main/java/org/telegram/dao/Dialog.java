@@ -14,6 +14,7 @@ public class Dialog {
     private int contentType;
     private String message;
     private int messageState;
+    private byte[] extras;
     private int lastLocalViewedMessage;
     private int lastRemoteViewedMessage;
     private boolean failure;
@@ -26,7 +27,7 @@ public class Dialog {
         this.id = id;
     }
 
-    public Dialog(long id, int unreadCount, int topMessageId, int senderId, int date, int contentType, String message, int messageState, int lastLocalViewedMessage, int lastRemoteViewedMessage, boolean failure, long firstUnreadMessage) {
+    public Dialog(long id, int unreadCount, int topMessageId, int senderId, int date, int contentType, String message, int messageState, byte[] extras, int lastLocalViewedMessage, int lastRemoteViewedMessage, boolean failure, long firstUnreadMessage) {
         this.id = id;
         this.unreadCount = unreadCount;
         this.topMessageId = topMessageId;
@@ -35,6 +36,7 @@ public class Dialog {
         this.contentType = contentType;
         this.message = message;
         this.messageState = messageState;
+        this.extras = extras;
         this.lastLocalViewedMessage = lastLocalViewedMessage;
         this.lastRemoteViewedMessage = lastRemoteViewedMessage;
         this.failure = failure;
@@ -103,6 +105,14 @@ public class Dialog {
 
     public void setMessageState(int messageState) {
         this.messageState = messageState;
+    }
+
+    public byte[] getExtras() {
+        return extras;
+    }
+
+    public void setExtras(byte[] extras) {
+        this.extras = extras;
     }
 
     public int getLastLocalViewedMessage() {

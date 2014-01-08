@@ -3,11 +3,14 @@ package org.telegram.android.core.engines;
 import android.os.SystemClock;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.core.model.DialogDescription;
+import org.telegram.android.core.model.TLLocalContext;
+import org.telegram.android.core.model.media.TLLocalContact;
 import org.telegram.android.log.Logger;
 import org.telegram.dao.Dialog;
 import org.telegram.dao.DialogDao;
 import org.telegram.ormlite.OrmDialog;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -171,6 +174,16 @@ public class DialogsDatabase {
             res.setTopMessageId(dialog.getTopMessageId());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
             res.setUnreadCount(dialog.getUnreadCount());
+            if (dialog.getExtras() != null) {
+                try {
+                    res.setExtras(TLLocalContext.getInstance().deserializeMessage(dialog.getExtras()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    res.setExtras(null);
+                }
+            } else {
+                res.setExtras(null);
+            }
         }
 
         return dialogsCache.get(id);
@@ -190,6 +203,16 @@ public class DialogsDatabase {
         dest.setTopMessageId(src.getTopMessageId());
         dest.setFirstUnreadMessage(src.getFirstUnreadMessage());
         dest.setUnreadCount(src.getUnreadCount());
+        if (src.getExtras() != null) {
+            try {
+                dest.setExtras(src.getExtras().serialize());
+            } catch (IOException e) {
+                e.printStackTrace();
+                dest.setExtras(null);
+            }
+        } else {
+            dest.setExtras(null);
+        }
     }
 
     private long uniqId(DialogDescription description) {
