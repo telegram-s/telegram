@@ -26,7 +26,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private static final int DATABASE_VERSION = 57;
 
     private RuntimeExceptionDao<FullChatInfo, Long> fullChatInfoDao;
-    private RuntimeExceptionDao<ChatMessage, Long> messagesDao;
     private RuntimeExceptionDao<Contact, Long> contactsDao;
     private RuntimeExceptionDao<MediaRecord, Long> mediaDao;
 
@@ -42,7 +41,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
         try {
             TableUtils.createTable(connectionSource, OrmDialog.class);
-            TableUtils.createTable(connectionSource, ChatMessage.class);
             TableUtils.createTable(connectionSource, OrmUser.class);
             TableUtils.createTable(connectionSource, Contact.class);
             TableUtils.createTable(connectionSource, FullChatInfo.class);
@@ -62,7 +60,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
         wasUpgraded = true;
         try {
             TableUtils.dropTable(connectionSource, OrmDialog.class, true);
-            TableUtils.dropTable(connectionSource, ChatMessage.class, true);
             TableUtils.dropTable(connectionSource, User.class, true);
             TableUtils.dropTable(connectionSource, Contact.class, true);
             TableUtils.dropTable(connectionSource, FullChatInfo.class, true);
@@ -70,7 +67,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             TableUtils.dropTable(connectionSource, OrmEncryptedChat.class, true);
 
             TableUtils.createTable(connectionSource, OrmDialog.class);
-            TableUtils.createTable(connectionSource, ChatMessage.class);
             TableUtils.createTable(connectionSource, User.class);
             TableUtils.createTable(connectionSource, Contact.class);
             TableUtils.createTable(connectionSource, FullChatInfo.class);
@@ -123,7 +119,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
                     new Callable<Void>() {
                         public Void call() throws Exception {
                             TableUtils.clearTable(connectionSource, OrmDialog.class);
-                            TableUtils.clearTable(connectionSource, ChatMessage.class);
                             TableUtils.clearTable(connectionSource, OrmUser.class);
                             TableUtils.clearTable(connectionSource, Contact.class);
                             TableUtils.clearTable(connectionSource, FullChatInfo.class);
@@ -146,13 +141,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             mediaDao = getRuntimeExceptionDao(MediaRecord.class);
         }
         return mediaDao;
-    }
-
-    public RuntimeExceptionDao<ChatMessage, Long> getMessagesDao() {
-        if (messagesDao == null) {
-            messagesDao = getRuntimeExceptionDao(ChatMessage.class);
-        }
-        return messagesDao;
     }
 
     public RuntimeExceptionDao<Contact, Long> getContactsDao() {

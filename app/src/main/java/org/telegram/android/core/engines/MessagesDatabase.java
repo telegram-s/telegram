@@ -38,6 +38,29 @@ public class MessagesDatabase {
         return peerId * 10L + peerType;
     }
 
+    public ChatMessage[] getUnsentMessages() {
+        return convert(messageDao.queryBuilder()
+                .where(
+                        MessageDao.Properties.State.eq(MessageState.PENDING),
+                        MessageDao.Properties.IsOut.eq(true),
+                        MessageDao.Properties.DeletedLocal.eq(false))
+                .list());
+    }
+
+    public ChatMessage[] getUnsyncedDeletedMessages() {
+        return convert(messageDao.queryBuilder()
+                .where(MessageDao.Properties.DeletedLocal.eq(true),
+                        MessageDao.Properties.DeletedServer.eq(false))
+                .list());
+    }
+
+    public ChatMessage[] getUnsyncedRestoredMessages() {
+        return convert(messageDao.queryBuilder()
+                .where(MessageDao.Properties.DeletedLocal.eq(false),
+                        MessageDao.Properties.DeletedServer.eq(true))
+                .list());
+    }
+
     public ChatMessage[] queryMessages(int peerType, int peerId, int pageSize, int offset) {
         List<Message> dbres = messageDao.queryBuilder()
                 .where(

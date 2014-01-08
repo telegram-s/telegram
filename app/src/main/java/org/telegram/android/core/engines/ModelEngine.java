@@ -1,9 +1,7 @@
 package org.telegram.android.core.engines;
 
-import android.net.Uri;
 import android.util.Pair;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.StelsDatabase;
@@ -148,37 +146,9 @@ public class ModelEngine {
     }
 
     public void markUnsentAsFailured() {
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = database.getMessagesDao().queryBuilder();
-            queryBuilder.where().eq("state", MessageState.PENDING).and().eq("isOut", true).and().eq("deletedLocal", false);
-            for (ChatMessage message : database.getMessagesDao().query(queryBuilder.prepare())) {
-                onMessageFailure(message);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        for (ChatMessage message : messagesEngine.getUnsentMessages()) {
+            onMessageFailure(message);
         }
-    }
-
-    public ChatMessage[] getUnsyncedDeletedMessages() {
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = database.getMessagesDao().queryBuilder();
-            queryBuilder.where().eq("deletedLocal", true).and().eq("deletedServer", false);
-            return database.getMessagesDao().query(queryBuilder.prepare()).toArray(new ChatMessage[0]);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return new ChatMessage[0];
-    }
-
-    public ChatMessage[] getUnsyncedRestoredMessages() {
-        try {
-            QueryBuilder<ChatMessage, Long> queryBuilder = database.getMessagesDao().queryBuilder();
-            queryBuilder.where().eq("deletedLocal", false).and().eq("deletedServer", true);
-            return database.getMessagesDao().query(queryBuilder.prepare()).toArray(new ChatMessage[0]);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return new ChatMessage[0];
     }
 
     public void onUpdateMessageId(long rid, int mid) {
@@ -618,29 +588,9 @@ public class ModelEngine {
         return msg;
     }
 
-    public int sendVideo(int peerType, int peerId, String fileName, int previewW, int previewH) {
-        TLUploadingVideo video = new TLUploadingVideo(fileName, previewW, previewH);
-        return sendVideo(peerType, peerId, video);
-    }
-
-    public int sendPhotoUri(int peerType, int peerId, String uri, int width, int height) {
-        TLUploadingPhoto photo = new TLUploadingPhoto(width, height, Uri.parse(uri));
-        return sendPhoto(peerType, peerId, photo);
-    }
-
-    public int sendPhoto(int peerType, int peerId, String fileName, int width, int height) {
-        TLUploadingPhoto photo = new TLUploadingPhoto(width, height, fileName);
-        return sendPhoto(peerType, peerId, photo);
-    }
-
-    public int sendDocument(int peerType, int peerId, String fileName) {
-        TLUploadingDocument document = new TLUploadingDocument(fileName);
-        return sendDocument(peerType, peerId, document);
-    }
-
-    private int sendDocument(int peerType, int peerId, TLUploadingDocument doc) {
+    public int sendDocument(int peerType, int peerId, TLUploadingDocument doc) {
         ChatMessage msg = prepareSendMessage(peerType, peerId);
-        msg.setMessage("Document");
+        msg.setMessage("");
         msg.setContentType(ContentType.MESSAGE_DOCUMENT);
         msg.setExtras(doc);
         messagesEngine.create(msg);
@@ -649,7 +599,7 @@ public class ModelEngine {
         return msg.getDatabaseId();
     }
 
-    private int sendPhoto(int peerType, int peerId, TLUploadingPhoto photo) {
+    public int sendPhoto(int peerType, int peerId, TLUploadingPhoto photo) {
         ChatMessage msg = prepareSendMessage(peerType, peerId);
         msg.setMessage("Photo");
         msg.setContentType(ContentType.MESSAGE_PHOTO);
@@ -660,7 +610,7 @@ public class ModelEngine {
         return msg.getDatabaseId();
     }
 
-    private int sendVideo(int peerType, int peerId, TLUploadingVideo video) {
+    public int sendVideo(int peerType, int peerId, TLUploadingVideo video) {
         ChatMessage msg = prepareSendMessage(peerType, peerId);
         msg.setMessage("Video");
         msg.setContentType(ContentType.MESSAGE_VIDEO);
@@ -740,6 +690,7 @@ public class ModelEngine {
         return msg.getDatabaseId();
     }
 
+
     public ChatMessage prepareAsyncSendMessage(int peerType, int peerId, String message) {
         ChatMessage msg = prepareSendMessage(peerType, peerId);
         msg.setMessage(message);
@@ -798,7 +749,7 @@ public class ModelEngine {
         dialogsEngine.updateDescriptorPending(msg);
     }
 
-    public synchronized void onConfirmed(ChatMessage msg) {
+    public void onConfirmed(ChatMessage msg) {
         if (msg.getState() == MessageState.PENDING) {
             msg.setState(MessageState.SENT);
             messagesEngine.update(msg);
@@ -814,7 +765,7 @@ public class ModelEngine {
         }
     }
 
-    public synchronized void onForwarded(ChatMessage msg, TLAbsStatedMessages statedMessages) {
+    public void onForwarded(ChatMessage msg, TLAbsStatedMessages statedMessages) {
         int mid = statedMessages.getMessages().get(0).getId();
 
         if (getMessagesEngine().getMessageByMid(mid) != null) {
@@ -833,7 +784,7 @@ public class ModelEngine {
         dialogsEngine.updateDescriptorSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), mid, msg.getDatabaseId());
     }
 
-    public synchronized void onMessageSent(ChatMessage msg, TLAbsStatedMessage statedMessage) {
+    public void onMessageSent(ChatMessage msg, TLAbsStatedMessage statedMessage) {
         int mid = statedMessage.getMessage().getId();
         if (getMessagesEngine().getMessageByMid(mid) != null) {
             messagesEngine.delete(msg);
@@ -849,7 +800,7 @@ public class ModelEngine {
         dialogsEngine.updateDescriptorSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), mid, msg.getDatabaseId());
     }
 
-    public synchronized void onMessageSent(ChatMessage msg, TLAbsSentMessage tl) {
+    public void onMessageSent(ChatMessage msg, TLAbsSentMessage tl) {
         if (getMessagesEngine().getMessageByMid(tl.getId()) != null) {
             messagesEngine.delete(msg);
             return;
@@ -862,7 +813,7 @@ public class ModelEngine {
         dialogsEngine.updateDescriptorSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), tl.getId(), msg.getDatabaseId());
     }
 
-    public synchronized void onMessageSecretMediaSent(ChatMessage msg, int date, TLObject media) {
+    public void onMessageSecretMediaSent(ChatMessage msg, int date, TLObject media) {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
         msg.setExtras(media);
@@ -872,7 +823,7 @@ public class ModelEngine {
     }
 
 
-    public synchronized void onMessagePhotoSent(ChatMessage msg, int date, int mid, TLLocalPhoto photo) {
+    public void onMessagePhotoSent(ChatMessage msg, int date, int mid, TLLocalPhoto photo) {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
         msg.setMid(mid);
@@ -882,14 +833,14 @@ public class ModelEngine {
         dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
     }
 
-    public synchronized void onMessageSent(ChatMessage msg, int date) {
+    public void onMessageSent(ChatMessage msg, int date) {
         msg.setState(MessageState.SENT);
         msg.setDate(date);
         messagesEngine.update(msg);
         dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
     }
 
-    public synchronized void onMessageFailure(ChatMessage msg) {
+    public void onMessageFailure(ChatMessage msg) {
         if (getMessageByDbId(msg.getDatabaseId()) == null) {
             return;
         }
@@ -905,11 +856,11 @@ public class ModelEngine {
         }
     }
 
-    public synchronized void cancelMediaSend(int databaseId) {
+    public void cancelMediaSend(int databaseId) {
         deleteUnsentMessage(databaseId);
     }
 
-    public synchronized void onDeletedOnServer(int[] mids) {
+    public void onDeletedOnServer(int[] mids) {
         messagesEngine.onDeletedOnServer(mids);
 
         ChatMessage[] messages = messagesEngine.getMessagesByMid(mids);
@@ -921,7 +872,7 @@ public class ModelEngine {
         }
     }
 
-    public synchronized void onRestoredOnServer(int[] mids) {
+    public void onRestoredOnServer(int[] mids) {
         messagesEngine.onRestoredOnServer(mids);
 
         ChatMessage[] messages = messagesEngine.getMessagesByMid(mids);
@@ -965,71 +916,12 @@ public class ModelEngine {
     }
 
     public void onLoadMoreMessages(final List<TLAbsMessage> messages) {
-        messagesEngine.onLoadMoreMessages(messages);
+        messagesEngine.updateMessages(messages);
     }
 
     public void onLoadMoreDialogs(final List<TLAbsMessage> messages, final List<TLDialog> dialogs) {
-        ChatMessage[] res = messagesEngine.onLoadMoreMessages(messages);
-        HashSet<Long> dialogKeys = new HashSet<Long>();
-        for (ChatMessage msg : res) {
-            dialogKeys.add(msg.getPeerType() + msg.getPeerId() * 10L);
-        }
-        DialogDescription[] descriptions = dialogsEngine.loadDialogs(dialogKeys.toArray(new Long[0]));
-        HashSet<DialogDescription> all = new HashSet<DialogDescription>();
-        Collections.addAll(all, descriptions);
-        HashSet<DialogDescription> changed = new HashSet<DialogDescription>();
-        HashSet<DialogDescription> created = new HashSet<DialogDescription>();
-
-        for (ChatMessage msg : res) {
-            if (msg.getPeerType() != PeerType.PEER_USER && msg.getPeerType() != PeerType.PEER_CHAT) {
-                continue;
-            }
-            DialogDescription description = findDescription(msg.getPeerType(), msg.getPeerId(), all);
-            if (description == null) {
-                // Hack to avoid recreating dialog when leaving group
-                if (msg.getPeerType() == PeerType.PEER_CHAT) {
-                    if (msg.getContentType() == ContentType.MESSAGE_SYSTEM && msg.getExtras() instanceof TLLocalActionChatDeleteUser) {
-                        TLLocalActionChatDeleteUser user = (TLLocalActionChatDeleteUser) msg.getExtras();
-                        if (user.getUserId() == application.getCurrentUid() && msg.getSenderId() == application.getCurrentUid()) {
-                            continue;
-                        }
-                    }
-                }
-
-                description = new DialogDescription(msg.getPeerType(), msg.getPeerId());
-                dialogsEngine.applyDescriptor(description, msg);
-                TLDialog dialog = EngineUtils.findDialog(dialogs, description.getPeerType(), description.getPeerId());
-                if (dialog != null) {
-                    description.setUnreadCount(dialog.getUnreadCount());
-                }
-                created.add(description);
-                all.add(description);
-            } else {
-                if (description.getDate() <= msg.getDate()) {
-                    dialogsEngine.applyDescriptor(description, msg);
-                    dialogsEngine.updateDialog(description);
-                    changed.add(description);
-                }
-            }
-        }
-
-        for (DialogDescription description : changed) {
-            dialogsEngine.updateDialog(description);
-        }
-
-        for (DialogDescription description : created) {
-            dialogsEngine.updateOrCreateDialog(description);
-        }
-    }
-
-    private DialogDescription findDescription(int peerType, int peerId, HashSet<DialogDescription> descriptions) {
-        for (DialogDescription description : descriptions) {
-            if (description.getPeerType() == peerType && description.getPeerId() == peerId) {
-                return description;
-            }
-        }
-
-        return null;
+        ChatMessage[] res = messagesEngine.updateMessages(messages);
+        dialogsEngine.updateDescriptors(res, dialogs);
     }
 
     public void onUpdatedMessage(TLAbsMessage message) {
@@ -1039,7 +931,9 @@ public class ModelEngine {
     }
 
     public ChatMessage[] onUpdatedMessages(final List<TLAbsMessage> messages) {
-        return messagesEngine.onLoadMoreMessages(messages);
+        ChatMessage[] res = messagesEngine.updateMessages(messages);
+        dialogsEngine.updateDescriptors(res, null);
+        return res;
     }
 
     public void deleteHistory(int peerType, int peerId) {

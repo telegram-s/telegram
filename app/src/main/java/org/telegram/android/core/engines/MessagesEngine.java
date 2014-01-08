@@ -42,78 +42,90 @@ public class MessagesEngine {
         this.application = engine.getApplication();
     }
 
-    public ChatMessage[] queryMessages(int peerType, int peerId, int pageSize, int offset) {
+    public synchronized ChatMessage[] getUnsentMessages() {
+        return database.getUnsentMessages();
+    }
+
+    public synchronized ChatMessage[] getUnsyncedDeletedMessages() {
+        return database.getUnsyncedDeletedMessages();
+    }
+
+    public synchronized ChatMessage[] getUnsyncedRestoredMessages() {
+        return database.getUnsyncedRestoredMessages();
+    }
+
+    public synchronized ChatMessage[] queryMessages(int peerType, int peerId, int pageSize, int offset) {
         return database.queryMessages(peerType, peerId, pageSize, offset);
     }
 
-    public ChatMessage[] queryUnreadedMessages(int peerType, int peerId, int pageSize, int mid) {
+    public synchronized ChatMessage[] queryUnreadedMessages(int peerType, int peerId, int pageSize, int mid) {
         return database.queryUnreadedMessages(peerType, peerId, pageSize, mid);
     }
 
-    public ChatMessage getMessageByMid(int mid) {
+    public synchronized ChatMessage getMessageByMid(int mid) {
         return database.getMessageByMid(mid);
     }
 
-    public ChatMessage[] getMessagesByMid(int[] mids) {
+    public synchronized ChatMessage[] getMessagesByMid(int[] mids) {
         return database.getMessagesByMid(mids);
     }
 
-    public ChatMessage getMessageById(int id) {
+    public synchronized ChatMessage getMessageById(int id) {
         return database.getMessageById(id);
     }
 
-    public ChatMessage getMessageByRandomId(long rid) {
+    public synchronized ChatMessage getMessageByRandomId(long rid) {
         return database.getMessageByRid(rid);
     }
 
-    public void create(ChatMessage message) {
+    public synchronized void create(ChatMessage message) {
         database.create(message);
         application.getDataSourceKernel().onSourceAddMessage(message);
         updateMaxDate(message);
     }
 
-    public void delete(ChatMessage message) {
+    public synchronized void delete(ChatMessage message) {
         database.delete(message);
         application.getDataSourceKernel().onSourceRemoveMessage(message);
         updateMaxDate(message);
     }
 
-    public void update(ChatMessage message) {
+    public synchronized void update(ChatMessage message) {
         database.update(message);
         application.getDataSourceKernel().onSourceUpdateMessage(message);
         updateMaxDate(message);
     }
 
-    public void deleteHistory(int peerType, int peerId) {
+    public synchronized void deleteHistory(int peerType, int peerId) {
         database.deleteHistory(peerType, peerId);
         application.getDataSourceKernel().removeMessageSource(peerType, peerId);
     }
 
-    public ChatMessage findTopMessage(int peerType, int peerId) {
+    public synchronized ChatMessage findTopMessage(int peerType, int peerId) {
         return database.findTopMessage(peerType, peerId);
     }
 
-    public ChatMessage[] findDiedMessages(int currentTime) {
+    public synchronized ChatMessage[] findDiedMessages(int currentTime) {
         return database.findDiedMessages(currentTime);
     }
 
-    public ChatMessage[] findPendingSelfDestructMessages(int currentTime) {
+    public synchronized ChatMessage[] findPendingSelfDestructMessages(int currentTime) {
         return database.findPendingSelfDestructMessages(currentTime);
     }
 
-    public ChatMessage[] findUnreadedSelfDestructMessages(int peerType, int peerId) {
+    public synchronized ChatMessage[] findUnreadedSelfDestructMessages(int peerType, int peerId) {
         return database.findUnreadedSelfDestructMessages(peerType, peerId);
     }
 
-    public int getMaxDateInDialog(int peerType, int peerId) {
+    public synchronized int getMaxDateInDialog(int peerType, int peerId) {
         return database.getMaxDateInDialog(peerType, peerId);
     }
 
-    public int getMaxMidInDialog(int peerType, int peerId) {
+    public synchronized int getMaxMidInDialog(int peerType, int peerId) {
         return database.getMaxMidInDialog(peerType, peerId);
     }
 
-    public ChatMessage[] getUnreadSecret(int chatId, int maxDate) {
+    public synchronized ChatMessage[] getUnreadSecret(int chatId, int maxDate) {
         return database.getUnreadSecret(chatId, maxDate);
     }
 
@@ -159,21 +171,21 @@ public class MessagesEngine {
         return minMid.decrementAndGet();
     }
 
-    public void onMessageRead(ChatMessage[] messages) {
+    public synchronized void onMessageRead(ChatMessage[] messages) {
         for (ChatMessage msg : messages) {
             msg.setState(MessageState.READED);
         }
         database.updateInTx(messages);
     }
 
-    public ChatMessage[] onLoadMoreMessages(List<TLAbsMessage> messages) {
+    public synchronized ChatMessage[] updateMessages(List<TLAbsMessage> messages) {
         long start = SystemClock.uptimeMillis();
         ChatMessage[] converted = convert(messages);
         ArrayList<ChatMessage>[] diff = buildDiff(converted);
-        Logger.d(TAG, "onLoadMoreMessages:prepare time: " + (SystemClock.uptimeMillis() - start));
+        Logger.d(TAG, "updateMessages:prepare time: " + (SystemClock.uptimeMillis() - start));
         start = SystemClock.uptimeMillis();
         database.diffInTx(diff[0], diff[1]);
-        Logger.d(TAG, "onLoadMoreMessages:update time: " + (SystemClock.uptimeMillis() - start));
+        Logger.d(TAG, "updateMessages:update time: " + (SystemClock.uptimeMillis() - start));
         start = SystemClock.uptimeMillis();
         for (ChatMessage msg : diff[0]) {
             application.getDataSourceKernel().onSourceUpdateMessage(msg);
@@ -181,9 +193,9 @@ public class MessagesEngine {
         for (ChatMessage msg : diff[1]) {
             application.getDataSourceKernel().onSourceAddMessage(msg);
         }
-        Logger.d(TAG, "onLoadMoreMessages:datasource time: " + (SystemClock.uptimeMillis() - start));
+        Logger.d(TAG, "updateMessages:datasource time: " + (SystemClock.uptimeMillis() - start));
         start = SystemClock.uptimeMillis();
-        Logger.d(TAG, "onLoadMoreMessages:complete time: " + (SystemClock.uptimeMillis() - start));
+        Logger.d(TAG, "updateMessages:complete time: " + (SystemClock.uptimeMillis() - start));
         for (ChatMessage message : diff[0]) {
             if (message.getRawContentType() == ContentType.MESSAGE_PHOTO) {
                 engine.getMediaEngine().saveMedia(message.getMid(), message);

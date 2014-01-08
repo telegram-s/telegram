@@ -13,64 +13,25 @@ import java.io.Serializable;
  * Created: 28.07.13 18:28
  */
 public class ChatMessage implements Serializable {
-    @DatabaseField(generatedId = true, version = false)
     private int _id;
-
-    @DatabaseField(index = true, version = false)
     private int mid;
-
-    @DatabaseField(index = true, version = false)
     private int peerType;
-
-    @DatabaseField(index = true, version = false)
     private int peerId;
-
-    @DatabaseField(version = false)
     private boolean isOut;
-
-    @DatabaseField(version = false)
     private int state;
-
-    @DatabaseField(version = false)
     private int date;
-
-    @DatabaseField(version = false)
     private long randomId;
-
-    @DatabaseField(version = false)
     private int forwardDate;
-
-    @DatabaseField(version = false)
     private int forwardSenderId;
-
-    @DatabaseField(version = false)
     private int forwardMid;
-
-    @DatabaseField(version = false)
     private int contentType;
-
-    @DatabaseField(version = false)
     private int senderId;
-
-    @DatabaseField(version = false)
     private String message;
-
-    @DatabaseField(version = false)
-    private boolean bodyHasSmileys;
-
-    @DatabaseField(version = false)
-    private boolean deletedLocal;
-
-    @DatabaseField(version = false)
-    private boolean deletedServer;
-
-    @DatabaseField(version = false, persisterClass = TlDataType.class)
     private TLObject extras;
 
-    @DatabaseField(version = false)
+    private boolean deletedLocal;
+    private boolean deletedServer;
     private int messageTimeout;
-
-    @DatabaseField(version = false)
     private int messageDieTime;
 
     public int getDatabaseId() {

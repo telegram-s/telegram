@@ -119,6 +119,18 @@ public class DialogsDatabase {
         dialogsDao.insertOrReplace(dialog);
     }
 
+    public void updateOrCreateDialogs(DialogDescription[] descriptions) {
+        Dialog[] res = new Dialog[descriptions.length];
+        for (int i = 0; i < descriptions.length; i++) {
+            res[i] = loadDialogDb(descriptions[i].getPeerType(), descriptions[i].getPeerId());
+            if (res[i] == null) {
+                res[i] = new Dialog();
+            }
+            applyChanges(descriptions[i], res[i]);
+        }
+        dialogsDao.insertOrReplaceInTx(res);
+    }
+
     public void updateDialog(DialogDescription description) {
         Dialog dialog = loadDialogDb(description.getPeerType(), description.getPeerId());
         applyChanges(description, dialog);

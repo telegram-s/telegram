@@ -782,12 +782,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             listView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().sendPhoto(peerType, peerId, fileName, width, height);
+                    application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(width, height, fileName));
                     application.notifyUIUpdate();
                 }
             }, 300);
         } else {
-            application.getEngine().sendPhoto(peerType, peerId, fileName, width, height);
+            application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(width, height, fileName));
             application.notifyUIUpdate();
         }
     }
@@ -798,12 +798,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             listView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().sendPhotoUri(peerType, peerId, uri.toString(), width, height);
+                    application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(width, height, uri));
                     application.notifyUIUpdate();
                 }
             }, 300);
         } else {
-            application.getEngine().sendPhotoUri(peerType, peerId, uri.toString(), width, height);
+            application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(width, height, uri));
             application.notifyUIUpdate();
         }
     }
@@ -820,7 +820,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     w = res.getWidth();
                     h = res.getHeight();
                 }
-                application.getEngine().sendVideo(peerType, peerId, fileName, w, h);
+                application.getEngine().sendVideo(peerType, peerId, new TLUploadingVideo(fileName, w, h));
             }
 
             @Override
@@ -1052,7 +1052,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 application.notifyUIUpdate();
                 editText.setText("");
             } else if (data instanceof String) {
-                application.getEngine().sendDocument(peerType, peerId, (String) data);
+                application.getEngine().sendDocument(peerType, peerId, new TLUploadingDocument((String) data));
                 application.notifyUIUpdate();
             }
         }

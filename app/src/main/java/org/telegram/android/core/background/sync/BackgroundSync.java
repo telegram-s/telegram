@@ -189,7 +189,7 @@ public class BackgroundSync extends BaseSync {
     }
 
     protected void deletionsSync() throws Exception {
-        ChatMessage[] messages = application.getEngine().getUnsyncedDeletedMessages();
+        ChatMessage[] messages = application.getEngine().getMessagesEngine().getUnsyncedDeletedMessages();
         if (messages.length > 0) {
             TLIntVector mids = new TLIntVector();
             for (ChatMessage message : messages) {
@@ -199,7 +199,7 @@ public class BackgroundSync extends BaseSync {
             application.getEngine().onDeletedOnServer(res.toIntArray());
         }
 
-        messages = application.getEngine().getUnsyncedRestoredMessages();
+        messages = application.getEngine().getMessagesEngine().getUnsyncedRestoredMessages();
         if (messages.length > 0) {
             TLIntVector mids = new TLIntVector();
             for (ChatMessage message : messages) {

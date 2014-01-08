@@ -28,8 +28,7 @@ import org.telegram.android.config.DebugSettings;
 import org.telegram.android.core.DialogSource;
 import org.telegram.android.core.DialogSourceState;
 import org.telegram.android.core.model.*;
-import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
-import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.DialogWireframe;
 import org.telegram.android.log.Logger;
@@ -604,7 +603,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                             getRootController().doBack();
                                             return;
                                         }
-                                        application.getEngine().sendPhotoUri(peerType, peerId, actionUri, size.x, size.y);
+                                        application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(size.x, size.y, Uri.parse(actionUri)));
                                         application.notifyUIUpdate();
                                     }
 
@@ -626,7 +625,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                             w = res.getWidth();
                                             h = res.getHeight();
                                         }
-                                        application.getEngine().sendVideo(peerType, peerId, fileName, w, h);
+                                        application.getEngine().sendVideo(peerType, peerId, new TLUploadingVideo(fileName, w, h));
                                         application.notifyUIUpdate();
 
                                     }
@@ -644,7 +643,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                     @Override
                                     public void execute() throws AsyncException {
                                         String fileName = getRealPathFromURI(Uri.parse(actionUri));
-                                        application.getEngine().sendDocument(peerType, peerId, fileName);
+                                        application.getEngine().sendDocument(peerType, peerId, new TLUploadingDocument(fileName));
                                     }
 
                                     @Override
@@ -692,12 +691,12 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                                 getRootController().doBack();
                                                 return;
                                             }
-                                            application.getEngine().sendPhotoUri(peerType, peerId, uri, size.x, size.y);
+                                            application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(size.x, size.y, Uri.parse(uri)));
                                         }
                                     } else {
                                         for (String uri : actionUris) {
                                             String fileName = getRealPathFromURI(Uri.parse(uri));
-                                            application.getEngine().sendDocument(peerType, peerId, fileName);
+                                            application.getEngine().sendDocument(peerType, peerId, new TLUploadingDocument(fileName));
                                         }
                                     }
                                     application.notifyUIUpdate();
