@@ -182,7 +182,7 @@ public class MessageContactView extends BaseMsgView {
         this.showState = message.message.isOut();
 
         this.placeholder = getResources().getDrawable(Placeholders.getUserPlaceholder(contact.getUserId()));
-        this.showAddButton = (application.getEngine().getUser(contact.getUserId()).getLinkType() != LinkType.CONTACT)
+        this.showAddButton = message.relatedUser != null && (message.relatedUser.getLinkType() != LinkType.CONTACT)
                 && (contact.getUserId() != application.getCurrentUid());
         requestLayout();
     }
@@ -194,8 +194,7 @@ public class MessageContactView extends BaseMsgView {
     @Override
     protected void measureBubbleContent(int width) {
         int realWidth = width - getPx(50);// Avatar
-        User user = application.getEngine().getUser(uid);
-        if (user != null && user.getLinkType() != LinkType.CONTACT) {
+        if (showAddButton) {
             realWidth -= getPx(54);// Button
         }
 

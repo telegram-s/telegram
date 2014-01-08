@@ -406,8 +406,7 @@ public class MessageView extends BaseMsgView {
             }
 
             if (isGroup) {
-                User user = application.getEngine().getUser(wireframe.message.getSenderId());
-                this.senderName = user.getDisplayName();
+                this.senderName = wireframe.senderUser.getDisplayName();
             }
             if (wireframe.message.isForwarded()) {
                 isForwarded = true;

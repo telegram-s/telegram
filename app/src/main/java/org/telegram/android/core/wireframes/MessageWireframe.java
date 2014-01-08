@@ -19,6 +19,7 @@ public class MessageWireframe {
 
     public User senderUser;
     public User forwardUser;
+    public User relatedUser;
 
     public Object cachedLayout;
 }

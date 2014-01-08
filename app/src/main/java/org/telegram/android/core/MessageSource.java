@@ -10,6 +10,7 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.Configuration;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.media.TLLocalContact;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.cursors.ViewSourceState;
@@ -198,6 +199,11 @@ public class MessageSource {
                 res.senderUser = application.getEngine().getUser(item.getSenderId());
                 if (res.message.isForwarded()) {
                     res.forwardUser = application.getEngine().getUser(item.getForwardSenderId());
+                }
+
+                if (item.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+                    int uid = ((TLLocalContact) item.getExtras()).getUserId();
+                    res.relatedUser = application.getEngine().getUser(uid);
                 }
 
 //                if (item.getRawContentType() == ContentType.MESSAGE_TEXT) {

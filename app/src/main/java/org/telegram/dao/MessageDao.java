@@ -85,6 +85,8 @@ public class MessageDao extends AbstractDao<Message, Long> {
                 " (MESSAGE_TIMEOUT);");
         db.execSQL("CREATE INDEX " + constraint + "IDX_MESSAGE_MESSAGE_DIE_TIME ON MESSAGE" +
                 " (MESSAGE_DIE_TIME);");
+        db.execSQL("CREATE INDEX " + constraint + "IDX_MESSAGE_PEER_UNIQ_ID_MID_DATE_DELETED_LOCAL ON MESSAGE" +
+                " (PEER_UNIQ_ID,MID,DATE,DELETED_LOCAL);");
     }
 
     /** Drops the underlying database table. */
