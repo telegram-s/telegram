@@ -39,7 +39,7 @@ public class DialogsEngine {
         return database.getUnreadedRemotelyDescriptions();
     }
 
-    public synchronized DialogDescription loadDialog(int peerType, int peerId) {
+    public DialogDescription loadDialog(int peerType, int peerId) {
         return database.loadDialog(peerType, peerId);
     }
 

@@ -66,7 +66,7 @@ public class MessagesDatabase {
                 .where(
                         MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId)),
                         MessageDao.Properties.DeletedLocal.eq(false))
-                .orderRaw("-(date * 1000000 + abs(mid))")
+                .orderRaw("-(" + MessageDao.Properties.Date.columnName + " * 1000000 + abs(" + MessageDao.Properties.Mid.columnName + "))")
                 .offset(offset)
                 .limit(pageSize)
                 .list();
@@ -168,7 +168,9 @@ public class MessagesDatabase {
     }
 
     public void create(ChatMessage message) {
-        messageDao.insert(convert(message));
+        Message msg = convert(message);
+        messageDao.insert(msg);
+        message.setDatabaseId((int) (long) msg.getId());
     }
 
     public void delete(ChatMessage message) {
@@ -187,6 +189,9 @@ public class MessagesDatabase {
                 nMessages[i].setId(null);
             }
             messageDao.insertInTx(nMessages);
+            for (int i = 0; i < nMessages.length; i++) {
+                newMessages.get(i).setDatabaseId((int) (long) nMessages[i].getId());
+            }
         }
         if (updatedMessages.size() > 0) {
             Message[] nMessages = new Message[updatedMessages.size()];

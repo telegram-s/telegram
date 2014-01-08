@@ -46,9 +46,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             TableUtils.createTable(connectionSource, FullChatInfo.class);
             TableUtils.createTable(connectionSource, MediaRecord.class);
             TableUtils.createTable(connectionSource, OrmEncryptedChat.class);
-
-            //User
-            database.execSQL("CREATE UNIQUE INDEX mytest_id_idx ON ChatMessage(mid);\n");
         } catch (SQLException e) {
             Logger.e(TAG, "Can't create database", e);
             throw new RuntimeException(e);
@@ -72,7 +69,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             TableUtils.createTable(connectionSource, FullChatInfo.class);
             TableUtils.createTable(connectionSource, MediaRecord.class);
             TableUtils.createTable(connectionSource, OrmEncryptedChat.class);
-            database.execSQL("CREATE UNIQUE INDEX mytest_id_idx ON ChatMessage(mid);\n");
         } catch (SQLException e) {
             Logger.e(TAG, "Can't upgrade databases", e);
             throw new RuntimeException(e);
