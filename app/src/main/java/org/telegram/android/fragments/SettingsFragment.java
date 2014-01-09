@@ -214,13 +214,6 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         updateUser();
     }
 
-    @Override
-    public void onUserChanged(int uid, User user) {
-        if (uid == application.getCurrentUid()) {
-            updateUser();
-        }
-    }
-
     private void updateUser() {
         User user = application.getEngine().getUser(application.getCurrentUid());
         if (user != null) {
@@ -374,6 +367,16 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_settings_title));
         getSherlockActivity().getSupportActionBar().setSubtitle(null);
+    }
+
+    @Override
+    public void onUsersChanged(User[] users) {
+        for (User u : users) {
+            if (u.getUid() == application.getCurrentUid()) {
+                updateUser();
+                return;
+            }
+        }
     }
 }
 

@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.log.Logger;
 import org.telegram.mtproto.time.TimeOverlord;
 
 import java.lang.ref.WeakReference;
@@ -17,6 +18,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class TypingStates {
 
+    private static final String TAG = "TypingStates";
+
     public interface TypingListener {
         public void onChatTypingChanged(int chatId, int[] uids);
 
@@ -28,6 +31,7 @@ public class TypingStates {
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
+            Logger.d(TAG, "notify");
             if (msg.arg1 == 0) {
                 int[] types = getChatTypes(msg.arg2);
                 for (WeakReference<TypingListener> listener : listeners) {

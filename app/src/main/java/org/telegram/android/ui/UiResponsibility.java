@@ -18,6 +18,7 @@ public class UiResponsibility {
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
+            Logger.d(TAG, "notify");
             onResumed();
         }
     };

@@ -100,6 +100,7 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
         handler.post(new Runnable() {
             @Override
             public void run() {
+                Logger.d(TAG, "notify");
                 for (ContactSourceListener listener : listeners) {
                     listener.onContactsDataChanged();
                 }

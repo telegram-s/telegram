@@ -36,6 +36,7 @@ public class UiKernel {
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
+            Logger.d(TAG,"notify");
             if (msg.what == 0) {
                 checkGoesOffline();
             }

@@ -30,6 +30,8 @@ import org.telegram.android.ui.TextUtil;
  */
 public class ConversationListView extends ImagingListView {
 
+    private static final String TAG = "ConversationListView";
+
     private static final int DELTA = 26;
 
     private static final long ANIMATION_DURATION = 200;
@@ -56,6 +58,7 @@ public class ConversationListView extends ImagingListView {
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
+            Logger.d(TAG, "notify");
             if (msg.what == 0) {
                 if (isTimeVisible) {
                     isTimeVisible = false;

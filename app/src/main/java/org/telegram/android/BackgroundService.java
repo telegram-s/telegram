@@ -39,6 +39,7 @@ public class BackgroundService extends Service {
     }
 
     private void checkTimeout() {
+        org.telegram.android.log.Logger.d(TAG, "notify");
         long timeout = Math.min(CHECK_TIMEOUT, kernel.getLifeKernel().dieTimeout());
         Logger.d(TAG, "checkTimeout: " + timeout);
         if (timeout == 0) {

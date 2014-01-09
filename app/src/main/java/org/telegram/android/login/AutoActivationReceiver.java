@@ -86,6 +86,7 @@ public class AutoActivationReceiver {
         handler.post(new Runnable() {
             @Override
             public void run() {
+                Logger.d(TAG,"notify");
                 if (listener != null) {
                     listener.onCodeReceived(code);
                     listener = null;

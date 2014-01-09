@@ -7,5 +7,5 @@ import org.telegram.android.core.model.User;
  * Created: 31.07.13 3:37
  */
 public interface UserSourceListener {
-    public void onUserChanged(int uid, User user);
+    public void onUsersChanged(User[] users);
 }

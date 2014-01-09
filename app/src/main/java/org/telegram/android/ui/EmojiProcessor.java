@@ -296,7 +296,6 @@ public class EmojiProcessor {
                         Bitmap section = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                         section.setPixels(resultColors, 0, rectSize * SECTION_SIDE, 0, 0, width, height);
                         emojiMap.put(ordinal, section);
-                        notifyEmojiUpdated(false);
                     }
                     isLoaded = true;
                     notifyEmojiUpdated(true);
@@ -315,6 +314,7 @@ public class EmojiProcessor {
         handler.post(new Runnable() {
             @Override
             public void run() {
+                Logger.d(TAG, "notify");
                 for (EmojiListener listener : listeners) {
                     listener.onEmojiUpdated(completed);
                 }

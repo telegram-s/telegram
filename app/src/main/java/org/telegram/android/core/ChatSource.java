@@ -6,6 +6,7 @@ import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.FullChatInfo;
 import org.telegram.android.core.model.PeerType;
+import org.telegram.android.log.Logger;
 import org.telegram.api.messages.TLChatFull;
 import org.telegram.api.requests.TLRequestMessagesGetFullChat;
 
@@ -22,6 +23,8 @@ import java.util.concurrent.ThreadFactory;
  * Created: 31.07.13 3:36
  */
 public class ChatSource {
+    private static final String TAG = "ChatSource";
+
     private HashMap<Integer, FullChatInfo> chatInfos = new HashMap<Integer, FullChatInfo>();
 
     private HashSet<Integer> requestedChats = new HashSet<Integer>();
@@ -61,6 +64,7 @@ public class ChatSource {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
+                    Logger.d(TAG, "notify");
                     for (ChatSourceListener listener : listeners) {
                         listener.onChatChanged(chatId, u);
                     }

@@ -559,6 +559,7 @@ public class MediaSender {
         handler.post(new Runnable() {
             @Override
             public void run() {
+                Logger.d(TAG,"notify");
                 for (WeakReference<SenderListener> ref : listeners) {
                     SenderListener listener = ref.get();
                     if (listener != null) {

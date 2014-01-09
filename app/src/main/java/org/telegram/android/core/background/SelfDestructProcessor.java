@@ -6,6 +6,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.ChatMessage;
+import org.telegram.android.log.Logger;
 
 /**
  * Created with IntelliJ IDEA.

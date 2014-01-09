@@ -6,6 +6,7 @@ import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.User;
+import org.telegram.android.log.Logger;
 
 import java.sql.SQLException;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -15,6 +16,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created: 31.07.13 3:36
  */
 public class UserSource {
+    private static final String TAG = "UserSource";
+
     private final CopyOnWriteArrayList<UserSourceListener> listeners = new CopyOnWriteArrayList<UserSourceListener>();
 
     private StelsApplication application;
@@ -35,13 +38,14 @@ public class UserSource {
         listeners.remove(listener);
     }
 
-    public void notifyUserChanged(final int uid, final User u) {
+    public void notifyUsersChanged(final User[] u) {
         if (u != null) {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
+                    Logger.d(TAG, "notify");
                     for (UserSourceListener listener : listeners) {
-                        listener.onUserChanged(uid, u);
+                        listener.onUsersChanged(u);
                     }
                 }
             });

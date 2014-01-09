@@ -116,6 +116,7 @@ public class ActivationController {
     private Runnable cancelAutomatic = new Runnable() {
         @Override
         public void run() {
+            Logger.d(TAG,"notify");
             cancelAutomatic();
         }
     };

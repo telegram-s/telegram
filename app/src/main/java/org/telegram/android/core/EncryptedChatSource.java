@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.EncryptedChat;
+import org.telegram.android.log.Logger;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -12,6 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created: 31.07.13 3:36
  */
 public class EncryptedChatSource {
+    private static final String TAG = "EncryptedChatSource";
     private final CopyOnWriteArrayList<EncryptedChatSourceListener> listeners = new CopyOnWriteArrayList<EncryptedChatSourceListener>();
 
     private StelsApplication application;
@@ -38,6 +40,7 @@ public class EncryptedChatSource {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
+                    Logger.d(TAG, "notify");
                     for (EncryptedChatSourceListener listener : listeners) {
                         listener.onEncryptedChatChanged(chatId, u);
                     }

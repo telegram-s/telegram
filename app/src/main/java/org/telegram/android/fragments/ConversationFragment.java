@@ -1364,19 +1364,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     }
 
     @Override
-    public void onUserChanged(int uid, User user) {
-        if (peerType == PeerType.PEER_USER && peerId == uid) {
-            getSherlockActivity().invalidateOptionsMenu();
-        }
-        if (peerType == PeerType.PEER_USER_ENCRYPTED) {
-            EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(peerId);
-            if (encryptedChat != null && encryptedChat.getUserId() == uid) {
-                getSherlockActivity().invalidateOptionsMenu();
-            }
-        }
-    }
-
-    @Override
     public void onEmojiUpdated(boolean completed) {
         listView.post(new Runnable() {
             @Override
@@ -1521,6 +1508,29 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             } else {
                 selectedTop = 0;
                 selectedIndex = -1;
+            }
+        }
+    }
+
+    @Override
+    public void onUsersChanged(User[] users) {
+
+        if (peerType == PeerType.PEER_USER) {
+            for (User u : users) {
+                if (u.getUid() == peerId) {
+                    getSherlockActivity().invalidateOptionsMenu();
+                    return;
+                }
+            }
+        } else if (peerType == PeerType.PEER_USER_ENCRYPTED) {
+            EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(peerId);
+            if (encryptedChat != null) {
+                for (User u : users) {
+                    if (u.getUid() == encryptedChat.getUserId()) {
+                        getSherlockActivity().invalidateOptionsMenu();
+                        return;
+                    }
+                }
             }
         }
     }

@@ -120,9 +120,11 @@ public class UsersDatabase {
         userGreenDao.insertOrReplaceInTx(users);
         Logger.d(TAG, "onUsers updated in " + (SystemClock.uptimeMillis() - start) + " ms");
         if (application.getUserSource() != null) {
-            for (org.telegram.dao.User user : users) {
-                application.getUserSource().notifyUserChanged((int) (long) user.getId(), cachedConvert(user));
+            User[] u = new User[users.length];
+            for (int i = 0; i < u.length; i++) {
+                u[i] = cachedConvert(users[i]);
             }
+            application.getUserSource().notifyUsersChanged(u);
         }
     }
 

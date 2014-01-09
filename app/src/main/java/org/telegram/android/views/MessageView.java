@@ -364,7 +364,7 @@ public class MessageView extends BaseMsgView {
 
         public void build(MessageWireframe wireframe, int desiredWidth, StelsApplication application) {
 
-            Logger.d(TAG, "Build layout start");
+            // Logger.d(TAG, "Build layout start");
 
             checkResources(application);
 
@@ -421,14 +421,14 @@ public class MessageView extends BaseMsgView {
             this.spannable = application.getEmojiProcessor().processEmojiCompatMutable(wireframe.message.getMessage(), EmojiProcessor.CONFIGURATION_BUBBLES);
 
             // spannable = new SpannableString(wireframe.message.getMessage());
-            Logger.d(TAG, "Emoji processed in " + (SystemClock.uptimeMillis() - start) + " ms");
+            // Logger.d(TAG, "Emoji processed in " + (SystemClock.uptimeMillis() - start) + " ms");
             start = SystemClock.uptimeMillis();
             Linkify.addLinks(this.spannable, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS | Linkify.EMAIL_ADDRESSES);
             fixLinks(spannable);
-            Logger.d(TAG, "Added links in " + (SystemClock.uptimeMillis() - start) + " ms");
+            // Logger.d(TAG, "Added links in " + (SystemClock.uptimeMillis() - start) + " ms");
             start = SystemClock.uptimeMillis();
             layout = new StaticLayout(spannable, bodyPaint, desiredWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
-            Logger.d(TAG, "Built base layout in " + (SystemClock.uptimeMillis() - start) + " ms");
+            // Logger.d(TAG, "Built base layout in " + (SystemClock.uptimeMillis() - start) + " ms");
 
             if (layout.getLineCount() < 20) {
                 int layoutTextWidth = 0;
@@ -493,7 +493,7 @@ public class MessageView extends BaseMsgView {
                 layoutRealWidth = Math.max(layoutRealWidth, width);
             }
 
-            Logger.d(TAG, "Build layout end");
+            // Logger.d(TAG, "Build layout end");
         }
     }
 

@@ -22,6 +22,7 @@ import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.wireframes.MessageWireframe;
+import org.telegram.android.log.Logger;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.Placeholders;
@@ -32,6 +33,8 @@ import org.telegram.i18n.I18nUtil;
  * Created: 18.08.13 19:36
  */
 public abstract class BaseMsgView extends BaseView implements Checkable {
+    private static final String TAG = "BaseMsgView";
+
     protected static final long FADE_ANIMATION_TIME = 160;
     protected static final long STATE_ANIMATION_TIME = FADE_ANIMATION_TIME;
 
@@ -111,6 +114,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private Runnable longClickRunnable = new Runnable() {
         @Override
         public void run() {
+            Logger.d(TAG, "notify");
             if (performLongClick()) {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                 touchedElement = TOUCHED_NONE;

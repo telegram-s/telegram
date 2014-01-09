@@ -50,6 +50,7 @@ public abstract class ViewSource<T, V> {
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
+            Logger.d(TAG,"notify");
             if (msg.what == 0) {
                 for (ViewSourceListener listener : listeners) {
                     listener.onSourceStateChanged();
@@ -268,9 +269,9 @@ public abstract class ViewSource<T, V> {
 
     public synchronized void updateItem(V itm) {
         T dest = convert(itm);
-        Logger.d(TAG, "updateItem: " + itm);
+        // Logger.d(TAG, "updateItem: " + itm);
         long key = getItemKey(dest);
-        Logger.d(TAG, "item key: " + key);
+        // Logger.d(TAG, "item key: " + key);
 //        if (!items.containsKey(key)) {
 //            return;
 //        }
@@ -281,9 +282,9 @@ public abstract class ViewSource<T, V> {
     public synchronized void updateItems(V... itm) {
         for (V v : itm) {
             T dest = convert(v);
-            Logger.d(TAG, "updateItem: " + itm);
+            // Logger.d(TAG, "updateItem: " + itm);
             long key = getItemKey(dest);
-            Logger.d(TAG, "item key: " + key);
+            // Logger.d(TAG, "item key: " + key);
 //        if (!items.containsKey(key)) {
 //            return;
 //        }

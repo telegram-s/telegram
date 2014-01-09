@@ -454,10 +454,13 @@ public class ProfileFragment extends StelsFragment implements UserSourceListener
     }
 
     @Override
-    public void onUserChanged(int uid, User user) {
-        if (uid == userId) {
-            this.user = user;
-            bindUi();
+    public void onUsersChanged(User[] users) {
+        for (User u : users) {
+            if (u.getUid() == userId) {
+                this.user = u;
+                bindUi();
+                return;
+            }
         }
     }
 }
