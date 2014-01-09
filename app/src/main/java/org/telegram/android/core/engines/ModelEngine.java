@@ -1774,6 +1774,12 @@ public class ModelEngine {
             }*/
         }
 
+        final HashSet<DialogDescription> updated = new HashSet<DialogDescription>();
+        final HashSet<DialogDescription> added = new HashSet<DialogDescription>();
+
+        final HashSet<ChatMessage> updatedMsg = new HashSet<ChatMessage>();
+        final HashSet<ChatMessage> addedMsg = new HashSet<ChatMessage>();
+
         Logger.d(TAG, "newMessages:prepare time: " + (SystemClock.uptimeMillis() - start));
         start = SystemClock.uptimeMillis();
         getMessagesDao().callBatchTasks(new Callable<Void>() {
@@ -1789,11 +1795,12 @@ public class ModelEngine {
                         if (!changed.isOut() && changed.getState() == MessageState.SENT) {
                             newUnread.add(changed.getMid());
                         }
-                        application.getDataSourceKernel().onSourceAddMessage(changed);
+
+                        addedMsg.add(changed);
                     } else {
                         changed.setDatabaseId(orig.getDatabaseId());
                         getMessagesDao().update(changed);
-                        application.getDataSourceKernel().onSourceUpdateMessage(changed);
+                        updatedMsg.add(changed);
                     }
 
                     if (changed.getRawContentType() == ContentType.MESSAGE_PHOTO) {
@@ -1827,12 +1834,14 @@ public class ModelEngine {
                         }
 
                         getDialogsDao().create(description);
-                        application.getDialogSource().getViewSource().addItem(description);
+                        added.add(description);
                     } else {
                         if (description.getDate() <= changed.getDate()) {
                             applyDescriptor(description, changed);
                             getDialogsDao().update(description);
-                            application.getDialogSource().getViewSource().updateItem(description);
+                            if (!added.contains(description)) {
+                                updated.add(description);
+                            }
                         }
                     }
                 }
@@ -1840,6 +1849,21 @@ public class ModelEngine {
                 return null;
             }
         });
+
+        for (DialogDescription description : updated) {
+            application.getDataSourceKernel().getDialogSource().getViewSource().updateItem(description);
+        }
+
+        for (DialogDescription description : added) {
+            application.getDataSourceKernel().getDialogSource().getViewSource().addItem(description);
+        }
+
+        for (ChatMessage msg : updatedMsg) {
+            application.getDataSourceKernel().onSourceUpdateMessage(msg);
+        }
+        for (ChatMessage msg : addedMsg) {
+            application.getDataSourceKernel().onSourceAddMessage(msg);
+        }
 
         Logger.d(TAG, "newMessages:update time: " + (SystemClock.uptimeMillis() - start));
         return newUnread;
