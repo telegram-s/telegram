@@ -236,6 +236,11 @@ public class ConversationListView extends ImagingListView {
                 adapter = ((HeaderViewListAdapter) adapter).getWrappedAdapter();
             }
             if (adapter instanceof ConversationAdapter) {
+                if (firstVisibleItem == 0) {
+                    visibleDate = null;
+                    visibleDateNext = null;
+                    return;
+                }
                 int realFirstVisibleItem = firstVisibleItem - getHeaderViewsCount();
                 if (realFirstVisibleItem >= 0 && realFirstVisibleItem < adapter.getCount()) {
                     int date = ((ConversationAdapter) adapter).getItemDate(realFirstVisibleItem);
