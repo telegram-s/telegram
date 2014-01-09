@@ -236,9 +236,16 @@ public abstract class ViewSource<T, V> {
     }
 
     public synchronized boolean addItems(V... itm) {
+        long start = SystemClock.uptimeMillis();
+        Object[] converted = new Object[itm.length];
+        for (int i = 0; i < converted.length; i++) {
+            converted[i] = convert(itm[i]);
+        }
+        Logger.d(TAG, "Converted in " + (SystemClock.uptimeMillis() - start) + " ms");
+
         boolean added = false;
-        for (V v : itm) {
-            T dest = convert(v);
+        for (int i = 0; i < converted.length; i++) {
+            T dest = (T) converted[i];
             long key = getItemKey(dest);
             added = !items.containsKey(key) | added;
             items.put(key, dest);
@@ -280,14 +287,16 @@ public abstract class ViewSource<T, V> {
     }
 
     public synchronized void updateItems(V... itm) {
-        for (V v : itm) {
-            T dest = convert(v);
-            // Logger.d(TAG, "updateItem: " + itm);
+        long start = SystemClock.uptimeMillis();
+        Object[] converted = new Object[itm.length];
+        for (int i = 0; i < converted.length; i++) {
+            converted[i] = convert(itm[i]);
+        }
+        Logger.d(TAG, "Converted in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        for (int i = 0; i < converted.length; i++) {
+            T dest = (T) converted[i];
             long key = getItemKey(dest);
-            // Logger.d(TAG, "item key: " + key);
-//        if (!items.containsKey(key)) {
-//            return;
-//        }
             items.put(key, dest);
         }
         invalidated = true;

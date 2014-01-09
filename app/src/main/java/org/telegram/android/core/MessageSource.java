@@ -215,9 +215,9 @@ public class MessageSource {
                     res.relatedUser = application.getEngine().getUser(uid);
                 }
 
-                if (item.getRawContentType() == ContentType.MESSAGE_TEXT) {
-                    res.cachedLayout = MessageView.prepareLayout(res, application);
-                }
+//                if (item.getRawContentType() == ContentType.MESSAGE_TEXT) {
+//                    res.cachedLayout = MessageView.prepareLayout(res, application);
+//                }
 
                 return res;
             }
