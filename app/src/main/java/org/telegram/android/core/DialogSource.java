@@ -43,6 +43,7 @@ public class DialogSource {
     private static final int STATE_COMPLETED = 2;
 
     public static final int PAGE_SIZE = 40;
+    public static final int PAGE_SIZE_REMOTE = 20;
 
     public static final int PAGE_OVERLAP = 3;
 
@@ -325,7 +326,7 @@ public class DialogSource {
         if (isDestroyed) {
             return true;
         }
-        TLAbsDialogs dialogs = application.getApi().doRpcCall(new TLRequestMessagesGetDialogs(offset, 0, PAGE_SIZE));
+        TLAbsDialogs dialogs = application.getApi().doRpcCall(new TLRequestMessagesGetDialogs(offset, 0, PAGE_SIZE_REMOTE));
         if (isDestroyed) {
             return true;
         }
@@ -339,7 +340,7 @@ public class DialogSource {
         if (dialogs instanceof TLDialogs) {
             return true;
         } else if (dialogs instanceof TLDialogsSlice) {
-            return dialogs.getMessages().size() == 0 || ((TLDialogsSlice) dialogs).getCount() <= offset + PAGE_SIZE;
+            return dialogs.getMessages().size() == 0 || ((TLDialogsSlice) dialogs).getCount() <= offset + PAGE_SIZE_REMOTE;
         } else {
             return true;
         }

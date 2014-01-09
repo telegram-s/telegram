@@ -59,7 +59,8 @@ public class MessageSource {
     private static final int STATE_LOADED = 1;
     private static final int STATE_COMPLETED = 2;
 
-    public static final int PAGE_SIZE = 25;
+    public static final int PAGE_SIZE = 40;
+    public static final int PAGE_SIZE_REMOTE = 20;
 
     public static final int PAGE_OVERLAP = 3;
 
@@ -382,7 +383,7 @@ public class MessageSource {
             peer = new TLInputPeerChat(peerId);
         }
         long startRequest = SystemClock.uptimeMillis();
-        TLAbsMessages messagesEx = application.getApi().doRpcCall(new TLRequestMessagesGetHistory(peer, offset, 0, PAGE_SIZE));
+        TLAbsMessages messagesEx = application.getApi().doRpcCall(new TLRequestMessagesGetHistory(peer, offset, 0, PAGE_SIZE_REMOTE));
         Logger.d(TAG, "Requested in " + (SystemClock.uptimeMillis() - startRequest) + " ms");
 
         long start = SystemClock.uptimeMillis();
@@ -397,7 +398,7 @@ public class MessageSource {
         if (messagesEx instanceof TLMessages) {
             return true;
         } else {
-            return messagesEx.getMessages().size() == 0 || ((TLMessagesSlice) messagesEx).getCount() <= offset + PAGE_SIZE;
+            return messagesEx.getMessages().size() == 0 || ((TLMessagesSlice) messagesEx).getCount() <= offset + PAGE_SIZE_REMOTE;
         }
     }
 }
