@@ -237,7 +237,8 @@
                   android:layout_height="@dimen/st_section_div_h"
                   android:layout_marginLeft="8dp"
                   android:layout_marginRight="8dp"
-                  android:background="@color/st_section_div"/>
+                  android:background="@color/st_section_div"
+                  android:visibility="gone"/>
 
             <LinearLayout android:layout_width="fill_parent"
                           android:layout_height="64dp"
@@ -247,7 +248,8 @@
                           android:gravity="center_vertical"
                           android:clickable="true"
                           android:id="@+id/securitySettings"
-                          android:background="@drawable/st_list_selector">
+                          android:background="@drawable/st_list_selector"
+                          android:visibility="gone">
                 <TextView android:layout_width="fill_parent"
                           android:layout_height="wrap_content"
                           android:layout_gravity="center_vertical"
