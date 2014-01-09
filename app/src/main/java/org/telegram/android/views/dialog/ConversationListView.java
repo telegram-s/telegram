@@ -239,6 +239,17 @@ public class ConversationListView extends ImagingListView {
                 if (firstVisibleItem == 0) {
                     visibleDate = null;
                     visibleDateNext = null;
+
+                    View view = getChildAt(1);
+                    if (view != null) {
+                        offset = Math.min(view.getTop() - getPx(DELTA), 0);
+                        if (adapter.getCount() > 0) {
+                            int date = ((ConversationAdapter) adapter).getItemDate(0);
+                            visibleDateNext = TextUtil.formatDateLong(date);
+                            timeDivMeasureNext = (int) timeDivPaint.measureText(visibleDateNext);
+                        }
+                    }
+
                     return;
                 }
                 int realFirstVisibleItem = firstVisibleItem - getHeaderViewsCount();
