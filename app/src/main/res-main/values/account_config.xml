@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="config_account_type">org.telegram.android.account</string>
+    <string name="config_account_package">org.telegram.android</string>
+    <string name="config_account_settings">org.telegram.android.StartActivity</string>
+</resources>

@@ -8,7 +8,7 @@
                       android:title="Account Settings"
                       android:summary="Account, profile image, notifications, etc.">
         <intent android:action="org.telegram.android.OPEN_SETTINGS"
-                android:targetPackage="org.telegram.android"
-                android:targetClass="org.telegram.android.StartActivity"/>
+                android:targetPackage="@string/config_account_package"
+                android:targetClass="@string/config_account_settings"/>
     </PreferenceScreen>
 </PreferenceScreen>

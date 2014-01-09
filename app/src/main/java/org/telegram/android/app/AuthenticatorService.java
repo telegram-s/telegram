@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
-import org.telegram.android.R;
 import org.telegram.android.StartActivity;
 
 /**
@@ -17,9 +16,13 @@ public class AuthenticatorService extends Service {
     private static final String TAG = "AccountAuthenticatorService";
     private static AccountAuthenticatorImpl sAccountAuthenticator = null;
 
+    private String ACCOUNT_TYPE;
+
     public AuthenticatorService() {
         super();
+        // ACCOUNT_TYPE = kernel.getApplication().getPackageName() + ".account";
     }
+
 
     public IBinder onBind(Intent intent) {
         IBinder ret = null;
@@ -52,7 +55,7 @@ public class AuthenticatorService extends Service {
 
             Bundle reply = new Bundle();
             Intent res = new Intent(StartActivity.ACTION_LOGIN);
-            res.setClassName(mContext.getString(R.string.config_setting_package), mContext.getString(R.string.config_setting_class));
+            res.setClassName(mContext.getPackageName(), mContext.getPackageName() + ".StartActivity");
             res.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
             reply.putParcelable(AccountManager.KEY_INTENT, res);
             return reply;

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="config_account_type">org.telegram.android.debug.account</string>
-    <string name="config_setting_action">org.telegram.android.debug.OPEN_SETTINGS</string>
-    <string name="config_setting_package">org.telegram.android.debug</string>
-    <string name="config_setting_class">org.telegram.android.debug.StartActivity</string>
-</resources>
