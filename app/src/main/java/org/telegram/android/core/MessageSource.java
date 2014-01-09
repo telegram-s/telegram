@@ -47,13 +47,17 @@ public class MessageSource {
                 if (s.startsWith("org.telegram.android.Chat_")) {
                     String name = s.substring(0, s.length() - 4);
                     SharedPreferences pref = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-                    pref.edit().remove("state").commit();
+                    pref.edit().remove("state").remove("pstate").commit();
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    private static final int STATE_UNLOADED = 0;
+    private static final int STATE_LOADED = 1;
+    private static final int STATE_COMPLETED = 2;
 
     public static final int PAGE_SIZE = 25;
 
@@ -84,6 +88,8 @@ public class MessageSource {
 
     private boolean destroyed;
 
+    private int persistenceState = STATE_UNLOADED;
+
     private final String TAG;
 
     public MessageSource(int _peerType, int _peerId, StelsApplication _application) {
@@ -91,12 +97,15 @@ public class MessageSource {
         this.application = _application;
         this.destroyed = false;
         this.preferences = this.application.getSharedPreferences("org.telegram.android.Chat_" + _peerType + "_" + _peerId, Context.MODE_PRIVATE);
-        this.state = MessagesSourceState.valueOf(preferences.getString("state", MessagesSourceState.UNSYNCED.name()));
-        if (this.state == MessagesSourceState.FULL_SYNC) {
-            this.state = MessagesSourceState.UNSYNCED;
-        } else if (this.state == MessagesSourceState.LOAD_MORE || this.state == MessagesSourceState.LOAD_MORE_ERROR) {
+        this.persistenceState = preferences.getInt("pstate", STATE_UNLOADED);
+        if (persistenceState == STATE_COMPLETED) {
+            this.state = MessagesSourceState.COMPLETED;
+        } else if (persistenceState == STATE_LOADED) {
             this.state = MessagesSourceState.SYNCED;
+        } else {
+            this.state = MessagesSourceState.UNSYNCED;
         }
+
         this.peerType = _peerType;
         this.peerId = _peerId;
         this.messagesSource = new ViewSource<MessageWireframe, ChatMessage>() {
@@ -206,9 +215,9 @@ public class MessageSource {
                     res.relatedUser = application.getEngine().getUser(uid);
                 }
 
-//                if (item.getRawContentType() == ContentType.MESSAGE_TEXT) {
-//                    res.cachedLayout = MessageView.prepareLayout(res, application);
-//                }
+                if (item.getRawContentType() == ContentType.MESSAGE_TEXT) {
+                    res.cachedLayout = MessageView.prepareLayout(res, application);
+                }
 
                 return res;
             }
@@ -232,10 +241,21 @@ public class MessageSource {
         if (destroyed) {
             return;
         }
+        long start = SystemClock.uptimeMillis();
         state = nState;
-        preferences.edit().putString("state", state.name()).commit();
+        // preferences.edit().putString("state", state.name()).commit();
         messagesSource.invalidateState();
-        Logger.d(TAG, "Messages state: " + nState);
+        Logger.d(TAG, "Messages state: " + nState + " in " + (SystemClock.uptimeMillis() - start) + " ms");
+    }
+
+    private void onCompleted() {
+        persistenceState = STATE_COMPLETED;
+        preferences.edit().putInt("pstate", persistenceState).commit();
+    }
+
+    private void onLoaded() {
+        persistenceState = STATE_LOADED;
+        preferences.edit().putInt("pstate", persistenceState).commit();
     }
 
     public void startSyncIfRequired() {
@@ -275,8 +295,10 @@ public class MessageSource {
                                     if (state == MessagesSourceState.FULL_SYNC) {
                                         if (isCompleted) {
                                             setState(MessagesSourceState.COMPLETED);
+                                            onCompleted();
                                         } else {
                                             setState(MessagesSourceState.SYNCED);
+                                            onLoaded();
                                         }
                                     }
                                 }
@@ -315,6 +337,7 @@ public class MessageSource {
                                     if (state == MessagesSourceState.LOAD_MORE) {
                                         if (isCompleted) {
                                             setState(MessagesSourceState.COMPLETED);
+                                            onCompleted();
                                         } else {
                                             setState(MessagesSourceState.SYNCED);
                                         }

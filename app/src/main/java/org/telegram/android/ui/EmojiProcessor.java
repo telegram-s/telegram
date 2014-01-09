@@ -61,7 +61,6 @@ public class EmojiProcessor {
     private StelsApplication application;
     private float density;
 
-    private HashMap<Long, Rect> emojiRects;
     private HashMap<Long, Integer> indexes;
     private HashMap<Integer, Paint.FontMetricsInt> originalMetrics;
 
@@ -159,7 +158,6 @@ public class EmojiProcessor {
                 break;
         }
 
-        emojiRects = new HashMap<Long, Rect>();
         indexes = new HashMap<Long, Integer>();
         emojiMap = new HashMap<Integer, Bitmap>();
         originalMetrics = new HashMap<Integer, Paint.FontMetricsInt>();
@@ -180,13 +178,6 @@ public class EmojiProcessor {
         start = System.currentTimeMillis();
 
         for (int i = 0; i < EMOJI_MAP.length; i++) {
-            int x = i % COUNT_IN_ROW;
-            int y = i / COUNT_IN_ROW;
-            long id = EMOJI_MAP[i];
-
-            Rect emojiRect = new Rect(x * rectSize, y * rectSize, (x + 1) * rectSize, (y + 1) * rectSize);
-
-            emojiRects.put(id, emojiRect);
             indexes.put(EMOJI_MAP[i], i);
         }
 

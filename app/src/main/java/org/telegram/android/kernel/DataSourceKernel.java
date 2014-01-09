@@ -34,7 +34,6 @@ public class DataSourceKernel {
     private void init() {
         if (kernel.getAuthKernel().isLoggedIn()) {
             dialogSource = new DialogSource(kernel.getApplication());
-            dialogSource.startSyncIfRequired();
             userSource = new UserSource(kernel.getApplication());
             contactsSource = new ContactsSource(kernel.getApplication());
             chatSource = new ChatSource(kernel.getApplication());

@@ -2,11 +2,8 @@ package org.telegram.android.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.SystemClock;
 import android.support.v4.text.BidiFormatter;
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.Configuration;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
@@ -16,21 +13,14 @@ import org.telegram.android.core.wireframes.DialogWireframe;
 import org.telegram.android.cursors.ViewSource;
 import org.telegram.android.cursors.ViewSourceState;
 import org.telegram.android.log.Logger;
-import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.ui.TextUtil;
-import org.telegram.android.views.DialogView;
-import org.telegram.api.TLAbsMessageAction;
-import org.telegram.api.TLMessageActionChatAddUser;
-import org.telegram.api.TLMessageActionChatDeleteUser;
 import org.telegram.api.messages.TLAbsDialogs;
 import org.telegram.api.messages.TLDialogs;
 import org.telegram.api.messages.TLDialogsSlice;
 import org.telegram.api.requests.TLRequestMessagesGetDialogs;
-import org.telegram.dao.Dialog;
 import org.telegram.tl.TLObject;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -45,10 +35,14 @@ public class DialogSource {
 
     public static void clearData(StelsApplication application) {
         SharedPreferences preferences = application.getSharedPreferences("org.telegram.android.Dialogs", Context.MODE_PRIVATE);
-        preferences.edit().remove("state").commit();
+        preferences.edit().remove("pstate").remove("state").commit();
     }
 
-    public static final int PAGE_SIZE = 20;
+    private static final int STATE_UNLOADED = 0;
+    private static final int STATE_LOADED = 1;
+    private static final int STATE_COMPLETED = 2;
+
+    public static final int PAGE_SIZE = 40;
 
     public static final int PAGE_OVERLAP = 3;
 
@@ -66,6 +60,7 @@ public class DialogSource {
 
     private final Object stateSync = new Object();
     private DialogSourceState state;
+    private int persistenceState = STATE_UNLOADED;
 
     private StelsApplication application;
 
@@ -79,12 +74,14 @@ public class DialogSource {
         this.application = _application;
         this.isDestroyed = false;
         this.preferences = this.application.getSharedPreferences("org.telegram.android.Dialogs", Context.MODE_PRIVATE);
-        this.state = DialogSourceState.valueOf(preferences.getString("state", DialogSourceState.UNSYNCED.name()));
+        this.persistenceState = preferences.getInt("pstate", STATE_UNLOADED);
 
-        if (this.state == DialogSourceState.FULL_SYNC) {
-            this.state = DialogSourceState.UNSYNCED;
-        } else if (this.state == DialogSourceState.LOAD_MORE || this.state == DialogSourceState.LOAD_MORE_ERROR) {
+        if (persistenceState == STATE_COMPLETED) {
+            this.state = DialogSourceState.COMPLETED;
+        } else if (persistenceState == STATE_LOADED) {
             this.state = DialogSourceState.SYNCED;
+        } else {
+            this.state = DialogSourceState.UNSYNCED;
         }
 
         this.dialogsSource = new ViewSource<DialogWireframe, DialogDescription>(true) {
@@ -181,11 +178,6 @@ public class DialogSource {
         };
     }
 
-    public void destroy() {
-        isDestroyed = true;
-        service.shutdownNow();
-    }
-
     public ViewSource<DialogWireframe, DialogDescription> getViewSource() {
         return dialogsSource;
     }
@@ -198,19 +190,23 @@ public class DialogSource {
         if (isDestroyed)
             return;
         state = nState;
-        Logger.d(TAG, "Dialogs state: " + nState);
-        preferences.edit().putString("state", state.name()).commit();
         dialogsSource.invalidateState();
+    }
+
+    private void onCompleted() {
+        persistenceState = STATE_COMPLETED;
+        preferences.edit().putInt("pstate", persistenceState).commit();
+    }
+
+    private void onLoaded() {
+        persistenceState = STATE_LOADED;
+        preferences.edit().putInt("pstate", persistenceState).commit();
     }
 
     public void startSyncIfRequired() {
         if (state == DialogSourceState.UNSYNCED) {
             startSync();
         }
-    }
-
-    public void resetSync() {
-        setState(DialogSourceState.UNSYNCED);
     }
 
     public void startSync() {
@@ -229,7 +225,7 @@ public class DialogSource {
                             try {
                                 while (application.isLoggedIn()) {
                                     try {
-                                        isCompleted = requestLoad(0);
+                                        isCompleted = doLoadDialogs(0);
                                         dialogsSource.invalidateDataIfRequired();
                                         // notifyDataChanged();
                                         return;
@@ -244,8 +240,10 @@ public class DialogSource {
                                     if (state == DialogSourceState.FULL_SYNC) {
                                         if (isCompleted) {
                                             setState(DialogSourceState.COMPLETED);
+                                            onCompleted();
                                         } else {
                                             setState(DialogSourceState.SYNCED);
+                                            onLoaded();
                                         }
                                     }
                                 }
@@ -259,6 +257,10 @@ public class DialogSource {
                 });
             }
         }
+    }
+
+    public void resetSync() {
+        setState(DialogSourceState.UNSYNCED);
     }
 
     public void requestLoadMore(final int offset) {
@@ -275,12 +277,13 @@ public class DialogSource {
                         long start = SystemClock.uptimeMillis();
                         try {
                             try {
-                                boolean isCompleted = requestLoad(offset);
+                                boolean isCompleted = doLoadDialogs(offset);
                                 dialogsSource.invalidateDataIfRequired();
                                 synchronized (stateSync) {
                                     if (state == DialogSourceState.LOAD_MORE) {
                                         if (isCompleted) {
                                             setState(DialogSourceState.COMPLETED);
+                                            onCompleted();
                                         } else {
                                             setState(DialogSourceState.SYNCED);
                                         }
@@ -303,11 +306,18 @@ public class DialogSource {
         }
     }
 
+
     public boolean isCompleted() {
         return state == DialogSourceState.COMPLETED;
     }
 
-    private boolean requestLoad(int offset) throws Exception {
+    public void destroy() {
+        isDestroyed = true;
+        service.shutdownNow();
+    }
+
+
+    private boolean doLoadDialogs(int offset) throws Exception {
         if (isDestroyed) {
             return true;
         }

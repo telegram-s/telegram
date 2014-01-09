@@ -825,7 +825,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 }
 
                 String preSequence = TextUtils.ellipsize(message, bodyTextPaint, layoutMainWidth, TextUtils.TruncateAt.END).toString();
-                Spannable sequence = application.getEmojiProcessor().processEmojiCutMutable(preSequence, EmojiProcessor.CONFIGURATION_DIALOGS);
+                Spannable sequence;
+                if (EmojiProcessor.containsEmoji(message)) {
+                    sequence = application.getEmojiProcessor().processEmojiCutMutable(preSequence, EmojiProcessor.CONFIGURATION_DIALOGS);
+                } else {
+                    sequence = new SpannableString(preSequence);
+                }
 
                 if (nameLength != 0) {
                     sequence.setSpan(new ForegroundColorSpan(HIGHLIGHT_COLOR), 0, Math.min(nameLength, sequence.length()), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
@@ -844,9 +849,14 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 title = title.replace("\n", " ");
 
                 TextPaint paint = isEncrypted ? titleEncryptedPaint : (isHighlighted ? titleHighlightPaint : titlePaint);
-                Spannable preSequence = application.getEmojiProcessor().processEmojiCutMutable(title, EmojiProcessor.CONFIGURATION_DIALOGS);
-                CharSequence sequence = TextUtils.ellipsize(preSequence, paint, layoutTitleWidth, TextUtils.TruncateAt.END);
-                titleLayout = new StaticLayout(sequence, paint, layoutTitleWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                if (EmojiProcessor.containsEmoji(title)) {
+                    Spannable preSequence = application.getEmojiProcessor().processEmojiCutMutable(title, EmojiProcessor.CONFIGURATION_DIALOGS);
+                    CharSequence sequence = TextUtils.ellipsize(preSequence, paint, layoutTitleWidth, TextUtils.TruncateAt.END);
+                    titleLayout = new StaticLayout(sequence, paint, layoutTitleWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                } else {
+                    CharSequence sequence = TextUtils.ellipsize(new SpannableString(title), paint, layoutTitleWidth, TextUtils.TruncateAt.END);
+                    titleLayout = new StaticLayout(sequence, paint, layoutTitleWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                }
             }
         }
     }

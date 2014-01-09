@@ -1387,7 +1387,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     @Override
     public void onSourceDataChanged() {
-
+        long start = SystemClock.uptimeMillis();
         ArrayList<MessageWireframe> nWorkingSet = source.getMessagesSource().getCurrentWorkingSet();
         Logger.d(TAG, "onSourceDataChanged: " + firstUnreadMessage + ", " + isFreshUpdate);
         if (isFreshUpdate) {
@@ -1489,6 +1489,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
 
         onDataChanged();
+
+        Logger.d(TAG, "onSourceDataChanged time: " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     @Override

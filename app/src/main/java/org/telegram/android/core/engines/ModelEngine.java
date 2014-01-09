@@ -585,6 +585,7 @@ public class ModelEngine {
         msg.setSenderId(application.getCurrentUid());
         msg.setState(MessageState.PENDING);
         msg.setRandomId(Entropy.generateRandomId());
+        msg.setExtras(new TLLocalEmpty());
         return msg;
     }
 

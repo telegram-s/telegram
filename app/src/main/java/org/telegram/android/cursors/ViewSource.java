@@ -50,7 +50,7 @@ public abstract class ViewSource<T, V> {
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
-            Logger.d(TAG,"notify");
+            Logger.d(TAG, "notify");
             if (msg.what == 0) {
                 for (ViewSourceListener listener : listeners) {
                     listener.onSourceStateChanged();
@@ -236,25 +236,25 @@ public abstract class ViewSource<T, V> {
     }
 
     public synchronized boolean addItems(V... itm) {
-        boolean res = false;
+        boolean added = false;
         for (V v : itm) {
             T dest = convert(v);
             long key = getItemKey(dest);
-            res = items.containsKey(key) | res;
+            added = !items.containsKey(key) | added;
             items.put(key, dest);
         }
         invalidated = true;
-        return res;
+        return added;
     }
 
     public synchronized boolean addToEndHacky(V itm) {
         T dest = convert(itm);
         long key = getItemKey(dest);
-        boolean res = items.containsKey(key);
+        boolean added = !items.containsKey(key);
         items.put(key, dest);
         workingSet.add(0, dest);
         invalidated = true;
-        return res;
+        return added;
     }
 
     public synchronized void removeItem(V itm) {
