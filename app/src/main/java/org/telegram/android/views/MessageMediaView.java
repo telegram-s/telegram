@@ -322,13 +322,6 @@ public class MessageMediaView extends BaseMsgView {
                     previewTask.setMaxHeight(scaledH);
                     previewTask.setFillRect(true);
                     previewTask.setPutInDiskCache(true);
-
-                    if (oldPreview == null) {
-                        if (mediaPhoto.getFastPreviewH() != 0 && mediaPhoto.getFastPreviewW() != 0) {
-                            CachedImageTask cachedImageTask = new CachedImageTask(mediaPhoto, scaledW, scaledH, true);
-                            oldPreview = application.getImageController().tryToFindInCache(cachedImageTask);
-                        }
-                    }
                 }
                 isDownloadable = true;
             } else {
@@ -380,6 +373,26 @@ public class MessageMediaView extends BaseMsgView {
             if (!(mediaVideo.getVideoLocation() instanceof TLLocalFileEmpty)) {
                 key = DownloadManager.getVideoKey(mediaVideo);
                 isDownloadable = true;
+
+                if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
+                    float maxWidth = getPx(160);
+                    float maxHeight = getPx(300);
+
+                    float scale = maxWidth / mediaVideo.getPreviewW();
+
+                    if (previewHeight * scale > maxHeight) {
+                        scale = maxHeight / mediaVideo.getPreviewH();
+                    }
+
+                    int scaledW = (int) maxWidth;
+                    int scaledH = (int) (mediaVideo.getPreviewH() * scale);
+
+                    previewTask = new VideoThumbTask(application.getDownloadManager().getVideoFileName(key), 0);
+                    previewTask.setMaxWidth(scaledW);
+                    previewTask.setMaxHeight(scaledH);
+                    previewTask.setFillRect(true);
+                    previewTask.setPutInDiskCache(true);
+                }
             }
 
             if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
@@ -416,28 +429,30 @@ public class MessageMediaView extends BaseMsgView {
                     fastPreviewWidth = mediaVideo.getPreviewW() - 1;
                     fastPreviewHeight = mediaVideo.getPreviewH() - 1;
                 } else {
-                    if (mediaVideo.getPreviewLocation() instanceof TLLocalFileLocation) {
-                        TLLocalFileLocation location = (TLLocalFileLocation) mediaVideo.getPreviewLocation();
+                    if (previewTask == null) {
+                        if (mediaVideo.getPreviewLocation() instanceof TLLocalFileLocation) {
+                            TLLocalFileLocation location = (TLLocalFileLocation) mediaVideo.getPreviewLocation();
 
-                        previewTask = new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret()));
-                        previewWidth = mediaVideo.getPreviewW();
-                        previewHeight = mediaVideo.getPreviewH();
+                            previewTask = new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret()));
+                            previewWidth = mediaVideo.getPreviewW();
+                            previewHeight = mediaVideo.getPreviewH();
 
-                        float maxWidth = getPx(160);
-                        float maxHeight = getPx(300);
+                            float maxWidth = getPx(160);
+                            float maxHeight = getPx(300);
 
-                        float scale = maxWidth / previewWidth;
+                            float scale = maxWidth / previewWidth;
 
-                        if (previewHeight * scale > maxHeight) {
-                            scale = maxHeight / previewHeight;
+                            if (previewHeight * scale > maxHeight) {
+                                scale = maxHeight / previewHeight;
+                            }
+
+                            int scaledW = (int) maxWidth;
+                            int scaledH = (int) (previewHeight * scale);
+
+                            previewTask.setMaxWidth(scaledW);
+                            previewTask.setMaxHeight(scaledH);
+                            previewTask.setFillRect(true);
                         }
-
-                        int scaledW = (int) maxWidth;
-                        int scaledH = (int) (previewHeight * scale);
-
-                        previewTask.setMaxWidth(scaledW);
-                        previewTask.setMaxHeight(scaledH);
-                        previewTask.setFillRect(true);
                     }
                 }
             }
