@@ -167,6 +167,7 @@ public class DialogsDatabase {
             res.setFailure(dialog.getFailure());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
             res.setLastLocalViewedMessage(dialog.getLastLocalViewedMessage());
+            res.setLastRemoteViewedMessage(dialog.getLastRemoteViewedMessage());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
             res.setMessage(dialog.getMessage());
             res.setMessageState(dialog.getMessageState());
@@ -196,6 +197,7 @@ public class DialogsDatabase {
         dest.setFailure(src.isFailure());
         dest.setFirstUnreadMessage(src.getFirstUnreadMessage());
         dest.setLastLocalViewedMessage(src.getLastLocalViewedMessage());
+        dest.setLastRemoteViewedMessage(src.getLastRemoteViewedMessage());
         dest.setFirstUnreadMessage(src.getFirstUnreadMessage());
         dest.setMessage(src.getMessage());
         dest.setMessageState(src.getMessageState());

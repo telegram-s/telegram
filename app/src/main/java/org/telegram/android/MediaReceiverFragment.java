@@ -299,7 +299,7 @@ public class MediaReceiverFragment extends StelsFragment {
                         }
                     });
                 } else if (requestCode % REQ_M == 1) {
-                    if (data == null)
+                    if (data == null || data.getData() == null)
                         return;
 
                     final Uri selectedImageUri = data.getData();
