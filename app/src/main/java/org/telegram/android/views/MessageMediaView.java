@@ -49,7 +49,10 @@ public class MessageMediaView extends BaseMsgView {
     private Paint bitmapPaint;
     private Paint bitmapFilteredPaint;
     private Paint timeBgRect;
+
     private Paint downloadBgRect;
+    private Paint downloadBgLightRect;
+
     private Paint placeholderPaint;
     private Paint clockIconPaint;
 
@@ -159,6 +162,11 @@ public class MessageMediaView extends BaseMsgView {
         downloadBgRect.setColor(0xB6000000);
         downloadBgRect.setStyle(Paint.Style.FILL);
         downloadBgRect.setAntiAlias(true);
+
+        downloadBgLightRect = new Paint();
+        downloadBgLightRect.setColor(0x60ffffff);
+        downloadBgLightRect.setStyle(Paint.Style.FILL);
+        downloadBgLightRect.setAntiAlias(true);
 
         stateSent = getResources().getDrawable(R.drawable.st_bubble_ic_check_photo);
         stateHalfCheck = getResources().getDrawable(R.drawable.st_bubble_ic_halfcheck_photo);
@@ -735,17 +743,28 @@ public class MessageMediaView extends BaseMsgView {
         if (isDownloadable || isUploadable) {
             long downloadProgressAnimationTime = SystemClock.uptimeMillis() - downloadStateTime;
             if (downloadProgress < 100 || downloadProgressAnimationTime < FADE_ANIMATION_TIME) {
+
+                int internalR = getPx(16);
+                int outerR = getPx(20);
+
                 if (downloadProgress == 100 && isAnimatedProgress) {
                     float alpha = fadeEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
+                    float scale = scaleEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
                     downloadBgRect.setAlpha((int) (0xB6 * (1 - alpha)));
+                    downloadBgLightRect.setAlpha((int) (0x60 * (1 - alpha)));
+
+                    outerR = (int) (getPx(20) + (getPx(100) * (scale)));
+                    internalR = (int) (getPx(16) * (1 - scale));
                 } else {
                     downloadBgRect.setAlpha(0xB6);
+                    downloadBgLightRect.setAlpha(0x60);
                 }
 
                 canvas.save();
                 canvas.clipRect(0, 0, desiredWidth, desiredHeight);
 
                 float currentDownloadProgress = downloadProgress;
+
 
                 if (downloadProgressAnimationTime < FADE_ANIMATION_TIME && isAnimatedProgress) {
                     float alpha = fadeEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
@@ -755,14 +774,33 @@ public class MessageMediaView extends BaseMsgView {
 
                 int centerX = desiredWidth / 2;
                 int centerY = desiredHeight / 2;
-                int R = (int) Math.sqrt(centerX * centerX + centerY * centerY);
-                canvas.drawArc(new RectF(centerX - R, centerY - R, centerX + R, centerY + R), -90, -360 + (currentDownloadProgress * 360 / 100), true, downloadBgRect);
+                //int R = (int) Math.sqrt(centerX * centerX + centerY * centerY);
+
+//                Path path = new Path();
+//                path.addCircle(centerX, centerY, internalR, Path.Direction.CW);
+//                canvas.drawPath(path, downloadBgRect);
+
+                Path bgPath = new Path();
+                bgPath.addRect(0, 0, desiredWidth, desiredHeight, Path.Direction.CW);
+                bgPath.close();
+                bgPath.addCircle(centerX, centerY, outerR, Path.Direction.CW);
+                bgPath.close();
+                bgPath.setFillType(Path.FillType.EVEN_ODD);
+                canvas.drawPath(bgPath, downloadBgRect);
+
+                canvas.drawCircle(centerX, centerY, outerR, downloadBgLightRect);
+
+                RectF progressRect = new RectF(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
+                int progressAngleStart = -90;
+                int progressAngle = (int) (-360 + (currentDownloadProgress * 360 / 100));
+                canvas.drawArc(progressRect, progressAngleStart, progressAngle, true, downloadBgRect);
                 canvas.restore();
             }
+
             if (downloadString != null) {
                 int textW = (int) downloadPaint.measureText(downloadString);
                 Paint.FontMetricsInt metricsInt = downloadPaint.getFontMetricsInt();
-                canvas.drawText(downloadString, (desiredWidth - textW) / 2, desiredHeight / 2 + (/*metricsInt.bottom*/ -metricsInt.ascent) / 2, downloadPaint);
+                canvas.drawText(downloadString, (desiredWidth - textW) / 2, desiredHeight / 2 + (/*metricsInt.bottom*/ -metricsInt.ascent) / 2 + getPx(24), downloadPaint);
             }
         }
 

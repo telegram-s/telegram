@@ -35,8 +35,8 @@ import org.telegram.i18n.I18nUtil;
 public abstract class BaseMsgView extends BaseView implements Checkable {
     private static final String TAG = "BaseMsgView";
 
-    protected static final long FADE_ANIMATION_TIME = 160;
-    protected static final long STATE_ANIMATION_TIME = FADE_ANIMATION_TIME;
+    protected static final long FADE_ANIMATION_TIME = 300;
+    protected static final long STATE_ANIMATION_TIME = 160;
 
     private static final int TOUCHED_NONE = 0;
     private static final int TOUCHED_OUTSIDE = 4;
@@ -235,6 +235,10 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
         newMessagesPaint = new Paint();
         newMessagesPaint.setColor(0x66435266);
+    }
+
+    protected float scaleEasing(float src) {
+        return 1 - (1 - src) * (1 - src) * (1 - src) * (1 - src);
     }
 
     protected float fadeEasing(float src) {

@@ -83,6 +83,8 @@ public class DownloadManager {
 
     private CopyOnWriteArrayList<WeakReference<DownloadListener>> listeners = new CopyOnWriteArrayList<WeakReference<DownloadListener>>();
 
+    private Handler handler = new Handler(Looper.getMainLooper());
+
     public DownloadManager(StelsApplication application) {
         this.service = Executors.newFixedThreadPool(3);
         this.application = application;
@@ -276,7 +278,7 @@ public class DownloadManager {
                         @Override
                         public void onPartDownloaded(int percent, int downloadedSize) {
                             if (record.state != DownloadState.CANCELLED) {
-                                updateState(key, DownloadState.IN_PROGRESS, percent, downloadedSize);
+                                updateState(key, DownloadState.IN_PROGRESS, (percent * 90) / 100, downloadedSize);
                             }
                         }
 
@@ -323,7 +325,7 @@ public class DownloadManager {
                         } catch (IOException e) {
                             e.printStackTrace();
                             Logger.t(TAG, e);
-                            updateState(key, DownloadState.FAILURE, 100, size);
+                            updateState(key, DownloadState.FAILURE, 0, 0);
                             return;
                         }
 
@@ -457,7 +459,7 @@ public class DownloadManager {
         record.downloadedPercent = percent;
         record.downloaded = bytes;
 
-        notifier.notify(key, new Runnable() {
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 for (WeakReference<DownloadListener> ref : listeners) {
