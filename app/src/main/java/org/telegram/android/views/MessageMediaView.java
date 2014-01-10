@@ -350,8 +350,8 @@ public class MessageMediaView extends BaseMsgView {
                     options.inTempStorage = bitmapTmp;
 
                     previewCached = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
-                    fastPreviewWidth = mediaPhoto.getFastPreviewW();
-                    fastPreviewHeight = mediaPhoto.getFastPreviewH();
+                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
+                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
                 } else {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -367,8 +367,8 @@ public class MessageMediaView extends BaseMsgView {
                         previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
                         BitmapUtils.fastblur(img, previewCached, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH(), 3);
                     }
-                    fastPreviewWidth = mediaPhoto.getFastPreviewW();
-                    fastPreviewHeight = mediaPhoto.getFastPreviewH();
+                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
+                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
                 }
             }
         } else if (message.message.getExtras() instanceof TLLocalVideo) {
@@ -399,7 +399,22 @@ public class MessageMediaView extends BaseMsgView {
                     previewHeight = scaledH;
                     previewWidth = scaledW;
 
-                    previewTask = new CachedImageTask(mediaVideo, scaledW, scaledH, true);
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    options.inMutable = true;
+                    options.inDither = false;
+                    options.inTempStorage = bitmapTmp;
+                    Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, options);
+                    if (previewBitmapHolder != null) {
+                        previewCached = previewBitmapHolder;
+                        previewBitmapHolder = null;
+                        BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+                    } else {
+                        previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+                        BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+                    }
+                    fastPreviewWidth = mediaVideo.getPreviewW() - 1;
+                    fastPreviewHeight = mediaVideo.getPreviewH() - 1;
                 } else {
                     if (mediaVideo.getPreviewLocation() instanceof TLLocalFileLocation) {
                         TLLocalFileLocation location = (TLLocalFileLocation) mediaVideo.getPreviewLocation();
