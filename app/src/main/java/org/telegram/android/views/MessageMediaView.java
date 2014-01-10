@@ -743,21 +743,23 @@ public class MessageMediaView extends BaseMsgView {
         if (isDownloadable || isUploadable) {
             long downloadProgressAnimationTime = SystemClock.uptimeMillis() - downloadStateTime;
             if (downloadProgress < 100 || downloadProgressAnimationTime < FADE_ANIMATION_TIME) {
-
+                isAnimated = true;
                 int internalR = getPx(16);
                 int outerR = getPx(20);
 
                 if (downloadProgress == 100 && isAnimatedProgress) {
                     float alpha = fadeEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
                     float scale = scaleEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
-                    downloadBgRect.setAlpha((int) (0xB6 * (1 - alpha)));
-                    downloadBgLightRect.setAlpha((int) (0x60 * (1 - alpha)));
+//                    downloadBgRect.setAlpha((int) (0xB6 * (1 - alpha)));
+                    downloadBgRect.setAlpha(0xB6);
+                    downloadBgLightRect.setAlpha((int) (0x30 * (1 - alpha)));
 
-                    outerR = (int) (getPx(20) + (getPx(100) * (scale)));
+                    int maxR = (int) Math.sqrt((desiredWidth * desiredWidth + desiredHeight * desiredHeight) / 4);
+                    outerR = (int) (getPx(20) + (maxR * (scale)));
                     internalR = (int) (getPx(16) * (1 - scale));
                 } else {
                     downloadBgRect.setAlpha(0xB6);
-                    downloadBgLightRect.setAlpha(0x60);
+                    downloadBgLightRect.setAlpha(0x30);
                 }
 
                 canvas.save();
@@ -766,8 +768,8 @@ public class MessageMediaView extends BaseMsgView {
                 float currentDownloadProgress = downloadProgress;
 
 
-                if (downloadProgressAnimationTime < FADE_ANIMATION_TIME && isAnimatedProgress) {
-                    float alpha = fadeEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
+                if (downloadProgressAnimationTime < STATE_ANIMATION_TIME && isAnimatedProgress) {
+                    float alpha = fadeEasing((float) downloadProgressAnimationTime / STATE_ANIMATION_TIME);
                     isAnimated = true;
                     currentDownloadProgress = oldDownloadProgress + (downloadProgress - oldDownloadProgress) * alpha;
                 }
