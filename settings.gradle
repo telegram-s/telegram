@@ -1,4 +1,4 @@
-include ':app', ':telegram-api', ':mtproto', ':tl-core', ':ui:images'
+include ':app', ':telegram-api', ':mtproto', ':tl-core', ':ui:images', ':ui:cropping'
 
 project(':tl-core').projectDir = new File( 'libraries/tl-core' )
 project(':mtproto').projectDir = new File( 'libraries/mtproto' )

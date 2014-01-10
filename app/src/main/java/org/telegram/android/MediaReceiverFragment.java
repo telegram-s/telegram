@@ -18,6 +18,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.widget.Toast;
 import com.extradea.framework.images.utils.ImageUtils;
+import org.telegram.android.activity.CropImageActivity;
 import org.telegram.android.ui.pick.PickIntentClickListener;
 import org.telegram.android.ui.pick.PickIntentDialog;
 import org.telegram.android.ui.pick.PickIntentItem;
@@ -218,7 +219,7 @@ public class MediaReceiverFragment extends StelsFragment {
 //        intent.setData(data);
 //        List<ResolveInfo> list = getActivity().getPackageManager().queryIntentActivities(intent, 0);
 //        return list.size() != 0;
-        return false;
+        return true;
     }
 
     public void requestCrop(String fileName, int width, int height, int requestId) {
@@ -233,8 +234,9 @@ public class MediaReceiverFragment extends StelsFragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setDataAndType(uri, "image/*");
+        Intent intent = new Intent();
+        intent.setClass(getActivity(), CropImageActivity.class);
+        intent.setData(uri);
         intent.putExtra("outputX", width);
         intent.putExtra("outputY", height);
         intent.putExtra("aspectX", 1);
