@@ -392,6 +392,9 @@ public class MessageMediaView extends BaseMsgView {
                     previewTask.setMaxHeight(scaledH);
                     previewTask.setFillRect(true);
                     previewTask.setPutInDiskCache(true);
+
+                    previewWidth = mediaVideo.getPreviewW();
+                    previewHeight = mediaVideo.getPreviewH();
                 }
             }
 
