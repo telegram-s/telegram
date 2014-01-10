@@ -66,6 +66,7 @@ public class MessageMediaView extends BaseMsgView {
     private Bitmap oldPreview;
     private Bitmap preview;
     private Bitmap previewCached;
+    private Bitmap previewBitmapHolder;
     private int fastPreviewHeight;
     private int fastPreviewWidth;
     private int previewHeight;
@@ -327,47 +328,41 @@ public class MessageMediaView extends BaseMsgView {
             }
 
 
-            if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0 && !isDownloadable) {
+            if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0 && isDownloadable) {
 
-                float maxWidth = getPx(160);
-                float maxHeight = getPx(300);
+                if (mediaPhoto.isOptimized()) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    if (previewBitmapHolder != null) {
+                        options.inBitmap = previewBitmapHolder;
+                        previewBitmapHolder = null;
+                    }
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    options.inMutable = true;
+                    options.inDither = false;
+                    options.inTempStorage = bitmapTmp;
 
-                float scale = maxWidth / mediaPhoto.getFastPreviewW();
-
-                if (mediaPhoto.getFastPreviewH() * scale > maxHeight) {
-                    scale = maxHeight / mediaPhoto.getFastPreviewH();
+                    previewCached = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
+                    fastPreviewWidth = mediaPhoto.getFastPreviewW();
+                    fastPreviewHeight = mediaPhoto.getFastPreviewH();
+                } else {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    options.inMutable = true;
+                    options.inDither = false;
+                    options.inTempStorage = bitmapTmp;
+                    Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
+                    if (previewBitmapHolder != null) {
+                        previewCached = previewBitmapHolder;
+                        previewBitmapHolder = null;
+                        BitmapUtils.fastblur(img, previewCached, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH(), 3);
+                    } else {
+                        previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+                        BitmapUtils.fastblur(img, previewCached, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH(), 3);
+                    }
+                    fastPreviewWidth = mediaPhoto.getFastPreviewW();
+                    fastPreviewHeight = mediaPhoto.getFastPreviewH();
                 }
-
-                int scaledW = (int) maxWidth;
-                int scaledH = (int) (mediaPhoto.getFastPreviewH() * scale);
-
-                // previewHeight = scaledH;
-                // previewWidth = scaledW;
-
-                previewTask = new CachedImageTask(mediaPhoto, scaledW, scaledH, true);
-
-//                BitmapFactory.Options options = new BitmapFactory.Options();
-//                if (previewCached != null) {
-//                    if (Build.VERSION.SDK_INT >= 11) {
-//                        if (previewCached.getWidth() == 90 && previewCached.getHeight() == 90) {
-//                            options.inBitmap = previewCached;
-//                            options.inMutable = true;
-//                        }
-//                    }
-//                }
-
-//                options.inDither = false;
-//                options.inTempStorage = bitmapTmp;
-
-//                previewCached = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
-
-//                fastPreviewWidth = mediaPhoto.getFastPreviewW();
-//                fastPreviewHeight = mediaPhoto.getFastPreviewH();
-            } else {
-                // previewWidth = 0;
-                // previewHeight = 0;
             }
-
         } else if (message.message.getExtras() instanceof TLLocalVideo) {
             TLLocalVideo mediaVideo = (TLLocalVideo) message.message.getExtras();
             isVideo = true;
@@ -557,6 +552,9 @@ public class MessageMediaView extends BaseMsgView {
         } else {
             placeholderPaint.setColor(Color.WHITE);
         }
+        if (this.previewCached != null && this.previewCached.getWidth() == 90 && this.previewCached.getHeight() == 90) {
+            this.previewBitmapHolder = this.previewCached;
+        }
         this.previewCached = null;
         this.state = message.message.getState();
         this.prevState = -1;
@@ -687,6 +685,9 @@ public class MessageMediaView extends BaseMsgView {
                     } else {
                         canvas.drawBitmap(oldPreview, 0, 0, bitmapPaint);
                     }
+                } else if (previewCached != null) {
+                    bitmapFilteredPaint.setAlpha(255);
+                    canvas.drawBitmap(previewCached, new Rect(0, 0, fastPreviewWidth, fastPreviewHeight), new Rect(0, 0, desiredWidth, desiredHeight), bitmapFilteredPaint);
                 } else {
                     canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
                 }
@@ -702,7 +703,7 @@ public class MessageMediaView extends BaseMsgView {
                 isAnimated = true;
             }
         } else if (previewCached != null) {
-            bitmapPaint.setAlpha(255);
+            bitmapFilteredPaint.setAlpha(255);
             canvas.drawBitmap(previewCached, new Rect(0, 0, fastPreviewWidth, fastPreviewHeight), new Rect(0, 0, desiredWidth, desiredHeight), bitmapFilteredPaint);
 //            if (scaleUpMedia) {
 //                canvas.drawBitmap(previewCached, new Rect(0, 0, previewCached.getWidth(), previewCached.getHeight()), new Rect(0, 0, desiredWidth, desiredHeight), bitmapPaint);

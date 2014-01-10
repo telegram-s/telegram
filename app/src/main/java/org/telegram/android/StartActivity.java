@@ -336,7 +336,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         }
         if (Intent.ACTION_SEND_MULTIPLE.equals(intent.getAction())) {
             if (intent.getType() != null) {
-                if (intent.getType().equals("image/*")) {
+                if (intent.getType().startsWith("image/")) {
                     ArrayList<Parcelable> uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
                     String[] uris2 = new String[uris.size()];
                     for (int i = 0; i < uris2.length; i++) {

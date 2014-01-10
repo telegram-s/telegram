@@ -8,6 +8,14 @@ import android.graphics.Bitmap;
  */
 public class BitmapUtils {
     public static Bitmap fastblur(Bitmap sentBitmap, int radius) {
+        int w = sentBitmap.getWidth();
+        int h = sentBitmap.getHeight();
+        Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
+        fastblur(sentBitmap, bitmap, w, h, radius);
+        return bitmap;
+    }
+
+    public static void fastblur(Bitmap srcBitmap, Bitmap destBitmap, int w, int h, int radius) {
 
         // Stack Blur v1.0 from
         // http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
@@ -37,17 +45,12 @@ public class BitmapUtils {
         //
         // Stack Blur Algorithm by Mario Klingemann <mario@quasimondo.com>
 
-        Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
-
         if (radius < 1) {
-            return (null);
+            return;
         }
 
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
-
         int[] pix = new int[w * h];
-        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+        srcBitmap.getPixels(pix, 0, w, 0, 0, w, h);
 
         int wm = w - 1;
         int hm = h - 1;
@@ -187,7 +190,7 @@ public class BitmapUtils {
             stackpointer = radius;
             for (y = 0; y < h; y++) {
                 // Preserve alpha channel: ( 0xff000000 & pix[yi] )
-                pix[yi] = ( 0xff000000 & pix[yi] ) | ( dv[rsum] << 16 ) | ( dv[gsum] << 8 ) | dv[bsum];
+                pix[yi] = (0xff000000 & pix[yi]) | (dv[rsum] << 16) | (dv[gsum] << 8) | dv[bsum];
 
                 rsum -= routsum;
                 gsum -= goutsum;
@@ -232,8 +235,6 @@ public class BitmapUtils {
             }
         }
 
-        bitmap.setPixels(pix, 0, w, 0, 0, w, h);
-
-        return (bitmap);
+        destBitmap.setPixels(pix, 0, w, 0, 0, w, h);
     }
 }

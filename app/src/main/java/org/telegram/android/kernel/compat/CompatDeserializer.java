@@ -10,6 +10,7 @@ import org.telegram.android.kernel.compat.v1.TLUserStatusEmptyCompat;
 import org.telegram.android.kernel.compat.v1.TLUserStatusOfflineCompat;
 import org.telegram.android.kernel.compat.v1.TLUserStatusOnlineCompat;
 import org.telegram.android.kernel.compat.v4.*;
+import org.telegram.android.kernel.compat.v8.TLLocalPhotoCompat8;
 import org.telegram.mtproto.log.Logger;
 import org.telegram.tl.StreamingUtils;
 import org.telegram.tl.TLObject;
@@ -70,6 +71,7 @@ public class CompatDeserializer {
             res.setFullH(localPhoto.getFullH());
             res.setFullW(localPhoto.getFullW());
             res.setFullLocation((TLAbsLocalFileLocation) convert(localPhoto.getFullLocation()));
+            res.setOptimized(false);
             return res;
         } else if (object instanceof CompatTLLocalVideo) {
             CompatTLLocalVideo localVideo = (CompatTLLocalVideo) object;

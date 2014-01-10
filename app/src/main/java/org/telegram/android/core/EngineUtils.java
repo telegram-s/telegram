@@ -12,6 +12,7 @@ import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
+import org.telegram.android.ui.BitmapUtils;
 import org.telegram.api.*;
 import org.telegram.tl.TLObject;
 
@@ -248,17 +249,17 @@ public class EngineUtils {
             TLPhotoCachedSize cachedSize = ApiUtils.findCachedSize((TLPhoto) src.getPhoto());
             if (cachedSize != null) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(cachedSize.getBytes(), 0, cachedSize.getBytes().length);
-                if (bitmap != null) {
+                if (bitmap != null && bitmap.getWidth() <= 90 && bitmap.getHeight() <= 90) {
                     Bitmap destPreview = Bitmap.createBitmap(90, 90, Bitmap.Config.ARGB_8888);
-                    Canvas canvas = new Canvas(destPreview);
-                    canvas.drawBitmap(bitmap, 0, 0, new Paint());
+                    BitmapUtils.fastblur(bitmap, destPreview, bitmap.getWidth(), bitmap.getHeight(), 3);
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     destPreview.compress(Bitmap.CompressFormat.JPEG, 55, outputStream);
                     byte[] preview = outputStream.toByteArray();
 
                     res.setFastPreview(preview);
-                    res.setFastPreviewW(cachedSize.getW());
-                    res.setFastPreviewH(cachedSize.getH());
+                    res.setFastPreviewW(bitmap.getWidth());
+                    res.setFastPreviewH(bitmap.getHeight());
+                    res.setOptimized(true);
 
                     if (cachedSize.getLocation() instanceof TLFileLocation) {
                         TLFileLocation location = (TLFileLocation) cachedSize.getLocation();
@@ -272,12 +273,14 @@ public class EngineUtils {
                     res.setFastPreviewKey("");
                     res.setFastPreviewH(0);
                     res.setFastPreviewW(0);
+                    res.setOptimized(false);
                 }
             } else {
                 res.setFastPreview(new byte[0]);
                 res.setFastPreviewKey("");
                 res.setFastPreviewH(0);
                 res.setFastPreviewW(0);
+                res.setOptimized(false);
             }
 
             TLPhotoSize downloadSize = ApiUtils.findDownloadSize((TLPhoto) src.getPhoto());
@@ -304,6 +307,7 @@ public class EngineUtils {
             res.setFastPreviewKey("");
             res.setFastPreviewH(0);
             res.setFastPreviewW(0);
+            res.setOptimized(false);
             res.setFullH(0);
             res.setFullW(0);
             res.setFullLocation(new TLLocalFileEmpty());

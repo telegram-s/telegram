@@ -333,7 +333,9 @@ public class MessagesDatabase {
 
     private Message convert(ChatMessage src) {
         Message res = new Message();
-        res.setId((long) src.getDatabaseId());
+        if (src.getDatabaseId() != 0) {
+            res.setId((long) src.getDatabaseId());
+        }
         res.setPeerUniqId(uniq(src.getPeerType(), src.getPeerId()));
         res.setMid(src.getMid());
         res.setRid(src.getRandomId());

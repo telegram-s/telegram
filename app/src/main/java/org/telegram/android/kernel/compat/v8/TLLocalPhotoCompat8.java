@@ -1,5 +1,6 @@
-package org.telegram.android.core.model.media;
+package org.telegram.android.kernel.compat.v8;
 
+import org.telegram.android.core.model.media.TLAbsLocalFileLocation;
 import org.telegram.tl.TLContext;
 import org.telegram.tl.TLObject;
 
@@ -8,38 +9,24 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import static org.telegram.tl.StreamingUtils.*;
+import static org.telegram.tl.StreamingUtils.readInt;
+import static org.telegram.tl.StreamingUtils.readTLObject;
 
 /**
- * Created with IntelliJ IDEA.
- * User: ex3ndr
- * Date: 15.10.13
- * Time: 2:16
+ * Created by ex3ndr on 10.01.14.
  */
-public class TLLocalPhoto extends TLObject {
-
-    public static final int CLASS_ID = 0x4d7adc15;
+public class TLLocalPhotoCompat8 extends TLObject {
+    public static final int CLASS_ID = 0x36740e72;
 
     private int fastPreviewW;
     private int fastPreviewH;
     private byte[] fastPreview;
     private String fastPreviewKey;
-    private boolean isOptimized;
 
     private int fullW;
     private int fullH;
     private TLAbsLocalFileLocation fullLocation;
 
-    public TLLocalPhoto() {
-
-    }
-
-    public boolean isOptimized() {
-        return isOptimized;
-    }
-
-    public void setOptimized(boolean isOptimized) {
-        this.isOptimized = isOptimized;
-    }
 
     public int getFastPreviewW() {
         return fastPreviewW;
@@ -65,6 +52,14 @@ public class TLLocalPhoto extends TLObject {
         this.fastPreview = fastPreview;
     }
 
+    public String getFastPreviewKey() {
+        return fastPreviewKey;
+    }
+
+    public void setFastPreviewKey(String fastPreviewKey) {
+        this.fastPreviewKey = fastPreviewKey;
+    }
+
     public int getFullW() {
         return fullW;
     }
@@ -87,14 +82,6 @@ public class TLLocalPhoto extends TLObject {
 
     public void setFullLocation(TLAbsLocalFileLocation fullLocation) {
         this.fullLocation = fullLocation;
-    }
-
-    public String getFastPreviewKey() {
-        return fastPreviewKey;
-    }
-
-    public void setFastPreviewKey(String fastPreviewKey) {
-        this.fastPreviewKey = fastPreviewKey;
     }
 
     @Override

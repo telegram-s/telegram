@@ -9,6 +9,7 @@ import org.telegram.android.core.model.phone.TLLocalImportedPhone;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.storage.*;
 import org.telegram.android.kernel.compat.v5.TLDcInfoCompat;
+import org.telegram.android.kernel.compat.v8.TLLocalPhotoCompat8;
 import org.telegram.tl.TLContext;
 import org.telegram.tl.TLObject;
 
@@ -77,6 +78,7 @@ public class TLLocalContext extends TLContext {
 
         // Compat
         registerCompatClass(TLDcInfoCompat.CLASS_ID, TLDcInfoCompat.class);
+        registerCompatClass(TLLocalPhotoCompat8.CLASS_ID, TLLocalPhotoCompat8.class);
 
         // PhoneBook
         registerClass(TLLocalBook.CLASS_ID, TLLocalBook.class);
@@ -91,6 +93,18 @@ public class TLLocalContext extends TLContext {
         if (src instanceof TLDcInfoCompat) {
             TLDcInfoCompat compat = (TLDcInfoCompat) src;
             return new TLDcInfo(compat.getDcId(), compat.getAddress(), compat.getPort(), 0);
+        } else if (src instanceof TLLocalPhotoCompat8) {
+            TLLocalPhotoCompat8 localPhoto = (TLLocalPhotoCompat8) src;
+            TLLocalPhoto res = new TLLocalPhoto();
+            res.setFastPreview(localPhoto.getFastPreview());
+            res.setFastPreviewH(localPhoto.getFastPreviewH());
+            res.setFastPreviewW(localPhoto.getFastPreviewW());
+            res.setFastPreviewKey(localPhoto.getFastPreviewKey());
+            res.setFullH(localPhoto.getFullH());
+            res.setFullW(localPhoto.getFullW());
+            res.setFullLocation(localPhoto.getFullLocation());
+            res.setOptimized(false);
+            return res;
         }
 
         return src;
