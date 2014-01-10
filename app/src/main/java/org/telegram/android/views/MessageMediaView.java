@@ -28,6 +28,8 @@ import org.telegram.api.TLFileLocation;
  */
 public class MessageMediaView extends BaseMsgView {
 
+    private static final String TAG = "MessageMediaView";
+
     private static byte[] bitmapTmp = new byte[16 * 1024];
 
     public static String buildMapUrl(double latitude, double longitude, int width, int height) {
@@ -545,6 +547,7 @@ public class MessageMediaView extends BaseMsgView {
 
     @Override
     protected void bindNewView(MessageWireframe message) {
+        long start = SystemClock.uptimeMillis();
         this.databaseId = message.message.getDatabaseId();
         this.isOut = message.message.isOut();
         this.date = TextUtil.formatTime(message.message.getDate(), getContext());
@@ -572,6 +575,7 @@ public class MessageMediaView extends BaseMsgView {
         } else {
             receiver.receiveImage(null);
         }
+        Logger.d(TAG, "Bind in " + (SystemClock.uptimeMillis() - start) + " ms");
         requestLayout();
     }
 

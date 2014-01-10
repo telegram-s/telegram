@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2013 Extradea LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.extradea.framework.images.tasks;
+
+import java.io.Serializable;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: ex3ndr
+ * Date: 11.06.12
+ * Time: 23:45
+ */
+public class RoundedQuadImageTask extends ImageTask implements Serializable {
+
+    private String[] urls;
+
+    private int radius = 6;
+
+    public RoundedQuadImageTask(String[] urls) {
+        this.urls = urls;
+        ImageTask[] required = new ImageTask[urls.length];
+        for (int i = 0; i < urls.length; i++) {
+            required[i] = new ImageDownloadTask(urls[i]);
+            required[i].setPutInMemoryCache(false);
+        }
+        setRequiredTasks(required);
+    }
+
+    public String[] getUrls() {
+        return urls;
+    }
+
+    @Override
+    public String getKeyImpl() {
+        String res = "Quad(" + radius + "): ";
+        for (String s : urls) {
+            res += s + ",";
+        }
+        return res;
+    }
+
+    @Override
+    public boolean skipDiskCacheCheck() {
+        return true;
+    }
+
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
+}

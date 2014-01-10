@@ -1918,7 +1918,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 if (!object.message.isOut() && object.message.getMid() == firstUnreadMessage) {
                     showDiv = true;
                 }
-                messageView.bind(object, showTime, showDiv, unreadCount);
+                long start = SystemClock.uptimeMillis();
+                boolean res = messageView.bind(object, showTime, showDiv, unreadCount);
+                Logger.d(TAG, "Bind #" + object.message.getContentType() + " in " + (SystemClock.uptimeMillis() - start) + " ms \t" + res);
 
                 messageView.setOnBubbleClickListener(new View.OnClickListener() {
                     @Override

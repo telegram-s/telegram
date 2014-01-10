@@ -129,7 +129,7 @@ public class TourFragment extends StelsFragment {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 if (application.getKernel().getActivationController() != null) {
-                                    if (application.getKernel().getActivationController().getCurrentState() == ActivationController.STATE_PHONE_EDIT) {
+                                    if (application.getKernel().getActivationController().getCurrentState() == ActivationController.STATE_PHONE_CONFIRM) {
                                         application.getKernel().getActivationController().doEditPhone();
                                     }
                                 }

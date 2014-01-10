@@ -249,7 +249,9 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         bind(message, showTimeSeparator, showUnreadMessagesNotify, unreadMessagesCount);
     }
 
-    public final void bind(MessageWireframe message, boolean showTime, boolean showUnread, int unreadMessagesCount) {
+    public final boolean bind(MessageWireframe message, boolean showTime, boolean showUnread, int unreadMessagesCount) {
+        long start = SystemClock.uptimeMillis();
+        boolean isUpdated = false;
         this.message = message;
         if (showTimeSeparator != showTime) {
             requestLayout();
@@ -262,23 +264,29 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         this.unreadMessagesCount = unreadMessagesCount;
 
         if (showUnreadMessagesNotify) {
-            newDivText = I18nUtil.getInstance().getPluralFormatted(R.plurals.st_new_messages, unreadMessagesCount);
+            //newDivText = I18nUtil.getInstance().getPluralFormatted(R.plurals.st_new_messages, unreadMessagesCount);
+            newDivText = "???";
         }
 
         showTimeSeparator = showTime;
         if (showTimeSeparator) {
-            timeDivText = org.telegram.android.ui.TextUtil.formatDateLong(message.message.getDate());
+            // timeDivText = org.telegram.android.ui.TextUtil.formatDateLong(message.message.getDate());
+            timeDivText = "???";
         }
         bindCommonInt(message);
         bindCommon(message);
+        Logger.d(TAG, "common bind in " + (SystemClock.uptimeMillis() - start) + " ms");
         if (oldId != -1 && message.message.getDatabaseId() == oldId) {
             bindUpdateInt(message);
             bindUpdate(message);
+            isUpdated = true;
         } else {
             bindNewInt(message);
             bindNewView(message);
         }
         oldId = message.message.getDatabaseId();
+        Logger.d(TAG, "end___ bind in " + (SystemClock.uptimeMillis() - start) + " ms");
+        return isUpdated;
     }
 
     private void bindCommonInt(MessageWireframe message) {
@@ -304,7 +312,9 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                         task.setMaxWidth(getPx(42));
                         task.setMaxHeight(getPx(42));
                         task.setFillRect(true);
+                        long bindStart = SystemClock.uptimeMillis();
                         receiver.receiveImage(task);
+                        Logger.d(TAG, "Bind avatar in " + (SystemClock.uptimeMillis() - bindStart) + " ms");
                         avatar = receiver.getResult();
                         if (avatar != null) {
                             avatarImageTime = 0;
