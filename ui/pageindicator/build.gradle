@@ -1,0 +1,38 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.3+'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+project.version = "1.2.2"
+
+project.group = "org.telegram"
+
+apply plugin: 'android-library'
+
+dependencies {
+    compile 'com.android.support:support-v4:19.0.0+'
+}
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "19.0.0"
+}
+
+apply plugin: 'maven'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "http://192.168.1.12:8080/archiva/repository/internal/")
+        }
+    }
+}
