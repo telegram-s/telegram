@@ -875,6 +875,16 @@ public class ModelEngine {
         dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
     }
 
+    public void onMessageDocSent(ChatMessage msg, int date, int mid, TLLocalDocument doc) {
+        msg.setState(MessageState.SENT);
+        msg.setDate(date);
+        msg.setMid(mid);
+        msg.setExtras(doc);
+        messagesEngine.update(msg);
+        mediaEngine.saveMedia(msg.getMid(), msg);
+        dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
+    }
+
     public void onMessageSent(ChatMessage msg, int date) {
         msg.setState(MessageState.SENT);
         msg.setDate(date);

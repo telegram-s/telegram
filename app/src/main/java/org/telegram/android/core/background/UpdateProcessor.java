@@ -8,6 +8,7 @@ import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
+import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.service.TLLocalActionUserRegistered;
 import org.telegram.android.core.model.update.*;
@@ -275,6 +276,14 @@ public class UpdateProcessor {
             return identity;
         } else if (object instanceof TLLocalMessageSentPhoto) {
             TLAbsStatedMessage statedMessage = ((TLLocalMessageSentPhoto) object).getAbsStatedMessage();
+            PackageIdentity identity = new PackageIdentity();
+            identity.seq = statedMessage.getSeq();
+            identity.seqEnd = 0;
+            identity.pts = statedMessage.getPts();
+            identity.date = 0;
+            return identity;
+        } else if (object instanceof TLLocalMessageSentDoc) {
+            TLAbsStatedMessage statedMessage = ((TLLocalMessageSentDoc) object).getAbsStatedMessage();
             PackageIdentity identity = new PackageIdentity();
             identity.seq = statedMessage.getSeq();
             identity.seqEnd = 0;
@@ -588,6 +597,18 @@ public class UpdateProcessor {
                 }
             }
             application.getEngine().onMessagePhotoSent(sentPhoto.getMessage(), message.getDate(), message.getId(), object);
+        } else if (update instanceof TLLocalMessageSentDoc) {
+            TLLocalMessageSentDoc sentDoc = (TLLocalMessageSentDoc) update;
+            TLMessage message = (TLMessage) sentDoc.getAbsStatedMessage().getMessage();
+            TLLocalDocument doc = (TLLocalDocument) EngineUtils.convertMedia(message.getMedia());
+            if (doc.getFastPreview().length == 0) {
+                if (sentDoc.getFastPreview().length > 0) {
+                    doc.setFastPreview(sentDoc.getFastPreview());
+                    doc.setPreviewW(sentDoc.getFastPreviewW());
+                    doc.setPreviewH(sentDoc.getFastPreviewH());
+                }
+            }
+            application.getEngine().onMessageDocSent(sentDoc.getMessage(), message.getDate(), message.getId(), doc);
         }
     }
 

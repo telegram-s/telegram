@@ -904,6 +904,13 @@ public class MessageMediaView extends BaseMsgView {
 
                 isAnimated = true;
             }
+        } else if (oldPreview != null) {
+            bitmapPaint.setAlpha(255);
+            if (scaleUpMedia) {
+                canvas.drawBitmap(oldPreview, new Rect(0, 0, oldPreview.getWidth(), oldPreview.getHeight()), new Rect(0, 0, desiredWidth, desiredHeight), bitmapPaint);
+            } else {
+                canvas.drawBitmap(oldPreview, 0, 0, bitmapPaint);
+            }
         } else if (previewCached != null) {
             bitmapFilteredPaint.setAlpha(255);
             canvas.drawBitmap(previewCached, new Rect(0, 0, fastPreviewWidth, fastPreviewHeight), new Rect(0, 0, desiredWidth, desiredHeight), bitmapFilteredPaint);
@@ -913,16 +920,7 @@ public class MessageMediaView extends BaseMsgView {
 //                canvas.drawBitmap(previewCached, 0, 0, bitmapPaint);
 //            }
         } else {
-            if (oldPreview != null) {
-                bitmapPaint.setAlpha(255);
-                if (scaleUpMedia) {
-                    canvas.drawBitmap(oldPreview, new Rect(0, 0, oldPreview.getWidth(), oldPreview.getHeight()), new Rect(0, 0, desiredWidth, desiredHeight), bitmapPaint);
-                } else {
-                    canvas.drawBitmap(oldPreview, 0, 0, bitmapPaint);
-                }
-            } else {
-                canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
-            }
+            canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
         }
 
         if (showMapPoint) {

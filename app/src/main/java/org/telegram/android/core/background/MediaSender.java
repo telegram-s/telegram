@@ -17,6 +17,7 @@ import org.telegram.android.core.model.EncryptedChat;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.*;
+import org.telegram.android.core.model.update.TLLocalMessageSentDoc;
 import org.telegram.android.core.model.update.TLLocalMessageSentPhoto;
 import org.telegram.android.core.model.update.TLLocalMessageSentStated;
 import org.telegram.android.log.Logger;
@@ -132,13 +133,8 @@ public class MediaSender {
         });
     }
 
-    private Uploader.UploadResult tryBuildThumb(String path, ChatMessage message) throws Exception {
-        Optimizer.FastPreviewResult preview = Optimizer.buildPreview(path);
-        if (preview == null) {
-            return null;
-        }
-        String thumbFile = writeTempFile(preview.getData());
-        return uploadFileSilent(thumbFile, message.getDatabaseId());
+    private Optimizer.FastPreviewResult tryBuildThumb(String path) throws Exception {
+        return Optimizer.buildPreview(path);
     }
 
     private void uploadDocument(ChatMessage message) throws Exception {
@@ -149,11 +145,18 @@ public class MediaSender {
         } else {
             sourceFileName = copyFile(document.getFileUri());
         }
-        Uploader.UploadResult thumbResult = tryBuildThumb(sourceFileName, message);
+
+        Optimizer.FastPreviewResult thumb = tryBuildThumb(sourceFileName);
+        Uploader.UploadResult thumbResult = null;
+        if (thumb != null) {
+            String thumbFile = writeTempFile(thumb.getData());
+            thumbResult = uploadFileSilent(thumbFile, message.getDatabaseId());
+        }
+
         Uploader.UploadResult result = uploadFile(sourceFileName, message.getDatabaseId());
         TLAbsStatedMessage sent = doSendDoc(result, thumbResult, document, message);
         saveUploadedDocument(sent, sourceFileName);
-        completeDocSending(sent, message);
+        completeDocSending(sent, thumb, message);
     }
 
     private void uploadEncDocument(ChatMessage message) throws Exception {
@@ -165,9 +168,10 @@ public class MediaSender {
         } else {
             sourceFileName = copyFile(document.getFileUri());
         }
+        Optimizer.FastPreviewResult thumb = tryBuildThumb(sourceFileName);
         EncryptedFile encryptedFile = encryptFile(sourceFileName);
         Uploader.UploadResult result = uploadFile(encryptedFile.getFileName(), message.getDatabaseId());
-        EncryptedDocSent sent = doSendEncDoc(result, document, encryptedFile, message, chat);
+        EncryptedDocSent sent = doSendEncDoc(result, document, thumb, encryptedFile, message, chat);
         saveUploadedEncDocument(sent, sourceFileName);
         completeEncDocSending(sent, message, chat);
     }
@@ -270,14 +274,19 @@ public class MediaSender {
         return application.getApi().doRpcCall(new TLRequestMessagesSendMedia(peer, media, message.getRandomId()), TIMEOUT);
     }
 
-    private EncryptedDocSent doSendEncDoc(Uploader.UploadResult result, TLUploadingDocument document, EncryptedFile encryptedFile, ChatMessage message, EncryptedChat chat) throws Exception {
+    private EncryptedDocSent doSendEncDoc(Uploader.UploadResult result, TLUploadingDocument document, Optimizer.FastPreviewResult thumb, EncryptedFile encryptedFile, ChatMessage message, EncryptedChat chat) throws Exception {
         TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
         decryptedMessage.setRandomId(message.getRandomId());
         decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
         decryptedMessage.setMessage("");
 
-        decryptedMessage.setMedia(new TLDecryptedMessageMediaDocument(new byte[0], 0, 0,
-                document.getFileName(), document.getMimeType(), document.getFileSize(), encryptedFile.getKey(), encryptedFile.getIv()));
+        if (thumb != null) {
+            decryptedMessage.setMedia(new TLDecryptedMessageMediaDocument(thumb.getData(), thumb.getW(), thumb.getH(),
+                    document.getFileName(), document.getMimeType(), document.getFileSize(), encryptedFile.getKey(), encryptedFile.getIv()));
+        } else {
+            decryptedMessage.setMedia(new TLDecryptedMessageMediaDocument(new byte[0], 0, 0,
+                    document.getFileName(), document.getMimeType(), document.getFileSize(), encryptedFile.getKey(), encryptedFile.getIv()));
+        }
 
         byte[] digest = MD5Raw(concat(encryptedFile.getKey(), encryptedFile.getIv()));
         int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)), 0);
@@ -310,6 +319,10 @@ public class MediaSender {
 
         localDocument.setFileName(document.getFileName());
         localDocument.setMimeType(document.getMimeType());
+
+        if (thumb != null) {
+            localDocument.setFastPreview(thumb.getData(), thumb.getW(), thumb.getH());
+        }
 
         return new EncryptedDocSent(encryptedMessage, localDocument);
     }
@@ -544,8 +557,14 @@ public class MediaSender {
                 previewResult.getData(), previewResult.getW(), previewResult.getH()));
     }
 
-    private void completeDocSending(TLAbsStatedMessage sent, ChatMessage message) {
-        application.getUpdateProcessor().onMessage(new TLLocalMessageSentStated(sent, message));
+    private void completeDocSending(TLAbsStatedMessage sent, Optimizer.FastPreviewResult thumb, ChatMessage message) {
+        if (thumb != null) {
+            application.getUpdateProcessor().onMessage(new TLLocalMessageSentDoc(sent, message,
+                    thumb.getData(), thumb.getW(), thumb.getH()));
+        } else {
+            application.getUpdateProcessor().onMessage(new TLLocalMessageSentDoc(sent, message,
+                    new byte[0], 0, 0));
+        }
     }
 
     private void completeEncDocSending(EncryptedDocSent encryptedMessage, ChatMessage message, EncryptedChat chat) {
