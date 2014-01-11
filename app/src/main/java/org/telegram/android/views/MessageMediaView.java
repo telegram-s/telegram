@@ -566,7 +566,9 @@ public class MessageMediaView extends BaseMsgView {
                 previewWidth = document.getPreviewW();
                 previewHeight = document.getPreviewH();
 
-                if (document.getMimeType().equals("image/gif")) {
+                if (document.getMimeType().equals("image/gif") ||
+                        document.getMimeType().equals("image/png") ||
+                        document.getMimeType().equals("image/jpeg")) {
                     if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
                         float maxWidth = getPx(160);
                         float maxHeight = getPx(300);
