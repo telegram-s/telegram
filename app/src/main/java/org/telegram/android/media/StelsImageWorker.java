@@ -5,6 +5,7 @@ import com.extradea.framework.images.ImageController;
 import com.extradea.framework.images.tasks.ImageTask;
 import com.extradea.framework.images.workers.ImageWorker;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.ui.BitmapUtils;
 import org.telegram.api.TLFileLocation;
 import org.telegram.api.TLInputFileLocation;
 import org.telegram.api.upload.TLFile;
@@ -49,6 +50,9 @@ public class StelsImageWorker implements ImageWorker {
                         img.recycle();
                     }
                     img = scaled;
+                }
+                if (stelsImageTask.isBlur()) {
+                    img = BitmapUtils.fastblur(img, stelsImageTask.getBlurRadius());
                 }
                 task.setResult(img);
                 task.setBinaryResult(res.getBytes());

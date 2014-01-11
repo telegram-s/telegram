@@ -10,6 +10,8 @@ import org.telegram.api.TLFileLocation;
  */
 public class StelsImageTask extends ImageTask {
     private TLFileLocation fileLocation;
+    private boolean blur;
+    private int blurRadius;
 
     public StelsImageTask(TLFileLocation fileLocation) {
         this.fileLocation = fileLocation;
@@ -19,12 +21,25 @@ public class StelsImageTask extends ImageTask {
         this.fileLocation = new TLFileLocation(localFileLocation.getDcId(), localFileLocation.getVolumeId(), localFileLocation.getLocalId(), localFileLocation.getSecret());
     }
 
+    public void enableBlur(int r) {
+        this.blurRadius = r;
+        this.blur = true;
+    }
+
+    public boolean isBlur() {
+        return blur;
+    }
+
+    public int getBlurRadius() {
+        return blurRadius;
+    }
+
     public TLFileLocation getFileLocation() {
         return fileLocation;
     }
 
     @Override
     protected String getKeyImpl() {
-        return getMaxWidth() + ":" + getMaxHeight() + ":" + isFillRect() + ":" + fileLocation.getDcId() + "+" + fileLocation.getVolumeId() + "+" + fileLocation.getLocalId();
+        return blur + ":" + blurRadius + ":" + getMaxWidth() + ":" + getMaxHeight() + ":" + isFillRect() + ":" + fileLocation.getDcId() + "+" + fileLocation.getVolumeId() + "+" + fileLocation.getLocalId();
     }
 }

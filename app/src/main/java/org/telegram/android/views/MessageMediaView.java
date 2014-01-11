@@ -442,6 +442,7 @@ public class MessageMediaView extends BaseMsgView {
                             TLLocalFileLocation location = (TLLocalFileLocation) mediaVideo.getPreviewLocation();
 
                             previewTask = new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret()));
+                            ((StelsImageTask) previewTask).enableBlur(3);
                             previewWidth = mediaVideo.getPreviewW();
                             previewHeight = mediaVideo.getPreviewH();
 
@@ -565,6 +566,28 @@ public class MessageMediaView extends BaseMsgView {
                 previewWidth = document.getPreviewW();
                 previewHeight = document.getPreviewH();
 
+                if (document.getMimeType().equals("image/gif")) {
+                    if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
+                        float maxWidth = getPx(160);
+                        float maxHeight = getPx(300);
+
+                        float scale = maxWidth / previewWidth;
+
+                        if (previewHeight * scale > maxHeight) {
+                            scale = maxHeight / previewHeight;
+                        }
+
+                        int scaledW = (int) maxWidth;
+                        int scaledH = (int) (previewHeight * scale);
+
+                        previewTask = new FileSystemImageTask(application.getDownloadManager().getDocFileName(key));
+                        previewTask.setMaxWidth(scaledW);
+                        previewTask.setMaxHeight(scaledH);
+                        previewTask.setFillRect(true);
+                        previewTask.setPutInDiskCache(true);
+                    }
+                }
+
                 if (document.getFastPreview().length > 0) {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -575,23 +598,26 @@ public class MessageMediaView extends BaseMsgView {
                     previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
                     BitmapUtils.fastblur(img, previewCached, document.getPreviewW(), document.getPreviewH(), 3);
                 } else if (document.getPreviewLocation() instanceof TLLocalFileLocation) {
-                    previewTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
+                    if (previewTask == null) {
+                        previewTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
+                        ((StelsImageTask) previewTask).enableBlur(3);
 
-                    float maxWidth = getPx(160);
-                    float maxHeight = getPx(300);
+                        float maxWidth = getPx(160);
+                        float maxHeight = getPx(300);
 
-                    float scale = maxWidth / previewWidth;
+                        float scale = maxWidth / previewWidth;
 
-                    if (previewHeight * scale > maxHeight) {
-                        scale = maxHeight / previewHeight;
+                        if (previewHeight * scale > maxHeight) {
+                            scale = maxHeight / previewHeight;
+                        }
+
+                        int scaledW = (int) maxWidth;
+                        int scaledH = (int) (previewHeight * scale);
+
+                        previewTask.setMaxWidth(scaledW);
+                        previewTask.setMaxHeight(scaledH);
+                        previewTask.setFillRect(true);
                     }
-
-                    int scaledW = (int) maxWidth;
-                    int scaledH = (int) (previewHeight * scale);
-
-                    previewTask.setMaxWidth(scaledW);
-                    previewTask.setMaxHeight(scaledH);
-                    previewTask.setFillRect(true);
                 }
             }
         }
