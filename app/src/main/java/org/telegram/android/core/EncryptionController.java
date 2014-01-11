@@ -245,15 +245,7 @@ public class EncryptionController {
                         }
 
                         if (mediaDocument.getThumbH() != 0 && mediaDocument.getThumbW() != 0 && mediaDocument.getThumb().length > 0) {
-                            Bitmap src = BitmapFactory.decodeByteArray(mediaDocument.getThumb(), 0, mediaDocument.getThumb().length);
-                            if (src != null && src.getHeight() > 0 && src.getWidth() > 0) {
-                                if (src.getWidth() < 90 && src.getHeight() < 90) {
-                                    Bitmap dest = Bitmap.createBitmap(90, 90, Bitmap.Config.ARGB_8888);
-                                    Canvas canvas = new Canvas(dest);
-                                    canvas.drawBitmap(dest, 0, 0, new Paint());
-                                }
-                                localDocument.setFastPreview(mediaDocument.getThumb(), src.getWidth(), src.getHeight());
-                            }
+                            localDocument.setFastPreview(mediaDocument.getThumb(), mediaDocument.getThumbW(), mediaDocument.getThumbH());
                         }
 
                         localDocument.setFileName(mediaDocument.getFileName());

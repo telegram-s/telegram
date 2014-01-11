@@ -522,7 +522,17 @@ public class ModelEngine {
             nmsg.setContentType(ContentType.MESSAGE_VIDEO);
         } else if (media instanceof TLLocalDocument) {
             nmsg.setMessage("Document");
-            nmsg.setContentType(ContentType.MESSAGE_DOCUMENT);
+
+            TLLocalDocument document = (TLLocalDocument) media;
+            if (document.getFastPreview().length > 0) {
+                if (document.getMimeType().equals("image/gif")) {
+                    nmsg.setContentType(ContentType.MESSAGE_DOC_ANIMATED);
+                } else {
+                    nmsg.setContentType(ContentType.MESSAGE_DOC_PREVIEW);
+                }
+            } else {
+                nmsg.setContentType(ContentType.MESSAGE_DOCUMENT);
+            }
         } else {
             nmsg.setMessage("Unknown");
             nmsg.setContentType(ContentType.MESSAGE_UNKNOWN);
