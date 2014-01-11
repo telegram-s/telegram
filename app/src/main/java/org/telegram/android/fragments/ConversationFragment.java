@@ -2107,6 +2107,36 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 if (state == DownloadState.COMPLETED) {
                                     if (((TLLocalDocument) object.message.getExtras()).getMimeType().equals("image/gif")) {
                                         ((MessageMediaView) view).toggleMovie();
+                                    } else {
+                                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                                        TLLocalDocument doc = (TLLocalDocument) object.message.getExtras();
+
+                                        String mimeType = null;
+                                        if (doc.getFileName().indexOf('.') > -1) {
+                                            String ext = doc.getFileName().substring(doc.getFileName().lastIndexOf('.') + 1);
+                                            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+                                        }
+
+                                        if (mimeType != null) {
+                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), mimeType);
+                                        } else {
+                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
+                                        }
+
+                                        try {
+                                            startActivity(intent);
+                                        } catch (android.content.ActivityNotFoundException e) {
+                                            if (mimeType != null) {
+                                                intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
+                                                try {
+                                                    startActivity(intent);
+                                                } catch (android.content.ActivityNotFoundException e2) {
+                                                    Toast.makeText(getActivity(), "Unable to open file", Toast.LENGTH_SHORT).show();
+                                                }
+                                            } else {
+                                                Toast.makeText(getActivity(), "Unable to open file", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
                                     }
                                 } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
                                     // CANCEL
