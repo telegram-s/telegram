@@ -465,6 +465,7 @@
     <string name="st_dialog_geo">Location</string>
     <string name="st_dialog_contact">Shared contact</string>
     <string name="st_dialog_document">Document</string>
+    <string name="st_dialog_animation">Animation</string>
     <string name="st_dialog_unknown">Unsupported content</string>
 
     <string name="st_dialog_user_add_avatar">{sender} added a new profile photo</string>

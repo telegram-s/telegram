@@ -1,5 +1,6 @@
 package org.telegram.android.core.engines;
 
+import android.net.Uri;
 import android.util.Pair;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import org.telegram.android.StelsApplication;
@@ -19,6 +20,9 @@ import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
 import org.telegram.tl.TLObject;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -592,7 +596,14 @@ public class ModelEngine {
     public int sendDocument(int peerType, int peerId, TLUploadingDocument doc) {
         ChatMessage msg = prepareSendMessage(peerType, peerId);
         msg.setMessage("");
-        msg.setContentType(ContentType.MESSAGE_DOCUMENT);
+        if (doc.getKind() == TLUploadingDocument.KIND_PHOTO) {
+            msg.setContentType(ContentType.MESSAGE_DOC_PREVIEW);
+        } else if (doc.getKind() == TLUploadingDocument.KIND_GIF) {
+            msg.setContentType(ContentType.MESSAGE_DOC_ANIMATED);
+        } else {
+            msg.setContentType(ContentType.MESSAGE_DOCUMENT);
+        }
+
         msg.setExtras(doc);
         messagesEngine.create(msg);
         application.getMediaSender().sendMedia(msg);
@@ -600,7 +611,37 @@ public class ModelEngine {
         return msg.getDatabaseId();
     }
 
-    public int sendPhoto(int peerType, int peerId, TLUploadingPhoto photo) {
+    public int sendPhoto(int peerType, int peerId, int w, int h, Uri uri) {
+        try {
+            InputStream inputStream = application.getContentResolver().openInputStream(uri);
+            char a = (char) inputStream.read();
+            char b = (char) inputStream.read();
+            char c = (char) inputStream.read();
+            if (a == 'G' && b == 'I' && c == 'F') {
+                return sendDocument(peerType, peerId, new TLUploadingDocument(uri.toString(), application));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return sendPhoto(peerType, peerId, new TLUploadingPhoto(w, h, uri));
+    }
+
+    public int sendPhoto(int peerType, int peerId, int w, int h, String fileName) {
+        try {
+            FileInputStream inputStream = new FileInputStream(fileName);
+            char a = (char) inputStream.read();
+            char b = (char) inputStream.read();
+            char c = (char) inputStream.read();
+            if (a == 'G' && b == 'I' && c == 'F') {
+                return sendDocument(peerType, peerId, new TLUploadingDocument(fileName));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return sendPhoto(peerType, peerId, new TLUploadingPhoto(w, h, fileName));
+    }
+
+    private int sendPhoto(int peerType, int peerId, TLUploadingPhoto photo) {
         ChatMessage msg = prepareSendMessage(peerType, peerId);
         msg.setMessage("Photo");
         msg.setContentType(ContentType.MESSAGE_PHOTO);

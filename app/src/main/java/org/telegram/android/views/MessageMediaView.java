@@ -3,7 +3,6 @@ package org.telegram.android.views;
 import android.content.Context;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.text.TextPaint;
@@ -12,7 +11,6 @@ import com.extradea.framework.images.ImageReceiver;
 import com.extradea.framework.images.tasks.*;
 import org.telegram.android.R;
 import org.telegram.android.core.background.MediaSender;
-import org.telegram.android.core.background.MessageSender;
 import org.telegram.android.core.background.SenderListener;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.*;
@@ -22,11 +20,21 @@ import org.telegram.android.media.*;
 import org.telegram.android.ui.*;
 import org.telegram.api.TLFileLocation;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Author: Korshakov Stepan
  * Created: 15.08.13 1:14
  */
 public class MessageMediaView extends BaseMsgView {
+
+    private static Movie lastMovie;
+    private static long lastMovieStart;
+    private static int lastDatabaseId;
+    private static boolean moviePaused;
+    private static Executor movieLoader = Executors.newSingleThreadExecutor();
 
     private static final String TAG = "MessageMediaView";
 
@@ -520,13 +528,72 @@ public class MessageMediaView extends BaseMsgView {
             previewTask.setFillRect(true);
             showMapPoint = true;
         } else if (message.message.getExtras() instanceof TLUploadingDocument) {
-            previewWidth = getPx(160);
-            previewHeight = getPx(160);
+            TLUploadingDocument doc = (TLUploadingDocument) message.message.getExtras();
+
+            if (doc.getFilePath().length() > 0) {
+                previewTask = new FileSystemImageTask(doc.getFilePath());
+            } else {
+                previewTask = new UriImageTask(doc.getFileUri());
+            }
+
+            previewWidth = doc.getFullPreviewW();
+            previewHeight = doc.getFullPreviewH();
+
+            float maxWidth = getPx(160);
+            float maxHeight = getPx(300);
+
+            float scale = maxWidth / previewWidth;
+
+            if (previewHeight * scale > maxHeight) {
+                scale = maxHeight / previewHeight;
+            }
+
+            int scaledW = (int) maxWidth;
+            int scaledH = (int) (previewHeight * scale);
+
+            previewTask.setMaxWidth(scaledW);
+            previewTask.setMaxHeight(scaledH);
+            previewTask.setFillRect(true);
+
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLLocalDocument) {
             TLLocalDocument document = (TLLocalDocument) message.message.getExtras();
             key = DownloadManager.getDocumentKey(document);
             isDownloadable = true;
+
+            if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
+                previewWidth = document.getPreviewW();
+                previewHeight = document.getPreviewH();
+
+                if (document.getFastPreview().length > 0) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    options.inMutable = true;
+                    options.inDither = false;
+                    options.inTempStorage = bitmapTmp;
+                    Bitmap img = BitmapFactory.decodeByteArray(document.getFastPreview(), 0, document.getFastPreview().length, options);
+                    previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+                    BitmapUtils.fastblur(img, previewCached, document.getPreviewW(), document.getPreviewH(), 3);
+                } else if (document.getPreviewLocation() instanceof TLLocalFileLocation) {
+                    previewTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
+
+                    float maxWidth = getPx(160);
+                    float maxHeight = getPx(300);
+
+                    float scale = maxWidth / previewWidth;
+
+                    if (previewHeight * scale > maxHeight) {
+                        scale = maxHeight / previewHeight;
+                    }
+
+                    int scaledW = (int) maxWidth;
+                    int scaledH = (int) (previewHeight * scale);
+
+                    previewTask.setMaxWidth(scaledW);
+                    previewTask.setMaxHeight(scaledH);
+                    previewTask.setFillRect(true);
+                }
+            }
         }
 
         if (isDownloadable) {
@@ -580,6 +647,11 @@ public class MessageMediaView extends BaseMsgView {
 
     @Override
     protected void bindNewView(MessageWireframe message) {
+        if (message.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        } else {
+            setLayerType(LAYER_TYPE_NONE, null);
+        }
         long start = SystemClock.uptimeMillis();
         this.databaseId = message.message.getDatabaseId();
         this.isOut = message.message.isOut();
@@ -637,6 +709,47 @@ public class MessageMediaView extends BaseMsgView {
             }
         } else {
             receiver.receiveImage(null);
+        }
+        invalidate();
+    }
+
+    public void toggleMovie() {
+        if (lastDatabaseId != databaseId) {
+            lastDatabaseId = databaseId;
+            lastMovieStart = 0;
+            lastMovie = null;
+            moviePaused = false;
+            movieLoader.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (lastDatabaseId != databaseId) {
+                        return;
+                    }
+
+                    final Movie fmovie = Movie.decodeFile(application.getDownloadManager().getDocFileName(key));
+
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (lastDatabaseId != databaseId) {
+                                return;
+                            }
+
+                            moviePaused = false;
+                            lastMovie = fmovie;
+                            lastMovieStart = System.currentTimeMillis();
+                            invalidate();
+                        }
+                    });
+                }
+            });
+        } else {
+            if (moviePaused) {
+                moviePaused = false;
+                lastMovieStart = System.currentTimeMillis();
+            } else {
+                moviePaused = true;
+            }
         }
         invalidate();
     }
@@ -700,12 +813,35 @@ public class MessageMediaView extends BaseMsgView {
         }
     }
 
+
     @Override
     protected boolean drawBubble(Canvas canvas) {
         boolean isAnimated = false;
 
         long animationTime = SystemClock.uptimeMillis() - previewAppearTime;
-        if (preview != null) {
+        Movie movie = lastMovie;
+        if (movie != null && lastDatabaseId == databaseId) {
+            // if (movie.duration() != 0) {
+            if (!moviePaused) {
+                int duration = movie.duration();
+                if (duration == 0) {
+                    duration = 1000;
+                }
+                movie.setTime((int) ((System.currentTimeMillis() - lastMovieStart) % duration));
+                isAnimated = true;
+            }
+            //}
+            if (movie.width() != 0 && movie.height() != 0) {
+                canvas.save();
+                float scale = Math.min((float) desiredWidth / movie.width(), (float) desiredHeight / movie.height());
+                canvas.translate((desiredWidth - scale * movie.width()) / 2, (desiredHeight - scale * movie.height()) / 2);
+                canvas.scale(scale, scale);
+                movie.draw(canvas, 0, 0);
+                canvas.restore();
+            } else {
+                movie.draw(canvas, 0, 0);
+            }
+        } else if (preview != null) {
             if (animationTime > FADE_ANIMATION_TIME || !isAnimatedProgress) {
                 bitmapPaint.setAlpha(255);
                 if (scaleUpMedia) {

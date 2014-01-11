@@ -603,7 +603,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                             getRootController().doBack();
                                             return;
                                         }
-                                        application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(size.x, size.y, Uri.parse(actionUri)));
+                                        application.getEngine().sendPhoto(peerType, peerId, size.x, size.y, Uri.parse(actionUri));
                                         application.notifyUIUpdate();
                                     }
 
@@ -691,7 +691,7 @@ public class DialogsFragment extends StelsFragment implements ViewSourceListener
                                                 getRootController().doBack();
                                                 return;
                                             }
-                                            application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(size.x, size.y, Uri.parse(uri)));
+                                            application.getEngine().sendPhoto(peerType, peerId, size.x, size.y, Uri.parse(uri));
                                         }
                                     } else {
                                         for (String uri : actionUris) {

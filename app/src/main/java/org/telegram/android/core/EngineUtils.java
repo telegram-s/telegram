@@ -357,7 +357,16 @@ public class EngineUtils {
             } else if (res.getExtras() instanceof TLLocalUnknown) {
                 res.setContentType(ContentType.MESSAGE_UNKNOWN);
             } else if (res.getExtras() instanceof TLLocalDocument) {
-                res.setContentType(ContentType.MESSAGE_DOCUMENT);
+                TLLocalDocument doc = (TLLocalDocument) res.getExtras();
+                if (doc.getPreviewH() != 0 && doc.getPreviewW() != 0) {
+                    if ("image/gif".equals(doc.getMimeType())) {
+                        res.setContentType(ContentType.MESSAGE_DOC_ANIMATED);
+                    } else {
+                        res.setContentType(ContentType.MESSAGE_DOC_PREVIEW);
+                    }
+                } else {
+                    res.setContentType(ContentType.MESSAGE_DOCUMENT);
+                }
             } else {
                 res.setContentType(ContentType.MESSAGE_TEXT);
             }
@@ -401,7 +410,16 @@ public class EngineUtils {
             } else if (res.getExtras() instanceof TLLocalContact) {
                 res.setContentType(ContentType.MESSAGE_CONTACT | ContentType.MESSAGE_FORWARDED);
             } else if (res.getExtras() instanceof TLLocalDocument) {
-                res.setContentType(ContentType.MESSAGE_DOCUMENT | ContentType.MESSAGE_FORWARDED);
+                TLLocalDocument doc = (TLLocalDocument) res.getExtras();
+                if (doc.getPreviewH() != 0 && doc.getPreviewW() != 0) {
+                    if ("image/gif".equals(doc.getMimeType())) {
+                        res.setContentType(ContentType.MESSAGE_DOC_ANIMATED | ContentType.MESSAGE_FORWARDED);
+                    } else {
+                        res.setContentType(ContentType.MESSAGE_DOC_PREVIEW | ContentType.MESSAGE_FORWARDED);
+                    }
+                } else {
+                    res.setContentType(ContentType.MESSAGE_DOCUMENT | ContentType.MESSAGE_FORWARDED);
+                }
             } else if (res.getExtras() instanceof TLLocalUnknown) {
                 res.setContentType(ContentType.MESSAGE_UNKNOWN | ContentType.MESSAGE_FORWARDED);
             } else {

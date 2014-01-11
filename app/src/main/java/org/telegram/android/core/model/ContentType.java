@@ -14,6 +14,8 @@ public class ContentType {
     public static final int MESSAGE_UNKNOWN = 7;
     public static final int MESSAGE_DOCUMENT = 8;
     public static final int MESSAGE_AUDIO = 9;
+    public static final int MESSAGE_DOC_PREVIEW = 10;
+    public static final int MESSAGE_DOC_ANIMATED = 11;
     public static final int CONTENT_MASK = 0xFF;
     public static final int MESSAGE_FORWARDED = 1024;
 }

@@ -491,8 +491,12 @@ public class DialogSource {
                 case ContentType.MESSAGE_CONTACT:
                     body = getString(R.string.st_dialog_contact);
                     break;
+                case ContentType.MESSAGE_DOC_PREVIEW:
                 case ContentType.MESSAGE_DOCUMENT:
                     body = getString(R.string.st_dialog_document);
+                    break;
+                case ContentType.MESSAGE_DOC_ANIMATED:
+                    body = getString(R.string.st_dialog_animation);
                     break;
                 default:
                     body = getString(R.string.st_dialog_unknown);

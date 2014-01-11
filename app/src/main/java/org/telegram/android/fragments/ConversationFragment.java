@@ -782,12 +782,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             listView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(width, height, fileName));
+                    application.getEngine().sendPhoto(peerType, peerId, width, height, fileName);
                     application.notifyUIUpdate();
                 }
             }, 300);
         } else {
-            application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(width, height, fileName));
+            application.getEngine().sendPhoto(peerType, peerId, width, height, fileName);
             application.notifyUIUpdate();
         }
     }
@@ -798,12 +798,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             listView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(width, height, uri));
+                    application.getEngine().sendPhoto(peerType, peerId, width, height, uri);
                     application.notifyUIUpdate();
                 }
             }, 300);
         } else {
-            application.getEngine().sendPhoto(peerType, peerId, new TLUploadingPhoto(width, height, uri));
+            application.getEngine().sendPhoto(peerType, peerId, width, height, uri);
             application.notifyUIUpdate();
         }
     }
@@ -1582,7 +1582,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     msg.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_GEO ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_AUDIO ||
-                    msg.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
+                    msg.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN ||
+                    msg.message.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW ||
+                    msg.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
                 return 1;
             }
 
@@ -1620,7 +1622,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     object.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
                     object.message.getRawContentType() == ContentType.MESSAGE_GEO ||
                     object.message.getRawContentType() == ContentType.MESSAGE_AUDIO ||
-                    object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
+                    object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN ||
+                    object.message.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW ||
+                    object.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
                 return new MessageMediaView(context);
             } else if (object.message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
                 return new MessageContactView(context);
@@ -1948,7 +1952,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     || object.message.getRawContentType() == ContentType.MESSAGE_VIDEO
                     || object.message.getRawContentType() == ContentType.MESSAGE_GEO
                     || object.message.getRawContentType() == ContentType.MESSAGE_AUDIO
-                    || object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN) {
+                    || object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN
+                    || object.message.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW
+                    || object.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
                 MessageMediaView messageView = (MessageMediaView) view;
                 boolean showDiv = false;
                 if (!object.message.isOut() && object.message.getMid() == firstUnreadMessage) {
@@ -1962,7 +1968,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     }
                 });
 
-                if (object.message.getExtras() instanceof TLUploadingPhoto || object.message.getExtras() instanceof TLUploadingVideo) {
+                if (object.message.getExtras() instanceof TLUploadingPhoto || object.message.getExtras() instanceof TLUploadingVideo || object.message.getExtras() instanceof TLUploadingDocument) {
                     messageView.setOnBubbleClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -2080,6 +2086,36 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             } else {
                                 TLLocalGeo geo = (TLLocalGeo) object.message.getExtras();
                                 getRootController().viewLocation(geo.getLatitude(), geo.getLongitude(), object.message.getSenderId());
+                            }
+                        }
+                    });
+                } else if (object.message.getExtras() instanceof TLLocalDocument) {
+                    final String key = DownloadManager.getDocumentKey((TLLocalDocument) object.message.getExtras());
+                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (selected.size() > 0) {
+                                if (selected.contains(object.message.getDatabaseId())) {
+                                    selected.remove(object.message.getDatabaseId());
+                                } else {
+                                    selected.add(object.message.getDatabaseId());
+                                }
+                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
+                                updateActionMode();
+                            } else {
+                                DownloadState state = application.getDownloadManager().getState(key);
+                                if (state == DownloadState.COMPLETED) {
+                                    if (((TLLocalDocument) object.message.getExtras()).getMimeType().equals("image/gif")) {
+                                        ((MessageMediaView) view).toggleMovie();
+                                    }
+                                } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
+                                    // CANCEL
+                                    application.getDownloadManager().abortDownload(key);
+                                } else {
+                                    TLLocalVideo video = (TLLocalVideo) object.message.getExtras();
+                                    // Check
+                                    application.getDownloadManager().requestDownload(video);
+                                }
                             }
                         }
                     });
