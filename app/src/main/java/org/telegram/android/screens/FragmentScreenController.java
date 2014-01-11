@@ -15,6 +15,7 @@ import org.telegram.android.R;
 import org.telegram.android.StartActivity;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.StelsFragment;
+import org.telegram.android.activity.SettingsActivity;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
@@ -404,7 +405,8 @@ public class FragmentScreenController implements RootController {
 
     @Override
     public void openSettings() {
-        openScreen(new SettingsFragment());
+        //openScreen(new SettingsFragment());
+        activity.startActivity(new Intent().setClass(activity, SettingsActivity.class));
     }
 
     @Override

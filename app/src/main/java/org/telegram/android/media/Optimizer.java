@@ -1,15 +1,13 @@
 package org.telegram.android.media;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.Uri;
-import android.provider.MediaStore;
-import android.util.Log;
 import com.extradea.framework.images.utils.ImageUtils;
 import org.telegram.android.log.Logger;
+import org.telegram.android.util.IOUtils;
 
 import java.io.*;
 
@@ -143,8 +141,27 @@ public class Optimizer {
         src.recycle();
     }
 
+    private static boolean detectGif(InputStream stream) throws IOException {
+        char a = (char) stream.read();
+        char b = (char) stream.read();
+        char c = (char) stream.read();
+        if (a == 'G' && b == 'I' && c == 'F') {
+            return true;
+        }
+        return false;
+    }
+
     public static void optimize(String srcFile, String destFile) throws IOException {
-        FileInputStream fis = new FileInputStream(srcFile);
+        InputStream fis = new FileInputStream(srcFile);
+        boolean isAnimated = detectGif(fis);
+        fis.close();
+
+        if (isAnimated) {
+            IOUtils.copy(new File(srcFile), new File(destFile));
+            return;
+        }
+
+        fis = new FileInputStream(srcFile);
         int scale = getScale(fis);
         fis.close();
 
@@ -169,6 +186,17 @@ public class Optimizer {
 
     public static void optimize(String uri, Context context, String destFile) throws IOException {
         InputStream fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        boolean isAnimated = detectGif(fis);
+        fis.close();
+
+        if (isAnimated) {
+            fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+            IOUtils.copy(fis, new File(destFile));
+            fis.close();
+            return;
+        }
+
+        fis = context.getContentResolver().openInputStream(Uri.parse(uri));
         int scale = getScale(fis);
         fis.close();
 

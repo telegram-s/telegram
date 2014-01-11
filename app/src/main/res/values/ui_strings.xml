@@ -190,6 +190,9 @@
     <string name="st_settings_header_settings">SETTINGS</string>
     <string name="st_settings_header_support">SUPPORT</string>
     <string name="st_settings_header_about">ABOUT</string>
+    <string name="st_settings_header_account">ACCOUNT</string>
+    <string name="st_settings_logout">Logout</string>
+    <string name="st_settings_delete_account">Delete account</string>
     <string name="st_settings_version">App version</string>
     <string name="st_settings_play">Google Play</string>
     <string name="st_settings_play_subtitle">Please rate our app</string>

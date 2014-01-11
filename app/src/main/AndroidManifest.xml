@@ -129,6 +129,11 @@
                   android:label="Telegram"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
                   android:windowSoftInputMode="stateHidden|adjustNothing"/>
+        <activity android:name=".activity.SettingsActivity"
+                  android:theme="@style/AppTheme.Theme"
+                  android:windowSoftInputMode="adjustResize"
+                  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                  android:launchMode="singleTop"/>
 
         <receiver
                 android:name="com.google.android.gcm.GCMBroadcastReceiver"

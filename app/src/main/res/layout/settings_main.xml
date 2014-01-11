@@ -11,17 +11,16 @@
     <LinearLayout android:orientation="vertical"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:paddingLeft="8dp"
-                  android:paddingRight="8dp"
-                  android:paddingTop="12dp">
+                  android:paddingLeft="@dimen/st_settings_padding"
+                  android:paddingRight="@dimen/st_settings_padding"
+                  android:paddingTop="16dp"
+                  android:paddingBottom="16dp">
 
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
                                                  android:layout_height="wrap_content"
                                                  ext:gravity="center_vertical">
-            <FrameLayout android:layout_width="108dp"
-                         android:layout_height="108dp"
-                         android:layout_marginLeft="8dp"
-                         android:layout_marginRight="8dp">
+            <FrameLayout android:layout_width="64dp"
+                         android:layout_height="64dp">
                 <com.extradea.framework.images.ui.FastWebImageView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
@@ -34,8 +33,8 @@
             <LinearLayout android:layout_width="0dp"
                           android:layout_height="wrap_content"
                           android:layout_marginTop="2dp"
-                          android:layout_marginLeft="6dp"
-                          android:layout_marginRight="6dp"
+                          android:layout_marginLeft="16dp"
+                          android:layout_marginRight="16dp"
                           ext:layout_weight="1"
                           ext:layout_gravity="center_vertical"
                           android:orientation="vertical">
@@ -71,23 +70,21 @@
         <TextView android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
                   android:layout_marginTop="16dp"
-                  android:layout_marginLeft="16dp"
+                  android:layout_marginLeft="8dp"
                   android:layout_marginBottom="2dp"
-                  android:layout_marginRight="16dp"
+                  android:layout_marginRight="8dp"
                   android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
                   android:textStyle="bold"
                   android:text="@string/st_settings_header_phone"/>
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_h"
-              android:layout_marginLeft="8dp"
-              android:layout_marginRight="8dp"
               android:background="@color/st_section_line"/>
 
         <TextView android:layout_width="fill_parent"
                   android:layout_height="48dp"
-                  android:layout_marginRight="16dp"
-                  android:layout_marginLeft="16dp"
+                  android:layout_marginRight="8dp"
+                  android:layout_marginLeft="8dp"
                   android:textSize="19sp"
                   android:textColor="@color/st_section_title"
                   android:text="+7 900 900 00 00"
@@ -96,8 +93,8 @@
         <TextView android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
                   android:layout_marginTop="12dp"
-                  android:layout_marginLeft="16dp"
-                  android:layout_marginRight="16dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
                   android:layout_marginBottom="2dp"
                   android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
@@ -105,14 +102,10 @@
                   android:text="@string/st_settings_header_settings"/>
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_h"
-              android:layout_marginRight="8dp"
-              android:layout_marginLeft="8dp"
               android:background="@color/st_section_line"/>
 
         <LinearLayout android:layout_width="fill_parent"
                       android:layout_height="64dp"
-                      android:layout_marginRight="8dp"
-                      android:layout_marginLeft="8dp"
                       android:clickable="true"
                       android:id="@+id/chatSettings"
                       android:orientation="vertical"
@@ -138,14 +131,10 @@
 
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_div_h"
-              android:layout_marginLeft="8dp"
-              android:layout_marginRight="8dp"
               android:background="@color/st_section_div"/>
 
         <FrameLayout android:layout_width="fill_parent"
                      android:layout_height="64dp"
-                     android:layout_marginRight="8dp"
-                     android:layout_marginLeft="8dp"
                      android:background="@drawable/st_list_selector"
                      android:clickable="true"
                      android:id="@+id/notifications">
@@ -161,14 +150,10 @@
 
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_div_h"
-              android:layout_marginLeft="8dp"
-              android:layout_marginRight="8dp"
               android:background="@color/st_section_div"/>
 
         <LinearLayout android:layout_width="fill_parent"
                       android:layout_height="64dp"
-                      android:layout_marginRight="8dp"
-                      android:layout_marginLeft="8dp"
                       android:orientation="vertical"
                       android:gravity="center_vertical"
                       android:clickable="true"
@@ -193,14 +178,10 @@
         </LinearLayout>
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_div_h"
-              android:layout_marginLeft="8dp"
-              android:layout_marginRight="8dp"
               android:background="@color/st_section_div"/>
 
         <LinearLayout android:layout_width="fill_parent"
                       android:layout_height="64dp"
-                      android:layout_marginRight="8dp"
-                      android:layout_marginLeft="8dp"
                       android:orientation="vertical"
                       android:gravity="center_vertical"
                       android:clickable="true"
@@ -228,8 +209,8 @@
         <TextView android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
                   android:layout_marginTop="21dp"
-                  android:layout_marginLeft="16dp"
-                  android:layout_marginRight="16dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
                   android:layout_marginBottom="2dp"
                   android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
@@ -238,14 +219,10 @@
 
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_h"
-              android:layout_marginLeft="8dp"
-              android:layout_marginRight="8dp"
               android:background="@color/st_section_line"/>
 
         <LinearLayout android:layout_width="fill_parent"
                       android:layout_height="64dp"
-                      android:layout_marginRight="8dp"
-                      android:layout_marginLeft="8dp"
                       android:orientation="vertical"
                       android:gravity="center_vertical"
                       android:id="@+id/support"
@@ -272,8 +249,8 @@
         <TextView android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
                   android:layout_marginTop="21dp"
-                  android:layout_marginLeft="16dp"
-                  android:layout_marginRight="16dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
                   android:layout_marginBottom="2dp"
                   android:textColor="@color/st_section_text"
                   android:textSize="@dimen/section_header_text"
@@ -282,8 +259,6 @@
 
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_h"
-              android:layout_marginLeft="8dp"
-              android:layout_marginRight="8dp"
               android:background="@color/st_section_line"/>
 
         <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
@@ -293,8 +268,8 @@
                       android:layout_height="wrap_content"
                       android:layout_marginTop="12dp"
                       android:layout_marginBottom="12dp"
-                      android:layout_marginLeft="16dp"
-                      android:layout_marginRight="16dp"
+                      android:layout_marginLeft="8dp"
+                      android:layout_marginRight="8dp"
                       android:textSize="18sp"
                       android:textColor="@color/st_section_title"
                       android:text="@string/st_settings_version"/>
@@ -307,8 +282,8 @@
                       android:layout_height="wrap_content"
                       android:layout_marginTop="12dp"
                       android:layout_marginBottom="12dp"
-                      android:layout_marginRight="16dp"
-                      android:layout_marginLeft="16dp"
+                      android:layout_marginRight="8dp"
+                      android:layout_marginLeft="8dp"
                       android:textSize="18sp"
                       android:textColor="@color/st_section_value"
                       ext:customFont="light"
@@ -328,8 +303,6 @@
 
         <LinearLayout android:layout_width="fill_parent"
                       android:layout_height="64dp"
-                      android:layout_marginRight="8dp"
-                      android:layout_marginLeft="8dp"
                       android:clickable="true"
                       android:orientation="vertical"
                       android:gravity="center_vertical"
@@ -355,15 +328,11 @@
 
         <View android:layout_width="fill_parent"
               android:layout_height="@dimen/st_section_div_h"
-              android:layout_marginLeft="8dp"
-              android:layout_marginRight="8dp"
               android:background="@color/st_section_div"
               android:id="@+id/developmentDiv"/>
 
         <FrameLayout android:layout_width="fill_parent"
                      android:layout_height="64dp"
-                     android:layout_marginRight="8dp"
-                     android:layout_marginLeft="8dp"
                      android:clickable="true"
                      android:background="@drawable/st_list_selector"
                      android:id="@+id/developmentButton">
@@ -379,17 +348,57 @@
 
         </FrameLayout>
 
-        <Button android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="6dp"
-                android:layout_marginLeft="6dp"
-                android:background="@drawable/st_btn"
-                android:textColor="@color/st_black_text"
-                android:textSize="19sp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                android:layout_gravity="center"
-                android:text="@string/st_settings_log_out"
-                android:id="@+id/logoutButton"/>
+        <TextView android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="21dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
+                  android:layout_marginBottom="2dp"
+                  android:textColor="@color/st_section_text"
+                  android:textSize="@dimen/section_header_text"
+                  android:textStyle="bold"
+                  android:text="@string/st_settings_header_account"/>
+
+        <View android:layout_width="fill_parent"
+              android:layout_height="@dimen/st_section_h"
+              android:background="@color/st_section_line"/>
+
+        <LinearLayout android:layout_width="fill_parent"
+                      android:layout_height="64dp"
+                      android:clickable="true"
+                      android:orientation="vertical"
+                      android:gravity="center_vertical"
+                      android:id="@+id/deleteAccount"
+                      android:background="@drawable/st_list_selector">
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_vertical"
+                      android:paddingLeft="8dp"
+                      android:paddingRight="8dp"
+                      android:textSize="19sp"
+                      android:textColor="@color/st_section_title"
+                      android:text="@string/st_settings_delete_account"/>
+        </LinearLayout>
+
+        <View android:layout_width="fill_parent"
+              android:layout_height="@dimen/st_section_div_h"
+              android:background="@color/st_section_div"/>
+
+        <LinearLayout android:layout_width="fill_parent"
+                      android:layout_height="64dp"
+                      android:clickable="true"
+                      android:orientation="vertical"
+                      android:gravity="center_vertical"
+                      android:id="@+id/logoutButton"
+                      android:background="@drawable/st_list_selector">
+            <TextView android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_vertical"
+                      android:paddingLeft="8dp"
+                      android:paddingRight="8dp"
+                      android:textSize="19sp"
+                      android:textColor="@color/st_section_title"
+                      android:text="@string/st_settings_logout"/>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

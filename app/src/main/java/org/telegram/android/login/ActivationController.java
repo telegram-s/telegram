@@ -116,7 +116,7 @@ public class ActivationController {
     private Runnable cancelAutomatic = new Runnable() {
         @Override
         public void run() {
-            Logger.d(TAG,"notify");
+            Logger.d(TAG, "notify");
             cancelAutomatic();
         }
     };
@@ -670,16 +670,6 @@ public class ActivationController {
 
                         String tagError = getErrorTag(message);
 
-                        if (tagError.equals("PHONE_CODE_INVALID") || tagError.equals("PHONE_CODE_EMPTY")) {
-                            doChangeState(STATE_ERROR_EXPIRED);
-                            return;
-                        }
-
-                        if (tagError.equals("PHONE_CODE_INVALID")) {
-                            doChangeState(STATE_ERROR_WRONG_CODE);
-                            return;
-                        }
-
                         if (tagError.equals("PHONE_NUMBER_INVALID")) {
                             doChangeState(STATE_ERROR_WRONG_PHONE);
                             return;
@@ -687,6 +677,11 @@ public class ActivationController {
 
                         if (tagError.equals("PHONE_NUMBER_UNOCCUPIED")) {
                             doChangeState(STATE_SIGNUP);
+                            return;
+                        }
+
+                        if (tagError.equals("PHONE_CODE_INVALID") || tagError.equals("PHONE_CODE_EMPTY")) {
+                            doChangeState(STATE_ERROR_WRONG_CODE);
                             return;
                         }
 

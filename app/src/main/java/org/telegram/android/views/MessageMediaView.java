@@ -304,7 +304,6 @@ public class MessageMediaView extends BaseMsgView {
                 previewHeight = mediaPhoto.getFullH();
                 previewWidth = mediaPhoto.getFullW();
                 if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-
                     float maxWidth = getPx(160);
                     float maxHeight = getPx(300);
 
@@ -328,9 +327,7 @@ public class MessageMediaView extends BaseMsgView {
                 isDownloadable = false;
             }
 
-
             if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0 && isDownloadable) {
-
                 if (mediaPhoto.isOptimized()) {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     if (previewBitmapHolder != null) {

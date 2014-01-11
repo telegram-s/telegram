@@ -25,6 +25,7 @@ public class TLLocalPhoto extends TLObject {
     private String fastPreviewKey;
     private boolean isOptimized;
 
+    private boolean isAnimated;
     private int fullW;
     private int fullH;
     private TLAbsLocalFileLocation fullLocation;
@@ -108,9 +109,11 @@ public class TLLocalPhoto extends TLObject {
         writeInt(fastPreviewH, stream);
         writeTLBytes(fastPreview, stream);
         writeTLString(fastPreviewKey, stream);
+        writeTLBool(isOptimized, stream);
         writeInt(fullW, stream);
         writeInt(fullH, stream);
         writeTLObject(fullLocation, stream);
+        writeTLBool(isAnimated, stream);
     }
 
     @Override
@@ -119,8 +122,10 @@ public class TLLocalPhoto extends TLObject {
         fastPreviewH = readInt(stream);
         fastPreview = readTLBytes(stream);
         fastPreviewKey = readTLString(stream);
+        isOptimized = readTLBool(stream);
         fullW = readInt(stream);
         fullH = readInt(stream);
         fullLocation = (TLAbsLocalFileLocation) readTLObject(stream, context);
+        isAnimated = readTLBool(stream);
     }
 }
