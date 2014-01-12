@@ -2275,12 +2275,71 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
                 audioView.bind(object, showTime, showDiv, unreadCount);
 
-                audioView.setOnBubbleClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
+                if (object.message.getExtras() instanceof TLUploadingDocument) {
+                    audioView.setOnBubbleClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (selected.size() > 0) {
+                                if (selected.contains(object.message.getDatabaseId())) {
+                                    selected.remove(object.message.getDatabaseId());
+                                } else {
+                                    selected.add(object.message.getDatabaseId());
+                                }
+                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
+                                updateActionMode();
+                            } else {
+                                if (object.message.getState() == MessageState.FAILURE) {
+                                    onMessageClick(object);
+                                } else {
+                                    AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_cancel_title).setMessage(R.string.st_conv_cancel_message)
+                                            .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    application.getMediaSender().cancelUpload(object.message.getDatabaseId());
+                                                    application.notifyUIUpdate();
+                                                }
+                                            }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
 
-                    }
-                });
+                                                }
+                                            }).create();
+                                    dialog.setCanceledOnTouchOutside(true);
+                                    dialog.show();
+                                }
+                            }
+                        }
+                    });
+                } else if (object.message.getExtras() instanceof TLLocalDocument) {
+                    final String key = DownloadManager.getDocumentKey((TLLocalDocument) object.message.getExtras());
+
+                    audioView.setOnBubbleClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (selected.size() > 0) {
+                                if (selected.contains(object.message.getDatabaseId())) {
+                                    selected.remove(object.message.getDatabaseId());
+                                } else {
+                                    selected.add(object.message.getDatabaseId());
+                                }
+                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
+                                updateActionMode();
+                            } else {
+                                DownloadState state = application.getDownloadManager().getState(key);
+                                if (state == DownloadState.COMPLETED) {
+                                    ((MessageAudioView) view).play();
+                                } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
+                                    // CANCEL
+                                    application.getDownloadManager().abortDownload(key);
+                                } else {
+                                    TLLocalDocument video = (TLLocalDocument) object.message.getExtras();
+                                    // Check
+                                    application.getDownloadManager().requestDownload(video);
+                                }
+                            }
+                        }
+                    });
+                }
             }
         }
 

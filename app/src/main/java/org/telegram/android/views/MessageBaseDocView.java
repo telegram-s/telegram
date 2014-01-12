@@ -53,14 +53,14 @@ public class MessageBaseDocView extends BaseMsgView {
     private int oldDownloadProgress;
     private long downloadStateTime;
     private String downloadString;
-    private String key;
+    protected String key;
 
-    private int databaseId;
+    protected int databaseId;
 
     private boolean isDownloaded;
 
-    private int contentW;
-    private int contentH;
+    protected int contentW;
+    protected int contentH;
 
     public MessageBaseDocView(Context context) {
         super(context);

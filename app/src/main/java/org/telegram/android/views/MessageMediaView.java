@@ -20,6 +20,7 @@ import org.telegram.android.media.*;
 import org.telegram.android.ui.*;
 import org.telegram.api.TLFileLocation;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
