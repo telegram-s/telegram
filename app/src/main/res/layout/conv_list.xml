@@ -217,5 +217,24 @@
                     android:text="@string/st_conv_delete_chat"
                     android:id="@+id/delete"/>
         </FrameLayout>
+
+        <LinearLayout android:layout_height="fill_parent"
+                      android:layout_width="fill_parent"
+                      android:orientation="horizontal"
+                      android:id="@+id/audioPanel"
+                      android:background="@android:color/white"
+                      android:gravity="center_vertical|left">
+            <Button android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/cancelAudio"
+                    android:text="Cancel"/>
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:id="@+id/timer"/>
+            <Button android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/sendAudio"
+                    android:text="Send"/>
+        </LinearLayout>
     </FrameLayout>
 </LinearLayout>

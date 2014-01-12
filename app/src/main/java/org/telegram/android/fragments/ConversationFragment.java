@@ -12,11 +12,10 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.SystemClock;
+import android.os.*;
 import android.provider.MediaStore;
 import android.text.*;
 import android.text.method.LinkMovementMethod;
@@ -69,6 +68,7 @@ import org.telegram.api.requests.TLRequestMessagesDiscardEncryption;
 import org.telegram.i18n.I18nUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -125,6 +125,24 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private long firstUnreadMessage = 0;
     private int unreadCount = 0;
+
+    private View audioRecordContainer;
+    private TextView audioRecordTimer;
+    private MediaRecorder audioRecorder;
+    private String audioFile;
+    private long audioStart;
+    private Handler handler = new Handler(Looper.getMainLooper());
+
+    private Runnable updateTimer = new Runnable() {
+        @Override
+        public void run() {
+            updateAudioUi();
+            handler.removeCallbacks(this);
+            if (audioRecorder != null) {
+                handler.postDelayed(this, 1000);
+            }
+        }
+    };
 
     public ConversationFragment(int peerType, int peerId) {
         this.peerId = peerId;
@@ -206,6 +224,25 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         listView.setCacheColorHint(0);
 
         contactsPanel = res.findViewById(R.id.contactsPanel);
+
+        audioRecordContainer = res.findViewById(R.id.audioPanel);
+        audioRecordContainer.setVisibility(View.GONE);
+
+        audioRecordContainer.findViewById(R.id.sendAudio).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendAudio();
+            }
+        });
+
+        audioRecordContainer.findViewById(R.id.cancelAudio).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cancelAudio();
+            }
+        });
+
+        audioRecordTimer = (TextView) audioRecordContainer.findViewById(R.id.timer);
 
         loading = res.findViewById(R.id.loading);
         empty = res.findViewById(R.id.empty);
@@ -830,6 +867,66 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         });
     }
 
+    private void startAudio() {
+        if (audioRecorder != null) {
+            updateAudioUi();
+            return;
+        }
+
+        try {
+            audioFile = getUploadTempAudioFile();
+            audioRecorder = new MediaRecorder();
+            audioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            audioRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            audioRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            audioRecorder.setOutputFile(audioFile);
+            audioRecorder.prepare();
+            audioRecorder.start();
+            audioStart = SystemClock.uptimeMillis();
+        } catch (Exception e) {
+            audioRecorder = null;
+            audioFile = null;
+        }
+        updateTimer.run();
+    }
+
+    private void sendAudio() {
+        if (audioRecorder == null) {
+            updateAudioUi();
+            return;
+        }
+
+        audioRecorder.stop();
+        audioRecorder = null;
+
+        application.getEngine().sendDocument(peerType, peerId, new TLUploadingDocument(audioFile));
+
+        updateAudioUi();
+    }
+
+    private void cancelAudio() {
+        if (audioRecorder == null) {
+            updateAudioUi();
+            return;
+        }
+
+        audioRecorder.stop();
+        audioRecorder = null;
+
+        updateAudioUi();
+    }
+
+    private void updateAudioUi() {
+        if (audioRecorder == null) {
+            // Hide
+            audioRecordContainer.setVisibility(View.GONE);
+        } else {
+            // Show
+            audioRecordContainer.setVisibility(View.VISIBLE);
+            audioRecordTimer.setText(TextUtil.formatDuration((int) ((SystemClock.uptimeMillis() - audioStart) / 1000)));
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -1036,6 +1133,16 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
 
             pickFile();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.attachAudio) {
+            if (!isEnabledInput) {
+                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            startAudio();
             return true;
         }
 
@@ -1314,6 +1421,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         isFreshUpdate = true;
 
         saveListPosition();
+
+        cancelAudio();
     }
 
     @Override
