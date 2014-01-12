@@ -168,7 +168,14 @@ public class EngineUtils {
                 return new TLLocalDocument();
             }
         } else if (messageMedia instanceof TLMessageMediaAudio) {
-            return new TLLocalEmpty();
+            TLMessageMediaAudio mediaAudio = (TLMessageMediaAudio) messageMedia;
+            if (mediaAudio.getAudio() instanceof TLAudio) {
+                TLAudio audio = (TLAudio) mediaAudio.getAudio();
+                return new TLLocalAudio(
+                        new TLLocalFileAudio(audio.getId(), audio.getAccessHash(), audio.getSize(), audio.getDcId()),
+                        audio.getDuration());
+            }
+            return new TLLocalAudio();
         } else if (messageMedia instanceof TLMessageMediaEmpty) {
             return new TLLocalEmpty();
         } else {
@@ -365,7 +372,15 @@ public class EngineUtils {
                         res.setContentType(ContentType.MESSAGE_DOC_PREVIEW);
                     }
                 } else {
-                    res.setContentType(ContentType.MESSAGE_DOCUMENT);
+                    if (doc.getMimeType().equals("application/ogg")
+                            || doc.getMimeType().equals("audio/ogg")
+                            || doc.getMimeType().equals("audio/mp4")
+                            || doc.getMimeType().equals("audio/mpeg")
+                            || doc.getMimeType().equals("audio/vorbis")) {
+                        res.setContentType(ContentType.MESSAGE_AUDIO);
+                    } else {
+                        res.setContentType(ContentType.MESSAGE_DOCUMENT);
+                    }
                 }
             } else {
                 res.setContentType(ContentType.MESSAGE_TEXT);
@@ -418,7 +433,15 @@ public class EngineUtils {
                         res.setContentType(ContentType.MESSAGE_DOC_PREVIEW | ContentType.MESSAGE_FORWARDED);
                     }
                 } else {
-                    res.setContentType(ContentType.MESSAGE_DOCUMENT | ContentType.MESSAGE_FORWARDED);
+                    if (doc.getMimeType().equals("application/ogg")
+                            || doc.getMimeType().equals("audio/ogg")
+                            || doc.getMimeType().equals("audio/mp4")
+                            || doc.getMimeType().equals("audio/mpeg")
+                            || doc.getMimeType().equals("audio/vorbis")) {
+                        res.setContentType(ContentType.MESSAGE_AUDIO | ContentType.MESSAGE_FORWARDED);
+                    } else {
+                        res.setContentType(ContentType.MESSAGE_DOCUMENT | ContentType.MESSAGE_FORWARDED);
+                    }
                 }
             } else if (res.getExtras() instanceof TLLocalUnknown) {
                 res.setContentType(ContentType.MESSAGE_UNKNOWN | ContentType.MESSAGE_FORWARDED);

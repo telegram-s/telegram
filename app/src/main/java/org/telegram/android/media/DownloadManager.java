@@ -57,6 +57,16 @@ public class DownloadManager {
         return null;
     }
 
+    public static String getAudioKey(TLLocalAudio audio) {
+        if (audio.getFileLocation() instanceof TLLocalFileAudio) {
+            return ((TLLocalFileAudio) audio.getFileLocation()).getDcId() + "_" +
+                    ((TLLocalFileAudio) audio.getFileLocation()).getId();
+        } else if (audio.getFileLocation() instanceof TLLocalEncryptedFileLocation) {
+            return ((TLLocalEncryptedFileLocation) audio.getFileLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) audio.getFileLocation()).getId();
+        }
+        return null;
+    }
+
 
     private final int SMALL_THUMB_SIDE;
 
@@ -401,6 +411,11 @@ public class DownloadManager {
         downloadPersistence.markDownloaded(key);
     }
 
+    public void saveDownloadAudio(String key, String fileName) throws IOException {
+        IOUtils.copy(new File(fileName), new File(getDownloadDocFile(key)));
+        downloadPersistence.markDownloaded(key);
+    }
+
     public void writeToGallery(String fileName, String destName) throws IOException {
         String directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()
                 + "/Telegram/";
@@ -416,6 +431,10 @@ public class DownloadManager {
 
     public String getVideoFileName(String key) {
         return getDownloadVideoFile(key);
+    }
+
+    public String getAudioFileName(String key) {
+        return getDownloadAudioFile(key);
     }
 
     public String getPhotoFileName(String key) {
@@ -440,6 +459,10 @@ public class DownloadManager {
 
     private String getDownloadDocFile(String key) {
         return application.getExternalCacheDir().getAbsolutePath() + "/doc_" + key;
+    }
+
+    private String getDownloadAudioFile(String key) {
+        return application.getExternalCacheDir().getAbsolutePath() + "/doc_" + key + ".m4a";
     }
 
     private String getDownloadImageThumbFile(String key) {

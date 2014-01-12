@@ -10,7 +10,9 @@ import org.telegram.android.R;
 import org.telegram.android.core.background.MediaSender;
 import org.telegram.android.core.background.SenderListener;
 import org.telegram.android.core.model.MessageState;
+import org.telegram.android.core.model.media.TLLocalAudio;
 import org.telegram.android.core.model.media.TLLocalDocument;
+import org.telegram.android.core.model.media.TLUploadingAudio;
 import org.telegram.android.core.model.media.TLUploadingDocument;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.media.DownloadListener;
@@ -189,7 +191,7 @@ public class MessageBaseDocView extends BaseMsgView {
             this.state = message.message.getState();
             this.stateChangeTime = SystemClock.uptimeMillis();
         }
-        if (message.message.getExtras() instanceof TLUploadingDocument) {
+        if (message.message.getExtras() instanceof TLUploadingDocument || message.message.getExtras() instanceof TLUploadingAudio) {
             isDownloaded = false;
 
             MediaSender.SendState state = application.getMediaSender().getSendState(databaseId);
@@ -207,9 +209,15 @@ public class MessageBaseDocView extends BaseMsgView {
                     downloadString = getResources().getString(R.string.st_bubble_media_in_progress);
                 }
             }
-        } else if (message.message.getExtras() instanceof TLLocalDocument) {
-            TLLocalDocument doc = (TLLocalDocument) message.message.getExtras();
-            key = DownloadManager.getDocumentKey(doc);
+        } else if (message.message.getExtras() instanceof TLLocalDocument || message.message.getExtras() instanceof TLLocalAudio) {
+            if (message.message.getExtras() instanceof TLLocalDocument) {
+                TLLocalDocument doc = (TLLocalDocument) message.message.getExtras();
+                key = DownloadManager.getDocumentKey(doc);
+            } else if (message.message.getExtras() instanceof TLLocalAudio) {
+                TLLocalAudio doc = (TLLocalAudio) message.message.getExtras();
+                key = DownloadManager.getAudioKey(doc);
+            }
+
 
             if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
                 isDownloaded = true;

@@ -17,6 +17,7 @@ import org.telegram.android.core.model.EncryptedChat;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.*;
+import org.telegram.android.core.model.update.TLLocalMessageSent;
 import org.telegram.android.core.model.update.TLLocalMessageSentDoc;
 import org.telegram.android.core.model.update.TLLocalMessageSentPhoto;
 import org.telegram.android.core.model.update.TLLocalMessageSentStated;
@@ -88,8 +89,10 @@ public class MediaSender {
             @Override
             public void run() {
                 Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-                if (message.getExtras() instanceof TLUploadingPhoto || message.getExtras() instanceof TLUploadingVideo
-                        || message.getExtras() instanceof TLUploadingDocument) {
+                if (message.getExtras() instanceof TLUploadingPhoto
+                        || message.getExtras() instanceof TLUploadingVideo
+                        || message.getExtras() instanceof TLUploadingDocument
+                        || message.getExtras() instanceof TLUploadingAudio) {
                     try {
                         if (message.getExtras() instanceof TLUploadingPhoto) {
                             if (message.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
@@ -108,6 +111,12 @@ public class MediaSender {
                                 uploadEncDocument(message);
                             } else {
                                 uploadDocument(message);
+                            }
+                        } else if (message.getExtras() instanceof TLUploadingAudio) {
+                            if (message.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+
+                            } else {
+                                uploadAudio(message);
                             }
                         }
 
@@ -131,6 +140,14 @@ public class MediaSender {
                 }
             }
         });
+    }
+
+    private void uploadAudio(ChatMessage message) throws Exception {
+        TLUploadingAudio audio = (TLUploadingAudio) message.getExtras();
+        Uploader.UploadResult result = uploadFile(audio.getFileName(), message.getDatabaseId());
+        TLAbsStatedMessage sent = doSendAudio(result, audio, message);
+        saveUploadedAudio(sent, audio.getFileName());
+        completeAudioSending(sent, message);
     }
 
     private Optimizer.FastPreviewResult tryBuildThumb(String path) throws Exception {
@@ -236,6 +253,26 @@ public class MediaSender {
             Optimizer.optimize(uploadingPhoto.getFileName(), destFile);
         }
         return destFile;
+    }
+
+    private TLAbsStatedMessage doSendAudio(Uploader.UploadResult result, TLUploadingAudio document, ChatMessage message) throws Exception {
+        TLAbsInputPeer peer;
+        if (message.getPeerType() == PeerType.PEER_USER) {
+            User user = application.getEngine().getUser(message.getPeerId());
+            peer = new TLInputPeerForeign(user.getUid(), user.getAccessHash());
+        } else {
+            peer = new TLInputPeerChat(message.getPeerId());
+        }
+
+        TLAbsInputFile inputFile;
+        if (result.isUsedBigFile()) {
+            inputFile = new TLInputFileBig(result.getFileId(), result.getPartsCount(), "audio");
+        } else {
+            inputFile = new TLInputFile(result.getFileId(), result.getPartsCount(), "audio", result.getHash());
+        }
+
+        TLAbsInputMedia media = new TLInputMediaUploadedAudio(inputFile, document.getDuration());
+        return application.getApi().doRpcCall(new TLRequestMessagesSendMedia(peer, media, message.getRandomId()), TIMEOUT);
     }
 
     private TLAbsStatedMessage doSendDoc(Uploader.UploadResult result, Uploader.UploadResult thumb, TLUploadingDocument document, ChatMessage message) throws Exception {
@@ -495,6 +532,15 @@ public class MediaSender {
         }
     }
 
+    private void saveUploadedAudio(TLAbsStatedMessage sent, String uploadFileName) throws Exception {
+        TLMessage msgRes = (TLMessage) sent.getMessage();
+        TLLocalAudio mediaDoc = (TLLocalAudio) EngineUtils.convertMedia(msgRes.getMedia());
+        if (!(mediaDoc.getFileLocation() instanceof TLLocalFileEmpty)) {
+            String downloadKey = DownloadManager.getAudioKey(mediaDoc);
+            application.getDownloadManager().saveDownloadAudio(downloadKey, uploadFileName);
+        }
+    }
+
     private void saveUploadedDocument(TLAbsStatedMessage sent, String uploadFileName) throws Exception {
         TLMessage msgRes = (TLMessage) sent.getMessage();
         TLLocalDocument mediaDoc = (TLLocalDocument) EngineUtils.convertMedia(msgRes.getMedia());
@@ -565,6 +611,10 @@ public class MediaSender {
             application.getUpdateProcessor().onMessage(new TLLocalMessageSentDoc(sent, message,
                     new byte[0], 0, 0));
         }
+    }
+
+    private void completeAudioSending(TLAbsStatedMessage sent, ChatMessage message) {
+        application.getUpdateProcessor().onMessage(new TLLocalMessageSentStated(sent, message));
     }
 
     private void completeEncDocSending(EncryptedDocSent encryptedMessage, ChatMessage message, EncryptedChat chat) {

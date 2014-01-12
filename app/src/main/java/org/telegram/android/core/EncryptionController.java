@@ -254,6 +254,8 @@ public class EncryptionController {
                         application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localDocument);
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessageDoc(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
+                    } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaAudio) {
+                        // TODO: implement audio
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaEmpty) {
                         application.getEngine().onNewSecretMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), decryptedMessage.getMessage());
                         User u = application.getEngine().getUser(chat.getUserId());

@@ -611,7 +611,15 @@ public class ModelEngine {
         } else if (doc.getKind() == TLUploadingDocument.KIND_GIF) {
             msg.setContentType(ContentType.MESSAGE_DOC_ANIMATED);
         } else {
-            msg.setContentType(ContentType.MESSAGE_DOCUMENT);
+            if (doc.getMimeType().equals("application/ogg")
+                    || doc.getMimeType().equals("audio/ogg")
+                    || doc.getMimeType().equals("audio/mp4")
+                    || doc.getMimeType().equals("audio/mpeg")
+                    || doc.getMimeType().equals("audio/vorbis")) {
+                msg.setContentType(ContentType.MESSAGE_AUDIO);
+            } else {
+                msg.setContentType(ContentType.MESSAGE_DOCUMENT);
+            }
         }
 
         msg.setExtras(doc);
@@ -667,6 +675,17 @@ public class ModelEngine {
         msg.setMessage("Video");
         msg.setContentType(ContentType.MESSAGE_VIDEO);
         msg.setExtras(video);
+        messagesEngine.create(msg);
+        application.getMediaSender().sendMedia(msg);
+        dialogsEngine.updateDescriptorPending(msg);
+        return msg.getDatabaseId();
+    }
+
+    public int sendAudio(int peerType, int peerId, TLUploadingAudio audio) {
+        ChatMessage msg = prepareSendMessage(peerType, peerId);
+        msg.setMessage("Video");
+        msg.setContentType(ContentType.MESSAGE_AUDIO);
+        msg.setExtras(audio);
         messagesEngine.create(msg);
         application.getMediaSender().sendMedia(msg);
         dialogsEngine.updateDescriptorPending(msg);

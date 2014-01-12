@@ -899,7 +899,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         audioRecorder.stop();
         audioRecorder = null;
 
-        application.getEngine().sendDocument(peerType, peerId, new TLUploadingDocument(audioFile));
+        application.getEngine().sendAudio(peerType, peerId,
+                new TLUploadingAudio(audioFile, (int) ((SystemClock.uptimeMillis() - audioStart) / 1000)));
 
         updateAudioUi();
     }
@@ -1690,23 +1691,26 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             if (msg.message.getRawContentType() == ContentType.MESSAGE_PHOTO ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_GEO ||
-                    msg.message.getRawContentType() == ContentType.MESSAGE_AUDIO ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW ||
                     msg.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
                 return 1;
             }
 
-            if (msg.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT) {
+            if (msg.message.getRawContentType() == ContentType.MESSAGE_AUDIO) {
                 return 2;
             }
 
-            if (msg.message.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
+            if (msg.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT) {
                 return 3;
             }
 
-            if (msg.message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+            if (msg.message.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
                 return 4;
+            }
+
+            if (msg.message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
+                return 5;
             }
 
             return 0;
@@ -1714,7 +1718,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         @Override
         public int getViewTypeCount() {
-            return 5;
+            return 6;
         }
 
 
@@ -1727,10 +1731,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 return new MessageDocumentView(context);
             }
 
+            if (object.message.getRawContentType() == ContentType.MESSAGE_AUDIO) {
+                return new MessageAudioView(context);
+            }
+
             if (object.message.getRawContentType() == ContentType.MESSAGE_PHOTO ||
                     object.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
                     object.message.getRawContentType() == ContentType.MESSAGE_GEO ||
-                    object.message.getRawContentType() == ContentType.MESSAGE_AUDIO ||
                     object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN ||
                     object.message.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW ||
                     object.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
@@ -2060,7 +2067,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             } else if (object.message.getRawContentType() == ContentType.MESSAGE_PHOTO
                     || object.message.getRawContentType() == ContentType.MESSAGE_VIDEO
                     || object.message.getRawContentType() == ContentType.MESSAGE_GEO
-                    || object.message.getRawContentType() == ContentType.MESSAGE_AUDIO
                     || object.message.getRawContentType() == ContentType.MESSAGE_UNKNOWN
                     || object.message.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW
                     || object.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
@@ -2261,6 +2267,20 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 } else {
                     messageView.setOnBubbleClickListener(null);
                 }
+            } else if (object.message.getRawContentType() == ContentType.MESSAGE_AUDIO) {
+                MessageAudioView audioView = (MessageAudioView) view;
+                boolean showDiv = false;
+                if (!object.message.isOut() && object.message.getMid() == firstUnreadMessage) {
+                    showDiv = true;
+                }
+                audioView.bind(object, showTime, showDiv, unreadCount);
+
+                audioView.setOnBubbleClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
             }
         }
 
