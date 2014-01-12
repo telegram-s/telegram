@@ -56,14 +56,6 @@ public class TLLocalDocument extends TLObject {
         return fileLocation;
     }
 
-//    public int getUid() {
-//        return uid;
-//    }
-
-//    public int getDate() {
-//        return date;
-//    }
-
     public String getFileName() {
         return fileName;
     }
@@ -91,14 +83,6 @@ public class TLLocalDocument extends TLObject {
     public void setFileLocation(TLAbsLocalFileLocation fileLocation) {
         this.fileLocation = fileLocation;
     }
-
-//    public void setUid(int uid) {
-//        this.uid = uid;
-//    }
-
-//    public void setDate(int date) {
-//        this.date = date;
-//    }
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
