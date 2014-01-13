@@ -20,10 +20,12 @@ public class LifeKernel {
     private boolean forceWaitForUpdate;
 
     private long lastVisibleTime;
+    private long lastUpdateRequired;
 
     public LifeKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
         this.lastVisibleTime = getCurrentTime();
+        this.lastUpdateRequired = getCurrentTime();
     }
 
     public void onAppVisible() {
@@ -39,6 +41,7 @@ public class LifeKernel {
 
     public void onUpdateRequired() {
         forceWaitForUpdate = true;
+        lastUpdateRequired = getCurrentTime();
         startService();
     }
 
@@ -48,14 +51,18 @@ public class LifeKernel {
     }
 
     public boolean isForcedKeepAlive() {
-        return forceWaitForUpdate | forceUiLife;
+        return forceUiLife;
     }
 
     public long dieTimeout() {
         if (isForcedKeepAlive()) {
             return Long.MAX_VALUE;
         } else {
-            return Math.max(0, KEEP_TIME - (getCurrentTime() - lastVisibleTime));
+            if (forceWaitForUpdate) {
+                return Math.max(KEEP_TIME - (getCurrentTime() - lastVisibleTime), Math.max(0, KEEP_TIME - (getCurrentTime() - lastUpdateRequired)));
+            } else {
+                return Math.max(0, KEEP_TIME - (getCurrentTime() - lastVisibleTime));
+            }
         }
     }
 
