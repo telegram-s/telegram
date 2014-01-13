@@ -65,7 +65,7 @@ public class MessageDao extends AbstractDao<Message, Long> {
                 "'SENDER_ID' INTEGER," + // 6: senderId
                 "'CONTENT_TYPE' INTEGER NOT NULL ," + // 7: contentType
                 "'MESSAGE' TEXT NOT NULL ," + // 8: message
-                "'EXTRAS' BLOB NOT NULL ," + // 9: extras
+                "'EXTRAS' BLOB," + // 9: extras
                 "'IS_OUT' INTEGER," + // 10: isOut
                 "'FORWARD_DATE' INTEGER," + // 11: forwardDate
                 "'FORWARD_SENDER_ID' INTEGER," + // 12: forwardSenderId
@@ -116,7 +116,11 @@ public class MessageDao extends AbstractDao<Message, Long> {
         }
         stmt.bindLong(8, entity.getContentType());
         stmt.bindString(9, entity.getMessage());
-        stmt.bindBlob(10, entity.getExtras());
+ 
+        byte[] extras = entity.getExtras();
+        if (extras != null) {
+            stmt.bindBlob(10, extras);
+        }
  
         Boolean isOut = entity.getIsOut();
         if (isOut != null) {
@@ -170,7 +174,7 @@ public class MessageDao extends AbstractDao<Message, Long> {
             cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // senderId
             cursor.getInt(offset + 7), // contentType
             cursor.getString(offset + 8), // message
-            cursor.getBlob(offset + 9), // extras
+            cursor.isNull(offset + 9) ? null : cursor.getBlob(offset + 9), // extras
             cursor.isNull(offset + 10) ? null : cursor.getShort(offset + 10) != 0, // isOut
             cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11), // forwardDate
             cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12), // forwardSenderId
@@ -195,7 +199,7 @@ public class MessageDao extends AbstractDao<Message, Long> {
         entity.setSenderId(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
         entity.setContentType(cursor.getInt(offset + 7));
         entity.setMessage(cursor.getString(offset + 8));
-        entity.setExtras(cursor.getBlob(offset + 9));
+        entity.setExtras(cursor.isNull(offset + 9) ? null : cursor.getBlob(offset + 9));
         entity.setIsOut(cursor.isNull(offset + 10) ? null : cursor.getShort(offset + 10) != 0);
         entity.setForwardDate(cursor.isNull(offset + 11) ? null : cursor.getInt(offset + 11));
         entity.setForwardSenderId(cursor.isNull(offset + 12) ? null : cursor.getInt(offset + 12));

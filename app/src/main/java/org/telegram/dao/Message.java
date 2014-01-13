@@ -16,7 +16,6 @@ public class Message {
     private int contentType;
     /** Not-null value. */
     private String message;
-    /** Not-null value. */
     private byte[] extras;
     private Boolean isOut;
     private Integer forwardDate;
@@ -129,12 +128,10 @@ public class Message {
         this.message = message;
     }
 
-    /** Not-null value. */
     public byte[] getExtras() {
         return extras;
     }
 
-    /** Not-null value; ensure this value is available before it is saved to the database. */
     public void setExtras(byte[] extras) {
         this.extras = extras;
     }
