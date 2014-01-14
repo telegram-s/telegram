@@ -339,10 +339,10 @@ public class MessageMediaView extends BaseMsgView {
             if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0 && isDownloadable) {
                 if (mediaPhoto.isOptimized()) {
                     BitmapFactory.Options options = new BitmapFactory.Options();
-                    if (previewBitmapHolder != null) {
-                        options.inBitmap = previewBitmapHolder;
-                        previewBitmapHolder = null;
-                    }
+//                    if (previewBitmapHolder != null) {
+//                        options.inBitmap = previewBitmapHolder;
+//                        previewBitmapHolder = null;
+//                    }
                     options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                     options.inMutable = true;
                     options.inDither = false;
@@ -598,8 +598,10 @@ public class MessageMediaView extends BaseMsgView {
                     options.inDither = false;
                     options.inTempStorage = bitmapTmp;
                     Bitmap img = BitmapFactory.decodeByteArray(document.getFastPreview(), 0, document.getFastPreview().length, options);
-                    previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-                    BitmapUtils.fastblur(img, previewCached, document.getPreviewW(), document.getPreviewH(), 3);
+                    previewCached = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
+                    BitmapUtils.fastblur(img, previewCached, img.getWidth(), img.getHeight(), 3);
+                    fastPreviewWidth = document.getPreviewW() - 1;
+                    fastPreviewHeight = document.getPreviewH() - 1;
                 } else if (document.getPreviewLocation() instanceof TLLocalFileLocation) {
                     if (previewTask == null) {
                         previewTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
@@ -691,7 +693,7 @@ public class MessageMediaView extends BaseMsgView {
         } else {
             placeholderPaint.setColor(Color.WHITE);
         }
-        if (this.previewCached != null && this.previewCached.getWidth() == 90 && this.previewCached.getHeight() == 90) {
+        if (this.previewCached != null && this.previewCached.getWidth() == 90 && this.previewCached.getHeight() == 90 && this.previewCached.isMutable()) {
             this.previewBitmapHolder = this.previewCached;
         }
         this.previewCached = null;

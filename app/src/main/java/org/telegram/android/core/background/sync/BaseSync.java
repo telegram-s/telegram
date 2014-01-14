@@ -200,7 +200,7 @@ public abstract class BaseSync {
             return;
         }
         if (entity.isCyclic) {
-            preferences.edit().putLong("background.sync_" + syncId, 0L);
+            preferences.edit().putLong("background.sync_" + syncId, 0L).commit();
         }
         requestSync(syncId);
     }
@@ -213,7 +213,7 @@ public abstract class BaseSync {
         if (!entity.isCyclic) {
             return;
         }
-        preferences.edit().putLong("background.sync_" + syncId, System.currentTimeMillis());
+        preferences.edit().putLong("background.sync_" + syncId, System.currentTimeMillis()).commit();
         requestSyncDelayed(syncId, entity.syncInterval * 1000L);
     }
 
