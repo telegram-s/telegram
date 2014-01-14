@@ -1,8 +1,7 @@
 package org.telegram.android.kernel;
 
-import android.os.HandlerThread;
 import android.os.SystemClock;
-import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.android.login.ActivationController;
@@ -10,6 +9,8 @@ import org.telegram.android.reflection.CrashHandler;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.engine.LoggerInterface;
 import org.telegram.mtproto.log.LogInterface;
+
+import java.io.IOException;
 
 /**
  * Created by ex3ndr on 16.11.13.
@@ -233,7 +234,33 @@ public class ApplicationKernel {
         dataSourceKernel.runKernel();
         Logger.d(TAG, "DataSourceKernel run in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();
-        GCMRegistrar.register(application, "216315056253");
+
+        new Thread() {
+            @Override
+            public void run() {
+                GoogleCloudMessaging gcm = null;
+                while (true) {
+                    if (gcm == null) {
+                        gcm = GoogleCloudMessaging.getInstance(application);
+                    }
+                    try {
+                        Logger.d(TAG, "Start GCM register");
+                        String id = gcm.register("216315056253");
+                        syncKernel.getBackgroundSync().onPushRegistered(id);
+                        Logger.d(TAG, "GCM Registered");
+                        return;
+                    } catch (IOException e) {
+                        Logger.d(TAG, "GCM Register error");
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e1) {
+                            return;
+                        }
+                    }
+                }
+            }
+        }.start();
+        // GCMRegistrar.register(application, "216315056253");
         Logger.d(TAG, "Push register in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         Logger.d(TAG, "Kernels started in " + (SystemClock.uptimeMillis() - kernelsStart) + " ms");
