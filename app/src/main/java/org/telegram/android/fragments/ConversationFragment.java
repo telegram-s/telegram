@@ -2257,7 +2257,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     // CANCEL
                                     application.getDownloadManager().abortDownload(key);
                                 } else {
-                                    TLLocalVideo video = (TLLocalVideo) object.message.getExtras();
+                                    TLLocalDocument video = (TLLocalDocument) object.message.getExtras();
                                     // Check
                                     application.getDownloadManager().requestDownload(video);
                                 }

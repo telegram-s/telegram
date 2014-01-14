@@ -266,9 +266,9 @@ public class MediaSender {
 
         TLAbsInputFile inputFile;
         if (result.isUsedBigFile()) {
-            inputFile = new TLInputFileBig(result.getFileId(), result.getPartsCount(), "audio");
+            inputFile = new TLInputFileBig(result.getFileId(), result.getPartsCount(), "audio.mp3");
         } else {
-            inputFile = new TLInputFile(result.getFileId(), result.getPartsCount(), "audio", result.getHash());
+            inputFile = new TLInputFile(result.getFileId(), result.getPartsCount(), "audio.mp3", result.getHash());
         }
 
         TLAbsInputMedia media = new TLInputMediaUploadedAudio(inputFile, document.getDuration());

@@ -382,6 +382,8 @@ public class EngineUtils {
                         res.setContentType(ContentType.MESSAGE_DOCUMENT);
                     }
                 }
+            } else if (res.getExtras() instanceof TLLocalAudio) {
+                res.setContentType(ContentType.MESSAGE_AUDIO);
             } else {
                 res.setContentType(ContentType.MESSAGE_TEXT);
             }
@@ -445,6 +447,8 @@ public class EngineUtils {
                 }
             } else if (res.getExtras() instanceof TLLocalUnknown) {
                 res.setContentType(ContentType.MESSAGE_UNKNOWN | ContentType.MESSAGE_FORWARDED);
+            } else if (res.getExtras() instanceof TLLocalAudio) {
+                res.setContentType(ContentType.MESSAGE_AUDIO | ContentType.MESSAGE_FORWARDED);
             } else {
                 res.setContentType(ContentType.MESSAGE_TEXT | ContentType.MESSAGE_FORWARDED);
             }
