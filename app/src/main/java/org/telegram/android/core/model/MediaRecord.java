@@ -12,35 +12,19 @@ import java.io.Serializable;
  * Created: 07.08.13 16:37
  */
 public class MediaRecord implements Serializable {
-    @DatabaseField(generatedId = true, version = false)
-    private int _id;
-
-    @DatabaseField(index = true, version = false)
+    private long _id;
     private int mid;
-
-    @DatabaseField(index = true, version = false)
     private int peerType;
-
-    @DatabaseField(index = true, version = false)
     private int peerId;
-
-    @DatabaseField(version = false)
     private int date;
-
-    @DatabaseField(version = false)
     private int senderId;
-
-    @DatabaseField(version = false)
-    private int mediaType;
-
-    @DatabaseField(version = false, persisterClass = TlDataType.class)
     private TLObject preview;
 
-    public int getDatabaseId() {
+    public long getDatabaseId() {
         return _id;
     }
 
-    public void setDatabaseId(int _id) {
+    public void setDatabaseId(long _id) {
         this._id = _id;
     }
 
@@ -82,14 +66,6 @@ public class MediaRecord implements Serializable {
 
     public void setSenderId(int senderId) {
         this.senderId = senderId;
-    }
-
-    public int getMediaType() {
-        return mediaType;
-    }
-
-    public void setMediaType(int mediaType) {
-        this.mediaType = mediaType;
     }
 
     public TLObject getPreview() {

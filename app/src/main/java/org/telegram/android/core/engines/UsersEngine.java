@@ -26,30 +26,19 @@ public class UsersEngine {
 
     private static final String TAG = "UsersEngine";
 
-    private RuntimeExceptionDao<Contact, Long> contactsDao;
-
     private StelsApplication application;
 
-    private boolean isContactsLoaded = false;
-    private final Object contactsCacheLock = new Object();
-    private final CopyOnWriteArrayList<Contact> cachedContacts = new CopyOnWriteArrayList<Contact>();
-
     private UsersDatabase usersDatabase;
-
+    private ContactsDatabase contactsDatabase;
 
     public UsersEngine(ModelEngine modelEngine) {
         this.application = modelEngine.getApplication();
-        this.contactsDao = modelEngine.getContactsDao();
-
         this.usersDatabase = new UsersDatabase(application, modelEngine);
+        this.contactsDatabase = new ContactsDatabase(modelEngine);
     }
 
     public void clearCache() {
         this.usersDatabase.clearCache();
-        synchronized (contactsCacheLock) {
-            isContactsLoaded = false;
-            cachedContacts.clear();
-        }
     }
 
     public User getUserRuntime(int id) {
@@ -126,147 +115,54 @@ public class UsersEngine {
 
     // Contacts
 
-    private void checkContacts() {
-        if (isContactsLoaded) {
-            return;
-        }
-        synchronized (contactsCacheLock) {
-            Contact[] contacts = contactsDao.queryForAll().toArray(new Contact[0]);
-            cachedContacts.clear();
-            Collections.addAll(cachedContacts, contacts);
-            isContactsLoaded = true;
-        }
-    }
-
     public User[] getContacts() {
         return usersDatabase.getContacts();
     }
 
     public void onImportedContacts(final HashMap<Long, HashSet<Integer>> importedContacts) {
-        contactsDao.callBatchTasks(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                HashSet<Integer> allUids = new HashSet<Integer>();
-                for (Long localId : importedContacts.keySet()) {
-                    Contact[] contacts = getContactsForLocalId(localId);
-                    HashSet<Integer> uids = importedContacts.get(localId);
-                    allUids.addAll(uids);
-                    for (Integer uid : uids) {
-                        boolean contains = false;
-                        for (Contact contact : contacts) {
-                            if (contact.getUid() == uid) {
-                                contains = true;
-                                break;
-                            }
-                        }
-
-                        if (!contains) {
-                            Contact contact = new Contact(uid, localId, false);
-                            cachedContacts.add(contact);
-                            contactsDao.create(contact);
-                        }
-                    }
-
-                    for (Contact contact : contacts) {
-                        boolean contains = false;
-                        for (Integer uid : uids) {
-                            if (contact.getUid() == uid) {
-                                contains = true;
-                                break;
-                            }
-                        }
-
-                        if (!contains) {
-                            cachedContacts.remove(contact);
-                            contactsDao.delete(contact);
-                        }
-                    }
-                }
-
-                ArrayList<User> updated = new ArrayList<User>();
-                for (User u : getUsersById(allUids.toArray())) {
-                    if (u.getLinkType() != LinkType.CONTACT) {
-                        u.setLinkType(LinkType.CONTACT);
-                        updated.add(u);
-                        forceUpdateUser(u);
-                    }
-                }
-                return null;
+        ArrayList<Contact> nContacts = new ArrayList<Contact>();
+        HashSet<Integer> allUids = new HashSet<Integer>();
+        for (Long localId : importedContacts.keySet()) {
+            HashSet<Integer> uids = importedContacts.get(localId);
+            allUids.addAll(uids);
+            for (Integer uid : uids) {
+                nContacts.add(new Contact(uid, localId));
             }
-        });
+        }
+        if (nContacts.size() > 0) {
+            contactsDatabase.writeContacts(nContacts.toArray(new Contact[0]));
+        }
+
+        ArrayList<User> updated = new ArrayList<User>();
+        for (User u : getUsersById(allUids.toArray())) {
+            if (u.getLinkType() != LinkType.CONTACT) {
+                u.setLinkType(LinkType.CONTACT);
+                updated.add(u);
+            }
+        }
+        if (updated.size() > 0) {
+            usersDatabase.updateUsers(updated.toArray(new User[0]));
+        }
     }
 
     public Contact[] getAllContacts() {
-        checkContacts();
-        return cachedContacts.toArray(new Contact[0]);
+        return contactsDatabase.readAllContacts();
     }
 
     public Contact[] getContactsForLocalId(long localId) {
-        checkContacts();
-
-        synchronized (contactsCacheLock) {
-            ArrayList<Contact> contacts = new ArrayList<Contact>();
-            for (Contact cached : cachedContacts) {
-                if (cached.getLocalId() == localId) {
-                    contacts.add(cached);
-                }
-            }
-
-            return contacts.toArray(new Contact[contacts.size()]);
-        }
+        return contactsDatabase.getContactsForLocalId(localId);
     }
 
     public int[] getUidsForLocalId(long localId) {
-        checkContacts();
-
-        synchronized (contactsCacheLock) {
-            ArrayList<Contact> contacts = new ArrayList<Contact>();
-            for (Contact cached : cachedContacts) {
-                if (cached.getLocalId() == localId) {
-                    contacts.add(cached);
-                }
-            }
-
-            int[] res = new int[contacts.size()];
-            for (int i = 0; i < res.length; i++) {
-                res[i] = contacts.get(i).getUid();
-            }
-            return res;
-        }
+        return contactsDatabase.getUidsForLocalId(localId);
     }
 
     public long[] getContactsForUid(int uid) {
-        checkContacts();
-
-        synchronized (contactsCacheLock) {
-            ArrayList<Contact> contacts = new ArrayList<Contact>();
-            for (Contact cached : cachedContacts) {
-                if (cached.getUid() == uid) {
-                    contacts.add(cached);
-                }
-            }
-
-            long[] res = new long[contacts.size()];
-            for (int i = 0; i < res.length; i++) {
-                res[i] = contacts.get(i).getLocalId();
-            }
-            return res;
-        }
+        return contactsDatabase.getContactsForUid(uid);
     }
 
     public void deleteContactsForLocalId(long localId) {
-        try {
-            DeleteBuilder<Contact, Long> builder = contactsDao.deleteBuilder();
-            builder.where().eq("localId", localId);
-            contactsDao.delete(builder.prepare());
-            for (Contact cached : cachedContacts) {
-                if (cached.getLocalId() == localId) {
-                    cachedContacts.remove(cached);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        contactsDatabase.deleteContactsForLocalId(localId);
     }
 
     public void onContacts(List<TLAbsUser> users, List<TLContact> contacts) {

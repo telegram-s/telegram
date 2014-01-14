@@ -26,8 +26,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     private static final int DATABASE_VERSION = 57;
 
     private RuntimeExceptionDao<FullChatInfo, Long> fullChatInfoDao;
-    private RuntimeExceptionDao<Contact, Long> contactsDao;
-    private RuntimeExceptionDao<MediaRecord, Long> mediaDao;
 
     private boolean wasUpgraded = false;
 
@@ -40,12 +38,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
         try {
-            TableUtils.createTable(connectionSource, OrmDialog.class);
-            TableUtils.createTable(connectionSource, OrmUser.class);
-            TableUtils.createTable(connectionSource, Contact.class);
             TableUtils.createTable(connectionSource, FullChatInfo.class);
-            TableUtils.createTable(connectionSource, MediaRecord.class);
-            TableUtils.createTable(connectionSource, OrmEncryptedChat.class);
         } catch (SQLException e) {
             Logger.e(TAG, "Can't create database", e);
             throw new RuntimeException(e);
@@ -56,19 +49,9 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
     public void onUpgrade(SQLiteDatabase database, ConnectionSource connectionSource, int oldVersion, int newVersion) {
         wasUpgraded = true;
         try {
-            TableUtils.dropTable(connectionSource, OrmDialog.class, true);
-            TableUtils.dropTable(connectionSource, User.class, true);
-            TableUtils.dropTable(connectionSource, Contact.class, true);
             TableUtils.dropTable(connectionSource, FullChatInfo.class, true);
-            TableUtils.dropTable(connectionSource, MediaRecord.class, true);
-            TableUtils.dropTable(connectionSource, OrmEncryptedChat.class, true);
 
-            TableUtils.createTable(connectionSource, OrmDialog.class);
-            TableUtils.createTable(connectionSource, User.class);
-            TableUtils.createTable(connectionSource, Contact.class);
             TableUtils.createTable(connectionSource, FullChatInfo.class);
-            TableUtils.createTable(connectionSource, MediaRecord.class);
-            TableUtils.createTable(connectionSource, OrmEncryptedChat.class);
         } catch (SQLException e) {
             Logger.e(TAG, "Can't upgrade databases", e);
             throw new RuntimeException(e);
@@ -114,12 +97,7 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
             TransactionManager.callInTransaction(connectionSource,
                     new Callable<Void>() {
                         public Void call() throws Exception {
-                            TableUtils.clearTable(connectionSource, OrmDialog.class);
-                            TableUtils.clearTable(connectionSource, OrmUser.class);
-                            TableUtils.clearTable(connectionSource, Contact.class);
                             TableUtils.clearTable(connectionSource, FullChatInfo.class);
-                            TableUtils.clearTable(connectionSource, MediaRecord.class);
-                            TableUtils.clearTable(connectionSource, OrmEncryptedChat.class);
                             return null;
                         }
                     });
@@ -130,20 +108,6 @@ public class StelsDatabase extends OrmLiteSqliteOpenHelper {
 
     public boolean isWasUpgraded() {
         return wasUpgraded;
-    }
-
-    public RuntimeExceptionDao<MediaRecord, Long> getMediaDao() {
-        if (mediaDao == null) {
-            mediaDao = getRuntimeExceptionDao(MediaRecord.class);
-        }
-        return mediaDao;
-    }
-
-    public RuntimeExceptionDao<Contact, Long> getContactsDao() {
-        if (contactsDao == null) {
-            contactsDao = getRuntimeExceptionDao(Contact.class);
-        }
-        return contactsDao;
     }
 
     public RuntimeExceptionDao<FullChatInfo, Long> getFullChatInfoDao() {

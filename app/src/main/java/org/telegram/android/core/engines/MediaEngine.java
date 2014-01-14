@@ -15,38 +15,36 @@ import java.util.List;
  * Created by ex3ndr on 17.12.13.
  */
 public class MediaEngine {
-    private RuntimeExceptionDao<MediaRecord, Long> mediaDao;
+    private MediaDatabase mediaDatabase;
 
     public MediaEngine(ModelEngine engine) {
-        mediaDao = engine.getMediasDao();
+        this.mediaDatabase = new MediaDatabase(engine);
     }
 
-    public int getMediaCount(int peerType, int peerId) {
-        PreparedQuery<MediaRecord> query = null;
-        try {
-            QueryBuilder<MediaRecord, Long> builder = mediaDao.queryBuilder();
-            if (peerType >= 0) {
-                builder.where().eq("peerType", peerType).and().eq("peerId", peerId);
-            }
-            builder.setCountOf(true);
-            query = builder.prepare();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return (int) mediaDao.countOf(query);
+    public synchronized int getMediaCount(int peerType, int peerId) {
+        return mediaDatabase.getMediaCount(peerType, peerId);
     }
 
-    public MediaRecord findMedia(int mid) {
-        List<MediaRecord> res = mediaDao.queryForEq("mid", mid);
-        if (res.size() == 0) {
-            return null;
-        } else {
-            return res.get(0);
+    public synchronized MediaRecord findMedia(int mid) {
+        return mediaDatabase.loadMedia(mid);
+    }
+
+    public synchronized void saveMedia(ChatMessage[] sourceMessages) {
+        for (ChatMessage msg : sourceMessages) {
+            saveMedia(msg);
         }
     }
 
-    public void saveMedia(int mid, ChatMessage sourceMessage) {
-        MediaRecord record = findMedia(mid);
+    public synchronized MediaRecord[] queryMedia(int peerType, int peerId) {
+        return mediaDatabase.queryMedia(peerType, peerId);
+    }
+
+    public List<MediaRecord> lazyQueryMedia(int peerType, int peerId) {
+        return mediaDatabase.lazyQueryMedia(peerType, peerId);
+    }
+
+    public synchronized void saveMedia(ChatMessage sourceMessage) {
+        MediaRecord record = findMedia(sourceMessage.getMid());
         if (record != null)
             return;
 
@@ -65,23 +63,14 @@ public class MediaEngine {
         } else {
             record.setSenderId(sourceMessage.getSenderId());
         }
-        mediaDao.create(record);
+        mediaDatabase.saveMedia(record);
     }
 
-    public void deleteMedia(int mid) {
-        MediaRecord record = findMedia(mid);
-        if (record == null)
-            return;
-        mediaDao.delete(record);
+    public synchronized void deleteMedia(int mid) {
+        mediaDatabase.deleteMedia(mid);
     }
 
-    public void deleteMediaFromChat(int peerType, int peerId) {
-        try {
-            DeleteBuilder<MediaRecord, Long> deleteBuilder = mediaDao.deleteBuilder();
-            deleteBuilder.where().eq("peerId", peerId).and().eq("peerType", peerType);
-            mediaDao.delete(deleteBuilder.prepare());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public synchronized void deleteMediaFromChat(int peerType, int peerId) {
+        mediaDatabase.deleteMediaFromChat(peerType, peerId);
     }
 }

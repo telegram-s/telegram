@@ -176,16 +176,7 @@ public class ImagePreviewFragment extends StelsFragment {
 
                     @Override
                     public void execute() throws AsyncException {
-                        PreparedQuery<MediaRecord> query = null;
-                        try {
-                            QueryBuilder<MediaRecord, Long> builder = getEngine().getMediasDao().queryBuilder();
-                            builder.where().eq("peerType", peerType).and().eq("peerId", peerId);
-                            builder.orderBy("date", true);
-                            query = builder.prepare();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        nRecords = application.getEngine().getMediasDao().query(query).toArray(new MediaRecord[0]);
+                        nRecords = application.getEngine().getMediaEngine().queryMedia(peerType, peerId);
                     }
 
                     @Override

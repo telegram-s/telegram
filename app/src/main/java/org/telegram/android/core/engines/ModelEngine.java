@@ -97,14 +97,6 @@ public class ModelEngine {
         return database;
     }
 
-    public RuntimeExceptionDao<MediaRecord, Long> getMediasDao() {
-        return database.getMediaDao();
-    }
-
-    public RuntimeExceptionDao<Contact, Long> getContactsDao() {
-        return database.getContactsDao();
-    }
-
     public RuntimeExceptionDao<FullChatInfo, Long> getFullChatInfoDao() {
         return database.getFullChatInfoDao();
     }
@@ -889,7 +881,7 @@ public class ModelEngine {
         msg.setDate(date);
         msg.setExtras(media);
         messagesEngine.update(msg);
-        mediaEngine.saveMedia(msg.getMid(), msg);
+        mediaEngine.saveMedia(msg);
         dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
     }
 
@@ -900,7 +892,7 @@ public class ModelEngine {
         msg.setMid(mid);
         msg.setExtras(photo);
         messagesEngine.update(msg);
-        mediaEngine.saveMedia(msg.getMid(), msg);
+        mediaEngine.saveMedia(msg);
         dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
     }
 
@@ -910,7 +902,7 @@ public class ModelEngine {
         msg.setMid(mid);
         msg.setExtras(doc);
         messagesEngine.update(msg);
-        mediaEngine.saveMedia(msg.getMid(), msg);
+        mediaEngine.saveMedia(msg);
         dialogsEngine.updateDescriptorEncSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), msg.getDatabaseId());
     }
 
@@ -959,7 +951,7 @@ public class ModelEngine {
         ChatMessage[] messages = messagesEngine.getMessagesByMid(mids);
         for (ChatMessage msg : messages) {
             if (msg.getExtras() instanceof TLLocalPhoto || msg.getExtras() instanceof TLLocalVideo) {
-                mediaEngine.saveMedia(msg.getMid(), msg);
+                mediaEngine.saveMedia(msg);
             }
             dialogsEngine.updateDescriptorShort(msg);
         }

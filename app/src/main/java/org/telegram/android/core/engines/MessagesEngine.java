@@ -192,12 +192,16 @@ public class MessagesEngine {
         Logger.d(TAG, "updateMessages:datasource time: " + (SystemClock.uptimeMillis() - start));
         start = SystemClock.uptimeMillis();
         Logger.d(TAG, "updateMessages:complete time: " + (SystemClock.uptimeMillis() - start));
+        ArrayList<ChatMessage> medias = new ArrayList<ChatMessage>();
         for (ChatMessage message : diff[0]) {
             if (message.getRawContentType() == ContentType.MESSAGE_PHOTO) {
-                engine.getMediaEngine().saveMedia(message.getMid(), message);
+                medias.add(message);
             } else if (message.getRawContentType() == ContentType.MESSAGE_VIDEO) {
-                engine.getMediaEngine().saveMedia(message.getMid(), message);
+                medias.add(message);
             }
+        }
+        if (medias.size() > 0) {
+            engine.getMediaEngine().saveMedia(medias.toArray(new ChatMessage[0]));
         }
 
         return converted;

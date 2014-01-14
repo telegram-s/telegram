@@ -16,6 +16,7 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.MediaRecord;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
@@ -26,6 +27,9 @@ import org.telegram.android.media.DownloadState;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.FontController;
 import org.telegram.api.TLFileLocation;
+import org.telegram.dao.*;
+
+import java.util.List;
 
 /**
  * Author: Korshakov Stepan
@@ -55,22 +59,39 @@ public class MediaFragment extends StelsFragment {
 
         View res = inflater.inflate(R.layout.media_view, container, false);
         gridView = (GridView) res.findViewById(R.id.mediaGrid);
-        PreparedQuery<MediaRecord> query = null;
-        try {
-            QueryBuilder<MediaRecord, Long> builder = getEngine().getMediasDao().queryBuilder();
-            if (peerType >= 0) {
-                builder.where().eq("peerType", peerType).and().eq("peerId", peerId);
-            }
-            builder.orderBy("date", false);
-            query = builder.prepare();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        final List<MediaRecord> lazyList = application.getEngine().getMediaEngine().lazyQueryMedia(peerType, peerId);
+
         final int margin = (int) (4 * getResources().getDisplayMetrics().density);
         final int cellWidth = ((Math.min(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels) - 5 * margin) / 4);
 
-        OrmCursorAdapter<MediaRecord> adapter = new OrmCursorAdapter<MediaRecord>(getActivity(), application.getEngine().getDatabase().getReadableDatabase(), query) {
+        final Context context = getActivity();
+        BaseAdapter adapter = new BaseAdapter() {
             @Override
+            public int getCount() {
+                return lazyList.size();
+            }
+
+            @Override
+            public MediaRecord getItem(int i) {
+                return lazyList.get(i);
+            }
+
+            @Override
+            public long getItemId(int i) {
+                return getItem(i).getDatabaseId();
+            }
+
+            @Override
+            public View getView(int i, View view, ViewGroup viewGroup) {
+                MediaRecord record = getItem(i);
+                if (view == null) {
+                    view = newView(context, record, viewGroup);
+                }
+                bindView(view, context, record, i);
+                return view;
+            }
+
             public View newView(Context context, MediaRecord object, ViewGroup parent) {
                 GridView.LayoutParams layoutParams = new GridView.LayoutParams(cellWidth + margin, cellWidth + margin);
                 FrameLayout frameLayout = new FrameLayout(context);
@@ -101,7 +122,6 @@ public class MediaFragment extends StelsFragment {
                 return frameLayout;
             }
 
-            @Override
             public void bindView(View view, Context context, MediaRecord object, int index) {
                 FastWebImageView imageView = (FastWebImageView) ((ViewGroup) view).getChildAt(0);
                 TextView timeView = (TextView) ((ViewGroup) view).getChildAt(1);
