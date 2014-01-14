@@ -3,6 +3,7 @@ package org.telegram.android.views;
 import android.content.Context;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.text.TextPaint;
@@ -18,8 +19,10 @@ import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.*;
 import org.telegram.android.ui.*;
+import org.telegram.android.util.IOUtils;
 import org.telegram.api.TLFileLocation;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -678,10 +681,12 @@ public class MessageMediaView extends BaseMsgView {
 
     @Override
     protected void bindNewView(MessageWireframe message) {
-        if (message.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
-            setLayerType(LAYER_TYPE_SOFTWARE, null);
-        } else {
-            setLayerType(LAYER_TYPE_NONE, null);
+        if (Build.VERSION.SDK_INT >= 11) {
+            if (message.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
+                setLayerType(LAYER_TYPE_SOFTWARE, null);
+            } else {
+                setLayerType(LAYER_TYPE_NONE, null);
+            }
         }
         long start = SystemClock.uptimeMillis();
         this.databaseId = message.message.getDatabaseId();
@@ -757,7 +762,14 @@ public class MessageMediaView extends BaseMsgView {
                         return;
                     }
 
-                    final Movie fmovie = Movie.decodeFile(application.getDownloadManager().getDocFileName(key));
+                    byte[] data;
+                    try {
+                        data = IOUtils.readAll(application.getDownloadManager().getDocFileName(key));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+                    final Movie fmovie = Movie.decodeByteArray(data, 0, data.length);
 
                     post(new Runnable() {
                         @Override
@@ -862,6 +874,7 @@ public class MessageMediaView extends BaseMsgView {
                 isAnimated = true;
             }
             //}
+            canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
             if (movie.width() != 0 && movie.height() != 0) {
                 canvas.save();
                 float scale = Math.min((float) desiredWidth / movie.width(), (float) desiredHeight / movie.height());

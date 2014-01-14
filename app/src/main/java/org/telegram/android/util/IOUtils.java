@@ -31,4 +31,25 @@ public class IOUtils {
         }
         out.close();
     }
+
+    public static byte[] readAll(String fileName) throws IOException {
+        byte[] res;
+        InputStream in = new FileInputStream(fileName);
+        res = readAll(in);
+        in.close();
+        return res;
+    }
+
+    public static byte[] readAll(InputStream in) throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
+        byte[] buffer = new byte[1024];
+        int len;
+        try {
+            while ((len = in.read(buffer)) >= 0) {
+                os.write(buffer, 0, len);
+            }
+        } catch (java.io.IOException e) {
+        }
+        return os.toByteArray();
+    }
 }
