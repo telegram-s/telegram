@@ -97,7 +97,6 @@ public class MessageMediaView extends BaseMsgView {
     private String downloadString;
     private String duration;
     private String date;
-    private boolean isGroup;
 
     private int desiredHeight;
     private int desiredWidth;
@@ -339,7 +338,7 @@ public class MessageMediaView extends BaseMsgView {
                 isDownloadable = false;
             }
 
-            if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0 && isDownloadable) {
+            if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0 && isDownloadable && previewCached == null) {
                 if (mediaPhoto.isOptimized()) {
                     BitmapFactory.Options options = new BitmapFactory.Options();
 //                    if (previewBitmapHolder != null) {
@@ -424,22 +423,24 @@ public class MessageMediaView extends BaseMsgView {
                     previewHeight = scaledH;
                     previewWidth = scaledW;
 
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    options.inMutable = true;
-                    options.inDither = false;
-                    options.inTempStorage = bitmapTmp;
-                    Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, options);
-                    if (previewBitmapHolder != null) {
-                        previewCached = previewBitmapHolder;
-                        previewBitmapHolder = null;
-                        BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
-                    } else {
-                        previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-                        BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+                    if (previewCached == null) {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                        options.inMutable = true;
+                        options.inDither = false;
+                        options.inTempStorage = bitmapTmp;
+                        Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, options);
+                        if (previewBitmapHolder != null) {
+                            previewCached = previewBitmapHolder;
+                            previewBitmapHolder = null;
+                            BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+                        } else {
+                            previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+                            BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+                        }
+                        fastPreviewWidth = mediaVideo.getPreviewW() - 1;
+                        fastPreviewHeight = mediaVideo.getPreviewH() - 1;
                     }
-                    fastPreviewWidth = mediaVideo.getPreviewW() - 1;
-                    fastPreviewHeight = mediaVideo.getPreviewH() - 1;
                 } else {
                     if (previewTask == null) {
                         if (mediaVideo.getPreviewLocation() instanceof TLLocalFileLocation) {
@@ -595,14 +596,16 @@ public class MessageMediaView extends BaseMsgView {
                 }
 
                 if (document.getFastPreview().length > 0) {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    options.inMutable = true;
-                    options.inDither = false;
-                    options.inTempStorage = bitmapTmp;
-                    Bitmap img = BitmapFactory.decodeByteArray(document.getFastPreview(), 0, document.getFastPreview().length, options);
-                    previewCached = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
-                    BitmapUtils.fastblur(img, previewCached, img.getWidth(), img.getHeight(), 3);
+                    if (previewCached == null) {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                        options.inMutable = true;
+                        options.inDither = false;
+                        options.inTempStorage = bitmapTmp;
+                        Bitmap img = BitmapFactory.decodeByteArray(document.getFastPreview(), 0, document.getFastPreview().length, options);
+                        previewCached = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
+                        BitmapUtils.fastblur(img, previewCached, img.getWidth(), img.getHeight(), 3);
+                    }
                     fastPreviewWidth = document.getPreviewW() - 1;
                     fastPreviewHeight = document.getPreviewH() - 1;
                 } else if (document.getPreviewLocation() instanceof TLLocalFileLocation) {
@@ -692,7 +695,6 @@ public class MessageMediaView extends BaseMsgView {
         this.databaseId = message.message.getDatabaseId();
         this.isOut = message.message.isOut();
         this.date = TextUtil.formatTime(message.message.getDate(), getContext());
-        this.isGroup = message.message.getPeerType() == PeerType.PEER_CHAT && !isOut;
         if (isOut) {
             placeholderPaint.setColor(0xffe6ffd1);
         } else {
@@ -713,6 +715,7 @@ public class MessageMediaView extends BaseMsgView {
         if (previewTask != null) {
             receiver.receiveImage(previewTask);
             preview = receiver.getResult();
+            Logger.d(TAG, "Bind avatar in " + (SystemClock.uptimeMillis() - start) + " ms");
             if (preview != null) {
                 previewAppearTime = 0;
             }

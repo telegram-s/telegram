@@ -62,7 +62,7 @@ public class ContactsSync extends BaseSync {
 
     private static final int OP_LIMIT = 20;
 
-    private static final boolean TWO_SIDE_SYNC = Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+    private static final boolean TWO_SIDE_SYNC = false;//Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 
     private static final String TAG = "ContactsSync";
 

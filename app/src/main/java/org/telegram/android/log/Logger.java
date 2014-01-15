@@ -35,7 +35,7 @@ public class Logger {
     private static final String TAG = "Logger";
 
     private static final boolean ENABLED = true;
-    private static final boolean LOG_THREAD = true;
+    private static final boolean LOG_THREAD = false;
 
     private static ArrayList<LogRecord> cachedRecords = new ArrayList<LogRecord>();
 
