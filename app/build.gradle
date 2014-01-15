@@ -152,8 +152,6 @@ dependencies {
     compile files('libs/libGoogleAnalyticsServices.jar')
     compile files('libs/libphonenumber-5.9.jar')
     compile files('libs/bugsense-3.6.jar')
-    compile files('libs/ormlite-core-4.47.jar')
-    compile files('libs/ormlite-android-4.47.jar')
     compile files('libs/HockeySDK-3.0.1.jar')
 }
 

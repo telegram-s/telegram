@@ -10,7 +10,6 @@ import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.log.Logger;
 import org.telegram.dao.DaoSession;
 import org.telegram.dao.UserDao;
-import org.telegram.ormlite.OrmUser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -169,15 +168,6 @@ public class UsersDatabase {
 
     public static User searchUser(User[] users, long id) {
         for (User user : users) {
-            if (user.getUid() == id)
-                return user;
-        }
-
-        return null;
-    }
-
-    public static OrmUser searchUser(OrmUser[] users, long id) {
-        for (OrmUser user : users) {
             if (user.getUid() == id)
                 return user;
         }

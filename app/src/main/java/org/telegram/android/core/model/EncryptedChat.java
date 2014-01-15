@@ -1,7 +1,5 @@
 package org.telegram.android.core.model;
 
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
 
 /**
  * Created with IntelliJ IDEA.

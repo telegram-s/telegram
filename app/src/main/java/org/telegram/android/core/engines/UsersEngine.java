@@ -1,9 +1,6 @@
 package org.telegram.android.core.engines;
 
 import android.os.SystemClock;
-import android.util.Pair;
-import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.stmt.*;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.*;
@@ -13,11 +10,7 @@ import org.telegram.api.TLAbsUser;
 import org.telegram.api.TLAbsUserStatus;
 import org.telegram.api.TLContact;
 
-import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by ex3ndr on 07.12.13.

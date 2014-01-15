@@ -1,14 +1,9 @@
 package org.telegram.android.core.engines;
 
-import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.stmt.DeleteBuilder;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.ContentType;
 import org.telegram.android.core.model.MediaRecord;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**

@@ -1,25 +1,13 @@
 package org.telegram.android.core.engines;
 
-import android.util.Pair;
-import com.j256.ormlite.dao.RuntimeExceptionDao;
-import com.j256.ormlite.stmt.DeleteBuilder;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
 import de.greenrobot.dao.query.WhereCondition;
 import org.telegram.android.core.model.*;
-import org.telegram.android.log.Logger;
 import org.telegram.dao.Message;
 import org.telegram.dao.MessageDao;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by ex3ndr on 04.01.14.

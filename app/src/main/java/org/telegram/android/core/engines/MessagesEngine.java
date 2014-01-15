@@ -1,24 +1,14 @@
 package org.telegram.android.core.engines;
 
 import android.os.SystemClock;
-import android.util.Pair;
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.*;
-import org.telegram.android.core.model.media.TLLocalPhoto;
-import org.telegram.android.core.model.media.TLLocalVideo;
-import org.telegram.android.core.model.service.TLLocalActionChatDeleteUser;
 import org.telegram.android.log.Logger;
 import org.telegram.api.TLAbsMessage;
-import org.telegram.api.TLDialog;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

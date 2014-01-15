@@ -1,11 +1,8 @@
 package org.telegram.android.core.engines;
 
 import android.net.Uri;
-import android.util.Pair;
-import com.j256.ormlite.dao.RuntimeExceptionDao;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
-import org.telegram.android.core.StelsDatabase;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
@@ -21,9 +18,7 @@ import org.telegram.mtproto.time.TimeOverlord;
 import org.telegram.tl.TLObject;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -33,7 +28,6 @@ import java.util.*;
 public class ModelEngine {
     private static final String TAG = "ModelEngine";
 
-    private StelsDatabase database;
     private DaoMaster daoMaster;
     private DaoSession daoSession;
     private StelsApplication application;
@@ -42,16 +36,17 @@ public class ModelEngine {
     private GroupsEngine groupsEngine;
     private SecretEngine secretEngine;
 
+    private FullGroupEngine fullGroupEngine;
+
     private DialogsEngine dialogsEngine;
     private MessagesEngine messagesEngine;
     private MediaEngine mediaEngine;
 
-    public ModelEngine(StelsDatabase database, StelsApplication application) {
+    public ModelEngine(StelsApplication application) {
         DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "users-db", null);
         this.daoMaster = new DaoMaster(helper.getWritableDatabase());
         this.daoMaster.getDatabase().execSQL("PRAGMA synchronous = OFF;");
         this.daoSession = daoMaster.newSession();
-        this.database = database;
         this.application = application;
         this.usersEngine = new UsersEngine(this);
         this.secretEngine = new SecretEngine(this);
@@ -59,6 +54,7 @@ public class ModelEngine {
         this.mediaEngine = new MediaEngine(this);
         this.dialogsEngine = new DialogsEngine(this);
         this.messagesEngine = new MessagesEngine(this);
+        this.fullGroupEngine = new FullGroupEngine(this);
     }
 
     public DaoSession getDaoSession() {
@@ -93,12 +89,8 @@ public class ModelEngine {
         return messagesEngine;
     }
 
-    public StelsDatabase getDatabase() {
-        return database;
-    }
-
-    public RuntimeExceptionDao<FullChatInfo, Long> getFullChatInfoDao() {
-        return database.getFullChatInfoDao();
+    public FullGroupEngine getFullGroupEngine() {
+        return fullGroupEngine;
     }
 
     /**
@@ -165,7 +157,7 @@ public class ModelEngine {
     }
 
     public FullChatInfo getFullChatInfo(int chatId) {
-        return getFullChatInfoDao().queryForId((long) chatId);
+        return fullGroupEngine.loadFullChatInfo(chatId);
     }
 
     public DialogDescription getDescriptionForPeer(int peerType, int peerId) {
@@ -206,185 +198,6 @@ public class ModelEngine {
 
     public void onChatAvatarChanges(int chatId, TLAbsLocalAvatarPhoto photo) {
         groupsEngine.onGroupAvatarChanged(chatId, photo);
-    }
-
-    public void onChatUserShortAdded(int chatId, int inviter, int uid) {
-        onChatUserAdded(chatId, inviter, uid);
-    }
-
-    public void onChatUserAdded(int chatId, int inviter, int uid) {
-        FullChatInfo chatInfo = getFullChatInfo(chatId);
-        if (chatInfo != null) {
-            if (chatInfo.isForbidden()) {
-                if (uid == application.getCurrentUid()) {
-                    chatInfo.setForbidden(false);
-                    chatInfo.setUids(new int[]{uid});
-                    chatInfo.setInviters(new int[]{inviter});
-                    getFullChatInfoDao().update(chatInfo);
-                    application.getChatSource().notifyChatChanged(chatId);
-                }
-            } else {
-
-                ArrayList<Pair<Integer, Integer>> uids = new ArrayList<Pair<Integer, Integer>>();
-                for (int i = 0; i < chatInfo.getUids().length; i++) {
-                    if (chatInfo.getUids()[i] != uid) {
-                        uids.add(new Pair<Integer, Integer>(
-                                chatInfo.getUids()[i],
-                                chatInfo.getInviters()[i]));
-                    }
-                }
-
-                uids.add(new Pair<Integer, Integer>(uid, inviter));
-
-                int[] newUids = new int[uids.size()];
-                int[] newInviters = new int[uids.size()];
-
-                int index = 0;
-                for (Pair<Integer, Integer> u : uids) {
-                    newUids[index] = u.first;
-                    newInviters[index] = u.second;
-                    index++;
-                }
-
-                chatInfo.setUids(newUids);
-                chatInfo.setInviters(newInviters);
-                getFullChatInfoDao().update(chatInfo);
-                application.getChatSource().notifyChatChanged(chatId);
-            }
-        }
-
-        Group group = getGroupsEngine().getGroup(chatId);
-        if (group != null) {
-            group.setUsersCount(group.getUsersCount() + 1);
-            getGroupsEngine().onGroupsUpdated(group);
-        }
-    }
-
-    public void onChatUserShortRemoved(int chatId, int uid) {
-        onChatUserRemoved(chatId, uid);
-    }
-
-    public void onChatUserRemoved(int chatId, int uid) {
-        FullChatInfo chatInfo = getFullChatInfo(chatId);
-        if (chatInfo != null) {
-            if (uid == application.getCurrentUid()) {
-                chatInfo.setForbidden(true);
-                chatInfo.setInviters(null);
-                chatInfo.setUids(null);
-                getFullChatInfoDao().update(chatInfo);
-                application.getChatSource().notifyChatChanged(chatId);
-            } else {
-                if (chatInfo.getUids() != null) {
-                    ArrayList<Pair<Integer, Integer>> uids = new ArrayList<Pair<Integer, Integer>>();
-                    for (int i = 0; i < chatInfo.getUids().length; i++) {
-                        if (chatInfo.getUids()[i] != uid) {
-                            uids.add(new Pair<Integer, Integer>(
-                                    chatInfo.getUids()[i],
-                                    chatInfo.getInviters()[i]));
-                        }
-                    }
-
-                    int[] newUids = new int[uids.size()];
-                    int[] newInviters = new int[uids.size()];
-
-                    int index = 0;
-                    for (Pair<Integer, Integer> u : uids) {
-                        newUids[index] = u.first;
-                        newInviters[index] = u.second;
-                        index++;
-                    }
-
-                    chatInfo.setUids(newUids);
-                    chatInfo.setInviters(newInviters);
-                    getFullChatInfoDao().update(chatInfo);
-                    application.getChatSource().notifyChatChanged(chatId);
-                }
-            }
-        }
-
-        Group group = getGroupsEngine().getGroup(chatId);
-        if (group != null) {
-            if (uid == application.getCurrentUid()) {
-                group.setUsersCount(0);
-                group.setForbidden(true);
-            } else {
-                group.setUsersCount(group.getUsersCount() - 1);
-            }
-            getGroupsEngine().onGroupsUpdated(group);
-        }
-    }
-
-    public void onChatParticipants(TLAbsChatParticipants participants) {
-        int chatId = participants.getChatId();
-        FullChatInfo info = getFullChatInfo(chatId);
-        if (info != null) {
-            if (participants instanceof TLChatParticipants) {
-                TLChatParticipants tlChatParticipants = (TLChatParticipants) participants;
-                if (info.getVersion() > tlChatParticipants.getVersion()) {
-                    return;
-                }
-                info.setVersion(tlChatParticipants.getVersion());
-                info.setAdminId(tlChatParticipants.getAdminId());
-                info.setForbidden(false);
-                int[] uids = new int[tlChatParticipants.getParticipants().size()];
-                int[] inviters = new int[uids.length];
-                int index = 0;
-                for (TLChatParticipant participant : tlChatParticipants.getParticipants()) {
-                    uids[index] = participant.getUserId();
-                    inviters[index] = participant.getInviterId();
-                    index++;
-                }
-                info.setInviters(inviters);
-                info.setUids(uids);
-                getFullChatInfoDao().update(info);
-                application.getChatSource().notifyChatChanged(chatId);
-            } else {
-                info.setForbidden(true);
-                getFullChatInfoDao().update(info);
-                application.getChatSource().notifyChatChanged(chatId);
-            }
-        } else {
-            info = new FullChatInfo();
-            if (participants instanceof TLChatParticipants) {
-                TLChatParticipants tlChatParticipants = (TLChatParticipants) participants;
-                if (info.getVersion() > tlChatParticipants.getVersion()) {
-                    return;
-                }
-                info.setChatId(chatId);
-                info.setVersion(tlChatParticipants.getVersion());
-                info.setAdminId(tlChatParticipants.getAdminId());
-                info.setForbidden(false);
-                int[] uids = new int[tlChatParticipants.getParticipants().size()];
-                int[] inviters = new int[uids.length];
-                int index = 0;
-                for (TLChatParticipant participant : tlChatParticipants.getParticipants()) {
-                    uids[index] = participant.getUserId();
-                    inviters[index] = participant.getInviterId();
-                    index++;
-                }
-                info.setInviters(inviters);
-                info.setUids(uids);
-                getFullChatInfoDao().create(info);
-                application.getChatSource().notifyChatChanged(chatId);
-            } else {
-                info.setChatId(chatId);
-                info.setForbidden(true);
-                getFullChatInfoDao().create(info);
-                application.getChatSource().notifyChatChanged(chatId);
-            }
-        }
-
-        Group group = getGroupsEngine().getGroup(chatId);
-        if (group != null) {
-            if (info.isForbidden()) {
-                group.setUsersCount(0);
-                group.setForbidden(true);
-            } else {
-                group.setUsersCount(info.getUids().length);
-                group.setForbidden(false);
-            }
-            getGroupsEngine().onGroupsUpdated(group);
-        }
     }
 
     public void onEncryptedReaded(int chatId, int readDate, int maxDate) {
@@ -1011,10 +824,7 @@ public class ModelEngine {
 
     public void deleteHistory(int peerType, int peerId) {
         if (peerType == PeerType.PEER_CHAT) {
-            FullChatInfo chatInfo = getFullChatInfo(peerId);
-            if (chatInfo != null) {
-                getFullChatInfoDao().delete(chatInfo);
-            }
+            fullGroupEngine.delete(peerId);
             groupsEngine.deleteGroup(peerId);
         }
         dialogsEngine.deleteDialog(peerType, peerId);

@@ -1,17 +1,12 @@
 package org.telegram.android.core.engines;
 
-import org.telegram.android.R;
 import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.TLLocalContext;
-import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
-import org.telegram.android.log.Logger;
 import org.telegram.dao.GroupChat;
 import org.telegram.dao.GroupChatDao;
-import org.telegram.dao.UserDao;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

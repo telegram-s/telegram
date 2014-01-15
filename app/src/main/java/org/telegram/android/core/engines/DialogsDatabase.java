@@ -1,17 +1,13 @@
 package org.telegram.android.core.engines;
 
 import android.os.SystemClock;
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.TLLocalContext;
-import org.telegram.android.core.model.media.TLLocalContact;
 import org.telegram.android.log.Logger;
 import org.telegram.dao.Dialog;
 import org.telegram.dao.DialogDao;
-import org.telegram.ormlite.OrmDialog;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -218,10 +214,6 @@ public class DialogsDatabase {
     }
 
     private long uniqId(DialogDescription description) {
-        return description.getPeerType() + description.getPeerId() * 10L;
-    }
-
-    private long uniqId(OrmDialog description) {
         return description.getPeerType() + description.getPeerId() * 10L;
     }
 

@@ -1,12 +1,7 @@
 package org.telegram.android.core.model;
 
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
-import org.telegram.android.ui.EmojiProcessor;
 import org.telegram.tl.TLObject;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 /**

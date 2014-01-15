@@ -1,7 +1,5 @@
 package org.telegram.android.core.model;
 
-import com.j256.ormlite.field.DatabaseField;
-
 /**
  * Author: Korshakov Stepan
  * Created: 01.08.13 4:24

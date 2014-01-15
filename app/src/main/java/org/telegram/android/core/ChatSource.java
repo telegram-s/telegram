@@ -6,6 +6,7 @@ import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.FullChatInfo;
 import org.telegram.android.core.model.PeerType;
+import org.telegram.android.core.model.local.TLLocalChatParticipant;
 import org.telegram.android.log.Logger;
 import org.telegram.api.messages.TLChatFull;
 import org.telegram.api.requests.TLRequestMessagesGetFullChat;
@@ -90,7 +91,8 @@ public class ChatSource {
                     } else {
                         TLChatFull full = application.getApi().doRpcCall(new TLRequestMessagesGetFullChat(chatId));
                         application.getEngine().onUsers(full.getUsers());
-                        application.getEngine().onChatParticipants(full.getFullChat().getParticipants());
+                        application.getEngine().getGroupsEngine().onGroupsUpdated(full.getChats());
+                        application.getEngine().getFullGroupEngine().onFullChat(full.getFullChat());
                     }
                     notifyChatChanged(chatId);
                 } catch (IOException e) {
@@ -115,8 +117,8 @@ public class ChatSource {
     }
 
     public void updateChatInfo(FullChatInfo info) {
-        for (int uid : info.getUids()) {
-            application.getEngine().getUser(uid);
+        for (TLLocalChatParticipant uid : info.getChatInfo().getUsers()) {
+            application.getEngine().getUser(uid.getUid());
         }
         chatInfos.put(info.getChatId(), info);
     }

@@ -25,6 +25,7 @@ public class SecretEngine {
     private StelsApplication application;
 
     public SecretEngine(ModelEngine engine) {
+        this.engine = engine;
         this.application = engine.getApplication();
         this.secretDatabase = new SecretDatabase(engine);
     }

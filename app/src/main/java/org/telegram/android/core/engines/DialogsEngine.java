@@ -1,12 +1,10 @@
 package org.telegram.android.core.engines;
 
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.service.TLLocalActionChatDeleteUser;
 import org.telegram.android.core.model.service.TLLocalActionEncryptedMessageDestructed;
-import org.telegram.android.log.Logger;
 import org.telegram.api.TLDialog;
 
 import java.util.Collections;

@@ -11,8 +11,6 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.extradea.framework.images.tasks.FileSystemImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.core.model.*;
@@ -20,14 +18,12 @@ import org.telegram.android.core.model.MediaRecord;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
-import org.telegram.android.cursors.OrmCursorAdapter;
 import org.telegram.android.media.CachedImageTask;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.media.DownloadState;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.FontController;
 import org.telegram.api.TLFileLocation;
-import org.telegram.dao.*;
 
 import java.util.List;
 

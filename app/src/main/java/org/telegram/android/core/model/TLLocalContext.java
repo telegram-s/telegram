@@ -1,8 +1,6 @@
 package org.telegram.android.core.model;
 
-import org.telegram.android.core.model.local.TLLocalUserStatusEmpty;
-import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
-import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
+import org.telegram.android.core.model.local.*;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.phone.TLLocalBook;
 import org.telegram.android.core.model.phone.TLLocalImportedPhone;
@@ -32,6 +30,8 @@ public class TLLocalContext extends TLContext {
         registerClass(TLLocalUserStatusOnline.CLASS_ID, TLLocalUserStatusOnline.class);
         registerClass(TLLocalUserStatusOffline.CLASS_ID, TLLocalUserStatusOffline.class);
         registerClass(TLLocalUserStatusEmpty.CLASS_ID, TLLocalUserStatusEmpty.class);
+        registerClass(TLLocalFullChatInfo.CLASS_ID, TLLocalFullChatInfo.class);
+        registerClass(TLLocalChatParticipant.CLASS_ID, TLLocalChatParticipant.class);
 
         // Media
         registerClass(TLLocalAvatarEmpty.CLASS_ID, TLLocalAvatarEmpty.class);

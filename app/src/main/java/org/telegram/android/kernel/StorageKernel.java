@@ -1,7 +1,6 @@
 package org.telegram.android.kernel;
 
 import org.telegram.android.core.engines.ModelEngine;
-import org.telegram.android.core.StelsDatabase;
 import org.telegram.android.log.Logger;
 
 /**
@@ -11,21 +10,13 @@ public class StorageKernel {
     private static final String TAG = "StorageKernel";
 
     private ApplicationKernel kernel;
-    private StelsDatabase database;
     private ModelEngine model;
 
     public StorageKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
         long start = System.currentTimeMillis();
-        this.database = new StelsDatabase(kernel.getApplication());
-        Logger.d(TAG, "Database loaded in " + (System.currentTimeMillis() - start) + " ms");
-        start = System.currentTimeMillis();
-        this.model = new ModelEngine(database, kernel.getApplication());
+        this.model = new ModelEngine(kernel.getApplication());
         Logger.d(TAG, "ModelEngine loaded in " + (System.currentTimeMillis() - start) + " ms");
-    }
-
-    public StelsDatabase getDatabase() {
-        return database;
     }
 
     public ModelEngine getModel() {
@@ -47,7 +38,6 @@ public class StorageKernel {
     }
 
     public void clearData() {
-        database.clearData();
         model.clearCache();
     }
 }

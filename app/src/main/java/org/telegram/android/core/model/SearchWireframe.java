@@ -2,7 +2,6 @@ package org.telegram.android.core.model;
 
 import android.text.Spanned;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
-import org.telegram.api.TLAbsUserStatus;
 import org.telegram.tl.TLObject;
 
 /**

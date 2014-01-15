@@ -670,13 +670,13 @@ public class UpdateProcessor {
 //            }
         } else if (update instanceof TLUpdateChatParticipants) {
             TLUpdateChatParticipants participants = (TLUpdateChatParticipants) update;
-            application.getEngine().onChatParticipants(participants.getParticipants());
+            application.getEngine().getFullGroupEngine().onChatParticipants(participants.getParticipants());
         } else if (update instanceof TLUpdateChatParticipantAdd) {
             TLUpdateChatParticipantAdd addUser = (TLUpdateChatParticipantAdd) update;
-            application.getEngine().onChatUserShortAdded(addUser.getChatId(), addUser.getInviterId(), addUser.getUserId());
+            application.getEngine().getFullGroupEngine().onChatUserAdded(addUser.getChatId(), addUser.getInviterId(), addUser.getUserId(), date);
         } else if (update instanceof TLUpdateChatParticipantDelete) {
             TLUpdateChatParticipantDelete deleteUser = (TLUpdateChatParticipantDelete) update;
-            application.getEngine().onChatUserShortRemoved(deleteUser.getChatId(), deleteUser.getUserId());
+            application.getEngine().getFullGroupEngine().onChatUserRemoved(deleteUser.getChatId(), deleteUser.getUserId());
         } else if (update instanceof TLUpdateReadMessages) {
             TLUpdateReadMessages readMessages = (TLUpdateReadMessages) update;
             application.getEngine().onMessagesReaded(readMessages.getMessages().toIntArray());

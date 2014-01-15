@@ -1,10 +1,7 @@
 package org.telegram.android.core.model;
 
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
-import org.telegram.api.TLAbsUserStatus;
 
 /**
  * Author: Korshakov Stepan

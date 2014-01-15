@@ -38,6 +38,7 @@ import org.telegram.android.StelsFragment;
 import org.telegram.android.config.DebugSettings;
 import org.telegram.android.core.*;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.local.TLLocalChatParticipant;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
@@ -1187,7 +1188,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (peerType == PeerType.PEER_CHAT) {
             Group group = application.getEngine().getGroupsEngine().getGroup(peerId);
             FullChatInfo chatInfo = application.getChatSource().getChatInfo(peerId);
-            if ((chatInfo != null && chatInfo.isForbidden()) || (group != null && group.isForbidden())) {
+            if ((chatInfo != null && chatInfo.getChatInfo().isForbidden()) || (group != null && group.isForbidden())) {
                 showOverlayPanel();
                 deleteButton.setVisibility(View.VISIBLE);
                 waitMessageView.setVisibility(View.GONE);
@@ -1288,15 +1289,15 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 return;
             getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(group.getTitle()));
             FullChatInfo chatInfo = application.getChatSource().getChatInfo(peerId);
-            if (group.isForbidden() || (chatInfo != null && chatInfo.isForbidden())) {
+            if (group.isForbidden() || (chatInfo != null && chatInfo.getChatInfo().isForbidden())) {
                 getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_conv_removed));
             } else {
                 int[] typing = application.getTypingStates().getChatTypes(peerId);
                 if (typing.length == 0) {
                     if (chatInfo != null) {
                         int onlineCount = 0;
-                        for (int uid : chatInfo.getUids()) {
-                            if (getUserState(getEngine().getUser(uid).getStatus()) == 0) {
+                        for (TLLocalChatParticipant participant : chatInfo.getChatInfo().getUsers()) {
+                            if (getUserState(getEngine().getUser(participant.getUid()).getStatus()) == 0) {
                                 onlineCount++;
                             }
                         }

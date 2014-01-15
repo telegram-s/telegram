@@ -38,23 +38,7 @@ public class DataSourceKernel {
             contactsSource = new ContactsSource(kernel.getApplication());
             chatSource = new ChatSource(kernel.getApplication());
             encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
-
-            if (kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
-                dialogSource.resetSync();
-                dialogSource.startSync();
-            } else {
-                dialogSource.startSyncIfRequired();
-            }
-
-            if (kernel.getTechKernel().getTechReflection().isAppUpgraded() || kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
-                // contactsSource.resetState();
-            }
-
-            if (kernel.getStorageKernel().getModel().getDatabase().isWasUpgraded()) {
-                MessageSource.clearData(kernel.getApplication());
-            }
-
-            // contactsSource.startSync();
+            dialogSource.startSyncIfRequired();
         }
     }
 

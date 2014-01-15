@@ -1,10 +1,8 @@
 package org.telegram.android.core.engines;
 
-import com.j256.ormlite.stmt.DeleteBuilder;
 import org.telegram.android.core.model.Contact;
 import org.telegram.dao.ContactDao;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**

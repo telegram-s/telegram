@@ -19,8 +19,6 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.tasks.FileSystemImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.core.model.*;

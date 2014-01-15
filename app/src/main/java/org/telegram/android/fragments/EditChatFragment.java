@@ -25,6 +25,7 @@ import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.files.UploadResult;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
+import org.telegram.android.core.model.local.TLLocalChatParticipant;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
@@ -91,9 +92,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
     private View progress;
 
-    private Pair<Integer, Integer>[] users;
-
     private int maxChatSize;
+
+    private TLLocalChatParticipant[] users;
 
     public EditChatFragment(int chatId) {
         this.chatId = chatId;
@@ -207,7 +208,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     public void execute() throws AsyncException {
                         org.telegram.api.messages.TLChatFull fullChat = rpc(new TLRequestMessagesGetFullChat(chatId));
                         getEngine().onUsers(fullChat.getUsers());
-                        getEngine().onChatParticipants(fullChat.getFullChat().getParticipants());
+                        getEngine().getGroupsEngine().onGroupsUpdated(fullChat.getChats());
+                        getEngine().getFullGroupEngine().onFullChat(fullChat.getFullChat());
+
                         fullChatInfo = getEngine().getFullChatInfo(chatId);
                         dialogDescription = getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
                         group = getEngine().getGroupsEngine().getGroup(chatId);
@@ -248,7 +251,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     private void bindView() {
         getSherlockActivity().invalidateOptionsMenu();
 
-        if (fullChatInfo.isForbidden()) {
+        if (fullChatInfo.getChatInfo().isForbidden()) {
             forbidden.setVisibility(View.VISIBLE);
             return;
         }
@@ -324,32 +327,33 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         updateNotificationSound();
 
         int onlineCount = 0;
-        for (int i = 0; i < fullChatInfo.getUids().length; i++) {
-            if (getUserState(getEngine().getUser(fullChatInfo.getUids()[i]).getStatus()) == 0) {
+        for (TLLocalChatParticipant participant : fullChatInfo.getChatInfo().getUsers()) {
+            if (getUserState(getEngine().getUser(participant.getUid()).getStatus()) == 0) {
                 onlineCount++;
             }
         }
         if (onlineCount == 0) {
-            onlineView.setText(getQuantityString(R.plurals.st_members, fullChatInfo.getUids().length)
-                    .replace("{d}", I18nUtil.getInstance().correctFormatNumber(fullChatInfo.getUids().length)));
+            onlineView.setText(getQuantityString(R.plurals.st_members, fullChatInfo.getChatInfo().getUsers().size())
+                    .replace("{d}", I18nUtil.getInstance().correctFormatNumber(fullChatInfo.getChatInfo().getUsers().size())));
         } else {
             onlineView.setText(Html.fromHtml(
-                    getQuantityString(R.plurals.st_members, fullChatInfo.getUids().length)
-                            .replace("{d}", I18nUtil.getInstance().correctFormatNumber(fullChatInfo.getUids().length)) + ", <font color='#006FC8'>" + I18nUtil.getInstance().correctFormatNumber(onlineCount) + " " + getStringSafe(R.string.st_online) + "</font>"));
+                    getQuantityString(R.plurals.st_members, fullChatInfo.getChatInfo().getUsers().size())
+                            .replace("{d}", I18nUtil.getInstance().correctFormatNumber(fullChatInfo.getChatInfo().getUsers().size())) + ", <font color='#006FC8'>" + I18nUtil.getInstance().correctFormatNumber(onlineCount) + " " + getStringSafe(R.string.st_online) + "</font>"));
         }
 
-        membersTitle.setText(getQuantityString(R.plurals.st_members_caps, fullChatInfo.getUids().length)
-                .replace("{d}", I18nUtil.getInstance().correctFormatNumber(fullChatInfo.getUids().length) + ""));
+        membersTitle.setText(getQuantityString(R.plurals.st_members_caps, fullChatInfo.getChatInfo().getUsers().size())
+                .replace("{d}", I18nUtil.getInstance().correctFormatNumber(fullChatInfo.getChatInfo().getUsers().size()) + ""));
         final Context context = getActivity();
-        users = new Pair[fullChatInfo.getUids().length];
+
+        users = new TLLocalChatParticipant[fullChatInfo.getChatInfo().getUsers().size()];
         for (int i = 0; i < users.length; i++) {
-            users[i] = new Pair<Integer, Integer>(fullChatInfo.getUids()[i], fullChatInfo.getInviters()[i]);
+            users[i] = fullChatInfo.getChatInfo().getUsers().get(i);
         }
-        Arrays.sort(users, new Comparator<Pair<Integer, Integer>>() {
+        Arrays.sort(users, new Comparator<TLLocalChatParticipant>() {
             @Override
-            public int compare(Pair<Integer, Integer> a, Pair<Integer, Integer> b) {
-                return -(getUserOnlineSorkKey(getEngine().getUser(a.first).getStatus())
-                        - getUserOnlineSorkKey(getEngine().getUser(b.first).getStatus()));
+            public int compare(TLLocalChatParticipant a, TLLocalChatParticipant b) {
+                return -(getUserOnlineSorkKey(getEngine().getUser(a.getUid()).getStatus())
+                        - getUserOnlineSorkKey(getEngine().getUser(b.getUid()).getStatus()));
             }
         });
         listView.setAdapter(new BaseAdapter() {
@@ -360,7 +364,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
             @Override
             public User getItem(int i) {
-                return application.getEngine().getUser(users[i].first);
+                return application.getEngine().getUser(users[i].getUid());
             }
 
             @Override
@@ -419,8 +423,8 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 if (i == 0) {
                     return true;
                 }
-                int uid = users[i - 1].first;
-                int inviter = users[i - 1].second;
+                int uid = users[i - 1].getUid();
+                int inviter = users[i - 1].getInviter();
                 final User user = application.getEngine().getUser(uid);
                 if (uid == application.getCurrentUid()) {
                     AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{getStringSafe(R.string.st_edit_dialog_action_leave)}, new DialogInterface.OnClickListener() {
@@ -433,7 +437,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     alertDialog.show();
                 } else {
                     CharSequence[] items;
-                    if (fullChatInfo.getAdminId() == application.getCurrentUid() || inviter == application.getCurrentUid()) {
+                    if (fullChatInfo.getChatInfo().getAdminId() == application.getCurrentUid() || inviter == application.getCurrentUid()) {
                         items = new CharSequence[]{
                                 getStringSafe(R.string.st_edit_dialog_action_view).replace("{0}", user.getFirstName()),
                                 getStringSafe(R.string.st_edit_dialog_action_dialog).replace("{0}", user.getFirstName()),
@@ -467,7 +471,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                int uid = users[i - 1].first;
+                int uid = users[i - 1].getUid();
                 final User user = application.getEngine().getUser(uid);
                 getRootController().openDialog(PeerType.PEER_USER, user.getUid());
             }
@@ -534,7 +538,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 application.getEngine().onUsers(message.getUsers());
                 application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
                 application.getEngine().onUpdatedMessage(message.getMessage());
-                application.getEngine().onChatUserRemoved(chatId, removeUser.getUserId());
+                application.getEngine().getFullGroupEngine().onChatUserRemoved(chatId, removeUser.getUserId());
                 application.getUpdateProcessor().onMessage(new TLLocalRemoveChatUser(message));
             }
 
@@ -649,7 +653,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     @Override
     public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        if (fullChatInfo != null && !fullChatInfo.isForbidden()) {
+        if (fullChatInfo != null && !fullChatInfo.getChatInfo().isForbidden()) {
             inflater.inflate(R.menu.edit_chat, menu);
         }
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_edit_dialog_title));
@@ -681,7 +685,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     application.getEngine().onUsers(message.getUsers());
                     application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
                     application.getEngine().onUpdatedMessage(message.getMessage());
-                    application.getEngine().onChatUserAdded(chatId, service.getFromId(), addUser.getUserId());
+                    application.getEngine().getFullGroupEngine().onChatUserAdded(chatId, service.getFromId(), addUser.getUserId(), service.getDate());
                     application.getUpdateProcessor().onMessage(new TLLocalAddChatUser(message));
                 }
 
