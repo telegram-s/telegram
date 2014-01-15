@@ -17,12 +17,9 @@ public class UserSource {
 
     private final CopyOnWriteArrayList<UserSourceListener> listeners = new CopyOnWriteArrayList<UserSourceListener>();
 
-    private StelsApplication application;
-
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    public UserSource(StelsApplication application) {
-        this.application = application;
+    public UserSource() {
     }
 
     public void registerListener(UserSourceListener listener) {

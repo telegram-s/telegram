@@ -48,7 +48,7 @@ public class GroupsDatabase {
         }
 
         GroupChat[] dbRes = groupDao.queryBuilder()
-                .where(GroupChatDao.Properties.Id.in((Object[])ids))
+                .where(GroupChatDao.Properties.Id.in((Object[]) ids))
                 .list()
                 .toArray(new GroupChat[0]);
         Group[] res = new Group[dbRes.length];
@@ -118,5 +118,10 @@ public class GroupsDatabase {
         }
 
         return groupCache.get((int) (long) group.getId());
+    }
+
+    public void clear() {
+        GroupChatDao.dropTable(groupDao.getDatabase(), true);
+        groupCache.clear();
     }
 }

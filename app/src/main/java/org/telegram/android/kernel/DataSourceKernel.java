@@ -34,7 +34,7 @@ public class DataSourceKernel {
     private void init() {
         if (kernel.getAuthKernel().isLoggedIn()) {
             dialogSource = new DialogSource(kernel.getApplication());
-            userSource = new UserSource(kernel.getApplication());
+            userSource = new UserSource();
             contactsSource = new ContactsSource(kernel.getApplication());
             chatSource = new ChatSource(kernel.getApplication());
             encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
@@ -192,7 +192,7 @@ public class DataSourceKernel {
 
     public void logIn() {
         dialogSource = new DialogSource(kernel.getApplication());
-        userSource = new UserSource(kernel.getApplication());
+        userSource = new UserSource();
         contactsSource = new ContactsSource(kernel.getApplication());
         chatSource = new ChatSource(kernel.getApplication());
         encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
@@ -208,7 +208,6 @@ public class DataSourceKernel {
             source.destroy();
         }
         messageSources.clear();
-        MessageSource.clearData(kernel.getApplication());
     }
 
     public void logOut() {
@@ -217,11 +216,9 @@ public class DataSourceKernel {
             source.destroy();
         }
         messageSources.clear();
-        MessageSource.clearData(kernel.getApplication());
 
         // Clearing dialogs states
         dialogSource.destroy();
-        DialogSource.clearData(kernel.getApplication());
 
         // Clearing contacts states
         contactsSource.destroy();

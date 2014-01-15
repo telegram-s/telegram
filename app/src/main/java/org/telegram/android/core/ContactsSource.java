@@ -23,8 +23,6 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
 
     private static final String TAG = "ContactsSource";
 
-    private ContactSourceState state;
-
     private Handler handler = new Handler(Looper.getMainLooper());
 
     private StelsApplication application;
@@ -46,7 +44,6 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
     }
 
     public ContactsSource(StelsApplication application) {
-        this.state = ContactSourceState.UNSYNCED;
         this.application = application;
         loadSettings();
     }
@@ -80,10 +77,6 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
 
     public void run() {
         this.application.getSyncKernel().getContactsSync().setListener(this);
-    }
-
-    public ContactSourceState getState() {
-        return state;
     }
 
     public void registerListener(ContactSourceListener listener) {

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.SystemClock;
 import org.telegram.android.Configuration;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLLocalContact;
 import org.telegram.android.core.wireframes.MessageWireframe;
@@ -32,23 +33,6 @@ import java.util.concurrent.ThreadFactory;
  * Created: 29.07.13 0:42
  */
 public class MessageSource {
-
-    public static void clearData(StelsApplication context) {
-        try {
-            File shared = new File("/data/data/" + context.getPackageName() + "/shared_prefs/");
-            String[] sharedPrefs = shared.list();
-            for (String s : sharedPrefs) {
-                if (s.startsWith("org.telegram.android.Chat_")) {
-                    String name = s.substring(0, s.length() - 4);
-                    SharedPreferences pref = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-                    pref.edit().remove("state").remove("pstate").commit();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private static final int STATE_UNLOADED = 0;
     private static final int STATE_LOADED = 1;
     private static final int STATE_COMPLETED = 2;
@@ -79,20 +63,23 @@ public class MessageSource {
 
     private ViewSource<MessageWireframe, ChatMessage> messagesSource;
 
-    private SharedPreferences preferences;
-
     private boolean destroyed;
 
     private int persistenceState = STATE_UNLOADED;
 
     private final String TAG;
 
+    private SyncStateEngine syncStateEngine;
+
     public MessageSource(int _peerType, int _peerId, StelsApplication _application) {
         TAG = "MessageSource#" + _peerType + "@" + _peerId;
+        this.peerType = _peerType;
+        this.peerId = _peerId;
         this.application = _application;
         this.destroyed = false;
-        this.preferences = this.application.getSharedPreferences("org.telegram.android.Chat_" + _peerType + "_" + _peerId, Context.MODE_PRIVATE);
-        this.persistenceState = preferences.getInt("pstate", STATE_UNLOADED);
+        this.syncStateEngine = application.getEngine().getSyncStateEngine();
+
+        this.persistenceState = syncStateEngine.getMessagesSyncState(peerType, peerId, STATE_UNLOADED);
         if (persistenceState == STATE_COMPLETED) {
             this.state = MessagesSourceState.COMPLETED;
         } else if (persistenceState == STATE_LOADED) {
@@ -101,8 +88,6 @@ public class MessageSource {
             this.state = MessagesSourceState.UNSYNCED;
         }
 
-        this.peerType = _peerType;
-        this.peerId = _peerId;
         this.messagesSource = new ViewSource<MessageWireframe, ChatMessage>() {
 
             @Override
@@ -244,13 +229,19 @@ public class MessageSource {
     }
 
     private void onCompleted() {
+        if (destroyed) {
+            return;
+        }
         persistenceState = STATE_COMPLETED;
-        preferences.edit().putInt("pstate", persistenceState).commit();
+        syncStateEngine.setMessagesSyncState(peerType, peerId, persistenceState);
     }
 
     private void onLoaded() {
+        if (destroyed) {
+            return;
+        }
         persistenceState = STATE_LOADED;
-        preferences.edit().putInt("pstate", persistenceState).commit();
+        syncStateEngine.setMessagesSyncState(peerType, peerId, persistenceState);
     }
 
     public void startSyncIfRequired() {

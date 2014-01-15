@@ -30,10 +30,6 @@ public class UsersEngine {
         this.contactsDatabase = new ContactsDatabase(modelEngine);
     }
 
-    public void clearCache() {
-        this.usersDatabase.clearCache();
-    }
-
     public User getUserRuntime(int id) {
         User res = getUser(id);
 
@@ -160,5 +156,10 @@ public class UsersEngine {
 
     public void onContacts(List<TLAbsUser> users, List<TLContact> contacts) {
         onUsers(users);
+    }
+
+    public void clear() {
+        contactsDatabase.clear();
+        usersDatabase.clear();
     }
 }

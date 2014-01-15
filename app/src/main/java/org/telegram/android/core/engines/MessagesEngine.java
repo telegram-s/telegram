@@ -226,4 +226,8 @@ public class MessagesEngine {
         }
         return converted;
     }
+
+    public void clear() {
+        database.clear();
+    }
 }

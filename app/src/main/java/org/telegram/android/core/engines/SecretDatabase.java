@@ -123,4 +123,9 @@ public class SecretDatabase {
 
         return secretCache.get(src.getId());
     }
+
+    public void clear() {
+        SecretChatDao.dropTable(secretDao.getDatabase(), true);
+        secretCache.clear();
+    }
 }

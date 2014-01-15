@@ -184,8 +184,8 @@ public class UsersDatabase {
         return null;
     }
 
-    public void clearCache() {
-        // userDbCache.clear();
+    public void clear() {
+        UserDao.dropTable(userGreenDao.getDatabase(), true);
         userCache.clear();
     }
 }

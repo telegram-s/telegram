@@ -1,4 +1,4 @@
-package org.telegram.android.core;
+package org.telegram.android.config;
 
 import android.content.Context;
 import android.content.SharedPreferences;

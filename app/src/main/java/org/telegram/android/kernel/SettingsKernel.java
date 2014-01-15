@@ -1,7 +1,7 @@
 package org.telegram.android.kernel;
 
 import org.telegram.android.config.UserSettings;
-import org.telegram.android.core.NotificationSettings;
+import org.telegram.android.config.NotificationSettings;
 
 /**
  * Created by ex3ndr on 16.11.13.

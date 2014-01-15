@@ -224,4 +224,9 @@ public class DialogsDatabase {
     private long uniqId(int peerType, int peerId) {
         return peerType + peerId * 10L;
     }
+
+    public void clear() {
+        DialogDao.dropTable(dialogsDao.getDatabase(), true);
+        dialogsCache.clear();
+    }
 }

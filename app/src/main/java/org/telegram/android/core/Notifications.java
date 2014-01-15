@@ -25,6 +25,7 @@ import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.config.NotificationSettings;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.MessageState;
 import org.telegram.android.core.model.PeerType;

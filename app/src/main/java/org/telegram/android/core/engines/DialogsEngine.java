@@ -310,4 +310,8 @@ public class DialogsEngine {
 
         return null;
     }
+
+    public void clear() {
+        database.clear();
+    }
 }

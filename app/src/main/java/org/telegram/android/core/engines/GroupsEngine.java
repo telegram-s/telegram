@@ -12,11 +12,9 @@ import java.util.List;
  * Created by ex3ndr on 04.01.14.
  */
 public class GroupsEngine {
-    private ModelEngine engine;
     private GroupsDatabase database;
 
     public GroupsEngine(ModelEngine engine) {
-        this.engine = engine;
         this.database = new GroupsDatabase(engine);
     }
 
@@ -87,5 +85,9 @@ public class GroupsEngine {
 
     public void deleteGroup(int id) {
         database.deleteGroup(id);
+    }
+
+    public void clear() {
+        database.clear();
     }
 }

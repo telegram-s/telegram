@@ -358,4 +358,8 @@ public class MessagesDatabase {
         }
         return res;
     }
+
+    public void clear() {
+        MessageDao.dropTable(messageDao.getDatabase(), true);
+    }
 }

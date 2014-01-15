@@ -38,6 +38,6 @@ public class StorageKernel {
     }
 
     public void clearData() {
-        model.clearCache();
+        model.dropData();
     }
 }

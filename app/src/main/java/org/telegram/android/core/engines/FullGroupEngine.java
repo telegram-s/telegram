@@ -132,4 +132,8 @@ public class FullGroupEngine {
     public synchronized void delete(int chatId) {
         fullGroupDatabase.delete(chatId);
     }
+
+    public synchronized void clear() {
+        fullGroupDatabase.clear();
+    }
 }

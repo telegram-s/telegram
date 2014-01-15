@@ -256,4 +256,8 @@ public class MediaDatabase {
             throw new UnsupportedOperationException();
         }
     }
+
+    public void clear() {
+        MediaRecordDao.dropTable(mediaRecordDao.getDatabase(), true);
+    }
 }

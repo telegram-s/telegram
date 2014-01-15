@@ -4,6 +4,8 @@ import android.net.Uri;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.MediaRecord;
+import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.log.Logger;
@@ -11,8 +13,7 @@ import org.telegram.api.*;
 import org.telegram.api.messages.TLAbsSentMessage;
 import org.telegram.api.messages.TLAbsStatedMessage;
 import org.telegram.api.messages.TLAbsStatedMessages;
-import org.telegram.dao.DaoMaster;
-import org.telegram.dao.DaoSession;
+import org.telegram.dao.*;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
 import org.telegram.tl.TLObject;
@@ -42,6 +43,8 @@ public class ModelEngine {
     private MessagesEngine messagesEngine;
     private MediaEngine mediaEngine;
 
+    private SyncStateEngine syncStateEngine;
+
     public ModelEngine(StelsApplication application) {
         DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "users-db", null);
         this.daoMaster = new DaoMaster(helper.getWritableDatabase());
@@ -55,6 +58,7 @@ public class ModelEngine {
         this.dialogsEngine = new DialogsEngine(this);
         this.messagesEngine = new MessagesEngine(this);
         this.fullGroupEngine = new FullGroupEngine(this);
+        this.syncStateEngine = new SyncStateEngine(application);
     }
 
     public DaoSession getDaoSession() {
@@ -93,6 +97,10 @@ public class ModelEngine {
         return fullGroupEngine;
     }
 
+    public SyncStateEngine getSyncStateEngine() {
+        return syncStateEngine;
+    }
+
     /**
      * Users actions
      */
@@ -107,10 +115,6 @@ public class ModelEngine {
 
     public User getUser(int id) {
         return usersEngine.getUser(id);
-    }
-
-    public void clearCache() {
-        usersEngine.clearCache();
     }
 
     /**
@@ -830,5 +834,19 @@ public class ModelEngine {
         dialogsEngine.deleteDialog(peerType, peerId);
         messagesEngine.deleteHistory(peerType, peerId);
         mediaEngine.deleteMediaFromChat(peerType, peerId);
+    }
+
+    public void dropData() {
+        usersEngine.clear();
+        groupsEngine.clear();
+        fullGroupEngine.clear();
+        secretEngine.clear();
+
+        dialogsEngine.clear();
+        messagesEngine.clear();
+
+        mediaEngine.clear();
+
+        syncStateEngine.clear();
     }
 }

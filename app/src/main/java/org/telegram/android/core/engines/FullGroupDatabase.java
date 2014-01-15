@@ -66,4 +66,8 @@ public class FullGroupDatabase {
             return null;
         }
     }
+
+    public void clear() {
+        FullGroupDao.dropTable(fullGroupDao.getDatabase(), true);
+    }
 }

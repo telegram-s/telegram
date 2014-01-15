@@ -68,4 +68,8 @@ public class MediaEngine {
     public synchronized void deleteMediaFromChat(int peerType, int peerId) {
         mediaDatabase.deleteMediaFromChat(peerType, peerId);
     }
+
+    public synchronized void clear() {
+        mediaDatabase.clear();
+    }
 }

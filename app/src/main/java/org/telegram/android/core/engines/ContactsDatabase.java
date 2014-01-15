@@ -2,6 +2,7 @@ package org.telegram.android.core.engines;
 
 import org.telegram.android.core.model.Contact;
 import org.telegram.dao.ContactDao;
+import org.telegram.dao.UserDao;
 
 import java.util.ArrayList;
 
@@ -97,5 +98,10 @@ public class ContactsDatabase {
         if (toAdd.size() > 0) {
             contactDao.insertInTx(toAdd, true);
         }
+    }
+
+    public synchronized void clear() {
+        ContactDao.dropTable(contactDao.getDatabase(), true);
+        cache = null;
     }
 }

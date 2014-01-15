@@ -7,6 +7,7 @@ import android.support.v4.text.BidiFormatter;
 import org.telegram.android.Configuration;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
+import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.wireframes.DialogWireframe;
@@ -30,13 +31,7 @@ import java.util.concurrent.ThreadFactory;
  * Created: 28.07.13 21:22
  */
 public class DialogSource {
-
     private static final String TAG = "DialogSource";
-
-    public static void clearData(StelsApplication application) {
-        SharedPreferences preferences = application.getSharedPreferences("org.telegram.android.Dialogs", Context.MODE_PRIVATE);
-        preferences.edit().remove("pstate").remove("state").commit();
-    }
 
     private static final int STATE_UNLOADED = 0;
     private static final int STATE_LOADED = 1;
@@ -67,15 +62,15 @@ public class DialogSource {
 
     private ViewSource<DialogWireframe, DialogDescription> dialogsSource;
 
-    private SharedPreferences preferences;
-
     private boolean isDestroyed;
+    private SyncStateEngine syncStateEngine;
 
     public DialogSource(StelsApplication _application) {
         this.application = _application;
         this.isDestroyed = false;
-        this.preferences = this.application.getSharedPreferences("org.telegram.android.Dialogs", Context.MODE_PRIVATE);
-        this.persistenceState = preferences.getInt("pstate", STATE_UNLOADED);
+        this.syncStateEngine = application.getEngine().getSyncStateEngine();
+
+        this.persistenceState = syncStateEngine.getDialogsSyncState(STATE_UNLOADED);
 
         if (persistenceState == STATE_COMPLETED) {
             this.state = DialogSourceState.COMPLETED;
@@ -195,13 +190,17 @@ public class DialogSource {
     }
 
     private void onCompleted() {
+        if (isDestroyed)
+            return;
         persistenceState = STATE_COMPLETED;
-        preferences.edit().putInt("pstate", persistenceState).commit();
+        syncStateEngine.setDialogsSyncState(persistenceState);
     }
 
     private void onLoaded() {
+        if (isDestroyed)
+            return;
         persistenceState = STATE_LOADED;
-        preferences.edit().putInt("pstate", persistenceState).commit();
+        syncStateEngine.setDialogsSyncState(persistenceState);
     }
 
     public void startSyncIfRequired() {

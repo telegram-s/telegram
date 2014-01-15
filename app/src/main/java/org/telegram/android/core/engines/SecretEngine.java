@@ -204,4 +204,8 @@ public class SecretEngine {
         res.setPeerId(chatId);
         return res;
     }
+
+    public void clear() {
+        secretDatabase.clear();
+    }
 }
