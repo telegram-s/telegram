@@ -1,4 +1,4 @@
-package org.telegram.android.cursors;
+package org.telegram.android.ui.source;
 
 /**
  * Author: Korshakov Stepan

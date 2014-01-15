@@ -5,12 +5,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;
@@ -43,8 +40,8 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.MessageWireframe;
-import org.telegram.android.cursors.ViewSourceListener;
-import org.telegram.android.cursors.ViewSourceState;
+import org.telegram.android.ui.source.ViewSourceListener;
+import org.telegram.android.ui.source.ViewSourceState;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.media.DownloadState;
@@ -53,7 +50,6 @@ import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
-import org.telegram.android.video.VideoRecorderActivity;
 import org.telegram.android.views.*;
 import org.telegram.android.views.dialog.ConversationAdapter;
 import org.telegram.android.views.dialog.ConversationListView;
@@ -69,10 +65,8 @@ import org.telegram.api.requests.TLRequestMessagesDiscardEncryption;
 import org.telegram.i18n.I18nUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * Author: Korshakov Stepan

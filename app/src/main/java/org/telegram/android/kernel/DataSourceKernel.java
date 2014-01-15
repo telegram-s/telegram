@@ -3,7 +3,7 @@ package org.telegram.android.kernel;
 import org.telegram.android.core.*;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.wireframes.MessageWireframe;
-import org.telegram.android.cursors.ViewSource;
+import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.log.Logger;
 
 import java.util.ArrayList;

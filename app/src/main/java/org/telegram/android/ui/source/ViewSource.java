@@ -1,10 +1,9 @@
-package org.telegram.android.cursors;
+package org.telegram.android.ui.source;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.Log;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.UiResponsibility;
 
