@@ -121,7 +121,7 @@ public class GroupsDatabase {
     }
 
     public void clear() {
-        GroupChatDao.dropTable(groupDao.getDatabase(), true);
+        groupDao.deleteAll();
         groupCache.clear();
     }
 }

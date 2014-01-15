@@ -101,7 +101,7 @@ public class ContactsDatabase {
     }
 
     public synchronized void clear() {
-        ContactDao.dropTable(contactDao.getDatabase(), true);
+        contactDao.deleteAll();
         cache = null;
     }
 }

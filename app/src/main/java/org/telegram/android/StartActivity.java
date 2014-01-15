@@ -13,6 +13,7 @@ import android.graphics.PixelFormat;
 import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.util.TypedValue;
 import android.view.*;
 import android.widget.FrameLayout;
@@ -86,6 +87,11 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         getSupportActionBar().setDisplayUseLogoEnabled(true);
 
         setContentView(R.layout.activity_main);
+//        setContentView(R.layout.activity_main_multi);
+//        if (Build.VERSION.SDK_INT < 11) {
+//            ((SlidingPaneLayout) findViewById(R.id.slideContainer)).setCoveredFadeColor(0);
+//            ((SlidingPaneLayout) findViewById(R.id.slideContainer)).setSliderFadeColor(0);
+//        }
         controller = new FragmentScreenController(this, savedState);
 
         updateHeaderHeight();
@@ -402,15 +408,6 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
             if (data != null && data.getIntExtra("forward_mid", 0) != 0) {
                 getRootController().forwardMessage(data.getIntExtra("forward_mid", 0));
             }
-        }
-    }
-
-    private FragmentTransaction prepareTransaction() {
-        if (application.getScreenLogicType() == ScreenLogicType.SINGLE_ANIMATED) {
-            return getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit, R.anim.fragment_close_enter, R.anim.fragment_close_exit);
-        } else {
-            return getSupportFragmentManager().beginTransaction();
         }
     }
 

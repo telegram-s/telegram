@@ -226,7 +226,7 @@ public class DialogsDatabase {
     }
 
     public void clear() {
-        DialogDao.dropTable(dialogsDao.getDatabase(), true);
+        dialogsDao.deleteAll();
         dialogsCache.clear();
     }
 }

@@ -258,6 +258,6 @@ public class MediaDatabase {
     }
 
     public void clear() {
-        MediaRecordDao.dropTable(mediaRecordDao.getDatabase(), true);
+        mediaRecordDao.deleteAll();
     }
 }

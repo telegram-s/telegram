@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:orientation="vertical"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+    <android.support.v4.widget.SlidingPaneLayout android:layout_width="fill_parent"
+                                                 android:layout_height="fill_parent"
+                                                 android:id="@+id/slideContainer">
+
+        <FrameLayout android:layout_width="fill_parent"
+                     android:layout_height="fill_parent"
+                     android:id="@+id/fragmentContainer">
+
+        </FrameLayout>
+        <FrameLayout android:layout_width="fill_parent"
+                     android:layout_height="fill_parent"
+                     android:background="@color/st_settings_bg"
+                     android:id="@+id/secondContainer">
+            <ImageView android:layout_width="fill_parent" android:layout_height="fill_parent"
+                       android:src="@drawable/app_icon"
+                       android:scaleType="fitXY"/>
+        </FrameLayout>
+    </android.support.v4.widget.SlidingPaneLayout>
+
+    <FrameLayout android:layout_width="fill_parent"
+                 android:layout_height="fill_parent"
+                 android:id="@+id/loginFragmentContainer"
+                 android:background="@color/st_settings_bg">
+
+    </FrameLayout>
+</FrameLayout>

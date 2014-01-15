@@ -125,7 +125,7 @@ public class SecretDatabase {
     }
 
     public void clear() {
-        SecretChatDao.dropTable(secretDao.getDatabase(), true);
+        secretDao.deleteAll();
         secretCache.clear();
     }
 }

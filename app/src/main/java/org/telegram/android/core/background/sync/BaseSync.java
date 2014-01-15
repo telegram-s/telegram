@@ -168,6 +168,7 @@ public abstract class BaseSync {
         }
 
         synchronized (entity) {
+            entity.isInvalidatedDuringExecution = false;
             entity.isInProgress = true;
         }
         try {

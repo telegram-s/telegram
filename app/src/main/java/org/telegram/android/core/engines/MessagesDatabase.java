@@ -360,6 +360,6 @@ public class MessagesDatabase {
     }
 
     public void clear() {
-        MessageDao.dropTable(messageDao.getDatabase(), true);
+        messageDao.deleteAll();
     }
 }
