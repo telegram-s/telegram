@@ -196,15 +196,13 @@ public class FastWebImageView extends View {
                 float mainAlpha = (time - showingTime) / (float) FADE_OUT_ANIMATION_TIME;
 
                 if (prevDrawable != null) {
-                    prevDrawable.setAlpha((int) (255 * (1 - mainAlpha)));
+                    prevDrawable.setAlpha(255);
                     setBounds(prevDrawable, scaleTypeImage);
                     prevDrawable.draw(canvas);
-                    prevDrawable.setAlpha(255);
                 } else if (emptyDrawable != null) {
-                    emptyDrawable.setAlpha((int) (255 * (1 - mainAlpha)));
+                    emptyDrawable.setAlpha(255);
                     setBounds(emptyDrawable, scaleTypeEmpty);
                     emptyDrawable.draw(canvas);
-                    emptyDrawable.setAlpha(255);
                 }
 
                 currentDrawable.setAlpha((int) (255 * mainAlpha));
