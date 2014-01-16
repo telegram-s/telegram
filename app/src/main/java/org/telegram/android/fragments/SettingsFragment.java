@@ -263,11 +263,11 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getUploadingSource();
                 if (fileSource != null) {
                     if (fileSource instanceof FileSource) {
-                        avatar.requestTask(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
+                        avatar.requestTaskSwitch(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
                         showView(avatarUploadView);
                         isLoaded = true;
                     } else if (fileSource instanceof FileUriSource) {
-                        avatar.requestTask(new UriImageTask(((FileUriSource) fileSource).getUri()));
+                        avatar.requestTaskSwitch(new UriImageTask(((FileUriSource) fileSource).getUri()));
                         showView(avatarUploadView);
                         isLoaded = true;
                     }
@@ -288,12 +288,12 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
                     TLLocalAvatarPhoto photo = (TLLocalAvatarPhoto) user.getPhoto();
                     if (photo.getPreviewLocation() instanceof TLLocalFileLocation) {
-                        avatar.requestTask(new StelsImageTask((TLLocalFileLocation) photo.getPreviewLocation()));
+                        avatar.requestTaskSwitch(new StelsImageTask((TLLocalFileLocation) photo.getPreviewLocation()));
                     } else {
-                        avatar.requestTask(null);
+                        avatar.requestTaskSwitch(null);
                     }
                 } else {
-                    avatar.requestTask(null);
+                    avatar.requestTaskSwitch(null);
                 }
             }
 

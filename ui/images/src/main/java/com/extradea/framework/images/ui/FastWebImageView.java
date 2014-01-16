@@ -101,10 +101,10 @@ public class FastWebImageView extends View {
     }
 
     public void requestTaskSwitch(ImageTask task) {
-        if (currentDrawable != null) {
-            prevDrawable = currentDrawable;
-        } else {
+        if (currentDrawable == null && prevDrawable == null) {
             prevDrawable = emptyDrawable;
+        } else if (currentDrawable != null) {
+            prevDrawable = currentDrawable;
         }
         receiver.receiveImage(task);
         if (currentDrawable != null) {
