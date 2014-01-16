@@ -40,6 +40,6 @@ public class StelsImageTask extends ImageTask {
 
     @Override
     protected String getKeyImpl() {
-        return blur + ":" + blurRadius + ":" + getMaxWidth() + ":" + getMaxHeight() + ":" + isFillRect() + ":" + fileLocation.getDcId() + "+" + fileLocation.getVolumeId() + "+" + fileLocation.getLocalId();
+        return blur + ":" + blurRadius + ":" + fileLocation.getDcId() + "+" + fileLocation.getVolumeId() + "+" + fileLocation.getLocalId();
     }
 }

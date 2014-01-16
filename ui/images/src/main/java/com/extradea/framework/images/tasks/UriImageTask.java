@@ -38,6 +38,6 @@ public class UriImageTask extends ImageTask implements Serializable {
 
     @Override
     public String getKeyImpl() {
-        return getMaxWidth() + ":" + getMaxHeight() + ":" + isFillRect() + ":" + uri;
+        return uri;
     }
 }

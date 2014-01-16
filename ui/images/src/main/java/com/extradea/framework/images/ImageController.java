@@ -628,15 +628,7 @@ public class ImageController {
             Bitmap img = getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
                 @Override
                 public Bitmap call() throws Exception {
-                    if (task.hasSizeLimitation()) {
-                        if (task.isFillRect()) {
-                            return imagePersistence.loadImageFill(task.getKey(), task.getMaxWidth(), task.getMaxHeight());
-                        } else {
-                            return imagePersistence.loadImageOptimized(task.getKey(), task.getMaxWidth(), task.getMaxHeight());
-                        }
-                    } else {
-                        return imagePersistence.loadImageOptimized(task.getKey());
-                    }
+                    return imagePersistence.loadImageOptimized(task.getKey());
                 }
             });
             Thread.yield();

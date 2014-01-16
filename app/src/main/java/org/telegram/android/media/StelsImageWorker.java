@@ -44,13 +44,6 @@ public class StelsImageWorker implements ImageWorker {
 
             if (res != null) {
                 Bitmap img = controller.getBitmapDecoder().decodeBitmap(res.getBytes());
-                if (stelsImageTask.hasSizeLimitation() && stelsImageTask.isFillRect()) {
-                    Bitmap scaled = Bitmap.createScaledBitmap(img, stelsImageTask.getMaxWidth(), stelsImageTask.getMaxHeight(), true);
-                    if (img != scaled) {
-                        img.recycle();
-                    }
-                    img = scaled;
-                }
                 if (stelsImageTask.isBlur()) {
                     img = BitmapUtils.fastblur(img, stelsImageTask.getBlurRadius());
                 }

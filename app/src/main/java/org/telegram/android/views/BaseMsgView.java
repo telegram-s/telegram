@@ -15,6 +15,7 @@ import android.util.AttributeSet;
 import android.view.*;
 import android.widget.Checkable;
 import com.extradea.framework.images.ImageReceiver;
+import com.extradea.framework.images.tasks.ScaleTask;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.PeerType;
@@ -309,10 +310,10 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                     TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) user.getPhoto();
                     if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
                         StelsImageTask task = new StelsImageTask((TLLocalFileLocation) profilePhoto.getPreviewLocation());
-                        task.setMaxWidth(getPx(42));
-                        task.setMaxHeight(getPx(42));
-                        task.setFillRect(true);
-                        receiver.receiveImage(task);
+//                        task.setMaxWidth(getPx(42));
+//                        task.setMaxHeight(getPx(42));
+//                        task.setFillRect(true);
+                        receiver.receiveImage(new ScaleTask(task, getPx(42), getPx(42)));
                         avatar = receiver.getResult();
                         if (avatar != null) {
                             avatarImageTime = 0;

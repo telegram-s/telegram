@@ -10,6 +10,7 @@ import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import com.extradea.framework.images.ImageReceiver;
 import com.extradea.framework.images.tasks.RoundedImageTask;
+import com.extradea.framework.images.tasks.ScaleTask;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.config.UserSettings;
@@ -324,22 +325,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) photo;
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
                 StelsImageTask task = new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
-                if (IS_LARGE) {
-                    task.setMaxHeight(getPx(64));
-                    task.setMaxWidth(getPx(64));
-                } else {
-                    task.setMaxHeight(getPx(52));
-                    task.setMaxWidth(getPx(52));
-                }
-                task.setFillRect(true);
-                RoundedImageTask roundedImageTask = new RoundedImageTask(task);
-//                if (IS_LARGE) {
-//                    roundedImageTask.setRadius(getPx(2));
-//                } else {
-//                    roundedImageTask.setRadius(0);
-//                }
-                roundedImageTask.setRadius(0);
-                avatarReceiver.receiveImage(roundedImageTask);
+                int size = IS_LARGE ? getPx(64) : getPx(52);
+                avatarReceiver.receiveImage(new ScaleTask(task, size, size));
                 avatar = avatarReceiver.getResult();
             } else {
                 avatarReceiver.receiveImage(null);

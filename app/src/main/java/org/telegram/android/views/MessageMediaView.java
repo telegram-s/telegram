@@ -327,10 +327,7 @@ public class MessageMediaView extends BaseMsgView {
                     int scaledW = (int) maxWidth;
                     int scaledH = (int) (previewHeight * scale);
 
-                    previewTask = new FileSystemImageTask(application.getDownloadManager().getPhotoFileName(key));
-                    previewTask.setMaxWidth(scaledW);
-                    previewTask.setMaxHeight(scaledH);
-                    previewTask.setFillRect(true);
+                    previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getPhotoFileName(key)), scaledW, scaledH);
                     previewTask.setPutInDiskCache(true);
                 }
                 isDownloadable = true;
@@ -395,10 +392,9 @@ public class MessageMediaView extends BaseMsgView {
                     int scaledW = (int) maxWidth;
                     int scaledH = (int) (mediaVideo.getPreviewH() * scale);
 
-                    previewTask = new VideoThumbTask(application.getDownloadManager().getVideoFileName(key), 0);
-                    previewTask.setMaxWidth(scaledW);
-                    previewTask.setMaxHeight(scaledH);
-                    previewTask.setFillRect(true);
+                    previewTask = new ScaleTask(
+                            new VideoThumbTask(application.getDownloadManager().getVideoFileName(key))
+                            , scaledW, scaledH);
                     previewTask.setPutInDiskCache(true);
 
                     previewWidth = mediaVideo.getPreviewW();
@@ -446,8 +442,6 @@ public class MessageMediaView extends BaseMsgView {
                         if (mediaVideo.getPreviewLocation() instanceof TLLocalFileLocation) {
                             TLLocalFileLocation location = (TLLocalFileLocation) mediaVideo.getPreviewLocation();
 
-                            previewTask = new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret()));
-                            ((StelsImageTask) previewTask).enableBlur(3);
                             previewWidth = mediaVideo.getPreviewW();
                             previewHeight = mediaVideo.getPreviewH();
 
@@ -463,20 +457,15 @@ public class MessageMediaView extends BaseMsgView {
                             int scaledW = (int) maxWidth;
                             int scaledH = (int) (previewHeight * scale);
 
-                            previewTask.setMaxWidth(scaledW);
-                            previewTask.setMaxHeight(scaledH);
-                            previewTask.setFillRect(true);
+                            StelsImageTask baseTask = new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret()));
+                            baseTask.enableBlur(3);
+                            previewTask = new ScaleTask(baseTask, scaledW, scaledH);
                         }
                     }
                 }
             }
         } else if (message.message.getExtras() instanceof TLUploadingPhoto) {
             TLUploadingPhoto photo = (TLUploadingPhoto) message.message.getExtras();
-            if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
-                previewTask = new UriImageTask(photo.getFileUri());
-            } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
-                previewTask = new FileSystemImageTask(photo.getFileName());
-            }
             previewWidth = photo.getWidth();
             previewHeight = photo.getHeight();
 
@@ -492,9 +481,11 @@ public class MessageMediaView extends BaseMsgView {
             int scaledW = (int) maxWidth;
             int scaledH = (int) (previewHeight * scale);
 
-            previewTask.setMaxWidth(scaledW);
-            previewTask.setMaxHeight(scaledH);
-            previewTask.setFillRect(true);
+            if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
+                previewTask = new ScaleTask(new UriImageTask(photo.getFileUri()), scaledW, scaledH);
+            } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
+                previewTask = new ScaleTask(new FileSystemImageTask(photo.getFileName()), scaledW, scaledH);
+            }
 
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLUploadingVideo) {
@@ -515,10 +506,7 @@ public class MessageMediaView extends BaseMsgView {
             int scaledW = (int) maxWidth;
             int scaledH = (int) (previewHeight * scale);
 
-            previewTask = new VideoThumbTask(video.getFileName(), MediaStore.Video.Thumbnails.MINI_KIND);
-            previewTask.setFillRect(true);
-            previewTask.setMaxWidth(scaledW);
-            previewTask.setMaxHeight(scaledH);
+            previewTask = new ScaleTask(new VideoThumbTask(video.getFileName()), scaledW, scaledH);
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLLocalGeo) {
             TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();
@@ -528,19 +516,11 @@ public class MessageMediaView extends BaseMsgView {
             int imageW = previewWidth / 2;
             int imageH = previewHeight / 2;
 
-            previewTask = new ImageDownloadTask(buildMapUrl(geo.getLatitude(), geo.getLongitude(), imageW, imageH));
-            previewTask.setMaxHeight(previewHeight);
-            previewTask.setMaxWidth(previewWidth);
-            previewTask.setFillRect(true);
+            previewTask = new ScaleTask(new ImageDownloadTask(buildMapUrl(geo.getLatitude(), geo.getLongitude(), imageW, imageH)), previewWidth, previewHeight);
             showMapPoint = true;
         } else if (message.message.getExtras() instanceof TLUploadingDocument) {
-            TLUploadingDocument doc = (TLUploadingDocument) message.message.getExtras();
 
-            if (doc.getFilePath().length() > 0) {
-                previewTask = new FileSystemImageTask(doc.getFilePath());
-            } else {
-                previewTask = new UriImageTask(doc.getFileUri());
-            }
+            TLUploadingDocument doc = (TLUploadingDocument) message.message.getExtras();
 
             previewWidth = doc.getFullPreviewW();
             previewHeight = doc.getFullPreviewH();
@@ -557,9 +537,11 @@ public class MessageMediaView extends BaseMsgView {
             int scaledW = (int) maxWidth;
             int scaledH = (int) (previewHeight * scale);
 
-            previewTask.setMaxWidth(scaledW);
-            previewTask.setMaxHeight(scaledH);
-            previewTask.setFillRect(true);
+            if (doc.getFilePath().length() > 0) {
+                previewTask = new ScaleTask(new FileSystemImageTask(doc.getFilePath()), scaledW, scaledH);
+            } else {
+                previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
+            }
 
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLLocalDocument) {
@@ -587,10 +569,7 @@ public class MessageMediaView extends BaseMsgView {
                         int scaledW = (int) maxWidth;
                         int scaledH = (int) (previewHeight * scale);
 
-                        previewTask = new FileSystemImageTask(application.getDownloadManager().getDocFileName(key));
-                        previewTask.setMaxWidth(scaledW);
-                        previewTask.setMaxHeight(scaledH);
-                        previewTask.setFillRect(true);
+                        previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getDocFileName(key)), scaledW, scaledH);
                         previewTask.setPutInDiskCache(true);
                     }
                 }
@@ -610,8 +589,6 @@ public class MessageMediaView extends BaseMsgView {
                     fastPreviewHeight = document.getPreviewH() - 1;
                 } else if (document.getPreviewLocation() instanceof TLLocalFileLocation) {
                     if (previewTask == null) {
-                        previewTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
-                        ((StelsImageTask) previewTask).enableBlur(3);
 
                         float maxWidth = getPx(160);
                         float maxHeight = getPx(300);
@@ -625,9 +602,9 @@ public class MessageMediaView extends BaseMsgView {
                         int scaledW = (int) maxWidth;
                         int scaledH = (int) (previewHeight * scale);
 
-                        previewTask.setMaxWidth(scaledW);
-                        previewTask.setMaxHeight(scaledH);
-                        previewTask.setFillRect(true);
+                        StelsImageTask baseTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
+                        baseTask.enableBlur(3);
+                        previewTask = new ScaleTask(baseTask, scaledW, scaledH);
                     }
                 }
             }

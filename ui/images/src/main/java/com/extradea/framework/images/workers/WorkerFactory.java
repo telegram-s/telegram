@@ -39,6 +39,7 @@ public class WorkerFactory {
         res.add(new QuadCornersWorker());
         res.add(new CornersWorker());
         res.add(new CustomWorker());
+        res.add(new ScaleWorker());
         for (ImageWorker worker : additional) {
             res.add(worker);
         }

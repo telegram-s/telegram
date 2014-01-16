@@ -38,6 +38,6 @@ public class FileSystemImageTask extends ImageTask implements Serializable {
 
     @Override
     public String getKeyImpl() {
-        return getMaxWidth() + ":" + getMaxHeight() + ":" + isFillRect() + ":" + fileName;
+        return fileName;
     }
 }

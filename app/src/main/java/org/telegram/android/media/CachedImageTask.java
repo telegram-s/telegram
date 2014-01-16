@@ -42,29 +42,9 @@ public class CachedImageTask extends ImageTask {
         setPutInDiskCache(false);
     }
 
-    public CachedImageTask(TLLocalPhoto photo, int w, int h, boolean blur) {
-        this.photo = photo;
-        this.blur = blur;
-        this.local = true;
-        setMaxHeight(h);
-        setMaxWidth(w);
-        setPutInMemoryCache(true);
-        setPutInDiskCache(false);
-    }
-
     public CachedImageTask(TLLocalVideo video) {
         this.video = video;
         this.local = true;
-        setPutInMemoryCache(true);
-        setPutInDiskCache(false);
-    }
-
-    public CachedImageTask(TLLocalVideo video, int w, int h, boolean blur) {
-        this.video = video;
-        this.blur = blur;
-        this.local = true;
-        setMaxHeight(h);
-        setMaxWidth(w);
         setPutInMemoryCache(true);
         setPutInDiskCache(false);
     }
@@ -73,17 +53,6 @@ public class CachedImageTask extends ImageTask {
         this.size = size;
         this.location = (TLFileLocation) size.getLocation();
         this.local = false;
-        setPutInMemoryCache(true);
-        setPutInDiskCache(false);
-    }
-
-    public CachedImageTask(TLPhotoCachedSize size, int w, int h, boolean blur) {
-        this.size = size;
-        this.location = (TLFileLocation) size.getLocation();
-        this.blur = blur;
-        this.local = false;
-        setMaxHeight(h);
-        setMaxWidth(w);
         setPutInMemoryCache(true);
         setPutInDiskCache(false);
     }

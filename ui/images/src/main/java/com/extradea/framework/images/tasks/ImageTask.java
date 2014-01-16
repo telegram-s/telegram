@@ -36,11 +36,6 @@ public abstract class ImageTask implements Serializable {
 
     private ImageTask[] requiredTasks;
 
-    private int maxWidth;
-    private int maxHeight;
-
-    private boolean fillRect;
-
     private String key;
 
     private boolean forceSaveToFS;
@@ -87,34 +82,6 @@ public abstract class ImageTask implements Serializable {
 
     public void setPutInDiskCache(boolean putInDiskCache) {
         this.putInDiskCache = putInDiskCache;
-    }
-
-    public int getMaxWidth() {
-        return maxWidth;
-    }
-
-    public void setMaxWidth(int maxWidth) {
-        this.maxWidth = maxWidth;
-    }
-
-    public int getMaxHeight() {
-        return maxHeight;
-    }
-
-    public void setMaxHeight(int maxHeight) {
-        this.maxHeight = maxHeight;
-    }
-
-    public boolean hasSizeLimitation() {
-        return maxWidth != 0 && maxHeight != 0;
-    }
-
-    public boolean isFillRect() {
-        return fillRect;
-    }
-
-    public void setFillRect(boolean fillRect) {
-        this.fillRect = fillRect;
     }
 
     protected abstract String getKeyImpl();

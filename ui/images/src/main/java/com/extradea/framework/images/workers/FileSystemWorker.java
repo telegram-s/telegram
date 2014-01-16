@@ -56,24 +56,24 @@ public class FileSystemWorker implements ImageWorker {
     public int processTask(ImageTask task, ImageController controller) {
         if (task instanceof FileSystemImageTask) {
             final FileSystemImageTask fsTask = (FileSystemImageTask) task;
-            if (fsTask.hasSizeLimitation()) {
-                Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
-                    @Override
-                    public Bitmap call() throws Exception {
-                        if (fsTask.isFillRect()) {
-                            return ImageUtils.getOptimalBitmapFill(fsTask.getFileName(), fsTask.getMaxWidth(), fsTask.getMaxHeight());
-                        } else {
-                            return ImageUtils.getOptimalBitmap(fsTask.getFileName(), fsTask.getMaxWidth(), fsTask.getMaxHeight());
-                        }
-                    }
-                });
-
-                if (image == null) {
-                    return RESULT_FAILURE;
-                }
-                task.setResult(image);
-                return RESULT_OK;
-            } else {
+//            if (fsTask.hasSizeLimitation()) {
+//                Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
+//                    @Override
+//                    public Bitmap call() throws Exception {
+//                        if (fsTask.isFillRect()) {
+//                            return ImageUtils.getOptimalBitmapFill(fsTask.getFileName(), fsTask.getMaxWidth(), fsTask.getMaxHeight());
+//                        } else {
+//                            return ImageUtils.getOptimalBitmap(fsTask.getFileName(), fsTask.getMaxWidth(), fsTask.getMaxHeight());
+//                        }
+//                    }
+//                });
+//
+//                if (image == null) {
+//                    return RESULT_FAILURE;
+//                }
+//                task.setResult(image);
+//                return RESULT_OK;
+//            } else {
                 Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
                     @Override
                     public Bitmap call() throws Exception {
@@ -85,27 +85,27 @@ public class FileSystemWorker implements ImageWorker {
                 }
                 task.setResult(image);
                 return RESULT_OK;
-            }
+//            }
         } else if (task instanceof UriImageTask) {
             final UriImageTask uriImageTask = (UriImageTask) task;
             try {
-                if (uriImageTask.hasSizeLimitation()) {
-                    Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
-                        @Override
-                        public Bitmap call() throws Exception {
-                            if (uriImageTask.isFillRect()) {
-                                return ImageUtils.getOptimalBitmapFill(Uri.parse(uriImageTask.getUri()), context, uriImageTask.getMaxWidth(), uriImageTask.getMaxHeight());
-                            } else {
-                                return ImageUtils.getOptimalBitmap(Uri.parse(uriImageTask.getUri()), context, uriImageTask.getMaxWidth(), uriImageTask.getMaxHeight());
-                            }
-                        }
-                    });
-                    if (image == null) {
-                        return RESULT_FAILURE;
-                    }
-                    task.setResult(image);
-                    return RESULT_OK;
-                } else {
+//                if (uriImageTask.hasSizeLimitation()) {
+//                    Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
+//                        @Override
+//                        public Bitmap call() throws Exception {
+//                            if (uriImageTask.isFillRect()) {
+//                                return ImageUtils.getOptimalBitmapFill(Uri.parse(uriImageTask.getUri()), context, uriImageTask.getMaxWidth(), uriImageTask.getMaxHeight());
+//                            } else {
+//                                return ImageUtils.getOptimalBitmap(Uri.parse(uriImageTask.getUri()), context, uriImageTask.getMaxWidth(), uriImageTask.getMaxHeight());
+//                            }
+//                        }
+//                    });
+//                    if (image == null) {
+//                        return RESULT_FAILURE;
+//                    }
+//                    task.setResult(image);
+//                    return RESULT_OK;
+//                } else {
                     Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
                         @Override
                         public Bitmap call() throws Exception {
@@ -117,7 +117,7 @@ public class FileSystemWorker implements ImageWorker {
                     }
                     task.setResult(image);
                     return RESULT_OK;
-                }
+//                }
             } catch (Exception e) {
                 e.printStackTrace();
                 return RESULT_FAILURE;
@@ -126,15 +126,9 @@ public class FileSystemWorker implements ImageWorker {
         } else {
             try {
                 VideoThumbTask videoThumbTask = (VideoThumbTask) task;
-
                 MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                 retriever.setDataSource(videoThumbTask.getFileName());
                 Bitmap res = retriever.getFrameAtTime(0);
-                if (videoThumbTask.hasSizeLimitation() && videoThumbTask.isFillRect()) {
-                    Bitmap scaled = Bitmap.createScaledBitmap(res, videoThumbTask.getMaxWidth(), videoThumbTask.getMaxHeight(), true);
-                    res.recycle();
-                    res = scaled;
-                }
                 task.setResult(res);
                 return RESULT_OK;
             } catch (Exception e) {

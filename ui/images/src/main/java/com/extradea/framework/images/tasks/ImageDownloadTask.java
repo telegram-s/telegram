@@ -37,6 +37,6 @@ public class ImageDownloadTask extends ImageTask implements Serializable {
 
     @Override
     public String getKeyImpl() {
-        return getMaxWidth() + ":" + getMaxHeight() + ":" + isFillRect() + ":" + url;
+        return url;
     }
 }

@@ -6,10 +6,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import com.extradea.framework.images.ImageController;
-import com.extradea.framework.images.workers.CornersWorker;
-import com.extradea.framework.images.workers.DownloadWorker;
-import com.extradea.framework.images.workers.FileSystemWorker;
-import com.extradea.framework.images.workers.ImageWorker;
+import com.extradea.framework.images.workers.*;
 import org.telegram.android.StelsActivity;
 import org.telegram.android.StelsApplication;
 import org.telegram.android.config.WallpaperHolder;
@@ -99,7 +96,8 @@ public class UiKernel {
                 new CornersWorker(),
                 new StelsImageWorker(application),
                 new StelsImageWorker(application),
-                new CachedImageWorker()
+                new CachedImageWorker(),
+                new ScaleWorker()
         });
 
         Logger.d(TAG, "ImageController loaded in " + (SystemClock.uptimeMillis() - start) + " ms");

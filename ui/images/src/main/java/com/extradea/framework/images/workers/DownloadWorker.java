@@ -142,9 +142,6 @@ public class DownloadWorker implements ImageWorker {
         try {
             byte[] res = downloadImage(((ImageDownloadTask) task).getUrl(), task, controller);
             Bitmap img = controller.getBitmapDecoder().decodeBitmap(res);
-            if (task.hasSizeLimitation() && task.isFillRect()) {
-                img = Bitmap.createScaledBitmap(img, task.getMaxWidth(), task.getMaxHeight(), true);
-            }
             task.setResult(img);
             task.setBinaryResult(res);
             return RESULT_OK;

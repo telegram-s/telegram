@@ -67,9 +67,6 @@ public class CornersWorker implements ImageWorker {
     @Override
     public int processTask(ImageTask task, ImageController controller) {
         Bitmap src = task.getRequiredTasks()[0].getResult();
-        if (task.hasSizeLimitation() && task.isFillRect()) {
-            src = ImageUtils.scale(src, task.getMaxWidth(), task.getMaxHeight());
-        }
         task.setResult(getRoundedCornerBitmap(src, ((RoundedImageTask) task).getRadius()));
         return RESULT_OK;
     }

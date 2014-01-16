@@ -26,11 +26,6 @@ public class CachedImageWorker implements ImageWorker {
         byte[] image = cachedImageTask.getData();
         Bitmap src = BitmapFactory.decodeByteArray(image, 0, image.length);
 
-        if (task.getMaxWidth() > 0 && task.getMaxHeight() > 0) {
-            Bitmap scaled = Bitmap.createScaledBitmap(src, task.getMaxWidth(), task.getMaxHeight(), false);
-            src.recycle();
-            src = scaled;
-        }
         if (cachedImageTask.isBlur()) {
             Bitmap filtered = BitmapUtils.fastblur(src, 10);
             src.recycle();

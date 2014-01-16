@@ -6,23 +6,17 @@ package com.extradea.framework.images.tasks;
  */
 public class VideoThumbTask extends ImageTask {
     private String fileName;
-    private int kind;
 
-    public VideoThumbTask(String fileName, int kind) {
+    public VideoThumbTask(String fileName) {
         this.fileName = fileName;
-        this.kind = kind;
     }
 
     public String getFileName() {
         return fileName;
     }
 
-    public int getKind() {
-        return kind;
-    }
-
     @Override
     protected String getKeyImpl() {
-        return "video-thumb:" + getMaxWidth() + ":" + getMaxHeight() + ":" + isFillRect() + ":" + kind + ":" + fileName;
+        return "video-thumb:" + fileName;
     }
 }
