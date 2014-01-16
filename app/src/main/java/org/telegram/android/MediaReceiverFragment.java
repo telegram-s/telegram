@@ -247,16 +247,19 @@ public class MediaReceiverFragment extends StelsFragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Intent intent = new Intent();
-        intent.setClass(getActivity(), CropImageActivity.class);
-        intent.setData(uri);
-        intent.putExtra("outputX", width);
-        intent.putExtra("outputY", height);
-        intent.putExtra("aspectX", 1);
-        intent.putExtra("aspectY", 1);
-        intent.putExtra("scale", true);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+
+        Intent intent = CropImageActivity.cropUriIntent(uri, 1, 1, imageFileName, getActivity());
         startActivityForResult(intent, requestId * REQ_M + REQUEST_BASE + 3);
+//        Intent intent = new Intent();
+//        intent.setClass(getActivity(), CropImageActivity.class);
+//        intent.setData(uri);
+//        intent.putExtra("outputX", width);
+//        intent.putExtra("outputY", height);
+//        intent.putExtra("aspectX", 1);
+//        intent.putExtra("aspectY", 1);
+//        intent.putExtra("scale", true);
+//        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+//        startActivityForResult(intent, requestId * REQ_M + REQUEST_BASE + 3);
     }
 
     protected void onPhotoArrived(String fileName, int width, int height, int requestId) {

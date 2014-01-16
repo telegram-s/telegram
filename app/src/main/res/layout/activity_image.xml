@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <com.edmodo.cropper.CropImageView android:layout_height="0dp"
+                                      android:layout_width="fill_parent"
+                                      android:layout_weight="1"
+                                      android:id="@+id/cropImage"/>
+    <Button android:layout_width="fill_parent"
+            android:layout_height="64dp"
+            android:textColor="@android:color/white"
+            android:text="Crop image"
+            android:id="@+id/doCropImage"
+            android:background="@drawable/st_list_selector"/>
+</LinearLayout>

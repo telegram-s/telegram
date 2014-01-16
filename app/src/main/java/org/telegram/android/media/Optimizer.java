@@ -133,7 +133,7 @@ public class Optimizer {
         return res;
     }
 
-    private static void save(Bitmap src, String destFile) throws IOException {
+    public static void save(Bitmap src, String destFile) throws IOException {
         FileOutputStream outputStream = new FileOutputStream(destFile);
         src.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
         outputStream.close();
@@ -172,6 +172,27 @@ public class Optimizer {
         save(res, destFile);
     }
 
+    public static Bitmap optimize(String srcFile) throws IOException {
+        InputStream fis = new FileInputStream(srcFile);
+        boolean isAnimated = detectGif(fis);
+        fis.close();
+
+        if (isAnimated) {
+            return BitmapFactory.decodeFile(srcFile);
+        }
+
+        fis = new FileInputStream(srcFile);
+        int scale = getScale(fis);
+        fis.close();
+
+        fis = new FileInputStream(srcFile);
+        Bitmap res = buildOptimized(fis, scale);
+        fis.close();
+        res = ImageUtils.fixExifRotation(res, srcFile);
+        return res;
+    }
+
+
     public static void optimizeHQ(String srcFile, String destFile) throws IOException {
         FileInputStream fis = new FileInputStream(srcFile);
         int scale = getScaleHQ(fis);
@@ -207,6 +228,31 @@ public class Optimizer {
         res = ImageUtils.fixRotation(res, Uri.parse(uri), context);
 
         save(res, destFile);
+    }
+
+    public static Bitmap optimize(String uri, Context context) throws IOException {
+        InputStream fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        boolean isAnimated = detectGif(fis);
+        fis.close();
+
+        if (isAnimated) {
+            fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+            Bitmap res = BitmapFactory.decodeStream(fis);
+            fis.close();
+            return res;
+        }
+
+        fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        int scale = getScale(fis);
+        fis.close();
+
+        fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        Bitmap res = buildOptimized(fis, scale);
+        fis.close();
+
+        res = ImageUtils.fixRotation(res, Uri.parse(uri), context);
+
+        return res;
     }
 
     public static void optimizeHQ(String uri, Context context, String destFile) throws IOException {
