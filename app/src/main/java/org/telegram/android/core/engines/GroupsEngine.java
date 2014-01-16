@@ -25,19 +25,19 @@ public class GroupsEngine {
         return database.getGroup(groupId);
     }
 
-    public Group[] getGroups(int[] ids) {
+    public synchronized Group[] getGroups(int[] ids) {
         return database.getGroups(ids);
     }
 
-    public Group[] getGroups(Integer[] ids) {
+    public synchronized Group[] getGroups(Integer[] ids) {
         return database.getGroups(ids);
     }
 
-    public void onGroupsUpdated(Group... chats) {
+    public synchronized void onGroupsUpdated(Group... chats) {
         database.updateGroups(chats);
     }
 
-    public void onGroupsUpdated(List<TLAbsChat> chats) {
+    public synchronized void onGroupsUpdated(List<TLAbsChat> chats) {
         Group[] groups = new Group[chats.size()];
         for (int i = 0; i < groups.length; i++) {
             TLAbsChat chat = chats.get(i);
@@ -73,7 +73,7 @@ public class GroupsEngine {
         }
     }
 
-    public void onGroupNameChanged(int id, String title) {
+    public synchronized void onGroupNameChanged(int id, String title) {
         Group group = getGroup(id);
         if (group != null) {
             group.setTitle(title);
@@ -82,7 +82,7 @@ public class GroupsEngine {
         }
     }
 
-    public void onGroupAvatarChanged(int id, TLAbsLocalAvatarPhoto avatar) {
+    public synchronized void onGroupAvatarChanged(int id, TLAbsLocalAvatarPhoto avatar) {
         Group group = getGroup(id);
         if (group != null) {
             group.setAvatar(avatar);
@@ -91,7 +91,7 @@ public class GroupsEngine {
         }
     }
 
-    public void deleteGroup(int id) {
+    public synchronized void deleteGroup(int id) {
         database.deleteGroup(id);
     }
 

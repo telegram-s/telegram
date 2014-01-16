@@ -87,8 +87,8 @@ public class CropImageActivity extends StelsActivity {
             @Override
             public void onClick(View view) {
                 Bitmap res = imageView.getCroppedImage();
-                int minW = getIntent().getIntExtra(EXTRA_MIN_W, 90);
-                int minH = getIntent().getIntExtra(EXTRA_MIN_H, 90);
+                int minW = getIntent().getIntExtra(EXTRA_MIN_W, 160);
+                int minH = getIntent().getIntExtra(EXTRA_MIN_H, 160);
                 res = Optimizer.scaleForMinimumSize(res, minW, minH);
                 try {
                     Optimizer.save(res, getIntent().getStringExtra(EXTRA_OUT_FILENAME));

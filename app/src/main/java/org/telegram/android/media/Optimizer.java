@@ -300,8 +300,8 @@ public class Optimizer {
             scale = Math.max(scale, h / (float) src.getHeight());
         }
 
-        int nw = (int) (scale * w);
-        int nh = (int) (scale * h);
+        int nw = (int) (scale * src.getWidth());
+        int nh = (int) (scale * src.getHeight());
         return Bitmap.createScaledBitmap(src, nw, nh, true);
     }
 }

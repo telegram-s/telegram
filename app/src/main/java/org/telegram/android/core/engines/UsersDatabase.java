@@ -118,11 +118,11 @@ public class UsersDatabase {
         long start = SystemClock.uptimeMillis();
         userGreenDao.insertOrReplaceInTx(users);
         Logger.d(TAG, "onUsers updated in " + (SystemClock.uptimeMillis() - start) + " ms");
+        User[] u = new User[users.length];
+        for (int i = 0; i < u.length; i++) {
+            u[i] = cachedConvert(users[i]);
+        }
         if (application.getUserSource() != null) {
-            User[] u = new User[users.length];
-            for (int i = 0; i < u.length; i++) {
-                u[i] = cachedConvert(users[i]);
-            }
             application.getUserSource().notifyUsersChanged(u);
         }
     }

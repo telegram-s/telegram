@@ -88,6 +88,9 @@ public class GroupsDatabase {
     }
 
     private void updateGroups(org.telegram.dao.GroupChat... groups) {
+        for (GroupChat groupChat : groups) {
+            cachedConvert(groupChat);
+        }
         groupDao.insertOrReplaceInTx(groups);
     }
 
