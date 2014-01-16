@@ -121,6 +121,12 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 });
             }
         });
+        res.findViewById(R.id.deleteAccount).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://telegram.org/deactivate")));
+            }
+        });
         res.findViewById(R.id.changeAvatar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
