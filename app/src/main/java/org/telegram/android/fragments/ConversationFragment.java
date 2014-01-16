@@ -46,7 +46,6 @@ import org.telegram.android.log.Logger;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.media.DownloadState;
 import org.telegram.android.media.StelsImageTask;
-import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
@@ -378,11 +377,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         updateContactsPanel(true);
 
         onDataChanged();
-
-        if (application.getScreenLogicType() == ScreenLogicType.SINGLE_ANIMATED) {
-            application.getResponsibility().doPause(250);
-            application.getImageController().doPause(250);
-        }
 
         updateOverlayPanel();
 

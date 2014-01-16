@@ -166,6 +166,18 @@ public class StelsSmileyActivity extends StelsActivity implements SmileysControl
         }
     }
 
+
+    private void toggleFullscreen(boolean fullscreen) {
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        if (fullscreen) {
+            attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        } else {
+            attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        }
+        getWindow().setAttributes(attrs);
+    }
+
+
     @Override
     public void hideSmileys() {
         hideSmileysPopup();
@@ -181,8 +193,12 @@ public class StelsSmileyActivity extends StelsActivity implements SmileysControl
                 isSmilesVisible = false;
                 showSmileysPopup(heightDp);
             }
+            // toggleFullscreen(true);
+            // getSupportActionBar().hide();
         } else {
             hideSmileysPopup();
+            // toggleFullscreen(false);
+            // getSupportActionBar().show();
         }
     }
 

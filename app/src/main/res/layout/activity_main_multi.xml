@@ -8,13 +8,14 @@
                                                  android:layout_height="fill_parent"
                                                  android:id="@+id/slideContainer">
 
-        <FrameLayout android:layout_width="fill_parent"
+        <FrameLayout android:layout_width="300dp"
                      android:layout_height="fill_parent"
                      android:id="@+id/fragmentContainer">
 
         </FrameLayout>
-        <FrameLayout android:layout_width="fill_parent"
+        <FrameLayout android:layout_width="0dp"
                      android:layout_height="fill_parent"
+                     android:layout_weight="1"
                      android:background="@color/st_settings_bg"
                      android:id="@+id/secondContainer">
             <ImageView android:layout_width="fill_parent" android:layout_height="fill_parent"
@@ -23,10 +24,10 @@
         </FrameLayout>
     </android.support.v4.widget.SlidingPaneLayout>
 
-    <FrameLayout android:layout_width="fill_parent"
-                 android:layout_height="fill_parent"
-                 android:id="@+id/loginFragmentContainer"
-                 android:background="@color/st_settings_bg">
+    <!--<FrameLayout android:layout_width="fill_parent"-->
+    <!--android:layout_height="fill_parent"-->
+    <!--android:id="@+id/loginFragmentContainer"-->
+    <!--android:background="@color/st_settings_bg">-->
 
-    </FrameLayout>
+    <!--</FrameLayout>-->
 </FrameLayout>

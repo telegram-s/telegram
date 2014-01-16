@@ -20,7 +20,6 @@ import org.telegram.android.core.model.PeerType;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.CachedImageWorker;
 import org.telegram.android.media.StelsImageWorker;
-import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
@@ -54,8 +53,6 @@ public class UiKernel {
     private EmojiProcessor emojiProcessor;
 
     private UiResponsibility responsibility;
-
-    private ScreenLogicType screenLogicType;
 
     private LastEmojiProcessor lastEmoji;
 
@@ -93,7 +90,6 @@ public class UiKernel {
         this.wallpaperHolder = new WallpaperHolder(application);
         Logger.d(TAG, "WallpaperHolder loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();
-        this.screenLogicType = ScreenLogicType.SINGLE_STATIC;
         this.isAppActive = false;
         this.isAppActive = false;
 
@@ -130,10 +126,6 @@ public class UiKernel {
 
     public UiResponsibility getResponsibility() {
         return responsibility;
-    }
-
-    public ScreenLogicType getScreenLogicType() {
-        return screenLogicType;
     }
 
     public Notifications getNotifications() {

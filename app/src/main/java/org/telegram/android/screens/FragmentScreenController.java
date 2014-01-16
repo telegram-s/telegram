@@ -1,5 +1,6 @@
 package org.telegram.android.screens;
 
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -180,7 +181,6 @@ public class FragmentScreenController implements RootController {
         if (backStack.size() > 0) {
             StelsFragment backFragment = backStack.get(backStack.size() - 1);
             if (backFragment.isSaveInStack()) {
-                // backFragment.setHasOptionsMenu(false);
                 transaction.detach(backFragment);
             } else {
                 transaction.remove(backFragment);
@@ -335,7 +335,7 @@ public class FragmentScreenController implements RootController {
             }
         }
 
-        openScreen(new ConversationFragment(peerType, peerId));
+        openScreen(new ConversationFragment(peerType, peerId), true);
 
         if (index >= 0) {
             backStack.remove(index);
@@ -405,8 +405,8 @@ public class FragmentScreenController implements RootController {
 
     @Override
     public void openSettings() {
-        //openScreen(new SettingsFragment());
-        activity.startActivity(new Intent().setClass(activity, SettingsActivity.class));
+        openScreen(new SettingsFragment());
+        // activity.startActivity(new Intent().setClass(activity, SettingsActivity.class));
     }
 
     @Override

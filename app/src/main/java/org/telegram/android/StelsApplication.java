@@ -16,7 +16,6 @@ import org.telegram.android.kernel.*;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.reflection.CrashHandler;
-import org.telegram.android.screens.ScreenLogicType;
 import org.telegram.android.ui.*;
 import org.telegram.api.engine.TelegramApi;
 
@@ -85,10 +84,6 @@ public class StelsApplication extends Application implements ImageSupport {
 
     public boolean isRTL() {
         return kernel.getTechKernel().getTechReflection().isRtl();
-    }
-
-    public ScreenLogicType getScreenLogicType() {
-        return kernel.getUiKernel().getScreenLogicType();
     }
 
     public boolean isSlow() {

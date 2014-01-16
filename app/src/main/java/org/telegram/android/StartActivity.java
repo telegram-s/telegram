@@ -1,26 +1,21 @@
 package org.telegram.android;
 
-import android.accounts.AccountAuthenticatorResponse;
-import android.accounts.AccountManager;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.*;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.SlidingPaneLayout;
 import android.util.TypedValue;
 import android.view.*;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
-import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.fragments.*;
 import org.telegram.android.fragments.interfaces.FragmentResultController;
@@ -28,9 +23,6 @@ import org.telegram.android.fragments.interfaces.RootController;
 import org.telegram.android.log.Logger;
 import org.telegram.android.screens.FragmentScreenController;
 import org.telegram.android.screens.RootControllerHolder;
-import org.telegram.android.screens.ScreenLogicType;
-import org.telegram.api.TLUserSelf;
-import org.telegram.api.auth.TLAuthorization;
 import org.telegram.integration.TestIntegration;
 
 import java.util.ArrayList;
@@ -87,11 +79,6 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         getSupportActionBar().setDisplayUseLogoEnabled(true);
 
         setContentView(R.layout.activity_main);
-//        setContentView(R.layout.activity_main_multi);
-//        if (Build.VERSION.SDK_INT < 11) {
-//            ((SlidingPaneLayout) findViewById(R.id.slideContainer)).setCoveredFadeColor(0);
-//            ((SlidingPaneLayout) findViewById(R.id.slideContainer)).setSliderFadeColor(0);
-//        }
         controller = new FragmentScreenController(this, savedState);
 
         updateHeaderHeight();
@@ -132,7 +119,6 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
 
         setWindowContentOverlayCompat();
     }
-
 
     private void setWindowContentOverlayCompat() {
         if (Build.VERSION.SDK_INT == 18) {
