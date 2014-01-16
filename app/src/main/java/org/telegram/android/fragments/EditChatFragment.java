@@ -11,19 +11,22 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.actionbarsherlock.view.MenuItem;
+import com.extradea.framework.images.tasks.FileSystemImageTask;
+import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.ChatSourceListener;
-import org.telegram.android.core.EngineUtils;
-import org.telegram.android.core.files.UploadResult;
+import org.telegram.android.core.background.AvatarUploader;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.file.AbsFileSource;
+import org.telegram.android.core.model.file.FileSource;
+import org.telegram.android.core.model.file.FileUriSource;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.local.TLLocalChatParticipant;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
@@ -34,7 +37,6 @@ import org.telegram.android.core.model.update.TLLocalAddChatUser;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.model.update.TLLocalRemoveChatUser;
 import org.telegram.android.core.model.update.TLLocalUpdateChatPhoto;
-import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
@@ -61,19 +63,21 @@ import java.util.Random;
  * Author: Korshakov Stepan
  * Created: 05.08.13 20:36
  */
-public class EditChatFragment extends MediaReceiverFragment implements ChatSourceListener {
+public class EditChatFragment extends MediaReceiverFragment implements ChatSourceListener, AvatarUploader.AvatarChatUploadListener {
 
     private static final int PICK_NOTIFICATION_SOUND = 1;
 
     private int chatId;
     private boolean loadingStarted;
     private FullChatInfo fullChatInfo;
-    private DialogDescription dialogDescription;
     private Group group;
 
     private View headerView;
     private TextView titleView;
     private FastWebImageView avatarView;
+    private View avatarUploadView;
+    private View avatarUploadProgress;
+    private View avatarUploadError;
     private ImageButton changeAvatarView;
     private ImageView enabledView;
     private View notifications;
@@ -157,6 +161,13 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         mediaContainer = headerView.findViewById(R.id.mediaContainer);
         mediaCounter = (TextView) headerView.findViewById(R.id.mediaCoutner);
         changeAvatarView = (ImageButton) headerView.findViewById(R.id.changeAvatar);
+        avatarUploadView = headerView.findViewById(R.id.avatarUploadProgress);
+        avatarUploadProgress = headerView.findViewById(R.id.uploadProgressBar);
+        avatarUploadError = headerView.findViewById(R.id.uploadError);
+        avatarUploadView.setVisibility(View.GONE);
+        avatarUploadProgress.setVisibility(View.GONE);
+        avatarUploadError.setVisibility(View.GONE);
+
         headerView.findViewById(R.id.mediaButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -198,7 +209,6 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
 
         fullChatInfo = getEngine().getFullChatInfo(chatId);
-        dialogDescription = getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
         group = getEngine().getGroupsEngine().getGroup(chatId);
         if (fullChatInfo == null) {
             if (!loadingStarted) {
@@ -212,7 +222,6 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                         getEngine().getFullGroupEngine().onFullChat(fullChat.getFullChat());
 
                         fullChatInfo = getEngine().getFullChatInfo(chatId);
-                        dialogDescription = getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
                         group = getEngine().getGroupsEngine().getGroup(chatId);
                     }
 
@@ -259,24 +268,75 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         forbidden.setVisibility(View.GONE);
 
         avatarView.setLoadingDrawable(Placeholders.getGroupPlaceholder(chatId));
-        if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
-            TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) group.getAvatar();
-            if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                avatarView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
-            } else {
-                avatarView.requestTask(null);
+        boolean isLoaded = false;
+
+        int state = application.getSyncKernel().getAvatarUploader().getGroupUploadState(chatId);
+        if (state != AvatarUploader.STATE_NONE) {
+            AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getGroupUploadingSource(chatId);
+            if (fileSource != null) {
+                if (fileSource instanceof FileSource) {
+                    avatarView.requestTaskSwitch(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
+                    showView(avatarUploadView);
+                    isLoaded = true;
+                } else if (fileSource instanceof FileUriSource) {
+                    avatarView.requestTaskSwitch(new UriImageTask(((FileUriSource) fileSource).getUri()));
+                    showView(avatarUploadView);
+                    isLoaded = true;
+                }
             }
-        } else {
-            avatarView.requestTask(null);
+            if (isLoaded) {
+                if (state == AvatarUploader.STATE_ERROR) {
+                    showView(avatarUploadError, false);
+                    hideView(avatarUploadProgress, false);
+                } else {
+                    hideView(avatarUploadError, false);
+                    showView(avatarUploadProgress, false);
+                }
+            }
+        }
+
+        if (!isLoaded) {
+            hideView(avatarUploadView);
+            if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
+                TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) group.getAvatar();
+                if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
+                    avatarView.requestTaskSwitch(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+                } else {
+                    avatarView.requestTaskSwitch(null);
+                }
+            } else {
+                avatarView.requestTaskSwitch(null);
+            }
         }
 
         changeAvatarView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
-                    requestPhotoChooserWithDelete(0);
+                int state = application.getSyncKernel().getAvatarUploader().getGroupUploadState(chatId);
+                if (state == AvatarUploader.STATE_ERROR) {
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                            .setTitle(R.string.st_avatar_change_error_title)
+                            .setMessage(R.string.st_avatar_change_error_message)
+                            .setPositiveButton(R.string.st_try_again, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    application.getSyncKernel().getAvatarUploader().tryAgainUploadGroup(chatId);
+                                }
+                            })
+                            .setNegativeButton(R.string.st_cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    application.getSyncKernel().getAvatarUploader().cancelUploadGroupAvatar(chatId);
+                                }
+                            }).create();
+                    dialog.setCanceledOnTouchOutside(true);
+                    dialog.show();
                 } else {
-                    requestPhotoChooser(0);
+                    if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
+                        requestPhotoChooserWithDelete(0);
+                    } else {
+                        requestPhotoChooser(0);
+                    }
                 }
             }
         });
@@ -578,76 +638,30 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     }
 
     private void uploadPhoto(final String fileName, final Uri content) {
-        runUiTask(new AsyncAction() {
-            @Override
-            public void execute() throws AsyncException {
-                InputStream stream = null;
-                try {
-                    if (fileName != null || content != null) {
-                        long fileId = Entropy.generateRandomId();
-                        String destFile = getUploadTempFile();
-                        if (fileName != null) {
-                            Optimizer.optimize(fileName, destFile);
-                        } else {
-                            Optimizer.optimize(content.toString(), application, destFile);
-                        }
-                        File file = new File(destFile);
-                        int len = (int) file.length();
-                        stream = new FileInputStream(file);
-                        UploadResult res = application.getUploadController().uploadFile(stream, len, fileId);
-                        if (res == null)
-                            throw new AsyncException(AsyncException.ExceptionType.CONNECTION_ERROR);
-
-                        TLAbsStatedMessage message = rpc(new TLRequestMessagesEditChatPhoto(chatId,
-                                new TLInputChatUploadedPhoto(
-                                        new TLInputFile(fileId, res.getPartsCount(), "photo.jpg", res.getHash()),
-                                        new TLInputPhotoCropAuto())));
-                        TLMessageService service = (TLMessageService) message.getMessage();
-                        TLMessageActionChatEditPhoto editPhoto = (TLMessageActionChatEditPhoto) service.getAction();
-
-                        application.getEngine().onUsers(message.getUsers());
-                        application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                        application.getEngine().onUpdatedMessage(message.getMessage());
-                        application.getEngine().onChatAvatarChanges(chatId, EngineUtils.convertAvatarPhoto(editPhoto.getPhoto()));
-                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
-                    } else {
-                        TLAbsStatedMessage message = rpc(new TLRequestMessagesEditChatPhoto(chatId, new TLInputChatPhotoEmpty()));
-                        application.getEngine().onUsers(message.getUsers());
-                        application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                        application.getEngine().onUpdatedMessage(message.getMessage());
-                        application.getEngine().onChatAvatarChanges(chatId, null);
-                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
-                    }
-                    application.getChatSource().notifyChatChanged(chatId);
-                    application.getDialogSource().getViewSource().invalidateData();
-                    application.notifyUIUpdate();
-                } catch (RpcException e) {
-                    e.printStackTrace();
-                    throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
-                } catch (FileNotFoundException e) {
-                    throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
-                } catch (IOException e) {
-                    throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
-                } finally {
-                    if (stream != null) {
-                        try {
-                            stream.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+        if (fileName != null || content != null) {
+            if (content != null) {
+                application.getSyncKernel().getAvatarUploader().uploadGroup(chatId, new FileUriSource(content.toString()));
+            } else {
+                application.getSyncKernel().getAvatarUploader().uploadGroup(chatId, new FileSource(fileName));
             }
+        } else {
+            runUiTask(new AsyncAction() {
+                @Override
+                public void execute() throws AsyncException {
+                    TLAbsStatedMessage message = rpc(new TLRequestMessagesEditChatPhoto(chatId, new TLInputChatPhotoEmpty()));
+                    application.getEngine().onUsers(message.getUsers());
+                    application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
+                    application.getEngine().onUpdatedMessage(message.getMessage());
+                    application.getEngine().onChatAvatarChanges(chatId, null);
+                    application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
+                }
 
-            @Override
-            public void afterExecute() {
-                if (fileName != null || content != null) {
-                    Toast.makeText(getActivity(), R.string.st_avatar_group_changed, Toast.LENGTH_SHORT).show();
-                } else {
+                @Override
+                public void afterExecute() {
                     Toast.makeText(getActivity(), R.string.st_avatar_group_removed, Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -732,9 +746,8 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     public void onChatChanged(int chatId, DialogDescription description) {
         if (chatId == this.chatId) {
             fullChatInfo = getEngine().getFullChatInfo(chatId);
-            dialogDescription = getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, chatId);
             group = getEngine().getGroupsEngine().getGroup(chatId);
-            if (fullChatInfo != null && dialogDescription != null && group != null) {
+            if (fullChatInfo != null && group != null) {
                 bindView();
             }
         }
@@ -745,17 +758,36 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         super.onResume();
         maxChatSize = application.getKernel().getTechKernel().getSystemConfig().getMaxChatSize();
         application.getChatSource().registerListener(this);
+        application.getSyncKernel().getAvatarUploader().setChatUploadListener(this);
+        bindView();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         application.getChatSource().unregisterListener(this);
+        application.getSyncKernel().getAvatarUploader().setChatUploadListener(null);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("chatId", chatId);
+    }
+
+    @Override
+    public void onAvatarUploadingStateChanged(final int chatId) {
+        if (this.chatId == chatId) {
+            secureCallback(new Runnable() {
+                @Override
+                public void run() {
+                    fullChatInfo = getEngine().getFullChatInfo(chatId);
+                    group = getEngine().getGroupsEngine().getGroup(chatId);
+                    if (fullChatInfo != null && group != null) {
+                        bindView();
+                    }
+                }
+            });
+        }
     }
 }

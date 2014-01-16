@@ -1,5 +1,6 @@
 package org.telegram.android.core.engines;
 
+import org.telegram.android.StelsApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
@@ -13,9 +14,11 @@ import java.util.List;
  */
 public class GroupsEngine {
     private GroupsDatabase database;
+    private StelsApplication application;
 
     public GroupsEngine(ModelEngine engine) {
         this.database = new GroupsDatabase(engine);
+        this.application = engine.getApplication();
     }
 
     public Group getGroup(int groupId) {
@@ -65,6 +68,9 @@ public class GroupsEngine {
             }
         }
         database.updateGroups(groups);
+        for (Group g : groups) {
+            application.getChatSource().notifyChatChanged(g.getChatId());
+        }
     }
 
     public void onGroupNameChanged(int id, String title) {
@@ -72,6 +78,7 @@ public class GroupsEngine {
         if (group != null) {
             group.setTitle(title);
             database.updateGroups(group);
+            application.getChatSource().notifyChatChanged(id);
         }
     }
 
@@ -80,6 +87,7 @@ public class GroupsEngine {
         if (group != null) {
             group.setAvatar(avatar);
             database.updateGroups(group);
+            application.getChatSource().notifyChatChanged(id);
         }
     }
 

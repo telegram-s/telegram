@@ -12,7 +12,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
@@ -24,7 +23,6 @@ import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.UserSourceListener;
 import org.telegram.android.core.background.AvatarUploader;
-import org.telegram.android.core.files.UploadResult;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.file.AbsFileSource;
 import org.telegram.android.core.model.file.FileSource;
@@ -33,7 +31,6 @@ import org.telegram.android.core.model.media.TLLocalAvatarEmpty;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.log.Logger;
-import org.telegram.android.media.Optimizer;
 import org.telegram.android.core.model.User;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
@@ -41,14 +38,11 @@ import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
-import org.telegram.api.photos.TLPhoto;
 import org.telegram.api.requests.TLRequestAuthLogOut;
 import org.telegram.api.requests.TLRequestAuthResetAuthorizations;
 import org.telegram.api.requests.TLRequestPhotosUpdateProfilePhoto;
-import org.telegram.api.requests.TLRequestPhotosUploadProfilePhoto;
 
 import java.io.*;
-import java.util.Random;
 
 /**
  * Author: Korshakov Stepan
@@ -130,7 +124,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         res.findViewById(R.id.changeAvatar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int state = application.getSyncKernel().getAvatarUploader().getState();
+                int state = application.getSyncKernel().getAvatarUploader().getAvatarUploadState();
                 if (state == AvatarUploader.STATE_ERROR) {
                     AlertDialog dialog = new AlertDialog.Builder(getActivity())
                             .setTitle(R.string.st_avatar_change_error_title)
@@ -138,13 +132,13 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                             .setPositiveButton(R.string.st_try_again, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    application.getSyncKernel().getAvatarUploader().tryAgain();
+                                    application.getSyncKernel().getAvatarUploader().tryAgainUploadAvatar();
                                 }
                             })
                             .setNegativeButton(R.string.st_cancel, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    application.getSyncKernel().getAvatarUploader().cancelUpload();
+                                    application.getSyncKernel().getAvatarUploader().cancelUploadAvatar();
                                 }
                             }).create();
                     dialog.setCanceledOnTouchOutside(true);
@@ -258,9 +252,9 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
 
             boolean isLoaded = false;
 
-            int state = application.getSyncKernel().getAvatarUploader().getState();
+            int state = application.getSyncKernel().getAvatarUploader().getAvatarUploadState();
             if (state != AvatarUploader.STATE_NONE) {
-                AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getUploadingSource();
+                AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getAvatarUploadingSource();
                 if (fileSource != null) {
                     if (fileSource instanceof FileSource) {
                         avatar.requestTaskSwitch(new FileSystemImageTask(((FileSource) fileSource).getFileName()));

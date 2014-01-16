@@ -98,6 +98,7 @@ public class FastWebImageView extends View {
         if (currentDrawable != null) {
             showingTime = 0;
         }
+        invalidate();
     }
 
     public void requestTaskSwitch(ImageTask task) {
@@ -115,6 +116,7 @@ public class FastWebImageView extends View {
         if (currentDrawable != null) {
             showingTime = 0;
         }
+        invalidate();
     }
 
     public void setLoadingDrawable(Drawable drawable) {

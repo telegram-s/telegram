@@ -37,6 +37,7 @@
 
     <string name="st_avatar_group_changed">Group photo updated</string>
     <string name="st_avatar_group_removed">Group photo removed</string>
+    <string name="st_avatar_group_error">Group photo update error</string>
 
     <string name="st_first_name">First name</string>
     <string name="st_last_name">Last name</string>
