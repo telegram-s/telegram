@@ -1,6 +1,7 @@
 package org.telegram.android.kernel;
 
 import org.telegram.android.core.TypingStates;
+import org.telegram.android.core.background.AvatarUploader;
 import org.telegram.android.core.background.MediaSender;
 import org.telegram.android.core.background.MessageSender;
 import org.telegram.android.core.background.UpdateProcessor;
@@ -25,6 +26,7 @@ public class SyncKernel {
     private MessageSender messageSender;
     private MediaSender mediaSender;
     private TypingStates typingStates;
+    private AvatarUploader avatarUploader;
 
     public SyncKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
@@ -55,10 +57,18 @@ public class SyncKernel {
         return contactsSync;
     }
 
+    public AvatarUploader getAvatarUploader() {
+        return avatarUploader;
+    }
+
     private void init() {
         long start = System.currentTimeMillis();
         messageSender = new MessageSender(kernel.getApplication());
         Logger.d(TAG, "MessageSender loaded in " + (System.currentTimeMillis() - start) + " ms");
+
+        start = System.currentTimeMillis();
+        avatarUploader = new AvatarUploader(kernel.getApplication());
+        Logger.d(TAG, "AvatarUploader loaded in " + (System.currentTimeMillis() - start) + " ms");
 
         start = System.currentTimeMillis();
         mediaSender = new MediaSender(kernel.getApplication());

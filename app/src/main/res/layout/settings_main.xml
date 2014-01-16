@@ -25,6 +25,21 @@
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:id="@+id/avatar"/>
+                <FrameLayout android:layout_width="fill_parent"
+                             android:layout_height="fill_parent"
+                             android:background="@color/st_avatar_upload_bg"
+                             android:id="@+id/avatarUploadProgress">
+                    <ProgressBar android:layout_width="wrap_content"
+                                 android:layout_height="wrap_content"
+                                 style="@style/Widget.Sherlock.ProgressBar"
+                                 android:id="@+id/uploadProgressBar"
+                                 android:layout_gravity="center"/>
+                    <ImageView android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:layout_gravity="center"
+                               android:src="@drawable/st_ic_upload_error"
+                               android:id="@+id/uploadError"/>
+                </FrameLayout>
                 <ImageButton android:layout_width="fill_parent"
                              android:layout_height="fill_parent"
                              android:id="@+id/changeAvatar"

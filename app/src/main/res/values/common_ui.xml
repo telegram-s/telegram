@@ -7,6 +7,9 @@
     <!-- Profile, edit chat & settings -->
     <color name="st_settings_bg">#fbfbfb</color>
 
+    <!-- Photo uploader -->
+    <color name="st_avatar_upload_bg">#8c000000</color>
+
     <!-- Selectors -->
     <color name="st_selector">#1c000000</color>
     <color name="st_selector_end">#1c000000</color>

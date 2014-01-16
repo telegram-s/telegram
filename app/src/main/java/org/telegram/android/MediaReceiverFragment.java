@@ -52,42 +52,15 @@ public class MediaReceiverFragment extends StelsFragment {
     }
 
     protected String getUploadTempAudioFile() {
-        if (Build.VERSION.SDK_INT >= 8) {
-            try {
-                //return getExternalCacheDir().getAbsolutePath();
-                return ((File) StelsApplication.class.getMethod("getExternalCacheDir").invoke(application)).getAbsolutePath() + "/upload_" + rnd.nextLong() + ".m4a";
-            } catch (Exception e) {
-                // Log.e(TAG, e);
-            }
-        }
-
-        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/cache/" + application.getPackageName() + "/upload_" + rnd.nextLong() + ".m4a";
+        return getUploadTempFile(".m4a");
     }
 
     protected String getUploadTempFile() {
-        if (Build.VERSION.SDK_INT >= 8) {
-            try {
-                //return getExternalCacheDir().getAbsolutePath();
-                return ((File) StelsApplication.class.getMethod("getExternalCacheDir").invoke(application)).getAbsolutePath() + "/upload_" + rnd.nextLong() + ".jpg";
-            } catch (Exception e) {
-                // Log.e(TAG, e);
-            }
-        }
-
-        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/cache/" + application.getPackageName() + "/upload_" + rnd.nextLong() + ".jpg";
+        return getUploadTempFile(".jpg");
     }
 
     protected String getUploadVideoTempFile() {
-        if (Build.VERSION.SDK_INT >= 8) {
-            try {
-                //return getExternalCacheDir().getAbsolutePath();
-                return ((File) StelsApplication.class.getMethod("getExternalCacheDir").invoke(application)).getAbsolutePath() + "/upload_" + rnd.nextLong() + ".mp4";
-            } catch (Exception e) {
-                // Log.e(TAG, e);
-            }
-        }
-
-        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/cache/" + application.getPackageName() + "/upload_" + rnd.nextLong() + ".mp4";
+        return getUploadTempFile(".mp4");
     }
 
     public void requestPhotoChooserWithDelete(final int requestId) {

@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.text.BidiFormatter;
 import android.text.Editable;
 import android.text.Html;
@@ -27,6 +28,9 @@ import org.telegram.api.*;
 import org.telegram.mtproto.time.TimeOverlord;
 import org.xml.sax.XMLReader;
 
+import java.io.File;
+import java.util.Random;
+
 /**
  * Author: Korshakov Stepan
  * Created: 05.08.13 15:50
@@ -35,6 +39,8 @@ public class StelsFragment extends StelsBaseFragment {
 
     private boolean requestedPick;
     private boolean saveInStack = true;
+
+    private Random rnd = new Random();
 
     public boolean isSaveInStack() {
         return saveInStack;
@@ -266,5 +272,9 @@ public class StelsFragment extends StelsBaseFragment {
     public void onPause() {
         super.onPause();
         sendEvent("#resume");
+    }
+
+    protected String getUploadTempFile(String fileName) {
+        return application.getCacheDir().getAbsolutePath() + "/u_" + rnd.nextInt() + fileName;
     }
 }

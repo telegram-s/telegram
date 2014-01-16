@@ -1,5 +1,7 @@
 package org.telegram.android.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -15,12 +17,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
+import com.extradea.framework.images.tasks.FileSystemImageTask;
+import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.UserSourceListener;
+import org.telegram.android.core.background.AvatarUploader;
 import org.telegram.android.core.files.UploadResult;
 import org.telegram.android.core.model.PeerType;
+import org.telegram.android.core.model.file.AbsFileSource;
+import org.telegram.android.core.model.file.FileSource;
+import org.telegram.android.core.model.file.FileUriSource;
 import org.telegram.android.core.model.media.TLLocalAvatarEmpty;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
@@ -46,12 +54,14 @@ import java.util.Random;
  * Author: Korshakov Stepan
  * Created: 31.07.13 4:48
  */
-public class SettingsFragment extends MediaReceiverFragment implements UserSourceListener {
+public class SettingsFragment extends MediaReceiverFragment implements UserSourceListener, AvatarUploader.AvatarUserUploadListener {
 
     private FastWebImageView avatar;
     private TextView nameView;
     private TextView phoneView;
-    private View mainContainer;
+    private View avatarUploadView;
+    private View avatarUploadError;
+    private View avatarUploadProgress;
 
     private int debugClickCount = 0;
     private long lastDebugClickTime = 0;
@@ -59,7 +69,13 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_main, container, false);
-        mainContainer = res.findViewById(R.id.mainContainer);
+        avatarUploadView = res.findViewById(R.id.avatarUploadProgress);
+        avatarUploadProgress = res.findViewById(R.id.uploadProgressBar);
+        avatarUploadError = res.findViewById(R.id.uploadError);
+
+        avatarUploadView.setVisibility(View.GONE);
+        avatarUploadProgress.setVisibility(View.GONE);
+        avatarUploadError.setVisibility(View.GONE);
 
         TextView textView = (TextView) res.findViewById(R.id.version);
         PackageInfo pInfo = null;
@@ -114,11 +130,32 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         res.findViewById(R.id.changeAvatar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                User user = application.getEngine().getUser(application.getCurrentUid());
-                if (user != null && user.getPhoto() instanceof TLLocalAvatarPhoto) {
-                    requestPhotoChooserWithDelete(0);
+                int state = application.getSyncKernel().getAvatarUploader().getState();
+                if (state == AvatarUploader.STATE_ERROR) {
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                            .setTitle(R.string.st_avatar_change_error_title)
+                            .setMessage(R.string.st_avatar_change_error_message)
+                            .setPositiveButton(R.string.st_try_again, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    application.getSyncKernel().getAvatarUploader().tryAgain();
+                                }
+                            })
+                            .setNegativeButton(R.string.st_cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    application.getSyncKernel().getAvatarUploader().cancelUpload();
+                                }
+                            }).create();
+                    dialog.setCanceledOnTouchOutside(true);
+                    dialog.show();
                 } else {
-                    requestPhotoChooser(0);
+                    User user = application.getEngine().getUser(application.getCurrentUid());
+                    if (user != null && user.getPhoto() instanceof TLLocalAvatarPhoto) {
+                        requestPhotoChooserWithDelete(0);
+                    } else {
+                        requestPhotoChooser(0);
+                    }
                 }
             }
         });
@@ -211,21 +248,53 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     public void onResume() {
         super.onResume();
         application.getUserSource().registerListener(this);
+        application.getSyncKernel().getAvatarUploader().setListener(this);
         updateUser();
     }
 
     private void updateUser() {
         User user = application.getEngine().getUser(application.getCurrentUid());
         if (user != null) {
-            if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
-                TLLocalAvatarPhoto photo = (TLLocalAvatarPhoto) user.getPhoto();
-                if (photo.getPreviewLocation() instanceof TLLocalFileLocation) {
-                    avatar.requestTask(new StelsImageTask((TLLocalFileLocation) photo.getPreviewLocation()));
+
+            boolean isLoaded = false;
+
+            int state = application.getSyncKernel().getAvatarUploader().getState();
+            if (state != AvatarUploader.STATE_NONE) {
+                AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getUploadingSource();
+                if (fileSource != null) {
+                    if (fileSource instanceof FileSource) {
+                        avatar.requestTask(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
+                        showView(avatarUploadView);
+                        isLoaded = true;
+                    } else if (fileSource instanceof FileUriSource) {
+                        avatar.requestTask(new UriImageTask(((FileUriSource) fileSource).getUri()));
+                        showView(avatarUploadView);
+                        isLoaded = true;
+                    }
+                }
+                if (isLoaded) {
+                    if (state == AvatarUploader.STATE_ERROR) {
+                        showView(avatarUploadError, false);
+                        hideView(avatarUploadProgress, false);
+                    } else {
+                        hideView(avatarUploadError, false);
+                        showView(avatarUploadProgress, false);
+                    }
+                }
+            }
+
+            if (!isLoaded) {
+                hideView(avatarUploadView);
+                if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
+                    TLLocalAvatarPhoto photo = (TLLocalAvatarPhoto) user.getPhoto();
+                    if (photo.getPreviewLocation() instanceof TLLocalFileLocation) {
+                        avatar.requestTask(new StelsImageTask((TLLocalFileLocation) photo.getPreviewLocation()));
+                    } else {
+                        avatar.requestTask(null);
+                    }
                 } else {
                     avatar.requestTask(null);
                 }
-            } else {
-                avatar.requestTask(null);
             }
 
             nameView.setText(unicodeWrap(user.getDisplayName()));
@@ -242,6 +311,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     public void onPause() {
         super.onPause();
         application.getUserSource().unregisterListener(this);
+        application.getSyncKernel().getAvatarUploader().setListener(null);
     }
 
     @Override
@@ -289,75 +359,36 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     }
 
     private void doUploadAvatar(final String fileName, final Uri uri) {
-        runUiTask(new AsyncAction() {
-            @Override
-            public void execute() throws AsyncException {
-                try {
-                    if (fileName != null || uri != null) {
-                        Random rnd = new Random();
-                        long fileId = rnd.nextLong();
-
-                        String destFile = getUploadTempFile();
-
-                        if (uri != null) {
-                            Optimizer.optimize(uri.toString(), getActivity(), destFile);
-                        } else {
-                            Optimizer.optimize(fileName, destFile);
-                        }
-                        File file = new File(destFile);
-                        FileInputStream fis = new FileInputStream(file);
-                        UploadResult res = application.getUploadController().uploadFile(fis, (int) file.length(), fileId);
-                        if (res == null)
-                            throw new AsyncException(AsyncException.ExceptionType.CONNECTION_ERROR);
-
-                        TLPhoto photo = rpc(new TLRequestPhotosUploadProfilePhoto(
-                                new TLInputFile(fileId, res.getPartsCount(), "photo.jpg", res.getHash()),
-                                "MyPhoto", new TLInputGeoPointEmpty(), new TLInputPhotoCropAuto()));
-
-                        if (photo.getPhoto() instanceof org.telegram.api.TLPhoto) {
-                            org.telegram.api.TLPhoto srcPhoto = (org.telegram.api.TLPhoto) photo.getPhoto();
-                            TLPhotoSize smallPhotoSize = (TLPhotoSize) findSmallest(srcPhoto);
-                            TLFileLocation smallLocation = (TLFileLocation) smallPhotoSize.getLocation();
-                            TLPhotoSize largePhotoSize = (TLPhotoSize) findLargest(srcPhoto);
-                            TLFileLocation largeLocation = (TLFileLocation) largePhotoSize.getLocation();
-                            TLLocalAvatarPhoto profilePhoto = new TLLocalAvatarPhoto();
-                            profilePhoto.setPreviewLocation(new TLLocalFileLocation(smallLocation.getDcId(), smallLocation.getVolumeId(), smallLocation.getLocalId(), smallLocation.getSecret(), smallPhotoSize.getSize()));
-                            profilePhoto.setFullLocation(new TLLocalFileLocation(largeLocation.getDcId(), largeLocation.getVolumeId(), largeLocation.getLocalId(), largeLocation.getSecret(), largePhotoSize.getSize()));
-                            application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), profilePhoto);
-                        } else {
-                            application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), new TLLocalAvatarEmpty());
-                        }
-                    } else {
-                        TLAbsUserProfilePhoto photo = rpc(new TLRequestPhotosUpdateProfilePhoto(new TLInputPhotoEmpty(), new TLInputPhotoCropAuto()));
-                        if (photo instanceof TLUserProfilePhoto) {
-                            TLUserProfilePhoto profilePhoto = (TLUserProfilePhoto) photo;
-                            TLFileLocation smallLocation = (TLFileLocation) profilePhoto.getPhotoSmall();
-                            TLFileLocation largeLocation = (TLFileLocation) profilePhoto.getPhotoBig();
-                            TLLocalAvatarPhoto localProfilePhoto = new TLLocalAvatarPhoto();
-                            localProfilePhoto.setPreviewLocation(new TLLocalFileLocation(smallLocation.getDcId(), smallLocation.getVolumeId(), smallLocation.getLocalId(), smallLocation.getSecret(), 0));
-                            localProfilePhoto.setFullLocation(new TLLocalFileLocation(largeLocation.getDcId(), largeLocation.getVolumeId(), largeLocation.getLocalId(), largeLocation.getSecret(), 0));
-                            application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), localProfilePhoto);
-                        } else {
-                            application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), new TLLocalAvatarEmpty());
-                        }
-                    }
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
-                }
+        if (fileName != null || uri != null) {
+            if (uri != null) {
+                application.getSyncKernel().getAvatarUploader().uploadAvatar(new FileUriSource(uri.toString()));
+            } else {
+                application.getSyncKernel().getAvatarUploader().uploadAvatar(new FileSource(fileName));
             }
+        } else {
+            runUiTask(new AsyncAction() {
+                @Override
+                public void execute() throws AsyncException {
+                    TLAbsUserProfilePhoto photo = rpc(new TLRequestPhotosUpdateProfilePhoto(new TLInputPhotoEmpty(), new TLInputPhotoCropAuto()));
+                    if (photo instanceof TLUserProfilePhoto) {
+                        TLUserProfilePhoto profilePhoto = (TLUserProfilePhoto) photo;
+                        TLFileLocation smallLocation = (TLFileLocation) profilePhoto.getPhotoSmall();
+                        TLFileLocation largeLocation = (TLFileLocation) profilePhoto.getPhotoBig();
+                        TLLocalAvatarPhoto localProfilePhoto = new TLLocalAvatarPhoto();
+                        localProfilePhoto.setPreviewLocation(new TLLocalFileLocation(smallLocation.getDcId(), smallLocation.getVolumeId(), smallLocation.getLocalId(), smallLocation.getSecret(), 0));
+                        localProfilePhoto.setFullLocation(new TLLocalFileLocation(largeLocation.getDcId(), largeLocation.getVolumeId(), largeLocation.getLocalId(), largeLocation.getSecret(), 0));
+                        application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), localProfilePhoto);
+                    } else {
+                        application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), new TLLocalAvatarEmpty());
+                    }
+                }
 
-            @Override
-            public void afterExecute() {
-                if (fileName != null || uri != null) {
-                    Toast.makeText(getActivity(), R.string.st_avatar_changed, Toast.LENGTH_SHORT).show();
-                } else {
+                @Override
+                public void afterExecute() {
                     Toast.makeText(getActivity(), R.string.st_avatar_removed, Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -377,6 +408,16 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 return;
             }
         }
+    }
+
+    @Override
+    public void onAvatarUploadingStateChanged() {
+        secureCallback(new Runnable() {
+            @Override
+            public void run() {
+                updateUser();
+            }
+        });
     }
 }
 

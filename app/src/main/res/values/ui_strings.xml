@@ -31,6 +31,9 @@
 
     <string name="st_avatar_changed">Profile photo updated</string>
     <string name="st_avatar_removed">Profile photo removed</string>
+    <string name="st_avatar_change_error">Profile photo upload error</string>
+    <string name="st_avatar_change_error_title">Upload error</string>
+    <string name="st_avatar_change_error_message">Unable to upload avatar. Try again?</string>
 
     <string name="st_avatar_group_changed">Group photo updated</string>
     <string name="st_avatar_group_removed">Group photo removed</string>
