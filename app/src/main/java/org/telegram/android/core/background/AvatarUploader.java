@@ -1,5 +1,7 @@
 package org.telegram.android.core.background;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 import org.telegram.android.R;
 import org.telegram.android.StelsApplication;
@@ -42,6 +44,8 @@ public class AvatarUploader extends TaskExecutor<AvatarUploader.Task> {
     private AbsFileSource uploadingSource;
 
     private boolean isUploadError;
+
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     public AvatarUploader(StelsApplication application) {
         super(1);
@@ -129,10 +133,21 @@ public class AvatarUploader extends TaskExecutor<AvatarUploader.Task> {
                     application.getEngine().getUsersEngine().onUserPhotoChanges(application.getCurrentUid(), new TLLocalAvatarEmpty());
                 }
 
-                Toast.makeText(application, R.string.st_avatar_changed, Toast.LENGTH_SHORT).show();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(application, R.string.st_avatar_changed, Toast.LENGTH_SHORT).show();
+                    }
+                });
             } catch (Exception e) {
                 isUploadError = true;
-                Toast.makeText(application, R.string.st_avatar_change_error, Toast.LENGTH_SHORT).show();
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(application, R.string.st_avatar_change_error, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         }
     }
