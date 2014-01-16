@@ -28,13 +28,19 @@ import android.widget.*;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.extradea.framework.images.tasks.FileSystemImageTask;
+import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.StelsFragment;
 import org.telegram.android.config.DebugSettings;
 import org.telegram.android.core.*;
+import org.telegram.android.core.background.AvatarUploader;
 import org.telegram.android.core.model.*;
+import org.telegram.android.core.model.file.AbsFileSource;
+import org.telegram.android.core.model.file.FileSource;
+import org.telegram.android.core.model.file.FileUriSource;
 import org.telegram.android.core.model.local.TLLocalChatParticipant;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
@@ -71,7 +77,7 @@ import java.util.HashSet;
  * Author: Korshakov Stepan
  * Created: 29.07.13 0:31
  */
-public class ConversationFragment extends MediaReceiverFragment implements ViewSourceListener, ChatSourceListener, TypingStates.TypingListener, UserSourceListener, EncryptedChatSourceListener {
+public class ConversationFragment extends MediaReceiverFragment implements ViewSourceListener, ChatSourceListener, TypingStates.TypingListener, UserSourceListener, EncryptedChatSourceListener, AvatarUploader.AvatarChatUploadListener {
 
     private static final String TAG = "ConversaionFragment";
 
@@ -976,6 +982,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
 
         getSherlockActivity().invalidateOptionsMenu();
+
+        if (peerType == PeerType.PEER_CHAT) {
+            application.getSyncKernel().getAvatarUploader().setChatUploadListener(this);
+        }
     }
 
     @Override
@@ -988,14 +998,22 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         menu.findItem(R.id.attachVideo).setTitle(highlightMenuText(R.string.st_conv_menu_video));
         menu.findItem(R.id.attachLocation).setTitle(highlightMenuText(R.string.st_conv_menu_location));
 
-        FastWebImageView imageView = (FastWebImageView) menu.findItem(R.id.userAvatar)
-                .getActionView().findViewById(R.id.image);
-        View touchLayer = menu.findItem(R.id.userAvatar).getActionView().findViewById(R.id.avatarTouchLayer);
+        MenuItem avatarItem = menu.findItem(R.id.userAvatar);
+        View avatarUploadView = avatarItem.getActionView().findViewById(R.id.avatarUploadProgress);
+        View avatarUploadProgress = avatarItem.getActionView().findViewById(R.id.uploadProgressBar);
+        View avatarUploadError = avatarItem.getActionView().findViewById(R.id.uploadError);
+        avatarUploadView.setVisibility(View.GONE);
+        avatarUploadProgress.setVisibility(View.GONE);
+        avatarUploadError.setVisibility(View.GONE);
+
+        FastWebImageView imageView = (FastWebImageView) avatarItem.getActionView().findViewById(R.id.image);
+        View touchLayer = avatarItem.getActionView().findViewById(R.id.avatarTouchLayer);
         int padding = 0;//(int) (getPx(1) * (getBarHeight() / ((float) getPx(48))) + 0.5f);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(getBarHeight() - padding, getBarHeight() - padding, Gravity.TOP | Gravity.RIGHT);
         params.bottomMargin = padding;
         imageView.setLayoutParams(params);
         touchLayer.setLayoutParams(params);
+        avatarUploadView.setLayoutParams(params);
 
         menu.findItem(R.id.userAvatar)
                 .getActionView().findViewById(R.id.imageOverlay).setLayoutParams(params);
@@ -1032,20 +1050,50 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         } else if (peerType == PeerType.PEER_CHAT) {
             imageView.setLoadingDrawable(Placeholders.GROUP_PLACEHOLDERS[peerId % Placeholders.GROUP_PLACEHOLDERS.length]);
             Group group = getEngine().getGroupsEngine().getGroup(peerId);
-            if (group != null) {
-                if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
-                    TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) group.getAvatar();
-                    if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                        imageView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+            int state = application.getSyncKernel().getAvatarUploader().getGroupUploadState(peerId);
+            boolean isLoaded = false;
+            if (state != AvatarUploader.STATE_NONE) {
+                AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getGroupUploadingSource(peerId);
+                if (fileSource != null) {
+                    if (fileSource instanceof FileSource) {
+                        imageView.requestTaskSwitch(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
+                        showView(avatarUploadView, false);
+                        isLoaded = true;
+                    } else if (fileSource instanceof FileUriSource) {
+                        imageView.requestTaskSwitch(new UriImageTask(((FileUriSource) fileSource).getUri()));
+                        showView(avatarUploadView, false);
+                        isLoaded = true;
+                    }
+                }
+                if (isLoaded) {
+                    if (state == AvatarUploader.STATE_ERROR) {
+                        showView(avatarUploadError, false);
+                        hideView(avatarUploadProgress, false);
+                    } else {
+                        hideView(avatarUploadError, false);
+                        showView(avatarUploadProgress, false);
+                    }
+                }
+            }
+
+            if (!isLoaded) {
+                hideView(avatarUploadView, false);
+                if (group != null) {
+                    if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
+                        TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) group.getAvatar();
+                        if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
+                            imageView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+                        } else {
+                            imageView.requestTask(null);
+                        }
                     } else {
                         imageView.requestTask(null);
                     }
                 } else {
                     imageView.requestTask(null);
                 }
-            } else {
-                imageView.requestTask(null);
             }
+
             touchLayer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -1413,6 +1461,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         saveListPosition();
 
         cancelAudio();
+
+        if (peerType == PeerType.PEER_CHAT) {
+            application.getSyncKernel().getAvatarUploader().setChatUploadListener(null);
+        }
     }
 
     @Override
@@ -1633,6 +1685,18 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     }
                 }
             }
+        }
+    }
+
+    @Override
+    public void onAvatarUploadingStateChanged(int chatId) {
+        if (peerType == PeerType.PEER_CHAT && peerId == chatId) {
+            secureCallback(new Runnable() {
+                @Override
+                public void run() {
+                    getSherlockActivity().invalidateOptionsMenu();
+                }
+            });
         }
     }
 

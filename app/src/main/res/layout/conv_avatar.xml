@@ -8,6 +8,21 @@
             android:layout_height="48dp"
             android:layout_width="48dp"
             android:id="@+id/image"/>
+    <FrameLayout android:layout_width="fill_parent"
+                 android:layout_height="fill_parent"
+                 android:background="@color/st_avatar_upload_bg"
+                 android:id="@+id/avatarUploadProgress">
+        <ProgressBar android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     style="@style/Widget.Sherlock.ProgressBar"
+                     android:id="@+id/uploadProgressBar"
+                     android:layout_gravity="center"/>
+        <ImageView android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center"
+                   android:src="@drawable/st_ic_upload_error"
+                   android:id="@+id/uploadError"/>
+    </FrameLayout>
     <ImageView android:layout_width="fill_parent" android:layout_height="fill_parent"
                android:id="@+id/avatarTouchLayer"
                android:src="@drawable/st_selector_avatar"/>
