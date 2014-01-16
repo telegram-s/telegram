@@ -287,4 +287,21 @@ public class Optimizer {
     public static FastPreviewResult buildPreview(String file) {
         return buildPreview(BitmapFactory.decodeFile(file));
     }
+
+    public static Bitmap scaleForMinimumSize(Bitmap src, int w, int h) {
+        if (src.getWidth() >= w && src.getHeight() >= h) {
+            return src;
+        }
+        float scale = 1.0f;
+        if (src.getWidth() < w) {
+            scale = Math.max(scale, w / (float) src.getWidth());
+        }
+        if (src.getHeight() < h) {
+            scale = Math.max(scale, h / (float) src.getHeight());
+        }
+
+        int nw = (int) (scale * w);
+        int nh = (int) (scale * h);
+        return Bitmap.createScaledBitmap(src, nw, nh, true);
+    }
 }

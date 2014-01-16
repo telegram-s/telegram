@@ -48,6 +48,8 @@ public class CropImageActivity extends StelsActivity {
     private static final String EXTRA_OUT_FILENAME = "outFileName";
     private static final String EXTRA_RATIO_X = "ratioX";
     private static final String EXTRA_RATIO_Y = "ratioY";
+    private static final String EXTRA_MIN_W = "minW";
+    private static final String EXTRA_MIN_H = "minH";
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +87,9 @@ public class CropImageActivity extends StelsActivity {
             @Override
             public void onClick(View view) {
                 Bitmap res = imageView.getCroppedImage();
+                int minW = getIntent().getIntExtra(EXTRA_MIN_W, 90);
+                int minH = getIntent().getIntExtra(EXTRA_MIN_H, 90);
+                res = Optimizer.scaleForMinimumSize(res, minW, minH);
                 try {
                     Optimizer.save(res, getIntent().getStringExtra(EXTRA_OUT_FILENAME));
                     setResult(RESULT_OK);

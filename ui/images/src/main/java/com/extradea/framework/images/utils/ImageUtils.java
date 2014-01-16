@@ -329,7 +329,7 @@ public class ImageUtils {
             String[] projection = {MediaStore.Images.ImageColumns.ORIENTATION};
             Cursor c = context.getContentResolver().query(
                     uri, projection, null, null, null);
-            if (c.moveToFirst()) {
+            if (c != null && c.moveToFirst()) {
                 return c.getInt(0);
             }
         } catch (Exception e) {
