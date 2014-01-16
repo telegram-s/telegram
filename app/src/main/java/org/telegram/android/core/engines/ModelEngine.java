@@ -766,10 +766,8 @@ public class ModelEngine {
         messagesEngine.onRestoredOnServer(mids);
 
         ChatMessage[] messages = messagesEngine.getMessagesByMid(mids);
+        mediaEngine.saveMedia(messages);
         for (ChatMessage msg : messages) {
-            if (msg.getExtras() instanceof TLLocalPhoto || msg.getExtras() instanceof TLLocalVideo) {
-                mediaEngine.saveMedia(msg);
-            }
             dialogsEngine.updateDescriptorShort(msg);
         }
     }
@@ -780,9 +778,7 @@ public class ModelEngine {
             return;
         msg.setDeletedLocal(true);
         messagesEngine.delete(msg);
-        if (msg.getExtras() instanceof TLLocalPhoto || msg.getExtras() instanceof TLLocalVideo) {
-            mediaEngine.deleteMedia(msg.getMid());
-        }
+        mediaEngine.deleteMedia(msg.getMid());
         dialogsEngine.updateDescriptorDeleteSent(msg.getPeerType(), msg.getPeerId(), msg.getMid());
     }
 

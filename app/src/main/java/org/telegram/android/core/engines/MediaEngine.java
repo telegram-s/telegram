@@ -39,6 +39,11 @@ public class MediaEngine {
     }
 
     public synchronized void saveMedia(ChatMessage sourceMessage) {
+        if (sourceMessage.getRawContentType() != ContentType.MESSAGE_PHOTO
+                && sourceMessage.getRawContentType() == ContentType.MESSAGE_VIDEO) {
+            return;
+        }
+
         MediaRecord record = findMedia(sourceMessage.getMid());
         if (record != null)
             return;
