@@ -39,7 +39,6 @@
                   android:textColor="@color/st_grey_text"
                   android:maxLines="1"
                   android:singleLine="true"
-                  ext:customFont="light"
                   android:id="@+id/status"/>
     </LinearLayout>
 </org.telegram.android.ui.RtlLinearLayout>

@@ -193,6 +193,22 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://play.google.com/store/apps/details?id=" + application.getPackageName())));
             }
         });
+        res.findViewById(R.id.twitter).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (getStringSafe(R.string.st_lang).equals("ar")) {
+                    startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://twitter.com/telegram_arabic")));
+                } else {
+                    startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://twitter.com/telegram")));
+                }
+            }
+        });
+        res.findViewById(R.id.faq).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://telegram.org/faq")));
+            }
+        });
         res.findViewById(R.id.notifications).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

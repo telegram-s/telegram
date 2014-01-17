@@ -208,8 +208,14 @@
     <string name="st_settings_chat">Chat settings</string>
     <string name="st_settings_chat_subtitle">Wallpaper, send by enter, font size...</string>
     <string name="st_settings_background">Chat background</string>
+
     <string name="st_settings_support">Ask a Question</string>
     <string name="st_settings_support_subtitle">Our support team will be glad to help</string>
+    <string name="st_settings_faq">Frequently Asked Questions</string>
+    <string name="st_settings_faq_subtitle">Check out our help</string>
+    <string name="st_settings_twitter">Twitter</string>
+    <string name="st_settings_twitter_subtitle">Subscribe for our news</string>
+
     <string name="st_settings_save_photo">Save incoming photos</string>
     <string name="st_settings_save_photo_subtitle">Automatically save to gallery</string>
     <string name="st_settings_notifications">Notifications and sounds</string>
