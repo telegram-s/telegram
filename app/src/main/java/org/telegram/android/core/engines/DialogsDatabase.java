@@ -1,6 +1,7 @@
 package org.telegram.android.core.engines;
 
 import android.os.SystemClock;
+import de.greenrobot.dao.query.WhereCondition;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.TLLocalContext;
 import org.telegram.android.log.Logger;
@@ -69,7 +70,10 @@ public class DialogsDatabase {
 
     public DialogDescription[] getUnreadedRemotelyDescriptions() {
         List<Dialog> dbRes = dialogsDao.queryBuilder()
-                .where(DialogDao.Properties.LastLocalViewedMessage.gt(DialogDao.Properties.LastRemoteViewedMessage))
+                .where(new WhereCondition.StringCondition(
+                        DialogDao.Properties.LastLocalViewedMessage.columnName +
+                                " > " +
+                                DialogDao.Properties.LastRemoteViewedMessage.columnName))
                 .list();
         DialogDescription[] res = new DialogDescription[dbRes.size()];
         for (int i = 0; i < dbRes.size(); i++) {
