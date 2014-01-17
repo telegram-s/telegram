@@ -15,7 +15,7 @@ public class DialogWireframe {
 
     private Object preparedLayout;
 
-    private int databaseId;
+    private long databaseId;
 
     private int peerId;
     private int peerType;
@@ -36,13 +36,13 @@ public class DialogWireframe {
     private boolean isErrorState;
     private int unreadCount;
 
-    public DialogWireframe(int databaseId, int peerId, int peerType) {
+    public DialogWireframe(long databaseId, int peerId, int peerType) {
         this.peerId = peerId;
         this.peerType = peerType;
         this.databaseId = databaseId;
     }
 
-    public int getDatabaseId() {
+    public long getDatabaseId() {
         return databaseId;
     }
 

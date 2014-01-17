@@ -114,7 +114,7 @@ public class MediaSender {
                             }
                         } else if (message.getExtras() instanceof TLUploadingAudio) {
                             if (message.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
-
+                                uploadEncAudio(message);
                             } else {
                                 uploadAudio(message);
                             }
@@ -150,8 +150,14 @@ public class MediaSender {
         completeAudioSending(sent, message);
     }
 
-    private Optimizer.FastPreviewResult tryBuildThumb(String path) throws Exception {
-        return Optimizer.buildPreview(path);
+    private void uploadEncAudio(ChatMessage message) throws Exception {
+        EncryptedChat chat = application.getEngine().getEncryptedChat(message.getPeerId());
+        TLUploadingAudio audio = (TLUploadingAudio) message.getExtras();
+        EncryptedFile encryptedFile = encryptFile(audio.getFileName());
+        Uploader.UploadResult result = uploadFile(encryptedFile.getFileName(), message.getDatabaseId());
+        EncryptedAudioSent audioSent = doSendEncAudio(result, encryptedFile, audio, message, chat);
+        saveUploadedEncAudio(audioSent, audio.getFileName());
+        completeEncAudioSending(audioSent, message, chat);
     }
 
     private void uploadDocument(ChatMessage message) throws Exception {
@@ -273,6 +279,44 @@ public class MediaSender {
 
         TLAbsInputMedia media = new TLInputMediaUploadedAudio(inputFile, document.getDuration());
         return application.getApi().doRpcCall(new TLRequestMessagesSendMedia(peer, media, message.getRandomId()), TIMEOUT);
+    }
+
+    private EncryptedAudioSent doSendEncAudio(Uploader.UploadResult result, EncryptedFile encryptedFile, TLUploadingAudio audio, ChatMessage message, EncryptedChat chat) throws Exception {
+        TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
+        decryptedMessage.setRandomId(message.getRandomId());
+        decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
+        decryptedMessage.setMessage("");
+        decryptedMessage.setMedia(new TLDecryptedMessageMediaAudio(audio.getDuration(), (int) new File(audio.getFileName()).length(), encryptedFile.getKey(), encryptedFile.getIv()));
+        byte[] digest = MD5Raw(concat(encryptedFile.getKey(), encryptedFile.getIv()));
+        int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)), 0);
+
+        byte[] bundle = application.getEncryptionController().encryptMessage(decryptedMessage, chat.getId());
+
+        TLAbsInputEncryptedFile inputEncryptedFile;
+        if (result.isUsedBigFile()) {
+            inputEncryptedFile = new TLInputEncryptedFileBigUploaded(result.getFileId(), result.getPartsCount(), fingerprint);
+        } else {
+            inputEncryptedFile = new TLInputEncryptedFileUploaded(result.getFileId(), result.getPartsCount(), result.getHash(), fingerprint);
+        }
+
+        TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(
+                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle,
+                inputEncryptedFile), TIMEOUT);
+
+        TLLocalAudio localAudio = new TLLocalAudio();
+        if (encryptedMessage instanceof TLSentEncryptedFile) {
+            TLSentEncryptedFile file = (TLSentEncryptedFile) encryptedMessage;
+            if (file.getFile() instanceof TLEncryptedFile) {
+                TLEncryptedFile file1 = (TLEncryptedFile) file.getFile();
+                localAudio.setFileLocation(new TLLocalEncryptedFileLocation(file1.getId(), file1.getAccessHash(), file1.getSize(), file1.getDcId(), encryptedFile.getKey(), encryptedFile.getIv()));
+            } else {
+                localAudio.setFileLocation(new TLLocalFileEmpty());
+            }
+        } else {
+            localAudio.setFileLocation(new TLLocalFileEmpty());
+        }
+        localAudio.setDuration(audio.getDuration());
+        return new EncryptedAudioSent(encryptedMessage, localAudio);
     }
 
     private TLAbsStatedMessage doSendDoc(Uploader.UploadResult result, Uploader.UploadResult thumb, TLUploadingDocument document, ChatMessage message) throws Exception {
@@ -541,6 +585,13 @@ public class MediaSender {
         }
     }
 
+    private void saveUploadedEncAudio(EncryptedAudioSent sent, String uploadFileName) throws Exception {
+        if (!(sent.getAudio().getFileLocation() instanceof TLLocalFileEmpty)) {
+            String downloadKey = DownloadManager.getAudioKey(sent.getAudio());
+            application.getDownloadManager().saveDownloadAudio(downloadKey, uploadFileName);
+        }
+    }
+
     private void saveUploadedDocument(TLAbsStatedMessage sent, String uploadFileName) throws Exception {
         TLMessage msgRes = (TLMessage) sent.getMessage();
         TLLocalDocument mediaDoc = (TLLocalDocument) EngineUtils.convertMedia(msgRes.getMedia());
@@ -620,6 +671,11 @@ public class MediaSender {
     private void completeEncDocSending(EncryptedDocSent encryptedMessage, ChatMessage message, EncryptedChat chat) {
         message.setMessageTimeout(chat.getSelfDestructTime());
         application.getEngine().onMessageSecretMediaSent(message, encryptedMessage.getEncryptedMessage().getDate(), encryptedMessage.getDocument());
+    }
+
+    private void completeEncAudioSending(EncryptedAudioSent encryptedMessage, ChatMessage message, EncryptedChat chat) {
+        message.setMessageTimeout(chat.getSelfDestructTime());
+        application.getEngine().onMessageSecretMediaSent(message, encryptedMessage.getEncryptedMessage().getDate(), encryptedMessage.getAudio());
     }
 
     private void completeEncPhotoSending(EncryptedPhotoSent encryptedMessage, ChatMessage message, EncryptedChat chat) {
@@ -834,6 +890,9 @@ public class MediaSender {
         return res;
     }
 
+    private Optimizer.FastPreviewResult tryBuildThumb(String path) throws Exception {
+        return Optimizer.buildPreview(path);
+    }
 
     public class SendState {
         private boolean isSent;
@@ -874,6 +933,24 @@ public class MediaSender {
 
         public TLLocalDocument getDocument() {
             return document;
+        }
+    }
+
+    private class EncryptedAudioSent {
+        private TLAbsSentEncryptedMessage encryptedMessage;
+        private TLLocalAudio audio;
+
+        private EncryptedAudioSent(TLAbsSentEncryptedMessage encryptedMessage, TLLocalAudio audio) {
+            this.encryptedMessage = encryptedMessage;
+            this.audio = audio;
+        }
+
+        public TLAbsSentEncryptedMessage getEncryptedMessage() {
+            return encryptedMessage;
+        }
+
+        public TLLocalAudio getAudio() {
+            return audio;
         }
     }
 

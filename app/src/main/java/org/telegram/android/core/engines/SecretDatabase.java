@@ -28,7 +28,7 @@ public class SecretDatabase {
         for (int i = 0; i < res.length; i++) {
             res[i] = cachedConvert(encryptedChats[i]);
         }
-        return new EncryptedChat[0];
+        return res;
     }
 
     public EncryptedChat[] loadChats(int[] ids) {
@@ -97,6 +97,7 @@ public class SecretDatabase {
         dest.setIsOut(src.isOut());
         dest.setSelfDestruct(src.getSelfDestructTime());
         dest.setAccessHash(src.getAccessHash());
+        dest.setState(src.getState());
     }
 
     private EncryptedChat cachedConvert(SecretChat src) {

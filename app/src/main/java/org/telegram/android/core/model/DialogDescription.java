@@ -33,8 +33,8 @@ public class DialogDescription implements Serializable {
 
     }
 
-    public int getUniqId() {
-        return peerId * 10 + peerType;
+    public long getUniqId() {
+        return peerId * 10L + peerType;
     }
 
     public int getPeerType() {

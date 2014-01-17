@@ -37,6 +37,14 @@ public class TLLocalAudio extends TLObject {
         return fileLocation;
     }
 
+    public void setFileLocation(TLAbsLocalFileLocation fileLocation) {
+        this.fileLocation = fileLocation;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
     @Override
     public int getClassId() {
         return CLASS_ID;

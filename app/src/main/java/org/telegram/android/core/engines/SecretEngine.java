@@ -107,7 +107,7 @@ public class SecretEngine {
 
         DialogDescription description = engine.getDescriptionForPeer(PeerType.PEER_USER_ENCRYPTED, encryptedChat.getId());
         if (description == null) {
-            description = createDescriptionForEncryptedUser(encryptedChat.getId(), encryptedChat.getUserId());
+            description = new DialogDescription(PeerType.PEER_USER_ENCRYPTED, encryptedChat.getId());
             description.setDate(date);
             switch (encryptedChat.getState()) {
                 default:
@@ -195,14 +195,6 @@ public class SecretEngine {
         } else if (rawChat instanceof TLEncryptedChat) {
             chat.setState(EncryptedChatState.NORMAL);
         }
-    }
-
-
-    private DialogDescription createDescriptionForEncryptedUser(int chatId, int uid) {
-        DialogDescription res = new DialogDescription();
-        res.setPeerType(PeerType.PEER_USER_ENCRYPTED);
-        res.setPeerId(chatId);
-        return res;
     }
 
     public void clear() {
