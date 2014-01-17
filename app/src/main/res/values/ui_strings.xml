@@ -188,6 +188,7 @@
     <string name="st_dialogs_menu_group">New group</string>
     <string name="st_dialogs_menu_secret">New secret chat</string>
     <string name="st_dialogs_menu_write_contact">Write to contact</string>
+    <string name="st_dialogs_menu_appearance">Appearance</string>
 
     <string name="st_settings_title">Settings</string>
     <string name="st_settings_header_phone">YOUR PHONE NUMBER</string>

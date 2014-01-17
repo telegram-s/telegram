@@ -78,6 +78,7 @@ public class DownloadManager {
         public TLLocalVideo video;
         public TLLocalPhoto photo;
         public TLLocalDocument doc;
+        public TLLocalAudio audio;
         public int downloaded;
         public int downloadedPercent;
         public DownloadState state;
@@ -177,6 +178,39 @@ public class DownloadManager {
         requestDownload(resourceKey, record,
                 getDownloadDocFile(resourceKey),
                 doc.getFileLocation());
+    }
+
+    public void requestDownload(TLLocalAudio audio) {
+        final String resourceKey = getAudioKey(audio);
+
+        if (downloadPersistence.isDownloaded(resourceKey))
+            return;
+
+        final DownloadRecord record;
+        if (records.containsKey(resourceKey)) {
+            record = records.get(resourceKey);
+            if (record.state == DownloadState.CANCELLED ||
+                    record.state == DownloadState.FAILURE ||
+                    record.state == DownloadState.NONE) {
+                record.state = DownloadState.PENDING;
+                record.downloaded = 0;
+                record.downloadedPercent = 0;
+                record.audio = audio;
+                updateState(resourceKey, record.state, 0, 0);
+            }
+        } else {
+            record = new DownloadRecord();
+            record.state = DownloadState.PENDING;
+            record.downloaded = 0;
+            record.downloadedPercent = 0;
+            record.audio = audio;
+            records.put(resourceKey, record);
+            updateState(resourceKey, record.state, 0, 0);
+        }
+
+        requestDownload(resourceKey, record,
+                getDownloadAudioFile(resourceKey),
+                audio.getFileLocation());
     }
 
 
@@ -358,6 +392,8 @@ public class DownloadManager {
                         }
                     } else if (record.doc != null) {
 
+                    } else if (record.audio != null) {
+
                     }
                     Logger.d(TAG, "@" + key + " = mark as downloaded");
                     downloadPersistence.markDownloaded(key);
@@ -412,7 +448,7 @@ public class DownloadManager {
     }
 
     public void saveDownloadAudio(String key, String fileName) throws IOException {
-        IOUtils.copy(new File(fileName), new File(getDownloadDocFile(key)));
+        IOUtils.copy(new File(fileName), new File(getDownloadAudioFile(key)));
         downloadPersistence.markDownloaded(key);
     }
 
@@ -462,7 +498,7 @@ public class DownloadManager {
     }
 
     private String getDownloadAudioFile(String key) {
-        return application.getExternalCacheDir().getAbsolutePath() + "/doc_" + key + ".m4a";
+        return application.getExternalCacheDir().getAbsolutePath() + "/audio_" + key + ".m4a";
     }
 
     private String getDownloadImageThumbFile(String key) {

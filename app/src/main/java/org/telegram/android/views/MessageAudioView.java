@@ -11,6 +11,8 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.AttributeSet;
 import org.telegram.android.R;
+import org.telegram.android.core.model.media.TLLocalDocument;
+import org.telegram.android.core.model.media.TLUploadingDocument;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.media.DownloadManager;
 
@@ -39,6 +41,8 @@ public class MessageAudioView extends MessageBaseDocView {
     private Drawable documentIconPausedIn;
     private Drawable documentIcon;
     private Drawable documentIconPaused;
+
+    private boolean isDocument;
 
     public MessageAudioView(Context context) {
         super(context);
@@ -85,6 +89,8 @@ public class MessageAudioView extends MessageBaseDocView {
             documentIcon = documentIconIn;
             documentIconPaused = documentIconPausedIn;
         }
+        isDocument = message.message.getExtras() instanceof TLUploadingDocument
+                || message.message.getExtras() instanceof TLLocalDocument;
     }
 
     public void play() {
@@ -117,7 +123,8 @@ public class MessageAudioView extends MessageBaseDocView {
                         MediaPlayer mplayer = new MediaPlayer();
                         mplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         mplayer.setDataSource(application, Uri.fromFile(
-                                new File(application.getDownloadManager().getDocFileName(key))));
+                                new File(isDocument ? application.getDownloadManager().getDocFileName(key) :
+                                        application.getDownloadManager().getAudioFileName(key))));
                         mplayer.prepare();
                         mplayer.setLooping(false);
                         mplayer.start();

@@ -105,11 +105,11 @@ public class SecretDatabase {
         }
 
         synchronized (src) {
-            EncryptedChat res = secretCache.get(src.getId());
+            EncryptedChat res = secretCache.get((int) (long) src.getId());
             if (res == null) {
                 res = new EncryptedChat();
                 secretCache.putIfAbsent((int) (long) src.getId(), res);
-                res = secretCache.get(src.getId());
+                res = secretCache.get((int) (long) src.getId());
             }
 
             res.setAccessHash(src.getAccessHash());
@@ -121,7 +121,7 @@ public class SecretDatabase {
             res.setUserId(src.getUid());
         }
 
-        return secretCache.get(src.getId());
+        return secretCache.get((int) (long) src.getId());
     }
 
     public void clear() {

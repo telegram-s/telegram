@@ -2328,7 +2328,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
                 audioView.bind(object, showTime, showDiv, unreadCount);
 
-                if (object.message.getExtras() instanceof TLUploadingDocument) {
+                if (object.message.getExtras() instanceof TLUploadingDocument ||
+                        object.message.getExtras() instanceof TLUploadingAudio) {
                     audioView.setOnBubbleClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -2386,6 +2387,35 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     application.getDownloadManager().abortDownload(key);
                                 } else {
                                     TLLocalDocument video = (TLLocalDocument) object.message.getExtras();
+                                    // Check
+                                    application.getDownloadManager().requestDownload(video);
+                                }
+                            }
+                        }
+                    });
+                } else if (object.message.getExtras() instanceof TLLocalAudio) {
+                    final String key = DownloadManager.getAudioKey((TLLocalAudio) object.message.getExtras());
+
+                    audioView.setOnBubbleClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (selected.size() > 0) {
+                                if (selected.contains(object.message.getDatabaseId())) {
+                                    selected.remove(object.message.getDatabaseId());
+                                } else {
+                                    selected.add(object.message.getDatabaseId());
+                                }
+                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
+                                updateActionMode();
+                            } else {
+                                DownloadState state = application.getDownloadManager().getState(key);
+                                if (state == DownloadState.COMPLETED) {
+                                    ((MessageAudioView) view).play();
+                                } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
+                                    // CANCEL
+                                    application.getDownloadManager().abortDownload(key);
+                                } else {
+                                    TLLocalAudio video = (TLLocalAudio) object.message.getExtras();
                                     // Check
                                     application.getDownloadManager().requestDownload(video);
                                 }

@@ -19,6 +19,9 @@
     <item android:id="@+id/contactsMenu"
           android:title="My contacts"
           android:showAsAction="never"/>
+    <item android:id="@+id/appearanceMenu"
+          android:title="Appearance"
+          android:showAsAction="never"/>
     <item android:id="@+id/settingsMenu"
           android:title="Settings"
           android:showAsAction="never"/>
