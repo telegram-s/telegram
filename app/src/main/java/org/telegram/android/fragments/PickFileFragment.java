@@ -72,6 +72,18 @@ public class PickFileFragment extends StelsFragment {
                         break;
                 }
 
+                switch (item.getType()) {
+                    case RECORD_DIRECTORY:
+                    case RECORD_STORAGE:
+                    case RECORD_STORAGE_EX:
+                        view.findViewById(R.id.icon).setBackgroundColor(
+                                application.getResources().getColor(R.color.st_file_dir_bg));
+                        break;
+                    default:
+                        view.findViewById(R.id.icon).setBackgroundColor(0);
+                        break;
+                }
+
                 return view;
             }
         };

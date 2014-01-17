@@ -12,7 +12,8 @@
                android:scaleType="center"
                android:id="@+id/icon"/>
 
-    <TextView android:layout_width="fill_parent" android:layout_height="48dp"
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="48dp"
               android:layout_marginTop="8dp"
               android:layout_marginBottom="8dp"
               android:layout_marginLeft="8dp"

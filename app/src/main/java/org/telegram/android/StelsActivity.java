@@ -49,6 +49,7 @@ public class StelsActivity extends SherlockFragmentActivity {
                 getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.st_bar_bg_line));
                 break;
         }
+        invalidateOptionsMenu();
     }
 
     public void onBack(View view) {

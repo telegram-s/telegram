@@ -10,6 +10,9 @@
     <!-- Photo uploader -->
     <color name="st_avatar_upload_bg">#8c000000</color>
 
+    <!-- File pick -->
+    <color name="st_file_dir_bg">#f3f3f3</color>
+
     <!-- Selectors -->
     <color name="st_selector">#1c000000</color>
     <color name="st_selector_end">#1c000000</color>
