@@ -35,7 +35,7 @@ public class PickCountryActivity extends StelsActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.st_bar_bg));
+        setBarBg();
         getSupportActionBar().setLogo(R.drawable.st_bar_logo);
         getSupportActionBar().setIcon(R.drawable.st_bar_logo);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
@@ -247,5 +247,11 @@ public class PickCountryActivity extends StelsActivity {
         public long getHeaderId(int i) {
             return getSectionForPosition(i);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setBarBg();
     }
 }

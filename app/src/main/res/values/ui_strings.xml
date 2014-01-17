@@ -388,7 +388,8 @@
     <string name="st_blocked_phone_hidden">hidden</string>
 
     <string name="st_appearance_title">Chat settings</string>
-    <string name="st_appearance_header_common">MESSAGE WINDOW</string>
+    <string name="st_appearance_header_common">APPEARANCE</string>
+    <string name="st_appearance_header_chat">MESSAGE WINDOW</string>
 
     <string name="st_appearance_header_dialogs">CHAT LIST</string>
 
@@ -404,6 +405,14 @@
     <string name="st_appearance_enter_subtitle_disable">Enter adds a new line</string>
     <string name="st_appearance_background">Wallpaper</string>
     <string name="st_appearance_background_subtitle">Chat background</string>
+    <string name="st_appearance_bar">Bar color</string>
+    <string name="st_appearance_bar_subtitle">Color of application header</string>
+    <string name="st_appearance_bar_color_default">Default</string>
+    <string name="st_appearance_bar_color_green">Green</string>
+    <string name="st_appearance_bar_color_cyan">Cyan</string>
+    <string name="st_appearance_bar_color_red">Red</string>
+    <string name="st_appearance_bar_color_purple">Purple</string>
+    <string name="st_appearance_bar_color_wa">WhatsApp like</string>
 
     <string name="st_appearance_item_size">Style: {s}</string>
     <string name="st_appearance_item_size_subtitle">Chat size on messages screen</string>

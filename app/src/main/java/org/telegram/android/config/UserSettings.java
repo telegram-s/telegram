@@ -11,6 +11,13 @@ import android.content.SharedPreferences;
  */
 public class UserSettings {
 
+    public static final int BAR_COLOR_DEFAULT = 0;
+    public static final int BAR_COLOR_GREEN = 1;
+    public static final int BAR_COLOR_RED = 2;
+    public static final int BAR_COLOR_PURPLE = 3;
+    public static final int BAR_COLOR_CYAN = 4;
+    public static final int BAR_COLOR_WA = 5;
+
     public static final int DIALOG_SIZE_NORMAL = 0;
     public static final int DIALOG_SIZE_LARGE = 1;
 
@@ -40,6 +47,7 @@ public class UserSettings {
     private int bubbleFontSize = BUBBLE_FONT_NORMAL;
     private boolean sendByEnter = false;
     private int dialogItemSize = DIALOG_SIZE_NORMAL;
+    private int barColor = BAR_COLOR_DEFAULT;
 
     public UserSettings(Context context) {
         preferences = context.getSharedPreferences("org.telegram.android.UserSettings.pref", Context.MODE_PRIVATE);
@@ -52,6 +60,16 @@ public class UserSettings {
         bubbleFontSize = preferences.getInt("bubbleFontSize", bubbleFontSize);
         sendByEnter = preferences.getBoolean("sendByEnter", sendByEnter);
         dialogItemSize = preferences.getInt("bubbleFontSize", dialogItemSize);
+        barColor = preferences.getInt("barColor", BAR_COLOR_DEFAULT);
+    }
+
+    public int getBarColor() {
+        return barColor;
+    }
+
+    public void setBarColor(int barColor) {
+        this.barColor = barColor;
+        preferences.edit().putInt("barColor", barColor).commit();
     }
 
     public int getCurrentWallpaperId() {
@@ -143,6 +161,7 @@ public class UserSettings {
         bubbleFontSize = BUBBLE_FONT_NORMAL;
         dialogItemSize = DIALOG_SIZE_NORMAL;
         sendByEnter = false;
+        barColor = BAR_COLOR_DEFAULT;
     }
 
     public boolean showOnlyTelegramContacts() {

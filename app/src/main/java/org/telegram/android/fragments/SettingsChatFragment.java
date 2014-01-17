@@ -14,6 +14,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import org.telegram.android.MediaReceiverFragment;
 import org.telegram.android.R;
+import org.telegram.android.StelsActivity;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.views.DialogView;
@@ -181,6 +182,64 @@ public class SettingsChatFragment extends MediaReceiverFragment {
             public void onClick(View view) {
                 application.getUserSettings().setSaveToGalleryEnabled(!application.getUserSettings().isSaveToGalleryEnabled());
                 bindUi();
+            }
+        });
+        res.findViewById(R.id.barBackground).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final int[] titles = new int[]{
+                        R.string.st_appearance_bar_color_default,
+                        R.string.st_appearance_bar_color_green,
+                        R.string.st_appearance_bar_color_red,
+                        R.string.st_appearance_bar_color_cyan,
+                        R.string.st_appearance_bar_color_purple,
+                        R.string.st_appearance_bar_color_wa,
+                };
+                final int[] sizeIds = new int[]{
+                        UserSettings.BAR_COLOR_DEFAULT,
+                        UserSettings.BAR_COLOR_GREEN,
+                        UserSettings.BAR_COLOR_RED,
+                        UserSettings.BAR_COLOR_CYAN,
+                        UserSettings.BAR_COLOR_PURPLE,
+                        UserSettings.BAR_COLOR_WA,
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setAdapter(new BaseAdapter() {
+                                       @Override
+                                       public int getCount() {
+                                           return titles.length;
+                                       }
+
+                                       @Override
+                                       public Integer getItem(int i) {
+                                           return titles[i];
+                                       }
+
+                                       @Override
+                                       public long getItemId(int i) {
+                                           return 0;
+                                       }
+
+                                       @Override
+                                       public View getView(int i, View view, ViewGroup viewGroup) {
+                                           View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
+                                           TextView text = (TextView) res.findViewById(android.R.id.text1);
+                                           text.setText(titles[i]);
+                                           return res;
+                                       }
+                                   }, new DialogInterface.OnClickListener() {
+                                       @Override
+                                       public void onClick(DialogInterface dialogInterface, int i) {
+                                           application.getUserSettings().setBarColor(sizeIds[i]);
+                                           ((StelsActivity) getActivity()).setBarBg();
+                                           bindUi();
+                                       }
+                                   }
+                );
+                AlertDialog dialog = builder.create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
             }
         });
 

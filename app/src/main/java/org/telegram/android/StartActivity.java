@@ -6,7 +6,9 @@ import android.app.FragmentManager;
 import android.content.*;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.GradientDrawable;
 import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -73,7 +75,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
 
         getWindow().setBackgroundDrawableResource(R.drawable.transparent);
 
-        getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.st_bar_bg));
+        setBarBg();
         getSupportActionBar().setLogo(R.drawable.st_bar_logo);
         getSupportActionBar().setIcon(R.drawable.st_bar_logo);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
@@ -477,6 +479,8 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
 
         TestIntegration.initActivity(this);
         // getWindow().setBackgroundDrawableResource(R.drawable.transparent);
+
+        setBarBg();
     }
 
     @Override

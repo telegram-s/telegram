@@ -361,7 +361,7 @@
     <string name="st_blocked_phone_hidden">مخفي</string>
 
     <string name="st_appearance_title">Chat settings</string>
-    <string name="st_appearance_header_common">نافذة الرسائل</string>
+    <string name="st_appearance_header_chat">نافذة الرسائل</string>
 
     <string name="st_appearance_header_dialogs">قائمة المحادثات</string>
 
