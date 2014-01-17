@@ -17,6 +17,8 @@ public class UserSettings {
     public static final int BAR_COLOR_PURPLE = 3;
     public static final int BAR_COLOR_CYAN = 4;
     public static final int BAR_COLOR_WA = 5;
+    public static final int BAR_COLOR_MAGENTA = 6;
+    public static final int BAR_COLOR_LINE = 7;
 
     public static final int DIALOG_SIZE_NORMAL = 0;
     public static final int DIALOG_SIZE_LARGE = 1;

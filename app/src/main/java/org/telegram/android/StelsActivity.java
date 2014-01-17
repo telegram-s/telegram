@@ -42,6 +42,12 @@ public class StelsActivity extends SherlockFragmentActivity {
             case UserSettings.BAR_COLOR_WA:
                 getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.st_bar_bg_wa));
                 break;
+            case UserSettings.BAR_COLOR_MAGENTA:
+                getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.st_bar_bg_magenta));
+                break;
+            case UserSettings.BAR_COLOR_LINE:
+                getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.st_bar_bg_line));
+                break;
         }
     }
 

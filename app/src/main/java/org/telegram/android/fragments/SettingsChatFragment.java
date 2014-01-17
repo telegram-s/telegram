@@ -193,7 +193,9 @@ public class SettingsChatFragment extends MediaReceiverFragment {
                         R.string.st_appearance_bar_color_red,
                         R.string.st_appearance_bar_color_cyan,
                         R.string.st_appearance_bar_color_purple,
+                        R.string.st_appearance_bar_color_magenta,
                         R.string.st_appearance_bar_color_wa,
+                        R.string.st_appearance_bar_color_line,
                 };
                 final int[] sizeIds = new int[]{
                         UserSettings.BAR_COLOR_DEFAULT,
@@ -201,7 +203,9 @@ public class SettingsChatFragment extends MediaReceiverFragment {
                         UserSettings.BAR_COLOR_RED,
                         UserSettings.BAR_COLOR_CYAN,
                         UserSettings.BAR_COLOR_PURPLE,
+                        UserSettings.BAR_COLOR_MAGENTA,
                         UserSettings.BAR_COLOR_WA,
+                        UserSettings.BAR_COLOR_LINE,
                 };
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

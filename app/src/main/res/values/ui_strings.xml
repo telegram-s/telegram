@@ -413,6 +413,8 @@
     <string name="st_appearance_bar_color_red">Red</string>
     <string name="st_appearance_bar_color_purple">Purple</string>
     <string name="st_appearance_bar_color_wa">WhatsApp like</string>
+    <string name="st_appearance_bar_color_line">Line like</string>
+    <string name="st_appearance_bar_color_magenta">Magenta</string>
 
     <string name="st_appearance_item_size">Style: {s}</string>
     <string name="st_appearance_item_size_subtitle">Chat size on messages screen</string>
