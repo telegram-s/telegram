@@ -172,6 +172,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                     @Override
                     public void execute() throws AsyncException {
                         rpc(new TLRequestAuthResetAuthorizations());
+                        application.getUpdateProcessor().invalidateUpdates();
                     }
 
                     @Override
