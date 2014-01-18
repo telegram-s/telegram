@@ -38,13 +38,14 @@ public class DataSourceKernel {
             contactsSource = new ContactsSource(kernel.getApplication());
             chatSource = new ChatSource(kernel.getApplication());
             encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
-            dialogSource.startSyncIfRequired();
+
         }
     }
 
     public void runKernel() {
-        if (contactsSource != null) {
+        if (kernel.getAuthKernel().isLoggedIn()) {
             contactsSource.run();
+            dialogSource.startSyncIfRequired();
         }
     }
 

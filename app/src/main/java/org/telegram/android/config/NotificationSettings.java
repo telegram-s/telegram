@@ -13,10 +13,8 @@ public class NotificationSettings {
     private static final String PREFERENCE_NAME = "org.telegram.android.Notifications";
 
     private SharedPreferences preferences;
-    private StelsApplication application;
 
     public NotificationSettings(StelsApplication application) {
-        this.application = application;
         this.preferences = application.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
     }
 

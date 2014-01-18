@@ -23,12 +23,6 @@ public class EncryptedKernel {
         start = System.currentTimeMillis();
         selfDestructProcessor = new SelfDestructProcessor(kernel.getApplication());
         Logger.d(TAG, "SelfDestructProcessor loaded in " + (System.currentTimeMillis() - start) + " ms");
-
-        if (kernel.getAuthKernel().isLoggedIn()) {
-            start = System.currentTimeMillis();
-            selfDestructProcessor.requestInitialDeletions();
-            Logger.d(TAG, "SelfDestructProcessor checkInitialDeletions in " + (System.currentTimeMillis() - start) + " ms");
-        }
     }
 
     public EncryptionController getEncryptionController() {
@@ -37,5 +31,15 @@ public class EncryptedKernel {
 
     public SelfDestructProcessor getSelfDestructProcessor() {
         return selfDestructProcessor;
+    }
+
+    public void runKernel() {
+        selfDestructProcessor.runProcessor();
+
+        if (kernel.getAuthKernel().isLoggedIn()) {
+            long start = System.currentTimeMillis();
+            selfDestructProcessor.requestInitialDeletions();
+            Logger.d(TAG, "SelfDestructProcessor checkInitialDeletions in " + (System.currentTimeMillis() - start) + " ms");
+        }
     }
 }

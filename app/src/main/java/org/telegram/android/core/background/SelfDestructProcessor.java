@@ -20,11 +20,15 @@ public class SelfDestructProcessor {
     private static final int MSG_DESTROY = 1;
 
     private StelsApplication application;
-    private HandlerThread thread = new HandlerThread("SelfDestructThread");
+    private HandlerThread thread;
     private Handler handler;
 
     public SelfDestructProcessor(StelsApplication _application) {
         this.application = _application;
+    }
+
+    public void runProcessor() {
+        this.thread = new HandlerThread("SelfDestructThread");
         this.thread.start();
         while (this.thread.getLooper() == null) {
             Thread.yield();
@@ -44,6 +48,7 @@ public class SelfDestructProcessor {
             }
         };
     }
+
 
     public void performSelfDestruct(int databaseId, int time) {
         handler.removeMessages(databaseId);

@@ -222,6 +222,9 @@ public class ApplicationKernel {
         storageKernel.runKernel();
         Logger.d(TAG, "Storate run in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();
+        encryptedKernel.runKernel();
+        Logger.d(TAG, "EncryptedKernel run in " + (SystemClock.uptimeMillis() - start) + " ms");
+        start = SystemClock.uptimeMillis();
         apiKernel.runKernel();
         Logger.d(TAG, "ApiKernel run in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();
