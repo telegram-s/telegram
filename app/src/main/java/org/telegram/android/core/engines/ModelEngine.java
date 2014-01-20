@@ -46,7 +46,7 @@ public class ModelEngine {
     private SyncStateEngine syncStateEngine;
 
     public ModelEngine(TelegramApplication application) {
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "users-db", null);
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "telegram.db", null);
         this.daoMaster = new DaoMaster(helper.getWritableDatabase());
         this.daoMaster.getDatabase().execSQL("PRAGMA synchronous = OFF;");
         this.daoSession = daoMaster.newSession();
