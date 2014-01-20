@@ -1,6 +1,5 @@
 package org.telegram.android.screens;
 
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -14,9 +13,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
-import org.telegram.android.StelsApplication;
-import org.telegram.android.StelsFragment;
-import org.telegram.android.activity.SettingsActivity;
+import org.telegram.android.TelegramApplication;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
@@ -37,10 +35,10 @@ import java.util.List;
  */
 public class FragmentScreenController implements RootController {
     private StartActivity activity;
-    private StelsApplication application;
+    private TelegramApplication application;
     private View container;
 
-    private ArrayList<StelsFragment> backStack = new ArrayList<StelsFragment>();
+    private ArrayList<TelegramFragment> backStack = new ArrayList<TelegramFragment>();
 
     private Runnable removeBg = new Runnable() {
         @Override
@@ -62,13 +60,13 @@ public class FragmentScreenController implements RootController {
 
     public FragmentScreenController(StartActivity activity, Bundle savedState) {
         this.activity = activity;
-        this.application = (StelsApplication) activity.getApplicationContext();
+        this.application = (TelegramApplication) activity.getApplicationContext();
         container = activity.findViewById(R.id.fragmentContainer);
 
         if (savedState != null && savedState.containsKey("backstack")) {
             String[] keys = savedState.getStringArray("backstack");
             for (int i = 0; i < keys.length; i++) {
-                backStack.add((StelsFragment) activity.getSupportFragmentManager().findFragmentByTag(keys[i]));
+                backStack.add((TelegramFragment) activity.getSupportFragmentManager().findFragmentByTag(keys[i]));
             }
             if (backStack.size() > 0) {
                 backStack.get(backStack.size() - 1).setHasOptionsMenu(true);
@@ -121,7 +119,7 @@ public class FragmentScreenController implements RootController {
 
     public void doUp() {
         if (backStack.size() > 1) {
-            StelsFragment currentFragment = backStack.get(backStack.size() - 1);
+            TelegramFragment currentFragment = backStack.get(backStack.size() - 1);
 
             int count = 1;
             for (int i = backStack.size() - 2; i > 0; i--) {
@@ -134,7 +132,7 @@ public class FragmentScreenController implements RootController {
 
             popFragment(count);
 
-            // StelsFragment rootFragment = backStack.get(0);
+            // TelegramFragment rootFragment = backStack.get(0);
             // rootFragment.setHasOptionsMenu(true);
 
 //            prepareBackTransaction()
@@ -149,9 +147,9 @@ public class FragmentScreenController implements RootController {
 
     public boolean doSystemBack() {
         if (backStack.size() > 1) {
-            StelsFragment currentFragment = backStack.get(backStack.size() - 1);
+            TelegramFragment currentFragment = backStack.get(backStack.size() - 1);
             if (!currentFragment.onBackPressed()) {
-                StelsFragment prevFragment = backStack.get(backStack.size() - 2);
+                TelegramFragment prevFragment = backStack.get(backStack.size() - 2);
                 prevFragment.setHasOptionsMenu(true);
                 backStack.remove(backStack.size() - 1);
                 prepareBackTransaction()
@@ -166,11 +164,11 @@ public class FragmentScreenController implements RootController {
         }
     }
 
-    private void openScreen(StelsFragment fragment) {
+    private void openScreen(TelegramFragment fragment) {
         openScreen(fragment, false);
     }
 
-    private void openScreen(StelsFragment fragment, boolean forceNoAnimation) {
+    private void openScreen(TelegramFragment fragment, boolean forceNoAnimation) {
         fragment.setHasOptionsMenu(true);
         FragmentTransaction transaction;
         if (!forceNoAnimation) {
@@ -179,7 +177,7 @@ public class FragmentScreenController implements RootController {
             transaction = activity.getSupportFragmentManager().beginTransaction();
         }
         if (backStack.size() > 0) {
-            StelsFragment backFragment = backStack.get(backStack.size() - 1);
+            TelegramFragment backFragment = backStack.get(backStack.size() - 1);
             if (backFragment.isSaveInStack()) {
                 transaction.detach(backFragment);
             } else {
@@ -205,8 +203,8 @@ public class FragmentScreenController implements RootController {
         }
 
         if (backStack.size() > 1) {
-            StelsFragment currentFragment = backStack.get(backStack.size() - 1);
-            StelsFragment prevFragment = backStack.get(backStack.size() - 2);
+            TelegramFragment currentFragment = backStack.get(backStack.size() - 1);
+            TelegramFragment prevFragment = backStack.get(backStack.size() - 2);
             prevFragment.setHasOptionsMenu(true);
             backStack.remove(backStack.size() - 1);
             prepareBackTransaction()
@@ -442,7 +440,7 @@ public class FragmentScreenController implements RootController {
     @Override
     public void onLogout() {
         FragmentTransaction transaction = prepareTransaction();
-        for (StelsFragment fragment : backStack) {
+        for (TelegramFragment fragment : backStack) {
             transaction.remove(fragment);
         }
         StartActivity.isGuideShown = false;

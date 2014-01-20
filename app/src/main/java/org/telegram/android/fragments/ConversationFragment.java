@@ -31,9 +31,9 @@ import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.tasks.FileSystemImageTask;
 import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
-import org.telegram.android.MediaReceiverFragment;
+import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.config.DebugSettings;
 import org.telegram.android.core.*;
 import org.telegram.android.core.background.AvatarUploader;
@@ -2443,7 +2443,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     }
 
     @Override
-    public boolean isParentFragment(StelsFragment fragment) {
+    public boolean isParentFragment(TelegramFragment fragment) {
         return false;
     }
 }

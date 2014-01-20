@@ -12,7 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.Gallery;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
@@ -32,7 +32,7 @@ import java.io.IOException;
  * Date: 18.09.13
  * Time: 16:26
  */
-public class WallpapersFragment extends StelsFragment {
+public class WallpapersFragment extends TelegramFragment {
     private TLAbsWallPaper[] wallPapers;
     private Gallery gallery;
     private FastWebImageView preview;

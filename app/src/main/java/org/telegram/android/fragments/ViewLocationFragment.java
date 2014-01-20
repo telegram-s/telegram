@@ -14,7 +14,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import org.telegram.android.MapStelsFragment;
+import org.telegram.android.base.TelegramMapFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
@@ -27,7 +27,7 @@ import org.telegram.android.ui.TextUtil;
  * Author: Korshakov Stepan
  * Created: 15.08.13 19:32
  */
-public class ViewLocationFragment extends MapStelsFragment {
+public class ViewLocationFragment extends TelegramMapFragment {
     private int uid;
     private double latitude;
     private double longitude;

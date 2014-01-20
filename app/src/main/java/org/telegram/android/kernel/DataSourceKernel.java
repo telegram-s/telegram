@@ -1,6 +1,7 @@
 package org.telegram.android.kernel;
 
 import org.telegram.android.core.*;
+import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.ui.source.ViewSource;
@@ -38,7 +39,6 @@ public class DataSourceKernel {
             contactsSource = new ContactsSource(kernel.getApplication());
             chatSource = new ChatSource(kernel.getApplication());
             encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
-
         }
     }
 

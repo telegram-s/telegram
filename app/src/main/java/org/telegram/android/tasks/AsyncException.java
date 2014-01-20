@@ -1,11 +1,8 @@
 package org.telegram.android.tasks;
 
 import org.telegram.android.R;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.api.engine.RpcException;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Author: Korshakov Stepan
@@ -17,9 +14,9 @@ public class AsyncException extends Exception {
         CONNECTION_ERROR, UNKNOWN_ERROR, INTERNAL_SERVER_ERROR
     }
 
-    private static StelsApplication application;
+    private static TelegramApplication application;
 
-    public static void initLocalisation(StelsApplication application) {
+    public static void initLocalisation(TelegramApplication application) {
         AsyncException.application = application;
     }
 

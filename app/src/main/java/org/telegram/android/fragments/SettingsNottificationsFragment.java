@@ -2,7 +2,6 @@ package org.telegram.android.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -16,13 +15,13 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 
 /**
  * Author: Korshakov Stepan
  * Created: 16.08.13 15:04
  */
-public class SettingsNottificationsFragment extends StelsFragment {
+public class SettingsNottificationsFragment extends TelegramFragment {
 
     private static final int REQUEST_PICK_SOUND_ALL = 1;
     private static final int REQUEST_PICK_SOUND_GROUP = 2;

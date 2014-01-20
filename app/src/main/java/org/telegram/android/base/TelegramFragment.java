@@ -1,4 +1,4 @@
-package org.telegram.android;
+package org.telegram.android.base;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.text.BidiFormatter;
 import android.text.Editable;
 import android.text.Html;
@@ -17,6 +16,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
+import org.telegram.android.R;
 import org.telegram.android.core.engines.ModelEngine;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
@@ -28,14 +28,13 @@ import org.telegram.api.*;
 import org.telegram.mtproto.time.TimeOverlord;
 import org.xml.sax.XMLReader;
 
-import java.io.File;
 import java.util.Random;
 
 /**
  * Author: Korshakov Stepan
  * Created: 05.08.13 15:50
  */
-public class StelsFragment extends StelsBaseFragment {
+public class TelegramFragment extends TelegramBaseFragment {
 
     private boolean requestedPick;
     private boolean saveInStack = true;
@@ -252,7 +251,7 @@ public class StelsFragment extends StelsBaseFragment {
         return new ColorDrawable(Color.WHITE);
     }
 
-    public boolean isParentFragment(StelsFragment fragment) {
+    public boolean isParentFragment(TelegramFragment fragment) {
         return true;
     }
 

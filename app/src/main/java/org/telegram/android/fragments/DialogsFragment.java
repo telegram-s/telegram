@@ -19,7 +19,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.ui.FastWebImageView;
 import com.nineoldandroids.animation.ObjectAnimator;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.config.DebugSettings;
 import org.telegram.android.core.DialogSource;
 import org.telegram.android.core.DialogSourceState;
@@ -61,7 +61,7 @@ import java.util.HashSet;
  * Author: Korshakov Stepan
  * Created: 28.07.13 19:35
  */
-public class DialogsFragment extends StelsFragment implements ViewSourceListener {
+public class DialogsFragment extends TelegramFragment implements ViewSourceListener {
 
     private static final String TAG = "DialogsFragment";
 

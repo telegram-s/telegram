@@ -2,7 +2,7 @@ package org.telegram.android.config;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.api.TLConfig;
 
 /**
@@ -15,13 +15,13 @@ public class SystemConfig {
 
     private SharedPreferences preferences;
 
-    private StelsApplication application;
+    private TelegramApplication application;
     private int maxChatSize = 100;
 
     private String inviteMessage;
     private String inviteMessageLang;
 
-    public SystemConfig(StelsApplication application) {
+    public SystemConfig(TelegramApplication application) {
         this.application = application;
         preferences = application.getSharedPreferences("org.telegram.android.SystemConfig.pref", Context.MODE_PRIVATE);
         maxChatSize = preferences.getInt("max_chat_size", 100);

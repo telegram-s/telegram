@@ -7,14 +7,11 @@ import android.os.SystemClock;
 import android.text.*;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
-import android.util.AttributeSet;
-import android.util.TypedValue;
 import org.telegram.android.R;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
-import org.telegram.android.log.Logger;
 import org.telegram.android.ui.*;
 
 /**
@@ -65,7 +62,7 @@ public class MessageView extends BaseMsgView {
             return;
         }
 
-        StelsApplication application = (StelsApplication) context.getApplicationContext();
+        TelegramApplication application = (TelegramApplication) context.getApplicationContext();
 
         int fontSize;
         int fontSizeClock;
@@ -317,7 +314,7 @@ public class MessageView extends BaseMsgView {
         return isAnimated;
     }
 
-    public static Object prepareLayout(MessageWireframe wireframe, StelsApplication application1) {
+    public static Object prepareLayout(MessageWireframe wireframe, TelegramApplication application1) {
         checkResources(application1);
 
         int maxWidthH;
@@ -362,7 +359,7 @@ public class MessageView extends BaseMsgView {
 
         private int forwardOffset;
 
-        public void build(MessageWireframe wireframe, int desiredWidth, StelsApplication application) {
+        public void build(MessageWireframe wireframe, int desiredWidth, TelegramApplication application) {
 
             // Logger.d(TAG, "Build layout start");
 

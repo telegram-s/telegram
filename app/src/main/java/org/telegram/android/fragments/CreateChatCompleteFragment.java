@@ -1,6 +1,5 @@
 package org.telegram.android.fragments;
 
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -14,7 +13,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.tasks.FileSystemImageTask;
 import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
-import org.telegram.android.MediaReceiverFragment;
+import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.files.UploadResult;
@@ -26,16 +25,12 @@ import org.telegram.android.tasks.AsyncException;
 import org.telegram.api.*;
 import org.telegram.api.messages.TLAbsStatedMessage;
 import org.telegram.api.messages.TLStatedMessage;
-import org.telegram.api.messages.TLStatedMessageLink;
 import org.telegram.api.requests.TLRequestMessagesCreateChat;
 import org.telegram.api.requests.TLRequestMessagesEditChatPhoto;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.tl.TLVector;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * Author: Korshakov Stepan

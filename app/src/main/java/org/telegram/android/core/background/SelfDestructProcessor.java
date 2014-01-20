@@ -4,9 +4,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.ChatMessage;
-import org.telegram.android.log.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,11 +18,11 @@ public class SelfDestructProcessor {
     private static final int MSG_INITIAL_DELETIONS = 0;
     private static final int MSG_DESTROY = 1;
 
-    private StelsApplication application;
+    private TelegramApplication application;
     private HandlerThread thread;
     private Handler handler;
 
-    public SelfDestructProcessor(StelsApplication _application) {
+    public SelfDestructProcessor(TelegramApplication _application) {
         this.application = _application;
     }
 

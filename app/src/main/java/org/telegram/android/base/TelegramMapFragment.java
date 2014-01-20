@@ -1,4 +1,4 @@
-package org.telegram.android;
+package org.telegram.android.base;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -20,12 +20,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.LatLng;
+import org.telegram.android.R;
 
 /**
  * Author: Korshakov Stepan
  * Created: 15.08.13 17:49
  */
-public abstract class MapStelsFragment extends StelsFragment {
+public abstract class TelegramMapFragment extends TelegramFragment {
     private SharedPreferences preferences;
     private MapView mMapView;
     private GoogleMap mMap;

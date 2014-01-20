@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import org.json.JSONObject;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 
 /**
@@ -38,7 +38,7 @@ public class GCMBroadcastReceiver extends BroadcastReceiver {
                         String ip = parts[0];
                         int port = Integer.parseInt(parts[1]);
 
-                        StelsApplication application = ((StelsApplication) context.getApplicationContext());
+                        TelegramApplication application = ((TelegramApplication) context.getApplicationContext());
                         application.getKernel().getAuthKernel().getApiStorage().updateDCInfo(dc, ip, port);
                         application.getSyncKernel().getBackgroundSync().resetDcSync();
                     }

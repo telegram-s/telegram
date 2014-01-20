@@ -2,7 +2,7 @@ package org.telegram.android.core.engines;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 
 /**
  * Created by ex3ndr on 15.01.14.
@@ -11,7 +11,7 @@ public class SyncStateEngine {
 
     SharedPreferences syncPrefs;
 
-    public SyncStateEngine(StelsApplication application) {
+    public SyncStateEngine(TelegramApplication application) {
         syncPrefs = application.getSharedPreferences("org.telegram.android.Sync.prefs", Context.MODE_PRIVATE);
     }
 

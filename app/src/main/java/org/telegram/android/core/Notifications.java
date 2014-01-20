@@ -24,7 +24,7 @@ import android.widget.TextView;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.NotificationSettings;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.MessageState;
@@ -66,7 +66,7 @@ public class Notifications {
     private static final int NOTIFICATION_MESSAGE = 0;
     private static final int NOTIFICATION_SYSTEM = 1;
 
-    private StelsApplication application;
+    private TelegramApplication application;
     private NotificationManager manager;
 
     private int lastNotifiedMid = -1;
@@ -92,7 +92,7 @@ public class Notifications {
     private Activity notificationActivity;
     private WindowManager windowManager;
 
-    public Notifications(StelsApplication application) {
+    public Notifications(TelegramApplication application) {
         this.application = application;
         this.windowManager = (WindowManager) application.getSystemService(Context.WINDOW_SERVICE);
         this.manager = (NotificationManager) application.getSystemService(Context.NOTIFICATION_SERVICE);

@@ -2,7 +2,7 @@ package org.telegram.android.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 
 import java.util.HashMap;
 
@@ -18,7 +18,7 @@ public class TextSaver {
 
     private HashMap<String, String> savedText = new HashMap<String, String>();
 
-    public TextSaver(StelsApplication application) {
+    public TextSaver(TelegramApplication application) {
         preferences = application.getSharedPreferences("org.telegram.android.TextSaver.pref", Context.MODE_PRIVATE);
         preferences.getAll();
     }

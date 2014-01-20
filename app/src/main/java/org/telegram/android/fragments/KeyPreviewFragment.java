@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.User;
 
 /**
@@ -18,7 +18,7 @@ import org.telegram.android.core.model.User;
  * Date: 16.10.13
  * Time: 17:58
  */
-public class KeyPreviewFragment extends StelsFragment {
+public class KeyPreviewFragment extends TelegramFragment {
     private byte[] hash;
     private int uid;
 

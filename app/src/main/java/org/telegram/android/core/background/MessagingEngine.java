@@ -1,6 +1,6 @@
 package org.telegram.android.core.background;
 
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.engines.ModelEngine;
 
 /**
@@ -8,9 +8,9 @@ import org.telegram.android.core.engines.ModelEngine;
  */
 public class MessagingEngine {
     private ModelEngine engine;
-    private StelsApplication application;
+    private TelegramApplication application;
 
-    public MessagingEngine(StelsApplication application, ModelEngine engine) {
+    public MessagingEngine(TelegramApplication application, ModelEngine engine) {
         this.engine = engine;
     }
 }

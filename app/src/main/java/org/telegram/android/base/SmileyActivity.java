@@ -1,10 +1,9 @@
-package org.telegram.android;
+package org.telegram.android.base;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.text.BidiFormatter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
@@ -14,19 +13,18 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
+import org.telegram.android.R;
 import org.telegram.android.fragments.interfaces.SmileysController;
 import org.telegram.android.ui.EmojiProcessor;
 import org.telegram.android.ui.Smileys;
 import org.telegram.android.ui.SmileysView;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
-import java.text.Bidi;
-
 /**
  * Author: Korshakov Stepan
  * Created: 03.09.13 18:13
  */
-public class StelsSmileyActivity extends StelsActivity implements SmileysController, ViewTreeObserver.OnGlobalLayoutListener {
+public class SmileyActivity extends TelegramActivity implements SmileysController, ViewTreeObserver.OnGlobalLayoutListener {
 
     private View smileysView;
 
@@ -254,7 +252,7 @@ public class StelsSmileyActivity extends StelsActivity implements SmileysControl
                     View res = getLayoutInflater().inflate(R.layout.overlay_smileys_container, container, false);
 
 
-                    SmileysView mainSmileys = new SmileysView(StelsSmileyActivity.this, application.getEmojiProcessor(),
+                    SmileysView mainSmileys = new SmileysView(SmileyActivity.this, application.getEmojiProcessor(),
                             smileys,
                             countInRow, getPx(48), getPx(10));
                     mainSmileys.setOnSmileClickedListener(new SmileysView.OnSmileClickedListener() {

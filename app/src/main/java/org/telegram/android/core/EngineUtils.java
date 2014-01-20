@@ -2,9 +2,7 @@ package org.telegram.android.core;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.local.TLLocalUserStatusEmpty;
@@ -19,7 +17,6 @@ import org.telegram.tl.TLObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Author: Korshakov Stepan
@@ -322,7 +319,7 @@ public class EngineUtils {
         }
     }
 
-    public static ChatMessage fromTlMessage(TLAbsMessage absMessage, StelsApplication application) {
+    public static ChatMessage fromTlMessage(TLAbsMessage absMessage, TelegramApplication application) {
         ChatMessage res = new ChatMessage();
 
         if (absMessage instanceof TLMessage) {

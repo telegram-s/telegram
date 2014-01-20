@@ -7,28 +7,22 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import com.actionbarsherlock.view.MenuItem;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
-import org.telegram.android.core.model.DialogDescription;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.Group;
-import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.update.TLLocalEditChatTitle;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
-import org.telegram.api.TLAbsMessage;
-import org.telegram.api.TLDialog;
 import org.telegram.api.TLMessageActionChatEditTitle;
 import org.telegram.api.TLMessageService;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.messages.TLAbsStatedMessage;
 import org.telegram.api.requests.TLRequestMessagesEditChatTitle;
 
-import java.util.ArrayList;
-
 /**
  * Author: Korshakov Stepan
  * Created: 10.08.13 18:19
  */
-public class EditChatTitleFragment extends StelsFragment {
+public class EditChatTitleFragment extends TelegramFragment {
 
     private EditText chatTitleView;
     private int chatId;

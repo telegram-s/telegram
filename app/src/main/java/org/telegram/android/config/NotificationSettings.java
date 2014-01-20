@@ -2,7 +2,7 @@ package org.telegram.android.config;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 
 /**
  * Author: Korshakov Stepan
@@ -14,7 +14,7 @@ public class NotificationSettings {
 
     private SharedPreferences preferences;
 
-    public NotificationSettings(StelsApplication application) {
+    public NotificationSettings(TelegramApplication application) {
         this.preferences = application.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
     }
 

@@ -17,7 +17,7 @@ import android.widget.Checkable;
 import com.extradea.framework.images.ImageReceiver;
 import com.extradea.framework.images.tasks.ScaleTask;
 import org.telegram.android.R;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
@@ -702,7 +702,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         invalidate();
     }
 
-    public static int getBubblePadding(MessageWireframe wireframe, Rect bubblePadding, int width, StelsApplication application1) {
+    public static int getBubblePadding(MessageWireframe wireframe, Rect bubblePadding, int width, TelegramApplication application1) {
         boolean showAvatar = !wireframe.message.isOut() && wireframe.message.getPeerType() == PeerType.PEER_CHAT;
 
         int bubbleMaxSize = width - BUBBLE_PADDING - bubblePadding.left - bubblePadding.right;

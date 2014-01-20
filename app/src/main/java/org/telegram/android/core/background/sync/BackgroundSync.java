@@ -2,7 +2,7 @@ package org.telegram.android.core.background.sync;
 
 import android.os.Build;
 import android.os.SystemClock;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
@@ -19,7 +19,6 @@ import org.telegram.tl.TLVector;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -50,7 +49,7 @@ public class BackgroundSync extends BaseSync {
 
     private long appSession = Entropy.generateRandomId() ^ 0x0F;
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private final ArrayList<TLInputAppEvent> logs = new ArrayList<TLInputAppEvent>();
 
@@ -59,7 +58,7 @@ public class BackgroundSync extends BaseSync {
     private int typingPeerId;
     private long typingTime;
 
-    public BackgroundSync(StelsApplication application) {
+    public BackgroundSync(TelegramApplication application) {
         super(application, SETTINGS_NAME);
         this.application = application;
         registerTechSync(SYNC_DC, "dcSync", SYNC_DC_INTERVAL);

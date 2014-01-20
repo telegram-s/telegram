@@ -4,7 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 import org.telegram.android.R;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.background.common.TaskExecutor;
@@ -47,7 +47,7 @@ public class AvatarUploader extends TaskExecutor<AvatarUploader.Task> {
         public void onAvatarUploadingStateChanged(int chatId);
     }
 
-    private StelsApplication application;
+    private TelegramApplication application;
     private Random rnd = new Random();
 
     private AvatarUserUploadListener listener;
@@ -61,7 +61,7 @@ public class AvatarUploader extends TaskExecutor<AvatarUploader.Task> {
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    public AvatarUploader(StelsApplication application) {
+    public AvatarUploader(TelegramApplication application) {
         super(1);
         this.application = application;
     }

@@ -12,7 +12,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
@@ -28,13 +28,11 @@ import org.telegram.api.requests.TLRequestContactsBlock;
 import org.telegram.api.requests.TLRequestContactsGetBlocked;
 import org.telegram.api.requests.TLRequestContactsUnblock;
 
-import java.util.List;
-
 /**
  * Author: Korshakov Stepan
  * Created: 18.08.13 17:32
  */
-public class BlockedFragment extends StelsFragment {
+public class BlockedFragment extends TelegramFragment {
     private View loading;
     private View empty;
     private ListView usersList;

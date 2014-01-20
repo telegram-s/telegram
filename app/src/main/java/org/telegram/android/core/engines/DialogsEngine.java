@@ -1,6 +1,6 @@
 package org.telegram.android.core.engines;
 
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.service.TLLocalActionChatDeleteUser;
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class DialogsEngine {
     private DialogsDatabase database;
-    private StelsApplication application;
+    private TelegramApplication application;
     private ModelEngine engine;
 
     public DialogsEngine(ModelEngine engine) {

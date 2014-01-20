@@ -51,7 +51,7 @@
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="18"/>
     <application android:label="@string/st_app_name"
                  android:icon="@drawable/app_icon"
-                 android:name=".StelsApplication"
+                 android:name=".TelegramApplication"
                  android:hardwareAccelerated="true"
                  android:supportsRtl="true">
         <activity android:name=".StartActivity"
@@ -105,12 +105,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ViewImagesActivity"
+        <activity android:name=".activity.ViewImagesActivity"
                   android:theme="@style/AppTheme.Photo"
                   android:label="Telegram"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
                   android:windowSoftInputMode="stateHidden|adjustNothing"/>
-        <activity android:name=".ViewImageActivity"
+        <activity android:name=".activity.ViewImageActivity"
                   android:theme="@style/AppTheme.Photo"
                   android:label="Telegram"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenSize"

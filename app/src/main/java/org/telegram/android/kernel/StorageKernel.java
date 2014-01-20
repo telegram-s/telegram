@@ -1,5 +1,6 @@
 package org.telegram.android.kernel;
 
+import android.content.Context;
 import org.telegram.android.core.engines.ModelEngine;
 import org.telegram.android.log.Logger;
 
@@ -7,6 +8,11 @@ import org.telegram.android.log.Logger;
  * Created by ex3ndr on 16.11.13.
  */
 public class StorageKernel {
+
+    public static boolean requiredDatabaseUpgrade(ApplicationKernel kernel) {
+        return true;
+    }
+
     private static final String TAG = "StorageKernel";
 
     private ApplicationKernel kernel;
@@ -16,6 +22,12 @@ public class StorageKernel {
         this.kernel = kernel;
         long start = System.currentTimeMillis();
         this.model = new ModelEngine(kernel.getApplication());
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return;
+        }
         Logger.d(TAG, "ModelEngine loaded in " + (System.currentTimeMillis() - start) + " ms");
     }
 

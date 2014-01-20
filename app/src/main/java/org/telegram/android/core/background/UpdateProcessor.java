@@ -3,7 +3,7 @@ package org.telegram.android.core.background;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.*;
@@ -46,7 +46,7 @@ public class UpdateProcessor {
 
     private static final int DIFF_TIMEOUT = 60000;
 
-    private StelsApplication application;
+    private TelegramApplication application;
     private Thread corrector;
     private Looper correctorLooper;
     private Handler correctorHandler;
@@ -62,7 +62,7 @@ public class UpdateProcessor {
     private boolean isStarted = false;
 
 
-    public UpdateProcessor(StelsApplication _application) {
+    public UpdateProcessor(TelegramApplication _application) {
         this.application = _application;
         this.isInvalidated = false;
         this.updateState = new UpdateState(_application);

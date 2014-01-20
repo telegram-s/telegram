@@ -3,20 +3,15 @@ package org.telegram.android.fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import org.telegram.android.CrashActivity;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
-import org.telegram.android.core.ContactsSource;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.log.Logger;
-import org.telegram.android.tasks.AsyncAction;
-import org.telegram.android.tasks.AsyncException;
 
 import java.io.*;
 
@@ -24,7 +19,7 @@ import java.io.*;
  * Author: Korshakov Stepan
  * Created: 10.09.13 23:27
  */
-public class DebugFragment extends StelsFragment {
+public class DebugFragment extends TelegramFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -48,12 +43,6 @@ public class DebugFragment extends StelsFragment {
             @Override
             public void onClick(View v) {
                 application.getSyncKernel().getBackgroundSync().resetDcSync();
-            }
-        });
-        res.findViewById(R.id.crashApp).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent().setClass(getActivity(), CrashActivity.class));
             }
         });
 //        res.findViewById(R.id.phoneBook).setOnClickListener(new View.OnClickListener() {

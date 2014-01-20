@@ -1,7 +1,7 @@
 package org.telegram.android.core.engines;
 
 import android.os.SystemClock;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.*;
 import org.telegram.android.log.Logger;
@@ -20,7 +20,7 @@ public class MessagesEngine {
 
     private ModelEngine engine;
     private MessagesDatabase database;
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private int maxDate = 0;
     private AtomicInteger minMid = null;

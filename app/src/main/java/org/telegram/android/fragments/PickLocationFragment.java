@@ -13,7 +13,7 @@ import com.actionbarsherlock.view.Menu;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.*;
-import org.telegram.android.MapStelsFragment;
+import org.telegram.android.base.TelegramMapFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.model.media.TLLocalGeo;
 
@@ -23,7 +23,7 @@ import java.util.List;
  * Author: Korshakov Stepan
  * Created: 14.08.13 18:07
  */
-public class PickLocationFragment extends MapStelsFragment {
+public class PickLocationFragment extends TelegramMapFragment {
     private Marker currentMarker;
     private double latitude;
     private double longitude;

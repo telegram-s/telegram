@@ -1,4 +1,4 @@
-package org.telegram.android;
+package org.telegram.android.core;
 
 /**
  * Author: Korshakov Stepan

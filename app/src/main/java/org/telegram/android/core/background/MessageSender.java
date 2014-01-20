@@ -1,50 +1,29 @@
 package org.telegram.android.core.background;
 
-import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.media.MediaMetadataRetriever;
 import android.os.*;
-import org.telegram.android.StelsApplication;
-import org.telegram.android.core.EngineUtils;
-import org.telegram.android.core.files.UploadController;
-import org.telegram.android.core.files.UploadResult;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.update.TLLocalMessageEncryptedSent;
 import org.telegram.android.core.model.update.TLLocalMessageSent;
 import org.telegram.android.core.model.update.TLLocalMessageSentStated;
 import org.telegram.android.core.model.update.TLLocalMessagesSentStated;
 import org.telegram.android.log.Logger;
-import org.telegram.android.media.Optimizer;
 import org.telegram.android.core.model.*;
-import org.telegram.android.media.DownloadManager;
-import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.EmojiProcessor;
 import org.telegram.android.ui.LastEmojiProcessor;
 import org.telegram.api.*;
-import org.telegram.api.TLMessage;
-import org.telegram.api.engine.RpcCallback;
 import org.telegram.api.engine.RpcCallbackEx;
-import org.telegram.api.engine.RpcException;
-import org.telegram.api.engine.file.UploadListener;
-import org.telegram.api.engine.file.Uploader;
 import org.telegram.api.messages.*;
 import org.telegram.api.requests.*;
-import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
-import org.telegram.tl.StreamingUtils;
 import org.telegram.tl.TLIntVector;
 import org.telegram.tl.TLMethod;
 import org.telegram.tl.TLObject;
 
 import java.io.*;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
-import static org.telegram.mtproto.secure.CryptoUtils.*;
 
 /**
  * Author: Korshakov Stepan
@@ -65,10 +44,10 @@ public class MessageSender {
         }
     });
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
 
-    public MessageSender(StelsApplication application) {
+    public MessageSender(TelegramApplication application) {
         this.application = application;
     }
 

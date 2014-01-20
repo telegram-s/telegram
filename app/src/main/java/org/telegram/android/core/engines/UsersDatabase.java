@@ -1,7 +1,7 @@
 package org.telegram.android.core.engines;
 
 import android.os.SystemClock;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.TLLocalContext;
 import org.telegram.android.core.model.User;
@@ -27,9 +27,9 @@ public class UsersDatabase {
 
     private ConcurrentHashMap<Integer, User> userCache;
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
-    public UsersDatabase(StelsApplication application, ModelEngine engine) {
+    public UsersDatabase(TelegramApplication application, ModelEngine engine) {
         this.application = application;
         DaoSession session = engine.getDaoSession();
         userGreenDao = session.getUserDao();

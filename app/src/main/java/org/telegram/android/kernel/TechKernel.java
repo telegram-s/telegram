@@ -2,7 +2,7 @@ package org.telegram.android.kernel;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.DebugSettings;
 import org.telegram.android.config.SystemConfig;
 import org.telegram.android.core.ConnectionMonitor;
@@ -17,7 +17,7 @@ public class TechKernel {
 
     private static final String TAG = "TechKernel";
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private TechReflection techReflection;
     private DebugSettings debugSettings;
@@ -25,7 +25,7 @@ public class TechKernel {
     private ConnectionMonitor monitor;
     private SystemConfig systemConfig;
 
-    public TechKernel(StelsApplication application) {
+    public TechKernel(TelegramApplication application) {
         this.application = application;
 
         long start = System.currentTimeMillis();

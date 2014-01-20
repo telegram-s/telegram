@@ -2,17 +2,15 @@ package org.telegram.android.views;
 
 import android.content.Context;
 import android.graphics.*;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.text.BidiFormatter;
 import android.text.*;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import com.extradea.framework.images.ImageReceiver;
-import com.extradea.framework.images.tasks.RoundedImageTask;
 import com.extradea.framework.images.tasks.ScaleTask;
 import org.telegram.android.R;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.core.TypingStates;
 import org.telegram.android.core.model.*;
@@ -73,7 +71,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     // Help data
     private int currentUserUid;
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private ImageReceiver avatarReceiver;
 
@@ -119,7 +117,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private static void checkResources(Context context) {
         if (!isLoaded) {
-            StelsApplication application = (StelsApplication) context.getApplicationContext();
+            TelegramApplication application = (TelegramApplication) context.getApplicationContext();
             IS_LARGE = application.getUserSettings().getDialogItemSize() == UserSettings.DIALOG_SIZE_LARGE;
 
             avatarPaint = new Paint();
@@ -253,7 +251,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         super(context);
         checkResources(context);
 
-        this.application = (StelsApplication) context.getApplicationContext();
+        this.application = (TelegramApplication) context.getApplicationContext();
 
         this.currentUserUid = application.getCurrentUid();
         this.avatarReceiver = new ImageReceiver() {
@@ -534,7 +532,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         }
     }
 
-    public static Object prepareLayoutCache(DialogWireframe wireframe, StelsApplication context) {
+    public static Object prepareLayoutCache(DialogWireframe wireframe, TelegramApplication context) {
         checkResources(context);
         DialogLayout hl = new DialogLayout();
         hl.build(wireframe, UiMeasure.METRICS.widthPixels, px(80), context);
@@ -599,7 +597,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         public Layout bodyLayout;
         public Layout titleLayout;
 
-        public void build(DialogWireframe description, int w, int h, StelsApplication application) {
+        public void build(DialogWireframe description, int w, int h, TelegramApplication application) {
             layoutH = h;
             layoutW = w;
 

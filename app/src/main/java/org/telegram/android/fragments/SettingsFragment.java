@@ -19,7 +19,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.extradea.framework.images.tasks.FileSystemImageTask;
 import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
-import org.telegram.android.MediaReceiverFragment;
+import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.UserSourceListener;
 import org.telegram.android.core.background.AvatarUploader;

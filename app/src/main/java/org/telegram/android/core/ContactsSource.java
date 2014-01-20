@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.ContactsContract;
 import android.provider.Settings;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.background.sync.ContactsSync;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.User;
@@ -25,7 +25,7 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private final CopyOnWriteArrayList<ContactSourceListener> listeners = new CopyOnWriteArrayList<ContactSourceListener>();
 
@@ -43,7 +43,7 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
         return telegramContacts;
     }
 
-    public ContactsSource(StelsApplication application) {
+    public ContactsSource(TelegramApplication application) {
         this.application = application;
         loadSettings();
     }

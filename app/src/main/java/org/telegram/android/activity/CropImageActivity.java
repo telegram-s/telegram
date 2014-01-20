@@ -1,19 +1,16 @@
 package org.telegram.android.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.edmodo.cropper.CropImageView;
 import org.telegram.android.R;
-import org.telegram.android.StelsActivity;
+import org.telegram.android.base.TelegramActivity;
 import org.telegram.android.media.Optimizer;
 
 import java.io.IOException;
@@ -21,7 +18,7 @@ import java.io.IOException;
 /**
  * Created by ex3ndr on 10.01.14.
  */
-public class CropImageActivity extends StelsActivity {
+public class CropImageActivity extends TelegramActivity {
 
     public static Intent cropIntent(String fileName, int ratioX, int ratioY, String destFileName, Context context) {
         Intent res = new Intent();

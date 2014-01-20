@@ -6,9 +6,7 @@ import android.app.FragmentManager;
 import android.content.*;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.GradientDrawable;
 import android.os.*;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -18,10 +16,14 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
+import org.telegram.android.activity.ViewImageActivity;
+import org.telegram.android.activity.ViewImagesActivity;
+import org.telegram.android.base.SmileyActivity;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.fragments.*;
 import org.telegram.android.fragments.interfaces.FragmentResultController;
 import org.telegram.android.fragments.interfaces.RootController;
+import org.telegram.android.kernel.KernelsLoader;
 import org.telegram.android.log.Logger;
 import org.telegram.android.screens.FragmentScreenController;
 import org.telegram.android.screens.RootControllerHolder;
@@ -33,7 +35,7 @@ import java.util.ArrayList;
  * Author: Korshakov Stepan
  * Created: 28.07.13 19:09
  */
-public class StartActivity extends StelsSmileyActivity implements FragmentResultController, RootControllerHolder {
+public class StartActivity extends SmileyActivity implements FragmentResultController, RootControllerHolder {
 
     public static boolean isGuideShown = false;
 
@@ -42,6 +44,7 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     private static final int STATE_GENERAL = -1;
     private static final int STATE_TOUR = 0;
     private static final int STATE_LOGIN = 1;
+    private static final int STATE_WAIT = 2;
 
     private static final int REQUEST_OPEN_IMAGE = 300;
 
@@ -68,58 +71,59 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     public void onCreate(Bundle savedInstanceState) {
         long start = SystemClock.uptimeMillis();
         super.onCreate(savedInstanceState);
-        Bundle savedState = null;
-        if (savedInstanceState != null && savedInstanceState.containsKey("screen_controller")) {
-            savedState = savedInstanceState.getBundle("screen_controller");
-        }
 
         getWindow().setBackgroundDrawableResource(R.drawable.transparent);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            getWindow().setFormat(PixelFormat.RGB_565);
+        }
 
         setBarBg();
         getSupportActionBar().setLogo(R.drawable.st_bar_logo);
         getSupportActionBar().setIcon(R.drawable.st_bar_logo);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
 
+        setWindowContentOverlayCompat();
+
         setContentView(R.layout.activity_main);
+
+        Bundle savedState = null;
+        if (savedInstanceState != null && savedInstanceState.containsKey("screen_controller")) {
+            savedState = savedInstanceState.getBundle("screen_controller");
+        }
         controller = new FragmentScreenController(this, savedState);
 
-        updateHeaderHeight();
-
-        if (savedInstanceState == null) {
-            if (application.getVersionHolder().isWasUpgraded()) {
-                onInitUpdated();
+        if (application.getKernelsLoader().isLoaded()) {
+            if (savedInstanceState == null) {
+                if (application.getVersionHolder().isWasUpgraded()) {
+                    onInitUpdated();
+                } else {
+                    onInitApp(true);
+                }
             } else {
-                onInitApp(true);
+                setState(savedInstanceState.getInt("currentState", STATE_LOGIN));
+                barVisible = savedInstanceState.getBoolean("barVisible");
+                if (barVisible) {
+                    showBar();
+                } else {
+                    hideBar();
+                }
             }
         } else {
-            setState(savedInstanceState.getInt("currentState", STATE_LOGIN));
-            barVisible = savedInstanceState.getBoolean("barVisible");
-            if (barVisible) {
-                showBar();
-            } else {
-                hideBar();
-            }
-        }
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            getWindow().setFormat(PixelFormat.RGB_565);
-        }
-
-        if (getIntent().getAction() != null) {
-            onIntent(getIntent());
+            setState(STATE_WAIT);
+            // setState(savedInstanceState.getInt("currentState", STATE_WAIT));
+            application.getKernelsLoader().addListener(new KernelsLoader.KernelsLoadingListener() {
+                @Override
+                public void onKernelsLoaded() {
+                    if (application.getVersionHolder().isWasUpgraded()) {
+                        onInitUpdated();
+                    } else {
+                        onInitApp(true);
+                    }
+                }
+            });
         }
 
         Logger.d(TAG, "Kernel: Activity loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
-
-        Handler handler = new Handler();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                application.onLoaded();
-            }
-        });
-
-        setWindowContentOverlayCompat();
     }
 
     private void setWindowContentOverlayCompat() {
@@ -252,26 +256,9 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        application.getUiKernel().onConfigurationChanged();
-        updateHeaderHeight();
-    }
-
-    private void updateHeaderHeight() {
-    }
-
-    protected int getBarHeight() {
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            TypedValue tv = new TypedValue();
-            getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true);
-            return getResources().getDimensionPixelSize(tv.resourceId);
-        } else {
-            TypedValue tv = new TypedValue();
-            getTheme().resolveAttribute(R.attr.actionBarSize, tv, true);
-            return getResources().getDimensionPixelSize(tv.resourceId);
-        }*/
-        TypedValue tv = new TypedValue();
-        getTheme().resolveAttribute(R.attr.actionBarSize, tv, true);
-        return getResources().getDimensionPixelSize(tv.resourceId);
+        if (application.getKernelsLoader().isLoaded()) {
+            application.getUiKernel().onConfigurationChanged();
+        }
     }
 
     @Override
@@ -400,6 +387,10 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     }
 
     private void checkLogout() {
+        if (!application.getKernelsLoader().isLoaded()) {
+            return;
+        }
+
         if (!application.isLoggedIn()) {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
             if (!(fragment instanceof AuthFragment) && !(fragment instanceof TourFragment)) {
@@ -430,9 +421,15 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
 
     @Override
     public void onBackPressed() {
-        application.getKernel().sendEvent("app_back");
+        if (application.getKernelsLoader().isLoaded()) {
+            application.getKernel().sendEvent("app_back");
+        }
 
-        if (!controller.doSystemBack()) {
+        if (controller != null) {
+            if (!controller.doSystemBack()) {
+                finish();
+            }
+        } else {
             finish();
         }
     }
@@ -465,7 +462,10 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
     @Override
     protected void onResume() {
         super.onResume();
-        application.getUiKernel().onAppResume(this);
+        if (application.getKernelsLoader().isLoaded()) {
+            application.getUiKernel().onAppResume(this);
+        }
+
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("org.telegram.android.ACTION_LOGOUT");
         logoutReceiver = new BroadcastReceiver() {
@@ -477,18 +477,18 @@ public class StartActivity extends StelsSmileyActivity implements FragmentResult
         registerReceiver(logoutReceiver, intentFilter);
         checkLogout();
 
-        TestIntegration.initActivity(this);
-        // getWindow().setBackgroundDrawableResource(R.drawable.transparent);
-
         setBarBg();
+
+        TestIntegration.initActivity(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        application.getUiKernel().onAppPause();
+        if (application.getKernelsLoader().isLoaded()) {
+            application.getUiKernel().onAppPause();
+        }
         unregisterReceiver(logoutReceiver);
-        // getWindow().setBackgroundDrawableResource(R.drawable.smileys_bg);
     }
 
     @Override

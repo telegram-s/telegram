@@ -1,12 +1,9 @@
 package org.telegram.android.core;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.support.v4.text.BidiFormatter;
-import org.telegram.android.Configuration;
 import org.telegram.android.R;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.service.*;
@@ -58,14 +55,14 @@ public class DialogSource {
     private DialogSourceState state;
     private int persistenceState = STATE_UNLOADED;
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private ViewSource<DialogWireframe, DialogDescription> dialogsSource;
 
     private boolean isDestroyed;
     private SyncStateEngine syncStateEngine;
 
-    public DialogSource(StelsApplication _application) {
+    public DialogSource(TelegramApplication _application) {
         this.application = _application;
         this.isDestroyed = false;
         this.syncStateEngine = application.getEngine().getSyncStateEngine();
@@ -80,7 +77,7 @@ public class DialogSource {
             this.state = DialogSourceState.UNSYNCED;
         }
 
-        this.dialogsSource = new ViewSource<DialogWireframe, DialogDescription>(true) {
+        this.dialogsSource = new ViewSource<DialogWireframe, DialogDescription>(false) {
             @Override
             protected DialogDescription[] loadItems(int offset) {
 

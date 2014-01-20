@@ -1,10 +1,7 @@
 package org.telegram.android.core;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.SystemClock;
-import org.telegram.android.Configuration;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLLocalContact;
@@ -22,7 +19,6 @@ import org.telegram.api.messages.TLMessages;
 import org.telegram.api.messages.TLMessagesSlice;
 import org.telegram.api.requests.TLRequestMessagesGetHistory;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,7 +53,7 @@ public class MessageSource {
     private final Object stateSync = new Object();
     private MessagesSourceState state;
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private int peerType, peerId;
 
@@ -71,7 +67,7 @@ public class MessageSource {
 
     private SyncStateEngine syncStateEngine;
 
-    public MessageSource(int _peerType, int _peerId, StelsApplication _application) {
+    public MessageSource(int _peerType, int _peerId, TelegramApplication _application) {
         TAG = "MessageSource#" + _peerType + "@" + _peerId;
         this.peerType = _peerType;
         this.peerId = _peerId;

@@ -3,7 +3,7 @@ package org.telegram.android.core;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.mtproto.time.TimeOverlord;
 
@@ -82,9 +82,9 @@ public class TypingStates {
 
     private CopyOnWriteArrayList<WeakReference<TypingListener>> listeners = new CopyOnWriteArrayList<WeakReference<TypingListener>>();
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
-    public TypingStates(StelsApplication application) {
+    public TypingStates(TelegramApplication application) {
         this.application = application;
     }
 

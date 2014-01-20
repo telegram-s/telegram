@@ -1,4 +1,4 @@
-package org.telegram.android;
+package org.telegram.android.base;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,6 +19,8 @@ import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import com.actionbarsherlock.app.SherlockFragment;
+import org.telegram.android.R;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.fragments.interfaces.RootController;
 import org.telegram.android.fragments.interfaces.SmileysController;
 import org.telegram.android.screens.RootControllerHolder;
@@ -46,7 +48,7 @@ import java.util.concurrent.ThreadFactory;
  * Author: Korshakov Stepan
  * Created: 28.07.13 2:08
  */
-public class StelsBaseFragment extends SherlockFragment implements EmojiListener {
+public class TelegramBaseFragment extends SherlockFragment implements EmojiListener {
     private static final ExecutorService service = Executors.newFixedThreadPool(5, new ThreadFactory() {
         @Override
         public Thread newThread(Runnable runnable) {
@@ -108,7 +110,7 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
         }
     };
     private ProgressInterface defaultProgressInterface = dialogProgressInterface;
-    protected StelsApplication application;
+    protected TelegramApplication application;
     private Handler handler = new Handler(Looper.getMainLooper());
     private DisplayMetrics metrics;
 
@@ -167,7 +169,7 @@ public class StelsBaseFragment extends SherlockFragment implements EmojiListener
 
     private void ensureApp() {
         if (application == null) {
-            application = (StelsApplication) getActivity().getApplication();
+            application = (TelegramApplication) getActivity().getApplication();
         }
 
         rootController = null;

@@ -28,7 +28,7 @@ public class BackgroundService extends Service {
     public void onCreate() {
         super.onCreate();
         Logger.d(TAG, "onCreate");
-        kernel = ((StelsApplication) getApplication()).getKernel();
+        kernel = ((TelegramApplication) getApplication()).getKernel();
         checkRunnable = new Runnable() {
             @Override
             public void run() {

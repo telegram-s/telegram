@@ -1,7 +1,6 @@
 package org.telegram.android.core.background;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -9,15 +8,13 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.*;
 import android.provider.MediaStore;
-import android.webkit.MimeTypeMap;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.EncryptedChat;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.*;
-import org.telegram.android.core.model.update.TLLocalMessageSent;
 import org.telegram.android.core.model.update.TLLocalMessageSentDoc;
 import org.telegram.android.core.model.update.TLLocalMessageSentPhoto;
 import org.telegram.android.core.model.update.TLLocalMessageSentStated;
@@ -70,11 +67,11 @@ public class MediaSender {
         }
     });
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private CopyOnWriteArrayList<WeakReference<SenderListener>> listeners = new CopyOnWriteArrayList<WeakReference<SenderListener>>();
 
-    public MediaSender(StelsApplication application) {
+    public MediaSender(TelegramApplication application) {
         this.application = application;
     }
 
@@ -750,7 +747,7 @@ public class MediaSender {
         if (Build.VERSION.SDK_INT >= 8) {
             try {
                 //return getExternalCacheDir().getAbsolutePath();
-                return ((File) StelsApplication.class.getMethod("getExternalCacheDir").invoke(application)).getAbsolutePath() + "/upload_" + Entropy.generateRandomId() + ".jpg";
+                return ((File) TelegramApplication.class.getMethod("getExternalCacheDir").invoke(application)).getAbsolutePath() + "/upload_" + Entropy.generateRandomId() + ".jpg";
             } catch (Exception e) {
                 // Log.e(TAG, e);
             }

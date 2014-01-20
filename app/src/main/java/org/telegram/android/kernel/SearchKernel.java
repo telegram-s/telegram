@@ -1,7 +1,7 @@
 package org.telegram.android.kernel;
 
 import android.text.SpannableString;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.PeerType;
@@ -18,10 +18,10 @@ import java.util.HashSet;
  * Created: 24.08.13 22:35
  */
 public class SearchKernel {
-    private StelsApplication application;
+    private TelegramApplication application;
     private DialogDescription[] descriptions;
 
-    public SearchKernel(StelsApplication application) {
+    public SearchKernel(TelegramApplication application) {
         this.application = application;
     }
 

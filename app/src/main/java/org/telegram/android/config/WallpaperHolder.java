@@ -4,8 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import org.telegram.android.R;
-import org.telegram.android.StelsActivity;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 
 import java.io.FileNotFoundException;
 
@@ -17,9 +16,9 @@ import java.io.FileNotFoundException;
  */
 public class WallpaperHolder {
     private Bitmap wallpaper;
-    private StelsApplication application;
+    private TelegramApplication application;
 
-    public WallpaperHolder(StelsApplication application) {
+    public WallpaperHolder(TelegramApplication application) {
         this.application = application;
     }
 

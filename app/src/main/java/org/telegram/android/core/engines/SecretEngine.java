@@ -1,6 +1,6 @@
 package org.telegram.android.core.engines;
 
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.service.TLLocalActionEncryptedCancelled;
 import org.telegram.android.core.model.service.TLLocalActionEncryptedCreated;
@@ -12,8 +12,6 @@ import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.time.TimeOverlord;
 import org.telegram.tl.StreamingUtils;
 
-import java.sql.SQLException;
-
 /**
  * Created by ex3ndr on 03.01.14.
  */
@@ -22,7 +20,7 @@ public class SecretEngine {
 
     private SecretDatabase secretDatabase;
     private ModelEngine engine;
-    private StelsApplication application;
+    private TelegramApplication application;
 
     public SecretEngine(ModelEngine engine) {
         this.engine = engine;

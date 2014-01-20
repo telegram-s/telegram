@@ -15,7 +15,7 @@ import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.countries.Countries;
 import org.telegram.android.countries.CountryRecord;
 import org.telegram.android.log.Logger;
@@ -82,7 +82,7 @@ public class ActivationController {
 
     private ActivationListener listener;
 
-    private StelsApplication application;
+    private TelegramApplication application;
     private int currentState;
     private CountryRecord currentCountry;
     private String autoPhone;
@@ -121,7 +121,7 @@ public class ActivationController {
         }
     };
 
-    private static String findPhone(StelsApplication application) {
+    private static String findPhone(TelegramApplication application) {
         TelephonyManager manager = (TelephonyManager) application.getSystemService(Context.TELEPHONY_SERVICE);
         AccountManager am = AccountManager.get(application);
         Account[] accounts = am.getAccounts();
@@ -167,7 +167,7 @@ public class ActivationController {
         return null;
     }
 
-    public ActivationController(StelsApplication application) {
+    public ActivationController(TelegramApplication application) {
         this.application = application;
         this.autoPhone = findPhone(application);
         if (this.autoPhone != null) {

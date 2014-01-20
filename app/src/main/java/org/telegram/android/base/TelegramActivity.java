@@ -1,8 +1,10 @@
-package org.telegram.android;
+package org.telegram.android.base;
 
 import android.os.Bundle;
 import android.view.View;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import org.telegram.android.R;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.ui.FontController;
 
@@ -10,15 +12,15 @@ import org.telegram.android.ui.FontController;
  * Author: Korshakov Stepan
  * Created: 24.07.13 17:11
  */
-public class StelsActivity extends SherlockFragmentActivity {
+public class TelegramActivity extends SherlockFragmentActivity {
 
-    protected StelsApplication application;
+    protected TelegramApplication application;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         FontController.initInflater(this);
         super.onCreate(savedInstanceState);
-        application = (StelsApplication) getApplicationContext();
+        application = (TelegramApplication) getApplicationContext();
     }
 
     public void setBarBg() {

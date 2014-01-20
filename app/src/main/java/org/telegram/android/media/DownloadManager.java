@@ -4,7 +4,7 @@ import android.graphics.*;
 import android.media.MediaScannerConnection;
 import android.os.*;
 import com.extradea.framework.images.utils.ImageUtils;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.UiNotifier;
@@ -88,7 +88,7 @@ public class DownloadManager {
     private ExecutorService service;
 
     private UiNotifier notifier = new UiNotifier();
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private HashMap<String, DownloadRecord> records = new HashMap<String, DownloadRecord>();
 
@@ -96,7 +96,7 @@ public class DownloadManager {
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    public DownloadManager(StelsApplication application) {
+    public DownloadManager(TelegramApplication application) {
         this.service = Executors.newFixedThreadPool(3);
         this.application = application;
         this.downloadPersistence = new DownloadPersistence(application);

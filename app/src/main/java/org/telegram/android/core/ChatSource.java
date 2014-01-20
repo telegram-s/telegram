@@ -2,7 +2,7 @@ package org.telegram.android.core;
 
 import android.os.Handler;
 import android.os.Looper;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.DialogDescription;
 import org.telegram.android.core.model.FullChatInfo;
 import org.telegram.android.core.model.PeerType;
@@ -41,11 +41,11 @@ public class ChatSource {
 
     private final CopyOnWriteArrayList<ChatSourceListener> listeners = new CopyOnWriteArrayList<ChatSourceListener>();
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    public ChatSource(StelsApplication application) {
+    public ChatSource(TelegramApplication application) {
         this.application = application;
     }
 

@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Created by ex3ndr on 14.12.13.
  */
-public class PickFileFragment extends StelsFragment {
+public class PickFileFragment extends TelegramFragment {
     private String currentPath = "/";
     private ArrayList<String> history = new ArrayList<String>();
 

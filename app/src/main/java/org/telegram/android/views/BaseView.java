@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.ui.UiMeasure;
 
 /**
@@ -17,11 +17,11 @@ public class BaseView extends View {
     protected final float density;
     protected final float dDensity;
     protected final DisplayMetrics metrics;
-    protected final StelsApplication application;
+    protected final TelegramApplication application;
 
     public BaseView(Context context) {
         super(context);
-        application = (StelsApplication) context.getApplicationContext();
+        application = (TelegramApplication) context.getApplicationContext();
         metrics = context.getResources().getDisplayMetrics();
         density = metrics.density;
         dDensity = metrics.scaledDensity;
@@ -29,7 +29,7 @@ public class BaseView extends View {
 
     public BaseView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        application = (StelsApplication) context.getApplicationContext();
+        application = (TelegramApplication) context.getApplicationContext();
         metrics = context.getResources().getDisplayMetrics();
         density = metrics.density;
         dDensity = metrics.scaledDensity;
@@ -37,7 +37,7 @@ public class BaseView extends View {
 
     public BaseView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        application = (StelsApplication) context.getApplicationContext();
+        application = (TelegramApplication) context.getApplicationContext();
         metrics = context.getResources().getDisplayMetrics();
         density = metrics.density;
         dDensity = metrics.scaledDensity;

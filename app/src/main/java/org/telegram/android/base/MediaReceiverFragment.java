@@ -1,23 +1,18 @@
-package org.telegram.android;
+package org.telegram.android.base;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.widget.Toast;
 import com.extradea.framework.images.utils.ImageUtils;
+import org.telegram.android.R;
 import org.telegram.android.activity.CropImageActivity;
 import org.telegram.android.ui.pick.PickIntentClickListener;
 import org.telegram.android.ui.pick.PickIntentDialog;
@@ -31,7 +26,7 @@ import java.util.*;
  * Author: Korshakov Stepan
  * Created: 01.08.13 6:25
  */
-public class MediaReceiverFragment extends StelsFragment {
+public class MediaReceiverFragment extends TelegramFragment {
 
     private static final int REQ_M = 5;
 

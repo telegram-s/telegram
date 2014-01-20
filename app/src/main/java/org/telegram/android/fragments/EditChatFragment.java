@@ -19,7 +19,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.tasks.FileSystemImageTask;
 import com.extradea.framework.images.tasks.UriImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
-import org.telegram.android.MediaReceiverFragment;
+import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.ChatSourceListener;
 import org.telegram.android.core.background.AvatarUploader;
@@ -47,17 +47,12 @@ import org.telegram.api.*;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.messages.TLAbsStatedMessage;
 import org.telegram.api.messages.TLAffectedHistory;
-import org.telegram.api.messages.TLStatedMessage;
-import org.telegram.api.messages.TLStatedMessageLink;
 import org.telegram.api.requests.*;
 import org.telegram.i18n.I18nUtil;
-import org.telegram.mtproto.secure.Entropy;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Random;
 
 /**
  * Author: Korshakov Stepan

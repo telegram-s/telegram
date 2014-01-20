@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.PhotoImageView;
@@ -15,7 +15,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
  * Author: Korshakov Stepan
  * Created: 12.09.13 1:49
  */
-public class SingleImagePreviewFragment extends StelsFragment {
+public class SingleImagePreviewFragment extends TelegramFragment {
     private TLLocalFileLocation location;
 
     public SingleImagePreviewFragment(TLLocalFileLocation location) {

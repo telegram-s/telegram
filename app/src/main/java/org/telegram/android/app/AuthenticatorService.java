@@ -72,7 +72,7 @@ public class AuthenticatorService extends Service {
 
                 if (removalAllowed) {
                     // mContext.sendBroadcast(new Intent("org.telegram.android.LOGOUT"));
-                    //((StelsApplication) mContext.getApplicationContext()).dropLogin();
+                    //((TelegramApplication) mContext.getApplicationContext()).dropLogin();
                 }
             }
 

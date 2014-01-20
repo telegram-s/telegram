@@ -17,10 +17,8 @@ import android.widget.AbsListView;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import com.extradea.framework.images.ui.ImagingListView;
-import com.google.android.gms.internal.ca;
-import com.google.android.gms.internal.da;
 import org.telegram.android.R;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.TextUtil;
@@ -38,7 +36,7 @@ public class ConversationListView extends ImagingListView {
     private static final int ACTIVATE_DELTA = 50;
     private static final long UI_TIMEOUT = 900;
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private String visibleDate = null;
     private int timeDivMeasure;
@@ -91,7 +89,7 @@ public class ConversationListView extends ImagingListView {
     }
 
     private void init() {
-        application = (StelsApplication) getContext().getApplicationContext();
+        application = (TelegramApplication) getContext().getApplicationContext();
 
         setOnScrollListener(new ScrollListener());
 

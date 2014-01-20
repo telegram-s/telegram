@@ -1,6 +1,5 @@
 package org.telegram.android.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,10 +10,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.*;
 import com.actionbarsherlock.widget.SearchView;
 import org.telegram.android.R;
-import org.telegram.android.StelsActivity;
+import org.telegram.android.base.TelegramActivity;
 import org.telegram.android.countries.Countries;
 import org.telegram.android.countries.CountryRecord;
 import org.telegram.android.ui.FilterMatcher;
@@ -26,7 +24,7 @@ import java.util.ArrayList;
 /**
  * Created by ex3ndr on 23.12.13.
  */
-public class PickCountryActivity extends StelsActivity {
+public class PickCountryActivity extends TelegramActivity {
     private StickyListHeadersListView listView;
     private CountriesAdapter adapter;
     private CountryRecord[] countries;

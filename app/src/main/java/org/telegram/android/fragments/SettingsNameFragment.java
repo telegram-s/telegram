@@ -12,7 +12,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.User;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
  * Author: Korshakov Stepan
  * Created: 16.08.13 18:23
  */
-public class SettingsNameFragment extends StelsFragment {
+public class SettingsNameFragment extends TelegramFragment {
 
     private int uid;
     private User user;

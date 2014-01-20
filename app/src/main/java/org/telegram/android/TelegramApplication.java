@@ -23,63 +23,23 @@ import org.telegram.api.engine.TelegramApi;
  * Author: Korshakov Stepan
  * Created: 22.07.13 0:55
  */
-public class StelsApplication extends Application implements ImageSupport {
-
-    private static final String TAG = "StelsApplication";
+public class TelegramApplication extends Application implements ImageSupport {
 
     private ApplicationKernel kernel;
-
-    private long appCreateTime;
-    private long appStartTime;
-
-    private boolean isLoaded = false;
+    private KernelsLoader kernelsLoader;
 
     @Override
     public void onCreate() {
-        long start = SystemClock.uptimeMillis();
-        appStartTime = start;
         CrashHandler.init(this);
         kernel = new ApplicationKernel(this);
         super.onCreate();
 
-        long initStart = SystemClock.uptimeMillis();
-
-        // None of this objects starts doing something in background until someone ack them about this
-        kernel.initTechKernel(); // Technical information about environment. Might be loaded first.
-        kernel.initLifeKernel(); // Keeping application alive
-        kernel.initBasicUiKernel(); // UI state objects, eg opened page, app state
-
-        kernel.initAuthKernel(); // Authentication kernel. Might be loaded before other kernels.
-        kernel.initStorageKernel(); // Database kernel
-        kernel.initSourcesKernel(); // UI Data Sources kernel
-
-        kernel.initSettingsKernel(); // User app settings
-        kernel.initFileKernel(); // Uploading/Downloading files
-        kernel.initSearchKernel(); // Searching in app
-        kernel.initEncryptedKernel(); // Encrypted chats kernel
-
-        kernel.initSyncKernel(); // Background sync kernel
-
-        kernel.initApiKernel(); // Initializing api kernel
-
-        Logger.d(TAG, "Kernels created in " + (SystemClock.uptimeMillis() - initStart) + " ms");
-
-        kernel.runKernels();
-
-        kernel.getUiKernel().onAppPause();
-
-        Logger.d(TAG, "Kernels loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
-
-        appCreateTime = SystemClock.uptimeMillis();
+        kernelsLoader = new KernelsLoader();
+        kernelsLoader.stagedLoad(kernel);
     }
 
-    public void onLoaded() {
-        if (isLoaded) {
-            return;
-        }
-
-        Logger.d(TAG, "Kernel: all loading in " + (SystemClock.uptimeMillis() - appStartTime) + " ms");
-        Logger.d(TAG, "Kernel: complete loading in " + (SystemClock.uptimeMillis() - appCreateTime) + " ms");
+    public KernelsLoader getKernelsLoader() {
+        return kernelsLoader;
     }
 
     public boolean isRTL() {
@@ -97,35 +57,6 @@ public class StelsApplication extends Application implements ImageSupport {
     public int getCurrentUid() {
         return kernel.getAuthKernel().getApiStorage().getObj().getUid();
     }
-
-//    public void dropLogin() {
-//        if (!isLoggedIn())
-//            return;
-//
-//        kernel.getAuthKernel().getApiStorage().resetAuth();
-//
-//        clearLoginState();
-//
-//        updateApi();
-//
-//        if (kernel.getUiKernel().isAppVisible()) {
-//            Intent broadcastIntent = new Intent();
-//            broadcastIntent.setAction("org.telegram.android.ACTION_LOGOUT");
-//            sendBroadcast(broadcastIntent);
-//            // startActivity(new Intent().setClass(this, StartActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-//        } else {
-//            NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
-//            notification.setTicker("Required login in Telegram");
-//            notification.setContentTitle("Telegram");
-//            notification.setContentText("Please login again to Telegram");
-//            notification.setContentIntent(PendingIntent.getActivity(this, 0, new Intent().setClass(this, StartActivity.class), 0));
-//            notification.setSmallIcon(R.drawable.app_notify);
-//            notification.setAutoCancel(true);
-//            Notification not = notification.build();
-//            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//            manager.notify(1, not);
-//        }
-//    }
 
     public UploadController getUploadController() {
         return kernel.getFileKernel().getUploadController();
@@ -146,7 +77,6 @@ public class StelsApplication extends Application implements ImageSupport {
     public MediaSender getMediaSender() {
         return kernel.getSyncKernel().getMediaSender();
     }
-
 
     public DialogSource getDialogSource() {
         return kernel.getDataSourceKernel().getDialogSource();

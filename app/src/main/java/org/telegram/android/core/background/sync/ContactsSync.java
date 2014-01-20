@@ -15,7 +15,7 @@ import android.telephony.TelephonyManager;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.TLLocalContext;
 import org.telegram.android.core.model.User;
@@ -33,7 +33,6 @@ import org.telegram.api.requests.TLRequestContactsImportContacts;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.tl.TLVector;
 
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -66,7 +65,7 @@ public class ContactsSync extends BaseSync {
 
     private static final String TAG = "ContactsSync";
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private TLPersistence<TLLocalBook> bookPersistence;
 
@@ -93,7 +92,7 @@ public class ContactsSync extends BaseSync {
 
     private long lastContactsChanged = 0;
 
-    public ContactsSync(StelsApplication application) {
+    public ContactsSync(TelegramApplication application) {
         super(application, SETTINGS_NAME);
 
         long start = SystemClock.uptimeMillis();

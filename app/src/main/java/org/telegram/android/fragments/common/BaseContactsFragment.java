@@ -2,16 +2,14 @@ package org.telegram.android.fragments.common;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.text.SpannableString;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.ContactSourceListener;
 import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
@@ -25,12 +23,11 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by ex3ndr on 08.12.13.
  */
-public abstract class BaseContactsFragment extends StelsFragment implements ContactSourceListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+public abstract class BaseContactsFragment extends TelegramFragment implements ContactSourceListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
     private boolean isLoaded;
 
     private FilterMatcher matcher;

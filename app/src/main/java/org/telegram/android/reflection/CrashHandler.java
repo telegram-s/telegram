@@ -1,9 +1,7 @@
 package org.telegram.android.reflection;
 
 import com.bugsense.trace.BugSenseHandler;
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.MapBuilder;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 
 /**
@@ -13,7 +11,7 @@ import org.telegram.android.log.Logger;
  * Time: 4:02
  */
 public class CrashHandler {
-    public static void init(StelsApplication application) {
+    public static void init(TelegramApplication application) {
         BugSenseHandler.initAndStartSession(application, "e6d19090");
 
         // Flushing logs to disk

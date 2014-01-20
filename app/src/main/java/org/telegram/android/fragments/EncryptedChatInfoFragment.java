@@ -17,8 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
-import org.telegram.android.core.EngineUtils;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.EncryptedChat;
 import org.telegram.android.core.model.EncryptedChatState;
 import org.telegram.android.core.model.PeerType;
@@ -26,13 +25,11 @@ import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.service.TLLocalActionEncryptedTtl;
-import org.telegram.android.log.Logger;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
-import org.telegram.api.TLAbsUserStatus;
 import org.telegram.api.TLDecryptedMessageActionSetMessageTTL;
 import org.telegram.api.TLDecryptedMessageService;
 import org.telegram.api.TLInputEncryptedChat;
@@ -50,7 +47,7 @@ import static org.telegram.mtproto.secure.CryptoUtils.*;
  * Date: 16.10.13
  * Time: 16:28
  */
-public class EncryptedChatInfoFragment extends StelsFragment {
+public class EncryptedChatInfoFragment extends TelegramFragment {
 
     private static final String TAG = "EncryptedInfoFragment";
 

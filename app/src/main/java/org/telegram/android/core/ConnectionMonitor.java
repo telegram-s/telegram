@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 
 /**
@@ -19,13 +19,13 @@ public class ConnectionMonitor {
 
     private static final String TAG = "ConnectionMonitor";
     private static final long DEFAULT_TIMEOUT = 5 * 60 * 1000;
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private ConnectivityManager connectivityManager;
 
     private final Object locker = new Object();
 
-    public ConnectionMonitor(StelsApplication application) {
+    public ConnectionMonitor(TelegramApplication application) {
         this.application = application;
         this.connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
 

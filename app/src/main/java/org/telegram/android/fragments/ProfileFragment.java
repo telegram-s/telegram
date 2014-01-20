@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -20,9 +19,8 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.UserSourceListener;
-import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
@@ -47,7 +45,7 @@ import java.util.ArrayList;
  * Author: Korshakov Stepan
  * Created: 05.08.13 11:01
  */
-public class ProfileFragment extends StelsFragment implements UserSourceListener {
+public class ProfileFragment extends TelegramFragment implements UserSourceListener {
 
     private static final int PICK_NOTIFICATION_SOUND = 1;
 

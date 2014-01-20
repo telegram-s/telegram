@@ -1,6 +1,6 @@
 package org.telegram.android.core.engines;
 
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class GroupsEngine {
     private GroupsDatabase database;
-    private StelsApplication application;
+    private TelegramApplication application;
 
     public GroupsEngine(ModelEngine engine) {
         this.database = new GroupsDatabase(engine);

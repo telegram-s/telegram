@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import com.extradea.framework.images.ImageController;
 import com.extradea.framework.images.tasks.ImageTask;
 import com.extradea.framework.images.workers.ImageWorker;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.ui.BitmapUtils;
 import org.telegram.api.TLFileLocation;
 import org.telegram.api.TLInputFileLocation;
@@ -16,9 +16,9 @@ import org.telegram.api.upload.TLFile;
  */
 public class StelsImageWorker implements ImageWorker {
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
-    public StelsImageWorker(StelsApplication application) {
+    public StelsImageWorker(TelegramApplication application) {
         this.application = application;
     }
 

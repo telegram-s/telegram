@@ -1,7 +1,7 @@
 package org.telegram.android.core.engines;
 
 import android.net.Uri;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.MediaRecord;
@@ -31,7 +31,7 @@ public class ModelEngine {
 
     private DaoMaster daoMaster;
     private DaoSession daoSession;
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private UsersEngine usersEngine;
     private GroupsEngine groupsEngine;
@@ -45,7 +45,7 @@ public class ModelEngine {
 
     private SyncStateEngine syncStateEngine;
 
-    public ModelEngine(StelsApplication application) {
+    public ModelEngine(TelegramApplication application) {
         DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(application, "users-db", null);
         this.daoMaster = new DaoMaster(helper.getWritableDatabase());
         this.daoMaster.getDatabase().execSQL("PRAGMA synchronous = OFF;");
@@ -65,7 +65,7 @@ public class ModelEngine {
         return daoSession;
     }
 
-    public StelsApplication getApplication() {
+    public TelegramApplication getApplication() {
         return application;
     }
 

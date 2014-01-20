@@ -2,11 +2,9 @@ package org.telegram.android.core.files;
 
 import android.os.SystemClock;
 import android.util.Pair;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.mtproto.secure.CryptoUtils;
-import org.telegram.tl.TLBool;
-import org.telegram.tl.TLObject;
 
 import java.io.*;
 import java.security.MessageDigest;
@@ -35,11 +33,11 @@ public class UploadController {
     private static final int PAGE_SIZE = 128 * 1024;
     private static final int PAGE_SIZE_SLOW = 8 * 1024;
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private ExecutorService service = Executors.newFixedThreadPool(THREADS_COUNT);
 
-    public UploadController(StelsApplication application) {
+    public UploadController(TelegramApplication application) {
         this.application = application;
     }
 

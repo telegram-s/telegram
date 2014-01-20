@@ -2,7 +2,7 @@ package org.telegram.android.kernel;
 
 import android.os.SystemClock;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.android.login.ActivationController;
 import org.telegram.android.reflection.CrashHandler;
@@ -18,7 +18,7 @@ import java.io.IOException;
 public class ApplicationKernel {
     private static final String TAG = "Kernel";
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private LifeKernel lifeKernel;
 
@@ -46,13 +46,13 @@ public class ApplicationKernel {
 
     private ActivationController activationController;
 
-    public ApplicationKernel(StelsApplication application) {
+    public ApplicationKernel(TelegramApplication application) {
         this.application = application;
         initLogging();
         Logger.d(TAG, "--------------- Kernel Created ------------------");
     }
 
-    public StelsApplication getApplication() {
+    public TelegramApplication getApplication() {
         return application;
     }
 
@@ -178,6 +178,10 @@ public class ApplicationKernel {
         long start = SystemClock.uptimeMillis();
         settingsKernel = new SettingsKernel(this);
         Logger.d(TAG, "SettingsKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
+    }
+
+    public boolean asyncRequiredInit() {
+        return StorageKernel.requiredDatabaseUpgrade(this);
     }
 
     public void initStorageKernel() {

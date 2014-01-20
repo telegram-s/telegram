@@ -12,9 +12,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import org.telegram.android.MediaReceiverFragment;
+import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
-import org.telegram.android.StelsActivity;
+import org.telegram.android.base.TelegramActivity;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.views.DialogView;
@@ -236,7 +236,7 @@ public class SettingsChatFragment extends MediaReceiverFragment {
                                        @Override
                                        public void onClick(DialogInterface dialogInterface, int i) {
                                            application.getUserSettings().setBarColor(sizeIds[i]);
-                                           ((StelsActivity) getActivity()).setBarBg();
+                                           ((TelegramActivity) getActivity()).setBarBg();
                                            bindUi();
                                        }
                                    }

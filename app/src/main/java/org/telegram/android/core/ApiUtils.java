@@ -1,6 +1,6 @@
 package org.telegram.android.core;
 
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
@@ -28,9 +28,9 @@ public class ApiUtils {
     protected static final String[] WALLPAPER_PREVIEW_PRIORITY = new String[]{"b", "m", "c", "x"};
     protected static String[] FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT;
 
-    private static StelsApplication application;
+    private static TelegramApplication application;
 
-    public static void init(StelsApplication _application, int screenSize) {
+    public static void init(TelegramApplication _application, int screenSize) {
         application = _application;
         if (screenSize <= 320) {
             FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT_320;

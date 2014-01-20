@@ -7,8 +7,8 @@ import android.os.Message;
 import android.os.SystemClock;
 import com.extradea.framework.images.ImageController;
 import com.extradea.framework.images.workers.*;
-import org.telegram.android.StelsActivity;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.base.TelegramActivity;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.WallpaperHolder;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.Notifications;
@@ -41,7 +41,7 @@ public class UiKernel {
 
     private ApplicationKernel kernel;
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private ImageController imageController;
 
@@ -63,7 +63,7 @@ public class UiKernel {
     private boolean isDialogsVisible = false;
 
     public boolean isAppVisible = false;
-    public StelsActivity visibleActivity;
+    public TelegramActivity visibleActivity;
 
     public boolean isAppActive = true;
     public long lastStartTime;
@@ -187,7 +187,7 @@ public class UiKernel {
         }
     }
 
-    public StelsActivity getVisibleActivity() {
+    public TelegramActivity getVisibleActivity() {
         return visibleActivity;
     }
 
@@ -212,7 +212,7 @@ public class UiKernel {
         return openedChatPeerType;
     }
 
-    public void onAppResume(StelsActivity activity) {
+    public void onAppResume(TelegramActivity activity) {
         visibleActivity = activity;
         isAppVisible = true;
         lastStartTime = SystemClock.uptimeMillis();

@@ -1,34 +1,17 @@
 package org.telegram.android.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
-import org.telegram.android.core.ContactSourceListener;
 import org.telegram.android.core.ContactsSource;
-import org.telegram.android.core.model.User;
-import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
-import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.fragments.common.BaseContactsFragment;
-import org.telegram.android.media.StelsImageTask;
-import org.telegram.android.tasks.AsyncAction;
-import org.telegram.android.tasks.AsyncException;
-import org.telegram.android.tasks.ProgressInterface;
-import org.telegram.android.ui.FilterMatcher;
-import org.telegram.android.ui.Placeholders;
-import org.telegram.android.ui.TextUtil;
-
-import java.util.ArrayList;
 
 /**
  * Author: Korshakov Stepan

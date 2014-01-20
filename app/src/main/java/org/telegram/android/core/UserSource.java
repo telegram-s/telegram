@@ -2,7 +2,6 @@ package org.telegram.android.core;
 
 import android.os.Handler;
 import android.os.Looper;
-import org.telegram.android.StelsApplication;
 import org.telegram.android.core.model.User;
 import org.telegram.android.log.Logger;
 

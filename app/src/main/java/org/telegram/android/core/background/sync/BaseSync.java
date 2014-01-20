@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 
 import java.lang.reflect.Method;
@@ -40,11 +40,11 @@ public abstract class BaseSync {
     private Handler networkHandler;
     private Handler offlineHandler;
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     protected SharedPreferences preferences;
 
-    protected BaseSync(StelsApplication application, String prefsName) {
+    protected BaseSync(TelegramApplication application, String prefsName) {
         this.TAG = getClass().getSimpleName();
         this.application = application;
         this.preferences = application.getSharedPreferences(prefsName, Context.MODE_PRIVATE);

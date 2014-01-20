@@ -9,11 +9,10 @@ import android.text.Spannable;
 import android.text.TextPaint;
 import android.text.style.ReplacementSpan;
 import android.util.TypedValue;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 import org.telegram.config.SmileysPack;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +57,7 @@ public class EmojiProcessor {
 
     private static final Spannable.Factory spannableFactory = Spannable.Factory.getInstance();
 
-    private StelsApplication application;
+    private TelegramApplication application;
     private float density;
 
     private HashMap<Long, Integer> indexes;
@@ -76,7 +75,7 @@ public class EmojiProcessor {
 
     private int rectSize = 0;
 
-    public EmojiProcessor(StelsApplication application) {
+    public EmojiProcessor(TelegramApplication application) {
         long start = System.currentTimeMillis();
         this.application = application;
 

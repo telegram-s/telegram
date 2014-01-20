@@ -1,7 +1,6 @@
 package org.telegram.android.fragments;
 
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Bundle;
@@ -11,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.ui.FontController;
 
 import java.io.Serializable;
@@ -22,7 +21,7 @@ import java.io.Serializable;
  * Date: 31.10.13
  * Time: 18:02
  */
-public class WhatsNewFragment extends StelsFragment {
+public class WhatsNewFragment extends TelegramFragment {
 
 
     public static class Definition implements Serializable {

@@ -3,10 +3,8 @@ package org.telegram.android.fragments;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.support.v4.text.BidiFormatter;
 import android.support.v4.view.PagerAdapter;
@@ -15,7 +13,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,9 +21,8 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import com.viewpagerindicator.UnderlinePageIndicator;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.login.ActivationController;
-import org.telegram.android.ui.PhotoViewPager;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,7 +30,7 @@ import org.telegram.android.ui.PhotoViewPager;
  * Date: 17.09.13
  * Time: 16:29
  */
-public class TourFragment extends StelsFragment {
+public class TourFragment extends TelegramFragment {
     private View indicatorContainer;
     private View indicator0;
     private View indicator1;

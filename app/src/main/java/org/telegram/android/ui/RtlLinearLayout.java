@@ -30,7 +30,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
 import org.telegram.android.R;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 
 
 /**
@@ -226,7 +226,7 @@ public class RtlLinearLayout extends ViewGroup {
     }
 
     public boolean isLayoutRtl() {
-        return ((StelsApplication) getContext().getApplicationContext()).isRTL();
+        return ((TelegramApplication) getContext().getApplicationContext()).isRTL();
     }
 
     @Override

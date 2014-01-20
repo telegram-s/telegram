@@ -2,7 +2,7 @@ package org.telegram.android.core;
 
 import android.os.Handler;
 import android.os.Looper;
-import org.telegram.android.StelsApplication;
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.EncryptedChat;
 import org.telegram.android.log.Logger;
 
@@ -16,11 +16,11 @@ public class EncryptedChatSource {
     private static final String TAG = "EncryptedChatSource";
     private final CopyOnWriteArrayList<EncryptedChatSourceListener> listeners = new CopyOnWriteArrayList<EncryptedChatSourceListener>();
 
-    private StelsApplication application;
+    private TelegramApplication application;
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    public EncryptedChatSource(StelsApplication application) {
+    public EncryptedChatSource(TelegramApplication application) {
         this.application = application;
     }
 

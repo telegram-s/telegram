@@ -20,7 +20,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.extradea.framework.images.tasks.FileSystemImageTask;
 import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
-import org.telegram.android.StelsFragment;
+import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLLocalFileEmpty;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
@@ -42,7 +42,7 @@ import java.util.ArrayList;
  * Author: Korshakov Stepan
  * Created: 07.08.13 18:05
  */
-public class ImagePreviewFragment extends StelsFragment {
+public class ImagePreviewFragment extends TelegramFragment {
     private int mid;
     private int peerType;
     private int peerId;
