@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import org.telegram.android.R;
+import org.telegram.android.StartActivity;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
@@ -70,7 +71,7 @@ public class RecoverFragment extends TelegramFragment {
 
             @Override
             public void afterExecute() {
-                getRootController().onRecovered();
+                ((StartActivity) getActivity()).doInitApp(false);
             }
         });
         return res;

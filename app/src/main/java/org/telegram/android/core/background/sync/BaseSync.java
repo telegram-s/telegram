@@ -90,6 +90,10 @@ public abstract class BaseSync {
     }
 
     private Handler getHandler(SyncHolder holder) {
+        if (syncHandlers == null) {
+            return null;
+        }
+
         if (holder.isOffline) {
             return syncHandlers.get(HANDLER_OFFLINE);
         } else {
@@ -239,6 +243,10 @@ public abstract class BaseSync {
         }
 
         Handler handler = getHandler(entity);
+        if (handler == null) {
+            return;
+        }
+
         handler.removeMessages(entity.id);
         if (delay > 0) {
             handler.sendEmptyMessageDelayed(entity.id, delay);

@@ -276,17 +276,6 @@ public class FragmentScreenController implements RootController {
     }
 
     @Override
-    public void onRecovered() {
-        openDialogs(true);
-        activity.showBar();
-    }
-
-    @Override
-    public void onCloseWhatsNew() {
-        activity.closeWhatsNew();
-    }
-
-    @Override
     public void showPanel() {
         activity.showBar();
     }

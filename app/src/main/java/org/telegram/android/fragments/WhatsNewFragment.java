@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.telegram.android.R;
+import org.telegram.android.StartActivity;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.ui.FontController;
 
@@ -88,7 +89,7 @@ public class WhatsNewFragment extends TelegramFragment {
                 @Override
                 public void run() {
                     application.getVersionHolder().markFinishedUpgrade();
-                    getRootController().onCloseWhatsNew();
+                    ((StartActivity) getActivity()).doInitApp(false);
                 }
             });
         } else {
@@ -146,7 +147,7 @@ public class WhatsNewFragment extends TelegramFragment {
             @Override
             public void onClick(View v) {
                 application.getVersionHolder().markFinishedUpgrade();
-                getRootController().onCloseWhatsNew();
+                ((StartActivity) getActivity()).doInitApp(false);
             }
         });
 

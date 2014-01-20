@@ -80,10 +80,6 @@ public interface RootController {
 
     public void viewLocation(double lat, double lon, int uid);
 
-    public void onRecovered();
-
-    public void onCloseWhatsNew();
-
     public void showPanel();
 
     public void hidePanel();

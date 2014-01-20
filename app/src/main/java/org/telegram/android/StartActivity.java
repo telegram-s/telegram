@@ -1,7 +1,6 @@
 package org.telegram.android;
 
 import android.app.ActivityOptions;
-import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.*;
 import android.content.res.Configuration;
@@ -41,16 +40,10 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
 
     private static final String TAG = "StartActivity";
 
-    private static final int STATE_GENERAL = -1;
-    private static final int STATE_TOUR = 0;
-    private static final int STATE_LOGIN = 1;
-    private static final int STATE_WAIT = 2;
-
     private static final int REQUEST_OPEN_IMAGE = 300;
 
     public static final String ACTION_OPEN_SETTINGS = "org.telegram.android.OPEN_SETTINGS";
     public static final String ACTION_OPEN_CHAT = "org.telegram.android.OPEN";
-    public static final String ACTION_LOGIN = "org.telegram.android.LOGIN";
 
     private boolean barVisible;
 
@@ -60,8 +53,6 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
     private Object lastResultData;
 
     private FragmentScreenController controller;
-
-    private int currentState = STATE_LOGIN;
 
     @Override
     public RootController getRootController() {
@@ -92,35 +83,15 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         }
         controller = new FragmentScreenController(this, savedState);
 
-        if (application.getKernelsLoader().isLoaded()) {
-            if (savedInstanceState == null) {
-                if (application.getVersionHolder().isWasUpgraded()) {
-                    onInitUpdated();
-                } else {
-                    onInitApp(true);
-                }
+        if (savedInstanceState != null) {
+            barVisible = savedInstanceState.getBoolean("barVisible");
+            if (barVisible) {
+                showBar();
             } else {
-                setState(savedInstanceState.getInt("currentState", STATE_LOGIN));
-                barVisible = savedInstanceState.getBoolean("barVisible");
-                if (barVisible) {
-                    showBar();
-                } else {
-                    hideBar();
-                }
+                hideBar();
             }
         } else {
-            setState(STATE_WAIT);
-            // setState(savedInstanceState.getInt("currentState", STATE_WAIT));
-            application.getKernelsLoader().addListener(new KernelsLoader.KernelsLoadingListener() {
-                @Override
-                public void onKernelsLoaded() {
-                    if (application.getVersionHolder().isWasUpgraded()) {
-                        onInitUpdated();
-                    } else {
-                        onInitApp(true);
-                    }
-                }
-            });
+            doInitApp(true);
         }
 
         Logger.d(TAG, "Kernel: Activity loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
@@ -150,22 +121,80 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         }
     }
 
-    protected void setState(int stateId) {
-        this.currentState = stateId;
-
-        if (stateId == STATE_GENERAL) {
-            application.getKernel().sendEvent("app_state", "general");
-        } else if (stateId == STATE_LOGIN) {
-            application.getKernel().sendEvent("app_state", "login");
-        } else if (stateId == STATE_TOUR) {
-            application.getKernel().sendEvent("app_state", "tour");
+    public void doInitApp(boolean firstAttempt) {
+        if (!application.getKernelsLoader().isLoaded()) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            if (firstAttempt) {
+                transaction.add(R.id.fragmentContainer, new UpgradeFragment(), "recoverFragment");
+            } else {
+                transaction.replace(R.id.fragmentContainer, new UpgradeFragment(), "recoverFragment");
+            }
+            transaction.commit();
+            hideBar();
+            return;
         }
+
+        if (application.getKernel().getAuthKernel().isLoggedIn()) {
+            if (application.getEngine().getUser(application.getCurrentUid()) == null) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                if (firstAttempt) {
+                    transaction.add(R.id.fragmentContainer, new RecoverFragment(), "recoverFragment");
+                } else {
+                    transaction.replace(R.id.fragmentContainer, new RecoverFragment(), "recoverFragment");
+                }
+                transaction.commit();
+                hideBar();
+                return;
+            }
+        }
+
+        WhatsNewFragment.Definition[] definitions = prepareWhatsNew();
+        if (definitions.length != 0) {
+            application.getKernel().sendEvent("show_whats_new");
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragmentContainer, new WhatsNewFragment(definitions), "whatsNewFragment")
+                    .commit();
+            hideBar();
+            return;
+        }
+
+        if (!application.isLoggedIn()) {
+            if (!isGuideShown) {
+                isGuideShown = true;
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                if (firstAttempt) {
+                    transaction.add(R.id.fragmentContainer, new TourFragment(), "tourFragment");
+                } else {
+                    transaction.replace(R.id.fragmentContainer, new TourFragment(), "tourFragment");
+                }
+                transaction.commit();
+                hideBar();
+                return;
+            }
+
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            if (firstAttempt) {
+                transaction.add(R.id.fragmentContainer, new AuthFragment(), "loginFragment");
+            } else {
+                transaction.replace(R.id.fragmentContainer, new AuthFragment(), "loginFragment");
+            }
+            transaction.commit();
+            showBar();
+        }
+
+
+        controller.openDialogs(true);
+        showBar();
     }
 
-    private void onInitUpdated() {
+    private WhatsNewFragment.Definition[] prepareWhatsNew() {
         ArrayList<WhatsNewFragment.Definition> definitions = new ArrayList<WhatsNewFragment.Definition>();
 
         int prevVersionCode = application.getVersionHolder().getPrevVersionInstalled();
+
+        if (prevVersionCode == 0) {
+            return new WhatsNewFragment.Definition[0];
+        }
 
         // Current version
 
@@ -206,51 +235,7 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                     getString(R.string.whats_new_secret_hint)));
         }
 
-
-        if (definitions.size() == 0) {
-            onInitApp(true);
-        } else {
-            application.getKernel().sendEvent("show_whats_new");
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragmentContainer, new WhatsNewFragment(definitions.toArray(new WhatsNewFragment.Definition[0])), "whatsNewFragment")
-                    .commit();
-            hideBar();
-        }
-    }
-
-    public void closeWhatsNew() {
-        onInitApp(false);
-    }
-
-    public void onInitApp(boolean first) {
-        if (application.isLoggedIn()) {
-            if (application.getEngine().getUser(application.getCurrentUid()) == null) {
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                if (first) {
-                    transaction.add(R.id.fragmentContainer, new RecoverFragment(), "recoverFragment");
-                } else {
-                    transaction.replace(R.id.fragmentContainer, new RecoverFragment(), "recoverFragment");
-                }
-                transaction.commit();
-                hideBar();
-            } else {
-                controller.openDialogs(true);
-                showBar();
-            }
-            setState(STATE_GENERAL);
-        } else {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            if (first && !isGuideShown) {
-                isGuideShown = true;
-                transaction.add(R.id.fragmentContainer, new TourFragment(), "tourFragment");
-                hideBar();
-            } else {
-                transaction.replace(R.id.fragmentContainer, new AuthFragment(), "loginFragment");
-                showBar();
-            }
-            transaction.commit();
-            setState(STATE_LOGIN);
-        }
+        return definitions.toArray(new WhatsNewFragment.Definition[0]);
     }
 
     @Override
@@ -272,20 +257,6 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
             int peerId = intent.getIntExtra("peerId", 0);
             int peerType = intent.getIntExtra("peerType", 0);
             getRootController().openDialog(peerType, peerId);
-        }
-
-        if (ACTION_LOGIN.equals(intent.getAction())) {
-            if (application.isLoggedIn()) {
-                new AlertDialog.Builder(this).setMessage("Only one account allowed do you want to login to another one?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                // TODO: Fix drop login
-                                // application.dropLogin();
-                            }
-                        })
-                        .setNegativeButton("No", null).show();
-            }
         }
 
         if (ACTION_OPEN_SETTINGS.equals(intent.getAction())) {
@@ -355,7 +326,6 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("barVisible", barVisible);
-        outState.putInt("currentState", currentState);
         outState.putBundle("screen_controller", controller.saveState());
     }
 
@@ -399,7 +369,6 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                         .replace(R.id.fragmentContainer, new TourFragment())
                         .commit();
                 getSupportFragmentManager().executePendingTransactions();
-                setState(STATE_TOUR);
                 hideBar();
             }
         }
@@ -407,7 +376,6 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
 
     public void onSuccessAuth() {
         controller.openDialogs(false);
-        setState(STATE_GENERAL);
         showBar();
     }
 
@@ -415,7 +383,6 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragmentContainer, new AuthFragment(), "loginFragment")
                 .commit();
-        setState(STATE_LOGIN);
         showBar();
     }
 

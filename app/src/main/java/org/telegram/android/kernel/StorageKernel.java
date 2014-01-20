@@ -22,12 +22,6 @@ public class StorageKernel {
         this.kernel = kernel;
         long start = System.currentTimeMillis();
         this.model = new ModelEngine(kernel.getApplication());
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return;
-        }
         Logger.d(TAG, "ModelEngine loaded in " + (System.currentTimeMillis() - start) + " ms");
     }
 

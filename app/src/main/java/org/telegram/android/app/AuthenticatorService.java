@@ -53,12 +53,7 @@ public class AuthenticatorService extends Service {
         public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options)
                 throws NetworkErrorException {
 
-            Bundle reply = new Bundle();
-            Intent res = new Intent(StartActivity.ACTION_LOGIN);
-            res.setClassName(mContext.getPackageName(), mContext.getPackageName() + ".StartActivity");
-            res.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-            reply.putParcelable(AccountManager.KEY_INTENT, res);
-            return reply;
+            return null;
         }
 
 
