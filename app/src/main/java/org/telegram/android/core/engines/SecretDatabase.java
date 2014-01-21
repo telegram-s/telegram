@@ -84,6 +84,15 @@ public class SecretDatabase {
         secretDao.insertOrReplace(encryptedChat);
     }
 
+    public void updateOrCreateChats(EncryptedChat[] chat) {
+        SecretChat[] encryptedChats = new SecretChat[chat.length];
+        for (int i = 0; i < chat.length; i++) {
+            encryptedChats[i] = new SecretChat();
+            applyData(chat[i], encryptedChats[i]);
+        }
+        secretDao.insertOrReplaceInTx(encryptedChats);
+    }
+
     public void createChat(EncryptedChat chat) {
         SecretChat encryptedChat = new SecretChat();
         applyData(chat, encryptedChat);

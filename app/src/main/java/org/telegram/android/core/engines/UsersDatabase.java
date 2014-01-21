@@ -122,7 +122,7 @@ public class UsersDatabase {
         for (int i = 0; i < u.length; i++) {
             u[i] = cachedConvert(users[i]);
         }
-        if (application.getUserSource() != null) {
+        if (application.getKernelsLoader().isLoaded() && application.getUserSource() != null) {
             application.getUserSource().notifyUsersChanged(u);
         }
     }

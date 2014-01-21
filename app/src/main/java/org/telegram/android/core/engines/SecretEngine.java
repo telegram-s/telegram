@@ -195,6 +195,10 @@ public class SecretEngine {
         }
     }
 
+    public void saveSecretChats(EncryptedChat[] chats) {
+        secretDatabase.updateOrCreateChats(chats);
+    }
+
     public void clear() {
         secretDatabase.clear();
     }

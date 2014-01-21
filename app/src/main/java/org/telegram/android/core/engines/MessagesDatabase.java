@@ -198,6 +198,14 @@ public class MessagesDatabase {
         messageDao.updateInTx(nMessages);
     }
 
+    public void createInTx(final ChatMessage... messages) {
+        ArrayList<Message> nMessages = new ArrayList<Message>();
+        for (int i = 0; i < messages.length; i++) {
+            nMessages.add(convert(messages[i]));
+        }
+        messageDao.insertInTx(nMessages, false);
+    }
+
     public void deleteHistory(int peerType, int peerId) {
         messageDao.queryBuilder().where(MessageDao.Properties.PeerUniqId.eq(uniq(peerType, peerId))).buildDelete().executeDeleteWithoutDetachingEntities();
     }
@@ -290,8 +298,8 @@ public class MessagesDatabase {
     private ChatMessage convert(Message src) {
         ChatMessage res = new ChatMessage();
         res.setDatabaseId((int) (long) src.getId());
-        res.setPeerId((int) (src.getPeerUniqId() / 10L));
-        res.setPeerType((int) (src.getPeerUniqId() % 10L));
+        res.setPeerType((int) ((10 + src.getPeerUniqId() % 10L) % 10));
+        res.setPeerId((int) ((src.getPeerUniqId() - res.getPeerType()) / 10L));
         res.setMid(src.getMid());
         res.setRandomId(src.getRid());
         res.setDate(src.getDate());

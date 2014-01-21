@@ -217,6 +217,11 @@ public class MessagesEngine {
         return converted;
     }
 
+    public void saveMessages(ChatMessage[] messages) {
+        database.createInTx(messages);
+    }
+
+
     public void clear() {
         database.clear();
     }

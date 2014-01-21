@@ -89,6 +89,10 @@ public class UsersEngine {
         Logger.d(TAG, "forceUpdateUser in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
+    public void onUsersUncached(User... converted) {
+        onUsers(converted);
+    }
+
     private void onUsers(User... converted) {
         usersDatabase.updateUsers(converted);
     }

@@ -47,27 +47,37 @@ public class DialogsEngine {
 
     public synchronized void updateOrCreateDialog(DialogDescription description) {
         database.updateOrCreateDialog(description);
-        application.getDialogSource().getViewSource().updateItem(description);
+        if (application.getKernelsLoader().isLoaded()) {
+            application.getDialogSource().getViewSource().updateItem(description);
+        }
     }
 
     public synchronized void updateDialog(DialogDescription description) {
         database.updateOrCreateDialog(description);
-        application.getDialogSource().getViewSource().updateItem(description);
+        if (application.getKernelsLoader().isLoaded()) {
+            application.getDialogSource().getViewSource().updateItem(description);
+        }
     }
 
     public synchronized void updateDialogs(DialogDescription[] description) {
         database.updateOrCreateDialogs(description);
-        application.getDialogSource().getViewSource().updateItems(description);
+        if (application.getKernelsLoader().isLoaded()) {
+            application.getDialogSource().getViewSource().updateItems(description);
+        }
     }
 
     public synchronized void updateOrCreateDialog(DialogDescription[] description) {
         database.updateOrCreateDialogs(description);
-        application.getDialogSource().getViewSource().updateItems(description);
+        if (application.getKernelsLoader().isLoaded()) {
+            application.getDialogSource().getViewSource().updateItems(description);
+        }
     }
 
     public synchronized void deleteDialog(int peerType, int peerId) {
         database.deleteDialog(peerType, peerId);
-        application.getDialogSource().getViewSource().removeItemByKey(peerType * 10L + peerId);
+        if (application.getKernelsLoader().isLoaded()) {
+            application.getDialogSource().getViewSource().removeItemByKey(peerType * 10L + peerId);
+        }
     }
 
     public synchronized void markDialogAsNonFailed(int peerType, int peerId) {

@@ -156,15 +156,8 @@ public class DialogsDatabase {
             DialogDescription res = dialogsCache.get(id);
             if (res == null) {
                 res = new DialogDescription();
-
-                if (dialog.getId() % 10L < 0) {
-                    res.setPeerType((int) ((10 + dialog.getId() % 10L) % 10));
-                    res.setPeerId((int) ((dialog.getId() - res.getPeerType()) / 10L));
-                } else {
-                    res.setPeerType((int) (dialog.getId() % 10L));
-                    res.setPeerId((int) (dialog.getId() / 10L));
-                }
-
+                res.setPeerType((int) ((10 + dialog.getId() % 10L) % 10));
+                res.setPeerId((int) ((dialog.getId() - res.getPeerType()) / 10L));
                 dialogsCache.putIfAbsent(id, res);
                 res = dialogsCache.get(id);
             }
