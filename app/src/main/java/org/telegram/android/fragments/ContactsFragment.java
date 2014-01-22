@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,7 +19,6 @@ import org.telegram.android.R;
 import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.LinkType;
-import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.fragments.common.BaseContactsFragment;
 import org.telegram.android.tasks.AsyncAction;
@@ -34,7 +32,6 @@ import org.telegram.api.TLInputUserContact;
 import org.telegram.api.messages.TLAffectedHistory;
 import org.telegram.api.requests.TLRequestContactsBlock;
 import org.telegram.api.requests.TLRequestContactsDeleteContacts;
-import org.telegram.api.requests.TLRequestHelpSaveAppLog;
 import org.telegram.api.requests.TLRequestMessagesDeleteHistory;
 import org.telegram.tl.TLVector;
 
@@ -296,8 +293,7 @@ public class ContactsFragment extends BaseContactsFragment {
     }
 
     private void viewInBookContact(final ContactsSource.LocalContact contact) {
-        startActivity(new Intent(Intent.ACTION_VIEW)
-                .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contact.contactId + "")));
+        openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contact.contactId + ""));
     }
 
     private void shareContact(final ContactsSource.LocalContact contact) {

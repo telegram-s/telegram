@@ -2,7 +2,6 @@ package org.telegram.android.fragments;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -124,7 +123,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         res.findViewById(R.id.deleteAccount).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://telegram.org/deactivate")));
+                openUri(Uri.parse("https://telegram.org/deactivate"));
             }
         });
         res.findViewById(R.id.changeAvatar).setOnClickListener(new View.OnClickListener() {
@@ -191,23 +190,23 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         res.findViewById(R.id.googlePlay).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://play.google.com/store/apps/details?id=" + application.getPackageName())));
+                openUri(Uri.parse("https://play.google.com/store/apps/details?id=" + application.getPackageName()));
             }
         });
         res.findViewById(R.id.twitter).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (getStringSafe(R.string.st_lang).equals("ar")) {
-                    startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://twitter.com/telegram_arabic")));
+                    openUri(Uri.parse("https://twitter.com/telegram_arabic"));
                 } else {
-                    startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://twitter.com/telegram")));
+                    openUri(Uri.parse("https://twitter.com/telegram"));
                 }
             }
         });
         res.findViewById(R.id.faq).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://telegram.org/faq")));
+                openUri(Uri.parse("https://telegram.org/faq"));
             }
         });
         res.findViewById(R.id.notifications).setOnClickListener(new View.OnClickListener() {

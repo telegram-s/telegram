@@ -23,7 +23,6 @@ import android.text.util.Linkify;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.MimeTypeMap;
 import android.widget.*;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
@@ -787,7 +786,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     actions.add(new Runnable() {
                         @Override
                         public void run() {
-                            getActivity().startActivity(new Intent(Intent.ACTION_VIEW).setData(uri));
+                            openUri(uri);
                         }
                     });
                 } catch (Exception e) {

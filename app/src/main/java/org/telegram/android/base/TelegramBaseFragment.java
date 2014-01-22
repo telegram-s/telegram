@@ -38,7 +38,6 @@ import org.telegram.api.engine.TimeoutException;
 import org.telegram.tl.TLMethod;
 import org.telegram.tl.TLObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -677,7 +676,7 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
 
     }
 
-    protected void openFile(Uri uri) {
+    protected void openUri(Uri uri) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(uri);
         try {
@@ -687,7 +686,7 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         }
     }
 
-    protected void openFile(Uri uri, String mimeType) {
+    protected void openUri(Uri uri, String mimeType) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, mimeType);
 
@@ -706,6 +705,6 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
     }
 
     protected void openInternalFile(String key, String mimeType) {
-        openFile(Uri.parse("content://" + getStringSafe(R.string.config_account_package) + "/" + key), mimeType);
+        openUri(Uri.parse("content://" + getStringSafe(R.string.config_account_package) + "/" + key), mimeType);
     }
 }

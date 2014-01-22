@@ -404,8 +404,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
         } else if (item.getItemId() == R.id.viewBook) {
             final long[] contacts = application.getEngine().getUsersEngine().getContactsForUid(userId);
             if (contacts.length == 1) {
-                startActivity(new Intent(Intent.ACTION_VIEW)
-                        .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[0] + "")));
+                openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[0] + ""));
             } else {
                 CharSequence[] sequences = new CharSequence[contacts.length];
                 for (int i = 0; i < contacts.length; i++) {
@@ -415,8 +414,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
                 AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(sequences, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        startActivity(new Intent(Intent.ACTION_VIEW)
-                                .setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[i] + "")));
+                        openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[i] + ""));
                     }
                 }).create();
                 alertDialog.setCanceledOnTouchOutside(true);

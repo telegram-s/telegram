@@ -140,6 +140,12 @@ public class DownloadManager {
 
         if (records.containsKey(key)) {
             DownloadRecord record = records.get(key);
+            if (record.state == DownloadState.COMPLETED) {
+                if (!fileCache.isDownloaded(key)) {
+                    records.remove(key);
+                    return DownloadState.NONE;
+                }
+            }
             return record.state;
         }
 
