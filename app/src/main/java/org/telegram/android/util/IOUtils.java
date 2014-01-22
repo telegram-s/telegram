@@ -6,6 +6,12 @@ import java.io.*;
  * Created by ex3ndr on 18.11.13.
  */
 public class IOUtils {
+    public static void delete(File src) {
+        if (!src.delete()) {
+            src.deleteOnExit();
+        }
+    }
+
     public static void copy(File src, File dst) throws IOException {
         InputStream in = new FileInputStream(src);
         OutputStream out = new FileOutputStream(dst);

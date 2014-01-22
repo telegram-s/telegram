@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.extradea.framework.images.utils.ImageUtils;
 import org.telegram.android.R;
 import org.telegram.android.activity.CropImageActivity;
+import org.telegram.android.media.Optimizer;
 import org.telegram.android.ui.pick.PickIntentClickListener;
 import org.telegram.android.ui.pick.PickIntentDialog;
 import org.telegram.android.ui.pick.PickIntentItem;
@@ -59,8 +60,7 @@ public class MediaReceiverFragment extends TelegramFragment {
     }
 
     public void requestPhotoChooserWithDelete(final int requestId) {
-
-        imageFileName = getUploadTempFile();
+        imageFileName = getTempExternalFile(".jpg");
         final Uri fileUri = Uri.fromFile(new File(imageFileName));
 
         ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
@@ -93,7 +93,7 @@ public class MediaReceiverFragment extends TelegramFragment {
     }
 
     public void requestWallpaperChooser(final int requestId) {
-        imageFileName = getUploadTempFile();
+        imageFileName = getTempExternalFile(".jpg");
         final Uri fileUri = Uri.fromFile(new File(imageFileName));
 
         ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
@@ -143,8 +143,7 @@ public class MediaReceiverFragment extends TelegramFragment {
     }
 
     public void requestPhotoChooser(final int requestId) {
-
-        imageFileName = getUploadTempFile();
+        imageFileName = getTempExternalFile(".jpg");
         final Uri fileUri = Uri.fromFile(new File(imageFileName));
 
         ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
@@ -171,7 +170,7 @@ public class MediaReceiverFragment extends TelegramFragment {
 
     public void requestVideo(int requestId) {
         try {
-            videoFileName = getUploadVideoTempFile();
+            videoFileName = getTempExternalFile(".mp4");
 
             Intent intent = new Intent();
             intent.setClass(getActivity(), VideoRecorderActivity.class);
@@ -195,39 +194,31 @@ public class MediaReceiverFragment extends TelegramFragment {
     }
 
     public boolean cropSupported(Uri data) {
-//        Intent intent = new Intent("com.android.camera.action.CROP");
-//        intent.setType("image/*");
-//        intent.setData(data);
-//        List<ResolveInfo> list = getActivity().getPackageManager().queryIntentActivities(intent, 0);
-//        return list.size() != 0;
         return true;
     }
 
     public void requestCrop(String fileName, int width, int height, int requestId) {
-        requestCrop(Uri.fromFile(new File(fileName)), width, height, requestId);
-    }
-
-    public void requestCrop(Uri uri, int width, int height, int requestId) {
-        imageFileName = getUploadTempFile();
-        File f = new File(imageFileName);
         try {
-            f.createNewFile();
+            imageFileName = getUploadTempFile();
+            String cropFileName = getUploadTempFile();
+            Optimizer.optimize(fileName, cropFileName);
+            Intent intent = CropImageActivity.cropIntent(cropFileName, 1, 1, imageFileName, getActivity());
+            startActivityForResult(intent, requestId * REQ_M + REQUEST_BASE + 3);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
-        Intent intent = CropImageActivity.cropUriIntent(uri, 1, 1, imageFileName, getActivity());
-        startActivityForResult(intent, requestId * REQ_M + REQUEST_BASE + 3);
-//        Intent intent = new Intent();
-//        intent.setClass(getActivity(), CropImageActivity.class);
-//        intent.setData(uri);
-//        intent.putExtra("outputX", width);
-//        intent.putExtra("outputY", height);
-//        intent.putExtra("aspectX", 1);
-//        intent.putExtra("aspectY", 1);
-//        intent.putExtra("scale", true);
-//        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-//        startActivityForResult(intent, requestId * REQ_M + REQUEST_BASE + 3);
+    public void requestCrop(Uri uri, int width, int height, int requestId) {
+        try {
+            imageFileName = getUploadTempFile();
+            String cropFileName = getUploadTempFile();
+            Optimizer.optimize(uri.toString(), application, cropFileName);
+            Intent intent = CropImageActivity.cropIntent(cropFileName, 1, 1, imageFileName, getActivity());
+            startActivityForResult(intent, requestId * REQ_M + REQUEST_BASE + 3);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     protected void onPhotoArrived(String fileName, int width, int height, int requestId) {

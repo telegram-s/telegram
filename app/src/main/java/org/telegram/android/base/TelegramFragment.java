@@ -276,4 +276,12 @@ public class TelegramFragment extends TelegramBaseFragment {
     protected String getUploadTempFile(String fileName) {
         return application.getCacheDir().getAbsolutePath() + "/u_" + rnd.nextInt() + fileName;
     }
+
+    protected String getTempExternalFile(String fileName) {
+        if (application.getExternalCacheDir() != null) {
+            return application.getExternalCacheDir().getAbsolutePath() + "/u_" + rnd.nextInt() + fileName;
+        } else {
+            return "/sdcard/u_" + rnd.nextInt() + fileName;
+        }
+    }
 }

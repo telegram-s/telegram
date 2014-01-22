@@ -372,8 +372,10 @@ public class DownloadManager {
                             byte[] iv = ((TLLocalEncryptedFileLocation) fileLocation).getIv();
                             byte[] key = ((TLLocalEncryptedFileLocation) fileLocation).getKey();
                             CryptoUtils.AES256IGEDecrypt(new File(destFileName), new File(fileName), iv, key);
+                            IOUtils.delete(new File(destFileName));
                         } else {
                             IOUtils.copy(new File(destFileName), new File(fileName));
+                            IOUtils.delete(new File(destFileName));
                         }
                     } catch (IOException e) {
                         Logger.t(TAG, e);
@@ -493,7 +495,7 @@ public class DownloadManager {
     }
 
     private String getDownloadTempFile() {
-        return application.getExternalCacheDir().getAbsolutePath() + "/download_" + Entropy.generateRandomId() + ".bin";
+        return fileCache.getFullPath("download_" + Entropy.generateRandomId() + ".bin");
     }
 
 
