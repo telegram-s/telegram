@@ -99,7 +99,7 @@ public class ActivationController {
 
     private int sentTime;
     private boolean isManualPhone;
-    private boolean isManualActivation;
+    private boolean isPhoneRequested;
     private int networkError;
     private int lastActivationCode;
 
@@ -109,15 +109,13 @@ public class ActivationController {
 
     private AutoActivationReceiver receiver;
 
-    private Random rnd = new Random();
-
     private boolean isPageVisible = true;
 
-    private Runnable cancelAutomatic = new Runnable() {
+    private Runnable codeTimeout = new Runnable() {
         @Override
         public void run() {
             Logger.d(TAG, "notify");
-            cancelAutomatic();
+            requestPhone();
         }
     };
 
@@ -249,8 +247,8 @@ public class ActivationController {
         }
     }
 
-    public boolean isManualActivation() {
-        return isManualActivation;
+    public boolean isPhoneRequested() {
+        return isPhoneRequested;
     }
 
     public void onPageShown() {
@@ -507,14 +505,12 @@ public class ActivationController {
     }
 
     public void manualCodeEnter() {
-        cancelAutomatic();
         doChangeState(STATE_MANUAL_ACTIVATION);
-        isManualActivation = true;
     }
 
     private void startCodeSearch() {
         Logger.d(TAG, "startCodeSearch");
-        handler.postDelayed(cancelAutomatic, AUTO_TIMEOUT);
+        handler.postDelayed(codeTimeout, AUTO_TIMEOUT);
         receiver = new AutoActivationReceiver(application);
         receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
             @Override
@@ -529,7 +525,6 @@ public class ActivationController {
 
         lastActivationCode = code;
 
-        handler.removeCallbacks(cancelAutomatic);
 
         application.getApi().doRpcCallNonAuth(new TLRequestAuthSignIn(currentPhone, phoneCodeHash, "" + code), REQUEST_TIMEOUT,
                 new RpcCallback<TLAuthorization>() {
@@ -537,36 +532,28 @@ public class ActivationController {
                     public void onResult(TLAuthorization result) {
                         application.getKernel().logIn(result);
                         doChangeState(STATE_ACTIVATED);
-                        // doChangeState(STATE_SIGNUP);
+                        disableTimeout();
                     }
 
                     @Override
                     public void onError(int errorCode, String message) {
-                        cancelAutomatic();
-                        requestPhone();
+                        manualCodeEnter();
                     }
                 });
     }
 
-    private void cancelAutomatic() {
-        Logger.d(TAG, "cancelAutomatic");
-
-        if (receiver != null) {
-            receiver.stopReceivingActivation();
-        }
-
-        handler.removeCallbacks(cancelAutomatic);
-
-//        if (currentState == STATE_ACTIVATION) {
-//            requestPhone();
-//        }
-//        } else {
-//            doChangeState(STATE_MANUAL_ACTIVATION);
-//        }
+    private void disableTimeout() {
+        handler.removeCallbacks(codeTimeout);
     }
 
     public void requestPhone() {
         Logger.d(TAG, "requestPhone");
+
+        if (isPhoneRequested) {
+            return;
+        }
+
+        disableTimeout();
 
         doChangeState(STATE_MANUAL_ACTIVATION_REQUEST);
 
@@ -574,6 +561,7 @@ public class ActivationController {
                 new RpcCallback<TLBool>() {
                     @Override
                     public void onResult(TLBool result) {
+                        isPhoneRequested = true;
                         doChangeState(STATE_MANUAL_ACTIVATION);
                     }
 
@@ -634,6 +622,7 @@ public class ActivationController {
                 String tagError = getErrorTag(message);
 
                 if (tagError.equals("PHONE_NUMBER_OCCUPIED")) {
+                    disableTimeout();
                     doSendCode(lastActivationCode);
                     return;
                 }
@@ -671,11 +660,13 @@ public class ActivationController {
                         String tagError = getErrorTag(message);
 
                         if (tagError.equals("PHONE_NUMBER_INVALID")) {
+                            disableTimeout();
                             doChangeState(STATE_ERROR_WRONG_PHONE);
                             return;
                         }
 
                         if (tagError.equals("PHONE_NUMBER_UNOCCUPIED")) {
+                            disableTimeout();
                             doChangeState(STATE_SIGNUP);
                             return;
                         }

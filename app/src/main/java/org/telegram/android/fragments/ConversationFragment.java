@@ -1173,15 +1173,15 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             return true;
         }
 
-        if (item.getItemId() == R.id.attachAudio) {
-            if (!isEnabledInput) {
-                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
-                return true;
-            }
-
-            startAudio();
-            return true;
-        }
+//        if (item.getItemId() == R.id.attachAudio) {
+//            if (!isEnabledInput) {
+//                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
+//                return true;
+//            }
+//
+//            startAudio();
+//            return true;
+//        }
 
         return false;
     }

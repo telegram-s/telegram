@@ -420,7 +420,7 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         }
         if (currentState == ActivationController.STATE_MANUAL_ACTIVATION) {
             if (application.getKernel().getActivationController() != null) {
-                if (application.getKernel().getActivationController().isManualActivation()) {
+                if (!application.getKernel().getActivationController().isPhoneRequested()) {
                     inflater.inflate(R.menu.auth_manual_menu, menu);
                 }
             }
