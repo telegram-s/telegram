@@ -73,6 +73,7 @@
     <string name="st_error_blocked">User added you to their blacklist.</string>
     <string name="st_error_incorrect">Cannot complete action.</string>
     <string name="st_error_many_attempts">Too many attempts. Please try again later.</string>
+    <string name="st_error_no_app_for_file">No suitable application for file</string>
 
     <string name="st_tour_start_messaging">Start Messaging</string>
     <string name="st_tour_page1_title">Telegram</string>

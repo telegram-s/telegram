@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.Toast;
 import com.actionbarsherlock.app.SherlockFragment;
 import org.telegram.android.R;
 import org.telegram.android.TelegramApplication;
@@ -36,6 +38,7 @@ import org.telegram.api.engine.TimeoutException;
 import org.telegram.tl.TLMethod;
 import org.telegram.tl.TLObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -672,5 +675,37 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
     @Override
     public void onEmojiUpdated(boolean completed) {
 
+    }
+
+    protected void openFile(Uri uri) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(uri);
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(application, R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    protected void openFile(Uri uri, String mimeType) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, mimeType);
+
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                intent.setDataAndType(uri, "*/*");
+                startActivity(intent);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+                Toast.makeText(application, R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    protected void openInternalFile(String key, String mimeType) {
+        openFile(Uri.parse("content://" + getStringSafe(R.string.config_account_package) + "/" + key), mimeType);
     }
 }

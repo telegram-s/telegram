@@ -118,7 +118,7 @@
         <activity android:name=".video.VideoRecorderActivity"
                   android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
                   android:windowSoftInputMode="stateHidden|adjustNothing"/>
-        <activity android:name=".CrashActivity"/>
+
         <activity android:name=".activity.PickCountryActivity"
                   android:theme="@style/AppTheme.Theme"/>
 
@@ -171,5 +171,8 @@
         <meta-data android:name="com.google.android.gms.version"
                    android:value="@integer/google_play_services_version"/>
 
+        <provider android:authorities="@string/config_account_package"
+                  android:name=".app.MediaProvider"
+                  android:exported="true"/>
     </application>
 </manifest> 

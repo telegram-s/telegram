@@ -2001,35 +2001,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 final TLLocalDocument doc = (TLLocalDocument) object.message.getExtras();
                                 DownloadState state = application.getDownloadManager().getState(key);
                                 if (state == DownloadState.COMPLETED) {
-                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+//                                    String mimeType = "*/*";
+//                                    if (doc.getFileName().indexOf('.') > -1) {
+//                                        String ext = doc.getFileName().substring(doc.getFileName().lastIndexOf('.') + 1);
+//                                        mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+//                                    }
 
-                                    String mimeType = null;
-                                    if (doc.getFileName().indexOf('.') > -1) {
-                                        String ext = doc.getFileName().substring(doc.getFileName().lastIndexOf('.') + 1);
-                                        mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
-                                    }
-
-                                    if (mimeType != null) {
-                                        intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), mimeType);
-                                    } else {
-                                        intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "*/*");
-                                    }
-
-                                    try {
-                                        startActivity(intent);
-                                    } catch (android.content.ActivityNotFoundException e) {
-                                        if (mimeType != null) {
-                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "*/*");
-                                            try {
-                                                startActivity(intent);
-                                            } catch (android.content.ActivityNotFoundException e2) {
-                                                Toast.makeText(getActivity(), "Unable to open file", Toast.LENGTH_SHORT).show();
-                                            }
-                                        } else {
-                                            Toast.makeText(getActivity(), "Unable to open file", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-
+                                    openInternalFile(key, doc.getMimeType());
                                 } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
                                     // CANCEL
                                     application.getDownloadManager().abortDownload(key);
@@ -2276,35 +2254,15 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     if (((TLLocalDocument) object.message.getExtras()).getMimeType().equals("image/gif")) {
                                         ((MessageMediaView) view).toggleMovie();
                                     } else {
-                                        Intent intent = new Intent(Intent.ACTION_VIEW);
                                         TLLocalDocument doc = (TLLocalDocument) object.message.getExtras();
 
-                                        String mimeType = null;
-                                        if (doc.getFileName().indexOf('.') > -1) {
-                                            String ext = doc.getFileName().substring(doc.getFileName().lastIndexOf('.') + 1);
-                                            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
-                                        }
+//                                        String mimeType = "*/*";
+//                                        if (doc.getFileName().indexOf('.') > -1) {
+//                                            String ext = doc.getFileName().substring(doc.getFileName().lastIndexOf('.') + 1);
+//                                            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+//                                        }
 
-                                        if (mimeType != null) {
-                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), mimeType);
-                                        } else {
-                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "*/*");
-                                        }
-
-                                        try {
-                                            startActivity(intent);
-                                        } catch (android.content.ActivityNotFoundException e) {
-                                            if (mimeType != null) {
-                                                intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "*/*");
-                                                try {
-                                                    startActivity(intent);
-                                                } catch (android.content.ActivityNotFoundException e2) {
-                                                    Toast.makeText(getActivity(), "Unable to open file", Toast.LENGTH_SHORT).show();
-                                                }
-                                            } else {
-                                                Toast.makeText(getActivity(), "Unable to open file", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
+                                        openInternalFile(key, doc.getMimeType());
                                     }
                                 } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
                                     // CANCEL
