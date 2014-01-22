@@ -327,7 +327,7 @@ public class MessageMediaView extends BaseMsgView {
                     int scaledW = (int) maxWidth;
                     int scaledH = (int) (previewHeight * scale);
 
-                    previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getPhotoFileName(key)), scaledW, scaledH);
+                    previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), scaledW, scaledH);
                     previewTask.setPutInDiskCache(true);
                 }
                 isDownloadable = true;
@@ -393,7 +393,7 @@ public class MessageMediaView extends BaseMsgView {
                     int scaledH = (int) (mediaVideo.getPreviewH() * scale);
 
                     previewTask = new ScaleTask(
-                            new VideoThumbTask(application.getDownloadManager().getVideoFileName(key))
+                            new VideoThumbTask(application.getDownloadManager().getFileName(key))
                             , scaledW, scaledH);
                     previewTask.setPutInDiskCache(true);
 
@@ -569,7 +569,7 @@ public class MessageMediaView extends BaseMsgView {
                         int scaledW = (int) maxWidth;
                         int scaledH = (int) (previewHeight * scale);
 
-                        previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getDocFileName(key)), scaledW, scaledH);
+                        previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), scaledW, scaledH);
                         previewTask.setPutInDiskCache(true);
                     }
                 }
@@ -744,7 +744,7 @@ public class MessageMediaView extends BaseMsgView {
 
                     byte[] data;
                     try {
-                        data = IOUtils.readAll(application.getDownloadManager().getDocFileName(key));
+                        data = IOUtils.readAll(application.getDownloadManager().getFileName(key));
                     } catch (IOException e) {
                         e.printStackTrace();
                         return;

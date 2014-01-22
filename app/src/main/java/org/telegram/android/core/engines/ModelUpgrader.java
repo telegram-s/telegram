@@ -2,7 +2,6 @@ package org.telegram.android.core.engines;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import org.telegram.android.Manifest;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
 import org.telegram.android.core.model.local.TLLocalUserStatusEmpty;
@@ -11,10 +10,8 @@ import org.telegram.android.core.model.media.TLLocalAvatarEmpty;
 import org.telegram.android.core.model.media.TLLocalEmpty;
 import org.telegram.android.kernel.ApplicationKernel;
 import org.telegram.android.kernel.StorageKernel;
-import org.telegram.android.util.IOUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -22,8 +19,8 @@ import java.util.ArrayList;
  */
 public class ModelUpgrader {
     public static void performUpgrade(StorageKernel storageKernel, ApplicationKernel kernel) {
-        File databasePath = kernel.getApplication().getDatabasePath("stels.db");
-//        File databasePath = new File("/sdcard/stels.db");
+//         File databasePath = kernel.getApplication().getDatabasePath("stels.db");
+        File databasePath = new File("/sdcard/stels.db");
         if (databasePath.exists()) {
             SQLiteDatabase database = null;
             try {
@@ -264,9 +261,9 @@ public class ModelUpgrader {
                     e.printStackTrace();
                 }
 
-                if (!databasePath.delete()) {
-                    databasePath.deleteOnExit();
-                }
+//                if (!databasePath.delete()) {
+//                    databasePath.deleteOnExit();
+//                }
             }
         }
     }

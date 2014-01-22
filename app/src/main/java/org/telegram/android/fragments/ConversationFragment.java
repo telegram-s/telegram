@@ -2010,16 +2010,16 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     }
 
                                     if (mimeType != null) {
-                                        intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), mimeType);
+                                        intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), mimeType);
                                     } else {
-                                        intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
+                                        intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "*/*");
                                     }
 
                                     try {
                                         startActivity(intent);
                                     } catch (android.content.ActivityNotFoundException e) {
                                         if (mimeType != null) {
-                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
+                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "*/*");
                                             try {
                                                 startActivity(intent);
                                             } catch (android.content.ActivityNotFoundException e2) {
@@ -2226,7 +2226,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 DownloadState state = application.getDownloadManager().getState(key);
                                 if (state == DownloadState.COMPLETED) {
                                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getVideoFileName(key))), "video/*");
+                                    intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "video/*");
                                     startActivity(intent);
                                 } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
                                     // CANCEL
@@ -2286,16 +2286,16 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                         }
 
                                         if (mimeType != null) {
-                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), mimeType);
+                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), mimeType);
                                         } else {
-                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
+                                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "*/*");
                                         }
 
                                         try {
                                             startActivity(intent);
                                         } catch (android.content.ActivityNotFoundException e) {
                                             if (mimeType != null) {
-                                                intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getDocFileName(key))), "*/*");
+                                                intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "*/*");
                                                 try {
                                                     startActivity(intent);
                                                 } catch (android.content.ActivityNotFoundException e2) {

@@ -122,9 +122,8 @@ public class MessageAudioView extends MessageBaseDocView {
                     try {
                         MediaPlayer mplayer = new MediaPlayer();
                         mplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mplayer.setDataSource(application, Uri.fromFile(
-                                new File(isDocument ? application.getDownloadManager().getDocFileName(key) :
-                                        application.getDownloadManager().getAudioFileName(key))));
+                        mplayer.setDataSource(application,
+                                Uri.fromFile(new File(application.getDownloadManager().getFileName(key))));
                         mplayer.prepare();
                         mplayer.setLooping(false);
                         mplayer.start();

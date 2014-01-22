@@ -29,48 +29,56 @@ public class DownloadManager {
     private static final String TAG = "Downloader";
 
     public static String getVideoKey(TLLocalVideo video) {
+        String baseKey = "";
         if (video.getVideoLocation() instanceof TLLocalFileVideoLocation) {
-            return ((TLLocalFileVideoLocation) video.getVideoLocation()).getDcId() + "_" + ((TLLocalFileVideoLocation) video.getVideoLocation()).getVideoId();
+            baseKey = ((TLLocalFileVideoLocation) video.getVideoLocation()).getDcId() + "_" + ((TLLocalFileVideoLocation) video.getVideoLocation()).getVideoId();
         } else if (video.getVideoLocation() instanceof TLLocalEncryptedFileLocation) {
-            return ((TLLocalEncryptedFileLocation) video.getVideoLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) video.getVideoLocation()).getId();
+            baseKey = ((TLLocalEncryptedFileLocation) video.getVideoLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) video.getVideoLocation()).getId();
+        } else {
+            throw new UnsupportedOperationException();
         }
-        return null;
+        return "video_" + baseKey + ".mp4";
     }
 
     public static String getPhotoKey(TLLocalPhoto photo) {
+        String baseKey = "";
         if (photo.getFullLocation() instanceof TLLocalFileLocation) {
-            return ((TLLocalFileLocation) photo.getFullLocation()).getDcId() + "_" + ((TLLocalFileLocation) photo.getFullLocation()).getVolumeId() + "_" + ((TLLocalFileLocation) photo.getFullLocation()).getLocalId();
+            baseKey = ((TLLocalFileLocation) photo.getFullLocation()).getDcId() + "_" + ((TLLocalFileLocation) photo.getFullLocation()).getVolumeId() + "_" + ((TLLocalFileLocation) photo.getFullLocation()).getLocalId();
         } else if (photo.getFullLocation() instanceof TLLocalEncryptedFileLocation) {
-            return ((TLLocalEncryptedFileLocation) photo.getFullLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) photo.getFullLocation()).getId();
+            baseKey = ((TLLocalEncryptedFileLocation) photo.getFullLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) photo.getFullLocation()).getId();
         } else {
-            return null;
+            throw new UnsupportedOperationException();
         }
+        return "image_" + baseKey + ".jpg";
     }
 
     public static String getDocumentKey(TLLocalDocument document) {
+        String baseKey = "";
         if (document.getFileLocation() instanceof TLLocalFileDocument) {
-            return ((TLLocalFileDocument) document.getFileLocation()).getDcId() + "_" +
+            baseKey = ((TLLocalFileDocument) document.getFileLocation()).getDcId() + "_" +
                     ((TLLocalFileDocument) document.getFileLocation()).getId() + "_" + document.getFileName();
         } else if (document.getFileLocation() instanceof TLLocalEncryptedFileLocation) {
-            return ((TLLocalEncryptedFileLocation) document.getFileLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) document.getFileLocation()).getId();
+            baseKey = ((TLLocalEncryptedFileLocation) document.getFileLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) document.getFileLocation()).getId() + document.getFileName();
+        } else {
+            throw new UnsupportedOperationException();
         }
-        return null;
+        return "doc_" + baseKey;
     }
 
     public static String getAudioKey(TLLocalAudio audio) {
+        String baseKey = "";
         if (audio.getFileLocation() instanceof TLLocalFileAudio) {
-            return ((TLLocalFileAudio) audio.getFileLocation()).getDcId() + "_" +
+            baseKey = ((TLLocalFileAudio) audio.getFileLocation()).getDcId() + "_" +
                     ((TLLocalFileAudio) audio.getFileLocation()).getId();
         } else if (audio.getFileLocation() instanceof TLLocalEncryptedFileLocation) {
-            return ((TLLocalEncryptedFileLocation) audio.getFileLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) audio.getFileLocation()).getId();
+            baseKey = ((TLLocalEncryptedFileLocation) audio.getFileLocation()).getDcId() + "_" + ((TLLocalEncryptedFileLocation) audio.getFileLocation()).getId();
+        } else {
+            throw new UnsupportedOperationException();
         }
-        return null;
+        return "audio_" + baseKey + ".m4a";
     }
 
-
     private final int SMALL_THUMB_SIDE;
-
-    private DownloadPersistence downloadPersistence;
 
     private HashSet<String> enqueued = new HashSet<String>();
 
@@ -87,7 +95,6 @@ public class DownloadManager {
 
     private ExecutorService service;
 
-    private UiNotifier notifier = new UiNotifier();
     private TelegramApplication application;
 
     private HashMap<String, DownloadRecord> records = new HashMap<String, DownloadRecord>();
@@ -96,10 +103,12 @@ public class DownloadManager {
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
+    private FileCache fileCache;
+
     public DownloadManager(TelegramApplication application) {
+        this.fileCache = new FileCache(application);
         this.service = Executors.newFixedThreadPool(3);
         this.application = application;
-        this.downloadPersistence = new DownloadPersistence(application);
 
         final int margin = (int) (4 * application.getResources().getDisplayMetrics().density);
         SMALL_THUMB_SIDE = ((Math.min(application.getResources().getDisplayMetrics().widthPixels, application.getResources().getDisplayMetrics().heightPixels) - 5 * margin) / 4);
@@ -123,9 +132,11 @@ public class DownloadManager {
         }
     }
 
+
     public DownloadState getState(String key) {
-        if (downloadPersistence.isDownloaded(key))
+        if (fileCache.isDownloaded(key)) {
             return DownloadState.COMPLETED;
+        }
 
         if (records.containsKey(key)) {
             DownloadRecord record = records.get(key);
@@ -136,8 +147,9 @@ public class DownloadManager {
     }
 
     public int getDownloadProgress(String key) {
-        if (downloadPersistence.isDownloaded(key))
+        if (fileCache.isDownloaded(key)) {
             return 100;
+        }
 
         if (records.containsKey(key)) {
             DownloadRecord record = records.get(key);
@@ -150,7 +162,7 @@ public class DownloadManager {
     public void requestDownload(TLLocalDocument doc) {
         final String resourceKey = getDocumentKey(doc);
 
-        if (downloadPersistence.isDownloaded(resourceKey))
+        if (fileCache.isDownloaded(resourceKey))
             return;
 
         final DownloadRecord record;
@@ -163,7 +175,7 @@ public class DownloadManager {
                 record.downloaded = 0;
                 record.downloadedPercent = 0;
                 record.doc = doc;
-                updateState(resourceKey, record.state, 0, 0);
+                updateState(resourceKey, record.state, 0, 0, true);
             }
         } else {
             record = new DownloadRecord();
@@ -172,18 +184,18 @@ public class DownloadManager {
             record.downloadedPercent = 0;
             record.doc = doc;
             records.put(resourceKey, record);
-            updateState(resourceKey, record.state, 0, 0);
+            updateState(resourceKey, record.state, 0, 0, true);
         }
 
         requestDownload(resourceKey, record,
-                getDownloadDocFile(resourceKey),
+                getFileName(resourceKey),
                 doc.getFileLocation());
     }
 
     public void requestDownload(TLLocalAudio audio) {
         final String resourceKey = getAudioKey(audio);
 
-        if (downloadPersistence.isDownloaded(resourceKey))
+        if (fileCache.isDownloaded(resourceKey))
             return;
 
         final DownloadRecord record;
@@ -196,7 +208,7 @@ public class DownloadManager {
                 record.downloaded = 0;
                 record.downloadedPercent = 0;
                 record.audio = audio;
-                updateState(resourceKey, record.state, 0, 0);
+                updateState(resourceKey, record.state, 0, 0, true);
             }
         } else {
             record = new DownloadRecord();
@@ -205,11 +217,11 @@ public class DownloadManager {
             record.downloadedPercent = 0;
             record.audio = audio;
             records.put(resourceKey, record);
-            updateState(resourceKey, record.state, 0, 0);
+            updateState(resourceKey, record.state, 0, 0, true);
         }
 
         requestDownload(resourceKey, record,
-                getDownloadAudioFile(resourceKey),
+                getFileName(resourceKey),
                 audio.getFileLocation());
     }
 
@@ -218,7 +230,7 @@ public class DownloadManager {
 
         final String resourceKey = getPhotoKey(photo);
 
-        if (downloadPersistence.isDownloaded(resourceKey))
+        if (fileCache.isDownloaded(resourceKey))
             return;
 
         final DownloadRecord record;
@@ -231,7 +243,7 @@ public class DownloadManager {
                 record.downloaded = 0;
                 record.downloadedPercent = 0;
                 record.photo = photo;
-                updateState(resourceKey, record.state, 0, 0);
+                updateState(resourceKey, record.state, 0, 0, true);
             }
         } else {
             record = new DownloadRecord();
@@ -240,17 +252,18 @@ public class DownloadManager {
             record.downloadedPercent = 0;
             record.photo = photo;
             records.put(resourceKey, record);
-            updateState(resourceKey, record.state, 0, 0);
+            updateState(resourceKey, record.state, 0, 0, true);
         }
 
         requestDownload(resourceKey, record,
-                getDownloadImageFile(resourceKey),
+                getFileName(resourceKey),
                 photo.getFullLocation());
     }
 
     public void requestDownload(TLLocalVideo video) {
         final String resourceKey = getVideoKey(video);
-        if (downloadPersistence.isDownloaded(resourceKey))
+
+        if (fileCache.isDownloaded(resourceKey))
             return;
 
         final DownloadRecord record;
@@ -263,7 +276,7 @@ public class DownloadManager {
                 record.downloaded = 0;
                 record.downloadedPercent = 0;
                 record.video = video;
-                updateState(resourceKey, record.state, 0, 0);
+                updateState(resourceKey, record.state, 0, 0, true);
             }
         } else {
             record = new DownloadRecord();
@@ -272,11 +285,11 @@ public class DownloadManager {
             record.downloadedPercent = 0;
             record.video = video;
             records.put(resourceKey, record);
-            updateState(resourceKey, record.state, 0, 0);
+            updateState(resourceKey, record.state, 0, 0, true);
         }
 
         requestDownload(resourceKey, record,
-                getDownloadVideoFile(resourceKey),
+                getFileName(resourceKey),
                 video.getVideoLocation());
     }
 
@@ -314,7 +327,7 @@ public class DownloadManager {
             public void run() {
                 try {
                     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-                    updateState(key, DownloadState.IN_PROGRESS, 0, 0);
+                    updateState(key, DownloadState.IN_PROGRESS, 0, 0, true);
 
                     String destFileName = getDownloadTempFile();
 
@@ -322,7 +335,7 @@ public class DownloadManager {
                         @Override
                         public void onPartDownloaded(int percent, int downloadedSize) {
                             if (record.state != DownloadState.CANCELLED) {
-                                updateState(key, DownloadState.IN_PROGRESS, (percent * 90) / 100, downloadedSize);
+                                updateState(key, DownloadState.IN_PROGRESS, (percent * 90) / 100, downloadedSize, false);
                             }
                         }
 
@@ -344,7 +357,7 @@ public class DownloadManager {
                     Logger.d(TAG, "Waiting for task ended #" + record.downloadTask);
 
                     if (application.getApi().getDownloader().getTaskState(record.downloadTask) != Downloader.FILE_COMPLETED) {
-                        updateState(key, DownloadState.FAILURE, 0, 0);
+                        updateState(key, DownloadState.FAILURE, 0, 0, false);
                         return;
                     }
 
@@ -358,7 +371,7 @@ public class DownloadManager {
                         }
                     } catch (IOException e) {
                         Logger.t(TAG, e);
-                        updateState(key, DownloadState.FAILURE, 0, 0);
+                        updateState(key, DownloadState.FAILURE, 0, 0, true);
                         return;
                     }
 
@@ -369,7 +382,7 @@ public class DownloadManager {
                         } catch (IOException e) {
                             e.printStackTrace();
                             Logger.t(TAG, e);
-                            updateState(key, DownloadState.FAILURE, 0, 0);
+                            updateState(key, DownloadState.FAILURE, 0, 0, true);
                             return;
                         }
 
@@ -396,8 +409,8 @@ public class DownloadManager {
 
                     }
                     Logger.d(TAG, "@" + key + " = mark as downloaded");
-                    downloadPersistence.markDownloaded(key);
-                    updateState(key, DownloadState.COMPLETED, 100, size);
+                    fileCache.trackFile(key);
+                    updateState(key, DownloadState.COMPLETED, 100, size, true);
                 } finally {
                     enqueued.remove(key);
                 }
@@ -408,27 +421,27 @@ public class DownloadManager {
     public void abortDownload(String key) {
         DownloadRecord record = records.get(key);
         if (record != null) {
-            updateState(key, DownloadState.CANCELLED, record.downloadedPercent, record.downloaded);
+            updateState(key, DownloadState.CANCELLED, record.downloadedPercent, record.downloaded, true);
             application.getApi().getDownloader().cancelTask(record.downloadTask);
         }
     }
 
     public void saveDownloadImage(String key, String fileName) throws IOException {
-        IOUtils.copy(new File(fileName), new File(getDownloadImageFile(key)));
-        downloadPersistence.markDownloaded(key);
+        IOUtils.copy(new File(fileName), new File(getFileName(key)));
+        fileCache.trackFile(key);
     }
 
     public void saveDownloadImagePreview(String key, String fileName) throws IOException {
         Bitmap thumb = ImageUtils.getBitmapThumb(fileName, SMALL_THUMB_SIDE, SMALL_THUMB_SIDE);
         if (thumb == null) {
-            updateState(key, DownloadState.FAILURE, 0, 0);
+            updateState(key, DownloadState.FAILURE, 0, 0, true);
             return;
         }
 
         Logger.d(TAG, "@" + key + " = saving thumb");
         FileOutputStream outputStream = null;
         try {
-            outputStream = new FileOutputStream(getPhotoThumbSmallFileName(key));
+            outputStream = new FileOutputStream(getPreviewFileName(key));
             thumb.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
         } finally {
             if (outputStream != null) {
@@ -438,18 +451,18 @@ public class DownloadManager {
     }
 
     public void saveDownloadVideo(String key, String fileName) throws IOException {
-        IOUtils.copy(new File(fileName), new File(getDownloadVideoFile(key)));
-        downloadPersistence.markDownloaded(key);
+        IOUtils.copy(new File(fileName), new File(getFileName(key)));
+        fileCache.trackFile(key);
     }
 
     public void saveDownloadDoc(String key, String fileName) throws IOException {
-        IOUtils.copy(new File(fileName), new File(getDownloadDocFile(key)));
-        downloadPersistence.markDownloaded(key);
+        IOUtils.copy(new File(fileName), new File(getFileName(key)));
+        fileCache.trackFile(key);
     }
 
     public void saveDownloadAudio(String key, String fileName) throws IOException {
-        IOUtils.copy(new File(fileName), new File(getDownloadAudioFile(key)));
-        downloadPersistence.markDownloaded(key);
+        IOUtils.copy(new File(fileName), new File(getFileName(key)));
+        fileCache.trackFile(key);
     }
 
     public void writeToGallery(String fileName, String destName) throws IOException {
@@ -465,44 +478,12 @@ public class DownloadManager {
         MediaScannerConnection.scanFile(application, new String[]{file}, null, null);
     }
 
-    public String getVideoFileName(String key) {
-        return getDownloadVideoFile(key);
+    public String getFileName(String key) {
+        return fileCache.getFullPath(key);
     }
 
-    public String getAudioFileName(String key) {
-        return getDownloadAudioFile(key);
-    }
-
-    public String getPhotoFileName(String key) {
-        return getDownloadImageFile(key);
-    }
-
-    public String getDocFileName(String key) {
-        return getDownloadDocFile(key);
-    }
-
-    public String getPhotoThumbSmallFileName(String key) {
-        return getDownloadImageThumbFile(key);
-    }
-
-    private String getDownloadVideoFile(String key) {
-        return application.getExternalCacheDir().getAbsolutePath() + "/video_" + key + ".mp4";
-    }
-
-    private String getDownloadImageFile(String key) {
-        return application.getExternalCacheDir().getAbsolutePath() + "/image_" + key + ".jpg";
-    }
-
-    private String getDownloadDocFile(String key) {
-        return application.getExternalCacheDir().getAbsolutePath() + "/doc_" + key;
-    }
-
-    private String getDownloadAudioFile(String key) {
-        return application.getExternalCacheDir().getAbsolutePath() + "/audio_" + key + ".m4a";
-    }
-
-    private String getDownloadImageThumbFile(String key) {
-        return application.getExternalCacheDir().getAbsolutePath() + "/image_thumb_" + key + ".jpg";
+    public String getPreviewFileName(String key) {
+        return fileCache.getFullPath("thumb_" + key);
     }
 
     private String getDownloadTempFile() {
@@ -510,10 +491,15 @@ public class DownloadManager {
     }
 
 
-    private void updateState(final String key, final DownloadState state, final int percent, int bytes) {
+    private void updateState(final String key, final DownloadState state, final int percent, int bytes, boolean ignoreCancel) {
         Logger.d(TAG, "State: " + key + " = " + state + " " + percent + "%");
 
         DownloadRecord record = records.get(key);
+
+        if (!ignoreCancel && record.state == DownloadState.CANCELLED) {
+            return;
+        }
+
         record.state = state;
         record.downloadedPercent = percent;
         record.downloaded = bytes;

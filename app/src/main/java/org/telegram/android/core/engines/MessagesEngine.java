@@ -219,6 +219,7 @@ public class MessagesEngine {
 
     public void saveMessages(ChatMessage[] messages) {
         database.createInTx(messages);
+        engine.getMediaEngine().saveMedia(messages);
     }
 
 

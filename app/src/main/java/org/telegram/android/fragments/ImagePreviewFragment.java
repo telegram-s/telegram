@@ -261,7 +261,7 @@ public class ImagePreviewFragment extends TelegramFragment {
                         @Override
                         public void onClick(View view) {
                             Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getVideoFileName(key))), "video/*");
+                            intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "video/*");
                             startActivity(intent);
                         }
                     });
@@ -351,7 +351,7 @@ public class ImagePreviewFragment extends TelegramFragment {
                                 }
 
                                 if (state == DownloadState.COMPLETED) {
-                                    imageView.setImageTask(new FileSystemImageTask(application.getDownloadManager().getPhotoFileName(key)));
+                                    imageView.setImageTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)));
                                     downloadButton.setVisibility(View.GONE);
                                     progressBar.setVisibility(View.GONE);
                                 } else if (state == DownloadState.IN_PROGRESS | state == DownloadState.PENDING) {
@@ -522,11 +522,11 @@ public class ImagePreviewFragment extends TelegramFragment {
             String fileNameDest = null;
             if (record.getPreview() instanceof TLLocalVideo) {
                 key = DownloadManager.getVideoKey((TLLocalVideo) record.getPreview());
-                fileName = application.getDownloadManager().getVideoFileName(key);
+                fileName = application.getDownloadManager().getFileName(key);
                 fileNameDest = key + ".mp4";
             } else if (record.getPreview() instanceof TLLocalPhoto) {
                 key = DownloadManager.getPhotoKey((TLLocalPhoto) record.getPreview());
-                fileName = application.getDownloadManager().getPhotoFileName(key);
+                fileName = application.getDownloadManager().getFileName(key);
                 fileNameDest = key + ".jpg";
             }
 

@@ -127,7 +127,7 @@ public class MediaFragment extends TelegramFragment {
                     timeView.setVisibility(View.GONE);
                     imageView.setBackgroundColor(0xffE6E6E6);
                     if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-                        imageView.requestTask(new FileSystemImageTask(application.getDownloadManager().getPhotoThumbSmallFileName(key)));
+                        imageView.requestTask(new FileSystemImageTask(application.getDownloadManager().getPreviewFileName(key)));
                     } else {
                         if (localPhoto.getFastPreviewW() != 0 && localPhoto.getFastPreviewH() != 0) {
                             imageView.requestTask(new CachedImageTask(localPhoto));
