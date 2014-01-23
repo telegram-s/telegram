@@ -20,6 +20,7 @@
     <string name="st_default">Default</string>
     <string name="st_select_tone">Select tone</string>
     <string name="st_none">None</string>
+    <string name="st_reset">Reset</string>
 
     <string name="st_continue">Continue</string>
     <string name="st_back">Back</string>
@@ -208,6 +209,10 @@
     <string name="st_settings_blocked_subtitle">List of blocked contacts</string>
     <string name="st_settings_reset">Revoke sessions</string>
     <string name="st_settings_reset_subtitle">Logout on all other devices</string>
+
+    <string name="st_settings_reset_title">Are you sure?</string>
+    <string name="st_settings_reset_message">Are you sure want to logout on all devices? All data will be lost.</string>
+
     <string name="st_settings_reset_toast">Sessions deleted</string>
     <string name="st_settings_chat">Chat settings</string>
     <string name="st_settings_chat_subtitle">Wallpaper, send by enter, font size...</string>

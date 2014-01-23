@@ -167,18 +167,30 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         res.findViewById(R.id.resetSessions).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                runUiTask(new AsyncAction() {
-                    @Override
-                    public void execute() throws AsyncException {
-                        rpc(new TLRequestAuthResetAuthorizations());
-                        application.getUpdateProcessor().invalidateUpdates();
-                    }
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setTitle(R.string.st_settings_reset_title)
+                        .setMessage(R.string.st_settings_reset_message)
+                        .setPositiveButton(R.string.st_reset, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                runUiTask(new AsyncAction() {
+                                    @Override
+                                    public void execute() throws AsyncException {
+                                        rpc(new TLRequestAuthResetAuthorizations());
+                                        application.getUpdateProcessor().invalidateUpdates();
+                                    }
 
-                    @Override
-                    public void afterExecute() {
-                        Toast.makeText(getActivity(), R.string.st_settings_reset_toast, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                                    @Override
+                                    public void afterExecute() {
+                                        Toast.makeText(getActivity(), R.string.st_settings_reset_toast, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton(R.string.st_cancel, null)
+                        .create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
             }
         });
         res.findViewById(R.id.support).setOnClickListener(new View.OnClickListener() {
