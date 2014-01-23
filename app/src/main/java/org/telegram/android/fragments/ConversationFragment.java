@@ -996,6 +996,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         menu.findItem(R.id.attachCamera).setTitle(highlightMenuText(R.string.st_conv_menu_photo));
         menu.findItem(R.id.attachVideo).setTitle(highlightMenuText(R.string.st_conv_menu_video));
         menu.findItem(R.id.attachLocation).setTitle(highlightMenuText(R.string.st_conv_menu_location));
+        menu.findItem(R.id.attachDocument).setTitle(highlightMenuText(R.string.st_conv_menu_doc));
+        // menu.findItem(R.id.attachAudio).setTitle(highlightMenuText(R.string.st_conv_menu_audio));
 
         MenuItem avatarItem = menu.findItem(R.id.userAvatar);
         View avatarUploadView = avatarItem.getActionView().findViewById(R.id.avatarUploadProgress);
@@ -1915,11 +1917,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 } else if (action instanceof TLLocalActionEncryptedTtl) {
                     TLLocalActionEncryptedTtl ttl = (TLLocalActionEncryptedTtl) action;
                     if (ttl.getTtlSeconds() > 0) {
-                        messageView.setText(fixedHtml(getStringSafe(R.string.st_message_enc_self_destruct)
+                        messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_enc_self_destruct_you : R.string.st_message_enc_self_destruct)
                                 .replace("{0}", senderHtml)
                                 .replace("{1}", "<b>" + unicodeWrap(TextUtil.formatHumanReadableDuration(((TLLocalActionEncryptedTtl) action).getTtlSeconds())) + "</b>")));
                     } else {
-                        messageView.setText(fixedHtml(getStringSafe(R.string.st_message_enc_self_destruct_off)
+                        messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_enc_self_destruct_off_you : R.string.st_message_enc_self_destruct_off)
                                 .replace("{0}", senderHtml)));
                     }
 
@@ -2275,7 +2277,29 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         }
                     });
                 } else {
-                    messageView.setOnBubbleClickListener(null);
+                    // Unknown
+                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (selected.size() > 0) {
+                                if (selected.contains(object.message.getDatabaseId())) {
+                                    selected.remove(object.message.getDatabaseId());
+                                } else {
+                                    selected.add(object.message.getDatabaseId());
+                                }
+                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
+                                updateActionMode();
+                            } else {
+                                AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                                        .setTitle(R.string.st_conv_unsupported_title)
+                                        .setMessage(R.string.st_conv_unsupported_message)
+                                        .setPositiveButton(R.string.st_ok, null)
+                                        .create();
+                                alertDialog.setCanceledOnTouchOutside(true);
+                                alertDialog.show();
+                            }
+                        }
+                    });
                 }
             } else if (object.message.getRawContentType() == ContentType.MESSAGE_AUDIO) {
                 MessageAudioView audioView = (MessageAudioView) view;

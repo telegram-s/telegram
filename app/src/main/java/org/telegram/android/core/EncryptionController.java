@@ -255,7 +255,24 @@ public class EncryptionController {
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessageDoc(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaAudio) {
-                        // TODO: implement audio
+                        TLDecryptedMessageMediaDocument mediaDocument = (TLDecryptedMessageMediaDocument) decryptedMessage.getMedia();
+                        TLLocalAudio localAudio = new TLLocalAudio();
+                        if (encMsg.getFile() instanceof TLEncryptedFile) {
+                            TLEncryptedFile file = (TLEncryptedFile) encMsg.getFile();
+                            byte[] digest = MD5Raw(concat(mediaDocument.getKey(), mediaDocument.getIv()));
+                            int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)));
+                            if (file.getKeyFingerprint() != fingerprint) {
+                                Logger.w(TAG, "Ignoring message: attach fingerprint mismatched");
+                                return;
+                            }
+                            localAudio.setFileLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), file.getSize(), file.getDcId(), mediaDocument.getKey(), mediaDocument.getIv()));
+                        } else {
+                            localAudio.setDuration(0);
+                            localAudio.setFileLocation(new TLLocalFileEmpty());
+                        }
+                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localAudio);
+                        User u = application.getEngine().getUser(chat.getUserId());
+                        application.getNotifications().onNewSecretMessageAudio(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaEmpty) {
                         application.getEngine().onNewSecretMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), decryptedMessage.getMessage());
                         User u = application.getEngine().getUser(chat.getUserId());

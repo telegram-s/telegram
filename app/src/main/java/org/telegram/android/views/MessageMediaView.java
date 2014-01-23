@@ -55,6 +55,7 @@ public class MessageMediaView extends BaseMsgView {
     private Drawable stateFailure;
     private Drawable videoIcon;
     private Drawable mapPoint;
+    private Drawable unsupportedMark;
     private TextPaint videoDurationPaint;
     private TextPaint downloadPaint;
     private TextPaint timePaint;
@@ -91,6 +92,7 @@ public class MessageMediaView extends BaseMsgView {
     private boolean isDownloadable;
     private boolean isUploadable;
     private boolean showMapPoint;
+    private boolean isUnsupported;
     private int downloadProgress;
     private int oldDownloadProgress;
     private long downloadStateTime;
@@ -128,6 +130,7 @@ public class MessageMediaView extends BaseMsgView {
         super.init();
         videoIcon = getResources().getDrawable(R.drawable.st_bubble_ic_video);
         mapPoint = getResources().getDrawable(R.drawable.st_map_pin);
+        unsupportedMark = getResources().getDrawable(R.drawable.st_bubble_unknown);
 
         if (FontController.USE_SUBPIXEL) {
             videoDurationPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
@@ -306,6 +309,7 @@ public class MessageMediaView extends BaseMsgView {
         this.downloadString = null;
         this.showMapPoint = false;
         this.key = null;
+        this.isUnsupported = false;
 
         if (message.message.getExtras() instanceof TLLocalPhoto) {
             TLLocalPhoto mediaPhoto = (TLLocalPhoto) message.message.getExtras();
@@ -608,6 +612,8 @@ public class MessageMediaView extends BaseMsgView {
                     }
                 }
             }
+        } else {
+            isUnsupported = true;
         }
 
         if (isDownloadable) {
@@ -927,6 +933,13 @@ public class MessageMediaView extends BaseMsgView {
             mapPoint.draw(canvas);
         }
 
+        if (isUnsupported) {
+            unsupportedMark.setBounds((desiredWidth - unsupportedMark.getIntrinsicWidth()) / 2,
+                    (desiredHeight - unsupportedMark.getIntrinsicHeight()) / 2,
+                    (desiredWidth + unsupportedMark.getIntrinsicWidth()) / 2,
+                    (desiredHeight + unsupportedMark.getIntrinsicHeight()) / 2);
+            unsupportedMark.draw(canvas);
+        }
 
         if (isDownloadable || isUploadable) {
             long downloadProgressAnimationTime = SystemClock.uptimeMillis() - downloadStateTime;

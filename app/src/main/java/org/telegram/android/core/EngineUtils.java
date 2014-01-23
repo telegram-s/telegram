@@ -382,7 +382,7 @@ public class EngineUtils {
             } else if (res.getExtras() instanceof TLLocalAudio) {
                 res.setContentType(ContentType.MESSAGE_AUDIO);
             } else {
-                res.setContentType(ContentType.MESSAGE_TEXT);
+                res.setContentType(ContentType.MESSAGE_UNKNOWN);
             }
         } else if (absMessage instanceof TLMessageForwarded) {
             TLMessageForwarded message = (TLMessageForwarded) absMessage;
@@ -447,7 +447,7 @@ public class EngineUtils {
             } else if (res.getExtras() instanceof TLLocalAudio) {
                 res.setContentType(ContentType.MESSAGE_AUDIO | ContentType.MESSAGE_FORWARDED);
             } else {
-                res.setContentType(ContentType.MESSAGE_TEXT | ContentType.MESSAGE_FORWARDED);
+                res.setContentType(ContentType.MESSAGE_UNKNOWN | ContentType.MESSAGE_FORWARDED);
             }
         } else if (absMessage instanceof TLMessageService) {
             TLMessageService message = (TLMessageService) absMessage;

@@ -169,6 +169,13 @@ public class Notifications {
                 PeerType.PEER_USER, uid, photo);
     }
 
+    public void onNewMessageAudio(String senderTitle, int uid, int mid, TLObject photo) {
+        notifyMessage(mid, senderTitle, uid,
+                application.getString(R.string.st_notification_sent_audio)
+                        .replace("{name}", senderTitle),
+                PeerType.PEER_USER, uid, photo);
+    }
+
     public void onNewMessageContact(String senderTitle, int uid, int mid, TLObject photo) {
         notifyMessage(mid, senderTitle, uid,
                 application.getString(R.string.st_notification_sent_contact)
@@ -212,6 +219,13 @@ public class Notifications {
     public void onNewChatMessageDoc(String senderTitle, int senderId, String chatTitle, int chatId, int mid, TLObject photo) {
         notifyMessage(mid, senderTitle, senderId,
                 application.getString(R.string.st_notification_group_sent_document)
+                        .replace("{name}", senderTitle)
+                        .replace("{chat}", chatTitle), PeerType.PEER_CHAT, chatId, photo);
+    }
+
+    public void onNewChatMessageAudio(String senderTitle, int senderId, String chatTitle, int chatId, int mid, TLObject photo) {
+        notifyMessage(mid, senderTitle, senderId,
+                application.getString(R.string.st_notification_group_sent_audio)
                         .replace("{name}", senderTitle)
                         .replace("{chat}", chatTitle), PeerType.PEER_CHAT, chatId, photo);
     }
@@ -277,6 +291,11 @@ public class Notifications {
 
     public void onNewSecretMessageDoc(String senderTitle, int senderId, int chatId, TLObject photo) {
         notifyMessage(0, senderTitle, senderId, application.getString(R.string.st_notification_secret_sent_doc),
+                PeerType.PEER_USER_ENCRYPTED, chatId, photo);
+    }
+
+    public void onNewSecretMessageAudio(String senderTitle, int senderId, int chatId, TLObject photo) {
+        notifyMessage(0, senderTitle, senderId, application.getString(R.string.st_notification_secret_sent_audio),
                 PeerType.PEER_USER_ENCRYPTED, chatId, photo);
     }
 

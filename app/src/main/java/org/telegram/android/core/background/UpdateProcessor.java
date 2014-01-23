@@ -980,6 +980,42 @@ public class UpdateProcessor {
                             sender.getPhoto());
                 }
             }
+        } else if (msg.getRawContentType() == ContentType.MESSAGE_DOCUMENT) {
+            User sender = application.getEngine().getUser(msg.getSenderId());
+            if (msg.getPeerType() == PeerType.PEER_USER) {
+                application.getNotifications().onNewMessageDoc(
+                        sender.getDisplayName(),
+                        msg.getSenderId(), msg.getMid(),
+                        sender.getPhoto());
+            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
+                if (group != null) {
+                    application.getNotifications().onNewChatMessageDoc(
+                            sender.getDisplayName(),
+                            sender.getUid(),
+                            group.getTitle(),
+                            msg.getPeerId(), msg.getMid(),
+                            sender.getPhoto());
+                }
+            }
+        } else if (msg.getRawContentType() == ContentType.MESSAGE_AUDIO) {
+            User sender = application.getEngine().getUser(msg.getSenderId());
+            if (msg.getPeerType() == PeerType.PEER_USER) {
+                application.getNotifications().onNewMessageAudio(
+                        sender.getDisplayName(),
+                        msg.getSenderId(), msg.getMid(),
+                        sender.getPhoto());
+            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
+                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
+                if (group != null) {
+                    application.getNotifications().onNewChatMessageAudio(
+                            sender.getDisplayName(),
+                            sender.getUid(),
+                            group.getTitle(),
+                            msg.getPeerId(), msg.getMid(),
+                            sender.getPhoto());
+                }
+            }
         }
     }
 

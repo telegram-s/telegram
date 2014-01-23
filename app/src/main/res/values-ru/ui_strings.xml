@@ -443,8 +443,10 @@
     <string name="st_message_by_you">Вы</string>
     <string name="st_message_you">Вас</string>
 
-    <string name="st_message_enc_self_destruct">{0} установили самоудаление на {1}</string>
-    <string name="st_message_enc_self_destruct_off">{0} отключили самоудаление</string>
+    <string name="st_message_enc_self_destruct">{0} установил(а) самоудаление на {1}</string>
+    <string name="st_message_enc_self_destruct_you">{0} установили самоудаление на {1}</string>
+    <string name="st_message_enc_self_destruct_off">{0} отключил(а) самоудаление</string>
+    <string name="st_message_enc_self_destruct_off_you">{0} отключили самоудаление</string>
 
     <string name="st_message_user_photo_change">{0} добавил(а) новое фото</string>
     <string name="st_message_user_joined_app">{0} зарегистрировался в Телеграме</string>
@@ -551,6 +553,7 @@
     <string name="st_notification_sent_photo">{name} отправил(а) фото</string>
     <string name="st_notification_sent_message">{name} отправил(а) сообщение</string>
     <string name="st_notification_sent_document">{name} отправил(а) документ</string>
+    <string name="st_notification_sent_audio">{name} отправил(а) аудио</string>
     <string name="st_notification_joined">{name} зарегистрировался в Телеграме!</string>
 
     <string name="st_notification_group_sent_map">{name} отправил(а) место в чат {chat}</string>
@@ -558,6 +561,7 @@
     <string name="st_notification_group_sent_video">{name} отправил(а) видео в чат {chat}</string>
     <string name="st_notification_group_sent_photo">{name} отправил(а) фото в чат {chat}</string>
     <string name="st_notification_group_sent_document">{name} отправил(а) документ в чат {chat}</string>
+    <string name="st_notification_group_sent_audio">{name} отправил(а) аудио в чат {chat}</string>
 
     <string name="st_notification_secret_requested">Запросил новый секретный чат</string>
     <string name="st_notification_secret_created">Секретный чат создан</string>
