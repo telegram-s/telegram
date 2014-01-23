@@ -19,8 +19,8 @@ import java.util.ArrayList;
  */
 public class ModelUpgrader {
     public static void performUpgrade(StorageKernel storageKernel, ApplicationKernel kernel) {
-//         File databasePath = kernel.getApplication().getDatabasePath("stels.db");
-        File databasePath = new File("/sdcard/stels.db");
+         File databasePath = kernel.getApplication().getDatabasePath("stels.db");
+//        File databasePath = new File("/sdcard/stels.db");
         if (databasePath.exists()) {
             SQLiteDatabase database = null;
             try {
@@ -261,9 +261,9 @@ public class ModelUpgrader {
                     e.printStackTrace();
                 }
 
-//                if (!databasePath.delete()) {
-//                    databasePath.deleteOnExit();
-//                }
+                if (!databasePath.delete()) {
+                    databasePath.deleteOnExit();
+                }
             }
         }
     }

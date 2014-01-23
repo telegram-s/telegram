@@ -92,9 +92,15 @@ public class KernelsLoader {
         kernel.initStorageKernel(); // Database kernel
         kernel.initSourcesKernel(); // UI Data Sources kernel
 
-
         Logger.d(TAG, "Kernels created in " + (SystemClock.uptimeMillis() - initStart) + " ms");
 
+        kernel.runKernels();
+
+        kernel.getUiKernel().onAppPause();
+
+        Logger.d(TAG, "Kernels loaded in " + (SystemClock.uptimeMillis() - initStart) + " ms");
+
+        notifyLoaded();
         return true;
     }
 

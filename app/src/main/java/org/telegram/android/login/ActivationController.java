@@ -10,12 +10,14 @@ import android.database.Cursor;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.core.model.file.FileUriSource;
 import org.telegram.android.countries.Countries;
 import org.telegram.android.countries.CountryRecord;
 import org.telegram.android.log.Logger;
@@ -78,7 +80,7 @@ public class ActivationController {
     public static final int ERROR_REQUEST_SIGNUP = 3;
 
     private static final int REQUEST_TIMEOUT = 30000;
-    private static final int AUTO_TIMEOUT = 60000;
+    public static final int AUTO_TIMEOUT = 60000;
 
     private ActivationListener listener;
 
@@ -92,6 +94,7 @@ public class ActivationController {
     private String autoFirstname;
     private String autoLastname;
 
+    private long codeSearchStartTime;
     private String manualFirstname;
     private String manualLastname;
     private String manualAvatarUri;
@@ -249,6 +252,10 @@ public class ActivationController {
 
     public boolean isPhoneRequested() {
         return isPhoneRequested;
+    }
+
+    public long getCodeSearchStartTime() {
+        return codeSearchStartTime;
     }
 
     public void onPageShown() {
@@ -510,6 +517,7 @@ public class ActivationController {
 
     private void startCodeSearch() {
         Logger.d(TAG, "startCodeSearch");
+        codeSearchStartTime = SystemClock.uptimeMillis();
         handler.postDelayed(codeTimeout, AUTO_TIMEOUT);
         receiver = new AutoActivationReceiver(application);
         receiver.startReceivingActivation(sentTime, new AutoActivationListener() {
@@ -608,6 +616,9 @@ public class ActivationController {
             @Override
             public void onResult(TLAuthorization result) {
                 application.getKernel().logIn(result);
+                if (manualAvatarUri != null) {
+                    application.getSyncKernel().getAvatarUploader().uploadAvatar(new FileUriSource(manualAvatarUri.toString()));
+                }
                 doChangeState(STATE_ACTIVATED);
             }
 

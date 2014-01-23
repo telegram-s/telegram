@@ -59,6 +59,8 @@ public class ContactsSync extends BaseSync {
 
     private static final int SYNC_UPLOAD_REQUEST_TIMEOUT = 30000;
 
+    private static final int IMPORT_LIMIT = 40;
+
     private static final int OP_LIMIT = 20;
 
     private static final boolean TWO_SIDE_SYNC = false;//Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
@@ -125,6 +127,7 @@ public class ContactsSync extends BaseSync {
 
     public void clear() {
         preferences.edit().putBoolean("is_synced", false).commit();
+        this.contacts = null;
         this.isSynced = false;
         this.isLoaded = false;
         this.bookPersistence.getObj().getImportedPhones().clear();
@@ -369,12 +372,12 @@ public class ContactsSync extends BaseSync {
 
             while (offset < resultImports.length) {
                 TLVector<TLInputContact> inputContacts = new TLVector<TLInputContact>();
-                for (int i = 0; i < 30 && (i + offset < resultImports.length); i++) {
+                for (int i = 0; i < IMPORT_LIMIT && (i + offset < resultImports.length); i++) {
                     PhonesForImport phone = resultImports[i + offset];
                     inputContacts.add(new TLInputContact(phone.baseId, phone.value, phone.firstName, phone.lastName));
 
                 }
-                offset += 30;
+                offset += IMPORT_LIMIT;
 
                 TLImportedContacts importedContacts = application.getApi().doRpcCallGzip(new TLRequestContactsImportContacts(inputContacts, false), 60000);
 
@@ -410,6 +413,7 @@ public class ContactsSync extends BaseSync {
             }
             isSynced = true;
             preferences.edit().putBoolean("is_synced", true).commit();
+            notifyChanged();
             invalidateIntegration();
             bookPersistence.write();
         } else {

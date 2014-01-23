@@ -86,7 +86,8 @@
     </string>
 
     <string name="st_tour_page3_title">Бесплатный</string>
-    <string name="st_tour_page3"><![CDATA[<b>Телеграм</b> бесплатен навсегда. Никакой рекламы. Никакой платной подписки.]]>
+    <string name="st_tour_page3">
+        <![CDATA[<b>Телеграм</b> бесплатен навсегда. Никакой рекламы. Никакой платной подписки.]]>
     </string>
 
     <string name="st_tour_page4_title">Мощный</string>
@@ -98,19 +99,21 @@
         <![CDATA[<b>Телеграм</b> защищает ваши сообщения от хакерских атак.]]>
     </string>
 
-    <string name="st_tour_page6_title">Облачнность</string>
+    <string name="st_tour_page6_title">Облачнный</string>
     <string name="st_tour_page6">
         <![CDATA[<b>Телеграм</b> позволяет Вам получать доступ к своим сообщениям с нескольких устройств.]]>
     </string>
 
-    <string name="st_auth_state_activation">Активация приложения…</string>
+    <string name="st_auth_state_activation">Активация…</string>
     <string name="st_auth_state_creating">Создание аккаунта</string>
     <string name="st_auth_state_error">Ошибка активации</string>
     <string name="st_auth_state_error_connection">Ошибка связи…</string>
     <string name="st_auth_state_phone">Ваш телефон</string>
     <string name="st_auth_state_common">Активация по телефону</string>
 
-    <string name="st_auth_not_activating_ticker">Активация Телеграма…</string>
+    <string name="st_auth_timer">Мы Вам позвоним через {time}</string>
+
+    <string name="st_auth_not_activating_ticker">Активация…</string>
     <string name="st_auth_not_activating_content">Активация в процессе</string>
 
     <string name="st_auth_not_connection_error_ticker">Ошибка подключения</string>
@@ -133,12 +136,12 @@
     <string name="st_auth_confirm_no">Нет, изменить номер</string>
     <string name="st_auth_confirm_sms">Мы отправим бесплатную SMS с кодом активации.</string>
 
-    <string name="st_auth_phone_title">Выберите Вашу страну, введите Ваш номер телефона и нажмите продолжить:</string>
+    <string name="st_auth_phone_title">Выберите страну, введите номер телефона и нажмите продолжить:</string>
     <string name="st_auth_phone_hint">Телефонный номер</string>
 
     <string name="st_auth_activating_manual">Введите код</string>
     <string name="st_auth_activating_title">Активация телефона…</string>
-    <string name="st_auth_activating_subtitle">Этот процесс может занять до минуты. Пожалуйста, подожди.</string>
+    <string name="st_auth_activating_subtitle">Этот процесс может занять до минуты. Пожалуйста, подождите.</string>
 
     <string name="st_auth_request_call">Запросить звонок</string>
     <string name="st_auth_phone_call">Запрашиваем телефонный звонок…</string>
@@ -148,11 +151,13 @@
     <string name="st_auth_code_call">Запросить звонок</string>
     <string name="st_auth_code">Код</string>
 
-    <string name="st_auth_signup_title">Ваш номер телефон подтвержден! Пожалуйста, введите свое Имя, добавьте свою фотографию и нажмите продолжить:
+    <string name="st_auth_signup_title">Ваш номер телефон подтвержден! Пожалуйста, введите свое Имя, добавьте свою
+        фотографию и нажмите продолжить:
     </string>
 
     <string name="st_auth_incorrect_phone">Телефонный номер {0} неверный</string>
-    <string name="st_auth_confirm_phone">Это ваш номер? \n\n{0} \n\nБесплатная SMS с кодом активации будет выслана на этот номер.
+    <string name="st_auth_confirm_phone">Это ваш номер? \n\n{0} \n\nБесплатная SMS с кодом активации будет выслана на
+        этот номер.
     </string>
 
     <string name="st_dialogs_pick_title">Выбрать беседу</string>
@@ -291,7 +296,8 @@
     </string>
     <string name="st_contacts_block">Вы уверены, что хотите заблокировать контакт \'{0}\'?
     </string>
-    <string name="st_contacts_block_delete">Вы уверены, что хотите заблоикровать контакт \'{0}\' и удалить историю общения?
+    <string name="st_contacts_block_delete">Вы уверены, что хотите заблоикровать контакт \'{0}\' и удалить историю
+        общения?
     </string>
 
     <string name="st_contacts_action_view">Посмотреть в телефонной книге</string>
@@ -300,7 +306,7 @@
     <string name="st_contacts_action_block">Заблокировать контакт</string>
     <string name="st_contacts_action_block_and_delete">Заблокировать и удалить контакт</string>
 
-    <string name="st_contacts_menu_only_t">Показывать только из Телеграма</string>
+    <string name="st_contacts_menu_only_t">Только из Телеграма</string>
     <string name="st_contacts_menu_all_contacts">Показывать все контакты</string>
     <string name="st_contacts_menu_add_contact">Добавить контакт</string>
     <string name="st_contacts_menu_book">Телефонная книга</string>
@@ -530,7 +536,8 @@
     <string name="st_secret_key_title">Ключ шифрования</string>
     <string name="st_secret_key_info1">Это изображение - визуализация ключей шифрования чата с {name}.
     </string>
-    <string name="st_secret_key_info2">Если эти изображение выглядит так же как на уйстройстве {name}, то Ваш чат на 200% безопасен.
+    <string name="st_secret_key_info2">Если эти изображение выглядит так же как на уйстройстве {name}, то Ваш чат на
+        200% безопасен.
     </string>
 
     <string name="st_bubble_media_cancelled">отменен</string>

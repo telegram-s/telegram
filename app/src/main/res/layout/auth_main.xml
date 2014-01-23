@@ -138,6 +138,7 @@
                   android:text="@string/st_auth_activating_title"/>
         <TextView android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
+                  android:id="@+id/progressTimer"
                   android:layout_gravity="center_horizontal"
                   android:textSize="16sp"
                   android:paddingLeft="32dp"
@@ -373,6 +374,15 @@
                   android:hint="@string/st_auth_code"
                   android:id="@+id/code"/>
 
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:textSize="18sp"
+                  android:gravity="center"
+                  android:paddingTop="16dp"
+                  android:textColor="@color/st_auth_text"
+                  android:id="@+id/codeTimer"/>
+
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -423,7 +433,7 @@
                                                  android:baselineAligned="false">
             <FrameLayout android:layout_width="108dp"
                          android:layout_height="108dp"
-                         android:visibility="gone">
+                         android:layout_marginTop="8dp">
                 <com.extradea.framework.images.ui.FastWebImageView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"

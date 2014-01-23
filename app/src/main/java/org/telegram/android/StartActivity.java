@@ -180,6 +180,7 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
             }
             transaction.commit();
             showBar();
+            return;
         }
 
 

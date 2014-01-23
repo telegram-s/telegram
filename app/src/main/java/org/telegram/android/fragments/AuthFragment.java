@@ -5,6 +5,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.support.v4.text.BidiFormatter;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -41,6 +44,8 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
 
     private int currentState = ActivationController.STATE_START;
 
+    private TextView progressTimer;
+    private TextView codeTimer;
     private View manual;
     private View automatic;
     private View progress;
@@ -55,6 +60,35 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
     private View wrongCodeError;
     private View signupPage;
     private View signupPageProgress;
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable updateTimer = new Runnable() {
+        @Override
+        public void run() {
+            if (progressTimer != null) {
+                if (application.getKernel().getActivationController() != null) {
+                    if (application.getKernel().getActivationController().isPhoneRequested()) {
+                        progressTimer.setText("");
+                        codeTimer.setText("");
+                        return;
+                    }
+                    long duration = SystemClock.uptimeMillis() - application.getKernel().getActivationController().getCodeSearchStartTime();
+                    String timer = null;
+                    if (duration < ActivationController.AUTO_TIMEOUT) {
+                        timer = TextUtil.formatDuration((int) ((ActivationController.AUTO_TIMEOUT - duration) / 1000));
+                    }
+
+                    if (timer == null) {
+                        progressTimer.setText("");
+                        codeTimer.setText("");
+                    } else {
+                        progressTimer.setText(getStringSafe(R.string.st_auth_timer).replace("{time}", timer));
+                        codeTimer.setText(getStringSafe(R.string.st_auth_timer).replace("{time}", timer));
+                    }
+                }
+            }
+            handler.postDelayed(this, 500);
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -79,6 +113,9 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         wrongCodeError = res.findViewById(R.id.wrongCodeError);
         signupPage = res.findViewById(R.id.signupPage);
         signupPageProgress = res.findViewById(R.id.completeSignupProgress);
+
+        progressTimer = (TextView) progress.findViewById(R.id.progressTimer);
+        codeTimer = (TextView) phoneActivation.findViewById(R.id.codeTimer);
 
         automatic.findViewById(R.id.confirmPhone).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -280,6 +317,8 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                 application.getKernel().getActivationController().setManualFirstname(firstName);
                 application.getKernel().getActivationController().setManualLastname(lastName);
 
+                hideKeyboard(signupPage.findViewById(R.id.firstName));
+                hideKeyboard(signupPage.findViewById(R.id.lastName));
 
                 if (firstName == null || firstName.trim().length() == 0) {
                     Toast.makeText(getActivity(), R.string.st_error_first_name_incorrect, Toast.LENGTH_SHORT).show();
@@ -450,14 +489,16 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
 
     @Override
     protected void onPhotoArrived(String fileName, int width, int height, int requestId) {
-        Uri uri = Uri.fromFile(new File(fileName));
-
-        application.getKernel().getActivationController().setManualAvatarUri(uri.toString());
-        ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(new UriImageTask(uri.toString()));
+        requestCrop(fileName, 200, 200, 0);
     }
 
     @Override
     protected void onPhotoArrived(Uri uri, int width, int height, int requestId) {
+        requestCrop(uri, 200, 200, 0);
+    }
+
+    @Override
+    protected void onPhotoCropped(Uri uri, int requestId) {
         application.getKernel().getActivationController().setManualAvatarUri(uri.toString());
         ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(new UriImageTask(uri.toString()));
     }
@@ -471,6 +512,9 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
     @Override
     public void onResume() {
         super.onResume();
+
+        handler.removeCallbacks(updateTimer);
+        updateTimer.run();
 
         if (application.getKernel().getActivationController() != null) {
             application.getKernel().getActivationController().onPageShown();
@@ -491,6 +535,9 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
     @Override
     public void onPause() {
         super.onPause();
+
+        handler.removeCallbacks(updateTimer);
+
         if (application.getKernel().getActivationController() != null) {
             application.getKernel().getActivationController().onPageHidden();
             application.getKernel().getActivationController().setListener(null);

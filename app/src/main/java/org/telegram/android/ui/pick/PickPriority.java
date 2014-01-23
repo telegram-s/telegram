@@ -5,6 +5,7 @@ package org.telegram.android.ui.pick;
  */
 public class PickPriority {
     public static final String[] PACKAGES_PRIORITY = new String[]{
+            "com.sec.android.gallery3d",
             "com.android.mms",
             "com.jb.gosms",
             "com.whatsapp",

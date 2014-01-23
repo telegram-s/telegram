@@ -110,6 +110,8 @@
     <string name="st_auth_state_phone">Your phone</string>
     <string name="st_auth_state_common">Phone activation</string>
 
+    <string name="st_auth_timer">We will call you in {time}</string>
+
     <string name="st_auth_not_activating_ticker">Activating Telegram...</string>
     <string name="st_auth_not_activating_content">Activation in progress</string>
 

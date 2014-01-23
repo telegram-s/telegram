@@ -108,7 +108,8 @@ public class SyncKernel {
         updateProcessor.clearData();
         updateProcessor.invalidateUpdates();
         updateProcessor.runUpdateProcessor();
-        contactsSync.invalidateContactsSync();
+        contactsSync.clear();
+        contactsSync.resetSync();
     }
 
     public void logOut() {

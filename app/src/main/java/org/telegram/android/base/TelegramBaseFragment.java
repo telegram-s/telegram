@@ -466,12 +466,14 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
     }
 
     protected void hideKeyboard(View editText) {
-        if (editText == getActivity().getCurrentFocus()) {
-            editText.clearFocus();
-            ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(),
-                    0);
-        } else {
-            editText.clearFocus();
+        if (getActivity() != null) {
+            if (editText == getActivity().getCurrentFocus()) {
+                editText.clearFocus();
+                ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(editText.getWindowToken(),
+                        0);
+            } else {
+                editText.clearFocus();
+            }
         }
     }
 
