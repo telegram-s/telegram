@@ -283,9 +283,8 @@
     <string name="st_conv_menu_photo">Photo</string>
     <string name="st_conv_menu_gallery">Gallery</string>
     <string name="st_conv_menu_video">Video</string>
-    <string name="st_conv_menu_video_sd">Video SD</string>
-    <string name="st_conv_menu_video_hd">Video HD</string>
     <string name="st_conv_menu_location">Location</string>
+    <string name="st_conv_menu_audio">Audio</string>
 
     <string name="st_contacts_add_name_title">EDIT FIRST AND LAST NAME</string>
     <string name="st_contacts_add_toast">Contact added</string>

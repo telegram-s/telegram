@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="st_lang">ru</string>
+    <string name="st_app_name">Телеграм</string>
+
+    <string name="st_no">Нет</string>
+    <string name="st_yes">Да</string>
+    <string name="st_repeat">Повторить</string>
+    <string name="st_ok">OK</string>
+    <string name="st_edit">Изменить</string>
+    <string name="st_cancel">Отменить</string>
+    <string name="st_cancel_caps">ОТМЕНИТЬ</string>
+    <string name="st_set">Установить</string>
+    <string name="st_set_caps">УСТАНОВИТЬ</string>
+    <string name="st_no_contacts">Нет контактов.</string>
+    <string name="st_title">Заголовок</string>
+    <string name="st_loading_more">Загрузка...</string>
+    <string name="st_loading">Загрузка...</string>
+    <string name="st_try_again">Повторить</string>
+    <string name="st_default">По-Умолчанию</string>
+    <string name="st_select_tone">Выбрать мелодию</string>
+    <string name="st_none">Нет</string>
+
+    <string name="st_continue">Продолжить</string>
+    <string name="st_back">Назад</string>
+    <string name="st_start_again">Начать сначала</string>
+
+    <string name="st_receiver_gallery">Из галереи</string>
+    <string name="st_receiver_photo">Сделать фото</string>
+    <string name="st_receiver_delete">Удалить фото</string>
+
+    <string name="st_avatar_changed">Фото изменено</string>
+    <string name="st_avatar_removed">Фото удалено</string>
+    <string name="st_avatar_change_error">Ошибка загрузки фотографии</string>
+    <string name="st_avatar_change_error_title">Ошибка загрузки</string>
+    <string name="st_avatar_change_error_message">Ошибка загрузки фотографии. Повторить попытку?</string>
+
+    <string name="st_avatar_group_changed">Групповое фото обновлено</string>
+    <string name="st_avatar_group_removed">Групповое фото удалено</string>
+    <string name="st_avatar_group_error">Ошибка загрузки группового фотографии</string>
+
+    <string name="st_first_name">Имя</string>
+    <string name="st_last_name">Фамилия</string>
+
+    <string name="st_unknown">unknown</string>
+    <string name="st_online">online</string>
+    <string name="st_offline">offline</string>
+    <string name="st_support_hint">Добро пожаловать</string>
+
+    <string name="st_error_file_open">Невозможно открыть файл</string>
+    <string name="st_error_unable_sms">Невозможно отправить SMS</string>
+
+    <string name="st_error_title">Ошибка</string>
+
+    <string name="st_error_unsupported">Не поддерживается на этом устройстве</string>
+    <string name="st_error_unknown">Неизвестная ошибка приложения :-(</string>
+    <string name="st_error_connection">Отсутствует подключение к сети. Пожалуйста, повторите попытку.</string>
+    <string name="st_error_server">Внутренняя ошибка сервера. Пожалуйста, повторите попытку.</string>
+
+    <string name="st_error_code_empty">Код активации пуст.</string>
+    <string name="st_error_code_incorrect">Неверный код активации.</string>
+    <string name="st_error_expired">Код активации устарел</string>
+    <string name="st_error_invalid_phone">Неверный номер телефона</string>
+    <string name="st_error_first_name_incorrect">Неверное имя.</string>
+    <string name="st_error_last_name_incorrect">Неверная фамилия.</string>
+    <string name="st_error_too_few_users">Слишком мало пользователей.</string>
+    <string name="st_error_too_much_users">Слишком много пользователей.</string>
+    <string name="st_error_name_not_modified">Имя не изменено.</string>
+    <string name="st_error_title_not_modified">Название группы не изменено.</string>
+    <string name="st_error_already_participant">Пользователь уже участник этой группы.</string>
+    <string name="st_error_participant_outdated">Пользователь пользуется неподдерживаемой версией Telegram.</string>
+    <string name="st_error_photo_small">Фото слишком маленькое.</string>
+    <string name="st_error_blocked">Пользователь добавил Вас в черный список.</string>
+    <string name="st_error_incorrect">Невозможно произвести действие.</string>
+    <string name="st_error_many_attempts">Слишком много попыток. Попробуйте повторить попытку позже.</string>
+    <string name="st_error_no_app_for_file">Нет приложения для данного типа файла</string>
+
+    <string name="st_tour_start_messaging">Начать общение</string>
+    <string name="st_tour_page1_title">Телеграм</string>
+    <string name="st_tour_page1">
+        Встречайте новую эру общения
+    </string>
+
+    <string name="st_tour_page2_title">Быстрый</string>
+    <string name="st_tour_page2"><![CDATA[<b>Телеграм</b> доставляет сообщения быстрее чем другие приложения.]]>
+    </string>
+
+    <string name="st_tour_page3_title">Бесплатный</string>
+    <string name="st_tour_page3"><![CDATA[<b>Телеграм</b> бесплатен навсегда. Никакой рекламы. Никакой платной подписки.]]>
+    </string>
+
+    <string name="st_tour_page4_title">Мощный</string>
+    <string name="st_tour_page4"><![CDATA[<b>Телеграм</b> не имеет лимитов по размерам медиа и чатов.]]>
+    </string>
+
+    <string name="st_tour_page5_title">Безопасный</string>
+    <string name="st_tour_page5">
+        <![CDATA[<b>Телеграм</b> защищает ваши сообщения от хакерских атак.]]>
+    </string>
+
+    <string name="st_tour_page6_title">Облачнность</string>
+    <string name="st_tour_page6">
+        <![CDATA[<b>Телеграм</b> позволяет Вам получать доступ к своим сообщениям с нескольких устройств.]]>
+    </string>
+
+    <string name="st_auth_state_activation">Активация приложения…</string>
+    <string name="st_auth_state_creating">Создание аккаунта</string>
+    <string name="st_auth_state_error">Ошибка активации</string>
+    <string name="st_auth_state_error_connection">Ошибка связи…</string>
+    <string name="st_auth_state_phone">Ваш телефон</string>
+    <string name="st_auth_state_common">Активация по телефону</string>
+
+    <string name="st_auth_not_activating_ticker">Активация Телеграма…</string>
+    <string name="st_auth_not_activating_content">Активация в процессе</string>
+
+    <string name="st_auth_not_connection_error_ticker">Ошибка подключения</string>
+    <string name="st_auth_not_connection_error_content">Невозможно активировать Телеграм: Ошибка подключения</string>
+
+    <string name="st_auth_not_error_ticker">Ошибка активации</string>
+    <string name="st_auth_not_error_content">Невозможно активировать Телеграм</string>
+
+    <string name="st_auth_not_activating_code_ticker">Необходима ручная активация</string>
+    <string name="st_auth_not_activating_code_content">Пожалуйста, введите код активации</string>
+
+    <string name="st_auth_not_activating_signup_ticker">Создание профиля</string>
+    <string name="st_auth_not_activating_signup_content">Телефон активирован, пожалуйста, зарегистрируйтесь.</string>
+
+    <string name="st_auth_not_activating_complete_ticker">Телеграм активирован</string>
+    <string name="st_auth_not_activating_complete_content">Телеграм успешно активирован!</string>
+
+    <string name="st_auth_confirm_number">Это Ваш номер?</string>
+    <string name="st_auth_confirm_yes">Да, активировать аккаунт</string>
+    <string name="st_auth_confirm_no">Нет, изменить номер</string>
+    <string name="st_auth_confirm_sms">Мы отправим бесплатную SMS с кодом активации.</string>
+
+    <string name="st_auth_phone_title">Выберите Вашу страну, введите Ваш номер телефона и нажмите продолжить:</string>
+    <string name="st_auth_phone_hint">Телефонный номер</string>
+
+    <string name="st_auth_activating_manual">Введите код</string>
+    <string name="st_auth_activating_title">Активация телефона…</string>
+    <string name="st_auth_activating_subtitle">Этот процесс может занять до минуты. Пожалуйста, подожди.</string>
+
+    <string name="st_auth_request_call">Запросить звонок</string>
+    <string name="st_auth_phone_call">Запрашиваем телефонный звонок…</string>
+    <string name="st_auth_creating">Создаем Ваш профиль…</string>
+
+    <string name="st_auth_code_title">Введите код активации и нажмите продолжить:</string>
+    <string name="st_auth_code_call">Запросить звонок</string>
+    <string name="st_auth_code">Код</string>
+
+    <string name="st_auth_signup_title">Ваш номер телефон подтвержден! Пожалуйста, введите свое Имя, добавьте свою фотографию и нажмите продолжить:
+    </string>
+
+    <string name="st_auth_incorrect_phone">Телефонный номер {0} неверный</string>
+    <string name="st_auth_confirm_phone">Это ваш номер? \n\n{0} \n\nБесплатная SMS с кодом активации будет выслана на этот номер.
+    </string>
+
+    <string name="st_dialogs_pick_title">Выбрать беседу</string>
+
+    <string name="st_dialogs_delete_header">Удалить чат?</string>
+    <string name="st_dialogs_delete_history">Вы уверены, что хотите удалить все сообщения?</string>
+    <string name="st_dialogs_delete_group">Вы уверены, что хотите удалить все сообщения и покинуть группу?</string>
+
+    <string name="st_dialogs_confirm_header">Вы уверены?</string>
+    <string name="st_dialogs_confirm_send">Отправить сообщение в "{0}"?</string>
+    <string name="st_dialogs_confirm_forward">Переслать сообщение в "{0}"?</string>
+    <string name="st_dialogs_confirm_forward_multiple">Переслать сообщения в "{0}"?</string>
+    <string name="st_dialogs_confirm_image">Отправить фото в "{0}"?</string>
+    <string name="st_dialogs_confirm_video">Отправить видео в "{0}"?</string>
+    <string name="st_dialogs_confirm_doc">Отправить документ в "{0}"?</string>
+    <string name="st_dialogs_confirm_images">Отобравить фотографии в "{0}"?</string>
+    <string name="st_dialogs_confirm_docs">Отправить документы в "{0}"?</string>
+    <string name="st_dialogs_confirm_contact">Отправить контакт в "{0}"?</string>
+
+    <string name="st_dialogs_search_hint">Быстрый поиск</string>
+    <string name="st_dialogs_search_hint_full">Введите название группы или имя контакта.</string>
+    <string name="st_dialogs_search_empty">Ничего не найдено.</string>
+
+    <string name="st_dialogs_write_to_friend">Написать другу</string>
+    <string name="st_dialogs_empty">Нет сообщений...</string>
+
+    <string name="st_dialogs_share_to_secret">Невозможно отправить контакт в секретный чат</string>
+    <string name="st_dialogs_forward_to_secret">Невозможно переслать сообщение в секретный чат</string>
+
+    <string name="st_dialogs_menu_contacts">Контакты</string>
+    <string name="st_dialogs_menu_settings">Настройки</string>
+    <string name="st_dialogs_menu_group">Новая группа</string>
+    <string name="st_dialogs_menu_secret">Новый секретный чат</string>
+    <string name="st_dialogs_menu_write_contact">Написать контакту</string>
+    <string name="st_dialogs_menu_appearance">Внешний вид</string>
+
+    <string name="st_settings_title">Настройки</string>
+    <string name="st_settings_header_phone">ВАШ НОМЕР ТЕЛЕФОНА</string>
+    <string name="st_settings_header_settings">НАСТРОЙКИ</string>
+    <string name="st_settings_header_support">ПОДДЕРЖКА</string>
+    <string name="st_settings_header_about">О ПРОГРАММЕ</string>
+    <string name="st_settings_header_account">АККАУНТ</string>
+    <string name="st_settings_logout">Выход</string>
+    <string name="st_settings_delete_account">Удалить аккаунт</string>
+    <string name="st_settings_version">Версия</string>
+    <string name="st_settings_play">Google Play</string>
+    <string name="st_settings_play_subtitle">Пожалуйста, оцените приложение</string>
+    <string name="st_settings_blocked">Черный список</string>
+    <string name="st_settings_blocked_subtitle">Список заблокированных контактов</string>
+    <string name="st_settings_reset">Удалить сессии</string>
+    <string name="st_settings_reset_subtitle">Выйти со всех других устройств</string>
+    <string name="st_settings_reset_toast">Сессии удалены</string>
+    <string name="st_settings_chat">Настройки чата</string>
+    <string name="st_settings_chat_subtitle">Обои, размер шрифта и т.д.</string>
+    <string name="st_settings_background">Обои</string>
+
+    <string name="st_settings_support">Задать вопрос</string>
+    <string name="st_settings_support_subtitle">Наша тех поддержка с радостью поможет</string>
+    <string name="st_settings_faq">Часто задаваемые вопросы</string>
+    <string name="st_settings_faq_subtitle">Найдите ответы на вопросы</string>
+    <string name="st_settings_twitter">Twitter</string>
+    <string name="st_settings_twitter_subtitle">Подпишитесь на наши новости</string>
+
+    <string name="st_settings_save_photo">Сохранять фотографии</string>
+    <string name="st_settings_save_photo_subtitle">Автоматически сохранять в галерею</string>
+    <string name="st_settings_notifications">Оповещения и звуки</string>
+
+    <string name="st_settings_advanced_title">Расширенные</string>
+    <string name="st_settings_advanced_background">ОБОИ</string>
+    <string name="st_settings_advanced_send_time">Время отправки сообщений</string>
+    <string name="st_settings_advanced_life_time">Поддерживание приложение запущеным</string>
+
+    <string name="st_settings_name_title">ВАШЕ ИМЯ И ФАМИЛИЯ</string>
+    <string name="st_settings_name_changed">Имя изменено</string>
+    <string name="st_settings_name_not_changed">Имя не изменено</string>
+    <string name="st_settings_name_empty_first">Пожалуйста, добавьте имя</string>
+    <string name="st_settings_name_empty_last">Пожалуйста, добавьте фамилию</string>
+
+    <string name="st_new_group_title">Новая группа</string>
+    <string name="st_new_group_hint">Добавить участников...</string>
+    <string name="st_new_group_maximum">Группа полная</string>
+    <string name="st_new_group_next">ДАЛЕЕ</string>
+
+    <string name="st_new_group_complete_title">НАЗВАНИЕ И ФОТО</string>
+    <string name="st_new_group_complete_done">СОЗДАТЬ</string>
+
+    <string name="st_conv_empty">Нет сообщений…</string>
+    <string name="st_conv_empty_support">Есть вопрос о Телеграме?</string>
+
+    <string name="st_conv_chat_closed_title">Вы больше не имеете доступа к этому чату</string>
+    <string name="st_conv_enc_exchanging_keys">Обмен ключами шифрования...</string>
+    <string name="st_conv_enc_waiting">Ждем пока {name} выйдет в сеть...</string>
+    <string name="st_conv_enc_cancelled">Секретный чат отменен</string>
+
+    <string name="st_conv_enc_invite_out_title">Вы пригласили {name} в секретный чат.</string>
+
+    <string name="st_conv_enc_invite_in_title">{name} пригласил(а) Вас в секретный чат.</string>
+
+    <string name="st_conv_enc_info_title">Секретный чат:</string>
+    <string name="st_conv_enc_info_info1">End-to-end шифрование</string>
+    <string name="st_conv_enc_info_info2">Не оставляет следов на наших серверах</string>
+    <string name="st_conv_enc_info_info3">Самоуничтожение сообщений</string>
+    <string name="st_conv_enc_info_info4">Запрещена пересылка</string>
+
+    <string name="st_conv_support_name">Телеграм</string>
+
+    <string name="st_conv_share_info">ПОДЕЛИТЬСЯ МОИМ КОНТАКТОМ</string>
+    <string name="st_conv_add_contact">ДОБАВИТЬ В КОНТАКТЫ</string>
+    <string name="st_conv_delete_chat">УДАЛИТЬ ЭТОТ ЧАТ</string>
+    <string name="st_conv_hint">Сообщение</string>
+    <string name="st_conv_removed">вы покинули группу</string>
+    <string name="st_conv_action_title">Сообщение</string>
+    <string name="st_conv_action_delete">Удалить</string>
+    <string name="st_conv_action_forward">Переслать</string>
+    <string name="st_conv_action_copy">Скопировать</string>
+    <string name="st_conv_action_quote">Цитировать</string>
+    <string name="st_conv_action_nothing_to_forward">Нечего пересылать</string>
+    <string name="st_conv_action_try_again">Повторить попытку</string>
+    <string name="st_conv_copied">Текст сообщения скопирован в буфер обмена</string>
+    <string name="st_conv_cancel_title">Отмена отправки</string>
+    <string name="st_conv_cancel_message">Вы уверены, что хотите отменить отправку?</string>
+    <string name="st_conv_menu_photo">Фото</string>
+    <string name="st_conv_menu_gallery">Галерея</string>
+    <string name="st_conv_menu_video">Видео</string>
+    <string name="st_conv_menu_location">Место</string>
+    <string name="st_conv_menu_audio">Аудио</string>
+
+    <string name="st_contacts_title">Контакты</string>
+    <string name="st_contacts_filter">Фильтр</string>
+    <string name="st_contacts_invite">Пригласить друга</string>
+    <string name="st_contacts_not_registered_title">Пользователь не зарегистрирован</string>
+    <string name="st_contacts_not_registered_message">{0} не зарегестрирован(а) в Телеграме. Выслать приглашение?
+    </string>
+
+    <string name="st_contacts_delete">Вы уверены, что хотите удалить контакт \'{0}\'?
+    </string>
+    <string name="st_contacts_block">Вы уверены, что хотите заблокировать контакт \'{0}\'?
+    </string>
+    <string name="st_contacts_block_delete">Вы уверены, что хотите заблоикровать контакт \'{0}\' и удалить историю общения?
+    </string>
+
+    <string name="st_contacts_action_view">Посмотреть в телефонной книге</string>
+    <string name="st_contacts_action_share">Поделиться контактом</string>
+    <string name="st_contacts_action_delete">Удалить контакт</string>
+    <string name="st_contacts_action_block">Заблокировать контакт</string>
+    <string name="st_contacts_action_block_and_delete">Заблокировать и удалить контакт</string>
+
+    <string name="st_contacts_menu_only_t">Показывать только из Телеграма</string>
+    <string name="st_contacts_menu_all_contacts">Показывать все контакты</string>
+    <string name="st_contacts_menu_add_contact">Добавить контакт</string>
+    <string name="st_contacts_menu_book">Телефонная книга</string>
+
+    <string name="st_profile_title">Информация</string>
+    <string name="st_profile_header_phone">ТЕЛЕФОН</string>
+    <string name="st_profile_header_settings">НАСТРОЙКИ</string>
+    <string name="st_profile_header_media">ОБЩЕЕ МЕДИА</string>
+
+    <string name="st_profile_phone_mobile">МОБИЛЬНЫЙ</string>
+
+    <string name="st_profile_notifications">Оповещения</string>
+    <string name="st_profile_notifications_sound">Мелодия</string>
+    <string name="st_profile_media">Общее медиа с пользователем</string>
+
+    <string name="st_profile_phone_hidden">скрыт</string>
+    <string name="st_profile_phone_copied">Номер скопирован в буфер обмена</string>
+    <string name="st_profile_menu_block">Заблоикровать</string>
+    <string name="st_profile_menu_add">Добавить в контакты</string>
+    <string name="st_profile_menu_share">Поделиться контактом</string>
+    <string name="st_profile_menu_edit_name">Изменить имя</string>
+    <string name="st_profile_menu_view">Открыть в контактах</string>
+    <string name="st_profile_blocked">Пользователь заблокирован</string>
+    <string name="st_profile_added">Контакт добавлен</string>
+    <string name="st_profile_secret">Начать секретный чат</string>
+
+    <string name="st_pick_file_title">Выбрать файл</string>
+
+    <string name="st_pick_user_title">Выбрать контакт</string>
+    <string name="st_pick_user_filter">Фильтр</string>
+
+    <string name="st_edit_dialog_title">Группа</string>
+    <string name="st_edit_dialog_no_access">Вы больше не участник этой группы.</string>
+    <string name="st_edit_dialog_added">Пользователь добавлен в группу</string>
+    <string name="st_edit_dialog_removed">Пользователь удален из группы</string>
+    <string name="st_edit_dialog_left">Вы покинули группу</string>
+    <string name="st_edit_dialog_header_settings">НАСТРОЙКИ</string>
+    <string name="st_edit_dialog_header_media">ОБЩЕЕ МЕДИА</string>
+    <string name="st_edit_dialog_notifications">Оповещение</string>
+    <string name="st_edit_dialog_notifications_sound">Мелодия</string>
+    <string name="st_edit_dialog_media">Медиа в группе</string>
+    <string name="st_edit_dialog_add_member">Добавить участника</string>
+    <string name="st_edit_dialog_delete">Покинуть группу</string>
+    <string name="st_edit_dialog_delete_title">Вы уверены?</string>
+    <string name="st_edit_dialog_delete_message">Покинуть группу и удалить все сообщения?
+    </string>
+    <string name="st_edit_dialog_action_leave">Покинуть группу</string>
+    <string name="st_edit_dialog_action_dialog">Открыть чат с {0}</string>
+    <string name="st_edit_dialog_action_view">Посмотреть профиль {0}</string>
+    <string name="st_edit_dialog_action_remove">Исключить {0} из группы</string>
+
+    <string name="st_edit_title_title">Группа</string>
+    <string name="st_edit_title_header">ВВЕДИТЕ НАЗВАНИЕ ГРУППЫ</string>
+    <string name="st_edit_title_done">ИЗМЕНИТЬ</string>
+
+    <string name="st_media_title_group">Медиа в группе</string>
+    <string name="st_media_title_user">Общее медиа</string>
+    <string name="st_media_title_all">Все общее медиа</string>
+    <string name="st_media_empty">Нет медиа.</string>
+
+    <string name="st_map_unavailable">Карты не доступны</string>
+    <string name="st_map_hybrid">Гибрид</string>
+    <string name="st_map_normal">Схема</string>
+    <string name="st_map_satellite">Со спутника</string>
+    <string name="st_map_location_unavailable">Ваше расположение не доступно</string>
+
+    <string name="st_location_title">Место</string>
+    <string name="st_location_unavailable">неизвестно</string>
+    <string name="st_location_pick_title">Выбрать место</string>
+    <string name="st_location_pick_action">Отправить место</string>
+
+    <string name="st_image_title">Фото</string>
+    <string name="st_image_deleted">Медиа удалено</string>
+    <string name="st_image_incorrect">Ошибка открытия медиа</string>
+
+    <string name="st_blocked_title">Заблокированные</string>
+    <string name="st_blocked_hint">Зажмите на пользователе для разблокировки.</string>
+    <string name="st_blocked_blocked">Пользователь заблокирован</string>
+    <string name="st_blocked_unblocked">Пользователь разблокирован</string>
+    <string name="st_blocked_empty">Нет заблокированных пользователей.</string>
+    <string name="st_blocked_phone_hidden">скрыт</string>
+
+    <string name="st_appearance_title">Настройки чата</string>
+    <string name="st_appearance_header_common">ВНЕШНИЙ ВИД</string>
+    <string name="st_appearance_header_chat">ОКНО СООБЩЕНИЙ</string>
+
+    <string name="st_appearance_header_dialogs">СПИСОК ЧАТОВ</string>
+
+    <string name="st_appearance_font_size">Размер текста: {s}</string>
+    <string name="st_appearance_font_size_subtitle">Размер текста для сообщений</string>
+    <string name="st_appearance_font_size_tiny">Минимальный</string>
+    <string name="st_appearance_font_size_small">Маленький</string>
+    <string name="st_appearance_font_size_normal">Нормальный</string>
+    <string name="st_appearance_font_size_large">Большой</string>
+    <string name="st_appearance_font_size_huge">Огромный</string>
+    <string name="st_appearance_enter">Отправлять с клавиатуры</string>
+    <string name="st_appearance_enter_subtitle_enable">Enter отправляет сообщение</string>
+    <string name="st_appearance_enter_subtitle_disable">Enter добавляет новую строку</string>
+    <string name="st_appearance_background">Обои</string>
+    <string name="st_appearance_background_subtitle">Фон чатов</string>
+    <string name="st_appearance_bar">Тема</string>
+    <string name="st_appearance_bar_subtitle">Оформление приложения</string>
+    <string name="st_appearance_bar_color_default">По-умолчанию</string>
+    <string name="st_appearance_bar_color_green">Зеленый</string>
+    <string name="st_appearance_bar_color_cyan">Циан</string>
+    <string name="st_appearance_bar_color_red">Красный</string>
+    <string name="st_appearance_bar_color_purple">Пурпурный</string>
+    <string name="st_appearance_bar_color_wa">WhatsApp</string>
+    <string name="st_appearance_bar_color_line">Line</string>
+    <string name="st_appearance_bar_color_magenta">Маджента</string>
+
+    <string name="st_appearance_item_size">Стиль: {s}</string>
+    <string name="st_appearance_item_size_subtitle">Стиль элементов в списке чатов</string>
+    <string name="st_appearance_item_size_normal">Обычный</string>
+    <string name="st_appearance_item_size_large">Большой</string>
+
+    <string name="st_notifications_title">Оповещения и звуки</string>
+    <string name="st_notifications_header_common">ОПОВЕЩЕНИЯ О СООБЩЕНИЯХ</string>
+    <string name="st_notifications_header_group">ГРУППОВЫЕ ОПОВЕЩЕНИЯ</string>
+    <string name="st_notifications_header_in_app">ВНУТРЕННИЕ ОПОВЕЩЕНИЯ</string>
+    <string name="st_notifications_header_reset">СБРОС</string>
+    <string name="st_notifications_alert">Оповещение</string>
+    <string name="st_notifications_vibrate">Вибрация</string>
+    <string name="st_notifications_sound">Звук</string>
+    <string name="st_notifications_sound_custom">Мелодия</string>
+    <string name="st_notifications_in_app_sound">Внутренние звуки</string>
+    <string name="st_notifications_in_app_vibrate">Внутренняя вибрация</string>
+    <string name="st_notifications_in_app_preview">Внутреннее оповещение</string>
+    <string name="st_notifications_reset">Сбросить все оповещения</string>
+    <string name="st_notifications_reset_hint">Отменить все настройки оповещений для контактов и групп
+    </string>
+    <string name="st_notifications_reset_success">Настройки сброшены</string>
+
+    <string name="st_message_by_you">Вы</string>
+    <string name="st_message_you">Вас</string>
+
+    <string name="st_message_enc_self_destruct">{0} установили самоудаление на {1}</string>
+    <string name="st_message_enc_self_destruct_off">{0} отключили самоудаление</string>
+
+    <string name="st_message_user_photo_change">{0} добавил(а) новое фото</string>
+    <string name="st_message_user_joined_app">{0} зарегистрировался в Телеграме</string>
+
+    <string name="st_message_create_group">{0} создал(а) группу</string>
+    <string name="st_message_create_group_you">{0} создали группу</string>
+
+    <string name="st_message_photo_change">{0} обновил(а) фото группы</string>
+    <string name="st_message_photo_change_you">{0} обновили фото группы</string>
+
+    <string name="st_message_photo_remove">{0} удалил(а) фото группы</string>
+    <string name="st_message_photo_remove_you">{0} удалили фото группы</string>
+
+    <string name="st_message_name_change">{0} поменял(а) название на {1}</string>
+    <string name="st_message_name_change_you">{0} поменяли название на {1}</string>
+
+    <string name="st_message_added_user">{0} добавил(а) {1} в группу</string>
+    <string name="st_message_added_user_you">{0} добавили {1} в группу</string>
+    <string name="st_message_added_user_of_you">@string/st_message_added_user</string>
+
+    <string name="st_message_kicked_user">{0} исключил(а) {1} из группы</string>
+    <string name="st_message_kicked_user_you">{0} исключили {1} из группы</string>
+    <string name="st_message_kicked_user_of_you">@string/st_message_kicked_user</string>
+
+    <string name="st_message_left_user">{0} покинул(а) группу</string>
+    <string name="st_message_left_user_you">{0} покинули группу</string>
+
+    <string name="st_message_service">Неизвестное сервисное сообщение</string>
+
+    <string name="st_dialog_you">Вы</string>
+    <string name="st_dialog_you_r">Вас</string>
+
+    <string name="st_dialog_photo">Фото</string>
+    <string name="st_dialog_video">Видео</string>
+    <string name="st_dialog_geo">Расположение</string>
+    <string name="st_dialog_contact">Контакт</string>
+    <string name="st_dialog_document">Документ</string>
+    <string name="st_dialog_animation">Анимация</string>
+    <string name="st_dialog_audio">Аудио</string>
+    <string name="st_dialog_unknown">Неизвестный контент</string>
+
+    <string name="st_dialog_user_add_avatar">{sender} добавил новую фотографию</string>
+    <string name="st_dialog_user_joined_app">{sender} присоединился к телеграму</string>
+
+    <string name="st_dialog_encrypted_switched_off">{sender} отключил(а) самоудаление</string>
+    <string name="st_dialog_encrypted_switched_off_you">{sender} отключили самоудаление</string>
+    <string name="st_dialog_encrypted_switched">{sender} уставлил(а) самоудаление на {time}</string>
+    <string name="st_dialog_encrypted_switched_you">{sender} уставлили самоудаление на {time}</string>
+
+    <string name="st_dialog_encrypted_selfdestructed">Последнее сообщение самоудалилось</string>
+    <string name="st_dialog_encrypted_requested">Обмен ключами шифрования…</string>
+    <string name="st_dialog_encrypted_waiting">Ожидаем пока {name} выйдет в сеть…</string>
+    <string name="st_dialog_encrypted_cancelled">Секретный чат отменен</string>
+    <string name="st_dialog_encrypted_created">Секретный чат создан</string>
+
+    <string name="st_dialog_created_group">{sender} создал(а) группу</string>
+    <string name="st_dialog_created_group_you">{sender} создали группу</string>
+
+    <string name="st_dialog_changed_photo">{sender} обновил(а) фото группы</string>
+    <string name="st_dialog_changed_photo_you">{sender} обновили фото группы</string>
+
+    <string name="st_dialog_removed_photo">{sender} удалил(а) фото группы</string>
+    <string name="st_dialog_removed_photo_you">{sender} удалили фото группы</string>
+
+    <string name="st_dialog_changed_name">{sender} обновил(а) имя группы</string>
+    <string name="st_dialog_changed_name_you">{sender} обновили имя группы</string>
+
+    <string name="st_dialog_added_user">{sender} добавил(а) {0} в группу</string>
+    <string name="st_dialog_added_user_you">{sender} добавили {0} в группу</string>
+    <string name="st_dialog_added_user_of_you">@string/st_dialog_added_user</string>
+
+    <string name="st_dialog_enter_user">{sender} присоединился(ась) к группе</string>
+    <string name="st_dialog_enter_user_you">{sender} присоединились к группе</string>
+
+    <string name="st_dialog_left_user">{sender} покинул(а) группу</string>
+    <string name="st_dialog_left_user_you">{sender} покинули группу</string>
+
+    <string name="st_dialog_kicked_user">{sender} исключил(а) {0} из группы</string>
+    <string name="st_dialog_kicked_user_you">{sender} исключили {0} из группы</string>
+    <string name="st_dialog_kicked_user_of_you">@string/st_dialog_kicked_user</string>
+
+    <string name="st_dialog_system">Системное сообщение</string>
+
+    <string name="st_secret_title">Секретный чат</string>
+    <string name="st_secret_key">Ключ шифрования</string>
+    <string name="st_secret_destruct">Самоуничтожение</string>
+    <string name="st_secret_header_chat">ЧАТ</string>
+
+    <string name="st_secret_key_title">Ключ шифрования</string>
+    <string name="st_secret_key_info1">Это изображение - визуализация ключей шифрования чата с {name}.
+    </string>
+    <string name="st_secret_key_info2">Если эти изображение выглядит так же как на уйстройстве {name}, то Ваш чат на 200% безопасен.
+    </string>
+
+    <string name="st_bubble_media_cancelled">отменен</string>
+    <string name="st_bubble_media_try_again">повторить?</string>
+    <string name="st_bubble_media_download">скачать</string>
+    <string name="st_bubble_media_in_progress">в процессе</string>
+
+    <string name="st_notification_sent_map">{name} отправил(а) место</string>
+    <string name="st_notification_sent_contact">{name} поделился(лась) контактом</string>
+    <string name="st_notification_sent_video">{name} отправил(а) видео</string>
+    <string name="st_notification_sent_photo">{name} отправил(а) фото</string>
+    <string name="st_notification_sent_message">{name} отправил(а) сообщение</string>
+    <string name="st_notification_sent_document">{name} отправил(а) документ</string>
+    <string name="st_notification_joined">{name} зарегистрировался в Телеграме!</string>
+
+    <string name="st_notification_group_sent_map">{name} отправил(а) место в чат {chat}</string>
+    <string name="st_notification_group_sent_contact">{name} поделился(лась) контактом в чате {chat}</string>
+    <string name="st_notification_group_sent_video">{name} отправил(а) видео в чат {chat}</string>
+    <string name="st_notification_group_sent_photo">{name} отправил(а) фото в чат {chat}</string>
+    <string name="st_notification_group_sent_document">{name} отправил(а) документ в чат {chat}</string>
+
+    <string name="st_notification_secret_requested">Запросил новый секретный чат</string>
+    <string name="st_notification_secret_created">Секретный чат создан</string>
+    <string name="st_notification_secret_cancelled">Секретный чат отменен</string>
+
+    <string name="st_notification_secret_sent_message">Отрпавил(а) сообщение в секретный чат</string>
+    <string name="st_notification_secret_sent_photo">Отправил(а) фото в секретный чат</string>
+    <string name="st_notification_secret_sent_video">Отправил(а) видео в секретный чат</string>
+    <string name="st_notification_secret_sent_map">Отправил(а) место в секретный чат</string>
+    <string name="st_notification_secret_sent_doc">Отправил(а) документ в секретный чат</string>
+
+    <string name="st_notification_new_login">Новая авторизация с неизвестного устройства {device}</string>
+    <string name="st_notification_new_login_location">Новая авторизация с неизвестного устройства {device} из {location}
+    </string>
+
+    <string name="st_whats_new_title">Что нового</string>
+    <string name="st_whats_new_continue">Продолжить общение</string>
+
+    <string name="st_invite_short">
+        Давай общаться в Телеграме http://telegram.org/dl1
+    </string>
+
+    <string name="st_invite_big">
+        Hey,
+
+        I just downloaded Telegram Messenger on my Android.
+
+        It is a fast, secure and free messenger that replaces SMS. With this app you can create groups for up to 200
+        people, send messages, photos and large videos!
+
+        Telegram Messenger is available for Android and iPhone. There is no PIN or username to remember - it works just
+        like SMS and uses your internet data plan.
+
+        Get it now from http://telegram.org/dl1 and say good-bye to SMS!
+    </string>
+</resources>

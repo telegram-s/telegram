@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lang_month_pattern">{day} {month}</string>
+    <string name="lang_january">Января</string>
+    <string name="lang_february">Февраля</string>
+    <string name="lang_march">Марта</string>
+    <string name="lang_april">Апреля</string>
+    <string name="lang_may">Мая</string>
+    <string name="lang_june">Июня</string>
+    <string name="lang_july">Июля</string>
+    <string name="lang_august">Августа</string>
+    <string name="lang_september">Сентября</string>
+    <string name="lang_october">Октября</string>
+    <string name="lang_november">Ноября</string>
+    <string name="lang_december">Декабря</string>
+
+    <string name="lang_january_s">января</string>
+    <string name="lang_february_s">февраля</string>
+    <string name="lang_march_s">марта</string>
+    <string name="lang_april_s">апреля</string>
+    <string name="lang_may_s">мая</string>
+    <string name="lang_june_s">июня</string>
+    <string name="lang_july_s">июля</string>
+    <string name="lang_august_s">августа</string>
+    <string name="lang_september_s">сентября</string>
+    <string name="lang_october_s">октября</string>
+    <string name="lang_november_s">ноября</string>
+    <string name="lang_december_s">декабря</string>
+
+    <string name="lang_january_short">Янв</string>
+    <string name="lang_february_short">Фев</string>
+    <string name="lang_march_short">Мар</string>
+    <string name="lang_april_short">Апр</string>
+    <string name="lang_may_short">Мая</string>
+    <string name="lang_june_short">Июн</string>
+    <string name="lang_july_short">Июл</string>
+    <string name="lang_august_short">Авг</string>
+    <string name="lang_september_short">Сен</string>
+    <string name="lang_october_short">Окт</string>
+    <string name="lang_november_short">Ноя</string>
+    <string name="lang_december_short">Дек</string>
+
+    <string name="lang_january_short_s">янв</string>
+    <string name="lang_february_short_s">фев</string>
+    <string name="lang_march_short_s">мар</string>
+    <string name="lang_april_short_s">апр</string>
+    <string name="lang_may_short_s">мая</string>
+    <string name="lang_june_short_s">июн</string>
+    <string name="lang_july_short_s">июл</string>
+    <string name="lang_august_short_s">авг</string>
+    <string name="lang_september_short_s">сен</string>
+    <string name="lang_october_short_s">окт</string>
+    <string name="lang_november_short_s">ноя</string>
+    <string name="lang_december_short_s">дек</string>
+</resources>

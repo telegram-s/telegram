@@ -17,6 +17,8 @@ import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.files.UploadResult;
+import org.telegram.android.core.model.file.FileSource;
+import org.telegram.android.core.model.file.FileUriSource;
 import org.telegram.android.core.model.update.TLLocalCreateChat;
 import org.telegram.android.core.model.update.TLLocalUpdateChatPhoto;
 import org.telegram.android.media.Optimizer;
@@ -170,71 +172,23 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
 
             @Override
             public void execute() throws AsyncException {
-                if (message == null) {
-                    TLVector<TLAbsInputUser> user = new TLVector<TLAbsInputUser>();
-                    for (int i : uids) {
-                        user.add(new TLInputUserContact(i));
-                    }
-                    message = rpc(new TLRequestMessagesCreateChat(user, chatTitle));
-                    application.getUpdateProcessor().onMessage(new TLLocalCreateChat(message));
-
-                    TLStatedMessage msg = (TLStatedMessage) message;
-                    getEngine().onUsers(msg.getUsers());
-                    getEngine().getGroupsEngine().onGroupsUpdated(msg.getChats());
-                    getEngine().onUpdatedMessage(msg.getMessage());
-                    chatId = ((TLPeerChat) ((TLMessageService) msg.getMessage()).getToId()).getChatId();
+                TLVector<TLAbsInputUser> user = new TLVector<TLAbsInputUser>();
+                for (int i : uids) {
+                    user.add(new TLInputUserContact(i));
                 }
+                message = rpc(new TLRequestMessagesCreateChat(user, chatTitle));
+                application.getUpdateProcessor().onMessage(new TLLocalCreateChat(message));
 
-                if (imageFileName != null || imageUri != null) {
-                    InputStream stream = null;
-                    try {
-                        long fileId = Entropy.generateRandomId();
-                        String destFile = getUploadTempFile();
-                        if (imageFileName != null) {
-                            Optimizer.optimize(imageFileName, destFile);
-                        } else {
-                            Optimizer.optimize(imageUri.toString(), application, destFile);
-                        }
-                        File file = new File(destFile);
-                        int len = (int) file.length();
-                        stream = new FileInputStream(file);
-                        UploadResult res = application.getUploadController().uploadFile(stream, len, fileId);
-                        if (res == null)
-                            throw new AsyncException(AsyncException.ExceptionType.CONNECTION_ERROR);
+                TLStatedMessage msg = (TLStatedMessage) message;
+                getEngine().onUsers(msg.getUsers());
+                getEngine().getGroupsEngine().onGroupsUpdated(msg.getChats());
+                getEngine().onUpdatedMessage(msg.getMessage());
+                chatId = ((TLPeerChat) ((TLMessageService) msg.getMessage()).getToId()).getChatId();
 
-                        TLAbsStatedMessage message = rpc(new TLRequestMessagesEditChatPhoto(chatId,
-                                new TLInputChatUploadedPhoto(
-                                        new TLInputFile(fileId, res.getPartsCount(), "photo.jpg", res.getHash()),
-                                        new TLInputPhotoCropAuto())));
-
-                        TLMessageService service = (TLMessageService) message.getMessage();
-                        TLMessageActionChatEditPhoto editPhoto = (TLMessageActionChatEditPhoto) service.getAction();
-
-                        getEngine().onUsers(message.getUsers());
-                        getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                        application.getEngine().onUpdatedMessage(message.getMessage());
-                        application.getEngine().onChatAvatarChanges(chatId, EngineUtils.convertAvatarPhoto(editPhoto.getPhoto()));
-
-                        application.getUpdateProcessor().onMessage(new TLLocalUpdateChatPhoto(message));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new AsyncException(getStringSafe(R.string.st_new_group_complete_avatar));
-                    } finally {
-                        if (stream != null) {
-                            try {
-                                stream.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCanceled() {
-                if (message != null) {
-                    afterExecute();
+                if (imageUri != null) {
+                    application.getSyncKernel().getAvatarUploader().uploadGroup(chatId, new FileUriSource(imageUri.toString()));
+                } else if (imageFileName != null) {
+                    application.getSyncKernel().getAvatarUploader().uploadGroup(chatId, new FileSource(imageFileName));
                 }
             }
 

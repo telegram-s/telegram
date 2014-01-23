@@ -250,8 +250,6 @@
     <string name="st_conv_menu_photo">التقط صورة</string>
     <string name="st_conv_menu_gallery">الأستوديو</string>
     <string name="st_conv_menu_video">مقطع مرئي</string>
-    <string name="st_conv_menu_video_sd">مقطع مرئي بصفاوة عادية</string>
-    <string name="st_conv_menu_video_hd">مقطع مرئي بصفاوة عالية</string>
     <string name="st_conv_menu_location">موقع</string>
 
     <string name="st_contacts_add_name_title">تعديل الاسم الأول واسم العائلة</string>

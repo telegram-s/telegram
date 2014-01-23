@@ -46,7 +46,6 @@
                               android:text="last seen today at 12:45 PM"
                               android:textSize="15sp"
                               android:textColor="@color/st_grey_text"
-                              ext:customFont="light"
                               android:id="@+id/online"/>
                 </LinearLayout>
             </org.telegram.android.ui.RtlLinearLayout>
@@ -88,7 +87,6 @@
                               android:textSize="14sp"
                               android:textColor="@color/st_grey_text"
                               android:text="@string/st_profile_phone_mobile"
-                              ext:customFont="light"
                               android:id="@+id/phoneType"/>
                 </LinearLayout>
 
