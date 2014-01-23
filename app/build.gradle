@@ -114,7 +114,7 @@ android {
         }
 
         beta {
-            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/translation-ru', 'src/main/res-beta']
+            res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/main/res-beta']
             assets.srcDirs = ['src/res-common/assets']
             java.srcDirs = ['src/dc-production/java', 'src/keys-beta/java', 'src/res-common/java', 'src/build-release/java']
         }
