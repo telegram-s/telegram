@@ -205,12 +205,20 @@ public class ModelEngine {
     }
 
     public void onEncryptedReaded(int chatId, int readDate, int maxDate) {
-        ChatMessage[] unreadMessage = messagesEngine.getUnreadSecret(chatId, maxDate);
         int localReadDate = (int) (readDate - TimeOverlord.getInstance().getTimeDelta() / 1000);
+
+        ChatMessage[] unreadMessage = messagesEngine.getUnreadSecret(chatId, maxDate);
+        ArrayList<ChatMessage> pendingSelfDestruct = new ArrayList<ChatMessage>();
         for (ChatMessage msg : unreadMessage) {
-            msg.setMessageDieTime(localReadDate + msg.getMessageTimeout());
+            if (msg.getMessageTimeout() > 0) {
+                msg.setMessageDieTime(localReadDate + msg.getMessageTimeout());
+                pendingSelfDestruct.add(msg);
+            }
+        }
+        messagesEngine.updateMessages(unreadMessage);
+
+        for (ChatMessage msg : pendingSelfDestruct) {
             application.getSelfDestructProcessor().performSelfDestruct(msg.getDatabaseId(), msg.getMessageDieTime());
-            markReaded(msg);
         }
     }
 

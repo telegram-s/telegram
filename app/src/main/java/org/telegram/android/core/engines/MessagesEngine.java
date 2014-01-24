@@ -168,6 +168,10 @@ public class MessagesEngine {
         database.updateInTx(messages);
     }
 
+    public synchronized void updateMessages(ChatMessage[] messages) {
+        database.updateInTx(messages);
+    }
+
     public synchronized ChatMessage[] updateMessages(List<TLAbsMessage> messages) {
         long start = SystemClock.uptimeMillis();
         ChatMessage[] converted = convert(messages);

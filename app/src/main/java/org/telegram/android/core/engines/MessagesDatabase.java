@@ -108,7 +108,6 @@ public class MessagesDatabase {
                 .where(MessageDao.Properties.PeerUniqId.eq(uniq(PeerType.PEER_USER_ENCRYPTED, chatId)),
                         MessageDao.Properties.IsOut.eq(true),
                         MessageDao.Properties.State.eq(MessageState.SENT),
-                        MessageDao.Properties.MessageTimeout.gt(0),
                         MessageDao.Properties.Date.le(maxDate))
                 .list();
 
