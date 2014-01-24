@@ -538,9 +538,9 @@ public class ActivationController {
                 new RpcCallback<TLAuthorization>() {
                     @Override
                     public void onResult(TLAuthorization result) {
+                        disableTimeout();
                         application.getKernel().logIn(result);
                         doChangeState(STATE_ACTIVATED);
-                        disableTimeout();
                     }
 
                     @Override
@@ -615,6 +615,7 @@ public class ActivationController {
                 REQUEST_TIMEOUT, new RpcCallback<TLAuthorization>() {
             @Override
             public void onResult(TLAuthorization result) {
+                disableTimeout();
                 application.getKernel().logIn(result);
                 if (manualAvatarUri != null) {
                     application.getSyncKernel().getAvatarUploader().uploadAvatar(new FileUriSource(manualAvatarUri.toString()));
@@ -656,6 +657,7 @@ public class ActivationController {
                 new RpcCallback<TLAuthorization>() {
                     @Override
                     public void onResult(TLAuthorization result) {
+                        disableTimeout();
                         application.getKernel().logIn(result);
                         doChangeState(STATE_ACTIVATED);
                     }

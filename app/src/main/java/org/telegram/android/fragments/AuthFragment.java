@@ -467,7 +467,9 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
     }
 
     private void updateBarTitle() {
-        getSherlockActivity().invalidateOptionsMenu();
+        if (getSherlockActivity() != null) {
+            getSherlockActivity().invalidateOptionsMenu();
+        }
     }
 
     @Override
@@ -776,6 +778,7 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         }
 
         if (state == ActivationController.STATE_ACTIVATED) {
+            application.getKernel().getActivationController().setListener(null);
             application.getKernel().setActivationController(null);
             ((StartActivity) getActivity()).onSuccessAuth();
         }
