@@ -754,7 +754,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         maxChatSize = application.getKernel().getTechKernel().getSystemConfig().getMaxChatSize();
         application.getChatSource().registerListener(this);
         application.getSyncKernel().getAvatarUploader().setChatUploadListener(this);
-        bindView();
+        if (fullChatInfo != null && group != null) {
+            bindView();
+        }
     }
 
     @Override
