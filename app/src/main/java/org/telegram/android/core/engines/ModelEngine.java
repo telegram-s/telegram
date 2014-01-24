@@ -208,6 +208,7 @@ public class ModelEngine {
         int localReadDate = (int) (readDate - TimeOverlord.getInstance().getTimeDelta() / 1000);
 
         ChatMessage[] unreadMessage = messagesEngine.getUnreadSecret(chatId, maxDate);
+
         ArrayList<ChatMessage> pendingSelfDestruct = new ArrayList<ChatMessage>();
         for (ChatMessage msg : unreadMessage) {
             if (msg.getMessageTimeout() > 0) {
@@ -215,29 +216,32 @@ public class ModelEngine {
                 pendingSelfDestruct.add(msg);
             }
         }
-        messagesEngine.updateMessages(unreadMessage);
+
+        onMessagesReaded(unreadMessage);
 
         for (ChatMessage msg : pendingSelfDestruct) {
             application.getSelfDestructProcessor().performSelfDestruct(msg.getDatabaseId(), msg.getMessageDieTime());
         }
     }
 
-    public void onMessagesReaded(int[] mids) {
-        ChatMessage[] saved = messagesEngine.getMessagesByMid(mids);
-        HashMap<Long, Integer> maxMap = new HashMap<Long, Integer>();
-        HashMap<Long, Integer> deletedMap = new HashMap<Long, Integer>();
-        for (ChatMessage msg : saved) {
-            long id = msg.getPeerType() + msg.getPeerId() * 10L;
-            if (msg.isOut()) {
-                if (maxMap.containsKey(id)) {
-                    if (maxMap.get(id) < msg.getMid()) {
-                        maxMap.put(id, msg.getMid());
-                    }
-                } else {
-                    maxMap.put(id, msg.getMid());
-                }
-            }
+    public void onMessagesReaded(ChatMessage[] messages) {
+        // Loading dialogs
+        HashSet<Long> dialogIds = new HashSet<Long>();
+        HashMap<Long, DialogDescription> dialogs = new HashMap<Long, DialogDescription>();
+        HashSet<DialogDescription> updatedDescriptions = new HashSet<DialogDescription>();
 
+        for (ChatMessage msg : messages) {
+            long id = msg.getPeerType() + msg.getPeerId() * 10L;
+            dialogIds.add(id);
+        }
+
+        DialogDescription[] tDescriptions = dialogsEngine.loadDialogs(dialogIds.toArray(new Long[0]));
+        for (DialogDescription d : tDescriptions) {
+            dialogs.put(d.getUniqId(), d);
+        }
+        HashMap<Long, Integer> deletedMap = new HashMap<Long, Integer>();
+        for (ChatMessage msg : messages) {
+            long id = msg.getPeerType() + msg.getPeerId() * 10L;
             if (!msg.isOut() && msg.getState() == MessageState.SENT) {
                 if (deletedMap.containsKey(id)) {
                     deletedMap.put(id, deletedMap.get(id) + 1);
@@ -245,57 +249,107 @@ public class ModelEngine {
                     deletedMap.put(id, 1);
                 }
             }
-        }
 
-        for (long key : maxMap.keySet()) {
-            int peerId = (int) (key / 10);
-            int peerType = (int) (key % 10);
-
-            DialogDescription description = getDescriptionForPeer(peerType, peerId);
-            if (description != null && description.getTopMessageId() == maxMap.get(key)) {
-                description.setMessageState(MessageState.READED);
-                dialogsEngine.updateDialog(description);
+            DialogDescription description = dialogs.get(id);
+            if (description != null) {
+                if (description.getTopMessageId() == -msg.getDatabaseId() || description.getTopMessageId() == msg.getMid()) {
+                    description.setMessageState(MessageState.READED);
+                    updatedDescriptions.add(description);
+                }
             }
+
+            msg.setState(MessageState.READED);
         }
         for (long key : deletedMap.keySet()) {
-            int peerId = (int) (key / 10);
-            int peerType = (int) (key % 10);
+            int peerType = (int) ((10 + key % 10L) % 10);
+            int peerId = (int) ((key - peerType) / 10L);
 
             DialogDescription description = getDescriptionForPeer(peerType, peerId);
             if (description != null) {
                 description.setUnreadCount(Math.max(0, description.getUnreadCount() - deletedMap.get(key)));
-                dialogsEngine.updateDialog(description);
+                updatedDescriptions.add(description);
             }
         }
 
-        for (int mid : mids) {
-            ChatMessage msg = EngineUtils.searchMessage(saved, mid);
-            if (msg != null) {
-                markReaded(msg);
-            }
-        }
-
-        messagesEngine.onMessageRead(saved);
+        dialogsEngine.updateOrCreateDialog(updatedDescriptions.toArray(new DialogDescription[updatedDescriptions.size()]));
+        messagesEngine.onMessageRead(messages);
     }
 
-    private void markReaded(ChatMessage msg) {
-        if (!msg.isOut() && msg.getState() == MessageState.SENT) {
-            DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
-            if (description != null) {
-                description.setUnreadCount(Math.max(0, description.getUnreadCount() - 1));
-                dialogsEngine.updateDialog(description);
-            }
-        }
-        if (msg.isOut()) {
-            DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
-            if (description != null && description.getTopMessageId() == msg.getMid()) {
-                description.setMessageState(MessageState.READED);
-                dialogsEngine.updateDialog(description);
-            }
-        }
-        msg.setState(MessageState.READED);
-        messagesEngine.update(msg);
+    public void onMessagesReaded(int[] mids) {
+        ChatMessage[] saved = messagesEngine.getMessagesByMid(mids);
+        onMessagesReaded(saved);
+//        HashMap<Long, Integer> maxMap = new HashMap<Long, Integer>();
+//        HashMap<Long, Integer> deletedMap = new HashMap<Long, Integer>();
+//        for (ChatMessage msg : saved) {
+//            long id = msg.getPeerType() + msg.getPeerId() * 10L;
+//            if (msg.isOut()) {
+//                if (maxMap.containsKey(id)) {
+//                    if (maxMap.get(id) < msg.getMid()) {
+//                        maxMap.put(id, msg.getMid());
+//                    }
+//                } else {
+//                    maxMap.put(id, msg.getMid());
+//                }
+//            }
+//
+//            if (!msg.isOut() && msg.getState() == MessageState.SENT) {
+//                if (deletedMap.containsKey(id)) {
+//                    deletedMap.put(id, deletedMap.get(id) + 1);
+//                } else {
+//                    deletedMap.put(id, 1);
+//                }
+//            }
+//        }
+//
+//        for (long key : maxMap.keySet()) {
+//            int peerId = (int) (key / 10);
+//            int peerType = (int) (key % 10);
+//
+//            DialogDescription description = getDescriptionForPeer(peerType, peerId);
+//            if (description != null && description.getTopMessageId() == maxMap.get(key)) {
+//                description.setMessageState(MessageState.READED);
+//                dialogsEngine.updateDialog(description);
+//            }
+//        }
+//        for (long key : deletedMap.keySet()) {
+//            int peerId = (int) (key / 10);
+//            int peerType = (int) (key % 10);
+//
+//            DialogDescription description = getDescriptionForPeer(peerType, peerId);
+//            if (description != null) {
+//                description.setUnreadCount(Math.max(0, description.getUnreadCount() - deletedMap.get(key)));
+//                dialogsEngine.updateDialog(description);
+//            }
+//        }
+
+//        for (int mid : mids) {
+//            ChatMessage msg = EngineUtils.searchMessage(saved, mid);
+//            if (msg != null) {
+//                markReaded(msg);
+//            }
+//        }
+
+//        messagesEngine.onMessageRead(saved);
     }
+
+//    private void markReaded(ChatMessage msg) {
+//        if (!msg.isOut() && msg.getState() == MessageState.SENT) {
+//            DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
+//            if (description != null) {
+//                description.setUnreadCount(Math.max(0, description.getUnreadCount() - 1));
+//                dialogsEngine.updateDialog(description);
+//            }
+//        }
+//        if (msg.isOut()) {
+//            DialogDescription description = getDescriptionForPeer(msg.getPeerType(), msg.getPeerId());
+//            if (description != null && description.getTopMessageId() == msg.getMid()) {
+//                description.setMessageState(MessageState.READED);
+//                dialogsEngine.updateDialog(description);
+//            }
+//        }
+//        msg.setState(MessageState.READED);
+//        messagesEngine.update(msg);
+//    }
 
     public boolean onNewSecretMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, String message) {
         if (messagesEngine.getMessageByRandomId(randomId) != null) {
@@ -798,7 +852,7 @@ public class ModelEngine {
         if (msg.getExtras() instanceof TLLocalPhoto || msg.getExtras() instanceof TLLocalVideo) {
             mediaEngine.deleteMedia(msg.getMid());
         }
-        dialogsEngine.updateDescriptorSelfDestructed(msg.getPeerType(), msg.getPeerId(), msg.getMid());
+        dialogsEngine.updateDescriptorSelfDestructed(msg.getPeerType(), msg.getPeerId(), msg.getMid(), msg.getDatabaseId());
     }
 
     public void deleteUnsentMessage(int databaseId) {

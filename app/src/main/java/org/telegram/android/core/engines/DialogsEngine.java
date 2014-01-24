@@ -168,10 +168,10 @@ public class DialogsEngine {
         }
     }
 
-    public synchronized void updateDescriptorSelfDestructed(int peerType, int peerId, int mid) {
+    public synchronized void updateDescriptorSelfDestructed(int peerType, int peerId, int mid, int databaseId) {
         DialogDescription description = loadDialog(peerType, peerId);
         if (description != null) {
-            if (description.getTopMessageId() == mid) {
+            if (description.getTopMessageId() == mid || description.getTopMessageId() == -databaseId) {
                 description.setMessageState(MessageState.READED);
                 description.setContentType(ContentType.MESSAGE_SYSTEM);
                 description.setMessage("");

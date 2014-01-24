@@ -166,10 +166,12 @@ public class MessagesEngine {
             msg.setState(MessageState.READED);
         }
         database.updateInTx(messages);
+        application.getDataSourceKernel().onSourceUpdateMessages(messages);
     }
 
     public synchronized void updateMessages(ChatMessage[] messages) {
         database.updateInTx(messages);
+        application.getDataSourceKernel().onSourceUpdateMessages(messages);
     }
 
     public synchronized ChatMessage[] updateMessages(List<TLAbsMessage> messages) {

@@ -225,14 +225,14 @@ public class MessagesDatabase {
     public ChatMessage[] findDiedMessages(int currentTime) {
         return convert(messageDao.queryBuilder().where(
                 MessageDao.Properties.MessageDieTime.le(currentTime),
-                MessageDao.Properties.MessageTimeout.notEq(0))
+                MessageDao.Properties.MessageDieTime.notEq(0))
                 .list());
     }
 
     public ChatMessage[] findPendingSelfDestructMessages(int currentTime) {
         return convert(messageDao.queryBuilder().where(
                 MessageDao.Properties.MessageDieTime.gt(currentTime),
-                MessageDao.Properties.MessageTimeout.notEq(0))
+                MessageDao.Properties.MessageDieTime.notEq(0))
                 .list());
     }
 
