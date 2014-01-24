@@ -76,7 +76,7 @@ public class DialogsEngine {
     public synchronized void deleteDialog(int peerType, int peerId) {
         database.deleteDialog(peerType, peerId);
         if (application.getKernelsLoader().isLoaded()) {
-            application.getDialogSource().getViewSource().removeItemByKey(peerType * 10L + peerId);
+            application.getDialogSource().getViewSource().removeItemByKey(peerType + peerId * 10L);
         }
     }
 

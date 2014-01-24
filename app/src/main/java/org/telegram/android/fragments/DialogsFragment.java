@@ -314,8 +314,8 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
 //                                                    throw new AsyncException(e);
 //                                                }
                                             }
-                                            getEngine().getSecretEngine().deleteEncryptedChat(description.getPeerId());
                                             getEngine().deleteHistory(description.getPeerType(), description.getPeerId());
+                                            getEngine().getSecretEngine().deleteEncryptedChat(description.getPeerId());
                                         } else {
 
                                             TLAbsInputPeer peer;
