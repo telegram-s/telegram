@@ -1,29 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="whats_contacts_title">Contacts and startup improvements</string>
-    <string name="whats_contacts_0">Deleting contacts</string>
-    <string name="whats_contacts_1">Contacts ordering (first \ last name) uses phone settings</string>
-    <string name="whats_contacts_2">Improved loading speed</string>
+    <string name="whats_contacts_title">Контакты и скорость запуска</string>
+    <string name="whats_contacts_0">Удаление контактов</string>
+    <string name="whats_contacts_1">Сортировка контактов (имя/фамилия) использует системную настройку</string>
+    <string name="whats_contacts_2">Улучшена скорость запуска</string>
 
-    <string name="whats_new_design_title">Design, speed and stability</string>
-    <string name="whats_new_design_0">New blue design</string>
-    <string name="whats_new_design_1">Speed up photo, video and message delivery</string>
-    <string name="whats_new_design_2">Optimizations to "firewalled" countries</string>
-    <string name="whats_new_design_3">Much better stability</string>
+    <string name="whats_new_design_title">Дизайн, скорость и стабильность</string>
+    <string name="whats_new_design_0">Новый синий дизайн</string>
+    <string name="whats_new_design_1">Ускорение доставки фото, видео и сообщений</string>
+    <string name="whats_new_design_2">Оптимизации для заблокированных стран</string>
+    <string name="whats_new_design_3">Повышена стабильность работы</string>
 
-    <string name="whats_new_secret_title">Added secret chats</string>
-    <string name="whats_new_secret_hint">Start a secret chat from the "Write to" menu or from a contact\'s profile.
+    <string name="whats_new_secret_title">Добавлены секретные чаты</string>
+    <string name="whats_new_secret_hint">Начните секретный чат из меню или из профиля контакта
     </string>
-    <string name="whats_new_secret_0">Use end-to-end encryption</string>
-    <string name="whats_new_secret_1">Leave no trace on our servers</string>
-    <string name="whats_new_secret_2">Have a self-destruct timer</string>
-    <string name="whats_new_secret_3">Do not allow forwarding</string>
+    <string name="whats_new_secret_0">End-to-End шифрование</string>
+    <string name="whats_new_secret_1">Не оставляет следов на наших серверах</string>
+    <string name="whats_new_secret_2">Имеет возможность самоудаления</string>
+    <string name="whats_new_secret_3">Запрещена пересылка сообщений</string>
 
-    <string name="whats_new_arabic_title">Added arabic localization</string>
-    <string name="whats_new_arabic_hint">If you have any problems with the arabic localization, please tell our support
-        team in Settings — Ask a question.
+    <string name="whats_new_arabic_title">Добавлена арабская локализация</string>
+    <string name="whats_new_arabic_hint">Если у Вас есть проблемы с арабской локализацией, пожалуйста, сообщите нашей команде поддержки в Настройках - Задать вопрос.
     </string>
-    <string name="whats_new_arabic_0">Full RTL support on android 4.0+</string>
-    <string name="whats_new_arabic_1">Mirrored interface on android 4.2+</string>
-    <string name="whats_new_arabic_2">Full support for eastern arabic numberals</string>
+    <string name="whats_new_arabic_0">Полная поддержка RTL на Андроиде 4.0+</string>
+    <string name="whats_new_arabic_1">Отраженный интерфейс на Андроиде 4.2+</string>
+    <string name="whats_new_arabic_2">Поддержка индийских цифр</string>
+
+    <string name="whats_new_gif_title">Gif-Анимации, аудио, русская локализация и скорость</string>
+    <string name="whats_new_gif_hint">
+        Gif-Анимации работает только с другими S-Версиями телеграма.
+        Если у Вас есть проблемы с русской локализацией, пожалуйста, сообщите нашей команде поддержки в Настройках - Задать вопрос.
+    </string>
+    <string name="whats_new_gif_0">Отправка Gif-Анимаций</string>
+    <string name="whats_new_gif_1">Предпросмотр документов-изображений</string>
+    <string name="whats_new_gif_2">Отправка и получение аудио (как Документ)</string>
+    <string name="whats_new_gif_3">Улучшена анимация загрузки фотографий</string>
+    <string name="whats_new_gif_4">Русская локализация</string>
+    <string name="whats_new_gif_5">Экспериментальные темы приложения</string>
 </resources>

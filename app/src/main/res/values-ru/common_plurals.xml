@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="lang_seconds">
-        <item quantity="one">{d} секунда</item>
+        <item quantity="one">{d} секунду</item>
         <item quantity="few">{d} секунды</item>
         <item quantity="many">{d} секунд</item>
         <item quantity="other">{d} секунд</item>
     </plurals>
 
     <plurals name="lang_minutes">
-        <item quantity="one">{d} минута</item>
+        <item quantity="one">{d} минуту</item>
         <item quantity="few">{d} минуты</item>
         <item quantity="many">{d} минут</item>
         <item quantity="other">{d} минуты</item>

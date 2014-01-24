@@ -198,6 +198,18 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         }
 
         // Current version
+        if (prevVersionCode < 997) {
+            definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_new_gif_title),
+                    new String[]{
+                            getString(R.string.whats_new_gif_0),
+                            getString(R.string.whats_new_gif_1),
+                            getString(R.string.whats_new_gif_2),
+                            getString(R.string.whats_new_gif_3),
+                            getString(R.string.whats_new_gif_4),
+                            getString(R.string.whats_new_gif_5),
+                    },
+                    getString(R.string.whats_new_gif_hint)));
+        }
 
         if (prevVersionCode < 732) {
             definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_contacts_title),

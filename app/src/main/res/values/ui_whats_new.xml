@@ -26,4 +26,17 @@
     <string name="whats_new_arabic_0">Full RTL support on android 4.0+</string>
     <string name="whats_new_arabic_1">Mirrored interface on android 4.2+</string>
     <string name="whats_new_arabic_2">Full support for eastern arabic numberals</string>
+
+    <string name="whats_new_gif_title">Gif Animations, russian localization and speed</string>
+    <string name="whats_new_gif_hint">
+        Gif animations works with images sent form other S-Edition versions of Telegram.
+        If you have any problems with the russian localization, please tell our support
+        team in Settings — Ask a question.
+    </string>
+    <string name="whats_new_gif_0">Sending and viewing Gif-Animations</string>
+    <string name="whats_new_gif_1">Preview in documents (now visible only in S edition)</string>
+    <string name="whats_new_gif_2">Sending and receiving audio (from Documents menu)</string>
+    <string name="whats_new_gif_3">Download animation improvements</string>
+    <string name="whats_new_gif_4">Russian localization</string>
+    <string name="whats_new_gif_5">Experimental themes</string>
 </resources>
