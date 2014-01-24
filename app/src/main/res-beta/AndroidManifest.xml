@@ -8,4 +8,14 @@
                 android:protectionLevel="signature" />
     <uses-permission android:name="org.telegram.android.beta.permission.C2D_MESSAGE" />
 
+    <application>
+        <receiver android:name="org.telegram.android.gcm.GCMBroadcastReceiver"
+                  android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <category android:name="org.telegram.android.beta"/>
+            </intent-filter>
+        </receiver>
+    </application>
+
 </manifest>
