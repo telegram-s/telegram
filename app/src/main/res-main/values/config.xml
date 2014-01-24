@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_package">org.telegram.android</string>
-    <string name="app_gcm_permission">org.telegram.android.permission.C2D_MESSAGE</string>
 </resources>
