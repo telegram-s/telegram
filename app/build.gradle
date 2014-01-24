@@ -93,12 +93,14 @@ android {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/main/res-main']
             assets.srcDirs = ['src/res-common/assets']
             java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java', 'src/res-common/java', 'src/build-release/java']
+            manifest.srcFile 'src/main/res-main/AndroidManifest.xml'
         }
 
         hockey {
             res.srcDirs = ['src/res-mdpi/res', 'src/res-hdpi/res', 'src/res-xhdpi/res', 'src/res-xxhdpi/res', 'src/main/res-main']
             assets.srcDirs = ['src/res-common/assets']
             java.srcDirs = ['src/dc-production/java', 'src/keys-prime/java', 'src/res-common/java', 'src/build-test/java']
+            manifest.srcFile 'src/main/res-main/AndroidManifest.xml'
         }
 
         hockeytest {
