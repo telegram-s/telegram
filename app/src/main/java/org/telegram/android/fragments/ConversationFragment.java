@@ -543,6 +543,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     }
 
     protected void updateContactsPanel(boolean initial) {
+        if (contactsPanel == null) {
+            return;
+        }
         if (peerType == PeerType.PEER_USER) {
             if (peerId == 333000) {
                 goneView(contactsPanel, false);

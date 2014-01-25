@@ -295,6 +295,9 @@ public class MessagesDatabase {
     }
 
     private ChatMessage convert(Message src) {
+        if (src == null) {
+            return null;
+        }
         ChatMessage res = new ChatMessage();
         res.setDatabaseId((int) (long) src.getId());
         res.setPeerType((int) ((10 + src.getPeerUniqId() % 10L) % 10));

@@ -31,6 +31,8 @@ public class CreateChatFragment extends BaseContactsFragment {
     private View mainContainer;
     private View headerContainer;
 
+    private TextWatcher textWatcher;
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -78,7 +80,7 @@ public class CreateChatFragment extends BaseContactsFragment {
         inputEdit = (EditText) view.findViewById(R.id.inputEdit);
         headerContainer = view.findViewById(R.id.header);
         counterView = (TextView) view.findViewById(R.id.counter);
-        inputEdit.addTextChangedListener(new TextWatcher() {
+        textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
 
@@ -101,7 +103,7 @@ public class CreateChatFragment extends BaseContactsFragment {
                     addUser(getContactAt(0).user);
                 }
             }
-        });
+        };
     }
 
     @Override
@@ -173,6 +175,7 @@ public class CreateChatFragment extends BaseContactsFragment {
     @Override
     public void onResume() {
         super.onResume();
+        inputEdit.addTextChangedListener(textWatcher);
         updateCounter();
     }
 
@@ -185,8 +188,10 @@ public class CreateChatFragment extends BaseContactsFragment {
         for (int i = 0; i < selected.size(); i++) {
             spannable.setSpan(new UserSpan(application.getEngine().getUser(selected.get(i)), getPx(200)), i, i + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
         }
+        inputEdit.removeTextChangedListener(textWatcher);
         inputEdit.setText(spannable);
         inputEdit.setSelection(spannable.length());
+        inputEdit.addTextChangedListener(textWatcher);
     }
 
     private static TextPaint textPaint;
@@ -292,5 +297,11 @@ public class CreateChatFragment extends BaseContactsFragment {
         inputEdit = null;
         counterView = null;
         doneButton = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        inputEdit.removeTextChangedListener(textWatcher);
     }
 }

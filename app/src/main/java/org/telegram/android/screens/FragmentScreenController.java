@@ -66,7 +66,10 @@ public class FragmentScreenController implements RootController {
         if (savedState != null && savedState.containsKey("backstack")) {
             String[] keys = savedState.getStringArray("backstack");
             for (int i = 0; i < keys.length; i++) {
-                backStack.add((TelegramFragment) activity.getSupportFragmentManager().findFragmentByTag(keys[i]));
+                TelegramFragment fragment = (TelegramFragment) activity.getSupportFragmentManager().findFragmentByTag(keys[i]);
+                if (fragment != null) {
+                    backStack.add(fragment);
+                }
             }
             if (backStack.size() > 0) {
                 backStack.get(backStack.size() - 1).setHasOptionsMenu(true);

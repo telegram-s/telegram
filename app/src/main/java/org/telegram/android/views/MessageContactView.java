@@ -182,8 +182,8 @@ public class MessageContactView extends BaseMsgView {
         this.showState = message.message.isOut();
 
         this.placeholder = getResources().getDrawable(Placeholders.getUserPlaceholder(contact.getUserId()));
-        this.showAddButton = message.relatedUser != null && (message.relatedUser.getLinkType() != LinkType.CONTACT)
-                && (contact.getUserId() != application.getCurrentUid());
+        boolean isNotContact = (message.relatedUser != null) && (message.relatedUser.getLinkType() != LinkType.CONTACT);
+        this.showAddButton = isNotContact && (contact.getUserId() != application.getCurrentUid());
         requestLayout();
     }
 

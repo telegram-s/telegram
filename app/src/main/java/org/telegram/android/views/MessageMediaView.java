@@ -347,7 +347,7 @@ public class MessageMediaView extends BaseMsgView {
 //                        previewBitmapHolder = null;
 //                    }
                     options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    options.inMutable = true;
+                    // options.inMutable = true;
                     options.inDither = false;
                     options.inTempStorage = bitmapTmp;
 
@@ -357,7 +357,7 @@ public class MessageMediaView extends BaseMsgView {
                 } else {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    options.inMutable = true;
+                    // options.inMutable = true;
                     options.inDither = false;
                     options.inTempStorage = bitmapTmp;
                     Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
@@ -426,7 +426,7 @@ public class MessageMediaView extends BaseMsgView {
                     if (previewCached == null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                        options.inMutable = true;
+                        // options.inMutable = true;
                         options.inDither = false;
                         options.inTempStorage = bitmapTmp;
                         Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, options);
@@ -582,7 +582,7 @@ public class MessageMediaView extends BaseMsgView {
                     if (previewCached == null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                        options.inMutable = true;
+                        // options.inMutable = true;
                         options.inDither = false;
                         options.inTempStorage = bitmapTmp;
                         Bitmap img = BitmapFactory.decodeByteArray(document.getFastPreview(), 0, document.getFastPreview().length, options);
