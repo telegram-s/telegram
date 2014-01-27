@@ -19,6 +19,7 @@ import org.telegram.android.core.contacts.SyncPhone;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.User;
 import org.telegram.android.log.Logger;
+import org.telegram.api.TLImportedContact;
 import org.telegram.api.TLInputContact;
 import org.telegram.api.contacts.TLAbsContacts;
 import org.telegram.api.contacts.TLContacts;
@@ -168,13 +169,6 @@ public class ContactsSync extends BaseSync {
         }
 
         for (Integer uid : uids) {
-//            for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
-//                if (importedPhone.getUid() == uid) {
-//                    bookPersistence.getObj().getImportedPhones().remove(importedPhone);
-//                    bookPersistence.write();
-//                    break;
-//                }
-//            }
             synchronized (contactsSync) {
                 Logger.d(TAG, "Writing integration contacts...");
 
@@ -299,13 +293,14 @@ public class ContactsSync extends BaseSync {
 
                 outer:
                 for (SyncPhone phone : syncPhones) {
+                    //
 //                    int uid = 0;
-//                    for (TLImportedContact contact : importedContacts.getImported()) {
-//                        if (phone.getPhoneId() == contact.getClientId()) {
-//                            uid = contact.getUserId();
-//                            break;
-//                        }
-//                    }
+                    for (TLImportedContact contact : importedContacts.getImported()) {
+                        if (phone.getPhoneId() == contact.getClientId()) {
+                            uploadState.getImportedPhones().put(phone.getNumber(), contact.getUserId());
+                            break;
+                        }
+                    }
 
 //                    for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
 //                        if (importedPhone.getPhone().equals(phone.getNumber())) {
@@ -384,7 +379,7 @@ public class ContactsSync extends BaseSync {
 
         Logger.d(TAG, "build map in " + (SystemClock.uptimeMillis() - start) + " ms");
 
-        application.getEngine().getUsersEngine().onImportedContacts(imported);
+        application.getEngine().getUsersEngine().updateContactMapping(imported);
 
         Logger.d(TAG, "updatedMapping in " + (SystemClock.uptimeMillis() - start) + " ms");
     }

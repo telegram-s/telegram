@@ -28,7 +28,6 @@ public class CreateChatFragment extends BaseContactsFragment {
     private CopyOnWriteArrayList<Integer> selected = new CopyOnWriteArrayList<Integer>();
     private TextView counterView;
     private TextView doneButton;
-    private View mainContainer;
     private View headerContainer;
 
     private TextWatcher textWatcher;
@@ -76,7 +75,6 @@ public class CreateChatFragment extends BaseContactsFragment {
 
     @Override
     protected void onCreateView(View view, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mainContainer = view.findViewById(R.id.mainContainer);
         inputEdit = (EditText) view.findViewById(R.id.inputEdit);
         headerContainer = view.findViewById(R.id.header);
         counterView = (TextView) view.findViewById(R.id.counter);

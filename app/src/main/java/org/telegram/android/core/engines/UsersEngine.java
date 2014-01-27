@@ -112,7 +112,7 @@ public class UsersEngine {
         return usersDatabase.getContacts();
     }
 
-    public void onImportedContacts(final HashMap<Long, HashSet<Integer>> importedContacts) {
+    public void updateContactMapping(final HashMap<Long, HashSet<Integer>> importedContacts) {
         ArrayList<Contact> nContacts = new ArrayList<Contact>();
         HashSet<Integer> allUids = new HashSet<Integer>();
         for (Long localId : importedContacts.keySet()) {

@@ -5,6 +5,7 @@ package org.telegram.android.core.model;
  * Created: 01.08.13 4:24
  */
 public class Contact {
+    private long databaseId;
     private int uid;
     private long localId;
 
