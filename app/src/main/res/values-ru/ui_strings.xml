@@ -100,7 +100,7 @@
         <![CDATA[<b>Телеграм</b> защищает ваши сообщения от хакерских атак.]]>
     </string>
 
-    <string name="st_tour_page6_title">Облачнный</string>
+    <string name="st_tour_page6_title">Облачный</string>
     <string name="st_tour_page6">
         <![CDATA[<b>Телеграм</b> позволяет Вам получать доступ к своим сообщениям с нескольких устройств.]]>
     </string>
@@ -300,7 +300,7 @@
     </string>
     <string name="st_contacts_block">Вы уверены, что хотите заблокировать контакт \'{0}\'?
     </string>
-    <string name="st_contacts_block_delete">Вы уверены, что хотите заблоикровать контакт \'{0}\' и удалить историю
+    <string name="st_contacts_block_delete">Вы уверены, что хотите заблокировать контакт \'{0}\' и удалить историю
         общения?
     </string>
 
@@ -328,7 +328,7 @@
 
     <string name="st_profile_phone_hidden">скрыт</string>
     <string name="st_profile_phone_copied">Номер скопирован в буфер обмена</string>
-    <string name="st_profile_menu_block">Заблоикровать</string>
+    <string name="st_profile_menu_block">Заблокировать</string>
     <string name="st_profile_menu_add">Добавить в контакты</string>
     <string name="st_profile_menu_share">Поделиться контактом</string>
     <string name="st_profile_menu_edit_name">Изменить имя</string>

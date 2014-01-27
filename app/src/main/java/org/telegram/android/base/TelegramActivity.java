@@ -24,6 +24,10 @@ public class TelegramActivity extends SherlockFragmentActivity {
     }
 
     public void setBarBg() {
+        setBarBg(true);
+    }
+
+    public void setBarBg(boolean fromStart) {
         switch (application.getSettingsKernel().getUserSettings().getBarColor()) {
             default:
             case UserSettings.BAR_COLOR_DEFAULT:
@@ -51,7 +55,9 @@ public class TelegramActivity extends SherlockFragmentActivity {
                 getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.st_bar_bg_line));
                 break;
         }
-        invalidateOptionsMenu();
+        if (!fromStart) {
+            invalidateOptionsMenu();
+        }
     }
 
     public void onBack(View view) {

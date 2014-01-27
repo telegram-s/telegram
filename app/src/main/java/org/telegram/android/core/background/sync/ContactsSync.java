@@ -317,8 +317,10 @@ public class ContactsSync extends BaseSync {
             return;
         }
 
+        Logger.d(TAG, "Contacts load start");
         String hash;
         User[] contacts = application.getEngine().getUsersEngine().getContacts();
+        Logger.d(TAG, "Contacts loaded: " + contacts.length);
         if (contacts.length == 0) {
             hash = "";
         } else {

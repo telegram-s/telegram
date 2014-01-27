@@ -54,6 +54,8 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
 
     private FragmentScreenController controller;
 
+    private boolean isStarted = false;
+
     @Override
     public RootController getRootController() {
         return controller;
@@ -68,7 +70,7 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
             getWindow().setFormat(PixelFormat.RGB_565);
         }
 
-        setBarBg();
+        setBarBg(true);
         getSupportActionBar().setLogo(R.drawable.st_bar_logo);
         getSupportActionBar().setIcon(R.drawable.st_bar_logo);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
@@ -82,6 +84,8 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
             savedState = savedInstanceState.getBundle("screen_controller");
         }
         controller = new FragmentScreenController(this, savedState);
+
+        isStarted = false;
 
         if (savedInstanceState != null) {
             barVisible = savedInstanceState.getBoolean("barVisible");
