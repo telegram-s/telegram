@@ -316,6 +316,8 @@
     <string name="st_contacts_block_delete">Are you sure want to block the contact \'{0}\' and delete contact history?
     </string>
 
+    <string name="st_contacts_header_unregistered">Unregistered contacts</string>
+
     <string name="st_contacts_action_view">View in address book</string>
     <string name="st_contacts_action_share">Share contact</string>
     <string name="st_contacts_action_delete">Delete contact</string>

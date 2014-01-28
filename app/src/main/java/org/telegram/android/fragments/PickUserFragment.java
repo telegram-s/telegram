@@ -11,6 +11,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView;
 import org.telegram.android.R;
 import org.telegram.android.core.ContactsSource;
+import org.telegram.android.core.wireframes.ContactWireframe;
 import org.telegram.android.fragments.common.BaseContactsFragment;
 
 /**
@@ -48,8 +49,8 @@ public class PickUserFragment extends BaseContactsFragment {
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);
-        setResult(Activity.RESULT_OK, contact.user.getUid());
+        ContactWireframe contact = getContactAt(i);
+        setResult(Activity.RESULT_OK, contact.getRelatedUsers()[0].getUid());
         getActivity().onBackPressed();
     }
 

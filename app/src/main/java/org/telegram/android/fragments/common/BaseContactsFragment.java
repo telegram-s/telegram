@@ -12,8 +12,10 @@ import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.ContactSourceListener;
 import org.telegram.android.core.ContactsSource;
+import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.core.wireframes.ContactWireframe;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.ProgressInterface;
 import org.telegram.android.ui.FilterMatcher;
@@ -32,8 +34,8 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
 
     private FilterMatcher matcher;
 
-    private ContactsSource.LocalContact[] allContacts;
-    private ContactsSource.LocalContact[] filteredContacts;
+    private ContactWireframe[] allContacts;
+    private ContactWireframe[] filteredContacts;
     private String[] headers;
     private Integer[] headerStart;
 
@@ -119,8 +121,8 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
 //        });
 
         isLoaded = false;
-        allContacts = new ContactsSource.LocalContact[0];
-        filteredContacts = new ContactsSource.LocalContact[0];
+        allContacts = new ContactWireframe[0];
+        filteredContacts = new ContactWireframe[0];
         contactsAdapter = new ContactsAdapter();
         listView.setAdapter(contactsAdapter);
 
@@ -158,11 +160,11 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
         return res;
     }
 
-    public boolean filterItem(ContactsSource.LocalContact contact) {
+    public boolean filterItem(ContactWireframe contact) {
         return true;
     }
 
-    public ContactsSource.LocalContact getContactAt(int index) {
+    public ContactWireframe getContactAt(int index) {
         return filteredContacts[index];
     }
 
@@ -194,25 +196,25 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
         }
 
         if (matcher != null && matcher.getQuery().length() > 0) {
-            ArrayList<ContactsSource.LocalContact> filtered = new ArrayList<ContactsSource.LocalContact>();
-            for (ContactsSource.LocalContact u : allContacts) {
+            ArrayList<ContactWireframe> filtered = new ArrayList<ContactWireframe>();
+            for (ContactWireframe u : allContacts) {
                 if (!filterItem(u)) {
                     continue;
                 }
-                if (matcher.isMatched(u.displayName)) {
+                if (matcher.isMatched(u.getDisplayName())) {
                     filtered.add(u);
                 }
             }
-            filteredContacts = filtered.toArray(new ContactsSource.LocalContact[filtered.size()]);
+            filteredContacts = filtered.toArray(new ContactWireframe[filtered.size()]);
         } else {
-            ArrayList<ContactsSource.LocalContact> filtered = new ArrayList<ContactsSource.LocalContact>();
-            for (ContactsSource.LocalContact u : allContacts) {
+            ArrayList<ContactWireframe> filtered = new ArrayList<ContactWireframe>();
+            for (ContactWireframe u : allContacts) {
                 if (!filterItem(u)) {
                     continue;
                 }
                 filtered.add(u);
             }
-            filteredContacts = filtered.toArray(new ContactsSource.LocalContact[filtered.size()]);
+            filteredContacts = filtered.toArray(new ContactWireframe[filtered.size()]);
         }
 
         ArrayList<String> nHeaders = new ArrayList<String>();
@@ -221,8 +223,9 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
         char header = '\0';
 
         for (int i = 0; i < filteredContacts.length; i++) {
-            if (filteredContacts[i].header != header) {
-                nHeaders.add("" + filteredContacts[i].header);
+            if (filteredContacts[i].getSection() != header) {
+                header = filteredContacts[i].getSection();
+                nHeaders.add("" + filteredContacts[i].getSection());
                 nHeaderStarts.add(i);
             }
         }
@@ -398,28 +401,29 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
         }
 
         public void bindView(View view, final Context context, int index) {
-            final ContactsSource.LocalContact contact = getItem(index);
+            final ContactWireframe contact = getItem(index);
 
             if (matcher != null) {
-                SpannableString spannableString = new SpannableString(contact.displayName);
+                SpannableString spannableString = new SpannableString(contact.getDisplayName());
                 matcher.highlight(context, spannableString);
                 ((TextView) view.findViewById(R.id.name)).setText(spannableString);
             } else {
-                ((TextView) view.findViewById(R.id.name)).setText(contact.displayName);
+                ((TextView) view.findViewById(R.id.name)).setText(contact.getDisplayName());
             }
 
             TextView onlineView = (TextView) view.findViewById(R.id.status);
 
-            if (contact.user != null) {
-                ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(Placeholders.getUserPlaceholder(contact.user.getUid()));
-                if (contact.user.getPhoto() != null && (contact.user.getPhoto() instanceof TLLocalAvatarPhoto)) {
-                    TLLocalAvatarPhoto p = (TLLocalAvatarPhoto) contact.user.getPhoto();
+            if (contact.getRelatedUsers().length > 0) {
+                User user = contact.getRelatedUsers()[0];
+                ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(Placeholders.getUserPlaceholder(user.getUid()));
+                if (user.getPhoto() != null && (user.getPhoto() instanceof TLLocalAvatarPhoto)) {
+                    TLLocalAvatarPhoto p = (TLLocalAvatarPhoto) user.getPhoto();
                     ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(new StelsImageTask((TLLocalFileLocation) p.getPreviewLocation()));
                 } else {
                     ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
                 }
 
-                int statusValue = getUserState(contact.user.getStatus());
+                int statusValue = getUserState(user.getStatus());
                 if (statusValue < 0) {
                     onlineView.setText(R.string.st_offline);
                     onlineView.setTextColor(context.getResources().getColor(R.color.st_grey_text));
@@ -459,13 +463,16 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
         }
 
         @Override
-        public ContactsSource.LocalContact getItem(int i) {
+        public ContactWireframe getItem(int i) {
             return filteredContacts[i];
         }
 
         @Override
         public long getItemId(int i) {
-            return filteredContacts[i].contactId;
+            if (filteredContacts[i].getContactId() == 0) {
+                return -filteredContacts[i].getRelatedUsers()[0].getUid();
+            }
+            return filteredContacts[i].getContactId();
         }
 
         @Override
@@ -482,13 +489,13 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
             if (view == null) {
                 view = View.inflate(application, R.layout.contact_item_header, null);
             }
-            ((TextView) view.findViewById(R.id.header)).setText(getItem(i).header + "");
+            ((TextView) view.findViewById(R.id.header)).setText(getItem(i).getHeader() + "");
             return view;
         }
 
         @Override
         public long getHeaderId(int i) {
-            return getItem(i).header;
+            return getItem(i).getHeader().charAt(0);
         }
 
         @Override

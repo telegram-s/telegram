@@ -211,7 +211,9 @@
     <string name="st_settings_reset">Удалить сессии</string>
     <string name="st_settings_reset_subtitle">Выйти со всех других устройств</string>
     <string name="st_settings_reset_title">Вы уверены?</string>
-    <string name="st_settings_reset_message">Вы уверены, что хотите выйти с других устройств? Все данные на них будут удалены, а секретные чаты будут потеряны безвозвратно.</string>
+    <string name="st_settings_reset_message">Вы уверены, что хотите выйти с других устройств? Все данные на них будут
+        удалены, а секретные чаты будут потеряны безвозвратно.
+    </string>
     <string name="st_settings_reset_toast">Сессии удалены</string>
     <string name="st_settings_chat">Настройки чата</string>
     <string name="st_settings_chat_subtitle">Обои, размер шрифта и т.д.</string>
@@ -303,6 +305,8 @@
     <string name="st_contacts_block_delete">Вы уверены, что хотите заблокировать контакт \'{0}\' и удалить историю
         общения?
     </string>
+
+    <string name="st_contacts_header_unregistered">Не зарегистрированные</string>
 
     <string name="st_contacts_action_view">Посмотреть в телефонной книге</string>
     <string name="st_contacts_action_share">Поделиться контактом</string>

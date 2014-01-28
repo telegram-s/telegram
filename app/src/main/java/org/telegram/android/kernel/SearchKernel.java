@@ -68,20 +68,20 @@ public class SearchKernel {
 //            }
 //        }
 
-        ContactsSource.LocalContact[] contacts = application.getContactsSource().getTelegramContacts();
-
-        for (ContactsSource.LocalContact c : contacts) {
-            User u = c.user;
-            long id = u.getUid() * 2 + PeerType.PEER_USER;
-            if (founded.contains(id)) {
-                continue;
-            }
-            if (matcher.isMatched(u.getDisplayName())) {
-                founded.add(id);
-                SpannableString spannableString = new SpannableString(u.getDisplayName());
-                wireframes.add(new SearchWireframe(u.getUid(), PeerType.PEER_USER, u.getDisplayName(), spannableString, u.getPhoto(), u.getStatus(), 0));
-            }
-        }
+//        ContactsSource.LocalContact[] contacts = application.getContactsSource().getTelegramContacts();
+//
+//        for (ContactsSource.LocalContact c : contacts) {
+//            User u = c.user;
+//            long id = u.getUid() * 2 + PeerType.PEER_USER;
+//            if (founded.contains(id)) {
+//                continue;
+//            }
+//            if (matcher.isMatched(u.getDisplayName())) {
+//                founded.add(id);
+//                SpannableString spannableString = new SpannableString(u.getDisplayName());
+//                wireframes.add(new SearchWireframe(u.getUid(), PeerType.PEER_USER, u.getDisplayName(), spannableString, u.getPhoto(), u.getStatus(), 0));
+//            }
+//        }
 
         return wireframes.toArray(new SearchWireframe[0]);
     }

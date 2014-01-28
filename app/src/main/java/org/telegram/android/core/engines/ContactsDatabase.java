@@ -94,7 +94,9 @@ public class ContactsDatabase {
                 }
             }
             toAdd.add(new org.telegram.dao.Contact(null, c.getUid(), c.getLocalId()));
-            cache.add(c);
+            if (cache != null) {
+                cache.add(c);
+            }
         }
 
         outer:
