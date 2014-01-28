@@ -17,7 +17,7 @@
     <string name="st_loading_more">Загрузка...</string>
     <string name="st_loading">Загрузка...</string>
     <string name="st_try_again">Повторить</string>
-    <string name="st_default">По-Умолчанию</string>
+    <string name="st_default">По умолчанию</string>
     <string name="st_select_tone">Выбрать мелодию</string>
     <string name="st_none">Нет</string>
     <string name="st_reset">Сбросить</string>
@@ -38,7 +38,7 @@
 
     <string name="st_avatar_group_changed">Групповое фото обновлено</string>
     <string name="st_avatar_group_removed">Групповое фото удалено</string>
-    <string name="st_avatar_group_error">Ошибка загрузки группового фотографии</string>
+    <string name="st_avatar_group_error">Ошибка загрузки групповой фотографии</string>
 
     <string name="st_first_name">Имя</string>
     <string name="st_last_name">Фамилия</string>
@@ -100,7 +100,7 @@
         <![CDATA[<b>Телеграм</b> защищает ваши сообщения от хакерских атак.]]>
     </string>
 
-    <string name="st_tour_page6_title">Облачнный</string>
+    <string name="st_tour_page6_title">Облачный</string>
     <string name="st_tour_page6">
         <![CDATA[<b>Телеграм</b> позволяет Вам получать доступ к своим сообщениям с нескольких устройств.]]>
     </string>
@@ -152,7 +152,7 @@
     <string name="st_auth_code_call">Запросить звонок</string>
     <string name="st_auth_code">Код</string>
 
-    <string name="st_auth_signup_title">Ваш номер телефон подтвержден! Пожалуйста, введите свое Имя, добавьте свою
+    <string name="st_auth_signup_title">Ваш номер телефона подтвержден! Пожалуйста, введите свое Имя, добавьте свою
         фотографию и нажмите продолжить:
     </string>
 
@@ -174,7 +174,7 @@
     <string name="st_dialogs_confirm_image">Отправить фото в "{0}"?</string>
     <string name="st_dialogs_confirm_video">Отправить видео в "{0}"?</string>
     <string name="st_dialogs_confirm_doc">Отправить документ в "{0}"?</string>
-    <string name="st_dialogs_confirm_images">Отобравить фотографии в "{0}"?</string>
+    <string name="st_dialogs_confirm_images">Отправить фотографии в "{0}"?</string>
     <string name="st_dialogs_confirm_docs">Отправить документы в "{0}"?</string>
     <string name="st_dialogs_confirm_contact">Отправить контакт в "{0}"?</string>
 
@@ -218,7 +218,7 @@
     <string name="st_settings_background">Обои</string>
 
     <string name="st_settings_support">Задать вопрос</string>
-    <string name="st_settings_support_subtitle">Наша тех поддержка с радостью поможет</string>
+    <string name="st_settings_support_subtitle">Наша техподдержка с радостью поможет</string>
     <string name="st_settings_faq">Часто задаваемые вопросы</string>
     <string name="st_settings_faq_subtitle">Найдите ответы на вопросы</string>
     <string name="st_settings_twitter">Twitter</string>
@@ -231,7 +231,7 @@
     <string name="st_settings_advanced_title">Расширенные</string>
     <string name="st_settings_advanced_background">ОБОИ</string>
     <string name="st_settings_advanced_send_time">Время отправки сообщений</string>
-    <string name="st_settings_advanced_life_time">Поддерживание приложение запущеным</string>
+    <string name="st_settings_advanced_life_time">Поддерживание приложения запущенным</string>
 
     <string name="st_settings_name_title">ВАШЕ ИМЯ И ФАМИЛИЯ</string>
     <string name="st_settings_name_changed">Имя изменено</string>
@@ -328,7 +328,7 @@
 
     <string name="st_profile_phone_hidden">скрыт</string>
     <string name="st_profile_phone_copied">Номер скопирован в буфер обмена</string>
-    <string name="st_profile_menu_block">Заблоикровать</string>
+    <string name="st_profile_menu_block">Заблокировать</string>
     <string name="st_profile_menu_add">Добавить в контакты</string>
     <string name="st_profile_menu_share">Поделиться контактом</string>
     <string name="st_profile_menu_edit_name">Изменить имя</string>
@@ -413,7 +413,7 @@
     <string name="st_appearance_background_subtitle">Фон чатов</string>
     <string name="st_appearance_bar">Тема</string>
     <string name="st_appearance_bar_subtitle">Оформление приложения</string>
-    <string name="st_appearance_bar_color_default">По-умолчанию</string>
+    <string name="st_appearance_bar_color_default">По умолчанию</string>
     <string name="st_appearance_bar_color_green">Зеленый</string>
     <string name="st_appearance_bar_color_cyan">Циан</string>
     <string name="st_appearance_bar_color_red">Красный</string>
@@ -497,8 +497,8 @@
 
     <string name="st_dialog_encrypted_switched_off">{sender} отключил(а) самоудаление</string>
     <string name="st_dialog_encrypted_switched_off_you">{sender} отключили самоудаление</string>
-    <string name="st_dialog_encrypted_switched">{sender} уставлил(а) самоудаление на {time}</string>
-    <string name="st_dialog_encrypted_switched_you">{sender} уставлили самоудаление на {time}</string>
+    <string name="st_dialog_encrypted_switched">{sender} установил(а) самоудаление на {time}</string>
+    <string name="st_dialog_encrypted_switched_you">{sender} установил самоудаление на {time}</string>
 
     <string name="st_dialog_encrypted_selfdestructed">Последнее сообщение самоудалилось</string>
     <string name="st_dialog_encrypted_requested">Обмен ключами шифрования…</string>
@@ -542,7 +542,7 @@
     <string name="st_secret_key_title">Ключ шифрования</string>
     <string name="st_secret_key_info1">Это изображение - визуализация ключей шифрования чата с {name}.
     </string>
-    <string name="st_secret_key_info2">Если эти изображение выглядит так же как на уйстройстве {name}, то Ваш чат на
+    <string name="st_secret_key_info2">Если это изображение выглядит так же, как на устройстве {name}, то Ваш чат на
         200% безопасен.
     </string>
 
@@ -571,7 +571,7 @@
     <string name="st_notification_secret_created">Секретный чат создан</string>
     <string name="st_notification_secret_cancelled">Секретный чат отменен</string>
 
-    <string name="st_notification_secret_sent_message">Отрпавил(а) сообщение в секретный чат</string>
+    <string name="st_notification_secret_sent_message">Отправил(а) сообщение в секретный чат</string>
     <string name="st_notification_secret_sent_photo">Отправил(а) фото в секретный чат</string>
     <string name="st_notification_secret_sent_video">Отправил(а) видео в секретный чат</string>
     <string name="st_notification_secret_sent_map">Отправил(а) место в секретный чат</string>
