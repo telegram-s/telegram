@@ -707,6 +707,6 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
     }
 
     protected void openInternalFile(String key, String mimeType) {
-        openUri(Uri.parse("content://" + getStringSafe(R.string.config_account_package) + "/" + key), mimeType);
+        openUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key), mimeType);
     }
 }

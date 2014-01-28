@@ -168,15 +168,7 @@ public class ContactsSync extends BaseSync {
             uids.add(c.getUid());
         }
 
-        for (Integer uid : uids) {
-            synchronized (contactsSync) {
-                Logger.d(TAG, "Writing integration contacts...");
-
-                Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, application.getKernel().getAuthKernel().getAccount().name).appendQueryParameter(
-                        ContactsContract.RawContacts.ACCOUNT_TYPE, application.getKernel().getAuthKernel().getAccount().type).build();
-                application.getContentResolver().delete(rawContactUri, ContactsContract.RawContacts.SYNC2 + " = " + uid, null);
-            }
-        }
+        // TODO: Correct implement
     }
 
 
