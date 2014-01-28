@@ -18,6 +18,7 @@ import org.telegram.android.core.contacts.SyncContact;
 import org.telegram.android.core.contacts.SyncPhone;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.User;
+import org.telegram.android.kernel.ApplicationKernel;
 import org.telegram.android.log.Logger;
 import org.telegram.api.TLImportedContact;
 import org.telegram.api.TLInputContact;
@@ -51,8 +52,6 @@ public class ContactsSync extends BaseSync {
 
     private static final String TAG = "ContactsSync";
 
-    private TelegramApplication application;
-
     private String isoCountry;
 
     private PhoneNumberUtil phoneUtil;
@@ -72,9 +71,12 @@ public class ContactsSync extends BaseSync {
 
     private ContactsUploadState uploadState;
 
-    public ContactsSync(TelegramApplication application) {
-        super(application, SETTINGS_NAME);
-        this.application = application;
+    private ApplicationKernel kernel;
+
+    public ContactsSync(ApplicationKernel kernel) {
+        super(kernel.getApplication(), SETTINGS_NAME);
+
+        this.kernel = kernel;
 
         long start = SystemClock.uptimeMillis();
         registerSyncSingleOffline(SYNC_CONTACTS_PRE, "contactsPreSync");
@@ -91,7 +93,7 @@ public class ContactsSync extends BaseSync {
             isoCountry = "us";
         }
 
-        isSynced = preferences.getBoolean("is_synced", false);
+        isSynced = kernel.getStorageKernel().getModel().getSyncStateEngine().isContactSynced();
         Logger.d(TAG, "Completed init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
@@ -131,10 +133,11 @@ public class ContactsSync extends BaseSync {
     }
 
     public void clear() {
-        preferences.edit().putBoolean("is_synced", false).commit();
+        this.kernel.getStorageKernel().getModel().getSyncStateEngine().setSynced(false);
         this.isSynced = false;
-//        this.bookPersistence.getObj().getImportedPhones().clear();
-//        this.bookPersistence.write();
+        this.uploadState.getImportedPhones().clear();
+        this.uploadState.getContacts().clear();
+        this.uploadState.write();
     }
 
     public void invalidateContactsSync() {
@@ -149,14 +152,8 @@ public class ContactsSync extends BaseSync {
     }
 
     public void addPhoneMapping(int uid, String phone) {
-//        for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
-//            if (importedPhone.getPhone().equals(phone)) {
-//                return;
-//            }
-//        }
-//
-//        bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phone, uid, false));
-//        bookPersistence.write();
+        uploadState.getImportedPhones().put(phone, uid);
+        uploadState.write();
     }
 
     public void removeContact(long contactId) {
@@ -301,13 +298,13 @@ public class ContactsSync extends BaseSync {
                 updateMapping();
             }
             isSynced = true;
-            preferences.edit().putBoolean("is_synced", true).commit();
+            this.kernel.getStorageKernel().getModel().getSyncStateEngine().setSynced(true);
             notifyChanged();
             uploadState.write();
         } else {
             updateMapping();
             isSynced = true;
-            preferences.edit().putBoolean("is_synced", true).commit();
+            this.kernel.getStorageKernel().getModel().getSyncStateEngine().setSynced(true);
             notifyChanged();
         }
     }

@@ -39,7 +39,7 @@ public class ContactsUploadState {
         }
     }
 
-    public void write() {
+    public synchronized void write() {
         persistence.getObj().getContacts().clear();
         persistence.getObj().getImportedPhones().clear();
         for (SyncContact contact : contacts) {

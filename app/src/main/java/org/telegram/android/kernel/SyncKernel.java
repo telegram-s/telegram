@@ -83,7 +83,7 @@ public class SyncKernel {
         Logger.d(TAG, "BackgroundSync loaded in " + (System.currentTimeMillis() - start) + " ms");
 
         start = System.currentTimeMillis();
-        contactsSync = new ContactsSync(kernel.getApplication());
+        contactsSync = new ContactsSync(kernel);
         Logger.d(TAG, "ContactsSync loaded in " + (System.currentTimeMillis() - start) + " ms");
     }
 
