@@ -41,7 +41,6 @@ import org.telegram.tl.TLVector;
  * Created: 30.07.13 11:33
  */
 public class ContactsFragment extends BaseContactsFragment {
-    private View mainContainer;
     private View share;
 
     @Override
@@ -170,7 +169,6 @@ public class ContactsFragment extends BaseContactsFragment {
 
     @Override
     protected void onCreateView(View res, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mainContainer = res.findViewById(R.id.mainContainer);
         share = inflater.inflate(R.layout.contacts_header_share, null);
         getListView().addHeaderView(share);
     }
@@ -195,24 +193,23 @@ public class ContactsFragment extends BaseContactsFragment {
         } else {
             // TODO: Correct fix
             final ContactWireframe contact = (ContactWireframe) adapterView.getItemAtPosition(i);
-            final Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.getContactId());
-            if (contacts.length == 1) {
-                getRootController().openUser(contacts[0].getUid());
-            } else if (contacts.length > 0) {
-                CharSequence[] names = new CharSequence[contacts.length];
+            // final Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.getContactId());
+            if (contact.getRelatedUsers().length == 1) {
+                getRootController().openUser(contact.getRelatedUsers()[0].getUid());
+            } else if (contact.getRelatedUsers().length > 0) {
+                CharSequence[] names = new CharSequence[contact.getRelatedUsers().length];
                 for (int j = 0; j < names.length; j++) {
-                    names[j] = application.getEngine().getUser(contacts[j].getUid()).getDisplayName();
+                    names[j] = application.getEngine().getUser(contact.getRelatedUsers()[j].getUid()).getDisplayName();
                 }
                 AlertDialog dialog = new AlertDialog.Builder(getActivity())
                         .setItems(names, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                getRootController().openUser(contacts[i].getUid());
+                                getRootController().openUser(contact.getRelatedUsers()[i].getUid());
                             }
                         }).create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
-
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_contacts_not_registered_title)
                         .setMessage(getStringSafe(R.string.st_contacts_not_registered_message).replace("{0}", contact.getDisplayName()))

@@ -47,7 +47,7 @@ public class ContactsSync extends BaseSync {
     private static final int SYNC_DOWNLOAD_REQUEST_TIMEOUT = 30000;
     private static final int SYNC_UPLOAD_REQUEST_TIMEOUT = 60000;
 
-    private static final int IMPORT_LIMIT = 40;
+    private static final int IMPORT_LIMIT = 150;
 
     private static final String TAG = "ContactsSync";
 
@@ -254,7 +254,7 @@ public class ContactsSync extends BaseSync {
     }
 
     private void contactsOffline() {
-        // TODO: Implement
+        updateMapping();
     }
 
     protected void contactsUpload() throws Exception {
@@ -291,32 +291,15 @@ public class ContactsSync extends BaseSync {
 
                 Logger.d(TAG, "Imported phones count: " + importedContacts.getImported().size());
 
-                outer:
                 for (SyncPhone phone : syncPhones) {
-                    //
-//                    int uid = 0;
                     for (TLImportedContact contact : importedContacts.getImported()) {
                         if (phone.getPhoneId() == contact.getClientId()) {
                             uploadState.getImportedPhones().put(phone.getNumber(), contact.getUserId());
                             break;
                         }
                     }
-
-//                    for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
-//                        if (importedPhone.getPhone().equals(phone.getNumber())) {
-//                            if (!importedPhone.isImported()) {
-//                                bookPersistence.getObj().getImportedPhones().remove(importedPhone);
-//                                break;
-//                            } else {
-//                                continue outer;
-//                            }
-//                        }
-//                    }
-//
-//                    bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phone.getNumber(), uid, true));
                 }
                 updateMapping();
-                notifyChanged();
             }
             isSynced = true;
             preferences.edit().putBoolean("is_synced", true).commit();
