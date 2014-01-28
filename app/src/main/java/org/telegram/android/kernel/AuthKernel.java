@@ -1,9 +1,6 @@
 package org.telegram.android.kernel;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.os.SystemClock;
-import org.telegram.android.R;
 import org.telegram.android.core.model.storage.TLDcInfo;
 import org.telegram.android.core.model.storage.TLKey;
 import org.telegram.android.critical.ApiStorage;
@@ -34,16 +31,13 @@ public class AuthKernel {
 
     private static final String TAG = "AuthKernel";
 
-    private final String ACCOUNT_TYPE;
-
-    private Account account;
+    // private Account account;
 
     private ApplicationKernel kernel;
     private ApiStorage storage;
 
     public AuthKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
-        ACCOUNT_TYPE = kernel.getApplication().getString(R.string.config_account_type);
 
         long start = SystemClock.uptimeMillis();
         boolean loaded = tryLoadGeneral();
@@ -69,10 +63,6 @@ public class AuthKernel {
 
     public ApiStorage getApiStorage() {
         return storage;
-    }
-
-    public Account getAccount() {
-        return account;
     }
 
     private boolean tryLoadGeneral() {
@@ -230,26 +220,6 @@ public class AuthKernel {
         }
         for (TLDcInfo dc : storage.getObj().getDcInfos()) {
             Logger.d(TAG, "Address: " + dc.getDcId() + " " + dc.getAddress() + ":" + dc.getPort() + " @" + dc.getVersion());
-        }
-
-        if (storage.isAuthenticated()) {
-            // Get existing or recreate system Account
-            AccountManager am = AccountManager.get(kernel.getApplication());
-            Account[] accounts = am.getAccountsByType(ACCOUNT_TYPE);
-            if (accounts.length == 0) {
-                Account account = new Account(storage.getObj().getPhone(), ACCOUNT_TYPE);
-                am.addAccountExplicitly(account, "", null);
-                this.account = account;
-            } else {
-                account = accounts[0];
-            }
-        } else {
-            this.account = null;
-            AccountManager am = AccountManager.get(kernel.getApplication());
-            Account[] accounts = am.getAccountsByType(ACCOUNT_TYPE);
-            for (Account c : accounts) {
-                am.removeAccount(c, null, null);
-            }
         }
     }
 
