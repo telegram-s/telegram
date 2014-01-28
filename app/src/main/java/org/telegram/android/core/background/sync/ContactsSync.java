@@ -70,7 +70,7 @@ public class ContactsSync extends BaseSync {
 
     private long lastContactsChanged = 0;
 
-    private ContactsUploadState uploadState = new ContactsUploadState();
+    private ContactsUploadState uploadState;
 
     public ContactsSync(TelegramApplication application) {
         super(application, SETTINGS_NAME);
@@ -195,6 +195,8 @@ public class ContactsSync extends BaseSync {
     protected void contactsPreSync() throws Exception {
         reloadPhoneBook();
 
+        notifyChanged();
+
         updateUploadingState();
 
         contactsOffline();
@@ -250,7 +252,11 @@ public class ContactsSync extends BaseSync {
     }
 
     private void updateUploadingState() {
+        if (uploadState == null) {
+            uploadState = new ContactsUploadState(application);
+        }
         applyUploadingState(uploadState, currentPhoneBook);
+        uploadState.write();
     }
 
     private void contactsOffline() {
@@ -299,12 +305,13 @@ public class ContactsSync extends BaseSync {
                         }
                     }
                 }
+                uploadState.write();
                 updateMapping();
             }
             isSynced = true;
             preferences.edit().putBoolean("is_synced", true).commit();
             notifyChanged();
-//            bookPersistence.write();
+            uploadState.write();
         } else {
             updateMapping();
             isSynced = true;

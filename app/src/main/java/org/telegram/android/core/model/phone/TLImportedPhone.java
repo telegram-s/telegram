@@ -10,23 +10,21 @@ import java.io.OutputStream;
 import static org.telegram.tl.StreamingUtils.*;
 
 /**
- * Created by ex3ndr on 07.12.13.
+ * Created by ex3ndr on 28.01.14.
  */
-public class TLLocalImportedPhone extends TLObject {
+public class TLImportedPhone extends TLObject {
 
-    public static final int CLASS_ID = 0xdb1e4a4b;
+    public static final int CLASS_ID = 0x313fc34e;
 
     private String phone;
     private int uid;
-    private boolean isImported;
 
-    public TLLocalImportedPhone(String phone, int uid, boolean isImported) {
+    public TLImportedPhone(String phone, int uid) {
         this.phone = phone;
         this.uid = uid;
-        this.isImported = isImported;
     }
 
-    public TLLocalImportedPhone() {
+    public TLImportedPhone() {
     }
 
     public String getPhone() {
@@ -35,10 +33,6 @@ public class TLLocalImportedPhone extends TLObject {
 
     public int getUid() {
         return uid;
-    }
-
-    public boolean isImported() {
-        return isImported;
     }
 
     @Override
@@ -50,13 +44,11 @@ public class TLLocalImportedPhone extends TLObject {
     public void serializeBody(OutputStream stream) throws IOException {
         writeTLString(phone, stream);
         writeInt(uid, stream);
-        writeTLBool(isImported, stream);
     }
 
     @Override
     public void deserializeBody(InputStream stream, TLContext context) throws IOException {
         phone = readTLString(stream);
         uid = readInt(stream);
-        isImported = readTLBool(stream);
     }
 }
