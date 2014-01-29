@@ -26,4 +26,17 @@
     <string name="whats_new_arabic_0">دعم الواجهة من اليمين لليسار لأنظمة الأندرويد ٤.٠ وما بعد.</string>
     <string name="whats_new_arabic_1">دعم الواجهة الانعكاسية لأنظمة الأندرويد ٤.٢ وما بعد.</string>
     <string name="whats_new_arabic_2">دعم الأرقام الهندية بشكل كامل.</string>
+
+    <string name="whats_new_gif_title">Gif Animations, russian localization and speed</string>
+    <string name="whats_new_gif_hint">
+        Gif animations works with images sent form other S-Edition versions of Telegram.
+        If you have any problems with the russian localization, please tell our support
+        team in Settings — Ask a question.
+    </string>
+    <string name="whats_new_gif_0">Sending and viewing Gif-Animations</string>
+    <string name="whats_new_gif_1">Preview in documents (now visible only in S edition)</string>
+    <string name="whats_new_gif_2">Sending and receiving audio (from Documents menu)</string>
+    <string name="whats_new_gif_3">Download animation improvements</string>
+    <string name="whats_new_gif_4">Russian localization</string>
+    <string name="whats_new_gif_5">Experimental themes</string>
 </resources>
