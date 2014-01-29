@@ -26,9 +26,9 @@
     <string name="st_back">رجوع</string>
     <string name="st_start_again">إبدأ من جديد</string>
 
-    <string name="st_receiver_pick_wallpaper">Change wallpaper</string>
-    <string name="st_receiver_pick_photo">Choose photo</string>
-    <string name="st_receiver_pick_video">Choose video</string>
+    <string name="st_receiver_pick_wallpaper">تغيير الخلفية</string>
+    <string name="st_receiver_pick_photo">اختر صورة</string>
+    <string name="st_receiver_pick_video">اختر مقطع مرئي</string>
 
     <string name="st_receiver_gallery">الأستوديو</string>
     <string name="st_receiver_photo">التقط صورة</string>
@@ -36,13 +36,13 @@
 
     <string name="st_avatar_changed">تم تغيير صورتك الشخصية</string>
     <string name="st_avatar_removed">تم إزالة صورتك الشخصية</string>
-    <string name="st_avatar_change_error">Profile photo upload error</string>
-    <string name="st_avatar_change_error_title">Upload error</string>
-    <string name="st_avatar_change_error_message">Unable to upload avatar. Try again?</string>
+    <string name="st_avatar_change_error">خطأ في رفع الصورة الشخصية</string>
+    <string name="st_avatar_change_error_title">خطأ في الرفع</string>
+    <string name="st_avatar_change_error_message">غير قادر على رفع الصورة الشخصية. هل ترغب في المحاولة مرة أخرى؟</string>
 
     <string name="st_avatar_group_changed">تم تغيير صورة المجموعة</string>
     <string name="st_avatar_group_removed">تم حذف صورة المجموعة</string>
-    <string name="st_avatar_group_error">Group photo update error</string>
+    <string name="st_avatar_group_error">خطأ في رفع صورة المجموعة</string>
 
     <string name="st_first_name">الاسم الأول</string>
     <string name="st_last_name">اسم العائلة</string>
@@ -78,7 +78,7 @@
     <string name="st_error_blocked">المستخدم أضافك للقائمة السوداء.</string>
     <string name="st_error_incorrect">لا يمكن إنجاز المهمة.</string>
     <string name="st_error_many_attempts">محاولات كثيرة خاطئة، يرجى المحاولة لاحقًا.</string>
-    <string name="st_error_no_app_for_file">No suitable application for file</string>
+    <string name="st_error_no_app_for_file">لا يوجد برنامج يمكنه استعراض الملف</string>
 
     <string name="st_tour_start_messaging">إبدأ المراسلة</string>
     <string name="st_tour_page1_title">تيليجرام</string>
@@ -186,33 +186,33 @@
     <string name="st_dialogs_menu_group">مجموعة جديدة</string>
     <string name="st_dialogs_menu_secret">محادثة سرية جديدة</string>
     <string name="st_dialogs_menu_write_contact">محادثة جديدة</string>
-    <string name="st_dialogs_menu_appearance">Appearance</string>
+    <string name="st_dialogs_menu_appearance">المظهر</string>
 
     <string name="st_settings_title">الإعدادات</string>
     <string name="st_settings_header_phone">رقم هاتفك</string>
     <string name="st_settings_header_settings">الإعدادات</string>
     <string name="st_settings_header_support">الدعم</string>
     <string name="st_settings_header_about">حول</string>
-    <string name="st_settings_header_account">ACCOUNT</string>
-    <string name="st_settings_logout">Logout</string>
-    <string name="st_settings_delete_account">Delete account</string>
+    <string name="st_settings_header_account">الحساب</string>
+    <string name="st_settings_logout">تسجيل الخروج</string>
+    <string name="st_settings_delete_account">حذف الحساب</string>
     <string name="st_settings_version">إصدار البرنامج</string>
     <string name="st_settings_play">سوق Play</string>
     <string name="st_settings_play_subtitle">يرجى تقييم تطبيقنا</string>
     <string name="st_settings_blocked">جهات الاتصال المحظورة</string>
     <string name="st_settings_blocked_subtitle">قائمة بجهات الاتصال المحظورة</string>
-    <string name="st_settings_reset">Terminate all sessions</string>
-    <string name="st_settings_reset_subtitle">Logout on all other devices</string>
-    <string name="st_settings_reset_toast">Sessions deleted</string>
+    <string name="st_settings_reset">سجل الخروج من كل الأجهزة</string>
+    <string name="st_settings_reset_subtitle">سجل الخروج من كافة الأجهزة الأخرى</string>
+    <string name="st_settings_reset_toast">تم الخروج من الأجهزة الأخرى</string>
     <string name="st_settings_chat">إعدادات المحادثة</string>
     <string name="st_settings_chat_subtitle">الخلفية، الإرسال بزر الإدخال، حجم النص …</string>
     <string name="st_settings_background">خلفية المحادثة</string>
     <string name="st_settings_support">اسأل سؤالًا</string>
     <string name="st_settings_support_subtitle">فريق الدعم الفني تسعده مساعدتكم</string>
-    <string name="st_settings_faq">Frequently Asked Questions</string>
-    <string name="st_settings_faq_subtitle">Check out our help</string>
-    <string name="st_settings_twitter">Twitter</string>
-    <string name="st_settings_twitter_subtitle">Subscribe for our news</string>
+    <string name="st_settings_faq">الأسئلة الأكثر شيوعًا</string>
+    <string name="st_settings_faq_subtitle">قم بالإطلاع للمساعدة</string>
+    <string name="st_settings_twitter">تويتر</string>
+    <string name="st_settings_twitter_subtitle">تابع حسابنا لآخر أخبار تيليجرام</string>
     <string name="st_settings_save_photo">حفظ الصور الواردة</string>
     <string name="st_settings_save_photo_subtitle">احفظها تلقائيًا في الألبوم</string>
     <string name="st_settings_notifications">الإشعارات والأصوات</string>
@@ -277,8 +277,8 @@
     <string name="st_conv_menu_location">موقع</string>
     <string name="st_conv_menu_doc">Document</string>
 
-    <string name="st_conv_unsupported_title">Unsupported content</string>
-    <string name="st_conv_unsupported_message">This type of content is unsupported in this application</string>
+    <string name="st_conv_unsupported_title">المحتوى غير مدعوم</string>
+    <string name="st_conv_unsupported_message">هذا المحتوى غير مدعوم من التطبيق</string>
 
     <string name="st_contacts_add_name_title">تعديل الاسم الأول واسم العائلة</string>
     <string name="st_contacts_add_toast">تم إضافة جهة الاتصال</string>
@@ -298,7 +298,7 @@
     <string name="st_contacts_block_delete">هل أنت متأمد من رغبتك في حظر \'{0}\' وحذف كافة المحادثات بينكما؟
     </string>
 
-    <string name="st_contacts_header_unregistered">Unregistered contacts</string>
+    <string name="st_contacts_header_unregistered">جهة اتصال غير مسجلة</string>
 
     <string name="st_contacts_action_view">عرض في تطبيق جهات الاتصال</string>
     <string name="st_contacts_action_share">قم بمشاركة جهة الاتصال</string>
@@ -329,10 +329,10 @@
     <string name="st_profile_menu_share">أرسل جهة الاتصال</string>
     <string name="st_profile_menu_edit_name">قم بتعديل الاسم</string>
 
-    <string name="st_profile_menu_add_phone">Add to Contacts App</string>
-    <string name="st_profile_menu_view">View in Contacts App</string>
-    <string name="st_profile_menu_remove">Remove from contacts</string>
-    <string name="st_profile_menu_add">Add to contacts</string>
+    <string name="st_profile_menu_add_phone">أضف جهة الاتصال للبرنامج</string>
+    <string name="st_profile_menu_view">اعرض في تطبيق جهات الاتصال</string>
+    <string name="st_profile_menu_remove">حذف من جهات الاتصال</string>
+    <string name="st_profile_menu_add">إضافة لجهات الاتصال</string>
 
     <string name="st_profile_blocked">جهة الاتصال محظورة</string>
     <string name="st_profile_added">تم إضافة جهة الاتصال</string>
@@ -393,9 +393,9 @@
     <string name="st_blocked_empty">لا يوجد جهات اتصال محظورة.</string>
     <string name="st_blocked_phone_hidden">مخفي</string>
 
-    <string name="st_appearance_title">Chat settings</string>
-    <string name="st_appearance_header_common">APPEARANCE</string>
-    <string name="st_appearance_header_chat">MESSAGE WINDOW</string>
+    <string name="st_appearance_title">إعدادات المحادثة</string>
+    <string name="st_appearance_header_common">المظهر</string>
+    <string name="st_appearance_header_chat">نافذة الرسالة</string>
 
     <string name="st_appearance_header_dialogs">قائمة المحادثات</string>
 
@@ -411,16 +411,16 @@
     <string name="st_appearance_enter_subtitle_disable">زر الإدخال يذهب لسطر جديد</string>
     <string name="st_appearance_background">الخلفية</string>
     <string name="st_appearance_background_subtitle">خلفية المحادثات</string>
-    <string name="st_appearance_bar">Theme (experimental)</string>
-    <string name="st_appearance_bar_subtitle">Color scheme and styles</string>
-    <string name="st_appearance_bar_color_default">Default</string>
-    <string name="st_appearance_bar_color_green">Green</string>
-    <string name="st_appearance_bar_color_cyan">Cyan</string>
-    <string name="st_appearance_bar_color_red">Red</string>
-    <string name="st_appearance_bar_color_purple">Purple</string>
-    <string name="st_appearance_bar_color_wa">WhatsApp like</string>
-    <string name="st_appearance_bar_color_line">Line like</string>
-    <string name="st_appearance_bar_color_magenta">Magenta</string>
+    <string name="st_appearance_bar">الثيم (تجريبي)</string>
+    <string name="st_appearance_bar_subtitle">الألوان والأسلوب</string>
+    <string name="st_appearance_bar_color_default">افتراضي</string>
+    <string name="st_appearance_bar_color_green">أخضر</string>
+    <string name="st_appearance_bar_color_cyan">تركوازي</string>
+    <string name="st_appearance_bar_color_red">أحمر</string>
+    <string name="st_appearance_bar_color_purple">بنفسجي</string>
+    <string name="st_appearance_bar_color_wa">لون الواتساب</string>
+    <string name="st_appearance_bar_color_line">لون لاين</string>
+    <string name="st_appearance_bar_color_magenta">قرمزي</string>
 
     <string name="st_appearance_item_size">الحجم {s}</string>
     <string name="st_appearance_item_size_subtitle">حجم المحادثة في قائمة المحادثات</string>
@@ -446,10 +446,10 @@
     <string name="st_message_by_you">أنت</string>
     <string name="st_message_you">أنت</string>
 
-    <string name="st_message_enc_self_destruct">{0} set the self-destruct timer to {1}</string>
-    <string name="st_message_enc_self_destruct_you">{0} set the self-destruct timer to {1}</string>
-    <string name="st_message_enc_self_destruct_off">{0} disabled the self-destruct timer</string>
-    <string name="st_message_enc_self_destruct_off_you">{0} disabled the self-destruct timer</string>
+    <string name="st_message_enc_self_destruct">{0} قام بتعيين عداد التدمير الذاتي إلى {1}</string>
+    <string name="st_message_enc_self_destruct_you">{0} قمت بتعيين عداد التدمير الذاتي إلى {1}</string>
+    <string name="st_message_enc_self_destruct_off">{0} قام بتعطيل عداد التدمير الذاتي</string>
+    <string name="st_message_enc_self_destruct_off_you">{0} قمت بتعطيل عداد التدمير الذاتي</string>
 
     <string name="st_message_user_photo_change">{0} قام بإضافة صورة شخصية</string>
     <string name="st_message_user_joined_app">{0} قام بالتسجيل في تيليجرام</string>
