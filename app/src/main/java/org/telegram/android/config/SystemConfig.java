@@ -16,7 +16,7 @@ public class SystemConfig {
     private SharedPreferences preferences;
 
     private TelegramApplication application;
-    private int maxChatSize = 100;
+    private int maxChatSize = 200;
 
     private String inviteMessage;
     private String inviteMessageLang;
@@ -24,7 +24,7 @@ public class SystemConfig {
     public SystemConfig(TelegramApplication application) {
         this.application = application;
         preferences = application.getSharedPreferences("org.telegram.android.SystemConfig.pref", Context.MODE_PRIVATE);
-        maxChatSize = preferences.getInt("max_chat_size", 100);
+        maxChatSize = preferences.getInt("max_chat_size", 200);
         inviteMessage = preferences.getString("invite_message", INVITE_MESSAGE_DEFAULT);
         inviteMessageLang = preferences.getString("invite_message_lang", "");
     }

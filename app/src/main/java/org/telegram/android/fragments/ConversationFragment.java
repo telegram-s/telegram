@@ -553,8 +553,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             } else {
                 int linkType = application.getEngine().getUser(peerId).getLinkType();
                 if (linkType == LinkType.FOREIGN || linkType == LinkType.REQUEST) {
-                    showView(contactsPanel, !initial);
                     if (linkType == LinkType.REQUEST) {
+                        showView(contactsPanel, !initial);
                         ((TextView) contactsPanel.findViewById(R.id.panelTitle)).setText(R.string.st_conv_add_contact);
                         contactsPanel.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -563,15 +563,23 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             }
                         });
                     } else {
-                        ((TextView) contactsPanel.findViewById(R.id.panelTitle)).setText(R.string.st_conv_share_info);
-                        contactsPanel.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                application.getEngine().shareContact(peerType, peerId, application.getCurrentUid());
-                                application.getSyncKernel().getBackgroundSync().resetTypingDelay();
-                                application.notifyUIUpdate();
-                            }
-                        });
+                        if (application.getNotificationSettings().isAddToContactVisible(peerId)) {
+                            showView(contactsPanel, !initial);
+                            ((TextView) contactsPanel.findViewById(R.id.panelTitle)).setText(R.string.st_conv_share_info);
+                            contactsPanel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    application.getNotificationSettings().hideAddToContact(peerId);
+                                    application.getEngine().shareContact(peerType, peerId, application.getCurrentUid());
+                                    application.getSyncKernel().getBackgroundSync().resetTypingDelay();
+                                    application.notifyUIUpdate();
+                                    updateContactsPanel(false);
+                                }
+                            });
+                        } else {
+                            goneView(contactsPanel, !initial);
+                            contactsPanel.setOnClickListener(null);
+                        }
                     }
                 } else {
                     goneView(contactsPanel, !initial);

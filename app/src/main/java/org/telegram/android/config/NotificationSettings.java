@@ -12,10 +12,25 @@ public class NotificationSettings {
 
     private static final String PREFERENCE_NAME = "org.telegram.android.Notifications";
 
+    private static long ADD_TO_CONTACT_TIMEOUT = 24 * 60 * 60 * 1000;
+
     private SharedPreferences preferences;
 
     public NotificationSettings(TelegramApplication application) {
         this.preferences = application.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
+    }
+
+    public boolean isAddToContactVisible(int uid) {
+        int sec = preferences.getInt("add_to_contact_" + uid, 0);
+        if (System.currentTimeMillis() < sec * 1000L || sec * 1000L + ADD_TO_CONTACT_TIMEOUT < System.currentTimeMillis()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void hideAddToContact(int uid) {
+        preferences.edit().putInt("add_to_contact_" + uid, (int) (System.currentTimeMillis() / 1000)).commit();
     }
 
     public boolean isEnabled() {
