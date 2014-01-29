@@ -372,11 +372,15 @@ public class DownloadManager {
                         if (fileLocation instanceof TLLocalEncryptedFileLocation) {
                             byte[] iv = ((TLLocalEncryptedFileLocation) fileLocation).getIv();
                             byte[] key = ((TLLocalEncryptedFileLocation) fileLocation).getKey();
+                            Logger.d(TAG, "Decrypting file #" + record.downloadTask);
                             CryptoUtils.AES256IGEDecrypt(new File(destFileName), new File(fileName), iv, key);
                             IOUtils.delete(new File(destFileName));
+                            Logger.d(TAG, "Decrypting file end #" + record.downloadTask);
                         } else {
+                            Logger.d(TAG, "Copying file #" + record.downloadTask);
                             IOUtils.copy(new File(destFileName), new File(fileName));
                             IOUtils.delete(new File(destFileName));
+                            Logger.d(TAG, "Copying file end #" + record.downloadTask);
                         }
                     } catch (IOException e) {
                         Logger.t(TAG, e);
@@ -385,9 +389,10 @@ public class DownloadManager {
                     }
 
                     if (record.photo != null) {
-                        Logger.d(TAG, "@" + key + " = building thumb");
                         try {
+                            Logger.d(TAG, "Saving preview #" + record.downloadTask);
                             saveDownloadImagePreview(key, fileName);
+                            Logger.d(TAG, "Saving end #" + record.downloadTask);
                         } catch (IOException e) {
                             e.printStackTrace();
                             Logger.t(TAG, e);
@@ -396,9 +401,10 @@ public class DownloadManager {
                         }
 
                         try {
-                            Logger.d(TAG, "@" + key + " = writing to gallery");
+                            Logger.d(TAG, "Saving to gallery #" + record.downloadTask);
                             if (application.getUserSettings().isSaveToGalleryEnabled()) {
                                 writeToGallery(fileName, key + ".jpg");
+                                Logger.d(TAG, "Saving to gallery end #" + record.downloadTask);
                             }
                         } catch (Exception e) {
                             Logger.t(TAG, e);

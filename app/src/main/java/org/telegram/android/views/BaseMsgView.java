@@ -659,7 +659,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
             if (Build.VERSION.SDK_INT >= 16) {
                 postInvalidateOnAnimation();
             } else {
-                invalidate();
+                postInvalidateDelayed(16);
             }
         }
     }

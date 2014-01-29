@@ -168,6 +168,8 @@ public class MessageView extends BaseMsgView {
         this.wireframe = msg;
         if (msg.cachedLayout instanceof MessageLayout[]) {
             cachedLayout = (MessageLayout[]) msg.cachedLayout;
+        } else {
+            cachedLayout = null;
         }
         this.state = msg.message.getState();
         this.prevState = -1;
@@ -181,6 +183,8 @@ public class MessageView extends BaseMsgView {
         this.wireframe = msg;
         if (msg.cachedLayout instanceof MessageLayout[]) {
             cachedLayout = (MessageLayout[]) msg.cachedLayout;
+        } else {
+            cachedLayout = null;
         }
         if (this.state != msg.message.getState()) {
             this.prevState = this.state;
