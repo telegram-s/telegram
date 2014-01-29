@@ -333,10 +333,15 @@
     <string name="st_profile_phone_hidden">скрыт</string>
     <string name="st_profile_phone_copied">Номер скопирован в буфер обмена</string>
     <string name="st_profile_menu_block">Заблокировать</string>
+
+    <string name="st_profile_menu_add_phone">Добавить в адр. книгу</string>
+    <string name="st_profile_menu_view">Открыть в адр. книге</string>
+
     <string name="st_profile_menu_add">Добавить в контакты</string>
+    <string name="st_profile_menu_remove">Удалить из контактов</string>
+
     <string name="st_profile_menu_share">Поделиться контактом</string>
     <string name="st_profile_menu_edit_name">Изменить имя</string>
-    <string name="st_profile_menu_view">Открыть в контактах</string>
     <string name="st_profile_blocked">Пользователь заблокирован</string>
     <string name="st_profile_added">Контакт добавлен</string>
     <string name="st_profile_secret">Начать секретный чат</string>

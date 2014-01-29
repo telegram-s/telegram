@@ -47,7 +47,7 @@ public class ContactsFragment extends BaseContactsFragment {
 
     @Override
     public boolean isSaveInStack() {
-        return false;
+        return true;
     }
 
     @Override

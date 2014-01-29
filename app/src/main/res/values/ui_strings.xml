@@ -343,10 +343,16 @@
     <string name="st_profile_phone_hidden">hidden</string>
     <string name="st_profile_phone_copied">Number copied to pastebin</string>
     <string name="st_profile_menu_block">Block user</string>
+
+    <string name="st_profile_menu_add_phone">Add to Contacts App</string>
+    <string name="st_profile_menu_view">View in Contacts App</string>
+
     <string name="st_profile_menu_add">Add to contacts</string>
+    <string name="st_profile_menu_remove">Remove from contacts</string>
+
     <string name="st_profile_menu_share">Share contact</string>
     <string name="st_profile_menu_edit_name">Edit name</string>
-    <string name="st_profile_menu_view">View in Contacts App</string>
+
     <string name="st_profile_blocked">User blocked</string>
     <string name="st_profile_added">Contact added</string>
     <string name="st_profile_secret">Start Secret Chat</string>
