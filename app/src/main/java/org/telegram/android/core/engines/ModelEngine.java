@@ -414,6 +414,7 @@ public class ModelEngine {
         nmsg.setRandomId(randomId);
         nmsg.setMessageTimeout(timeout);
         messagesEngine.create(nmsg);
+        mediaEngine.saveMedia(nmsg);
         dialogsEngine.updateDescriptorShortEnc(nmsg);
         return true;
     }
@@ -828,10 +829,15 @@ public class ModelEngine {
         ChatMessage msg = getMessageByDbId(databaseId);
         if (msg == null)
             return;
-        msg.setDeletedLocal(true);
-        messagesEngine.delete(msg);
+        if (msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+            messagesEngine.delete(msg);
+        } else {
+            msg.setDeletedLocal(true);
+            messagesEngine.update(msg);
+        }
         mediaEngine.deleteMedia(msg.getMid());
         dialogsEngine.updateDescriptorDeleteSent(msg.getPeerType(), msg.getPeerId(), msg.getMid());
+        application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
     }
 
     public void selfDestructMessage(int databaseId) {

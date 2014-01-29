@@ -305,11 +305,15 @@ public class ApplicationKernel {
     }
 
     public void sendEvent(String type) {
-        syncKernel.getBackgroundSync().sendLog(type, "");
+        if (syncKernel.getBackgroundSync() != null) {
+            syncKernel.getBackgroundSync().sendLog(type, "");
+        }
     }
 
     public void sendEvent(String type, String message) {
-        syncKernel.getBackgroundSync().sendLog(type, message);
+        if (syncKernel.getBackgroundSync() != null) {
+            syncKernel.getBackgroundSync().sendLog(type, message);
+        }
     }
 
     public ActivationController getActivationController() {
