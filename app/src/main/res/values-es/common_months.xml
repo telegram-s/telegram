@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lang_month_pattern">{month} {day}</string>
+    <string name="lang_january">January</string>
+    <string name="lang_february">February</string>
+    <string name="lang_march">March</string>
+    <string name="lang_april">April</string>
+    <string name="lang_may">May</string>
+    <string name="lang_june">June</string>
+    <string name="lang_july">July</string>
+    <string name="lang_august">August</string>
+    <string name="lang_september">September</string>
+    <string name="lang_october">October</string>
+    <string name="lang_november">November</string>
+    <string name="lang_december">December</string>
+
+    <string name="lang_january_s">january</string>
+    <string name="lang_february_s">february</string>
+    <string name="lang_march_s">march</string>
+    <string name="lang_april_s">april</string>
+    <string name="lang_may_s">may</string>
+    <string name="lang_june_s">june</string>
+    <string name="lang_july_s">july</string>
+    <string name="lang_august_s">august</string>
+    <string name="lang_september_s">september</string>
+    <string name="lang_october_s">october</string>
+    <string name="lang_november_s">november</string>
+    <string name="lang_december_s">december</string>
+
+    <string name="lang_january_short">Jan</string>
+    <string name="lang_february_short">Feb</string>
+    <string name="lang_march_short">Mar</string>
+    <string name="lang_april_short">Apr</string>
+    <string name="lang_may_short">May</string>
+    <string name="lang_june_short">Jun</string>
+    <string name="lang_july_short">Jul</string>
+    <string name="lang_august_short">Aug</string>
+    <string name="lang_september_short">Sep</string>
+    <string name="lang_october_short">Oct</string>
+    <string name="lang_november_short">Nov</string>
+    <string name="lang_december_short">Dec</string>
+
+    <string name="lang_january_short_s">jan</string>
+    <string name="lang_february_short_s">feb</string>
+    <string name="lang_march_short_s">mar</string>
+    <string name="lang_april_short_s">apr</string>
+    <string name="lang_may_short_s">may</string>
+    <string name="lang_june_short_s">jun</string>
+    <string name="lang_july_short_s">jul</string>
+    <string name="lang_august_short_s">aug</string>
+    <string name="lang_september_short_s">sep</string>
+    <string name="lang_october_short_s">oct</string>
+    <string name="lang_november_short_s">nov</string>
+    <string name="lang_december_short_s">dec</string>
+</resources>
