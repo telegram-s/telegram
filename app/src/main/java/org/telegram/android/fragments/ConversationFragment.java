@@ -1300,7 +1300,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_online));
                     } else {
                         getSherlockActivity().getSupportActionBar().setSubtitle(
-                                highlightSubtitleText(TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang))));
+                                highlightSubtitleText(formatLastSeen(status)));
                     }
                 }
             }
@@ -1329,7 +1329,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_online));
                         } else {
                             getSherlockActivity().getSupportActionBar().setSubtitle(
-                                    highlightSubtitleText(TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang))));
+                                    highlightSubtitleText(formatLastSeen(status)));
                         }
                     }
                 }

@@ -5,6 +5,7 @@ import android.text.format.DateFormat;
 import org.telegram.android.R;
 import org.telegram.i18n.I18nUtil;
 import org.telegram.i18n.UserListFormatter;
+import org.telegram.mtproto.time.TimeOverlord;
 import org.telegram.phones.PhoneFormat;
 
 import java.util.Calendar;
@@ -25,7 +26,7 @@ public class TextUtil {
         if (lastSeen == 0)
             return "";
 
-        int delta = (int) (System.currentTimeMillis() / 1000 - lastSeen);//Secs
+        int delta = (int) (TimeOverlord.getInstance().getServerTime() / 1000 - lastSeen);//Secs
         if (delta < 60) {
             return context.getString(R.string.lang_common_online_templates)
                     .replace("{time}", context.getString(R.string.lang_common_online_now));

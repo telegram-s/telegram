@@ -432,8 +432,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                         ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_blue_bright));
                     } else {
                         ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                        ((TextView) view.findViewById(R.id.status)).setText(
-                                TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang)));
+                        ((TextView) view.findViewById(R.id.status)).setText(formatLastSeen(status));
                     }
                 } else {
                     ((TextView) view.findViewById(R.id.status)).setText(

@@ -432,7 +432,7 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
                     onlineView.setTextColor(context.getResources().getColor(R.color.st_blue_bright));
                 } else {
                     onlineView.setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                    onlineView.setText(TextUtil.formatHumanReadableLastSeen(statusValue, getStringSafe(R.string.st_lang)));
+                    onlineView.setText(formatLastSeen(statusValue));
                 }
 
                 onlineView.setVisibility(View.VISIBLE);

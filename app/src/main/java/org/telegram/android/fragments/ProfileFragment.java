@@ -242,7 +242,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
             onlineView.setTextColor(getResources().getColor(R.color.st_blue_bright));
         } else {
             onlineView.setTextColor(getResources().getColor(R.color.st_grey_text));
-            onlineView.setText(TextUtil.formatHumanReadableLastSeen(statusValue, getStringSafe(R.string.st_lang)));
+            onlineView.setText(formatLastSeen(statusValue));
         }
 
         nameView.setText(name);
