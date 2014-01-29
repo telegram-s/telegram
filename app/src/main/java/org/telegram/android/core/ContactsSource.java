@@ -6,10 +6,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.ContactsContract;
 import android.provider.Settings;
+import org.telegram.android.R;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.background.sync.ContactsSync;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.User;
+import org.telegram.android.core.wireframes.ContactWireframe;
 import org.telegram.android.log.Logger;
 
 import java.util.*;
@@ -23,6 +25,12 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
 
     private static final String TAG = "ContactsSource";
 
+    private static final int SORT_ORDER_FIRST_NAME = 0;
+    private static final int SORT_ORDER_LAST_NAME = 1;
+
+    private static final int DISPLAY_FIRST_NAME = 0;
+    private static final int DISPLAY_LAST_NAME = 1;
+
     private Handler handler = new Handler(Looper.getMainLooper());
 
     private TelegramApplication application;
@@ -32,14 +40,17 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
     private String settingSortKey;
     private String settingDisplayOrder;
 
-    private LocalContact[] contacts;
-    private LocalContact[] telegramContacts;
+    private int sortOrder = SORT_ORDER_FIRST_NAME;
+    private int displayOrder = DISPLAY_FIRST_NAME;
 
-    public LocalContact[] getContacts() {
+    private ContactWireframe[] contacts;
+    private ContactWireframe[] telegramContacts;
+
+    public ContactWireframe[] getContacts() {
         return contacts;
     }
 
-    public LocalContact[] getTelegramContacts() {
+    public ContactWireframe[] getTelegramContacts() {
         return telegramContacts;
     }
 
@@ -49,26 +60,29 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
     }
 
     private void loadSettings() {
-        int sort_order = 1;
-        int display_order = 1;
+        sortOrder = SORT_ORDER_FIRST_NAME;
+        displayOrder = DISPLAY_FIRST_NAME;
+
         try {
-            sort_order = Settings.System.getInt(application.getContentResolver(), "android.contacts.SORT_ORDER");
+            if (Settings.System.getInt(application.getContentResolver(), "android.contacts.SORT_ORDER") == 2) {
+                sortOrder = SORT_ORDER_LAST_NAME;
+            }
         } catch (Settings.SettingNotFoundException e) {
-            // e.printStackTrace();
         }
         try {
-            display_order = Settings.System.getInt(application.getContentResolver(), "android.contacts.DISPLAY_ORDER");
+            if (Settings.System.getInt(application.getContentResolver(), "android.contacts.DISPLAY_ORDER") == 2) {
+                displayOrder = DISPLAY_LAST_NAME;
+            }
         } catch (Settings.SettingNotFoundException e) {
-            // e.printStackTrace();
         }
 
-        if (sort_order == 1) {
+        if (sortOrder == SORT_ORDER_FIRST_NAME) {
             settingSortKey = ContactsContract.Contacts.SORT_KEY_PRIMARY;
         } else {
             settingSortKey = ContactsContract.Contacts.SORT_KEY_ALTERNATIVE;
         }
 
-        if (display_order == 1) {
+        if (displayOrder == DISPLAY_FIRST_NAME) {
             settingDisplayOrder = ContactsContract.Contacts.DISPLAY_NAME_PRIMARY;
         } else {
             settingDisplayOrder = ContactsContract.Contacts.DISPLAY_NAME_ALTERNATIVE;
@@ -106,8 +120,38 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
     }
 
     @Override
-    public void onBookUpdated() {
+    public synchronized void onBookUpdated() {
         Logger.d(TAG, "onBookUpdated");
+
+        Contact[] netContacts = application.getEngine().getUsersEngine().getAllContacts();
+        HashSet<Integer> ids = new HashSet<Integer>();
+        for (Contact c : netContacts) {
+            ids.add(c.getUid());
+        }
+        application.getEngine().getUsersEngine().getUsersById(ids.toArray());
+
+        ArrayList<ContactWireframe> allContacts = new ArrayList<ContactWireframe>();
+        ArrayList<ContactWireframe> telegramContacts = new ArrayList<ContactWireframe>();
+
+        User[] myContacts = application.getEngine().getUsersEngine().getContacts();
+        Arrays.sort(myContacts, new Comparator<User>() {
+            @Override
+            public int compare(User user, User user2) {
+                if (sortOrder == SORT_ORDER_FIRST_NAME) {
+                    return user.getFirstName().compareTo(user2.getFirstName());
+                } else {
+                    return user.getLastName().compareTo(user2.getLastName());
+                }
+            }
+        });
+
+        HashSet<Integer> addedUids = new HashSet<Integer>();
+
+        for (int i = 0; i < myContacts.length; i++) {
+            addedUids.add(myContacts[i].getUid());
+            allContacts.add(new ContactWireframe(myContacts[i], sortOrder == SORT_ORDER_FIRST_NAME));
+            telegramContacts.add(new ContactWireframe(myContacts[i], sortOrder == SORT_ORDER_FIRST_NAME));
+        }
 
         ContentResolver cr = application.getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
@@ -118,82 +162,31 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
                         settingSortKey
                 },
                 ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0 ", null, settingSortKey);
-
-        final LocalContact[] contacts = new LocalContact[cur.getCount()];
-
-        Contact[] netContacts = application.getEngine().getUsersEngine().getAllContacts();
-        HashSet<Integer> ids = new HashSet<Integer>();
-        for (Contact c : netContacts) {
-            ids.add(c.getUid());
-        }
-        application.getEngine().getUsersEngine().getUsersById(ids.toArray());
-
-        ArrayList<LocalContact> tContacts = new ArrayList<LocalContact>();
-
-        if (cur.moveToFirst()) {
-            for (int i = 0; i < contacts.length; i++) {
+        if (cur != null && cur.moveToFirst()) {
+            outer:
+            do {
                 final long id = cur.getLong(cur.getColumnIndex(ContactsContract.Contacts._ID));
                 String srcName = cur.getString(cur.getColumnIndex(settingDisplayOrder));
                 String sortName = cur.getString(cur.getColumnIndex(settingSortKey));
                 String lookupKey = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
 
-                User relatedContact = null;
                 for (Contact contact : netContacts) {
-                    if (contact.getLocalId() == id) {
-                        relatedContact = application.getEngine().getUser(contact.getUid());
-                        break;
+                    if (contact.getLocalId() != id) {
+                        continue;
+                    }
+                    if (addedUids.contains(contact.getUid())) {
+                        continue outer;
                     }
                 }
-                if (relatedContact != null) {
-                    contacts[i] = new LocalContact(id, lookupKey, srcName, sortName, relatedContact);
-                    tContacts.add(contacts[i]);
-                } else {
-                    contacts[i] = new LocalContact(id, lookupKey, srcName, sortName);
-                }
-                cur.moveToNext();
-            }
+
+                allContacts.add(new ContactWireframe(id, lookupKey, srcName, application.getString(R.string.st_contacts_header_unregistered)));
+            } while (cur.moveToNext());
+            cur.close();
         }
 
-        cur.close();
-
-        this.telegramContacts = tContacts.toArray(new LocalContact[tContacts.size()]);
-        this.contacts = contacts;
+        this.telegramContacts = telegramContacts.toArray(new ContactWireframe[telegramContacts.size()]);
+        this.contacts = allContacts.toArray(new ContactWireframe[allContacts.size()]);
 
         notifyDataChanged();
-    }
-
-
-    public class LocalContact {
-        public long contactId;
-        public String displayName;
-        public String lookupKey;
-        public char header;
-        public User user;
-
-        private LocalContact(long contactId, String lookupKey, String displayName, String sortName) {
-            this.contactId = contactId;
-            this.displayName = displayName;
-            this.lookupKey = lookupKey;
-            this.user = null;
-            setHeader(sortName);
-        }
-
-        private LocalContact(long contactId, String lookupKey, String displayName, String sortName, User user) {
-            this.contactId = contactId;
-            this.displayName = displayName;
-            this.lookupKey = lookupKey;
-            this.user = user;
-            setHeader(sortName);
-        }
-
-        private void setHeader(String s) {
-            if (s == null || s.length() == 0) {
-                header = '#';
-            } else if (Character.isLetter(s.charAt(0))) {
-                header = (s.charAt(0) + "").toUpperCase().charAt(0);
-            } else {
-                header = '#';
-            }
-        }
     }
 }

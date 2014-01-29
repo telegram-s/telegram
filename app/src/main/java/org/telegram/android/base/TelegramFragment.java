@@ -24,6 +24,7 @@ import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
 import org.telegram.android.fragments.interfaces.FragmentResultController;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.ui.StelsTypefaceSpan;
+import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
 import org.telegram.mtproto.time.TimeOverlord;
 import org.xml.sax.XMLReader;
@@ -63,6 +64,10 @@ public class TelegramFragment extends TelegramBaseFragment {
 
     protected TLPhotoSize findDownloadSize(org.telegram.api.TLPhoto photo) {
         return ApiUtils.findDownloadSize(photo);
+    }
+
+    protected String formatLastSeen(int lastSeen) {
+        return TextUtil.formatHumanReadableLastSeen(lastSeen, getStringSafe(R.string.st_lang));
     }
 
     protected int getUserState(TLAbsLocalUserStatus status) {

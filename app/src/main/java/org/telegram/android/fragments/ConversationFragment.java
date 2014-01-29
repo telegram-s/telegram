@@ -45,6 +45,7 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.MessageWireframe;
+import org.telegram.android.media.Optimizer;
 import org.telegram.android.ui.source.ViewSourceListener;
 import org.telegram.android.ui.source.ViewSourceState;
 import org.telegram.android.log.Logger;
@@ -553,8 +554,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             } else {
                 int linkType = application.getEngine().getUser(peerId).getLinkType();
                 if (linkType == LinkType.FOREIGN || linkType == LinkType.REQUEST) {
-                    showView(contactsPanel, !initial);
                     if (linkType == LinkType.REQUEST) {
+                        showView(contactsPanel, !initial);
                         ((TextView) contactsPanel.findViewById(R.id.panelTitle)).setText(R.string.st_conv_add_contact);
                         contactsPanel.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -563,15 +564,23 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             }
                         });
                     } else {
-                        ((TextView) contactsPanel.findViewById(R.id.panelTitle)).setText(R.string.st_conv_share_info);
-                        contactsPanel.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                application.getEngine().shareContact(peerType, peerId, application.getCurrentUid());
-                                application.getSyncKernel().getBackgroundSync().resetTypingDelay();
-                                application.notifyUIUpdate();
-                            }
-                        });
+                        if (application.getNotificationSettings().isAddToContactVisible(peerId)) {
+                            showView(contactsPanel, !initial);
+                            ((TextView) contactsPanel.findViewById(R.id.panelTitle)).setText(R.string.st_conv_share_info);
+                            contactsPanel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    application.getNotificationSettings().hideAddToContact(peerId);
+                                    application.getEngine().shareContact(peerType, peerId, application.getCurrentUid());
+                                    application.getSyncKernel().getBackgroundSync().resetTypingDelay();
+                                    application.notifyUIUpdate();
+                                    updateContactsPanel(false);
+                                }
+                            });
+                        } else {
+                            goneView(contactsPanel, !initial);
+                            contactsPanel.setOnClickListener(null);
+                        }
                     }
                 } else {
                     goneView(contactsPanel, !initial);
@@ -812,6 +821,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     @Override
     protected void onPhotoArrived(final String fileName, final int width, final int height, int requestId) {
+        if (fileName == null) {
+            return;
+        }
         if (Build.VERSION.SDK_INT >= 18) {
             listView.postDelayed(new Runnable() {
                 @Override
@@ -847,14 +859,41 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         runUiTask(new AsyncAction() {
             @Override
             public void execute() throws AsyncException {
-                Bitmap res = ThumbnailUtils.createVideoThumbnail(fileName, MediaStore.Video.Thumbnails.MINI_KIND);
-                int w = 0;
-                int h = 0;
-                if (res != null) {
-                    w = res.getWidth();
-                    h = res.getHeight();
+                Optimizer.VideoMetadata metadata;
+                try {
+                    metadata = Optimizer.getVideoSize(fileName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
                 }
-                application.getEngine().sendVideo(peerType, peerId, new TLUploadingVideo(fileName, w, h));
+                application.getEngine().sendVideo(peerType, peerId,
+                        new TLUploadingVideo(fileName, metadata.getWidth(), metadata.getHeight()));
+            }
+
+            @Override
+            public void afterExecute() {
+                application.notifyUIUpdate();
+            }
+        });
+    }
+
+    @Override
+    protected void onVideoArrived(final Uri uri, int requestId) {
+        runUiTask(new AsyncAction() {
+            @Override
+            public void execute() throws AsyncException {
+                String fileName = getRealPathFromURI(uri);
+                Optimizer.VideoMetadata metadata;
+                try {
+                    metadata = Optimizer.getVideoSize(fileName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
+                }
+
+                application.getEngine().sendVideo(peerType, peerId,
+                        new TLUploadingVideo(fileName, metadata.getWidth(), metadata.getHeight()));
+                application.notifyUIUpdate();
             }
 
             @Override
@@ -1289,7 +1328,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_online));
                     } else {
                         getSherlockActivity().getSupportActionBar().setSubtitle(
-                                highlightSubtitleText(TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang))));
+                                highlightSubtitleText(formatLastSeen(status)));
                     }
                 }
             }
@@ -1318,7 +1357,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_online));
                         } else {
                             getSherlockActivity().getSupportActionBar().setSubtitle(
-                                    highlightSubtitleText(TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang))));
+                                    highlightSubtitleText(formatLastSeen(status)));
                         }
                     }
                 }

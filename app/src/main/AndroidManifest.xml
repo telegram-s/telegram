@@ -131,25 +131,6 @@
                   android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
                   android:launchMode="singleTop"/>
 
-        <service android:name=".app.AuthenticatorService"
-                 android:exported="true">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
-            </intent-filter>
-            <meta-data android:name="android.accounts.AccountAuthenticator"
-                       android:resource="@xml/authenticator"/>
-        </service>
-
-        <service android:name=".app.ContactsSyncAdapterService"
-                 android:exported="true">
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter"/>
-            </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter"
-                       android:resource="@xml/sync_contacts"/>
-            <meta-data android:name="android.provider.CONTACTS_STRUCTURE"
-                       android:resource="@xml/contacts"/>
-        </service>
         <service android:name=".BackgroundService"/>
 
         <meta-data android:name="com.google.android.maps.v2.API_KEY"
@@ -158,7 +139,7 @@
         <meta-data android:name="com.google.android.gms.version"
                    android:value="@integer/google_play_services_version"/>
 
-        <provider android:authorities="@string/config_account_package"
+        <provider android:authorities="@string/app_package"
                   android:name=".app.MediaProvider"
                   android:exported="true"/>
     </application>

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -36,7 +37,9 @@ import org.telegram.api.*;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.engine.TimeoutException;
 import org.telegram.api.requests.TLRequestContactsBlock;
+import org.telegram.api.requests.TLRequestContactsDeleteContacts;
 import org.telegram.api.requests.TLRequestUsersGetFullUser;
+import org.telegram.tl.TLVector;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -239,7 +242,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
             onlineView.setTextColor(getResources().getColor(R.color.st_blue_bright));
         } else {
             onlineView.setTextColor(getResources().getColor(R.color.st_grey_text));
-            onlineView.setText(TextUtil.formatHumanReadableLastSeen(statusValue, getStringSafe(R.string.st_lang)));
+            onlineView.setText(formatLastSeen(statusValue));
         }
 
         nameView.setText(name);
@@ -302,6 +305,8 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
         });
 
         updateNotificationSound();
+
+        getSherlockActivity().invalidateOptionsMenu();
     }
 
     private void updateNotificationSound() {
@@ -347,24 +352,35 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
     public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.user_menu, menu);
+
         menu.findItem(R.id.blockUserMenu).setTitle(highlightMenuText(R.string.st_profile_menu_block));
+        menu.findItem(R.id.viewBook).setTitle(highlightMenuText(R.string.st_profile_menu_view));
+        menu.findItem(R.id.addBook).setTitle(highlightMenuText(R.string.st_profile_menu_add_phone));
+        menu.findItem(R.id.removeContact).setTitle(highlightMenuText(R.string.st_profile_menu_remove));
         menu.findItem(R.id.addContact).setTitle(highlightMenuText(R.string.st_profile_menu_add));
-        if (application.getEngine().getUsersEngine().getContactsForUid(userId).length > 0) {
+
+        if (user.getLinkType() == LinkType.CONTACT) {
             menu.findItem(R.id.addContact).setVisible(false);
-            if (!application.getTechKernel().getTechReflection().isOnSdCard()) {
+            menu.findItem(R.id.removeContact).setVisible(true);
+            if (application.getEngine().getUsersEngine().getContactsForUid(userId).length > 0) {
+                menu.findItem(R.id.addBook).setVisible(false);
                 menu.findItem(R.id.viewBook).setVisible(true);
-                menu.findItem(R.id.viewBook).setTitle(highlightMenuText(R.string.st_profile_menu_view));
             } else {
+                menu.findItem(R.id.addBook).setVisible(true);
                 menu.findItem(R.id.viewBook).setVisible(false);
             }
         } else {
+            menu.findItem(R.id.removeContact).setVisible(false);
             menu.findItem(R.id.viewBook).setVisible(false);
-            if (user != null && user.getPhone() != null && user.getPhone().length() > 0 && user.getLinkType() != LinkType.CONTACT) {
+            menu.findItem(R.id.addBook).setVisible(false);
+
+            if (user != null && user.getPhone() != null && user.getPhone().length() > 0) {
                 menu.findItem(R.id.addContact).setVisible(true);
             } else {
                 menu.findItem(R.id.addContact).setVisible(false);
             }
         }
+
         if (user != null && user.getPhone() != null && user.getPhone().length() > 0) {
             menu.findItem(R.id.shareContact).setVisible(true);
             menu.findItem(R.id.shareContact).setTitle(highlightMenuText(R.string.st_profile_menu_share));
@@ -402,29 +418,52 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
             });
             return true;
         } else if (item.getItemId() == R.id.viewBook) {
-            final long[] contacts = application.getEngine().getUsersEngine().getContactsForUid(userId);
+            long[] contacts = application.getEngine().getUsersEngine().getContactsForUid(userId);
             if (contacts.length == 1) {
                 openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[0] + ""));
             } else {
-                CharSequence[] sequences = new CharSequence[contacts.length];
+                final ArrayList<CharSequence> sequences = new ArrayList<CharSequence>();
+                final ArrayList<Long> ids = new ArrayList<Long>();
                 for (int i = 0; i < contacts.length; i++) {
-                    User user = getEngine().getUser(userId);
-                    sequences[i] = user.getDisplayName();
+                    Cursor cursor = application.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, new String[]{
+                            ContactsContract.Contacts.DISPLAY_NAME
+                    }, ContactsContract.Contacts._ID + " = ?", new String[]{"" + contacts[i]}, null);
+                    if (cursor != null) {
+                        if (cursor.moveToFirst()) {
+                            sequences.add(cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME)));
+                            ids.add(contacts[i]);
+                        }
+                        cursor.close();
+                    }
                 }
-                AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(sequences, new DialogInterface.OnClickListener() {
+                AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(sequences.toArray(new CharSequence[0]), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contacts[i] + ""));
+                        openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, ids.get(i) + ""));
                     }
                 }).create();
                 alertDialog.setCanceledOnTouchOutside(true);
                 alertDialog.show();
             }
             return true;
-        } else if (item.getItemId() == R.id.addContact) {
+        } else if (item.getItemId() == R.id.addContact || item.getItemId() == R.id.addBook) {
             getRootController().addContact(userId);
         } else if (item.getItemId() == R.id.shareContact) {
             getRootController().shareContact(userId);
+        } else if (item.getItemId() == R.id.removeContact) {
+            runUiTask(new AsyncAction() {
+                @Override
+                public void execute() throws AsyncException {
+                    TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
+                    inputUsers.add(new TLInputUserContact(userId));
+                    rpc(new TLRequestContactsDeleteContacts(inputUsers));
+                    application.getEngine().getUsersEngine().deleteContact(userId);
+                    application.getSyncKernel().getContactsSync().removeContactLinks(userId);
+
+                    application.getSyncKernel().getContactsSync().invalidateContactsSync();
+                    application.getDataSourceKernel().getContactsSource().onBookUpdated();
+                }
+            });
         }
         return super.onOptionsItemSelected(item);
     }

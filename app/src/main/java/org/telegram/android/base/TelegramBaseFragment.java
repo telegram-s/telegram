@@ -8,11 +8,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -707,6 +709,18 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
     }
 
     protected void openInternalFile(String key, String mimeType) {
-        openUri(Uri.parse("content://" + getStringSafe(R.string.config_account_package) + "/" + key), mimeType);
+        openUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key), mimeType);
+    }
+
+    public String getRealPathFromURI(Uri contentUri) {
+        if ("file".equals(contentUri.getScheme())) {
+            return contentUri.getPath();
+        } else {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            Cursor cursor = getActivity().getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        }
     }
 }

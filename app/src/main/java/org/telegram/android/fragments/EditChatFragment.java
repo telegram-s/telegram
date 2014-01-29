@@ -464,8 +464,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     ((TextView) row.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_blue_bright));
                 } else {
                     ((TextView) row.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                    ((TextView) row.findViewById(R.id.status)).setText(
-                            TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang)));
+                    ((TextView) row.findViewById(R.id.status)).setText(formatLastSeen(status));
                 }
 
                 return row;

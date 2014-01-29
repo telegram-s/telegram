@@ -68,8 +68,6 @@ public class KernelsLoader {
         kernel.initSearchKernel(); // Searching in app
         kernel.initEncryptedKernel(); // Encrypted chats kernel
 
-        kernel.initSyncKernel(); // Background sync kernel
-
         kernel.initApiKernel(); // Initializing api kernel
 
         if (kernel.asyncRequiredInit()) {
@@ -79,6 +77,7 @@ public class KernelsLoader {
                 public void run() {
                     long upgradeStart = SystemClock.uptimeMillis();
                     kernel.initStorageKernel(); // Database kernel
+                    kernel.initSyncKernel(); // Background sync kernel
                     kernel.initSourcesKernel(); // UI Data Sources kernel
                     kernel.runKernels(); // Run all kernels
                     Logger.d(TAG, "Storage kernels updated " + (SystemClock.uptimeMillis() - upgradeStart) + " ms");
@@ -90,6 +89,7 @@ public class KernelsLoader {
         }
 
         kernel.initStorageKernel(); // Database kernel
+        kernel.initSyncKernel(); // Background sync kernel
         kernel.initSourcesKernel(); // UI Data Sources kernel
 
         Logger.d(TAG, "Kernels created in " + (SystemClock.uptimeMillis() - initStart) + " ms");

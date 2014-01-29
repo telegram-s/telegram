@@ -26,6 +26,10 @@
     <string name="st_back">Назад</string>
     <string name="st_start_again">Начать сначала</string>
 
+    <string name="st_receiver_pick_wallpaper">Обои</string>
+    <string name="st_receiver_pick_photo">Выберите фото</string>
+    <string name="st_receiver_pick_video">Выберите видео</string>
+
     <string name="st_receiver_gallery">Из галереи</string>
     <string name="st_receiver_photo">Сделать фото</string>
     <string name="st_receiver_delete">Удалить фото</string>
@@ -211,7 +215,9 @@
     <string name="st_settings_reset">Удалить сессии</string>
     <string name="st_settings_reset_subtitle">Выйти со всех других устройств</string>
     <string name="st_settings_reset_title">Вы уверены?</string>
-    <string name="st_settings_reset_message">Вы уверены, что хотите выйти с других устройств? Все данные на них будут удалены, а секретные чаты будут потеряны безвозвратно.</string>
+    <string name="st_settings_reset_message">Вы уверены, что хотите выйти с других устройств? Все данные на них будут
+        удалены, а секретные чаты будут потеряны безвозвратно.
+    </string>
     <string name="st_settings_reset_toast">Сессии удалены</string>
     <string name="st_settings_chat">Настройки чата</string>
     <string name="st_settings_chat_subtitle">Обои, размер шрифта и т.д.</string>
@@ -304,6 +310,8 @@
         общения?
     </string>
 
+    <string name="st_contacts_header_unregistered">Не зарегистрированные</string>
+
     <string name="st_contacts_action_view">Посмотреть в телефонной книге</string>
     <string name="st_contacts_action_share">Поделиться контактом</string>
     <string name="st_contacts_action_delete">Удалить контакт</string>
@@ -329,10 +337,15 @@
     <string name="st_profile_phone_hidden">скрыт</string>
     <string name="st_profile_phone_copied">Номер скопирован в буфер обмена</string>
     <string name="st_profile_menu_block">Заблокировать</string>
+
+    <string name="st_profile_menu_add_phone">Добавить в адр. книгу</string>
+    <string name="st_profile_menu_view">Открыть в адр. книге</string>
+
     <string name="st_profile_menu_add">Добавить в контакты</string>
+    <string name="st_profile_menu_remove">Удалить из контактов</string>
+
     <string name="st_profile_menu_share">Поделиться контактом</string>
     <string name="st_profile_menu_edit_name">Изменить имя</string>
-    <string name="st_profile_menu_view">Открыть в контактах</string>
     <string name="st_profile_blocked">Пользователь заблокирован</string>
     <string name="st_profile_added">Контакт добавлен</string>
     <string name="st_profile_secret">Начать секретный чат</string>

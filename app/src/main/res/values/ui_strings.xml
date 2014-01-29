@@ -26,6 +26,10 @@
     <string name="st_back">Back</string>
     <string name="st_start_again">Start again</string>
 
+    <string name="st_receiver_pick_wallpaper">Change wallpaper</string>
+    <string name="st_receiver_pick_photo">Choose photo</string>
+    <string name="st_receiver_pick_video">Choose video</string>
+
     <string name="st_receiver_gallery">From gallery</string>
     <string name="st_receiver_photo">Take photo</string>
     <string name="st_receiver_delete">Delete photo</string>
@@ -316,6 +320,8 @@
     <string name="st_contacts_block_delete">Are you sure want to block the contact \'{0}\' and delete contact history?
     </string>
 
+    <string name="st_contacts_header_unregistered">Unregistered contacts</string>
+
     <string name="st_contacts_action_view">View in address book</string>
     <string name="st_contacts_action_share">Share contact</string>
     <string name="st_contacts_action_delete">Delete contact</string>
@@ -341,10 +347,16 @@
     <string name="st_profile_phone_hidden">hidden</string>
     <string name="st_profile_phone_copied">Number copied to pastebin</string>
     <string name="st_profile_menu_block">Block user</string>
+
+    <string name="st_profile_menu_add_phone">Add to Contacts App</string>
+    <string name="st_profile_menu_view">View in Contacts App</string>
+
     <string name="st_profile_menu_add">Add to contacts</string>
+    <string name="st_profile_menu_remove">Remove from contacts</string>
+
     <string name="st_profile_menu_share">Share contact</string>
     <string name="st_profile_menu_edit_name">Edit name</string>
-    <string name="st_profile_menu_view">View in Contacts App</string>
+
     <string name="st_profile_blocked">User blocked</string>
     <string name="st_profile_added">Contact added</string>
     <string name="st_profile_secret">Start Secret Chat</string>

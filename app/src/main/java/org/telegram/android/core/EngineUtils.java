@@ -252,32 +252,16 @@ public class EngineUtils {
             TLLocalPhoto res = new TLLocalPhoto();
             TLPhotoCachedSize cachedSize = ApiUtils.findCachedSize((TLPhoto) src.getPhoto());
             if (cachedSize != null) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(cachedSize.getBytes(), 0, cachedSize.getBytes().length);
-                if (bitmap != null && bitmap.getWidth() <= 90 && bitmap.getHeight() <= 90) {
-                    Bitmap destPreview = Bitmap.createBitmap(90, 90, Bitmap.Config.ARGB_8888);
-                    BitmapUtils.fastblur(bitmap, destPreview, bitmap.getWidth(), bitmap.getHeight(), 3);
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    destPreview.compress(Bitmap.CompressFormat.JPEG, 55, outputStream);
-                    byte[] preview = outputStream.toByteArray();
+                res.setFastPreview(cachedSize.getBytes());
+                res.setFastPreviewW(cachedSize.getW());
+                res.setFastPreviewH(cachedSize.getH());
 
-                    res.setFastPreview(preview);
-                    res.setFastPreviewW(bitmap.getWidth());
-                    res.setFastPreviewH(bitmap.getHeight());
-                    res.setOptimized(true);
-
-                    if (cachedSize.getLocation() instanceof TLFileLocation) {
-                        TLFileLocation location = (TLFileLocation) cachedSize.getLocation();
-                        res.setFastPreviewKey(location.getVolumeId() + "." + location.getLocalId());
-                    } else {
-                        TLFileLocationUnavailable location = (TLFileLocationUnavailable) cachedSize.getLocation();
-                        res.setFastPreviewKey(location.getVolumeId() + "." + location.getLocalId());
-                    }
+                if (cachedSize.getLocation() instanceof TLFileLocation) {
+                    TLFileLocation location = (TLFileLocation) cachedSize.getLocation();
+                    res.setFastPreviewKey(location.getVolumeId() + "." + location.getLocalId());
                 } else {
-                    res.setFastPreview(new byte[0]);
-                    res.setFastPreviewKey("");
-                    res.setFastPreviewH(0);
-                    res.setFastPreviewW(0);
-                    res.setOptimized(false);
+                    TLFileLocationUnavailable location = (TLFileLocationUnavailable) cachedSize.getLocation();
+                    res.setFastPreviewKey(location.getVolumeId() + "." + location.getLocalId());
                 }
             } else {
                 res.setFastPreview(new byte[0]);

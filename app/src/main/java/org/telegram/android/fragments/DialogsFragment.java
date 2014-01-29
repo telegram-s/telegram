@@ -432,8 +432,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                         ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_blue_bright));
                     } else {
                         ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                        ((TextView) view.findViewById(R.id.status)).setText(
-                                TextUtil.formatHumanReadableLastSeen(status, getStringSafe(R.string.st_lang)));
+                        ((TextView) view.findViewById(R.id.status)).setText(formatLastSeen(status));
                     }
                 } else {
                     ((TextView) view.findViewById(R.id.status)).setText(
@@ -507,7 +506,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                     .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            application.getEngine().sendMessage(peerType, peerId, actionText);
+                            application.getMessageSender().postTextMessage(peerType, peerId, actionText);
                             application.getSyncKernel().getBackgroundSync().resetTypingDelay();
                             application.notifyUIUpdate();
                             action = null;
@@ -614,16 +613,17 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                     @Override
                                     public void execute() throws AsyncException {
                                         String fileName = getRealPathFromURI(Uri.parse(actionUri));
-                                        Bitmap res = ThumbnailUtils.createVideoThumbnail(fileName, MediaStore.Video.Thumbnails.MINI_KIND);
-                                        int w = 0;
-                                        int h = 0;
-                                        if (res != null) {
-                                            w = res.getWidth();
-                                            h = res.getHeight();
+                                        Optimizer.VideoMetadata metadata;
+                                        try {
+                                            metadata = Optimizer.getVideoSize(fileName);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
                                         }
-                                        application.getEngine().sendVideo(peerType, peerId, new TLUploadingVideo(fileName, w, h));
-                                        application.notifyUIUpdate();
 
+                                        application.getEngine().sendVideo(peerType, peerId,
+                                                new TLUploadingVideo(fileName, metadata.getWidth(), metadata.getHeight()));
+                                        application.notifyUIUpdate();
                                     }
 
                                     @Override
@@ -716,18 +716,6 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             dialog.show();
         } else {
             getRootController().openDialog(peerType, peerId);
-        }
-    }
-
-    public String getRealPathFromURI(Uri contentUri) {
-        if ("file".equals(contentUri.getScheme())) {
-            return contentUri.getPath();
-        } else {
-            String[] proj = {MediaStore.Images.Media.DATA};
-            Cursor cursor = getActivity().getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
         }
     }
 

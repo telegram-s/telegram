@@ -5,6 +5,7 @@ import org.telegram.dao.ContactDao;
 import org.telegram.dao.UserDao;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ex3ndr on 14.01.14.
@@ -81,22 +82,51 @@ public class ContactsDatabase {
         }
     }
 
+    public synchronized void deleteContactsForUid(int uid) {
+        contactDao.queryBuilder()
+                .where(ContactDao.Properties.Uid.eq(uid))
+                .buildDelete()
+                .executeDeleteWithoutDetachingEntities();
+        for (Contact cached : readAllContacts()) {
+            if (cached.getUid() == uid) {
+                cache.remove(cached);
+            }
+        }
+    }
+
     public synchronized void writeContacts(Contact[] contacts) {
-        Contact[] saved = readAllContacts();
+        List<org.telegram.dao.Contact> saved = contactDao.loadAll();
         ArrayList<org.telegram.dao.Contact> toAdd = new ArrayList<org.telegram.dao.Contact>();
+        ArrayList<org.telegram.dao.Contact> toRemove = new ArrayList<org.telegram.dao.Contact>();
         outer:
         for (Contact c : contacts) {
-            for (Contact s : saved) {
+            for (org.telegram.dao.Contact s : saved) {
                 if (c.getUid() == s.getUid() && c.getLocalId() == s.getLocalId()) {
                     continue outer;
                 }
             }
             toAdd.add(new org.telegram.dao.Contact(null, c.getUid(), c.getLocalId()));
-            cache.add(c);
+            if (cache != null) {
+                cache.add(c);
+            }
+        }
+
+        outer:
+        for (org.telegram.dao.Contact c : saved) {
+            for (Contact s : contacts) {
+                if (c.getUid() == s.getUid() && c.getLocalId() == s.getLocalId()) {
+                    continue outer;
+                }
+            }
+            toRemove.add(c);
         }
 
         if (toAdd.size() > 0) {
             contactDao.insertInTx(toAdd, true);
+        }
+
+        if (toRemove.size() > 0) {
+            contactDao.deleteInTx(toRemove);
         }
     }
 

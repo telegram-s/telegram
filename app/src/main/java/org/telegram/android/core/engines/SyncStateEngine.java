@@ -15,6 +15,14 @@ public class SyncStateEngine {
         syncPrefs = application.getSharedPreferences("org.telegram.android.Sync.prefs", Context.MODE_PRIVATE);
     }
 
+    public synchronized boolean isContactSynced() {
+        return syncPrefs.getBoolean("contacts_synced", false);
+    }
+
+    public synchronized void setSynced(boolean isSynced) {
+        syncPrefs.edit().putBoolean("contacts_synced", isSynced).commit();
+    }
+
     public synchronized int getMessagesSyncState(int peerType, int peerId, int def) {
         return syncPrefs.getInt("msg_" + (peerType + peerId * 10L), def);
     }

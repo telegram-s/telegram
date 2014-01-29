@@ -2,8 +2,10 @@ package org.telegram.android.core.model;
 
 import org.telegram.android.core.model.local.*;
 import org.telegram.android.core.model.media.*;
-import org.telegram.android.core.model.phone.TLLocalBook;
-import org.telegram.android.core.model.phone.TLLocalImportedPhone;
+import org.telegram.android.core.model.phone.TLImportedPhone;
+import org.telegram.android.core.model.phone.TLSyncContact;
+import org.telegram.android.core.model.phone.TLSyncPhone;
+import org.telegram.android.core.model.phone.TLSyncState;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.storage.*;
 import org.telegram.android.kernel.compat.v5.TLDcInfoCompat;
@@ -83,12 +85,14 @@ public class TLLocalContext extends TLContext {
         registerCompatClass(TLDcInfoCompat.CLASS_ID, TLDcInfoCompat.class);
         registerCompatClass(TLLocalPhotoCompat8.CLASS_ID, TLLocalPhotoCompat8.class);
 
-        // PhoneBook
-        registerClass(TLLocalBook.CLASS_ID, TLLocalBook.class);
-        registerClass(TLLocalImportedPhone.CLASS_ID, TLLocalImportedPhone.class);
-
         // UpdateState
         registerClass(TLUpdateState.CLASS_ID, TLUpdateState.class);
+
+        // PhoneBook
+        registerClass(TLImportedPhone.CLASS_ID, TLImportedPhone.class);
+        registerClass(TLSyncContact.CLASS_ID, TLSyncContact.class);
+        registerClass(TLSyncPhone.CLASS_ID, TLSyncPhone.class);
+        registerClass(TLSyncState.CLASS_ID, TLSyncState.class);
     }
 
     @Override

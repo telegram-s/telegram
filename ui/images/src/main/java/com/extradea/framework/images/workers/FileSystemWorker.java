@@ -74,17 +74,17 @@ public class FileSystemWorker implements ImageWorker {
 //                task.setResult(image);
 //                return RESULT_OK;
 //            } else {
-                Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
-                    @Override
-                    public Bitmap call() throws Exception {
-                        return ImageUtils.getOptimalBitmap(fsTask.getFileName());
-                    }
-                });
-                if (image == null) {
-                    return RESULT_FAILURE;
+            Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
+                @Override
+                public Bitmap call() throws Exception {
+                    return ImageUtils.getOptimalBitmap(fsTask.getFileName());
                 }
-                task.setResult(image);
-                return RESULT_OK;
+            });
+            if (image == null) {
+                return RESULT_FAILURE;
+            }
+            task.setResult(image);
+            return RESULT_OK;
 //            }
         } else if (task instanceof UriImageTask) {
             final UriImageTask uriImageTask = (UriImageTask) task;
@@ -106,17 +106,17 @@ public class FileSystemWorker implements ImageWorker {
 //                    task.setResult(image);
 //                    return RESULT_OK;
 //                } else {
-                    Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
-                        @Override
-                        public Bitmap call() throws Exception {
-                            return ImageUtils.getOptimalBitmap(Uri.parse(uriImageTask.getUri()), context);
-                        }
-                    });
-                    if (image == null) {
-                        return RESULT_FAILURE;
+                Bitmap image = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
+                    @Override
+                    public Bitmap call() throws Exception {
+                        return ImageUtils.getOptimalBitmap(Uri.parse(uriImageTask.getUri()), context);
                     }
-                    task.setResult(image);
-                    return RESULT_OK;
+                });
+                if (image == null) {
+                    return RESULT_FAILURE;
+                }
+                task.setResult(image);
+                return RESULT_OK;
 //                }
             } catch (Exception e) {
                 e.printStackTrace();

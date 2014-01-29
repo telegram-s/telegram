@@ -649,16 +649,6 @@ public class ModelEngine {
         dialogsEngine.updateDescriptorPending(msg);
     }
 
-
-    public int sendMessage(int peerType, int peerId, String message) {
-        ChatMessage msg = prepareSendMessage(peerType, peerId);
-        msg.setMessage(message);
-        msg.setContentType(ContentType.MESSAGE_TEXT);
-        messagesEngine.create(msg);
-        dialogsEngine.updateDescriptorPending(msg);
-        return msg.getDatabaseId();
-    }
-
     public void tryAgainMedia(int localId) {
         ChatMessage msg = getMessageByDbId(localId);
         msg.setMid(messagesEngine.generateMid());

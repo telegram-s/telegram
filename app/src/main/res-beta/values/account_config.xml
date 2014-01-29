@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="config_account_type">org.telegram.android.beta.account</string>
-    <string name="config_account_package">org.telegram.android.beta</string>
-    <string name="config_account_settings">org.telegram.android.beta.StartActivity</string>
-</resources>

@@ -187,8 +187,9 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
             return;
         }
 
-
         controller.openDialogs(true);
+        onNewIntent(getIntent());
+
         showBar();
     }
 
@@ -461,7 +462,9 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         registerReceiver(logoutReceiver, intentFilter);
         checkLogout();
 
-        setBarBg();
+        setBarBg(!isStarted);
+
+        isStarted = true;
 
         TestIntegration.initActivity(this);
     }

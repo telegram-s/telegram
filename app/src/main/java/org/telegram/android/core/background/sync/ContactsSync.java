@@ -1,27 +1,26 @@
 package org.telegram.android.core.background.sync;
 
-import android.accounts.Account;
-import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.OperationApplicationException;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.*;
-import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.core.contacts.ContactsUploadState;
+import org.telegram.android.core.contacts.SyncContact;
+import org.telegram.android.core.contacts.SyncPhone;
 import org.telegram.android.core.model.Contact;
-import org.telegram.android.core.model.TLLocalContext;
+import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.User;
-import org.telegram.android.core.model.phone.TLLocalBook;
-import org.telegram.android.core.model.phone.TLLocalImportedPhone;
-import org.telegram.android.critical.TLPersistence;
+import org.telegram.android.core.model.phone.TLImportedPhone;
+import org.telegram.android.kernel.ApplicationKernel;
 import org.telegram.android.log.Logger;
 import org.telegram.api.TLImportedContact;
 import org.telegram.api.TLInputContact;
@@ -33,12 +32,7 @@ import org.telegram.api.requests.TLRequestContactsImportContacts;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.tl.TLVector;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * Created by ex3ndr on 07.12.13.
@@ -52,36 +46,19 @@ public class ContactsSync extends BaseSync {
     private static final String SETTINGS_NAME = "org.telegram.android.contacts";
 
     private static final int SYNC_CONTACTS_PRE = 1;
-    private static final int SYNC_CONTACTS = 2;
-    private static final int SYNC_CONTACTS_INTEGRATION = 3;
-    private static final int SYNC_CONTACTS_TWO_SIDE = 4;
-    private static final int SYNC_CONTACTS_TWO_SIDE_TIMEOUT = 12 * HOUR;
 
-    private static final int SYNC_UPLOAD_REQUEST_TIMEOUT = 30000;
+    private static final int SYNC_DOWNLOAD_REQUEST_TIMEOUT = 30000;
+    private static final int SYNC_UPLOAD_REQUEST_TIMEOUT = 60000;
 
-    private static final int IMPORT_LIMIT = 40;
-
-    private static final int OP_LIMIT = 20;
-
-    private static final boolean TWO_SIDE_SYNC = Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+    private static final int IMPORT_LIMIT = 150;
 
     private static final String TAG = "ContactsSync";
-
-    private TelegramApplication application;
-
-    private TLPersistence<TLLocalBook> bookPersistence;
 
     private String isoCountry;
 
     private PhoneNumberUtil phoneUtil;
 
-    private final Object phoneBookSync = new Object();
-
     private PhoneBookRecord[] currentPhoneBook;
-
-    private ArrayList<Contact> contacts;
-
-    private boolean isLoaded = true;
 
     private boolean isSynced = false;
 
@@ -94,19 +71,17 @@ public class ContactsSync extends BaseSync {
 
     private long lastContactsChanged = 0;
 
-    public ContactsSync(TelegramApplication application) {
-        super(application, SETTINGS_NAME);
+    private ContactsUploadState uploadState;
+
+    private ApplicationKernel kernel;
+
+    public ContactsSync(ApplicationKernel kernel) {
+        super(kernel.getApplication(), SETTINGS_NAME);
+
+        this.kernel = kernel;
 
         long start = SystemClock.uptimeMillis();
-        this.application = application;
-        this.bookPersistence = new TLPersistence<TLLocalBook>(application, "book_sync.bin", TLLocalBook.class, TLLocalContext.getInstance());
-        Logger.d(TAG, "Persistence loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
-
-        start = SystemClock.uptimeMillis();
         registerSyncSingleOffline(SYNC_CONTACTS_PRE, "contactsPreSync");
-        registerSyncSingleOffline(SYNC_CONTACTS_INTEGRATION, "updateIntegration");
-        registerSyncEvent(SYNC_CONTACTS, "contactsSync");
-        registerSync(SYNC_CONTACTS_TWO_SIDE, "updateContacts", SYNC_CONTACTS_TWO_SIDE_TIMEOUT);
         Logger.d(TAG, "Sync registered in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         start = SystemClock.uptimeMillis();
@@ -120,63 +95,10 @@ public class ContactsSync extends BaseSync {
             isoCountry = "us";
         }
 
-        isSynced = preferences.getBoolean("is_synced", false);
-        isLoaded = false;
+        isSynced = kernel.getStorageKernel().getModel().getSyncStateEngine().isContactSynced();
         Logger.d(TAG, "Completed init in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
-    public void clear() {
-        preferences.edit().putBoolean("is_synced", false).commit();
-        this.contacts = null;
-        this.isSynced = false;
-        this.isLoaded = false;
-        this.bookPersistence.getObj().getImportedPhones().clear();
-        this.bookPersistence.write();
-    }
-
-    public void addPhoneMapping(int uid, String phone) {
-        for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
-            if (importedPhone.getPhone().equals(phone)) {
-                return;
-            }
-        }
-
-        bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phone, uid, false));
-        bookPersistence.write();
-    }
-
-    public void removeContact(long contactId) {
-        Contact[] relatedContacts = application.getEngine().getUsersEngine().getContactsForLocalId(contactId);
-        application.getEngine().getUsersEngine().deleteContactsForLocalId(contactId);
-
-        HashSet<Integer> uids = new HashSet<Integer>();
-        for (Contact c : relatedContacts) {
-            uids.add(c.getUid());
-        }
-
-        for (Integer uid : uids) {
-            for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
-                if (importedPhone.getUid() == uid) {
-                    bookPersistence.getObj().getImportedPhones().remove(importedPhone);
-                    bookPersistence.write();
-                    break;
-                }
-            }
-            synchronized (contactsSync) {
-                Logger.d(TAG, "Writing integration contacts...");
-
-                Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, application.getKernel().getAuthKernel().getAccount().name).appendQueryParameter(
-                        ContactsContract.RawContacts.ACCOUNT_TYPE, application.getKernel().getAuthKernel().getAccount().type).build();
-                application.getContentResolver().delete(rawContactUri, ContactsContract.RawContacts.SYNC2 + " = " + uid, null);
-            }
-        }
-    }
-
-    public void resetSync() {
-        Logger.d(TAG, "resetSync");
-        resetSync(SYNC_CONTACTS_PRE);
-        resetSync(SYNC_CONTACTS_TWO_SIDE);
-    }
 
     public ContactSyncListener getListener() {
         return listener;
@@ -185,6 +107,65 @@ public class ContactsSync extends BaseSync {
     public void setListener(ContactSyncListener listener) {
         this.listener = listener;
     }
+
+    public void run() {
+        init();
+        this.observerUpdatesThread = new HandlerThread("ObserverHandlerThread") {
+            @Override
+            protected void onLooperPrepared() {
+                contentObserver = new ContentObserver(new Handler(observerUpdatesThread.getLooper())) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        if (SystemClock.uptimeMillis() - lastContactsChanged < 500) {
+                            return;
+                        }
+                        invalidateContactsSync();
+                        lastContactsChanged = SystemClock.uptimeMillis();
+
+                    }
+                };
+                application.getContentResolver().
+                        registerContentObserver(ContactsContract.Contacts.CONTENT_URI, false, contentObserver);
+            }
+        }
+
+        ;
+        this.observerUpdatesThread.setPriority(Thread.MIN_PRIORITY);
+        this.observerUpdatesThread.start();
+    }
+
+    public void clear() {
+        this.kernel.getStorageKernel().getModel().getSyncStateEngine().setSynced(false);
+        this.isSynced = false;
+        this.uploadState.getImportedPhones().clear();
+        this.uploadState.getContacts().clear();
+        this.uploadState.write();
+    }
+
+    public void invalidateContactsSync() {
+        resetSync(SYNC_CONTACTS_PRE);
+        Logger.d(TAG, "invalidateContactsSync");
+    }
+
+
+    public void resetSync() {
+        Logger.d(TAG, "resetSync");
+        resetSync(SYNC_CONTACTS_PRE);
+    }
+
+    public void addPhoneMapping(int uid, String phone) {
+        uploadState.getImportedPhones().put(phone, uid);
+        uploadState.write();
+    }
+
+    public void removeContact(long contactId) {
+        application.getEngine().getUsersEngine().deleteContactsForLocalId(contactId);
+    }
+
+    public void removeContactLinks(int uid) {
+        application.getEngine().getUsersEngine().deleteContactsForUid(uid);
+    }
+
 
     private synchronized void notifyChanged() {
         if (!isSynced) {
@@ -198,129 +179,144 @@ public class ContactsSync extends BaseSync {
         }
     }
 
-    public boolean isLoaded() {
-        return isLoaded;
-    }
-
-    public boolean isSynced() {
-        return isSynced;
-    }
-
-    public ArrayList<Contact> getContacts() {
-        return contacts;
-    }
-
-    public PhoneBookRecord[] getCurrentPhoneBook() {
-        return currentPhoneBook;
-    }
-
-    private String currentPhoneBookHash;
-
-    public void run() {
-        init();
-        this.observerUpdatesThread = new HandlerThread("ObserverHandlerThread") {
-            @Override
-            protected void onLooperPrepared() {
-
-                contentObserver = new ContentObserver(new Handler(observerUpdatesThread.getLooper())) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        if (SystemClock.uptimeMillis() - lastContactsChanged < 1000) {
-                            return;
-                        }
-
-                        if (currentPhoneBookHash == null) {
-                            invalidateContactsSync();
-                        } else {
-                            PhoneBookRecord[] records = loadPhoneBook();
-                            String hash = phoneBookHash(records);
-                            if (!hash.equals(currentPhoneBookHash)) {
-                                currentPhoneBookHash = hash;
-                                invalidateContactsSync();
-                            } else {
-                                lastContactsChanged = SystemClock.uptimeMillis();
-                            }
-                        }
-                    }
-                };
-                application.getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, false, contentObserver);
-            }
-        };
-        this.observerUpdatesThread.setPriority(Thread.MIN_PRIORITY);
-        this.observerUpdatesThread.start();
-    }
-
-    private String phoneBookHash(PhoneBookRecord[] book) {
-        MessageDigest crypt = null;
-        try {
-            crypt = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            // Never happens
-            return "";
-        }
-
-        for (PhoneBookRecord record : book) {
-            crypt.update(record.getFirstName().getBytes());
-            crypt.update(record.getLastName().getBytes());
-            for (Phone phone : record.getPhones()) {
-                crypt.update(phone.getNumber().getBytes());
-            }
-        }
-
-        return CryptoUtils.ToHex(crypt.digest());
-    }
-
-    public void invalidateContactsSync() {
-        resetSync(SYNC_CONTACTS_PRE);
-        resetSync(SYNC_CONTACTS_TWO_SIDE);
-        Logger.d(TAG, "invalidateContactsSync");
-    }
-
-    private void invalidateIntegration() {
-        resetSync(SYNC_CONTACTS_INTEGRATION);
-        Logger.d(TAG, "invalidateIntegration");
-    }
-
     protected void contactsPreSync() throws Exception {
-        Logger.d(TAG, "PreSync:" + isLoaded);
-        if (!isLoaded) {
-            PhoneBookRecord[] freshPhoneBook = loadPhoneBook();
-            ArrayList<Contact> freshContacts = new ArrayList<Contact>();
-            Collections.addAll(freshContacts, application.getEngine().getUsersEngine().getAllContacts());
-            synchronized (phoneBookSync) {
-                currentPhoneBook = freshPhoneBook;
-                currentPhoneBookHash = phoneBookHash(currentPhoneBook);
-                contacts = freshContacts;
-                isLoaded = true;
-            }
-        } else {
-            PhoneBookRecord[] freshPhoneBook = loadPhoneBook();
-            synchronized (phoneBookSync) {
-                currentPhoneBook = freshPhoneBook;
-                currentPhoneBookHash = phoneBookHash(currentPhoneBook);
-            }
-        }
+        reloadPhoneBook();
 
         notifyChanged();
+
+        updateUploadingState();
+
+        contactsOffline();
+
+        contactsUpload();
+
+        contactsDownload();
 
         updateMapping();
 
         notifyChanged();
-
-        resetSync(SYNC_CONTACTS);
     }
 
-    protected void updateContacts() throws Exception {
-        if (!isSynced) {
-            Logger.d(TAG, "Ignoring contacts loading: not synced");
-            return;
+    private void reloadPhoneBook() {
+        PhoneBookDiff diff = null;
+        PhoneBookRecord[] freshPhoneBook = loadPhoneBook();
+        if (currentPhoneBook != null) {
+            diff = diffPhoneBook(currentPhoneBook, freshPhoneBook);
         }
+        currentPhoneBook = freshPhoneBook;
 
-        Logger.d(TAG, "Contacts load start");
+        // Log difference
+        if (diff != null && !diff.isEmpty()) {
+            if (diff.getAddedContacts().size() != 0) {
+                for (PhoneBookRecord record : diff.getAddedContacts()) {
+                    Logger.d(TAG, "DIFF: Added:  #" + record.getContactId() + " " + record.getFirstName() + " " + record.getLastName());
+                }
+            }
+            if (diff.getRemovedContacts().size() != 0) {
+                for (PhoneBookRecord record : diff.getRemovedContacts()) {
+                    Logger.d(TAG, "DIFF: Removed: #" + record.getContactId() + " " + record.getFirstName() + " " + record.getLastName());
+                }
+            }
+
+            if (diff.getUpdatedContacts().size() != 0) {
+                for (UpdatedRecord record : diff.getUpdatedContacts()) {
+                    Logger.d(TAG, "DIFF: Updated: #" + record.getOldRecord().getContactId() + " " + record.getOldRecord().getFirstName() + " " + record.getOldRecord().getLastName());
+                    if (record.isChangedName()) {
+                        Logger.d(TAG, "DIFF: New name: " + record.getNewRecord().getFirstName() + " " + record.getNewRecord().getLastName());
+                    }
+                    for (Phone removed : record.getRemovedPhones()) {
+                        Logger.d(TAG, "DIFF: Phone remove: #" + removed.getId() + " " + removed.getNumber());
+                    }
+                    for (Phone added : record.getAddedPhones()) {
+                        Logger.d(TAG, "DIFF: Phone added: #" + added.getId() + " " + added.getNumber());
+                    }
+                    for (UpdatedPhone updatedPhone : record.getUpdatedPhones()) {
+                        Logger.d(TAG, "DIFF: Phone update: #" + updatedPhone.getPhoneId() + " " + updatedPhone.getOldPhone() + " -> " + updatedPhone.getNewPhone());
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateUploadingState() {
+        if (uploadState == null) {
+            uploadState = new ContactsUploadState(application);
+        }
+        applyUploadingState(uploadState, currentPhoneBook);
+        uploadState.write();
+    }
+
+    private void contactsOffline() {
+        List<SyncPhone> syncPhones = uploadState.buildImportPhones();
+        for (SyncPhone phone : syncPhones) {
+            Integer uid = uploadState.getImportedPhones().get(phone.getNumber());
+            if (uid != null) {
+                application.getEngine().getUsersEngine().onUserLinkChanged(uid, LinkType.CONTACT);
+            }
+        }
+        updateMapping();
+    }
+
+    protected void contactsUpload() throws Exception {
+
+        List<SyncPhone> syncPhones = uploadState.buildImportPhones();
+
+        Logger.d(TAG, "Phone book contacts for import: " + syncPhones.size());
+
+        if (syncPhones.size() > 0) {
+
+            int offset = 0;
+
+            while (offset < syncPhones.size()) {
+                TLVector<TLInputContact> inputContacts = new TLVector<TLInputContact>();
+                for (int i = 0; i < IMPORT_LIMIT && (i + offset < syncPhones.size()); i++) {
+                    SyncPhone phone = syncPhones.get(i + offset);
+                    inputContacts.add(new TLInputContact(phone.getPhoneId(), phone.getNumber(), phone.getContact().getFirstName(), phone.getContact().getLastName()));
+
+                }
+                offset += IMPORT_LIMIT;
+
+                TLImportedContacts importedContacts = application.getApi().doRpcCallGzip(
+                        new TLRequestContactsImportContacts(inputContacts, false), SYNC_UPLOAD_REQUEST_TIMEOUT);
+
+                for (TLInputContact contact : inputContacts) {
+                    for (SyncPhone phone : syncPhones) {
+                        if (phone.getPhoneId() == contact.getClientId()) {
+                            phone.setImported(true);
+                        }
+                    }
+                }
+
+                application.getEngine().onUsers(importedContacts.getUsers());
+
+                Logger.d(TAG, "Imported phones count: " + importedContacts.getImported().size());
+
+                for (SyncPhone phone : syncPhones) {
+                    for (TLImportedContact contact : importedContacts.getImported()) {
+                        if (phone.getPhoneId() == contact.getClientId()) {
+                            uploadState.getImportedPhones().put(phone.getNumber(), contact.getUserId());
+                            break;
+                        }
+                    }
+                }
+                uploadState.write();
+                updateMapping();
+            }
+            isSynced = true;
+            this.kernel.getStorageKernel().getModel().getSyncStateEngine().setSynced(true);
+            notifyChanged();
+            uploadState.write();
+        } else {
+            updateMapping();
+            isSynced = true;
+            this.kernel.getStorageKernel().getModel().getSyncStateEngine().setSynced(true);
+            notifyChanged();
+        }
+    }
+
+    protected void contactsDownload() throws Exception {
         String hash;
         User[] contacts = application.getEngine().getUsersEngine().getContacts();
-        Logger.d(TAG, "Contacts loaded: " + contacts.length);
         if (contacts.length == 0) {
             hash = "";
         } else {
@@ -339,242 +335,23 @@ public class ContactsSync extends BaseSync {
             hash = CryptoUtils.MD5(uidString.getBytes());
         }
 
-        TLAbsContacts response = application.getApi().doRpcCall(new TLRequestContactsGetContacts(hash), SYNC_UPLOAD_REQUEST_TIMEOUT);
+        TLAbsContacts response = application.getApi().doRpcCall(new TLRequestContactsGetContacts(hash), SYNC_DOWNLOAD_REQUEST_TIMEOUT);
         if (response instanceof TLContacts) {
             TLContacts contactsResponse = (TLContacts) response;
             application.getEngine().getUsersEngine().onContacts(contactsResponse.getUsers(), contactsResponse.getContacts());
         }
-
-        if (TWO_SIDE_SYNC) {
-            // updateIntegration();
-            invalidateIntegration();
-        }
     }
-
-    protected void contactsSync() throws Exception {
-
-        PhoneBookRecord[] phoneBookRecords;
-        synchronized (phoneBookSync) {
-            phoneBookRecords = currentPhoneBook;
-        }
-        if (phoneBookRecords == null) {
-            Logger.w(TAG, "Cancelling contacts sync: preloaded phonebook is empty");
-            return;
-        }
-
-        PhonesForImport[] phonesForImports = filterPhones(phoneBookRecords);
-        PhonesForImport[] resultImports = diff(phonesForImports);
-        Logger.d(TAG, "Phone book contacts: " + phoneBookRecords.length);
-        Logger.d(TAG, "Phone book uniq phones: " + phonesForImports.length);
-        Logger.d(TAG, "Diff phones count: " + resultImports.length);
-
-        if (resultImports.length > 0) {
-
-            int offset = 0;
-
-            while (offset < resultImports.length) {
-                TLVector<TLInputContact> inputContacts = new TLVector<TLInputContact>();
-                for (int i = 0; i < IMPORT_LIMIT && (i + offset < resultImports.length); i++) {
-                    PhonesForImport phone = resultImports[i + offset];
-                    inputContacts.add(new TLInputContact(phone.baseId, phone.value, phone.firstName, phone.lastName));
-
-                }
-                offset += IMPORT_LIMIT;
-
-                TLImportedContacts importedContacts = application.getApi().doRpcCallGzip(new TLRequestContactsImportContacts(inputContacts, false), 60000);
-
-                application.getEngine().onUsers(importedContacts.getUsers());
-
-                Logger.d(TAG, "Imported phones count: " + importedContacts.getImported().size());
-
-                outer:
-                for (PhonesForImport phonesForImport : resultImports) {
-                    int uid = 0;
-                    for (TLImportedContact contact : importedContacts.getImported()) {
-                        if (phonesForImport.baseId == contact.getClientId()) {
-                            uid = contact.getUserId();
-                            break;
-                        }
-                    }
-
-                    for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
-                        if (importedPhone.getPhone().equals(phonesForImport.value)) {
-                            if (!importedPhone.isImported()) {
-                                bookPersistence.getObj().getImportedPhones().remove(importedPhone);
-                                break;
-                            } else {
-                                continue outer;
-                            }
-                        }
-                    }
-
-                    bookPersistence.getObj().getImportedPhones().add(new TLLocalImportedPhone(phonesForImport.value, uid, true));
-                }
-                updateMapping();
-                notifyChanged();
-            }
-            isSynced = true;
-            preferences.edit().putBoolean("is_synced", true).commit();
-            notifyChanged();
-            invalidateIntegration();
-            bookPersistence.write();
-        } else {
-            updateMapping();
-            isSynced = true;
-            preferences.edit().putBoolean("is_synced", true).commit();
-            notifyChanged();
-            invalidateIntegration();
-        }
-    }
-
-    protected void updateIntegration() {
-        if (!isSynced) {
-            Logger.d(TAG, "Ignoring integration: not synced");
-            return;
-        }
-
-        if (!TWO_SIDE_SYNC) {
-            return;
-        }
-
-        long start = SystemClock.uptimeMillis();
-        User[] users = application.getEngine().getUsersEngine().getContacts();
-        HashMap<Integer, Long> localContacts = new HashMap<Integer, Long>();
-        synchronized (contactsSync) {
-            Logger.d(TAG, "Writing integration contacts...");
-
-            Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI.buildUpon().appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, application.getKernel().getAuthKernel().getAccount().name).appendQueryParameter(
-                    ContactsContract.RawContacts.ACCOUNT_TYPE, application.getKernel().getAuthKernel().getAccount().type).build();
-            Cursor c1 = application.getContentResolver().query(rawContactUri, new String[]{BaseColumns._ID, ContactsContract.RawContacts.SYNC2}, null, null, null);
-            if (c1 != null) {
-                while (c1.moveToNext()) {
-                    localContacts.put(c1.getInt(1), c1.getLong(0));
-                }
-                c1.close();
-            }
-        }
-
-        Logger.d(TAG, "Readed saved contacts in " + (SystemClock.uptimeMillis() - start) + " ms");
-        start = SystemClock.uptimeMillis();
-
-        synchronized (contactsSync) {
-            ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-            for (User u : users) {
-                if (!localContacts.containsKey(u.getUid())) {
-                    long startAdd = SystemClock.uptimeMillis();
-                    addContact(false, application.getKernel().getAuthKernel().getAccount(), u, u.getDisplayName(), u.getPhone(), operationList);
-                    //if (operationList.size() > OP_LIMIT) {
-                    complete(operationList);
-                    operationList.clear();
-
-                    Logger.d(TAG, "Added contact in " + (SystemClock.uptimeMillis() - startAdd) + " ms");
-                    //}
-                }
-            }
-
-            if (operationList.size() > 0) {
-                complete(operationList);
-            }
-        }
-        Logger.d(TAG, "Changes applied in " + (SystemClock.uptimeMillis() - start) + " ms");
-    }
-
-    private void addContact(boolean withCheck, Account account, User user, String name, String phone, ArrayList<ContentProviderOperation> operationList) {
-        if (withCheck) {
-            ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(ContactsContract.RawContacts.CONTENT_URI);
-            builder.withSelection(
-                    ContactsContract.RawContacts.ACCOUNT_NAME + " = ? AND " +
-                            ContactsContract.RawContacts.ACCOUNT_TYPE + " = ? AND " +
-                            ContactsContract.RawContacts.SYNC2 + " = ?",
-                    new String[]{account.name, account.type, "" + user.getUid()});
-            operationList.add(builder.build());
-        }
-
-        int first = operationList.size();
-
-        //Create our RawContact
-        ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI);
-        builder.withValue(ContactsContract.RawContacts.ACCOUNT_NAME, account.name);
-        builder.withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, account.type);
-        builder.withValue(ContactsContract.RawContacts.SYNC1, phone);
-        builder.withValue(ContactsContract.RawContacts.SYNC2, user.getUid());
-        operationList.add(builder.build());
-
-        //Create a Data record of common type 'StructuredName' for our RawContact
-        builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
-        builder.withValueBackReference(ContactsContract.CommonDataKinds.StructuredName.RAW_CONTACT_ID, first);
-        builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
-        builder.withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
-        operationList.add(builder.build());
-
-        builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
-        builder.withValueBackReference(ContactsContract.CommonDataKinds.StructuredName.RAW_CONTACT_ID, first);
-        builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
-        builder.withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, "+" + phone);
-        builder.withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-        operationList.add(builder.build());
-
-        //Create a Data record of custom type "vnd.android.cursor.item/vnd.fm.last.android.profile" to display a link to the Last.fm profile
-        builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
-        builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, first);
-        builder.withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.org.telegram.android.profile");
-        builder.withValue(ContactsContract.Data.DATA1, "+" + phone);
-        builder.withValue(ContactsContract.Data.DATA2, "Telegram Profile");
-        builder.withValue(ContactsContract.Data.DATA3, "+" + phone);
-        builder.withValue(ContactsContract.Data.DATA4, user.getUid());
-        operationList.add(builder.build());
-
-//        try {
-//            ContentProviderResult[] results = application.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operationList);
-//            if (results.length < 4) {
-//                return 0;
-//            }
-//            return Long.parseLong(results[results.length - 4].uri.getLastPathSegment());
-//        } catch (RemoteException e) {
-//            e.printStackTrace();
-//        } catch (OperationApplicationException e) {
-//            e.printStackTrace();
-//        }
-//        return 0;
-    }
-
-    private void complete(ArrayList<ContentProviderOperation> operationList) {
-        try {
-            application.getContentResolver().applyBatch(ContactsContract.AUTHORITY, operationList);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (OperationApplicationException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     protected void updateMapping() {
         Logger.d(TAG, "updatingMapping...");
         long start = SystemClock.uptimeMillis();
 
-        PhoneBookRecord[] phoneBookRecords;
-        synchronized (phoneBookSync) {
-            phoneBookRecords = currentPhoneBook;
-        }
-        if (phoneBookRecords == null) {
-            Logger.w(TAG, "Cancelling contact mapping: preloaded phonebook is empty");
-            return;
-        }
-
         HashMap<Long, HashSet<Integer>> imported = new HashMap<Long, HashSet<Integer>>();
         HashSet<Integer> uids = new HashSet<Integer>();
-        for (PhoneBookRecord bookRecord : phoneBookRecords) {
-            phoneLoop:
+        for (PhoneBookRecord bookRecord : currentPhoneBook) {
             for (Phone phone : bookRecord.getPhones()) {
-                for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
-                    if (importedPhone.getUid() == 0) {
-                        continue;
-                    }
-                    if (phone.getNumber().equals(importedPhone.getPhone())) {
-                        uids.add(importedPhone.getUid());
-                        continue phoneLoop;
-                    }
+                if (uploadState.getImportedPhones().containsKey(phone.getNumber())) {
+                    uids.add(uploadState.getImportedPhones().get(phone.getNumber()));
                 }
             }
 
@@ -586,49 +363,190 @@ public class ContactsSync extends BaseSync {
 
         Logger.d(TAG, "build map in " + (SystemClock.uptimeMillis() - start) + " ms");
 
-        application.getEngine().getUsersEngine().onImportedContacts(imported);
+        application.getEngine().getUsersEngine().updateContactMapping(imported);
 
         Logger.d(TAG, "updatedMapping in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
-    private PhonesForImport[] diff(PhonesForImport[] phones) {
-        ArrayList<PhonesForImport> res = new ArrayList<PhonesForImport>();
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Helper objects and methods
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void applyUploadingState(ContactsUploadState uploadState, PhoneBookRecord[] phoneBook) {
+        HashMap<String, SyncPhone> primaryPhones = new HashMap<String, SyncPhone>();
+        for (SyncContact contact : uploadState.getContacts()) {
+            for (SyncPhone phone : contact.getSyncPhones()) {
+                if (phone.isPrimary()) {
+                    primaryPhones.put(phone.getNumber(), phone);
+                }
+            }
+        }
+
+        for (PhoneBookRecord record : phoneBook) {
+            SyncContact syncContact = findSyncContact(uploadState, record.contactId);
+            if (syncContact != null) {
+                if (!syncContact.getFirstName().equals(record.getFirstName()) ||
+                        !syncContact.getLastName().equals(record.getLastName())) {
+
+                    for (SyncPhone phone : syncContact.getSyncPhones()) {
+                        phone.setImported(false);
+                        markAsPrimary(phone, primaryPhones);
+                    }
+
+                    Log.d(TAG, "UDIFF: contact renamed #" + syncContact.getContactId() + " from '" + syncContact.getFirstName() + " " + syncContact.getLastName() +
+                            "' to '" + record.getFirstName() + " " + record.getLastName() + "'");
+                    syncContact.setFirstName(record.getFirstName());
+                    syncContact.setLastName(record.getLastName());
+                }
+                for (Phone phone : record.getPhones()) {
+                    SyncPhone syncPhone = findSyncPhone(syncContact, phone.getId());
+                    if (syncPhone == null) {
+                        syncPhone = new SyncPhone(phone.id, phone.getNumber(), syncContact);
+                        syncPhone.setImported(false);
+                        markAsPrimary(syncPhone, primaryPhones);
+                        syncContact.getSyncPhones().add(syncPhone);
+                        Log.d(TAG, "UDIFF: Added phone to contact #" + syncContact.getContactId() + ": " + syncPhone.getNumber());
+                    } else {
+                        if (!syncPhone.getNumber().equals(phone.getNumber())) {
+                            Log.d(TAG, "UDIFF: Changed phone in contact #" + syncContact.getContactId() + ": " + syncPhone.getNumber() + " -> " + phone.getNumber());
+
+                            if (primaryPhones.get(syncPhone.getNumber()) == syncPhone) {
+                                boolean founded = false;
+                                outer:
+                                for (SyncContact tc : uploadState.getContacts()) {
+                                    for (SyncPhone tp : tc.getSyncPhones()) {
+                                        if (tp.getNumber().equals(syncPhone.getNumber()) && tp.getPhoneId() != syncPhone.getPhoneId()) {
+                                            markAsPrimary(tp, primaryPhones);
+                                            founded = true;
+                                            break outer;
+                                        }
+                                    }
+                                }
+
+                                if (!founded) {
+                                    Log.d(TAG, "UDIFF: Deleted primary phone #" + syncPhone.getNumber());
+                                    primaryPhones.remove(syncPhone.getNumber());
+                                }
+                            }
+
+                            syncPhone.setNumber(phone.getNumber());
+                            syncPhone.setImported(false);
+                            markAsPrimary(syncPhone, primaryPhones);
+
+
+                        }
+                    }
+                }
+            } else {
+                syncContact = new SyncContact(record.getContactId(), record.getFirstName(), record.getLastName());
+                for (Phone phone : record.getPhones()) {
+                    SyncPhone syncPhone = new SyncPhone(phone.id, phone.getNumber(), syncContact);
+                    syncPhone.setImported(false);
+                    markAsPrimary(syncPhone, primaryPhones);
+                    syncContact.getSyncPhones().add(syncPhone);
+                }
+                uploadState.getContacts().add(syncContact);
+                Log.d(TAG, "UDIFF: Added contact #" + syncContact.getContactId());
+            }
+        }
+    }
+
+    private void markAsPrimary(SyncPhone phone, HashMap<String, SyncPhone> primaryPhones) {
+        phone.setPrimary(true);
+        if (primaryPhones.get(phone.getNumber()) != phone) {
+            SyncPhone oldPrimaryPhone = primaryPhones.get(phone.getNumber());
+            if (oldPrimaryPhone != null) {
+                oldPrimaryPhone.setPrimary(false);
+
+                if (oldPrimaryPhone.getContact() != phone.getContact()) {
+                    SyncContact oldConcact = oldPrimaryPhone.getContact();
+                    SyncContact syncContact = phone.getContact();
+                    Log.d(TAG, "UDIFF: Phone primary moved from #" + oldConcact.getContactId() + " " + oldConcact.getFirstName() + " " + oldConcact.getLastName() + " to #" +
+                            syncContact.getContactId() + " " + syncContact.getFirstName() + " " + syncContact.getLastName());
+                }
+            }
+            primaryPhones.put(phone.getNumber(), phone);
+        }
+    }
+
+    private PhoneBookDiff diffPhoneBook(PhoneBookRecord[] original, PhoneBookRecord[] updated) {
+        PhoneBookDiff res = new PhoneBookDiff();
+        for (PhoneBookRecord record : updated) {
+            PhoneBookRecord orig = findRecord(original, record.contactId);
+            if (orig != null) {
+                if (!isRecordsEquals(orig, record)) {
+                    res.getUpdatedContacts().add(new UpdatedRecord(orig, record));
+                }
+            } else {
+                res.getAddedContacts().add(record);
+            }
+        }
+        for (PhoneBookRecord record : original) {
+            PhoneBookRecord upd = findRecord(updated, record.contactId);
+            if (upd == null) {
+                res.getRemovedContacts().add(record);
+            }
+        }
+        return res;
+    }
+
+    private boolean isRecordsEquals(PhoneBookRecord a, PhoneBookRecord b) {
+        if (!a.getFirstName().equals(b.getFirstName())) {
+            return false;
+        }
+        if (!a.getLastName().equals(b.getLastName())) {
+            return false;
+        }
+        if (a.getPhones().size() != b.getPhones().size()) {
+            return false;
+        }
         outer:
-        for (PhonesForImport p : phones) {
-            for (TLLocalImportedPhone importedPhone : bookPersistence.getObj().getImportedPhones()) {
-                if (!importedPhone.isImported()) {
-                    break;
-                }
-
-                if (importedPhone.getPhone().equals(p.value)) {
-                    continue outer;
+        for (int i = 0; i < a.getPhones().size(); i++) {
+            Phone aphone = a.getPhones().get(i);
+            for (int j = 0; j < b.getPhones().size(); j++) {
+                Phone bphone = b.getPhones().get(j);
+                if (bphone.getId() == aphone.getId()) {
+                    if (bphone.getNumber().equals(aphone.getNumber())) {
+                        continue outer;
+                    } else {
+                        return false;
+                    }
                 }
             }
-            res.add(p);
+            return false;
         }
-        return res.toArray(new PhonesForImport[res.size()]);
+
+        return true;
     }
 
-    private PhonesForImport[] filterPhones(PhoneBookRecord[] book) {
-        ArrayList<PhonesForImport> res = new ArrayList<PhonesForImport>();
-
-        HashSet<String> foundedPhones = new HashSet<String>();
-
-        for (PhoneBookRecord record : book) {
-            for (Phone phone : record.getPhones()) {
-                if (foundedPhones.contains(phone.getNumber())) {
-                    continue;
-                }
-                foundedPhones.add(phone.getNumber());
-
-                res.add(new PhonesForImport(phone.id, phone.getNumber(), record.getFirstName(), record.getLastName()));
+    private PhoneBookRecord findRecord(PhoneBookRecord[] records, long id) {
+        for (PhoneBookRecord record : records) {
+            if (record.getContactId() == id) {
+                return record;
             }
         }
-
-        return res.toArray(new PhonesForImport[0]);
+        return null;
     }
 
-    public PhoneBookRecord[] loadPhoneBook() {
+    private SyncContact findSyncContact(ContactsUploadState uploadState, long id) {
+        for (SyncContact contact : uploadState.getContacts()) {
+            if (contact.getContactId() == id) {
+                return contact;
+            }
+        }
+        return null;
+    }
+
+    private SyncPhone findSyncPhone(SyncContact syncContact, long id) {
+        for (SyncPhone phone : syncContact.getSyncPhones()) {
+            if (phone.getPhoneId() == id) {
+                return phone;
+            }
+        }
+        return null;
+    }
+
+    private PhoneBookRecord[] loadPhoneBook() {
         synchronized (contactsSync) {
             Logger.d(TAG, "Loading phone book");
             long start = SystemClock.uptimeMillis();
@@ -718,38 +636,7 @@ public class ContactsSync extends BaseSync {
         }
     }
 
-    private class PhonesForImport {
-        private long baseId;
-        private String value;
-
-        private String firstName;
-        private String lastName;
-
-        public PhonesForImport(long baseId, String value, String firstName, String lastName) {
-            this.baseId = baseId;
-            this.value = value;
-            this.firstName = firstName;
-            this.lastName = lastName;
-        }
-
-        public long getBaseId() {
-            return baseId;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public String getLastName() {
-            return lastName;
-        }
-    }
-
-    public class PhoneBookRecord {
+    private class PhoneBookRecord {
         private long contactId;
         private String firstName;
         private String lastName;
@@ -784,7 +671,7 @@ public class ContactsSync extends BaseSync {
         }
     }
 
-    public class Phone {
+    private class Phone {
         private String number;
         private long id;
 
@@ -799,6 +686,115 @@ public class ContactsSync extends BaseSync {
 
         public long getId() {
             return id;
+        }
+    }
+
+    private class UpdatedPhone {
+        private long phoneId;
+        private String oldPhone;
+        private String newPhone;
+
+        private UpdatedPhone(long phoneId, String oldPhone, String newPhone) {
+            this.phoneId = phoneId;
+            this.oldPhone = oldPhone;
+            this.newPhone = newPhone;
+        }
+
+        public long getPhoneId() {
+            return phoneId;
+        }
+
+        public String getOldPhone() {
+            return oldPhone;
+        }
+
+        public String getNewPhone() {
+            return newPhone;
+        }
+    }
+
+    private class UpdatedRecord {
+        private boolean isChangedName;
+
+        private PhoneBookRecord oldRecord;
+        private PhoneBookRecord newRecord;
+        private ArrayList<Phone> addedPhones = new ArrayList<Phone>();
+        private ArrayList<Phone> removedPhones = new ArrayList<Phone>();
+        private ArrayList<UpdatedPhone> updatedPhones = new ArrayList<UpdatedPhone>();
+
+        private UpdatedRecord(PhoneBookRecord oldRecord, PhoneBookRecord newRecord) {
+            this.oldRecord = oldRecord;
+            this.newRecord = newRecord;
+            this.isChangedName = !(this.oldRecord.getFirstName().equals(newRecord.getFirstName()) &&
+                    this.oldRecord.getLastName().equals(newRecord.getLastName()));
+            outer:
+            for (Phone oPhone : oldRecord.getPhones()) {
+                for (Phone uPhone : newRecord.getPhones()) {
+                    if (uPhone.getId() == oPhone.getId()) {
+                        if (!uPhone.getNumber().equals(oPhone.getNumber())) {
+                            updatedPhones.add(new UpdatedPhone(oPhone.id, oPhone.getNumber(), uPhone.getNumber()));
+                        }
+                        continue outer;
+                    }
+                }
+                removedPhones.add(oPhone);
+            }
+
+            outer:
+            for (Phone uPhone : newRecord.getPhones()) {
+                for (Phone oPhone : oldRecord.getPhones()) {
+                    if (uPhone.getId() == oPhone.getId()) {
+                        continue outer;
+                    }
+                }
+                addedPhones.add(uPhone);
+            }
+        }
+
+        public PhoneBookRecord getOldRecord() {
+            return oldRecord;
+        }
+
+        public PhoneBookRecord getNewRecord() {
+            return newRecord;
+        }
+
+        public boolean isChangedName() {
+            return isChangedName;
+        }
+
+        public ArrayList<Phone> getAddedPhones() {
+            return addedPhones;
+        }
+
+        public ArrayList<Phone> getRemovedPhones() {
+            return removedPhones;
+        }
+
+        public ArrayList<UpdatedPhone> getUpdatedPhones() {
+            return updatedPhones;
+        }
+    }
+
+    private class PhoneBookDiff {
+        private ArrayList<UpdatedRecord> updatedContacts = new ArrayList<UpdatedRecord>();
+        private ArrayList<PhoneBookRecord> removedContacts = new ArrayList<PhoneBookRecord>();
+        private ArrayList<PhoneBookRecord> addedContacts = new ArrayList<PhoneBookRecord>();
+
+        public ArrayList<UpdatedRecord> getUpdatedContacts() {
+            return updatedContacts;
+        }
+
+        public ArrayList<PhoneBookRecord> getRemovedContacts() {
+            return removedContacts;
+        }
+
+        public ArrayList<PhoneBookRecord> getAddedContacts() {
+            return addedContacts;
+        }
+
+        public boolean isEmpty() {
+            return updatedContacts.isEmpty() && removedContacts.isEmpty() && addedContacts.isEmpty();
         }
     }
 }

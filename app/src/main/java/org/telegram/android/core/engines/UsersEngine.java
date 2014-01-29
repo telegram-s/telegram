@@ -112,30 +112,27 @@ public class UsersEngine {
         return usersDatabase.getContacts();
     }
 
-    public void onImportedContacts(final HashMap<Long, HashSet<Integer>> importedContacts) {
+    public void updateContactMapping(final HashMap<Long, HashSet<Integer>> importedContacts) {
         ArrayList<Contact> nContacts = new ArrayList<Contact>();
-        HashSet<Integer> allUids = new HashSet<Integer>();
         for (Long localId : importedContacts.keySet()) {
-            HashSet<Integer> uids = importedContacts.get(localId);
-            allUids.addAll(uids);
-            for (Integer uid : uids) {
+            for (Integer uid : importedContacts.get(localId)) {
                 nContacts.add(new Contact(uid, localId));
             }
         }
         if (nContacts.size() > 0) {
-            contactsDatabase.writeContacts(nContacts.toArray(new Contact[0]));
+            contactsDatabase.writeContacts(nContacts.toArray(new Contact[nContacts.size()]));
         }
 
-        ArrayList<User> updated = new ArrayList<User>();
-        for (User u : getUsersById(allUids.toArray())) {
-            if (u.getLinkType() != LinkType.CONTACT) {
-                u.setLinkType(LinkType.CONTACT);
-                updated.add(u);
-            }
-        }
-        if (updated.size() > 0) {
-            usersDatabase.updateUsers(updated.toArray(new User[0]));
-        }
+//        ArrayList<User> updated = new ArrayList<User>();
+//        for (User u : getUsersById(allUids.toArray())) {
+//            if (u.getLinkType() != LinkType.CONTACT) {
+//                u.setLinkType(LinkType.CONTACT);
+//                updated.add(u);
+//            }
+//        }
+//        if (updated.size() > 0) {
+//            usersDatabase.updateUsers(updated.toArray(new User[0]));
+//        }
     }
 
     public Contact[] getAllContacts() {
@@ -156,6 +153,14 @@ public class UsersEngine {
 
     public void deleteContactsForLocalId(long localId) {
         contactsDatabase.deleteContactsForLocalId(localId);
+    }
+
+    public void deleteContact(int uid) {
+        onUserLinkChanged(uid, LinkType.FOREIGN);
+    }
+
+    public void deleteContactsForUid(int uid) {
+        contactsDatabase.deleteContactsForUid(uid);
     }
 
     public void onContacts(List<TLAbsUser> users, List<TLContact> contacts) {

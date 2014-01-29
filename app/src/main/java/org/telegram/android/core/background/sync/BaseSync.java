@@ -40,7 +40,7 @@ public abstract class BaseSync {
     private Handler networkHandler;
     private Handler offlineHandler;
 
-    private TelegramApplication application;
+    protected TelegramApplication application;
 
     protected SharedPreferences preferences;
 

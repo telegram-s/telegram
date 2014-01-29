@@ -14,6 +14,7 @@ import android.widget.*;
 import org.telegram.android.R;
 import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.User;
+import org.telegram.android.core.wireframes.ContactWireframe;
 import org.telegram.android.fragments.common.BaseContactsFragment;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,7 +29,6 @@ public class CreateChatFragment extends BaseContactsFragment {
     private CopyOnWriteArrayList<Integer> selected = new CopyOnWriteArrayList<Integer>();
     private TextView counterView;
     private TextView doneButton;
-    private View mainContainer;
     private View headerContainer;
 
     private TextWatcher textWatcher;
@@ -51,8 +51,8 @@ public class CreateChatFragment extends BaseContactsFragment {
 
     @Override
     protected boolean isSelected(int index) {
-        ContactsSource.LocalContact contact = (ContactsSource.LocalContact) getListView().getItemAtPosition(index);
-        return selected.contains(contact.user.getUid());
+        ContactWireframe contact = getContactAt(index);
+        return selected.contains(contact.getRelatedUsers()[0].getUid());
     }
 
     @Override
@@ -76,7 +76,6 @@ public class CreateChatFragment extends BaseContactsFragment {
 
     @Override
     protected void onCreateView(View view, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mainContainer = view.findViewById(R.id.mainContainer);
         inputEdit = (EditText) view.findViewById(R.id.inputEdit);
         headerContainer = view.findViewById(R.id.header);
         counterView = (TextView) view.findViewById(R.id.counter);
@@ -100,7 +99,7 @@ public class CreateChatFragment extends BaseContactsFragment {
                 }
                 doFilter(filter);
                 if (getContactsCount() == 1) {
-                    addUser(getContactAt(0).user);
+                    addUser(getContactAt(0).getRelatedUsers()[0]);
                 }
             }
         };
@@ -108,12 +107,12 @@ public class CreateChatFragment extends BaseContactsFragment {
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);
-        if (selected.contains(contact.user.getUid())) {
-            removeUser(contact.user);
+        ContactWireframe contact = (ContactWireframe) adapterView.getItemAtPosition(i);
+        if (selected.contains(contact.getRelatedUsers()[0].getUid())) {
+            removeUser(contact.getRelatedUsers()[0]);
         } else {
             if (selected.size() < application.getTechKernel().getSystemConfig().getMaxChatSize()) {
-                addUser(contact.user);
+                addUser(contact.getRelatedUsers()[0]);
             } else {
                 Toast.makeText(getActivity(), R.string.st_new_group_maximum, Toast.LENGTH_SHORT).show();
             }
@@ -280,11 +279,11 @@ public class CreateChatFragment extends BaseContactsFragment {
     }
 
     @Override
-    public boolean filterItem(ContactsSource.LocalContact contact) {
-        if (contact.user.getUid() == application.getCurrentUid()) {
+    public boolean filterItem(ContactWireframe contact) {
+        if (contact.getRelatedUsers()[0].getUid() == application.getCurrentUid()) {
             return false;
         }
-        if (selected.contains(contact.user.getUid()) && isFiltering()) {
+        if (selected.contains(contact.getRelatedUsers()[0].getUid()) && isFiltering()) {
             return false;
         }
         return true;

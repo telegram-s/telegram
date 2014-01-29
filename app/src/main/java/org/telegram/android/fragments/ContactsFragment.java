@@ -19,7 +19,10 @@ import org.telegram.android.R;
 import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.LinkType;
+import org.telegram.android.core.model.PeerType;
+import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
+import org.telegram.android.core.wireframes.ContactWireframe;
 import org.telegram.android.fragments.common.BaseContactsFragment;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
@@ -40,12 +43,11 @@ import org.telegram.tl.TLVector;
  * Created: 30.07.13 11:33
  */
 public class ContactsFragment extends BaseContactsFragment {
-    private View mainContainer;
     private View share;
 
     @Override
     public boolean isSaveInStack() {
-        return false;
+        return true;
     }
 
     @Override
@@ -169,7 +171,6 @@ public class ContactsFragment extends BaseContactsFragment {
 
     @Override
     protected void onCreateView(View res, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mainContainer = res.findViewById(R.id.mainContainer);
         share = inflater.inflate(R.layout.contacts_header_share, null);
         getListView().addHeaderView(share);
     }
@@ -192,13 +193,28 @@ public class ContactsFragment extends BaseContactsFragment {
             dialog.setTitle("Share by...");
             dialog.show();
         } else {
-            final ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);
-            Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.contactId);
-            if (contacts.length > 0) {
-                getRootController().openUser(contacts[0].getUid());
+            // TODO: Correct fix
+            final ContactWireframe contact = (ContactWireframe) adapterView.getItemAtPosition(i);
+            // final Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.getContactId());
+            if (contact.getRelatedUsers().length == 1) {
+                getRootController().openUser(contact.getRelatedUsers()[0].getUid());
+            } else if (contact.getRelatedUsers().length > 0) {
+                CharSequence[] names = new CharSequence[contact.getRelatedUsers().length];
+                for (int j = 0; j < names.length; j++) {
+                    names[j] = application.getEngine().getUser(contact.getRelatedUsers()[j].getUid()).getDisplayName();
+                }
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setItems(names, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                getRootController().openUser(contact.getRelatedUsers()[i].getUid());
+                            }
+                        }).create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_contacts_not_registered_title)
-                        .setMessage(getStringSafe(R.string.st_contacts_not_registered_message).replace("{0}", contact.displayName))
+                        .setMessage(getStringSafe(R.string.st_contacts_not_registered_message).replace("{0}", contact.getDisplayName()))
                         .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -207,7 +223,7 @@ public class ContactsFragment extends BaseContactsFragment {
                                             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                                             null,
                                             ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                                            new String[]{contact.contactId + ""}, null);
+                                            new String[]{contact.getContactId() + ""}, null);
 
                                     if (pCur.moveToFirst()) {
                                         String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
@@ -242,12 +258,12 @@ public class ContactsFragment extends BaseContactsFragment {
             return false;
         }
 
-        final ContactsSource.LocalContact contact = (ContactsSource.LocalContact) adapterView.getItemAtPosition(i);
+        final ContactWireframe contact = (ContactWireframe) adapterView.getItemAtPosition(i);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(contact.displayName);
+        builder.setTitle(contact.getDisplayName());
 
-        if (contact.user != null) {
+        if (contact.getRelatedUsers().length > 0) {
             builder.setItems(new CharSequence[]{
                     getStringSafe(R.string.st_contacts_action_view),
                     getStringSafe(R.string.st_contacts_action_share),
@@ -292,66 +308,50 @@ public class ContactsFragment extends BaseContactsFragment {
         return true;
     }
 
-    private void viewInBookContact(final ContactsSource.LocalContact contact) {
-        openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contact.contactId + ""));
+    private void viewInBookContact(final ContactWireframe contact) {
+        openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contact.getContactId() + ""));
     }
 
-    private void shareContact(final ContactsSource.LocalContact contact) {
-        getRootController().shareContact(contact.user.getUid());
+    private void shareContact(final ContactWireframe contact) {
+        getRootController().shareContact(contact.getRelatedUsers()[0].getUid());
     }
 
-    private void deleteContact(final ContactsSource.LocalContact contact) {
+    private void deleteContact(final ContactWireframe contact) {
         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
-                .setMessage(getStringSafe(R.string.st_contacts_delete).replace("{0}", contact.displayName))
+                .setMessage(getStringSafe(R.string.st_contacts_delete).replace("{0}", contact.getDisplayName()))
                 .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int b) {
-                        final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.lookupKey);
-                        final Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.contactId);
-                        if (contacts.length > 0) {
-                            runUiTask(new AsyncAction() {
-                                @Override
-                                public void execute() throws AsyncException {
+
+                        runUiTask(new AsyncAction() {
+                            @Override
+                            public void execute() throws AsyncException {
+                                if (contact.getRelatedUsers().length > 0) {
                                     TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
-                                    for (Contact c : contacts) {
+                                    for (User c : contact.getRelatedUsers()) {
                                         inputUsers.add(new TLInputUserContact(c.getUid()));
                                     }
                                     rpc(new TLRequestContactsDeleteContacts(inputUsers));
 
-                                    for (Contact c : contacts) {
-                                        application.getEngine().getUsersEngine().onUserLinkChanged(c.getUid(),LinkType.REQUEST);
+                                    for (User u : contact.getRelatedUsers()) {
+                                        application.getEngine().getUsersEngine().deleteContact(u.getUid());
+                                        application.getSyncKernel().getContactsSync().removeContactLinks(u.getUid());
                                     }
+                                }
 
+                                if (contact.getContactId() > 0) {
+                                    Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.getLookupKey());
                                     application.getContentResolver().delete(uri, null, null);
-                                    application.getSyncKernel().getContactsSync().removeContact(contact.contactId);
+                                    application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
                                 }
 
-                                @Override
-                                public void afterExecute() {
-                                    reloadData();
-                                }
-                            });
-                        } else {
-                            application.getContentResolver().delete(uri, null, null);
-                            application.getSyncKernel().getContactsSync().removeContact(contact.contactId);
-                            reloadData();
-                        }
-                    }
-                }).setNegativeButton(R.string.st_no, null).create();
-        alertDialog.setCanceledOnTouchOutside(true);
-        alertDialog.show();
-    }
+                                application.getSyncKernel().getContactsSync().invalidateContactsSync();
+                                application.getDataSourceKernel().getContactsSource().onBookUpdated();
+                            }
 
-    private void blockContact(final ContactsSource.LocalContact contact) {
-        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
-                .setMessage(getStringSafe(R.string.st_contacts_block).replace("{0}", contact.displayName))
-                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        runUiTask(new AsyncAction() {
                             @Override
-                            public void execute() throws AsyncException {
-                                rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
+                            public void afterExecute() {
+                                reloadData();
                             }
                         });
                     }
@@ -360,38 +360,66 @@ public class ContactsFragment extends BaseContactsFragment {
         alertDialog.show();
     }
 
-    private void blockDeleteContact(final ContactsSource.LocalContact contact) {
+    private void blockContact(final ContactWireframe contact) {
         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
-                .setMessage(getStringSafe(R.string.st_contacts_block_delete).replace("{0}", contact.displayName))
+                .setMessage(getStringSafe(R.string.st_contacts_block).replace("{0}", contact.getDisplayName()))
                 .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         runUiTask(new AsyncAction() {
                             @Override
                             public void execute() throws AsyncException {
-                                TLAffectedHistory tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.user.getUid()), 0));
+                                rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.getRelatedUsers()[0].getUid())));
+                            }
+                        });
+                    }
+                }).setNegativeButton(R.string.st_no, null).create();
+        alertDialog.setCanceledOnTouchOutside(true);
+        alertDialog.show();
+    }
+
+    private void blockDeleteContact(final ContactWireframe contact) {
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                .setMessage(getStringSafe(R.string.st_contacts_block_delete).replace("{0}", contact.getDisplayName()))
+                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        runUiTask(new AsyncAction() {
+                            @Override
+                            public void execute() throws AsyncException {
+                                // Clean history
+                                TLAffectedHistory tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.getRelatedUsers()[0].getUid()), 0));
                                 application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
                                 while (tlAffectedHistory.getOffset() > 0) {
-                                    tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.user.getUid()), tlAffectedHistory.getOffset()));
+                                    tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.getRelatedUsers()[0].getUid()), tlAffectedHistory.getOffset()));
                                     application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
                                 }
-                                rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.user.getUid())));
+                                application.getEngine().deleteHistory(PeerType.PEER_USER, contact.getRelatedUsers()[0].getUid());
 
-                                Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.contactId);
+                                // Block user
+                                rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.getRelatedUsers()[0].getUid())));
 
+                                // Deleting from contacts
                                 TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
-                                for (Contact c : contacts) {
-                                    inputUsers.add(new TLInputUserContact(c.getUid()));
+                                for (User u : contact.getRelatedUsers()) {
+                                    inputUsers.add(new TLInputUserContact(u.getUid()));
                                 }
                                 rpc(new TLRequestContactsDeleteContacts(inputUsers));
 
-                                for (Contact c : contacts) {
-                                    application.getEngine().getUsersEngine().onUserLinkChanged(c.getUid(),LinkType.REQUEST);
+                                for (User u : contact.getRelatedUsers()) {
+                                    application.getEngine().getUsersEngine().deleteContact(u.getUid());
+                                    application.getSyncKernel().getContactsSync().removeContactLinks(u.getUid());
                                 }
 
-                                final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.lookupKey);
-                                application.getContentResolver().delete(uri, null, null);
-                                application.getSyncKernel().getContactsSync().removeContact(contact.contactId);
+                                // Deleting local contact
+                                if (contact.getContactId() > 0) {
+                                    Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.getLookupKey());
+                                    application.getContentResolver().delete(uri, null, null);
+                                    application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
+                                }
+
+                                application.getSyncKernel().getContactsSync().invalidateContactsSync();
+                                application.getDataSourceKernel().getContactsSource().onBookUpdated();
                             }
 
                             @Override
