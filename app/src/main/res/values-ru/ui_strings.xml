@@ -424,7 +424,7 @@
     <string name="st_appearance_enter_subtitle_disable">Enter добавляет новую строку</string>
     <string name="st_appearance_background">Обои</string>
     <string name="st_appearance_background_subtitle">Фон чатов</string>
-    <string name="st_appearance_bar">Тема</string>
+    <string name="st_appearance_bar">Тема (экспериментально)</string>
     <string name="st_appearance_bar_subtitle">Оформление приложения</string>
     <string name="st_appearance_bar_color_default">По умолчанию</string>
     <string name="st_appearance_bar_color_green">Зеленый</string>

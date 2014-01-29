@@ -435,7 +435,7 @@
     <string name="st_appearance_enter_subtitle_disable">Enter adds a new line</string>
     <string name="st_appearance_background">Wallpaper</string>
     <string name="st_appearance_background_subtitle">Chat background</string>
-    <string name="st_appearance_bar">Theme</string>
+    <string name="st_appearance_bar">Theme (experimental)</string>
     <string name="st_appearance_bar_subtitle">Color scheme and styles</string>
     <string name="st_appearance_bar_color_default">Default</string>
     <string name="st_appearance_bar_color_green">Green</string>
