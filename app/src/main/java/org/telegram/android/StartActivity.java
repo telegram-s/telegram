@@ -187,8 +187,9 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
             return;
         }
 
-
         controller.openDialogs(true);
+        onNewIntent(getIntent());
+
         showBar();
     }
 
