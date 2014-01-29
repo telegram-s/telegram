@@ -29,7 +29,7 @@ import java.util.*;
  */
 public class MediaReceiverFragment extends TelegramFragment {
 
-    private static final int REQ_M = 5;
+    private static final int REQ_M = 7;
 
     private static final int REQUEST_BASE = 100;
 
@@ -138,7 +138,7 @@ public class MediaReceiverFragment extends TelegramFragment {
                         }
                     }
                 });
-        dialog.setTitle("Change wallpaper");
+        dialog.setTitle(getStringSafe(R.string.st_receiver_pick_wallpaper));
         dialog.show();
     }
 
@@ -164,30 +164,43 @@ public class MediaReceiverFragment extends TelegramFragment {
                         }
                     }
                 });
-        pickIntentDialog.setTitle("Choose photo");
+        pickIntentDialog.setTitle(getStringSafe(R.string.st_receiver_pick_photo));
         pickIntentDialog.show();
     }
 
-    public void requestVideo(int requestId) {
+    public void requestVideo(final int requestId) {
         try {
             videoFileName = getTempExternalFile(".mp4");
 
-            Intent intent = new Intent();
-            intent.setClass(getActivity(), VideoRecorderActivity.class);
-            intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(videoFileName)));
+            final Uri fileUri = Uri.fromFile(new File(videoFileName));
 
-            startActivityForResult(intent, requestId * REQ_M + REQUEST_BASE);
-//            PackageManager pm = application.getPackageManager();
-//
-//            List<ResolveInfo> rList = application.getPackageManager().queryIntentActivities(
-//                    intent, PackageManager.MATCH_DEFAULT_ONLY);
-//
-//            ArrayList<PickIntentDialog.PickIntentItem> items = new ArrayList<PickIntentDialog.PickIntentItem>();
-//            for (ResolveInfo info : rList) {
-//                items.add(new PickIntentDialog.PickIntentItem(info.loadIcon(pm), info.loadLabel(pm).toString()));
-//            }
-//
-//            new PickIntentDialog(getActivity(), items.toArray(new PickIntentDialog.PickIntentItem[0])).show();
+            ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
+            Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_VIDEO_CAPTURE)));
+            Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT).setType("video/*")));
+            items.add(new PickIntentItem(R.drawable.app_icon, "Built-in [alpha]"));
+
+            PickIntentDialog pickIntentDialog = new PickIntentDialog(getActivity(),
+                    items.toArray(new PickIntentItem[items.size()]),
+                    new PickIntentClickListener() {
+                        @Override
+                        public void onItemClicked(int index, PickIntentItem item) {
+                            if (item.getIntent() != null) {
+                                if (MediaStore.ACTION_VIDEO_CAPTURE.equals(item.getIntent().getAction())) {
+                                    startActivityForResult(item.getIntent().putExtra(MediaStore.EXTRA_OUTPUT, fileUri),
+                                            requestId * REQ_M + REQUEST_BASE + 2);
+                                } else {
+                                    startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 5);
+                                }
+                            } else {
+                                startActivityForResult(new Intent()
+                                        .putExtra(MediaStore.EXTRA_OUTPUT, fileUri)
+                                        .setClass(application, VideoRecorderActivity.class),
+                                        requestId * REQ_M + REQUEST_BASE + 2);
+                            }
+                        }
+                    });
+            pickIntentDialog.setTitle(getStringSafe(R.string.st_receiver_pick_video));
+            pickIntentDialog.show();
         } catch (Exception e) {
             Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
         }
@@ -241,13 +254,20 @@ public class MediaReceiverFragment extends TelegramFragment {
 
     }
 
+    protected void onVideoArrived(Uri uri, int requestId) {
+
+    }
+
     @Override
     public void onActivityResult(final int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode >= REQUEST_BASE) {
-                if (requestCode % REQ_M == 0) {
+                final int originalRequest = (requestCode - REQUEST_BASE) / REQ_M;
+                final int internalRequest = requestCode - REQUEST_BASE - originalRequest * REQ_M;
+
+                if (internalRequest == 0) {
                     if (imageFileName == null) {
                         return;
                     }
@@ -276,10 +296,10 @@ public class MediaReceiverFragment extends TelegramFragment {
                     secureCallback(new Runnable() {
                         @Override
                         public void run() {
-                            onPhotoArrived(imageFileName, finalWidth, finalHeight, (requestCode - REQUEST_BASE) / REQ_M);
+                            onPhotoArrived(imageFileName, finalWidth, finalHeight, originalRequest);
                         }
                     });
-                } else if (requestCode % REQ_M == 1) {
+                } else if (internalRequest == 1) {
                     if (data == null || data.getData() == null || data.getData().getPath() == null)
                         return;
 
@@ -311,31 +331,33 @@ public class MediaReceiverFragment extends TelegramFragment {
                         @Override
                         public void run() {
                             if (selectedImageUri.getScheme().equals("file")) {
-                                onPhotoArrived(selectedImageUri.getPath(), finalWidth, finalHeight, (requestCode - REQUEST_BASE) / REQ_M);
+                                onPhotoArrived(selectedImageUri.getPath(), finalWidth, finalHeight, originalRequest);
                             } else {
-                                onPhotoArrived(selectedImageUri, finalWidth, finalHeight, (requestCode - REQUEST_BASE) / REQ_M);
+                                onPhotoArrived(selectedImageUri, finalWidth, finalHeight, originalRequest);
                             }
                         }
                     });
-                } else if (requestCode % REQ_M == 2) {
+                } else if (internalRequest == 2) {
+                    if (videoFileName == null) {
+                        return;
+                    }
                     secureCallback(new Runnable() {
                         @Override
                         public void run() {
-                            onVideoArrived(videoFileName, (requestCode - REQUEST_BASE) / REQ_M);
+                            onVideoArrived(videoFileName, originalRequest);
                         }
                     });
-                } else if (requestCode % REQ_M == 3) {
-                    /*Uri selectedImageUri = data.getData();
-                    if (selectedImageUri == null) {
-
-                    }*/
+                } else if (internalRequest == 3) {
+                    if (imageFileName == null) {
+                        return;
+                    }
                     secureCallback(new Runnable() {
                         @Override
                         public void run() {
-                            onPhotoCropped(Uri.fromFile(new File(imageFileName)), (requestCode - REQUEST_BASE) / REQ_M);
+                            onPhotoCropped(Uri.fromFile(new File(imageFileName)), originalRequest);
                         }
                     });
-                } else if (requestCode % REQ_M == 4) {
+                } else if (internalRequest == 4) {
                     try {
                         Integer resourceId = data.getExtras().getInt("redId");
                         BitmapDrawable drawable = (BitmapDrawable) application.getPackageManager().getResourcesForApplication("com.whatsapp.wallpaper").getDrawable(resourceId);
@@ -344,7 +366,7 @@ public class MediaReceiverFragment extends TelegramFragment {
                         FileOutputStream outputStream = new FileOutputStream(fileName);
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
                         outputStream.close();
-                        onPhotoArrived(fileName, bitmap.getWidth(), bitmap.getHeight(), (requestCode - REQUEST_BASE) / REQ_M);
+                        onPhotoArrived(fileName, bitmap.getWidth(), bitmap.getHeight(), originalRequest);
                     } catch (PackageManager.NameNotFoundException e) {
                         e.printStackTrace();
                     } catch (FileNotFoundException e) {
@@ -352,6 +374,18 @@ public class MediaReceiverFragment extends TelegramFragment {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                } else if (internalRequest == 5) {
+                    if (data == null || data.getData() == null || data.getData().getPath() == null)
+                        return;
+
+                    final Uri videoUri = data.getData();
+
+                    secureCallback(new Runnable() {
+                        @Override
+                        public void run() {
+                            onVideoArrived(videoUri, originalRequest);
+                        }
+                    });
                 }
             }
         }

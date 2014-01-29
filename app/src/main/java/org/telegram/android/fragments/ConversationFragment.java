@@ -45,6 +45,7 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.MessageWireframe;
+import org.telegram.android.media.Optimizer;
 import org.telegram.android.ui.source.ViewSourceListener;
 import org.telegram.android.ui.source.ViewSourceState;
 import org.telegram.android.log.Logger;
@@ -858,14 +859,41 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         runUiTask(new AsyncAction() {
             @Override
             public void execute() throws AsyncException {
-                Bitmap res = ThumbnailUtils.createVideoThumbnail(fileName, MediaStore.Video.Thumbnails.MINI_KIND);
-                int w = 0;
-                int h = 0;
-                if (res != null) {
-                    w = res.getWidth();
-                    h = res.getHeight();
+                Optimizer.VideoMetadata metadata;
+                try {
+                    metadata = Optimizer.getVideoSize(fileName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
                 }
-                application.getEngine().sendVideo(peerType, peerId, new TLUploadingVideo(fileName, w, h));
+                application.getEngine().sendVideo(peerType, peerId,
+                        new TLUploadingVideo(fileName, metadata.getWidth(), metadata.getHeight()));
+            }
+
+            @Override
+            public void afterExecute() {
+                application.notifyUIUpdate();
+            }
+        });
+    }
+
+    @Override
+    protected void onVideoArrived(final Uri uri, int requestId) {
+        runUiTask(new AsyncAction() {
+            @Override
+            public void execute() throws AsyncException {
+                String fileName = getRealPathFromURI(uri);
+                Optimizer.VideoMetadata metadata;
+                try {
+                    metadata = Optimizer.getVideoSize(fileName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
+                }
+
+                application.getEngine().sendVideo(peerType, peerId,
+                        new TLUploadingVideo(fileName, metadata.getWidth(), metadata.getHeight()));
+                application.notifyUIUpdate();
             }
 
             @Override

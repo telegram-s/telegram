@@ -123,7 +123,6 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
     public synchronized void onBookUpdated() {
         Logger.d(TAG, "onBookUpdated");
 
-
         Contact[] netContacts = application.getEngine().getUsersEngine().getAllContacts();
         HashSet<Integer> ids = new HashSet<Integer>();
         for (Contact c : netContacts) {

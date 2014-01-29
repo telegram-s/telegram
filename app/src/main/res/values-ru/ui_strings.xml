@@ -26,6 +26,10 @@
     <string name="st_back">Назад</string>
     <string name="st_start_again">Начать сначала</string>
 
+    <string name="st_receiver_pick_wallpaper">Обои</string>
+    <string name="st_receiver_pick_photo">Выберите фото</string>
+    <string name="st_receiver_pick_video">Выберите видео</string>
+
     <string name="st_receiver_gallery">Из галереи</string>
     <string name="st_receiver_photo">Сделать фото</string>
     <string name="st_receiver_delete">Удалить фото</string>

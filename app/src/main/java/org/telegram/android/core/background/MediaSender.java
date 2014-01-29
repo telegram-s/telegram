@@ -2,9 +2,7 @@ package org.telegram.android.core.background;
 
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
-import android.media.ThumbnailUtils;
+import android.media.*;
 import android.net.Uri;
 import android.os.*;
 import android.provider.MediaStore;
@@ -217,28 +215,31 @@ public class MediaSender {
 
     private void uploadVideo(ChatMessage message) throws Exception {
         TLUploadingVideo srcVideo = (TLUploadingVideo) message.getExtras();
-        VideoMetadata metadata = getVideoMetadata(srcVideo.getFileName());
+        String fileName = srcVideo.getFileName();
+        // String transcoded = getUploadTempFile();
+        // transcodeVideo(fileName, transcoded);
+        VideoMetadata metadata = getVideoMetadata(fileName);
         String fullPreview = writeTempFile(metadata.img);
         Optimizer.FastPreviewResult previewResult = Optimizer.buildPreview(metadata.getImg());
         Uploader.UploadResult thumbResult = uploadFileSilent(writeTempFile(previewResult.getData()), message.getDatabaseId());
-        Uploader.UploadResult mainResult = uploadFile(srcVideo.getFileName(), message.getDatabaseId());
+        Uploader.UploadResult mainResult = uploadFile(fileName, message.getDatabaseId());
         TLAbsStatedMessage sent = doSendVideo(mainResult, thumbResult, metadata, message);
-        saveUploadedVideo(srcVideo.getFileName(), fullPreview, sent);
+        saveUploadedVideo(fileName, fullPreview, sent);
         completeVideoSending(sent, message);
     }
 
     private void uploadEncVideo(ChatMessage message) throws Exception {
         EncryptedChat chat = application.getEngine().getEncryptedChat(message.getPeerId());
-
         TLUploadingVideo srcVideo = (TLUploadingVideo) message.getExtras();
-        VideoMetadata metadata = getVideoMetadata(srcVideo.getFileName());
-        EncryptedFile encryptedFile = encryptFile(srcVideo.getFileName());
+        String fileName = srcVideo.getFileName();
+        VideoMetadata metadata = getVideoMetadata(fileName);
+        EncryptedFile encryptedFile = encryptFile(fileName);
         String fullPreview = writeTempFile(metadata.img);
         Optimizer.FastPreviewResult previewResult = Optimizer.buildPreview(metadata.getImg());
         Uploader.UploadResult mainResult = uploadFile(encryptedFile.getFileName(), message.getDatabaseId());
 
-        EncryptedVideoSent videoSent = doSendEncVideo(mainResult, encryptedFile, srcVideo.getFileName(), metadata, previewResult, chat, message);
-        saveUploadedEncVideo(srcVideo.getFileName(), fullPreview, videoSent.getVideo());
+        EncryptedVideoSent videoSent = doSendEncVideo(mainResult, encryptedFile, fileName, metadata, previewResult, chat, message);
+        saveUploadedEncVideo(fileName, fullPreview, videoSent.getVideo());
 
         completeEncVideoSending(videoSent, message, chat);
     }
@@ -777,7 +778,7 @@ public class MediaSender {
             @Override
             public void onPartUploaded(int percent, int downloadedSize) {
                 SendState state = states.get(localId);
-                state.uploadProgress = percent;
+                state.uploadProgress = (int) (percent * 0.9);
                 updateState(localId, state);
             }
         });
@@ -890,6 +891,24 @@ public class MediaSender {
     private Optimizer.FastPreviewResult tryBuildThumb(String path) throws Exception {
         return Optimizer.buildPreview(path);
     }
+
+//    private void transcodeVideo(String source, String dest) throws Exception {
+//        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 100, 100);
+//
+//        // Set some properties.  Failing to specify some of these can cause the MediaCodec
+//        // configure() call to throw an unhelpful exception.
+//        format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
+//                MediaCodecInfo.CodecCapabilities.COLOR_Format16bitRGB565);
+//        format.setInteger(MediaFormat.KEY_BIT_RATE, 60000);
+//        format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
+//        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5);
+//
+//        MediaCodec mediaCodec = MediaCodec.createEncoderByType("video/avc");
+//        mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+//
+//        ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
+//        ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
+//    }
 
     public class SendState {
         private boolean isSent;
