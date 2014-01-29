@@ -164,25 +164,23 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
                 },
                 ContactsContract.Contacts.HAS_PHONE_NUMBER + " > 0 ", null, settingSortKey);
         if (cur != null && cur.moveToFirst()) {
+            outer:
             do {
                 final long id = cur.getLong(cur.getColumnIndex(ContactsContract.Contacts._ID));
                 String srcName = cur.getString(cur.getColumnIndex(settingDisplayOrder));
                 String sortName = cur.getString(cur.getColumnIndex(settingSortKey));
                 String lookupKey = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
 
-                User relatedContact = null;
                 for (Contact contact : netContacts) {
-                    if (addedUids.contains(contact.getUid())) {
+                    if (contact.getLocalId() != id) {
                         continue;
                     }
-                    if (contact.getLocalId() == id) {
-                        relatedContact = application.getEngine().getUser(contact.getUid());
-                        break;
+                    if (addedUids.contains(contact.getUid())) {
+                        continue outer;
                     }
                 }
-                if (relatedContact == null) {
-                    allContacts.add(new ContactWireframe(id, lookupKey, srcName, application.getString(R.string.st_contacts_header_unregistered)));
-                }
+
+                allContacts.add(new ContactWireframe(id, lookupKey, srcName, application.getString(R.string.st_contacts_header_unregistered)));
             } while (cur.moveToNext());
             cur.close();
         }

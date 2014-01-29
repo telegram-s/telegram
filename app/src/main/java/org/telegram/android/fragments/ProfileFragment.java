@@ -359,7 +359,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
             }
         } else {
             menu.findItem(R.id.viewBook).setVisible(false);
-            if (user != null && user.getPhone() != null && user.getPhone().length() > 0 && user.getLinkType() != LinkType.CONTACT) {
+            if (user != null && user.getPhone() != null && user.getPhone().length() > 0) {
                 menu.findItem(R.id.addContact).setVisible(true);
             } else {
                 menu.findItem(R.id.addContact).setVisible(false);

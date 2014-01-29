@@ -82,6 +82,18 @@ public class ContactsDatabase {
         }
     }
 
+    public synchronized void deleteContactsForUid(int uid) {
+        contactDao.queryBuilder()
+                .where(ContactDao.Properties.Uid.eq(uid))
+                .buildDelete()
+                .executeDeleteWithoutDetachingEntities();
+        for (Contact cached : readAllContacts()) {
+            if (cached.getUid() == uid) {
+                cache.remove(cached);
+            }
+        }
+    }
+
     public synchronized void writeContacts(Contact[] contacts) {
         List<org.telegram.dao.Contact> saved = contactDao.loadAll();
         ArrayList<org.telegram.dao.Contact> toAdd = new ArrayList<org.telegram.dao.Contact>();

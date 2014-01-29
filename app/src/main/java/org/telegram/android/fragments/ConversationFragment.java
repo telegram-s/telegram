@@ -812,6 +812,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     @Override
     protected void onPhotoArrived(final String fileName, final int width, final int height, int requestId) {
+        if (fileName == null) {
+            return;
+        }
         if (Build.VERSION.SDK_INT >= 18) {
             listView.postDelayed(new Runnable() {
                 @Override

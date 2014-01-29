@@ -19,6 +19,7 @@ import org.telegram.android.R;
 import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.LinkType;
+import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.ContactWireframe;
 import org.telegram.android.fragments.common.BaseContactsFragment;
@@ -321,23 +322,29 @@ public class ContactsFragment extends BaseContactsFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int b) {
                         final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.getLookupKey());
-                        final Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.getContactId());
-                        if (contacts.length > 0) {
+
+                        if (contact.getRelatedUsers().length > 0) {
                             runUiTask(new AsyncAction() {
                                 @Override
                                 public void execute() throws AsyncException {
                                     TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
-                                    for (Contact c : contacts) {
+                                    for (User c : contact.getRelatedUsers()) {
                                         inputUsers.add(new TLInputUserContact(c.getUid()));
                                     }
                                     rpc(new TLRequestContactsDeleteContacts(inputUsers));
 
-                                    for (Contact c : contacts) {
+                                    for (User c : contact.getRelatedUsers()) {
                                         application.getEngine().getUsersEngine().onUserLinkChanged(c.getUid(), LinkType.REQUEST);
                                     }
 
-                                    application.getContentResolver().delete(uri, null, null);
-                                    application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
+                                    if (contact.getContactId() > 0) {
+                                        application.getContentResolver().delete(uri, null, null);
+                                        application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
+                                    }
+                                    for (User u : contact.getRelatedUsers()) {
+                                        application.getSyncKernel().getContactsSync().removeContactLinks(u.getUid());
+                                    }
+                                    application.getSyncKernel().getContactsSync().invalidateContactsSync();
                                 }
 
                                 @Override
@@ -346,8 +353,10 @@ public class ContactsFragment extends BaseContactsFragment {
                                 }
                             });
                         } else {
-                            application.getContentResolver().delete(uri, null, null);
-                            application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
+                            if (contact.getContactId() > 0) {
+                                application.getContentResolver().delete(uri, null, null);
+                                application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
+                            }
                             reloadData();
                         }
                     }

@@ -248,6 +248,10 @@ public class MediaReceiverFragment extends TelegramFragment {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode >= REQUEST_BASE) {
                 if (requestCode % REQ_M == 0) {
+                    if (imageFileName == null) {
+                        return;
+                    }
+
                     int width = 0;
                     int height = 0;
 
@@ -276,7 +280,7 @@ public class MediaReceiverFragment extends TelegramFragment {
                         }
                     });
                 } else if (requestCode % REQ_M == 1) {
-                    if (data == null || data.getData() == null)
+                    if (data == null || data.getData() == null || data.getData().getPath() == null)
                         return;
 
                     final Uri selectedImageUri = data.getData();

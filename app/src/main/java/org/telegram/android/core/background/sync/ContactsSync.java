@@ -18,6 +18,7 @@ import org.telegram.android.core.contacts.SyncContact;
 import org.telegram.android.core.contacts.SyncPhone;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.User;
+import org.telegram.android.core.model.phone.TLImportedPhone;
 import org.telegram.android.kernel.ApplicationKernel;
 import org.telegram.android.log.Logger;
 import org.telegram.api.TLImportedContact;
@@ -152,20 +153,21 @@ public class ContactsSync extends BaseSync {
     }
 
     public void addPhoneMapping(int uid, String phone) {
-        uploadState.getImportedPhones().put(phone, uid);
-        uploadState.write();
+        // uploadState.getImportedPhones().put(phone, uid);
+        // uploadState.write();
     }
 
     public void removeContact(long contactId) {
-        Contact[] relatedContacts = application.getEngine().getUsersEngine().getContactsForLocalId(contactId);
         application.getEngine().getUsersEngine().deleteContactsForLocalId(contactId);
+    }
 
-        HashSet<Integer> uids = new HashSet<Integer>();
-        for (Contact c : relatedContacts) {
-            uids.add(c.getUid());
+    public void removeContactLinks(int uid) {
+        application.getEngine().getUsersEngine().deleteContactsForUid(uid);
+        for (String keys : uploadState.getImportedPhones().keySet()) {
+            if (uploadState.getImportedPhones().get(keys) == uid) {
+
+            }
         }
-
-        // TODO: Correct implement
     }
 
 
