@@ -20,7 +20,7 @@
     <string name="st_default">الوضع الإفتراضي</string>
     <string name="st_select_tone">اختر نغمة</string>
     <string name="st_none">بدون</string>
-    <string name="st_reset">Reset</string>
+    <string name="st_reset">إعادة تعيين</string>
 
     <string name="st_continue">استمرار</string>
     <string name="st_back">رجوع</string>
@@ -107,7 +107,7 @@
     <string name="st_auth_state_phone">هاتفك</string>
     <string name="st_auth_state_common">تفعيل الهاتف</string>
 
-    <string name="st_auth_timer">We will call you in {time}</string>
+    <string name="st_auth_timer">سنقوم بالاتصال بك خلال {time}</string>
 
     <string name="st_auth_not_activating_ticker">جاري تفعيل تيليجرام...</string>
     <string name="st_auth_not_activating_content">جاري عملية التفعيل</string>
@@ -273,9 +273,9 @@
     <string name="st_conv_menu_photo">التقط صورة</string>
     <string name="st_conv_menu_gallery">الأستوديو</string>
     <string name="st_conv_menu_video">مقطع مرئي</string>
-    <string name="st_conv_menu_audio">Audio</string>
+    <string name="st_conv_menu_audio">مقطع صوتي</string>
     <string name="st_conv_menu_location">موقع</string>
-    <string name="st_conv_menu_doc">Document</string>
+    <string name="st_conv_menu_doc">مستند</string>
 
     <string name="st_conv_unsupported_title">المحتوى غير مدعوم</string>
     <string name="st_conv_unsupported_message">هذا المحتوى غير مدعوم من التطبيق</string>
@@ -488,8 +488,8 @@
     <string name="st_dialog_geo">موقع</string>
     <string name="st_dialog_contact">مشاركة جهة اتصال</string>
     <string name="st_dialog_unknown">المحتوى غير مدعوم</string>
-    <string name="st_dialog_audio">Audio</string>
-    <string name="st_dialog_animation">Animation</string>
+    <string name="st_dialog_audio">مقطع صوتي</string>
+    <string name="st_dialog_animation">صورة متحركة</string>
 
     <string name="st_dialog_user_add_avatar">{sender} قام بإضافة صورة شخصية جديدة</string>
     <string name="st_dialog_user_joined_app">{sender} قام بالتسجيل في تيليجرام</string>
