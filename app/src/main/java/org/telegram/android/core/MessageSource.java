@@ -10,6 +10,7 @@ import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.ui.source.ViewSourceState;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.TextUtil;
+import org.telegram.android.views.MessageView;
 import org.telegram.api.TLAbsInputPeer;
 import org.telegram.api.TLInputPeerChat;
 import org.telegram.api.TLInputPeerContact;
@@ -39,6 +40,8 @@ public class MessageSource {
     public static final int PAGE_OVERLAP = 3;
 
     public static final int PAGE_REQUEST_PADDING = 20;
+
+    public static final int CACHE_MIN_LEN = 1000;
 
     private ExecutorService service = Executors.newSingleThreadExecutor(new ThreadFactory() {
         @Override
@@ -191,9 +194,11 @@ public class MessageSource {
                     res.relatedUser = application.getEngine().getUser(uid);
                 }
 
-//                if (item.getRawContentType() == ContentType.MESSAGE_TEXT) {
-//                    res.cachedLayout = MessageView.prepareLayout(res, application);
-//                }
+                if (item.getRawContentType() == ContentType.MESSAGE_TEXT) {
+                    if (item.getMessage().length() > CACHE_MIN_LEN) {
+                        res.cachedLayout = MessageView.prepareLayout(res, application);
+                    }
+                }
 
                 return res;
             }
