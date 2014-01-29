@@ -48,35 +48,45 @@ public class DialogsEngine {
     public synchronized void updateOrCreateDialog(DialogDescription description) {
         database.updateOrCreateDialog(description);
         if (application.getKernelsLoader().isLoaded()) {
-            application.getDialogSource().getViewSource().updateItem(description);
+            if (application.getDialogSource() != null) {
+                application.getDialogSource().getViewSource().updateItem(description);
+            }
         }
     }
 
     public synchronized void updateDialog(DialogDescription description) {
         database.updateOrCreateDialog(description);
         if (application.getKernelsLoader().isLoaded()) {
-            application.getDialogSource().getViewSource().updateItem(description);
+            if (application.getDialogSource() != null) {
+                application.getDialogSource().getViewSource().updateItem(description);
+            }
         }
     }
 
     public synchronized void updateDialogs(DialogDescription[] description) {
         database.updateOrCreateDialogs(description);
         if (application.getKernelsLoader().isLoaded()) {
-            application.getDialogSource().getViewSource().updateItems(description);
+            if (application.getDialogSource() != null) {
+                application.getDialogSource().getViewSource().updateItems(description);
+            }
         }
     }
 
     public synchronized void updateOrCreateDialog(DialogDescription[] description) {
         database.updateOrCreateDialogs(description);
         if (application.getKernelsLoader().isLoaded()) {
-            application.getDialogSource().getViewSource().updateItems(description);
+            if (application.getDialogSource() != null) {
+                application.getDialogSource().getViewSource().updateItems(description);
+            }
         }
     }
 
     public synchronized void deleteDialog(int peerType, int peerId) {
         database.deleteDialog(peerType, peerId);
         if (application.getKernelsLoader().isLoaded()) {
-            application.getDialogSource().getViewSource().removeItemByKey(peerType + peerId * 10L);
+            if (application.getDialogSource() != null) {
+                application.getDialogSource().getViewSource().removeItemByKey(peerType + peerId * 10L);
+            }
         }
     }
 

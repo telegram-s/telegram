@@ -101,7 +101,9 @@ public class SecretEngine {
             writeEncryptedChatInfo(encryptedChat, chat);
             secretDatabase.createChat(encryptedChat);
         }
-        application.getEncryptedChatSource().notifyChatChanged(id);
+        if (application.getEncryptedChatSource() != null) {
+            application.getEncryptedChatSource().notifyChatChanged(id);
+        }
 
         DialogDescription description = engine.getDescriptionForPeer(PeerType.PEER_USER_ENCRYPTED, encryptedChat.getId());
         if (description == null) {

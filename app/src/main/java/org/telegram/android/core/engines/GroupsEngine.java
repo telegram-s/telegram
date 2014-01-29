@@ -70,7 +70,9 @@ public class GroupsEngine {
         database.updateGroups(groups);
         if (application.getKernelsLoader().isLoaded()) {
             for (Group g : groups) {
-                application.getChatSource().notifyChatChanged(g.getChatId());
+                if (application.getChatSource() != null) {
+                    application.getChatSource().notifyChatChanged(g.getChatId());
+                }
             }
         }
     }
@@ -81,7 +83,9 @@ public class GroupsEngine {
             group.setTitle(title);
             database.updateGroups(group);
             if (application.getKernelsLoader().isLoaded()) {
-                application.getChatSource().notifyChatChanged(id);
+                if (application.getChatSource() != null) {
+                    application.getChatSource().notifyChatChanged(id);
+                }
             }
         }
     }
@@ -92,7 +96,9 @@ public class GroupsEngine {
             group.setAvatar(avatar);
             database.updateGroups(group);
             if (application.getKernelsLoader().isLoaded()) {
-                application.getChatSource().notifyChatChanged(id);
+                if (application.getChatSource() != null) {
+                    application.getChatSource().notifyChatChanged(id);
+                }
             }
         }
     }
