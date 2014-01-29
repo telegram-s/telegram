@@ -461,7 +461,7 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         registerReceiver(logoutReceiver, intentFilter);
         checkLogout();
 
-        setBarBg(isStarted);
+        setBarBg(!isStarted);
 
         isStarted = true;
 
