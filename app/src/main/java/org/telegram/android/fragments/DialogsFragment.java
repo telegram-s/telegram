@@ -212,6 +212,8 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
         }
         View res = inflater.inflate(R.layout.dialogs_list, container, false);
 
+        checkState();
+
         if (workingSet == null) {
             DialogSource source = application.getDialogSource();
             ViewSource<DialogWireframe, DialogDescription> viewSource = source.getViewSource();
@@ -475,6 +477,16 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
         return res;
     }
 
+    private void checkState() {
+        if (!application.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in");
+        }
+
+        if (!application.getKernelsLoader().isLoaded()) {
+            throw new IllegalStateException("Application is not loaded");
+        }
+    }
+
     private void onItemClicked(final int peerType, final int peerId, final String title) {
         if (ACTION_SEND_CONTACT.equals(action)) {
             if (peerType == PeerType.PEER_USER_ENCRYPTED) {
@@ -723,6 +735,8 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
     @Override
     public void onResume() {
         super.onResume();
+
+        checkState();
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN |
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);

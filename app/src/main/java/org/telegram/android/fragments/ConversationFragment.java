@@ -176,12 +176,24 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         getSherlockActivity().invalidateOptionsMenu();
     }
 
+    private void checkState() {
+        if (!application.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in");
+        }
+
+        if (!application.getKernelsLoader().isLoaded()) {
+            throw new IllegalStateException("Application is not loaded");
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             peerId = savedInstanceState.getInt("peerId");
             peerType = savedInstanceState.getInt("peerType");
         }
+
+        checkState();
 
         viewCreateTime = SystemClock.uptimeMillis();
 
@@ -967,6 +979,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     @Override
     public void onResume() {
         super.onResume();
+
+        checkState();
+
         source.getMessagesSource().addListener(this);
         application.getChatSource().registerListener(this);
         application.getTypingStates().registerListener(this);
