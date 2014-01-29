@@ -3,6 +3,7 @@ package org.telegram.android.media;
 import android.graphics.*;
 import android.media.MediaScannerConnection;
 import android.os.*;
+import com.extradea.framework.images.BitmapDecoder;
 import com.extradea.framework.images.utils.ImageUtils;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.media.*;
@@ -439,8 +440,13 @@ public class DownloadManager {
         fileCache.trackFile(key);
     }
 
-    public void saveDownloadImagePreview(String key, String fileName) throws IOException {
-        Bitmap thumb = ImageUtils.getBitmapThumb(fileName, SMALL_THUMB_SIDE, SMALL_THUMB_SIDE);
+    public void saveDownloadImagePreview(String key, final String fileName) throws IOException {
+        Bitmap thumb = application.getImageController().getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
+            @Override
+            public Bitmap call() throws Exception {
+                return ImageUtils.getBitmapThumb(fileName, SMALL_THUMB_SIDE, SMALL_THUMB_SIDE);
+            }
+        });
         if (thumb == null) {
             updateState(key, DownloadState.FAILURE, 0, 0, true);
             return;
