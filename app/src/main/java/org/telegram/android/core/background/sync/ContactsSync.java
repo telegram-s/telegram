@@ -17,6 +17,7 @@ import org.telegram.android.core.contacts.ContactsUploadState;
 import org.telegram.android.core.contacts.SyncContact;
 import org.telegram.android.core.contacts.SyncPhone;
 import org.telegram.android.core.model.Contact;
+import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.phone.TLImportedPhone;
 import org.telegram.android.kernel.ApplicationKernel;
@@ -153,8 +154,8 @@ public class ContactsSync extends BaseSync {
     }
 
     public void addPhoneMapping(int uid, String phone) {
-        // uploadState.getImportedPhones().put(phone, uid);
-        // uploadState.write();
+        uploadState.getImportedPhones().put(phone, uid);
+        uploadState.write();
     }
 
     public void removeContact(long contactId) {
@@ -163,11 +164,6 @@ public class ContactsSync extends BaseSync {
 
     public void removeContactLinks(int uid) {
         application.getEngine().getUsersEngine().deleteContactsForUid(uid);
-        for (String keys : uploadState.getImportedPhones().keySet()) {
-            if (uploadState.getImportedPhones().get(keys) == uid) {
-
-            }
-        }
     }
 
 
@@ -251,6 +247,13 @@ public class ContactsSync extends BaseSync {
     }
 
     private void contactsOffline() {
+        List<SyncPhone> syncPhones = uploadState.buildImportPhones();
+        for (SyncPhone phone : syncPhones) {
+            Integer uid = uploadState.getImportedPhones().get(phone.getNumber());
+            if (uid != null) {
+                application.getEngine().getUsersEngine().onUserLinkChanged(uid, LinkType.CONTACT);
+            }
+        }
         updateMapping();
     }
 

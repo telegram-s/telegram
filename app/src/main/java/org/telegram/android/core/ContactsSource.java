@@ -120,7 +120,7 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
     }
 
     @Override
-    public void onBookUpdated() {
+    public synchronized void onBookUpdated() {
         Logger.d(TAG, "onBookUpdated");
 
 

@@ -19,6 +19,7 @@ import org.telegram.android.R;
 import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.LinkType;
+import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.ContactWireframe;
@@ -321,44 +322,38 @@ public class ContactsFragment extends BaseContactsFragment {
                 .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int b) {
-                        final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.getLookupKey());
 
-                        if (contact.getRelatedUsers().length > 0) {
-                            runUiTask(new AsyncAction() {
-                                @Override
-                                public void execute() throws AsyncException {
+                        runUiTask(new AsyncAction() {
+                            @Override
+                            public void execute() throws AsyncException {
+                                if (contact.getRelatedUsers().length > 0) {
                                     TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
                                     for (User c : contact.getRelatedUsers()) {
                                         inputUsers.add(new TLInputUserContact(c.getUid()));
                                     }
                                     rpc(new TLRequestContactsDeleteContacts(inputUsers));
 
-                                    for (User c : contact.getRelatedUsers()) {
-                                        application.getEngine().getUsersEngine().onUserLinkChanged(c.getUid(), LinkType.REQUEST);
-                                    }
-
-                                    if (contact.getContactId() > 0) {
-                                        application.getContentResolver().delete(uri, null, null);
-                                        application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
-                                    }
                                     for (User u : contact.getRelatedUsers()) {
+                                        application.getEngine().getUsersEngine().deleteContact(u.getUid());
                                         application.getSyncKernel().getContactsSync().removeContactLinks(u.getUid());
                                     }
-                                    application.getSyncKernel().getContactsSync().invalidateContactsSync();
                                 }
 
-                                @Override
-                                public void afterExecute() {
-                                    reloadData();
+                                if (contact.getContactId() > 0) {
+                                    Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.getLookupKey());
+                                    application.getContentResolver().delete(uri, null, null);
+                                    application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
                                 }
-                            });
-                        } else {
-                            if (contact.getContactId() > 0) {
-                                application.getContentResolver().delete(uri, null, null);
-                                application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
+
+                                application.getSyncKernel().getContactsSync().invalidateContactsSync();
+                                application.getDataSourceKernel().getContactsSource().onBookUpdated();
                             }
-                            reloadData();
-                        }
+
+                            @Override
+                            public void afterExecute() {
+                                reloadData();
+                            }
+                        });
                     }
                 }).setNegativeButton(R.string.st_no, null).create();
         alertDialog.setCanceledOnTouchOutside(true);
@@ -392,29 +387,39 @@ public class ContactsFragment extends BaseContactsFragment {
                         runUiTask(new AsyncAction() {
                             @Override
                             public void execute() throws AsyncException {
+                                // Clean history
                                 TLAffectedHistory tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.getRelatedUsers()[0].getUid()), 0));
                                 application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
                                 while (tlAffectedHistory.getOffset() > 0) {
                                     tlAffectedHistory = rpc(new TLRequestMessagesDeleteHistory(new TLInputPeerContact(contact.getRelatedUsers()[0].getUid()), tlAffectedHistory.getOffset()));
                                     application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(tlAffectedHistory));
                                 }
+                                application.getEngine().deleteHistory(PeerType.PEER_USER, contact.getRelatedUsers()[0].getUid());
+
+                                // Block user
                                 rpc(new TLRequestContactsBlock(new TLInputUserContact(contact.getRelatedUsers()[0].getUid())));
 
-                                Contact[] contacts = application.getEngine().getUsersEngine().getContactsForLocalId(contact.getContactId());
-
+                                // Deleting from contacts
                                 TLVector<TLAbsInputUser> inputUsers = new TLVector<TLAbsInputUser>();
-                                for (Contact c : contacts) {
-                                    inputUsers.add(new TLInputUserContact(c.getUid()));
+                                for (User u : contact.getRelatedUsers()) {
+                                    inputUsers.add(new TLInputUserContact(u.getUid()));
                                 }
                                 rpc(new TLRequestContactsDeleteContacts(inputUsers));
 
-                                for (Contact c : contacts) {
-                                    application.getEngine().getUsersEngine().onUserLinkChanged(c.getUid(), LinkType.REQUEST);
+                                for (User u : contact.getRelatedUsers()) {
+                                    application.getEngine().getUsersEngine().deleteContact(u.getUid());
+                                    application.getSyncKernel().getContactsSync().removeContactLinks(u.getUid());
                                 }
 
-                                final Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.getLookupKey());
-                                application.getContentResolver().delete(uri, null, null);
-                                application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
+                                // Deleting local contact
+                                if (contact.getContactId() > 0) {
+                                    Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, contact.getLookupKey());
+                                    application.getContentResolver().delete(uri, null, null);
+                                    application.getSyncKernel().getContactsSync().removeContact(contact.getContactId());
+                                }
+
+                                application.getSyncKernel().getContactsSync().invalidateContactsSync();
+                                application.getDataSourceKernel().getContactsSource().onBookUpdated();
                             }
 
                             @Override

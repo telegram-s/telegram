@@ -155,6 +155,10 @@ public class UsersEngine {
         contactsDatabase.deleteContactsForLocalId(localId);
     }
 
+    public void deleteContact(int uid) {
+        onUserLinkChanged(uid, LinkType.FOREIGN);
+    }
+
     public void deleteContactsForUid(int uid) {
         contactsDatabase.deleteContactsForUid(uid);
     }
