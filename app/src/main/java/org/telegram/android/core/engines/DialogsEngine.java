@@ -90,6 +90,15 @@ public class DialogsEngine {
         }
     }
 
+    public synchronized void deleteDialogPermanent(int peerType, int peerId) {
+        database.deleteDialogPermanent(peerType, peerId);
+        if (application.getKernelsLoader().isLoaded()) {
+            if (application.getDialogSource() != null) {
+                application.getDialogSource().getViewSource().removeItemByKey(peerType + peerId * 10L);
+            }
+        }
+    }
+
     public synchronized void markDialogAsNonFailed(int peerType, int peerId) {
         DialogDescription description = loadDialog(peerType, peerId);
         if (description != null) {

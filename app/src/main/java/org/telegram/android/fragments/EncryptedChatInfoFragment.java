@@ -318,7 +318,7 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
             enabledView.setImageResource(R.drawable.holo_btn_check_off);
         }
 
-        notifications.setOnClickListener(new View.OnClickListener() {
+        notifications.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (application.getNotificationSettings().isEnabledForUser(user.getUid())) {
@@ -329,9 +329,9 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
                     enabledView.setImageResource(R.drawable.holo_btn_check_on);
                 }
             }
-        });
+        }));
 
-        notificationsSound.setOnClickListener(new View.OnClickListener() {
+        notificationsSound.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
@@ -345,7 +345,7 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
                 }
                 startActivityForResult(intent, PICK_NOTIFICATION_SOUND);
             }
-        });
+        }));
 
         updateNotificationSound();
     }

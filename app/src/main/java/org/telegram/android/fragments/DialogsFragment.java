@@ -485,6 +485,10 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
         if (!application.getKernelsLoader().isLoaded()) {
             throw new IllegalStateException("Application is not loaded");
         }
+
+        if (application.getDialogSource() == null) {
+            throw new IllegalStateException("Empty dialog source");
+        }
     }
 
     private void onItemClicked(final int peerType, final int peerId, final String title) {

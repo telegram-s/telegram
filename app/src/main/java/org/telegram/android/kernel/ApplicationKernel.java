@@ -259,10 +259,12 @@ public class ApplicationKernel {
                     } catch (IOException e) {
                         Logger.d(TAG, "GCM Register error");
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(10000);
                         } catch (InterruptedException e1) {
                             return;
                         }
+                    } catch (Throwable t) {
+                        Logger.d(TAG, "GCM Register failure");
                     }
                 }
             }
@@ -305,13 +307,13 @@ public class ApplicationKernel {
     }
 
     public void sendEvent(String type) {
-        if (syncKernel.getBackgroundSync() != null) {
+        if (syncKernel != null && syncKernel.getBackgroundSync() != null) {
             syncKernel.getBackgroundSync().sendLog(type, "");
         }
     }
 
     public void sendEvent(String type, String message) {
-        if (syncKernel.getBackgroundSync() != null) {
+        if (syncKernel != null && syncKernel.getBackgroundSync() != null) {
             syncKernel.getBackgroundSync().sendLog(type, message);
         }
     }

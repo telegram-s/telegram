@@ -295,6 +295,10 @@ public class Optimizer {
     }
 
     public static Bitmap scaleForMinimumSize(Bitmap src, int w, int h) {
+        if (src.isRecycled()) {
+            throw new IllegalStateException("Source bitmap is recycled");
+        }
+
         if (src.getWidth() >= w && src.getHeight() >= h) {
             return src;
         }

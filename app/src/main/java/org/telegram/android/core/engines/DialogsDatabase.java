@@ -142,8 +142,17 @@ public class DialogsDatabase {
 
     public void deleteDialog(int peerType, int peerId) {
         Dialog dialog = loadDialogDb(peerType, peerId);
-        dialog.setDate(0);
-        dialogsDao.update(dialog);
+        if (dialog != null) {
+            dialog.setDate(0);
+            dialogsDao.update(dialog);
+        }
+    }
+
+    public void deleteDialogPermanent(int peerType, int peerId) {
+        Dialog dialog = loadDialogDb(peerType, peerId);
+        if (dialog != null) {
+            dialogsDao.delete(dialog);
+        }
     }
 
     private DialogDescription convertCached(Dialog dialog) {

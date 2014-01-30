@@ -426,6 +426,24 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         barrier.sendCallback(runnable);
     }
 
+    public void secureCallbackWeak(Runnable runnable) {
+        barrier.sendCallbackWeak(runnable);
+    }
+
+    public View.OnClickListener secure(final View.OnClickListener onClickListener) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                secureCallbackWeak(new Runnable() {
+                    @Override
+                    public void run() {
+                        onClickListener.onClick(v);
+                    }
+                });
+            }
+        };
+    }
+
     public void postDelayerWeak(final Runnable runnable, int delta) {
         if (!barrier.isPaused()) {
             handler.postDelayed(new Runnable() {

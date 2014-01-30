@@ -16,8 +16,10 @@ import org.telegram.api.messages.TLAbsDialogs;
 import org.telegram.api.messages.TLDialogs;
 import org.telegram.api.messages.TLDialogsSlice;
 import org.telegram.api.requests.TLRequestMessagesGetDialogs;
+import org.telegram.dao.SecretChat;
 import org.telegram.tl.TLObject;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -120,7 +122,20 @@ public class DialogSource {
                 start = SystemClock.uptimeMillis();
                 application.getEngine().getUsersEngine().getUsersById(users.toArray());
                 Logger.d(TAG, "Users loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
-                return res;
+
+
+                ArrayList<DialogDescription> resDescriptions = new ArrayList<DialogDescription>();
+                for (DialogDescription description : res) {
+                    if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                        if (application.getEngine().getSecretEngine().getEncryptedChat(description.getPeerId()) == null) {
+                            application.getEngine().getDialogsEngine().deleteDialog(PeerType.PEER_USER_ENCRYPTED, description.getPeerId());
+                            continue;
+                        }
+                    }
+                    resDescriptions.add(description);
+                }
+
+                return resDescriptions.toArray(new DialogDescription[0]);
             }
 
             @Override

@@ -379,7 +379,7 @@ public class ActivationController {
     public void doConfirmPhone() {
         Logger.d(TAG, "doConfirmPhone");
         if (this.currentState != STATE_PHONE_CONFIRM) {
-            throw new RuntimeException("Invalid state for doConfirmPhone");
+            throw new RuntimeException("Invalid state for doConfirmPhone: " + currentState);
         }
         currentPhone = autoPhone;
         isManualPhone = false;
@@ -389,7 +389,7 @@ public class ActivationController {
     public void doEditPhone() {
         Logger.d(TAG, "doConfirmPhone");
         if (this.currentState != STATE_PHONE_CONFIRM) {
-            throw new RuntimeException("Invalid state for doEditPhone");
+            throw new RuntimeException("Invalid state for doEditPhone: " + currentState);
         }
 
         doChangeState(STATE_PHONE_EDIT);
