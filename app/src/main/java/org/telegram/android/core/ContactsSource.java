@@ -170,6 +170,10 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
                 String sortName = cur.getString(cur.getColumnIndex(settingSortKey));
                 String lookupKey = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
 
+                if (srcName == null || sortName == null) {
+                    continue;
+                }
+
                 for (Contact contact : netContacts) {
                     if (contact.getLocalId() != id) {
                         continue;
