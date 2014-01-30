@@ -111,23 +111,23 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
             ((TextView) res.findViewById(R.id.secretChatTitle)).setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_ic_lock_gray, 0, 0, 0);
         }
 
-        res.findViewById(R.id.mediaButton).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.mediaButton).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openMedia(PeerType.PEER_USER, userId);
             }
-        });
-        res.findViewById(R.id.sendMessage).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.sendMessage).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openDialog(PeerType.PEER_USER, userId);
             }
-        });
+        }));
 
         res.findViewById(R.id.secureChat).setVisibility(View.VISIBLE);
         res.findViewById(R.id.secureChatDiv).setVisibility(View.VISIBLE);
 
-        res.findViewById(R.id.secureChat).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.secureChat).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 runUiTask(new AsyncAction() {
@@ -152,7 +152,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
                     }
                 });
             }
-        });
+        }));
 
         setDefaultProgressInterface(new ProgressInterface() {
             @Override
@@ -216,12 +216,12 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
             avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(userId));
             avatarView.requestTask(new StelsImageTask((TLLocalFileLocation) ((TLLocalAvatarPhoto) user.getPhoto()).getPreviewLocation()));
             if (((TLLocalAvatarPhoto) user.getPhoto()).getFullLocation() instanceof TLLocalFileLocation) {
-                avatarView.setOnClickListener(new View.OnClickListener() {
+                avatarView.setOnClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         getRootController().openImage((TLLocalFileLocation) ((TLLocalAvatarPhoto) user.getPhoto()).getFullLocation());
                     }
-                });
+                }));
             } else {
                 avatarView.setOnClickListener(null);
             }
@@ -275,7 +275,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
             enabledView.setImageResource(R.drawable.holo_btn_check_off);
         }
 
-        notifications.setOnClickListener(new View.OnClickListener() {
+        notifications.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (application.getNotificationSettings().isEnabledForUser(userId)) {
@@ -286,9 +286,9 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
                     enabledView.setImageResource(R.drawable.holo_btn_check_on);
                 }
             }
-        });
+        }));
 
-        notificationsSound.setOnClickListener(new View.OnClickListener() {
+        notificationsSound.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
@@ -302,7 +302,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
                 }
                 startActivityForResult(intent, PICK_NOTIFICATION_SOUND);
             }
-        });
+        }));
 
         updateNotificationSound();
 
@@ -436,12 +436,13 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
                         cursor.close();
                     }
                 }
-                AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(sequences.toArray(new CharSequence[0]), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, ids.get(i) + ""));
-                    }
-                }).create();
+                AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(sequences.toArray(new CharSequence[0]),
+                        secure(new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, ids.get(i) + ""));
+                            }
+                        })).create();
                 alertDialog.setCanceledOnTouchOutside(true);
                 alertDialog.show();
             }

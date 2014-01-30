@@ -96,7 +96,7 @@ public class TourFragment extends TelegramFragment {
         pageIndicator.setSelectedColor(0xffbfbfbf);
 
         openAppButton = res.findViewById(R.id.openAppButton);
-        openAppButton.setOnClickListener(new View.OnClickListener() {
+        openAppButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (application.getKernel().getActivationController() == null) {
@@ -111,7 +111,7 @@ public class TourFragment extends TelegramFragment {
                                 getStringSafe(R.string.st_auth_confirm_phone)
                                         .replace("\\n", "\n")
                                         .replace("{0}", BidiFormatter.getInstance().unicodeWrap(PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL))));
-                        builder.setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 if (application.getKernel().getActivationController() != null) {
@@ -121,7 +121,7 @@ public class TourFragment extends TelegramFragment {
                                 }
                                 getRootController().openApp();
                             }
-                        }).setNegativeButton(R.string.st_edit, new DialogInterface.OnClickListener() {
+                        })).setNegativeButton(R.string.st_edit, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 if (application.getKernel().getActivationController() != null) {
@@ -131,7 +131,7 @@ public class TourFragment extends TelegramFragment {
                                 }
                                 getRootController().openApp();
                             }
-                        });
+                        }));
                         AlertDialog dialog = builder.create();
                         dialog.setCanceledOnTouchOutside(true);
                         dialog.show();
@@ -143,7 +143,7 @@ public class TourFragment extends TelegramFragment {
                     getRootController().openApp();
                 }
             }
-        });
+        }));
         // dynamicBg = res.findViewById(R.id.dynamicBg);
         // bottomView = dynamicBg;
         indicator0 = res.findViewById(R.id.intro0);

@@ -105,32 +105,32 @@ public class SettingsNottificationsFragment extends TelegramFragment {
         inAppPreviewCheck = (ImageView) res.findViewById(R.id.inAppPreviewCheck);
         inAppPreviewContainer = res.findViewById(R.id.inAppPreviewContainer);
 
-        res.findViewById(R.id.allAlertContainer).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.allAlertContainer).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().setEnabled(!application.getNotificationSettings().isEnabled());
                 updateUi();
             }
-        });
+        }));
 
-        allVibrationContainer.setOnClickListener(new View.OnClickListener() {
+        allVibrationContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().setMessageVibrationEnabled(!application.getNotificationSettings().isMessageVibrationEnabled());
                 updateUi();
             }
-        });
+        }));
 
-        allSoundContainer.setOnClickListener(new View.OnClickListener() {
+        allSoundContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().setMessageSoundEnabled(!application.getNotificationSettings().isMessageSoundEnabled());
                 updateUi();
             }
-        });
+        }));
 
 
-        allCustomSoundContainer.setOnClickListener(new View.OnClickListener() {
+        allCustomSoundContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
@@ -144,33 +144,33 @@ public class SettingsNottificationsFragment extends TelegramFragment {
                 }
                 startActivityForResult(intent, REQUEST_PICK_SOUND_ALL);
             }
-        });
+        }));
 
-        groupAlertContainer.setOnClickListener(new View.OnClickListener() {
+        groupAlertContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().setGroupEnabled(!application.getNotificationSettings().isGroupEnabled());
                 updateUi();
             }
-        });
+        }));
 
-        groupVibrationContainer.setOnClickListener(new View.OnClickListener() {
+        groupVibrationContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().setGroupVibrateEnabled(!application.getNotificationSettings().isGroupVibrateEnabled());
                 updateUi();
             }
-        });
+        }));
 
-        groupSoundContainer.setOnClickListener(new View.OnClickListener() {
+        groupSoundContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().setGroupSoundEnabled(!application.getNotificationSettings().isGroupSoundEnabled());
                 updateUi();
             }
-        });
+        }));
 
-        groupCustomSoundContainer.setOnClickListener(new View.OnClickListener() {
+        groupCustomSoundContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
@@ -184,39 +184,39 @@ public class SettingsNottificationsFragment extends TelegramFragment {
                 }
                 startActivityForResult(intent, REQUEST_PICK_SOUND_GROUP);
             }
-        });
+        }));
 
-        inAppSoundContainer.setOnClickListener(new View.OnClickListener() {
+        inAppSoundContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().setInAppSoundsEnabled(!application.getNotificationSettings().isInAppSoundsEnabled());
                 updateUi();
             }
-        });
+        }));
 
-        inAppVibrateContainer.setOnClickListener(new View.OnClickListener() {
+        inAppVibrateContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().setInAppVibrateEnabled(!application.getNotificationSettings().isInAppVibrateEnabled());
                 updateUi();
             }
-        });
+        }));
 
-        inAppPreviewContainer.setOnClickListener(new View.OnClickListener() {
+        inAppPreviewContainer.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().setInAppPreviewEnabled(!application.getNotificationSettings().isInAppPreviewEnabled());
                 updateUi();
             }
-        });
+        }));
 
-        res.findViewById(R.id.resetNotifications).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.resetNotifications).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getNotificationSettings().resetGroupSettings();
                 Toast.makeText(getActivity(), R.string.st_notifications_reset_success, Toast.LENGTH_SHORT).show();
             }
-        });
+        }));
 
         updateUi();
         return res;

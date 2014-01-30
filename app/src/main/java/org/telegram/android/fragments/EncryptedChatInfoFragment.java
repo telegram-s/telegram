@@ -104,31 +104,31 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
         selfDestructTimerTitle = (TextView) res.findViewById(R.id.selfDestructTitle);
         selfDestructTimerValue = (TextView) res.findViewById(R.id.selfDestructValue);
 
-        res.findViewById(R.id.mediaButton).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.mediaButton).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openMedia(PeerType.PEER_USER_ENCRYPTED, chatId);
             }
-        });
-        res.findViewById(R.id.sendMessage).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.sendMessage).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openDialog(PeerType.PEER_USER, user.getUid());
             }
-        });
-        encryptionKeyButton.setOnClickListener(new View.OnClickListener() {
+        }));
+        encryptionKeyButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (chat.getState() == EncryptedChatState.NORMAL) {
                     getRootController().openKeyPreview(SHA1(chat.getKey()), chat.getUserId());
                 }
             }
-        });
-        selfDestructTimerButton.setOnClickListener(new View.OnClickListener() {
+        }));
+        selfDestructTimerButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                        .setItems(new CharSequence[]{"Off", "2s", "5s", "1m", "1h", "1d", "1w"}, new DialogInterface.OnClickListener() {
+                        .setItems(new CharSequence[]{"Off", "2s", "5s", "1m", "1h", "1d", "1w"}, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 switch (which) {
@@ -156,11 +156,11 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
                                         return;
                                 }
                             }
-                        }).create();
+                        })).create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
-        });
+        }));
 
         chat = application.getEngine().getEncryptedChat(chatId);
         user = application.getEngine().getUser(chat.getUserId());
@@ -255,12 +255,12 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
                 avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(user.getUid()));
                 avatarView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
                 if (avatarPhoto.getFullLocation() instanceof TLLocalFileLocation) {
-                    avatarView.setOnClickListener(new View.OnClickListener() {
+                    avatarView.setOnClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             getRootController().openImage((TLLocalFileLocation) avatarPhoto.getFullLocation());
                         }
-                    });
+                    }));
                 } else {
                     avatarView.setOnClickListener(null);
                 }

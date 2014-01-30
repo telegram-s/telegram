@@ -114,7 +114,7 @@ public class DataSourceKernel {
 
         for (Long id : ids) {
             int peerType = (int) ((10 + id % 10L) % 10);
-            int peerId =  (int) ((id - peerType) / 10L);
+            int peerId = (int) ((id - peerType) / 10L);
 
             ViewSource<MessageWireframe, ChatMessage> res = getMessagesViewSource(peerType, peerId);
             if (res == null)
@@ -139,7 +139,7 @@ public class DataSourceKernel {
 
         for (Long id : ids) {
             int peerType = (int) ((10 + id % 10L) % 10);
-            int peerId =  (int) ((id - peerType) / 10L);
+            int peerId = (int) ((id - peerType) / 10L);
 
             ViewSource<MessageWireframe, ChatMessage> res = getMessagesViewSource(peerType, peerId);
             if (res == null)
@@ -234,7 +234,9 @@ public class DataSourceKernel {
         }
         messageSources.clear();
 
+        if (dialogSource != null) {
+            dialogSource.destroy();
+        }
         dialogSource = new DialogSource(kernel.getApplication());
-        dialogSource.destroy();
     }
 }

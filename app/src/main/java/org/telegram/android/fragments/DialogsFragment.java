@@ -263,12 +263,12 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
         loadMore = bottomPadding.findViewById(R.id.loadingMore);
         dialogCounter = (TextView) bottomPadding.findViewById(R.id.dialogsCount);
         tryAgain = (Button) bottomPadding.findViewById(R.id.tryAgain);
-        tryAgain.setOnClickListener(new View.OnClickListener() {
+        tryAgain.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getDialogSource().requestLoadMore(dialogAdapter.getCount());
             }
-        });
+        }));
 
         mainContainer = res.findViewById(R.id.mainContainer);
         listView = (ListView) res.findViewById(R.id.dialogsList);
@@ -298,7 +298,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                 final DialogWireframe description = (DialogWireframe) adapterView.getItemAtPosition(i);
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_delete_header)
                         .setMessage(description.getPeerType() == PeerType.PEER_CHAT ? R.string.st_dialogs_delete_group : R.string.st_dialogs_delete_history)
-                        .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -353,19 +353,19 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                     }
                                 });
                             }
-                        }).setNegativeButton(R.string.st_no, null).create();
+                        })).setNegativeButton(R.string.st_no, null).create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
                 return true;
             }
         });
 
-        res.findViewById(R.id.writeToFriend).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.writeToFriend).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openContacts();
             }
-        });
+        }));
 
         searchListView = (ListView) res.findViewById(R.id.dialogsSearch);
         searchContainer = res.findViewById(R.id.searchContainer);
@@ -498,7 +498,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
                         .setMessage(getStringSafe(R.string.st_dialogs_confirm_contact).replace("{0}", title))
-                        .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 application.getEngine().shareContact(peerType, peerId, actionUid);
@@ -507,19 +507,19 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                 action = null;
                                 getRootController().openDialog(peerType, peerId);
                             }
-                        }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                        })).setNegativeButton(R.string.st_no, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
 
                             }
-                        }).create();
+                        })).create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
         } else if (ACTION_SEND_TEXT.equals(action)) {
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
                     .setMessage(getStringSafe(R.string.st_dialogs_confirm_send).replace("{0}", title))
-                    .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             application.getMessageSender().postTextMessage(peerType, peerId, actionText);
@@ -528,13 +528,13 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                             action = null;
                             getRootController().openDialog(peerType, peerId);
                         }
-                    })
-                    .setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                    }))
+                    .setNegativeButton(R.string.st_no, secure(new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
 
                         }
-                    }).create();
+                    })).create();
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
         } else if (ACTION_FORWARD_MULTIPLE.equals(action)) {
@@ -543,7 +543,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
                         .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward_multiple).replace("{0}", title))
-                        .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 for (Integer mid : actionMids) {
@@ -554,12 +554,12 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                 action = null;
                                 getRootController().openDialog(peerType, peerId);
                             }
-                        }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                        })).setNegativeButton(R.string.st_no, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
 
                             }
-                        }).create();
+                        })).create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
@@ -569,7 +569,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
                         .setMessage(getStringSafe(R.string.st_dialogs_confirm_forward).replace("{0}", title))
-                        .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 application.getEngine().forwardMessage(peerType, peerId, actionMid);
@@ -578,12 +578,12 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                 action = null;
                                 getRootController().openDialog(peerType, peerId);
                             }
-                        }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                        })).setNegativeButton(R.string.st_no, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
 
                             }
-                        }).create();
+                        })).create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
@@ -598,7 +598,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             }
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
                     .setMessage(getStringSafe(textId).replace("{0}", title))
-                    .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             if (ACTION_SEND_IMAGE.equals(action)) {
@@ -667,13 +667,13 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                 });
                             }
                         }
-                    })
-                    .setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                    }))
+                    .setNegativeButton(R.string.st_no, secure(new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
 
                         }
-                    }).create();
+                    })).create();
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
         } else if (ACTION_SEND_IMAGES.equals(action) || ACTION_SEND_DOCS.equals(action)) {
@@ -685,7 +685,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             }
             AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_confirm_header)
                     .setMessage(getStringSafe(textId).replace("{0}", title))
-                    .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             runUiTask(new AsyncAction() {
@@ -721,13 +721,13 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                 }
                             });
                         }
-                    })
-                    .setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                    }))
+                    .setNegativeButton(R.string.st_no, secure(new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
 
                         }
-                    }).create();
+                    })).create();
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();
         } else {

@@ -240,19 +240,19 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         audioRecordContainer = res.findViewById(R.id.audioPanel);
         audioRecordContainer.setVisibility(View.GONE);
 
-        audioRecordContainer.findViewById(R.id.sendAudio).setOnClickListener(new View.OnClickListener() {
+        audioRecordContainer.findViewById(R.id.sendAudio).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sendAudio();
             }
-        });
+        }));
 
-        audioRecordContainer.findViewById(R.id.cancelAudio).setOnClickListener(new View.OnClickListener() {
+        audioRecordContainer.findViewById(R.id.cancelAudio).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 cancelAudio();
             }
-        });
+        }));
 
         audioRecordTimer = (TextView) audioRecordContainer.findViewById(R.id.timer);
 
@@ -269,12 +269,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         waitMessageView = (TextView) res.findViewById(R.id.waiting);
         deleteButton = res.findViewById(R.id.delete);
 
-        deleteButton.setOnClickListener(new View.OnClickListener() {
+        deleteButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 deleteDialog();
             }
-        });
+        }));
 
         View bottomPadding = new View(getActivity());
         bottomPadding.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getPx(8)));
@@ -284,12 +284,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         messagesCount = (TextView) topView.findViewById(R.id.messagesCount);
         tryAgain = topView.findViewById(R.id.tryAgain);
 
-        tryAgain.setOnClickListener(new View.OnClickListener() {
+        tryAgain.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 source.requestLoadMore(dialogAdapter.getCount());
             }
-        });
+        }));
 
         source = application.getDataSourceKernel().getMessageSource(peerType, peerId);
         source.getMessagesSource().onConnected();
@@ -361,7 +361,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             smileButton.setImageResource(R.drawable.st_conv_panel_smiles);
         }
 
-        smileButton.setOnClickListener(new View.OnClickListener() {
+        smileButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (getSmileysController().areSmileysVisible()) {
@@ -371,16 +371,16 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
                 getSmileysController().showSmileys(editText);
             }
-        });
+        }));
 
         sendButton = (ImageButton) res.findViewById(R.id.sendMessage);
         sendButton.setEnabled(false);
-        sendButton.setOnClickListener(new View.OnClickListener() {
+        sendButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 doSend();
             }
-        });
+        }));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             listView.setLayerType(View.LAYER_TYPE_NONE, null);
@@ -426,7 +426,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     private void deleteDialog() {
         AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_dialogs_delete_header)
                 .setMessage(peerType == PeerType.PEER_CHAT ? R.string.st_dialogs_delete_group : R.string.st_dialogs_delete_history)
-                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         runUiTask(new AsyncAction() {
@@ -476,7 +476,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             }
                         });
                     }
-                }).setNegativeButton(R.string.st_no, null).create();
+                })).setNegativeButton(R.string.st_no, null).create();
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
@@ -569,17 +569,17 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     if (linkType == LinkType.REQUEST) {
                         showView(contactsPanel, !initial);
                         ((TextView) contactsPanel.findViewById(R.id.panelTitle)).setText(R.string.st_conv_add_contact);
-                        contactsPanel.setOnClickListener(new View.OnClickListener() {
+                        contactsPanel.setOnClickListener(secure(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 getRootController().addContact(peerId);
                             }
-                        });
+                        }));
                     } else {
                         if (application.getNotificationSettings().isAddToContactVisible(peerId)) {
                             showView(contactsPanel, !initial);
                             ((TextView) contactsPanel.findViewById(R.id.panelTitle)).setText(R.string.st_conv_share_info);
-                            contactsPanel.setOnClickListener(new View.OnClickListener() {
+                            contactsPanel.setOnClickListener(secure(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     application.getNotificationSettings().hideAddToContact(peerId);
@@ -588,7 +588,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     application.notifyUIUpdate();
                                     updateContactsPanel(false);
                                 }
-                            });
+                            }));
                         } else {
                             goneView(contactsPanel, !initial);
                             contactsPanel.setOnClickListener(null);
@@ -819,14 +819,15 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
         }
 
-        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_action_title).setItems(items.toArray(new CharSequence[items.size()]), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (i >= 0 && i < actions.size()) {
-                    actions.get(i).run();
-                }
-            }
-        }).create();
+        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_action_title).setItems(items.toArray(new CharSequence[items.size()]),
+                secure(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (i >= 0 && i < actions.size()) {
+                            actions.get(i).run();
+                        }
+                    }
+                })).create();
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
@@ -1037,8 +1038,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             showKeyboard(editText);
         }
 
-        getSherlockActivity().invalidateOptionsMenu();
-
         if (peerType == PeerType.PEER_CHAT) {
             application.getSyncKernel().getAvatarUploader().setChatUploadListener(this);
         }
@@ -1098,12 +1097,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 } else {
                     imageView.requestTask(null);
                 }
-                touchLayer.setOnClickListener(new View.OnClickListener() {
+                touchLayer.setOnClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         getRootController().openUser(peerId);
                     }
-                });
+                }));
             }
         } else if (peerType == PeerType.PEER_CHAT) {
             imageView.setLoadingDrawable(Placeholders.GROUP_PLACEHOLDERS[peerId % Placeholders.GROUP_PLACEHOLDERS.length]);
@@ -1152,12 +1151,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
             }
 
-            touchLayer.setOnClickListener(new View.OnClickListener() {
+            touchLayer.setOnClickListener(secure(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     getRootController().openChatEdit(peerId);
                 }
-            });
+            }));
         } else {
             final EncryptedChat chat = application.getEngine().getEncryptedChat(peerId);
             if (chat.getUserId() == 333000) {
@@ -1181,12 +1180,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 } else {
                     imageView.requestTask(null);
                 }
-                touchLayer.setOnClickListener(new View.OnClickListener() {
+                touchLayer.setOnClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         getRootController().openSecretChatInfo(chat.getId());
                     }
-                });
+                }));
             }
         }
 
@@ -1903,12 +1902,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         imageView.requestTask(null);
                     }
                     if (chatEditPhoto.getPhoto().getFullLocation() instanceof TLLocalFileLocation) {
-                        imageView.setOnClickListener(new View.OnClickListener() {
+                        imageView.setOnClickListener(secure(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getFullLocation());
                             }
-                        });
+                        }));
                     } else {
                         imageView.setOnClickListener(null);
                     }
@@ -1922,19 +1921,19 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         imageView.requestTask(null);
                     }
                     if (chatEditPhoto.getPhoto().getFullLocation() instanceof TLLocalFileLocation) {
-                        imageView.setOnClickListener(new View.OnClickListener() {
+                        imageView.setOnClickListener(secure(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getFullLocation());
                             }
-                        });
+                        }));
                     } else {
-                        imageView.setOnClickListener(new View.OnClickListener() {
+                        imageView.setOnClickListener(secure(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation());
                             }
-                        });
+                        }));
                     }
                 } else if (action instanceof TLLocalActionChatCreate) {
                     messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_create_group_you : R.string.st_message_create_group).replace("{0}", senderHtml)));
@@ -2022,7 +2021,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
                 documentView.bind(object, showTime, showDiv, unreadCount);
 
-                documentView.setOnBubbleClickListener(new View.OnClickListener() {
+                documentView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if (selected.size() > 0) {
@@ -2039,18 +2038,18 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     onMessageClick(object);
                                 } else {
                                     AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_cancel_title).setMessage(R.string.st_conv_cancel_message)
-                                            .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                            .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
                                                     application.getMediaSender().cancelUpload(object.message.getDatabaseId());
                                                     application.notifyUIUpdate();
                                                 }
-                                            }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                                            })).setNegativeButton(R.string.st_no, secure(new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
 
                                                 }
-                                            }).create();
+                                            })).create();
                                     dialog.setCanceledOnTouchOutside(true);
                                     dialog.show();
                                 }
@@ -2077,13 +2076,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             }
                         }
                     }
-                });
-                documentView.setOnAvatarClickListener(new View.OnClickListener() {
+                }));
+                documentView.setOnAvatarClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         getRootController().openUser(object.message.getSenderId());
                     }
-                });
+                }));
 
             } else if (object.message.getRawContentType() == ContentType.MESSAGE_CONTACT) {
                 MessageContactView messageView = (MessageContactView) view;
@@ -2093,7 +2092,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
                 messageView.bind(object, showTime, showDiv, unreadCount);
 
-                messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if (selected.size() > 0) {
@@ -2108,19 +2107,19 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             onMessageClick(object);
                         }
                     }
-                });
-                messageView.setOnAvatarClickListener(new View.OnClickListener() {
+                }));
+                messageView.setOnAvatarClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         getRootController().openUser(object.message.getSenderId());
                     }
-                });
-                messageView.setOnAddContactClick(new View.OnClickListener() {
+                }));
+                messageView.setOnAddContactClick(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         getRootController().addContact(((TLLocalContact) object.message.getExtras()).getUserId());
                     }
-                });
+                }));
             } else if (object.message.getRawContentType() == ContentType.MESSAGE_TEXT) {
                 MessageView messageView = (MessageView) view;
                 boolean showDiv = false;
@@ -2131,7 +2130,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 boolean res = messageView.bind(object, showTime, showDiv, unreadCount);
                 Logger.d(TAG, "Bind #" + object.message.getContentType() + " in " + (SystemClock.uptimeMillis() - start) + " ms \t" + res);
 
-                messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if (selected.size() > 0) {
@@ -2146,13 +2145,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             onMessageClick(object);
                         }
                     }
-                });
-                messageView.setOnAvatarClickListener(new View.OnClickListener() {
+                }));
+                messageView.setOnAvatarClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         getRootController().openUser(object.message.getSenderId());
                     }
-                });
+                }));
             } else if (object.message.getRawContentType() == ContentType.MESSAGE_PHOTO
                     || object.message.getRawContentType() == ContentType.MESSAGE_VIDEO
                     || object.message.getRawContentType() == ContentType.MESSAGE_GEO
@@ -2165,15 +2164,15 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     showDiv = true;
                 }
                 messageView.bind(object, showTime, showDiv, unreadCount);
-                messageView.setOnAvatarClickListener(new View.OnClickListener() {
+                messageView.setOnAvatarClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         getRootController().openUser(object.message.getSenderId());
                     }
-                });
+                }));
 
                 if (object.message.getExtras() instanceof TLUploadingPhoto || object.message.getExtras() instanceof TLUploadingVideo || object.message.getExtras() instanceof TLUploadingDocument) {
-                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                    messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
@@ -2189,24 +2188,24 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     onMessageClick(object);
                                 } else {
                                     AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_cancel_title).setMessage(R.string.st_conv_cancel_message)
-                                            .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                            .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
                                                     application.getMediaSender().cancelUpload(object.message.getDatabaseId());
                                                     application.notifyUIUpdate();
                                                 }
-                                            }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                                            })).setNegativeButton(R.string.st_no, secure(new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
 
                                                 }
-                                            }).create();
+                                            })).create();
                                     dialog.setCanceledOnTouchOutside(true);
                                     dialog.show();
                                 }
                             }
                         }
-                    });
+                    }));
                 } else if (object.message.getExtras() instanceof TLLocalPhoto) {
 
                     TLLocalPhoto photo = (TLLocalPhoto) object.message.getExtras();
@@ -2217,7 +2216,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             application.getDownloadManager().requestDownload(photo);
                         }
 
-                        messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                        messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 if (selected.size() > 0) {
@@ -2241,13 +2240,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     }
                                 }
                             }
-                        });
+                        }));
                     } else {
                         messageView.setOnBubbleClickListener(null);
                     }
                 } else if (object.message.getExtras() instanceof TLLocalVideo) {
                     final String key = DownloadManager.getVideoKey((TLLocalVideo) object.message.getExtras());
-                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                    messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
@@ -2274,9 +2273,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 }
                             }
                         }
-                    });
+                    }));
                 } else if (object.message.getExtras() instanceof TLLocalGeo) {
-                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                    messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
@@ -2292,10 +2291,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 getRootController().viewLocation(geo.getLatitude(), geo.getLongitude(), object.message.getSenderId());
                             }
                         }
-                    });
+                    }));
                 } else if (object.message.getExtras() instanceof TLLocalDocument) {
                     final String key = DownloadManager.getDocumentKey((TLLocalDocument) object.message.getExtras());
-                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                    messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
@@ -2332,10 +2331,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 }
                             }
                         }
-                    });
+                    }));
                 } else {
                     // Unknown
-                    messageView.setOnBubbleClickListener(new View.OnClickListener() {
+                    messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
@@ -2356,7 +2355,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 alertDialog.show();
                             }
                         }
-                    });
+                    }));
                 }
             } else if (object.message.getRawContentType() == ContentType.MESSAGE_AUDIO) {
                 MessageAudioView audioView = (MessageAudioView) view;
@@ -2368,7 +2367,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
                 if (object.message.getExtras() instanceof TLUploadingDocument ||
                         object.message.getExtras() instanceof TLUploadingAudio) {
-                    audioView.setOnBubbleClickListener(new View.OnClickListener() {
+                    audioView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
@@ -2384,28 +2383,28 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     onMessageClick(object);
                                 } else {
                                     AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_conv_cancel_title).setMessage(R.string.st_conv_cancel_message)
-                                            .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                            .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
                                                     application.getMediaSender().cancelUpload(object.message.getDatabaseId());
                                                     application.notifyUIUpdate();
                                                 }
-                                            }).setNegativeButton(R.string.st_no, new DialogInterface.OnClickListener() {
+                                            })).setNegativeButton(R.string.st_no, secure(new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
 
                                                 }
-                                            }).create();
+                                            })).create();
                                     dialog.setCanceledOnTouchOutside(true);
                                     dialog.show();
                                 }
                             }
                         }
-                    });
+                    }));
                 } else if (object.message.getExtras() instanceof TLLocalDocument) {
                     final String key = DownloadManager.getDocumentKey((TLLocalDocument) object.message.getExtras());
 
-                    audioView.setOnBubbleClickListener(new View.OnClickListener() {
+                    audioView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
@@ -2430,11 +2429,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 }
                             }
                         }
-                    });
+                    }));
                 } else if (object.message.getExtras() instanceof TLLocalAudio) {
                     final String key = DownloadManager.getAudioKey((TLLocalAudio) object.message.getExtras());
 
-                    audioView.setOnBubbleClickListener(new View.OnClickListener() {
+                    audioView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (selected.size() > 0) {
@@ -2459,7 +2458,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 }
                             }
                         }
-                    });
+                    }));
                 }
             }
         }

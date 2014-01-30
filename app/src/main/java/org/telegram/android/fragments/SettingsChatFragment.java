@@ -42,7 +42,7 @@ public class SettingsChatFragment extends MediaReceiverFragment {
         sendByEnterCheck = (ImageView) res.findViewById(R.id.sendByEnterCheck);
         galleryCheck = (ImageView) res.findViewById(R.id.saveToGalleryCheck);
 
-        res.findViewById(R.id.fontSelect).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.fontSelect).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -70,47 +70,46 @@ public class SettingsChatFragment extends MediaReceiverFragment {
                 };
 
                 builder.setAdapter(new BaseAdapter() {
-                                       @Override
-                                       public int getCount() {
-                                           return sizes.length;
-                                       }
+                    @Override
+                    public int getCount() {
+                        return sizes.length;
+                    }
 
-                                       @Override
-                                       public Integer getItem(int i) {
-                                           return sizes[i];
-                                       }
+                    @Override
+                    public Integer getItem(int i) {
+                        return sizes[i];
+                    }
 
-                                       @Override
-                                       public long getItemId(int i) {
-                                           return 0;
-                                       }
+                    @Override
+                    public long getItemId(int i) {
+                        return 0;
+                    }
 
-                                       @Override
-                                       public View getView(int i, View view, ViewGroup viewGroup) {
-                                           View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
-                                           TextView text = (TextView) res.findViewById(android.R.id.text1);
-                                           text.setText(titles[i]);
-                                           text.setTextSize(getItem(i));
-                                           return res;
-                                       }
-                                   }, new DialogInterface.OnClickListener() {
-                                       @Override
-                                       public void onClick(DialogInterface dialogInterface, int i) {
-                                           application.getUserSettings().setBubbleFontSizeId(sizeIds[i]);
-                                           application.getDataSourceKernel().onFontChanged();
-                                           MessageView.resetSettings();
-                                           DialogView.resetSettings();
-                                           bindUi();
-                                       }
-                                   }
-                );
+                    @Override
+                    public View getView(int i, View view, ViewGroup viewGroup) {
+                        View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
+                        TextView text = (TextView) res.findViewById(android.R.id.text1);
+                        text.setText(titles[i]);
+                        text.setTextSize(getItem(i));
+                        return res;
+                    }
+                }, secure(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        application.getUserSettings().setBubbleFontSizeId(sizeIds[i]);
+                        application.getDataSourceKernel().onFontChanged();
+                        MessageView.resetSettings();
+                        DialogView.resetSettings();
+                        bindUi();
+                    }
+                }));
                 AlertDialog dialog = builder.create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
-        });
+        }));
 
-        res.findViewById(R.id.itemsSizeSelect).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.itemsSizeSelect).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -125,66 +124,65 @@ public class SettingsChatFragment extends MediaReceiverFragment {
                 };
 
                 builder.setAdapter(new BaseAdapter() {
-                                       @Override
-                                       public int getCount() {
-                                           return titles.length;
-                                       }
+                    @Override
+                    public int getCount() {
+                        return titles.length;
+                    }
 
-                                       @Override
-                                       public Integer getItem(int i) {
-                                           return titles[i];
-                                       }
+                    @Override
+                    public Integer getItem(int i) {
+                        return titles[i];
+                    }
 
-                                       @Override
-                                       public long getItemId(int i) {
-                                           return 0;
-                                       }
+                    @Override
+                    public long getItemId(int i) {
+                        return 0;
+                    }
 
-                                       @Override
-                                       public View getView(int i, View view, ViewGroup viewGroup) {
-                                           View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
-                                           TextView text = (TextView) res.findViewById(android.R.id.text1);
-                                           text.setText(titles[i]);
-                                           return res;
-                                       }
-                                   }, new DialogInterface.OnClickListener() {
-                                       @Override
-                                       public void onClick(DialogInterface dialogInterface, int i) {
-                                           application.getUserSettings().setDialogItemSize(sizeIds[i]);
-                                           application.getDataSourceKernel().onFontChanged();
-                                           MessageView.resetSettings();
-                                           DialogView.resetSettings();
-                                           bindUi();
-                                       }
-                                   }
-                );
+                    @Override
+                    public View getView(int i, View view, ViewGroup viewGroup) {
+                        View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
+                        TextView text = (TextView) res.findViewById(android.R.id.text1);
+                        text.setText(titles[i]);
+                        return res;
+                    }
+                }, secure(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        application.getUserSettings().setDialogItemSize(sizeIds[i]);
+                        application.getDataSourceKernel().onFontChanged();
+                        MessageView.resetSettings();
+                        DialogView.resetSettings();
+                        bindUi();
+                    }
+                }));
                 AlertDialog dialog = builder.create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
-        });
+        }));
 
-        res.findViewById(R.id.sendByEnterSelector).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.sendByEnterSelector).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getUserSettings().setSendByEnter(!application.getUserSettings().isSendByEnter());
                 bindUi();
             }
-        });
-        res.findViewById(R.id.chatBackgrounds).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.chatBackgrounds).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 requestWallpaperChooser(0);
             }
-        });
-        res.findViewById(R.id.savePhotos).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.savePhotos).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getUserSettings().setSaveToGalleryEnabled(!application.getUserSettings().isSaveToGalleryEnabled());
                 bindUi();
             }
-        });
-        res.findViewById(R.id.barBackground).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.barBackground).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final int[] titles = new int[]{
@@ -210,42 +208,42 @@ public class SettingsChatFragment extends MediaReceiverFragment {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setAdapter(new BaseAdapter() {
-                                       @Override
-                                       public int getCount() {
-                                           return titles.length;
-                                       }
+                    @Override
+                    public int getCount() {
+                        return titles.length;
+                    }
 
-                                       @Override
-                                       public Integer getItem(int i) {
-                                           return titles[i];
-                                       }
+                    @Override
+                    public Integer getItem(int i) {
+                        return titles[i];
+                    }
 
-                                       @Override
-                                       public long getItemId(int i) {
-                                           return 0;
-                                       }
+                    @Override
+                    public long getItemId(int i) {
+                        return 0;
+                    }
 
-                                       @Override
-                                       public View getView(int i, View view, ViewGroup viewGroup) {
-                                           View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
-                                           TextView text = (TextView) res.findViewById(android.R.id.text1);
-                                           text.setText(titles[i]);
-                                           return res;
-                                       }
-                                   }, new DialogInterface.OnClickListener() {
-                                       @Override
-                                       public void onClick(DialogInterface dialogInterface, int i) {
-                                           application.getUserSettings().setBarColor(sizeIds[i]);
-                                           ((TelegramActivity) getActivity()).setBarBg();
-                                           bindUi();
-                                       }
-                                   }
+                    @Override
+                    public View getView(int i, View view, ViewGroup viewGroup) {
+                        View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
+                        TextView text = (TextView) res.findViewById(android.R.id.text1);
+                        text.setText(titles[i]);
+                        return res;
+                    }
+                }, secure(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        application.getUserSettings().setBarColor(sizeIds[i]);
+                        ((TelegramActivity) getActivity()).setBarBg();
+                        bindUi();
+                    }
+                })
                 );
                 AlertDialog dialog = builder.create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
-        });
+        }));
 
         bindUi();
         return res;

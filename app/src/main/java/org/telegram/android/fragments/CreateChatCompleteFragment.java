@@ -139,7 +139,7 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
             }
         });
 
-        res.findViewById(R.id.changeAvatar).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.changeAvatar).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (imageUri != null || imageFileName != null) {
@@ -148,7 +148,7 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
                     requestPhotoChooser(0);
                 }
             }
-        });
+        }));
 
         return res;
     }

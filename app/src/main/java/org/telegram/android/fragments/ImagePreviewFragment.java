@@ -142,21 +142,21 @@ public class ImagePreviewFragment extends TelegramFragment {
         if (peerType == PeerType.PEER_USER_ENCRYPTED) {
             res.findViewById(R.id.shareButton).setVisibility(View.INVISIBLE);
         } else {
-            res.findViewById(R.id.shareButton).setOnClickListener(new View.OnClickListener() {
+            res.findViewById(R.id.shareButton).setOnClickListener(secure(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     share();
                 }
-            });
+            }));
             res.findViewById(R.id.shareButton).setVisibility(View.VISIBLE);
         }
 
-        res.findViewById(R.id.deleteButton).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.deleteButton).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 delete();
             }
-        });
+        }));
 
         if (mainRecord == null) {
             mainRecord = application.getEngine().findMedia(mid);
@@ -230,12 +230,12 @@ public class ImagePreviewFragment extends TelegramFragment {
                 if (record.getPreview() instanceof TLLocalVideo) {
                     final ImageButton playButton = (ImageButton) res.findViewById(R.id.play);
                     FastWebImageView imageView = (FastWebImageView) res.findViewById(R.id.previewImage);
-                    imageView.setOnClickListener(new View.OnClickListener() {
+                    imageView.setOnClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             onImageTap();
                         }
-                    });
+                    }));
                     imageView.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT);
 
                     final TLLocalVideo video = (TLLocalVideo) record.getPreview();
@@ -257,20 +257,20 @@ public class ImagePreviewFragment extends TelegramFragment {
                         imageView.requestTask(null);
                     }
 
-                    playButton.setOnClickListener(new View.OnClickListener() {
+                    playButton.setOnClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             Intent intent = new Intent(Intent.ACTION_VIEW);
                             intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "video/*");
                             startActivity(intent);
                         }
-                    });
-                    downloadButton.setOnClickListener(new View.OnClickListener() {
+                    }));
+                    downloadButton.setOnClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             application.getDownloadManager().requestDownload((TLLocalVideo) record.getPreview());
                         }
-                    });
+                    }));
 
                     DownloadListener listener = new DownloadListener() {
                         @Override
@@ -332,12 +332,12 @@ public class ImagePreviewFragment extends TelegramFragment {
                             imageView.setImageBitmap(BitmapFactory.decodeByteArray(photo.getFastPreview(), 0, photo.getFastPreview().length));
                         }
 
-                        downloadButton.setOnClickListener(new View.OnClickListener() {
+                        downloadButton.setOnClickListener(secure(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 application.getDownloadManager().requestDownload((TLLocalPhoto) record.getPreview());
                             }
-                        });
+                        }));
 
                         DownloadListener listener = new DownloadListener() {
                             @Override

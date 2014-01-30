@@ -430,6 +430,20 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         barrier.sendCallbackWeak(runnable);
     }
 
+    public PickIntentClickListener secure(final PickIntentClickListener listener) {
+        return new PickIntentClickListener() {
+            @Override
+            public void onItemClicked(final int index, final PickIntentItem item) {
+                secureCallbackWeak(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onItemClicked(index, item);
+                    }
+                });
+            }
+        };
+    }
+
     public View.OnClickListener secure(final View.OnClickListener onClickListener) {
         return new View.OnClickListener() {
             @Override
@@ -438,6 +452,20 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
                     @Override
                     public void run() {
                         onClickListener.onClick(v);
+                    }
+                });
+            }
+        };
+    }
+
+    public DialogInterface.OnClickListener secure(final DialogInterface.OnClickListener listener) {
+        return new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, final int which) {
+                secureCallbackWeak(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onClick(dialog, which);
                     }
                 });
             }
@@ -476,13 +504,13 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         });
 
         //Set on click listener to clear focus
-        editText.setOnClickListener(new View.OnClickListener() {
+        editText.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View clickedView) {
                 clickedView.clearFocus();
                 clickedView.requestFocus();
             }
-        });
+        }));
     }
 
     protected void hideKeyboard(View editText) {
@@ -520,12 +548,12 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
 
     protected void startPickerActivity(Intent intent, String title) {
         PickIntentItem[] pickIntentItems = createPickIntents(intent);
-        PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, new PickIntentClickListener() {
+        PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, secure(new PickIntentClickListener() {
             @Override
             public void onItemClicked(int index, PickIntentItem item) {
                 startActivity(item.getIntent());
             }
-        });
+        }));
         dialog.setTitle(title);
         dialog.show();
     }

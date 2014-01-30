@@ -117,18 +117,18 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         progressTimer = (TextView) progress.findViewById(R.id.progressTimer);
         codeTimer = (TextView) phoneActivation.findViewById(R.id.codeTimer);
 
-        automatic.findViewById(R.id.confirmPhone).setOnClickListener(new View.OnClickListener() {
+        automatic.findViewById(R.id.confirmPhone).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().doConfirmPhone();
             }
-        });
-        automatic.findViewById(R.id.editPhone).setOnClickListener(new View.OnClickListener() {
+        }));
+        automatic.findViewById(R.id.editPhone).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().doEditPhone();
             }
-        });
+        }));
 
 
         String autoPhone = application.getKernel().getActivationController().getAutoPhone();
@@ -136,12 +136,12 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
             ((TextView) automatic.findViewById(R.id.automaticPhone)).setText(TextUtil.formatPhone(autoPhone));
         }
 
-        manual.findViewById(R.id.countrySelect).setOnClickListener(new View.OnClickListener() {
+        manual.findViewById(R.id.countrySelect).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent().setClass(getActivity(), PickCountryActivity.class));
             }
-        });
+        }));
 
         ((EditText) manual.findViewById(R.id.phoneName)).addTextChangedListener(new TextWatcher() {
             @Override
@@ -182,67 +182,67 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
             manual.findViewById(R.id.doActivation).setEnabled(false);
         }
 
-        manual.findViewById(R.id.doActivation).setOnClickListener(new View.OnClickListener() {
+        manual.findViewById(R.id.doActivation).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 doActivation();
             }
-        });
+        }));
 
-        networkError.findViewById(R.id.tryAgain).setOnClickListener(new View.OnClickListener() {
+        networkError.findViewById(R.id.tryAgain).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().doTryAgain();
             }
-        });
-        networkError.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+        }));
+        networkError.findViewById(R.id.cancel).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().cancel();
             }
-        });
+        }));
 
-        tooOftenError.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+        tooOftenError.findViewById(R.id.back).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().cancel();
             }
-        });
+        }));
 
-        unknownError.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+        unknownError.findViewById(R.id.cancel).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().cancel();
             }
-        });
+        }));
 
-        unknownError.findViewById(R.id.tryAgain).setOnClickListener(new View.OnClickListener() {
+        unknownError.findViewById(R.id.tryAgain).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().doTryAgain();
             }
-        });
+        }));
 
-        expiredError.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+        expiredError.findViewById(R.id.back).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().cancel();
             }
-        });
+        }));
 
-        wrongPhoneError.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+        wrongPhoneError.findViewById(R.id.back).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().cancel();
             }
-        });
+        }));
 
-        phoneActivation.findViewById(R.id.completePhoneActivation).setOnClickListener(new View.OnClickListener() {
+        phoneActivation.findViewById(R.id.completePhoneActivation).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 doSendCode();
             }
-        });
+        }));
 
         ((EditText) phoneActivation.findViewById(R.id.code)).setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -284,19 +284,19 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
             phoneActivation.findViewById(R.id.completePhoneActivation).setEnabled(false);
         }
 
-        wrongCodeError.findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+        wrongCodeError.findViewById(R.id.back).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.getKernel().getActivationController().cancel();
             }
-        });
+        }));
 
         FastWebImageView avatar = ((FastWebImageView) signupPage.findViewById(R.id.avatar));
         avatar.setLoadingDrawable(getResources().getDrawable(R.drawable.st_user_placeholder_grey));
         avatar.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
         avatar.setScaleTypeEmpty(FastWebImageView.SCALE_TYPE_FIT_CROP);
 
-        signupPage.findViewById(R.id.changeAvatarButton).setOnClickListener(new View.OnClickListener() {
+        signupPage.findViewById(R.id.changeAvatarButton).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (application.getKernel().getActivationController().getManualAvatarUri() != null) {
@@ -305,9 +305,9 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                     requestPhotoChooser(0);
                 }
             }
-        });
+        }));
 
-        signupPage.findViewById(R.id.completeSignup).setOnClickListener(new View.OnClickListener() {
+        signupPage.findViewById(R.id.completeSignup).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -332,7 +332,7 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
 
                 application.getKernel().getActivationController().doCompleteSignUp(firstName, lastName, application.getKernel().getActivationController().getManualAvatarUri());
             }
-        });
+        }));
 
         manual.setVisibility(View.GONE);
         automatic.setVisibility(View.GONE);
@@ -380,17 +380,17 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                         getStringSafe(R.string.st_auth_confirm_phone)
                                 .replace("\\n", "\n")
                                 .replace("{0}", BidiFormatter.getInstance().unicodeWrap(PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL))));
-                builder.setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         application.getKernel().getActivationController().doActivation(numberUtil.getNationalNumber() + "");
                     }
-                }).setNegativeButton(R.string.st_edit, new DialogInterface.OnClickListener() {
+                })).setNegativeButton(R.string.st_edit, secure(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         showKeyboard((EditText) manual.findViewById(R.id.phoneName));
                     }
-                });
+                }));
                 AlertDialog dialog = builder.create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
@@ -406,12 +406,12 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         } catch (NumberParseException e) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                     .setMessage(getStringSafe(R.string.st_auth_incorrect_phone).replace("{0}", number));
-            builder.setPositiveButton(R.string.st_edit, new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(R.string.st_edit, secure(new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     showKeyboard((EditText) manual.findViewById(R.id.phoneName));
                 }
-            });
+            }));
             AlertDialog dialog = builder.create();
             dialog.setCanceledOnTouchOutside(true);
             dialog.show();

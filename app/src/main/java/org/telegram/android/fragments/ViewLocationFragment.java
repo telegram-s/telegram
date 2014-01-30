@@ -57,12 +57,12 @@ public class ViewLocationFragment extends TelegramMapFragment {
         avatarImage = (FastWebImageView) res.findViewById(R.id.avatar);
         userNameView = (TextView) res.findViewById(R.id.name);
         locationView = (TextView) res.findViewById(R.id.location);
-        res.findViewById(R.id.bottomPanel).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.bottomPanel).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openUser(uid);
             }
-        });
+        }));
         User user = getEngine().getUser(uid);
         userNameView.setText(user.getDisplayName());
         locationView.setText(R.string.st_location_unavailable);

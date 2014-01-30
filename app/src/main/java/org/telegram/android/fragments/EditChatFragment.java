@@ -131,18 +131,18 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         listView = (ListView) res.findViewById(R.id.mainListView);
 
         View footer = inflater.inflate(R.layout.chat_edit_footer, null);
-        footer.findViewById(R.id.leaveChat).setOnClickListener(new View.OnClickListener() {
+        footer.findViewById(R.id.leaveChat).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 leaveChat();
             }
-        });
-        footer.findViewById(R.id.addMember).setOnClickListener(new View.OnClickListener() {
+        }));
+        footer.findViewById(R.id.addMember).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 pickUser();
             }
-        });
+        }));
 
         headerView = inflater.inflate(R.layout.chat_edit_header, null);
         avatarView = (FastWebImageView) headerView.findViewById(R.id.avatar);
@@ -163,18 +163,18 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         avatarUploadProgress.setVisibility(View.GONE);
         avatarUploadError.setVisibility(View.GONE);
 
-        headerView.findViewById(R.id.mediaButton).setOnClickListener(new View.OnClickListener() {
+        headerView.findViewById(R.id.mediaButton).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openMedia(PeerType.PEER_CHAT, chatId);
             }
-        });
-        headerView.findViewById(R.id.editChat).setOnClickListener(new View.OnClickListener() {
+        }));
+        headerView.findViewById(R.id.editChat).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openChatEditTitle(chatId);
             }
-        });
+        }));
 
         listView.addHeaderView(headerView, null, false);
         listView.addFooterView(footer, null, false);
@@ -304,7 +304,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
             }
         }
 
-        changeAvatarView.setOnClickListener(new View.OnClickListener() {
+        changeAvatarView.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int state = application.getSyncKernel().getAvatarUploader().getGroupUploadState(chatId);
@@ -312,18 +312,18 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     AlertDialog dialog = new AlertDialog.Builder(getActivity())
                             .setTitle(R.string.st_avatar_change_error_title)
                             .setMessage(R.string.st_avatar_change_error_message)
-                            .setPositiveButton(R.string.st_try_again, new DialogInterface.OnClickListener() {
+                            .setPositiveButton(R.string.st_try_again, secure(new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     application.getSyncKernel().getAvatarUploader().tryAgainUploadGroup(chatId);
                                 }
-                            })
-                            .setNegativeButton(R.string.st_cancel, new DialogInterface.OnClickListener() {
+                            }))
+                            .setNegativeButton(R.string.st_cancel, secure(new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     application.getSyncKernel().getAvatarUploader().cancelUploadGroupAvatar(chatId);
                                 }
-                            }).create();
+                            })).create();
                     dialog.setCanceledOnTouchOutside(true);
                     dialog.show();
                 } else {
@@ -350,7 +350,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
             mediaContainer.setVisibility(View.VISIBLE);
             mediaCounter.setText(I18nUtil.getInstance().correctFormatNumber(mediaCount));
         }
-        notifications.setOnClickListener(new View.OnClickListener() {
+        notifications.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (application.getNotificationSettings().isEnabledForChat(chatId)) {
@@ -363,7 +363,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
             }
         });
 
-        notificationsSound.setOnClickListener(new View.OnClickListener() {
+        notificationsSound.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
@@ -481,12 +481,13 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 int inviter = users[i - 1].getInviter();
                 final User user = application.getEngine().getUser(uid);
                 if (uid == application.getCurrentUid()) {
-                    AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{getStringSafe(R.string.st_edit_dialog_action_leave)}, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            leaveChat();
-                        }
-                    }).create();
+                    AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).setItems(new CharSequence[]{getStringSafe(R.string.st_edit_dialog_action_leave)},
+                            secure(new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    leaveChat();
+                                }
+                            })).create();
                     alertDialog.setCanceledOnTouchOutside(true);
                     alertDialog.show();
                 } else {
@@ -503,7 +504,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                                 getStringSafe(R.string.st_edit_dialog_action_dialog).replace("{0}", user.getFirstName())
                         };
                     }
-                    AlertDialog dialog = new AlertDialog.Builder(getActivity()).setItems(items, new DialogInterface.OnClickListener() {
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity()).setItems(items, secure(new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             if (i == 0) {
@@ -514,7 +515,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                                 removeUser(user.getUid());
                             }
                         }
-                    }).create();
+                    })).create();
                     dialog.setCanceledOnTouchOutside(true);
                     dialog.show();
                 }
@@ -535,7 +536,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     private void leaveChat() {
         AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_edit_dialog_delete_title)
                 .setMessage(R.string.st_edit_dialog_delete_message)
-                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         runUiTask(new AsyncAction() {
@@ -567,7 +568,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                             }
                         });
                     }
-                })
+                }))
                 .setNegativeButton(R.string.st_no, null).create();
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();

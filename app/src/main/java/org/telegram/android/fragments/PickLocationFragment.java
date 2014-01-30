@@ -38,13 +38,13 @@ public class PickLocationFragment extends TelegramMapFragment {
         setResult(Activity.RESULT_CANCELED, null);
         View res = createMapView(R.layout.map_pick, inflater, container, savedInstanceState);
         sendButton = (Button) res.findViewById(R.id.pickLocation);
-        sendButton.setOnClickListener(new View.OnClickListener() {
+        sendButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setResult(Activity.RESULT_OK, new TLLocalGeo(latitude, longitude));
                 getActivity().onBackPressed();
             }
-        });
+        }));
 
         if (latitude != 0 && longitude != 0) {
             currentMarker = getMap().addMarker(new MarkerOptions()

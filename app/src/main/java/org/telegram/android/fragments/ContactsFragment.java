@@ -183,13 +183,13 @@ public class ContactsFragment extends BaseContactsFragment {
             shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, getStringSafe(R.string.st_invite_short));
 
             PickIntentItem[] pickIntentItems = createPickIntents(shareIntent);
-            PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, new PickIntentClickListener() {
+            PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, secure(new PickIntentClickListener() {
                 @Override
                 public void onItemClicked(int index, PickIntentItem item) {
                     sendEvent("share_pressed", item.getIntent().getComponent().getPackageName());
                     startActivity(item.getIntent());
                 }
-            });
+            }));
             dialog.setTitle("Share by...");
             dialog.show();
         } else {
@@ -204,18 +204,18 @@ public class ContactsFragment extends BaseContactsFragment {
                     names[j] = application.getEngine().getUser(contact.getRelatedUsers()[j].getUid()).getDisplayName();
                 }
                 AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                        .setItems(names, new DialogInterface.OnClickListener() {
+                        .setItems(names, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 getRootController().openUser(contact.getRelatedUsers()[i].getUid());
                             }
-                        }).create();
+                        })).create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.st_contacts_not_registered_title)
                         .setMessage(getStringSafe(R.string.st_contacts_not_registered_message).replace("{0}", contact.getDisplayName()))
-                        .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 try {
@@ -245,7 +245,7 @@ public class ContactsFragment extends BaseContactsFragment {
                                     }
                                 }
                             }
-                        }).setNegativeButton(R.string.st_no, null).create();
+                        })).setNegativeButton(R.string.st_no, null).create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
@@ -270,7 +270,7 @@ public class ContactsFragment extends BaseContactsFragment {
                     getStringSafe(R.string.st_contacts_action_delete),
                     getStringSafe(R.string.st_contacts_action_block),
                     getStringSafe(R.string.st_contacts_action_block_and_delete)
-            }, new DialogInterface.OnClickListener() {
+            }, secure(new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     if (i == 0) {
@@ -285,12 +285,12 @@ public class ContactsFragment extends BaseContactsFragment {
                         blockDeleteContact(contact);
                     }
                 }
-            });
+            }));
         } else {
             builder.setItems(new CharSequence[]{
                     getStringSafe(R.string.st_contacts_action_view),
                     getStringSafe(R.string.st_contacts_action_delete),
-            }, new DialogInterface.OnClickListener() {
+            }, secure(new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     if (i == 0) {
@@ -299,7 +299,7 @@ public class ContactsFragment extends BaseContactsFragment {
                         deleteContact(contact);
                     }
                 }
-            });
+            }));
         }
         AlertDialog contextMenu = builder.create();
         contextMenu.setCanceledOnTouchOutside(true);
@@ -319,7 +319,7 @@ public class ContactsFragment extends BaseContactsFragment {
     private void deleteContact(final ContactWireframe contact) {
         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
                 .setMessage(getStringSafe(R.string.st_contacts_delete).replace("{0}", contact.getDisplayName()))
-                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int b) {
 
@@ -355,7 +355,7 @@ public class ContactsFragment extends BaseContactsFragment {
                             }
                         });
                     }
-                }).setNegativeButton(R.string.st_no, null).create();
+                })).setNegativeButton(R.string.st_no, null).create();
         alertDialog.setCanceledOnTouchOutside(true);
         alertDialog.show();
     }
@@ -363,7 +363,7 @@ public class ContactsFragment extends BaseContactsFragment {
     private void blockContact(final ContactWireframe contact) {
         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
                 .setMessage(getStringSafe(R.string.st_contacts_block).replace("{0}", contact.getDisplayName()))
-                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         runUiTask(new AsyncAction() {
@@ -373,7 +373,7 @@ public class ContactsFragment extends BaseContactsFragment {
                             }
                         });
                     }
-                }).setNegativeButton(R.string.st_no, null).create();
+                })).setNegativeButton(R.string.st_no, null).create();
         alertDialog.setCanceledOnTouchOutside(true);
         alertDialog.show();
     }
@@ -381,7 +381,7 @@ public class ContactsFragment extends BaseContactsFragment {
     private void blockDeleteContact(final ContactWireframe contact) {
         AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
                 .setMessage(getStringSafe(R.string.st_contacts_block_delete).replace("{0}", contact.getDisplayName()))
-                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         runUiTask(new AsyncAction() {
@@ -428,7 +428,7 @@ public class ContactsFragment extends BaseContactsFragment {
                             }
                         });
                     }
-                }).setNegativeButton(R.string.st_no, null).create();
+                })).setNegativeButton(R.string.st_no, null).create();
         alertDialog.setCanceledOnTouchOutside(true);
         alertDialog.show();
     }

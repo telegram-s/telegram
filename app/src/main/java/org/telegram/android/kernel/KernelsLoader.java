@@ -52,6 +52,18 @@ public class KernelsLoader {
         });
     }
 
+    private void ensureLoaded(ApplicationKernel kernel) {
+        if (kernel.getAuthKernel() == null) {
+            throw new IllegalStateException("Auth kernel empty");
+        }
+
+        if (kernel.getAuthKernel().isLoggedIn()) {
+            if (kernel.getDataSourceKernel().getDialogSource() == null) {
+                throw new IllegalStateException("Dialogs are not loaded");
+            }
+        }
+    }
+
     public boolean stagedLoad(final ApplicationKernel kernel) {
         long initStart = SystemClock.uptimeMillis();
 
@@ -80,6 +92,7 @@ public class KernelsLoader {
                     kernel.initSyncKernel(); // Background sync kernel
                     kernel.initSourcesKernel(); // UI Data Sources kernel
                     kernel.runKernels(); // Run all kernels
+                    ensureLoaded(kernel);
                     Logger.d(TAG, "Storage kernels updated " + (SystemClock.uptimeMillis() - upgradeStart) + " ms");
                     notifyLoaded();
                 }
@@ -95,6 +108,8 @@ public class KernelsLoader {
         Logger.d(TAG, "Kernels created in " + (SystemClock.uptimeMillis() - initStart) + " ms");
 
         kernel.runKernels();
+
+        ensureLoaded(kernel);
 
         kernel.getUiKernel().onAppPause();
 

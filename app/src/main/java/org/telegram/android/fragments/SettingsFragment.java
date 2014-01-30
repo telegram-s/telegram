@@ -80,7 +80,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
             textView.setText("Unknown");
         }
 
-        textView.setOnClickListener(new View.OnClickListener() {
+        textView.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (debugClickCount == 0 || SystemClock.uptimeMillis() > lastDebugClickTime + 1000) {
@@ -101,9 +101,9 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                     }
                 }
             }
-        });
+        }));
 
-        res.findViewById(R.id.logoutButton).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.logoutButton).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 runUiTask(new AsyncAction() {
@@ -119,14 +119,14 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                     }
                 });
             }
-        });
-        res.findViewById(R.id.deleteAccount).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.deleteAccount).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 openUri(Uri.parse("https://telegram.org/deactivate"));
             }
-        });
-        res.findViewById(R.id.changeAvatar).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.changeAvatar).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int state = application.getSyncKernel().getAvatarUploader().getAvatarUploadState();
@@ -134,18 +134,18 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                     AlertDialog dialog = new AlertDialog.Builder(getActivity())
                             .setTitle(R.string.st_avatar_change_error_title)
                             .setMessage(R.string.st_avatar_change_error_message)
-                            .setPositiveButton(R.string.st_try_again, new DialogInterface.OnClickListener() {
+                            .setPositiveButton(R.string.st_try_again, secure(new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     application.getSyncKernel().getAvatarUploader().tryAgainUploadAvatar();
                                 }
-                            })
-                            .setNegativeButton(R.string.st_cancel, new DialogInterface.OnClickListener() {
+                            }))
+                            .setNegativeButton(R.string.st_cancel, secure(new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     application.getSyncKernel().getAvatarUploader().cancelUploadAvatar();
                                 }
-                            }).create();
+                            })).create();
                     dialog.setCanceledOnTouchOutside(true);
                     dialog.show();
                 } else {
@@ -157,20 +157,20 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                     }
                 }
             }
-        });
-        res.findViewById(R.id.chatSettings).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.chatSettings).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openChatSettings();
             }
-        });
-        res.findViewById(R.id.resetSessions).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.resetSessions).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog dialog = new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.st_settings_reset_title)
                         .setMessage(R.string.st_settings_reset_message)
-                        .setPositiveButton(R.string.st_reset, new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.st_reset, secure(new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 runUiTask(new AsyncAction() {
@@ -186,26 +186,26 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                                     }
                                 });
                             }
-                        })
+                        }))
                         .setNegativeButton(R.string.st_cancel, null)
                         .create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();
             }
-        });
-        res.findViewById(R.id.support).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.support).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openDialog(PeerType.PEER_USER, 333000);
             }
-        });
-        res.findViewById(R.id.googlePlay).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.googlePlay).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 openUri(Uri.parse("https://play.google.com/store/apps/details?id=" + application.getPackageName()));
             }
-        });
-        res.findViewById(R.id.twitter).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.twitter).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (getStringSafe(R.string.st_lang).equals("ar")) {
@@ -214,38 +214,38 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                     openUri(Uri.parse("https://twitter.com/telegram"));
                 }
             }
-        });
-        res.findViewById(R.id.faq).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.faq).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 openUri(Uri.parse("https://telegram.org/faq"));
             }
-        });
-        res.findViewById(R.id.notifications).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.notifications).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openNotificationSettings();
             }
-        });
-        res.findViewById(R.id.blocked).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.blocked).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openBlocked();
             }
-        });
-        res.findViewById(R.id.editName).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.editName).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getRootController().openNameSettings();
             }
-        });
+        }));
 
-        res.findViewById(R.id.developmentButton).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.developmentButton).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getRootController().openDebugSettings();
             }
-        });
+        }));
 
         if (application.getTechKernel().getDebugSettings().isDeveloperMode()) {
             res.findViewById(R.id.developmentButton).setVisibility(View.VISIBLE);

@@ -259,12 +259,12 @@ public class CreateChatFragment extends BaseContactsFragment {
         inflater.inflate(R.menu.create_chat_menu, menu);
         doneButton = (TextView) menu.findItem(R.id.done).getActionView().findViewById(R.id.doneButton);
         doneButton.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, getBarHeight()));
-        doneButton.setOnClickListener(new View.OnClickListener() {
+        doneButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 doCreateChat();
             }
-        });
+        }));
     }
 
     private void doCreateChat() {

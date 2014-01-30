@@ -143,13 +143,13 @@ public class WhatsNewFragment extends TelegramFragment {
             }
         }
 
-        res.findViewById(R.id.continueMessaging).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.continueMessaging).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 application.getVersionHolder().markFinishedUpgrade();
                 ((StartActivity) getActivity()).doInitApp(false);
             }
-        });
+        }));
 
         return res;
     }

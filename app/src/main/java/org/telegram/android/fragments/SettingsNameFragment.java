@@ -77,18 +77,19 @@ public class SettingsNameFragment extends TelegramFragment {
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSherlockActivity().getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSherlockActivity().getSupportActionBar().setCustomView(R.layout.settings_name_bar);
-        getSherlockActivity().getSupportActionBar().getCustomView().findViewById(R.id.dialogCancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onCancel();
-            }
-        });
-        getSherlockActivity().getSupportActionBar().getCustomView().findViewById(R.id.dialogDone).setOnClickListener(new View.OnClickListener() {
+        getSherlockActivity().getSupportActionBar().getCustomView().findViewById(R.id.dialogCancel).setOnClickListener(
+                secure(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onCancel();
+                    }
+                }));
+        getSherlockActivity().getSupportActionBar().getCustomView().findViewById(R.id.dialogDone).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onApplyName();
             }
-        });
+        }));
         getSherlockActivity().getSupportActionBar().setSubtitle(null);
     }
 

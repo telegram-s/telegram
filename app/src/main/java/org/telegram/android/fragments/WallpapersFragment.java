@@ -43,13 +43,13 @@ public class WallpapersFragment extends TelegramFragment {
         gallery = (Gallery) res.findViewById(R.id.previewGallery);
         preview = (FastWebImageView) res.findViewById(R.id.preview);
         preview.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
-        res.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+        res.findViewById(R.id.cancel).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().onBackPressed();
             }
-        });
-        res.findViewById(R.id.setWallpaper).setOnClickListener(new View.OnClickListener() {
+        }));
+        res.findViewById(R.id.setWallpaper).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final TLAbsWallPaper wallPaper = wallPapers[gallery.getSelectedItemPosition()];
@@ -91,7 +91,7 @@ public class WallpapersFragment extends TelegramFragment {
                     getRootController().doBack();
                 }
             }
-        });
+        }));
 
         if (wallPapers == null) {
             runUiTask(new AsyncAction() {

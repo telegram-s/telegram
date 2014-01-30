@@ -71,7 +71,7 @@ public class MediaReceiverFragment extends TelegramFragment {
 
         PickIntentDialog dialog = new PickIntentDialog(getActivity(),
                 items.toArray(new PickIntentItem[items.size()]),
-                new PickIntentClickListener() {
+                secure(new PickIntentClickListener() {
                     @Override
                     public void onItemClicked(int index, PickIntentItem item) {
                         if (item.getIntent() == null) {
@@ -87,7 +87,7 @@ public class MediaReceiverFragment extends TelegramFragment {
                             }
                         }
                     }
-                });
+                }));
         dialog.setTitle("Edit photo");
         dialog.show();
     }
@@ -110,7 +110,7 @@ public class MediaReceiverFragment extends TelegramFragment {
 
         PickIntentDialog dialog = new PickIntentDialog(getActivity(),
                 items.toArray(new PickIntentItem[items.size()]),
-                new PickIntentClickListener() {
+                secure(new PickIntentClickListener() {
                     @Override
                     public void onItemClicked(int index, PickIntentItem item) {
                         if ("empty".equals(item.getTag())) {
@@ -137,7 +137,7 @@ public class MediaReceiverFragment extends TelegramFragment {
                             }
                         }
                     }
-                });
+                }));
         dialog.setTitle(getStringSafe(R.string.st_receiver_pick_wallpaper));
         dialog.show();
     }
@@ -153,7 +153,7 @@ public class MediaReceiverFragment extends TelegramFragment {
 
         PickIntentDialog pickIntentDialog = new PickIntentDialog(getActivity(),
                 items.toArray(new PickIntentItem[items.size()]),
-                new PickIntentClickListener() {
+                secure(new PickIntentClickListener() {
                     @Override
                     public void onItemClicked(int index, PickIntentItem item) {
                         if (MediaStore.ACTION_IMAGE_CAPTURE.equals(item.getIntent().getAction())) {
@@ -163,7 +163,7 @@ public class MediaReceiverFragment extends TelegramFragment {
                             startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 1);
                         }
                     }
-                });
+                }));
         pickIntentDialog.setTitle(getStringSafe(R.string.st_receiver_pick_photo));
         pickIntentDialog.show();
     }
@@ -181,7 +181,7 @@ public class MediaReceiverFragment extends TelegramFragment {
 
             PickIntentDialog pickIntentDialog = new PickIntentDialog(getActivity(),
                     items.toArray(new PickIntentItem[items.size()]),
-                    new PickIntentClickListener() {
+                    secure(new PickIntentClickListener() {
                         @Override
                         public void onItemClicked(int index, PickIntentItem item) {
                             if (item.getIntent() != null) {
@@ -198,7 +198,7 @@ public class MediaReceiverFragment extends TelegramFragment {
                                         requestId * REQ_M + REQUEST_BASE + 2);
                             }
                         }
-                    });
+                    }));
             pickIntentDialog.setTitle(getStringSafe(R.string.st_receiver_pick_video));
             pickIntentDialog.show();
         } catch (Exception e) {
