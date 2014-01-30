@@ -30,6 +30,10 @@ public class TelegramApplication extends Application implements ImageSupport {
 
     @Override
     public void onCreate() {
+        if (kernel != null) {
+            super.onCreate();
+            return;
+        }
         CrashHandler.init(this);
         kernel = new ApplicationKernel(this);
         super.onCreate();
@@ -51,7 +55,7 @@ public class TelegramApplication extends Application implements ImageSupport {
     }
 
     public boolean isLoggedIn() {
-        return kernel.getAuthKernel().getApiStorage().isAuthenticated();
+        return kernel.getAuthKernel().isLoggedIn();
     }
 
     public int getCurrentUid() {

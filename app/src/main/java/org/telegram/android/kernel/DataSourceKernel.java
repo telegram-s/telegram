@@ -20,12 +20,12 @@ public class DataSourceKernel {
 
     private ApplicationKernel kernel;
 
-    private DialogSource dialogSource;
-    private HashMap<Long, MessageSource> messageSources = new HashMap<Long, MessageSource>();
-    private UserSource userSource;
-    private ContactsSource contactsSource;
-    private ChatSource chatSource;
-    private EncryptedChatSource encryptedChatSource;
+    private volatile DialogSource dialogSource;
+    private volatile HashMap<Long, MessageSource> messageSources = new HashMap<Long, MessageSource>();
+    private volatile UserSource userSource;
+    private volatile ContactsSource contactsSource;
+    private volatile ChatSource chatSource;
+    private volatile EncryptedChatSource encryptedChatSource;
 
     public DataSourceKernel(ApplicationKernel kernel) {
         this.kernel = kernel;

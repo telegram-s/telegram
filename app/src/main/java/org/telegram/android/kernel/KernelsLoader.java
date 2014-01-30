@@ -22,7 +22,7 @@ public class KernelsLoader {
     private Handler handler = new Handler(Looper.getMainLooper());
 
     private Thread loaderThread;
-    private boolean isLoaded = false;
+    private volatile boolean isLoaded = false;
 
     public void addListener(KernelsLoadingListener loadingListener) {
         if (listeners.contains(loadingListener)) {

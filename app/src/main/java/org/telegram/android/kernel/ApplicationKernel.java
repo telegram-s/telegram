@@ -18,33 +18,33 @@ import java.io.IOException;
 public class ApplicationKernel {
     private static final String TAG = "Kernel";
 
-    private TelegramApplication application;
+    private volatile TelegramApplication application;
 
-    private LifeKernel lifeKernel;
+    private volatile LifeKernel lifeKernel;
 
-    private UiKernel uiKernel;
+    private volatile UiKernel uiKernel;
 
-    private SearchKernel searchKernel;
+    private volatile SearchKernel searchKernel;
 
-    private TechKernel techKernel;
+    private volatile TechKernel techKernel;
 
-    private AuthKernel authKernel;
+    private volatile AuthKernel authKernel;
 
-    private SettingsKernel settingsKernel;
+    private volatile SettingsKernel settingsKernel;
 
-    private StorageKernel storageKernel;
+    private volatile StorageKernel storageKernel;
 
-    private DataSourceKernel dataSourceKernel;
+    private volatile DataSourceKernel dataSourceKernel;
 
-    private FileKernel fileKernel;
+    private volatile FileKernel fileKernel;
 
-    private EncryptedKernel encryptedKernel;
+    private volatile EncryptedKernel encryptedKernel;
 
-    private SyncKernel syncKernel;
+    private volatile SyncKernel syncKernel;
 
-    private ApiKernel apiKernel;
+    private volatile ApiKernel apiKernel;
 
-    private ActivationController activationController;
+    private volatile ActivationController activationController;
 
     public ApplicationKernel(TelegramApplication application) {
         this.application = application;

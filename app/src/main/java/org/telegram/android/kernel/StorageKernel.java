@@ -18,10 +18,7 @@ public class StorageKernel {
         if (kernel.getApplication().getDatabasePath("stels.db").exists()) {
             return true;
         }
-//        File databasePath = kernel.getApplication().getDatabasePath("telegram.db");
-//        if (databasePath.exists()) {
-//            SQLiteDatabase database = SQLiteDatabase.openDatabase("telegram.db", null, SQLiteDatabase.OPEN_READONLY);
-//        }
+
         return false;
     }
 

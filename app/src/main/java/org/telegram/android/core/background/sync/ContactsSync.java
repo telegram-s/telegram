@@ -137,6 +137,10 @@ public class ContactsSync extends BaseSync {
     public void clear() {
         this.kernel.getStorageKernel().getModel().getSyncStateEngine().setSynced(false);
         this.isSynced = false;
+        if (this.uploadState == null) {
+            this.uploadState = new ContactsUploadState(application);
+        }
+
         this.uploadState.getImportedPhones().clear();
         this.uploadState.getContacts().clear();
         this.uploadState.write();
