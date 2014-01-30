@@ -1,6 +1,8 @@
 package org.telegram.android.core.engines;
 
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.FullChatInfo;
+import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.local.TLLocalChatParticipant;
 import org.telegram.android.core.model.local.TLLocalFullChatInfo;
 import org.telegram.api.TLAbsChatParticipants;
@@ -13,8 +15,10 @@ import org.telegram.api.TLChatParticipants;
 public class FullGroupEngine {
 
     private FullGroupDatabase fullGroupDatabase;
+    private TelegramApplication application;
 
     public FullGroupEngine(ModelEngine modelEngine) {
+        this.application = modelEngine.getApplication();
         this.fullGroupDatabase = new FullGroupDatabase(modelEngine);
     }
 
@@ -41,6 +45,12 @@ public class FullGroupEngine {
 
         fullChatInfo.getChatInfo().getUsers().add(new TLLocalChatParticipant(uid, inviter, date));
         fullGroupDatabase.updateOrCreate(fullChatInfo);
+
+        if (application.getKernelsLoader().isLoaded()) {
+            if (application.getChatSource() != null) {
+                application.getChatSource().notifyChatChanged(chatId);
+            }
+        }
     }
 
     public synchronized void onChatUserRemoved(int chatId, int uid) {
@@ -62,6 +72,12 @@ public class FullGroupEngine {
         }
 
         fullGroupDatabase.updateOrCreate(fullChatInfo);
+
+        if (application.getKernelsLoader().isLoaded()) {
+            if (application.getChatSource() != null) {
+                application.getChatSource().notifyChatChanged(chatId);
+            }
+        }
     }
 
     public synchronized void onChatParticipants(TLAbsChatParticipants participants) {
@@ -87,6 +103,12 @@ public class FullGroupEngine {
         }
 
         fullGroupDatabase.updateOrCreate(fullChatInfo);
+
+        if (application.getKernelsLoader().isLoaded()) {
+            if (application.getChatSource() != null) {
+                application.getChatSource().notifyChatChanged(participants.getChatId());
+            }
+        }
     }
 
     public synchronized void onFullChat(org.telegram.api.TLChatFull fullChat) {
@@ -126,6 +148,12 @@ public class FullGroupEngine {
             }
 
             fullGroupDatabase.updateOrCreate(fullChatInfo);
+        }
+
+        if (application.getKernelsLoader().isLoaded()) {
+            if (application.getChatSource() != null) {
+                application.getChatSource().notifyChatChanged(fullChat.getId());
+            }
         }
     }
 

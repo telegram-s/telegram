@@ -288,17 +288,18 @@ public class DialogsEngine {
                 continue;
             }
             DialogDescription description = findDescription(msg.getPeerType(), msg.getPeerId(), all);
-            if (description == null) {
-                // Hack to avoid recreating dialog when leaving group
-                if (msg.getPeerType() == PeerType.PEER_CHAT) {
-                    if (msg.getContentType() == ContentType.MESSAGE_SYSTEM && msg.getExtras() instanceof TLLocalActionChatDeleteUser) {
-                        TLLocalActionChatDeleteUser user = (TLLocalActionChatDeleteUser) msg.getExtras();
-                        if (user.getUserId() == application.getCurrentUid() && msg.getSenderId() == application.getCurrentUid()) {
-                            continue;
-                        }
+
+            // Hack to avoid recreating dialog when leaving group
+            if (msg.getPeerType() == PeerType.PEER_CHAT && (description == null || description.getDate() <= 0)) {
+                if (msg.getContentType() == ContentType.MESSAGE_SYSTEM && msg.getExtras() instanceof TLLocalActionChatDeleteUser) {
+                    TLLocalActionChatDeleteUser user = (TLLocalActionChatDeleteUser) msg.getExtras();
+                    if (user.getUserId() == application.getCurrentUid() && msg.getSenderId() == application.getCurrentUid()) {
+                        continue;
                     }
                 }
+            }
 
+            if (description == null) {
                 description = new DialogDescription(msg.getPeerType(), msg.getPeerId());
                 applyDescriptor(description, msg);
                 if (dialogs != null) {

@@ -694,7 +694,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     application.getEngine().onUsers(message.getUsers());
                     application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
                     application.getEngine().onUpdatedMessage(message.getMessage());
-                    application.getEngine().getFullGroupEngine().onChatUserAdded(chatId, service.getFromId(), addUser.getUserId(), service.getDate());
+                    application.getEngine().getFullGroupEngine().onChatUserAdded(chatId, addUser.getUserId(), service.getFromId(), service.getDate());
                     application.getUpdateProcessor().onMessage(new TLLocalAddChatUser(message));
                 }
 

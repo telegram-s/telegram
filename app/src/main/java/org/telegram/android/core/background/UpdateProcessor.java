@@ -673,7 +673,7 @@ public class UpdateProcessor {
             application.getEngine().getFullGroupEngine().onChatParticipants(participants.getParticipants());
         } else if (update instanceof TLUpdateChatParticipantAdd) {
             TLUpdateChatParticipantAdd addUser = (TLUpdateChatParticipantAdd) update;
-            application.getEngine().getFullGroupEngine().onChatUserAdded(addUser.getChatId(), addUser.getInviterId(), addUser.getUserId(), date);
+            application.getEngine().getFullGroupEngine().onChatUserAdded(addUser.getChatId(), addUser.getUserId(), addUser.getInviterId(), date);
         } else if (update instanceof TLUpdateChatParticipantDelete) {
             TLUpdateChatParticipantDelete deleteUser = (TLUpdateChatParticipantDelete) update;
             application.getEngine().getFullGroupEngine().onChatUserRemoved(deleteUser.getChatId(), deleteUser.getUserId());

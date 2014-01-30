@@ -123,15 +123,14 @@ public class DialogSource {
                 application.getEngine().getUsersEngine().getUsersById(users.toArray());
                 Logger.d(TAG, "Users loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
-
                 ArrayList<DialogDescription> resDescriptions = new ArrayList<DialogDescription>();
                 for (DialogDescription description : res) {
-                    if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
-                        if (application.getEngine().getSecretEngine().getEncryptedChat(description.getPeerId()) == null) {
-                            application.getEngine().getDialogsEngine().deleteDialog(PeerType.PEER_USER_ENCRYPTED, description.getPeerId());
-                            continue;
-                        }
-                    }
+//                    if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+//                        if (application.getEngine().getSecretEngine().getEncryptedChat(description.getPeerId()) == null) {
+//                            application.getEngine().getDialogsEngine().deleteDialog(PeerType.PEER_USER_ENCRYPTED, description.getPeerId());
+//                            continue;
+//                        }
+//                    }
                     resDescriptions.add(description);
                 }
 
