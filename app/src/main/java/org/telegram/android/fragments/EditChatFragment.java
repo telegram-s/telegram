@@ -334,7 +334,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     }
                 }
             }
-        });
+        }));
 
         titleView.setText(group.getTitle());
         if (application.getNotificationSettings().isEnabledForChat(chatId)) {
@@ -361,7 +361,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     enabledView.setImageResource(R.drawable.holo_btn_check_on);
                 }
             }
-        });
+        }));
 
         notificationsSound.setOnClickListener(secure(new View.OnClickListener() {
             @Override
@@ -377,7 +377,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 }
                 startActivityForResult(intent, PICK_NOTIFICATION_SOUND);
             }
-        });
+        }));
 
         updateNotificationSound();
 
