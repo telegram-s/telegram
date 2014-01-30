@@ -178,7 +178,11 @@ public class DialogsDatabase {
             res.setLastLocalViewedMessage(dialog.getLastLocalViewedMessage());
             res.setLastRemoteViewedMessage(dialog.getLastRemoteViewedMessage());
             res.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
-            res.setMessage(dialog.getMessage());
+            if (dialog.getMessage() == null) {
+                res.setMessage("");
+            } else {
+                res.setMessage(dialog.getMessage());
+            }
             res.setMessageState(dialog.getMessageState());
             res.setSenderId(dialog.getSenderId());
             res.setTopMessageId(dialog.getTopMessageId());

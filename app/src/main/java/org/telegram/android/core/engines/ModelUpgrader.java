@@ -19,7 +19,7 @@ import java.util.ArrayList;
  */
 public class ModelUpgrader {
     public static void performUpgrade(StorageKernel storageKernel, ApplicationKernel kernel) {
-         File databasePath = kernel.getApplication().getDatabasePath("stels.db");
+        File databasePath = kernel.getApplication().getDatabasePath("stels.db");
 //        File databasePath = new File("/sdcard/stels.db");
         if (databasePath.exists()) {
             SQLiteDatabase database = null;
@@ -196,7 +196,11 @@ public class ModelUpgrader {
                     description.setDate(dialog.getDate());
                     description.setContentType(dialog.getContentId());
                     description.setFailure(dialog.isFailureFlag());
-                    description.setMessage(dialog.getMessage());
+                    if (dialog.getMessage() == null) {
+                        description.setMessage("");
+                    } else {
+                        description.setMessage(dialog.getMessage());
+                    }
                     description.setMessageState(dialog.getMessageState());
                     description.setFirstUnreadMessage(dialog.getFirstUnreadMessage());
                     description.setSenderId(dialog.getSenderId());
