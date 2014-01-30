@@ -20,6 +20,7 @@ public class DataSourceKernel {
 
     private ApplicationKernel kernel;
 
+    private volatile boolean wasInited = false;
     private volatile DialogSource dialogSource;
     private volatile HashMap<Long, MessageSource> messageSources = new HashMap<Long, MessageSource>();
     private volatile UserSource userSource;
@@ -39,6 +40,7 @@ public class DataSourceKernel {
             contactsSource = new ContactsSource(kernel.getApplication());
             chatSource = new ChatSource(kernel.getApplication());
             encryptedChatSource = new EncryptedChatSource(kernel.getApplication());
+            wasInited = true;
         }
     }
 
@@ -191,6 +193,10 @@ public class DataSourceKernel {
         }
     }
 
+    public boolean isWasInited() {
+        return wasInited;
+    }
+
     public void logIn() {
         dialogSource = new DialogSource(kernel.getApplication());
         userSource = new UserSource();
@@ -209,6 +215,8 @@ public class DataSourceKernel {
             source.destroy();
         }
         messageSources.clear();
+
+        wasInited = true;
     }
 
     public void logOut() {

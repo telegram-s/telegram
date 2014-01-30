@@ -159,7 +159,6 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
 
     private ArrayList<DialogWireframe> workingSet;
     private BaseAdapter dialogAdapter;
-    private View mainContainer;
     private ListView listView;
     private View loading;
     private View empty;
@@ -270,7 +269,6 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             }
         }));
 
-        mainContainer = res.findViewById(R.id.mainContainer);
         listView = (ListView) res.findViewById(R.id.dialogsList);
 
 //        TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
@@ -487,7 +485,18 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
         }
 
         if (application.getDialogSource() == null) {
-            throw new IllegalStateException("Empty dialog source");
+            if (application.getDataSourceKernel() != null) {
+                if (application.getDataSourceKernel().getDialogSource() != null) {
+                    throw new IllegalStateException("Empty application dialog source: wtf?");
+                } else if (application.getDataSourceKernel().isWasInited()) {
+                    throw new IllegalStateException("Empty inited dialog source: wtf?");
+                } else {
+                    throw new IllegalStateException("Empty dialog source");
+                }
+            } else {
+                throw new IllegalStateException("Empty data source kernel");
+            }
+
         }
     }
 
