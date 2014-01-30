@@ -235,6 +235,7 @@ public class SettingsChatFragment extends MediaReceiverFragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         application.getUserSettings().setBarColor(sizeIds[i]);
                         ((TelegramActivity) getActivity()).setBarBg();
+                        getSherlockActivity().invalidateOptionsMenu();
                         bindUi();
                     }
                 })
