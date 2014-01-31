@@ -12,7 +12,8 @@
     <string name="whats_new_design_3">Mejor estabilidad</string>
 
     <string name="whats_new_secret_title">Chats secretos añadidos</string>
-    <string name="whats_new_secret_hint">Inicia un chat secreto desde el menú para "Escribir a" o desde el perfil del contacto.
+    <string name="whats_new_secret_hint">Inicia un chat secreto desde el menú para "Escribir a" o desde el perfil del
+        contacto.
     </string>
     <string name="whats_new_secret_0">Usa cifrado de fin-a-fin</string>
     <string name="whats_new_secret_1">No deja rastro en nuestros servidores</string>
@@ -20,8 +21,9 @@
     <string name="whats_new_secret_3">No permite el reenvío de mensajes</string>
 
     <string name="whats_new_arabic_title">Traducción al Árabe añadida</string>
-    <string name="whats_new_arabic_hint">Si tienes cualquier problema con la traducción al Árabe, por favor, dile a nuestro
-    equipo de soporte en Ajustes — Haz una pregunta.
+    <string name="whats_new_arabic_hint">Si tienes cualquier problema con la traducción al Árabe, por favor, dile a
+        nuestro
+        equipo de soporte en Ajustes — Haz una pregunta.
     </string>
     <string name="whats_new_arabic_0">Soporte completo de RTL en android 4.0+</string>
     <string name="whats_new_arabic_1">Intefaz invertida en android 4.2+</string>
@@ -39,4 +41,11 @@
     <string name="whats_new_gif_3">Mejoras en la descarga de animaciones</string>
     <string name="whats_new_gif_4">Traducción al Ruso</string>
     <string name="whats_new_gif_5">Temas experimentales</string>
+
+    <string name="whats_new_spain_title">Traducción al Español añadida y mejor estabilidad</string>
+    <string name="whats_new_spain_hint">Si tienes cualquier problema con la traducción al Español, por favor, dile a
+        nuestro equipo de soporte en Ajustes — Haz una pregunta.
+    </string>
+    <string name="whats_new_spain_0">Completamente traducido al Español</string>
+    <string name="whats_new_spain_1">Alrededor de 50 bugs arreglados</string>
 </resources>
