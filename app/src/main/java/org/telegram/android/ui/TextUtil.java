@@ -28,25 +28,25 @@ public class TextUtil {
 
         int delta = (int) (TimeOverlord.getInstance().getServerTime() / 1000 - lastSeen);//Secs
         if (delta < 60) {
-            return context.getString(R.string.lang_common_online_templates)
+            return context.getString(R.string.lang_common_online_templates_now)
                     .replace("{time}", context.getString(R.string.lang_common_online_now));
         } else if (delta < 60 * 60) {
             int minutes = delta / 60;
-            return context.getString(R.string.lang_common_online_templates)
+            return context.getString(R.string.lang_common_online_templates_time)
                     .replace("{time}",
                             context.getString(R.string.lang_common_online_ago)
                                     .replace("{time}",
                                             I18nUtil.getInstance().getPluralFormatted(R.plurals.lang_minutes, minutes)));
         } else if (delta < 24 * 60 * 60) {
             int hours = delta / (60 * 60);
-            return context.getString(R.string.lang_common_online_templates)
+            return context.getString(R.string.lang_common_online_templates_time)
                     .replace("{time}",
                             context.getString(R.string.lang_common_online_ago)
                                     .replace("{time}",
                                             I18nUtil.getInstance().getPluralFormatted(R.plurals.lang_hours, hours)));
         } else {
             Date date = new Date(lastSeen * 1000L);
-            return context.getString(R.string.lang_common_online_templates)
+            return context.getString(R.string.lang_common_online_templates_date)
                     .replace("{time}", I18nUtil.getInstance().formatMonthShort(date.getDate(), date.getMonth()));
         }
     }

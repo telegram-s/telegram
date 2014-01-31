@@ -6,7 +6,10 @@
     <string name="lang_common_and">{content1} и {content2}</string>
     <string name="lang_common_and_short">{content1}, {content2}</string>
 
-    <string name="lang_common_online_templates">был(а) в сети {time}</string>
+    <string name="lang_common_online_templates_now">был(а) в сети {time}</string>
+    <string name="lang_common_online_templates_date">@string/lang_common_online_templates_now</string>
+    <string name="lang_common_online_templates_time">@string/lang_common_online_templates_now</string>
+
     <string name="lang_common_online_now">только что</string>
     <string name="lang_common_online_ago">{time} назад</string>
 </resources>

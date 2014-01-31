@@ -6,7 +6,10 @@
     <string name="lang_common_and">{content1} y {content2}</string>
     <string name="lang_common_and_short">{content1}, {content2}</string>
 
-    <string name="lang_common_online_templates">últ. vez a las {time}</string>
+    <string name="lang_common_online_templates_now">últ. vez {time}</string>
+    <string name="lang_common_online_templates_time">últ. vez {time}</string>
+    <string name="lang_common_online_templates_date">últ. vez el {time}</string>
+
     <string name="lang_common_online_now">hace un momento</string>
     <string name="lang_common_online_ago">hace {time}</string>
 </resources>

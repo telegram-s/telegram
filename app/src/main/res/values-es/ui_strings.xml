@@ -565,7 +565,7 @@
     <string name="st_secret_key_info1">Esta imagen es una visualización de la clave de cifrado para el chat secreto con 
         {name}.
     </string>
-    <string name="st_secret_key_info2">Si esta imagen se visualiza de la misma manera en el teléfono de {name}tu chat es seguro en un 200%.
+    <string name="st_secret_key_info2">Si esta imagen se visualiza de la misma manera en el teléfono de {name} tu chat es seguro en un 200%.
     </string>
 
     <string name="st_bubble_media_cancelled">cancelado</string>
