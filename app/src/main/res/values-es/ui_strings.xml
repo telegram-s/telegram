@@ -365,7 +365,7 @@
 
     <string name="st_profile_blocked">Usuario bloqueado</string>
     <string name="st_profile_added">Contacto añadido</string>
-    <string name="st_profile_secret">Iniciar Chat Secreto</string>
+    <string name="st_profile_secret">Iniciar chat secreto</string>
 
     <string name="st_pick_file_title">Seleccionar un Archivo</string>
 
