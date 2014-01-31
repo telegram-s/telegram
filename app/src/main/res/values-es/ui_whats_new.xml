@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="whats_contacts_title">Contacts and startup improvements</string>
-    <string name="whats_contacts_0">Deleting contacts</string>
-    <string name="whats_contacts_1">Contacts ordering (first \ last name) uses phone settings</string>
-    <string name="whats_contacts_2">Improved loading speed</string>
+    <string name="whats_contacts_title">Mejoras de contactos e inicio</string>
+    <string name="whats_contacts_0">Eliminar contactos</string>
+    <string name="whats_contacts_1">Ordenar contactos (nombre \ apellido) usa los ajustes del teléfono</string>
+    <string name="whats_contacts_2">Mejoras en la velocidad de carga</string>
 
-    <string name="whats_new_design_title">Design, speed and stability</string>
-    <string name="whats_new_design_0">New blue design</string>
-    <string name="whats_new_design_1">Speed up photo, video and message delivery</string>
-    <string name="whats_new_design_2">Optimizations to "firewalled" countries</string>
-    <string name="whats_new_design_3">Much better stability</string>
+    <string name="whats_new_design_title">Diseño, velocidad y estabilidad</string>
+    <string name="whats_new_design_0">Nuevo diseño azul</string>
+    <string name="whats_new_design_1">Aumento de velocidad de envío de fotos, vídeos y mensajes</string>
+    <string name="whats_new_design_2">Optimizaciones para países con "firewall"</string>
+    <string name="whats_new_design_3">Mejor estabilidad</string>
 
-    <string name="whats_new_secret_title">Added secret chats</string>
-    <string name="whats_new_secret_hint">Start a secret chat from the "Write to" menu or from a contact\'s profile.
+    <string name="whats_new_secret_title">Chats secretos añadidos</string>
+    <string name="whats_new_secret_hint">Inicia un chat secreto desde el menú para "Escribir a" o desde el perfil del contacto.
     </string>
-    <string name="whats_new_secret_0">Use end-to-end encryption</string>
-    <string name="whats_new_secret_1">Leave no trace on our servers</string>
-    <string name="whats_new_secret_2">Have a self-destruct timer</string>
-    <string name="whats_new_secret_3">Do not allow forwarding</string>
+    <string name="whats_new_secret_0">Usa cifrado de fin-a-fin</string>
+    <string name="whats_new_secret_1">No deja rastro en nuestros servidores</string>
+    <string name="whats_new_secret_2">Tiene autodestrucción</string>
+    <string name="whats_new_secret_3">No permite el reenvío de mensajes</string>
 
-    <string name="whats_new_arabic_title">Added arabic localization</string>
-    <string name="whats_new_arabic_hint">If you have any problems with the arabic localization, please tell our support
-        team in Settings — Ask a question.
+    <string name="whats_new_arabic_title">Traducción al Árabe añadida</string>
+    <string name="whats_new_arabic_hint">Si tienes cualquier problema con la traducción al Árabe, por favor, dile a nuestro
+    equipo de soporte en Ajustes — Haz una pregunta.
     </string>
-    <string name="whats_new_arabic_0">Full RTL support on android 4.0+</string>
-    <string name="whats_new_arabic_1">Mirrored interface on android 4.2+</string>
-    <string name="whats_new_arabic_2">Full support for eastern arabic numberals</string>
+    <string name="whats_new_arabic_0">Soporte completo de RTL en android 4.0+</string>
+    <string name="whats_new_arabic_1">Intefaz invertida en android 4.2+</string>
+    <string name="whats_new_arabic_2">Soporte completo para los numerales árabes del este</string>
 
-    <string name="whats_new_gif_title">Gif Animations, russian localization and speed</string>
+    <string name="whats_new_gif_title">Animaciones Gif, traducción al Ruso y velocidad</string>
     <string name="whats_new_gif_hint">
-        Gif animations works with images sent form other S-Edition versions of Telegram.
-        If you have any problems with the russian localization, please tell our support
-        team in Settings — Ask a question.
+        Las animaciones Gif funcionan con imágenes enviadas desde otras ediciones S de Telegram.
+        Si tienes cualquier problema con la traducción al Ruso, por favor, dile a nuestro equipo de soporte en
+        Ajustes — Haz una pregunta.
     </string>
-    <string name="whats_new_gif_0">Sending and viewing Gif-Animations</string>
-    <string name="whats_new_gif_1">Preview in documents (now visible only in S edition)</string>
-    <string name="whats_new_gif_2">Sending and receiving audio (from Documents menu)</string>
-    <string name="whats_new_gif_3">Download animation improvements</string>
-    <string name="whats_new_gif_4">Russian localization</string>
-    <string name="whats_new_gif_5">Experimental themes</string>
+    <string name="whats_new_gif_0">Envío y recepción de Animaciones Gif</string>
+    <string name="whats_new_gif_1">Vista previa de documentos (ahora visible sólo en edición S)</string>
+    <string name="whats_new_gif_2">Enviar y recibir audio (desde el menú Archivos)</string>
+    <string name="whats_new_gif_3">Mejoras en la descarga de animaciones</string>
+    <string name="whats_new_gif_4">Traducción al Ruso</string>
+    <string name="whats_new_gif_5">Temas experimentales</string>
 </resources>
