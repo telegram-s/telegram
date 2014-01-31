@@ -91,7 +91,8 @@
     </string>
 
     <string name="st_tour_page3_title">Gratis</string>
-    <string name="st_tour_page3"><![CDATA[<b>Telegram</b> es gratis para siempre. Sin avisos. Sin cuotas de suscripción.]]>
+    <string name="st_tour_page3">
+        <![CDATA[<b>Telegram</b> es gratis para siempre. Sin avisos. Sin cuotas de suscripción.]]>
     </string>
 
     <string name="st_tour_page4_title">Poderosa</string>
@@ -155,19 +156,22 @@
     <string name="st_auth_code_call">Solicitar llamada</string>
     <string name="st_auth_code">Código</string>
 
-    <string name="st_auth_signup_title">¡Tu número de teléfono está confirmado! Por favor, ingresa tu nombre, añade una foto y
+    <string name="st_auth_signup_title">¡Tu número de teléfono está confirmado! Por favor, ingresa tu nombre, añade una
+        foto y
         pulsa continuar:
     </string>
 
     <string name="st_auth_incorrect_phone">El número de teléfono {0} es incorrecto</string>
-    <string name="st_auth_confirm_phone">¿Es este tu número correcto? \n\n{0} \n\nUn SMS con tu código de acceso será enviado a este número.
+    <string name="st_auth_confirm_phone">¿Es este tu número correcto? \n\n{0} \n\nUn SMS con tu código de acceso será
+        enviado a este número.
     </string>
 
     <string name="st_dialogs_pick_title">Selecciona una conversación</string>
 
     <string name="st_dialogs_delete_header">¿Eliminar chat?</string>
     <string name="st_dialogs_delete_history">¿Estás seguro/a que quieres borrar todos los mensajes?</string>
-    <string name="st_dialogs_delete_group">¿Estás seguro/a que quieres elminar el chat y borrar todos los mensajes?</string>
+    <string name="st_dialogs_delete_group">¿Estás seguro/a que quieres elminar el chat y borrar todos los mensajes?
+    </string>
 
     <string name="st_dialogs_confirm_header">¿Estás seguro/a?</string>
     <string name="st_dialogs_confirm_send">¿Enviar mensaje a "{0}"?</string>
@@ -214,7 +218,9 @@
     <string name="st_settings_reset_subtitle">Cerrar sesión en todos los otros dispositivos</string>
 
     <string name="st_settings_reset_title">¿Estás seguro/a?</string>
-    <string name="st_settings_reset_message">¿Estás seguro/a que quieres cerrar sesión en los otros dispositivos? Todos los datos se perderán.</string>
+    <string name="st_settings_reset_message">¿Estás seguro/a que quieres cerrar sesión en los otros dispositivos? Todos
+        los datos se perderán.
+    </string>
 
     <string name="st_settings_reset_toast">Sesiones eliminadas</string>
     <string name="st_settings_chat">Ajustes de chat</string>
@@ -250,7 +256,8 @@
     <string name="st_new_group_next">SIGUIENTE</string>
 
     <string name="st_new_group_complete_title">NOMBRE DE GRUPO Y FOTO</string>
-    <string name="st_new_group_complete_avatar">Creaste un grupo satisfactoriamente, pero no pudimos subir la foto de grupo. ¿Reintentar?
+    <string name="st_new_group_complete_avatar">Creaste un grupo satisfactoriamente, pero no pudimos subir la foto de
+        grupo. ¿Reintentar?
     </string>
     <string name="st_new_group_complete_done">HECHO</string>
 
@@ -315,7 +322,8 @@
     </string>
     <string name="st_contacts_block">¿Estás seguro/a que quieres bloquear al contacto \'{0}\'?
     </string>
-    <string name="st_contacts_block_delete">¿Estás seguro/a que quieres bloquear el contacto \'{0}\' y eliminar el historial?
+    <string name="st_contacts_block_delete">¿Estás seguro/a que quieres bloquear el contacto \'{0}\' y eliminar el
+        historial?
     </string>
 
     <string name="st_contacts_header_unregistered">Usuarios no registrados</string>
@@ -381,8 +389,8 @@
     </string>
     <string name="st_edit_dialog_action_leave">Abandonar grupo</string>
     <string name="st_edit_dialog_action_dialog">Abrir conversación con {0}</string>
-    <string name="st_edit_dialog_action_view">Ver el perfil de {0}\</string>
-    <string name="st_edit_dialog_action_remove">Remove {0} from the group</string>
+    <string name="st_edit_dialog_action_view">Ver el perfil de {0}</string>
+    <string name="st_edit_dialog_action_remove">Expulsar a {0} del grupo</string>
 
     <string name="st_edit_title_title">Info. de grupo</string>
     <string name="st_edit_title_header">INGRESAR NOMBRE DEL GRUPO</string>
@@ -462,7 +470,8 @@
     <string name="st_notifications_in_app_vibrate">Vibración en la app</string>
     <string name="st_notifications_in_app_preview">Vista previa en la app</string>
     <string name="st_notifications_reset">Reiniciar todas las notificaciones</string>
-    <string name="st_notifications_reset_hint">Deshacer todos los ajustes personalizados en las notifiaciones para todos tus contactos y grupos
+    <string name="st_notifications_reset_hint">Deshacer todos los ajustes personalizados en las notifiaciones para todos
+        tus contactos y grupos
     </string>
     <string name="st_notifications_reset_success">Ajustes reiniciados satisfactoriamente</string>
 
@@ -490,12 +499,12 @@
     <string name="st_message_name_change_you">Cambiaste el nombre del grupo</string>
 
     <string name="st_message_added_user">{0} añadió a {1} al grupo</string>
-    <string name="st_message_added_user_you">{0} te añadió al grupo</string>
-    <string name="st_message_added_user_of_you">Añadiste a {0} al grupo</string>
+    <string name="st_message_added_user_you">Añadiste a {1} al grupo</string>
+    <string name="st_message_added_user_of_you">{0} te añadió al grupo</string>
 
     <string name="st_message_kicked_user">{0} expulsó a {1} del grupo</string>
-    <string name="st_message_kicked_user_you">{0} te expulsó del grupo</string>
-    <string name="st_message_kicked_user_of_you">Expulsaste a {0} del grupo</string>
+    <string name="st_message_kicked_user_you">Expulsaste a {1} del grupo</string>
+    <string name="st_message_kicked_user_of_you">{0} te expulsó del grupo</string>
 
     <string name="st_message_left_user">{0} abandonó</string>
     <string name="st_message_left_user_you">Abandonaste el grupo</string>
@@ -541,8 +550,8 @@
     <string name="st_dialog_changed_name_you">actualizaste el nombre del grupo</string>
 
     <string name="st_dialog_added_user">{sender} añadió a {0} al grupo</string>
-    <string name="st_dialog_added_user_you">{0} te añadió al grupo</string>
-    <string name="st_dialog_added_user_of_you">Añadiste a {0} al grupo</string>
+    <string name="st_dialog_added_user_you">Añadiste a {0} al grupo</string>
+    <string name="st_dialog_added_user_of_you">{sender} te añadió al grupo</string>
 
     <string name="st_dialog_enter_user">{sender} se unió al grupo</string>
     <string name="st_dialog_enter_user_you">Te uniste al grupo</string>
@@ -551,8 +560,8 @@
     <string name="st_dialog_left_user_you">Dejaste el grupo</string>
 
     <string name="st_dialog_kicked_user">{sender} expulsó a {0} del grupo</string>
-    <string name="st_dialog_kicked_user_you">{0} te expulsó del grupo</string>
-    <string name="st_dialog_kicked_user_of_you">Expulsaste a {0} del grupo</string>
+    <string name="st_dialog_kicked_user_you">Expulsaste a {0} del grupo</string>
+    <string name="st_dialog_kicked_user_of_you">{sender} te expulsó del grupo</string>
 
     <string name="st_dialog_system">Mensaje de sistema</string>
 
@@ -562,10 +571,11 @@
     <string name="st_secret_header_chat">CHAT</string>
 
     <string name="st_secret_key_title">Clave de cifrado</string>
-    <string name="st_secret_key_info1">Esta imagen es una visualización de la clave de cifrado para el chat secreto con 
+    <string name="st_secret_key_info1">Esta imagen es una visualización de la clave de cifrado para el chat secreto con
         {name}.
     </string>
-    <string name="st_secret_key_info2">Si esta imagen se visualiza de la misma manera en el teléfono de {name} tu chat es seguro en un 200%.
+    <string name="st_secret_key_info2">Si esta imagen se visualiza de la misma manera en el teléfono de {name} tu chat
+        es seguro en un 200%.
     </string>
 
     <string name="st_bubble_media_cancelled">cancelado</string>
@@ -601,7 +611,8 @@
     <string name="st_notification_secret_sent_audio">Envió un audio al chat secreto</string>
 
     <string name="st_notification_new_login">Inicio de sesión desde un dispositivo desconocido {device}</string>
-    <string name="st_notification_new_login_location">Inicio de sesión desde un dispositivo desconocido {device} de {location}
+    <string name="st_notification_new_login_location">Inicio de sesión desde un dispositivo desconocido {device} de
+        {location}
     </string>
 
     <string name="st_whats_new_title">Qué hay de nuevo</string>
