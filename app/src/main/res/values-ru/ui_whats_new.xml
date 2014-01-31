@@ -20,7 +20,8 @@
     <string name="whats_new_secret_3">Запрещена пересылка сообщений</string>
 
     <string name="whats_new_arabic_title">Добавлена арабская локализация</string>
-    <string name="whats_new_arabic_hint">Если у Вас есть проблемы с арабской локализацией, пожалуйста, сообщите нашей команде поддержки в Настройках - Задать вопрос.
+    <string name="whats_new_arabic_hint">Если у Вас есть проблемы с арабской локализацией, пожалуйста, сообщите нашей
+        команде поддержки в Настройках - Задать вопрос.
     </string>
     <string name="whats_new_arabic_0">Полная поддержка RTL на Андроиде 4.0+</string>
     <string name="whats_new_arabic_1">Отраженный интерфейс на Андроиде 4.2+</string>
@@ -29,7 +30,8 @@
     <string name="whats_new_gif_title">Gif-Анимации, аудио, русская локализация и скорость</string>
     <string name="whats_new_gif_hint">
         Gif-Анимации работает только с другими S-Версиями телеграма.
-        Если у Вас есть проблемы с русской локализацией, пожалуйста, сообщите нашей команде поддержки в Настройках - Задать вопрос.
+        Если у Вас есть проблемы с русской локализацией, пожалуйста, сообщите нашей команде поддержки в Настройках -
+        Задать вопрос.
     </string>
     <string name="whats_new_gif_0">Отправка Gif-Анимаций</string>
     <string name="whats_new_gif_1">Предпросмотр документов-изображений</string>
@@ -37,4 +39,11 @@
     <string name="whats_new_gif_3">Улучшена анимация загрузки фотографий</string>
     <string name="whats_new_gif_4">Русская локализация</string>
     <string name="whats_new_gif_5">Экспериментальные темы приложения</string>
+
+    <string name="whats_new_spain_title">Добавлена испанская локализация и улучшение стабильности</string>
+    <string name="whats_new_spain_hint">Если у Вас есть проблемы с испанской локализацией, пожалуйста, сообщите нашей
+        команде поддержки в Настройках - Задать вопрос.
+    </string>
+    <string name="whats_new_spain_0">Полностью переведено на испанский язык</string>
+    <string name="whats_new_spain_1">Исправлено около 50 ошибок</string>
 </resources>

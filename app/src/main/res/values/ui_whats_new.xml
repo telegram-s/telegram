@@ -39,4 +39,11 @@
     <string name="whats_new_gif_3">Download animation improvements</string>
     <string name="whats_new_gif_4">Russian localization</string>
     <string name="whats_new_gif_5">Experimental themes</string>
+
+    <string name="whats_new_spain_title">Added spain localization and better stability</string>
+    <string name="whats_new_spain_hint">If you have any problems with the spain localization, please tell our support
+        team in Settings — Ask a question.
+    </string>
+    <string name="whats_new_spain_0">Fully translated to spain language</string>
+    <string name="whats_new_spain_1">Fixed about 50 bugs</string>
 </resources>
