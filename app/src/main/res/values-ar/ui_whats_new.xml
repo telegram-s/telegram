@@ -38,10 +38,9 @@
     <string name="whats_new_gif_4">دعم اللغة الروسية</string>
     <string name="whats_new_gif_5">ثيمات تجريبية</string>
 
-    <string name="whats_new_spain_title">Added spain localization and better stability</string>
-    <string name="whats_new_spain_hint">If you have any problems with the spain localization, please tell our support
-        team in Settings — Ask a question.
+    <string name="whats_new_spain_title">تم إضافة اللغة الإسبانية وجعل البرنامج أكثر قوة</string>
+    <string name="whats_new_spain_hint">إذا واجهتكم مشاكل مع اللغة الإسبانية، نجو التواصل مع الدعم الفني داخل التطبيق
     </string>
-    <string name="whats_new_spain_0">Fully translated to spain language</string>
-    <string name="whats_new_spain_1">Fixed about 50 bugs</string>
+    <string name="whats_new_spain_0">دعم كامل للواجهة الإسبانية</string>
+    <string name="whats_new_spain_1">حل تقريبًا ٥٠ مشكلة سابقة</string>
 </resources>
