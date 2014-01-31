@@ -73,7 +73,7 @@
     <string name="st_error_name_not_modified">Nombre no modificado.</string>
     <string name="st_error_title_not_modified">Nombre de grupo no modificado.</string>
     <string name="st_error_already_participant">Este usuario ya es miembro del grupo.</string>
-    <string name="st_error_participant_outdated">La versión de Telegram de este usuario no es soportada.</string>
+    <string name="st_error_participant_outdated">La versión de Telegram de este usuario no está soportada.</string>
     <string name="st_error_photo_small">La foto es muy pequeña.</string>
     <string name="st_error_blocked">El usuario te ha añadido a su lista negra.</string>
     <string name="st_error_incorrect">No se puede completar la acción.</string>
@@ -94,13 +94,13 @@
     <string name="st_tour_page3"><![CDATA[<b>Telegram</b> es gratis para siempre. Sin avisos. Sin cuotas de suscripción.]]>
     </string>
 
-    <string name="st_tour_page4_title">Poderosa</string>
+    <string name="st_tour_page4_title">Potente</string>
     <string name="st_tour_page4"><![CDATA[<b>Telegram</b> no tiene límites en el tamaño de tus chats y archivos.]]>
     </string>
 
     <string name="st_tour_page5_title">Segura</string>
     <string name="st_tour_page5">
-        <![CDATA[<b>Telegram</b> mantiene tus mensajes a salvo del ataque de hackers.]]>
+        <![CDATA[<b>Telegram</b> mantiene tus mensajes a salvo del ataque de crackers.]]>
     </string>
 
     <string name="st_tour_page6_title">Basada en la nube</string>
@@ -173,7 +173,7 @@
     <string name="st_dialogs_confirm_send">¿Enviar mensaje a "{0}"?</string>
     <string name="st_dialogs_confirm_forward">¿Reenviar mensaje a "{0}"?</string>
     <string name="st_dialogs_confirm_forward_multiple">¿Reenviar mensajes a "{0}"?</string>
-    <string name="st_dialogs_confirm_image">¿Enviar foto a "{0}"?</string>
+    <string name="st_dialogs_confirm_image">¿Enviar imagen a "{0}"?</string>
     <string name="st_dialogs_confirm_video">¿Enviar vídeo a "{0}"?</string>
     <string name="st_dialogs_confirm_doc">¿Enviar archivo a "{0}"?</string>
     <string name="st_dialogs_confirm_images">¿Enviar imágenes a "{0}"?</string>
@@ -187,13 +187,13 @@
     <string name="st_dialogs_write_to_friend">Escribir a un amigo</string>
     <string name="st_dialogs_empty">No hay mensajes aún...</string>
 
-    <string name="st_dialogs_share_to_secret">No es posible enviar un contacto a un chat secreto</string>
-    <string name="st_dialogs_forward_to_secret">No es posible reenviar un mensaje a un chat secreto</string>
+    <string name="st_dialogs_share_to_secret">No es posible enviar un contacto a un chat privado</string>
+    <string name="st_dialogs_forward_to_secret">No es posible reenviar un mensaje a un chat privado</string>
 
     <string name="st_dialogs_menu_contacts">Contactos</string>
     <string name="st_dialogs_menu_settings">Ajustes</string>
     <string name="st_dialogs_menu_group">Nuevo grupo</string>
-    <string name="st_dialogs_menu_secret">Nuevo chat secreto</string>
+    <string name="st_dialogs_menu_secret">Nuevo chat privado</string>
     <string name="st_dialogs_menu_write_contact">Escribir a contacto</string>
     <string name="st_dialogs_menu_appearance">Apariencia</string>
 
@@ -218,12 +218,12 @@
 
     <string name="st_settings_reset_toast">Sesiones eliminadas</string>
     <string name="st_settings_chat">Ajustes de chat</string>
-    <string name="st_settings_chat_subtitle">Fondo, enviar con enter, tamaño de letra...</string>
+    <string name="st_settings_chat_subtitle">Fondo, enviar con "Intro", tamaño de letra...</string>
     <string name="st_settings_background">Fondo de chat</string>
 
-    <string name="st_settings_support">Haz una Pregunta</string>
+    <string name="st_settings_support">Formúlanos una pregunta</string>
     <string name="st_settings_support_subtitle">Nuestro equipo de soporte te ayudará con gusto</string>
-    <string name="st_settings_faq">Preguntas Frecuentes</string>
+    <string name="st_settings_faq">Preguntas frecuentes</string>
     <string name="st_settings_faq_subtitle">Mira nuestra ayuda</string>
     <string name="st_settings_twitter">Twitter</string>
     <string name="st_settings_twitter_subtitle">Suscríbete a nuestras noticias</string>
@@ -231,12 +231,12 @@
     <string name="st_settings_save_photo">Guardar fotos entrantes</string>
     <string name="st_settings_save_photo_subtitle">Guardar en galería automáticamente</string>
     <string name="st_settings_notifications">Notificaciones y sonidos</string>
-    <string name="st_settings_log_out">Cerrar Sesión</string>
+    <string name="st_settings_log_out">Cerrar sesión</string>
 
     <string name="st_settings_advanced_title">Avanzado</string>
     <string name="st_settings_advanced_background">BACKGROUND</string>
-    <string name="st_settings_advanced_send_time">Message send time</string>
-    <string name="st_settings_advanced_life_time">Keep app active</string>
+    <string name="st_settings_advanced_send_time">Tiempo de envío de mensaje</string>
+    <string name="st_settings_advanced_life_time">Mantener aplicación activa</string>
 
     <string name="st_settings_name_title">TU NOMBRE Y APELLIDO</string>
     <string name="st_settings_name_changed">Nombre cambiado</string>
@@ -260,13 +260,13 @@
     <string name="st_conv_chat_closed_title">Ya no tienes acceso a este chat</string>
     <string name="st_conv_enc_exchanging_keys">Intercambiando claves de cifrado...</string>
     <string name="st_conv_enc_waiting">Esperando que {name} se conecte...</string>
-    <string name="st_conv_enc_cancelled">Chat secreto cancelado</string>
+    <string name="st_conv_enc_cancelled">Chat privado cancelado</string>
 
-    <string name="st_conv_enc_invite_out_title">Invitaste a {name} a un chat secreto.</string>
+    <string name="st_conv_enc_invite_out_title">Invitaste a {name} a un chat privado.</string>
 
-    <string name="st_conv_enc_invite_in_title">{name} te invitó a un chat secreto.</string>
+    <string name="st_conv_enc_invite_in_title">{name} te invitó a un chat privado.</string>
 
-    <string name="st_conv_enc_info_title">Los Chats Secretos:</string>
+    <string name="st_conv_enc_info_title">Los chats privados:</string>
     <string name="st_conv_enc_info_info1">Usan cifrado de fin-a-fin</string>
     <string name="st_conv_enc_info_info2">No dejan rastro en nuestros servidores</string>
     <string name="st_conv_enc_info_info3">Tienen autodestrucción</string>
@@ -311,11 +311,11 @@
     <string name="st_contacts_not_registered_message">{0} no está registrado en Telegram. ¿Enviar una invitación?
     </string>
 
-    <string name="st_contacts_delete">¿Estás seguro/a que deseas eliminar el contacto \'{0}\'?
+    <string name="st_contacts_delete">¿Estás seguro/a que deseas eliminar al contacto \'{0}\'?
     </string>
     <string name="st_contacts_block">¿Estás seguro/a que quieres bloquear al contacto \'{0}\'?
     </string>
-    <string name="st_contacts_block_delete">¿Estás seguro/a que quieres bloquear el contacto \'{0}\' y eliminar el historial?
+    <string name="st_contacts_block_delete">¿Estás seguro/a que quieres bloquear al contacto \'{0}\' y eliminar el historial?
     </string>
 
     <string name="st_contacts_header_unregistered">Usuarios no registrados</string>
@@ -346,8 +346,8 @@
     <string name="st_profile_phone_copied">Número copiado</string>
     <string name="st_profile_menu_block">Bloquear usuario</string>
 
-    <string name="st_profile_menu_add_phone">Añadir a la App de Contactos</string>
-    <string name="st_profile_menu_view">Ver en la App de Contactos</string>
+    <string name="st_profile_menu_add_phone">Añadir a la aplicación de Contactos</string>
+    <string name="st_profile_menu_view">Ver en la aplicación de Contactos</string>
 
     <string name="st_profile_menu_add">Añadir a contactos</string>
     <string name="st_profile_menu_remove">Quitar de contactos</string>
@@ -357,7 +357,7 @@
 
     <string name="st_profile_blocked">Usuario bloqueado</string>
     <string name="st_profile_added">Contacto añadido</string>
-    <string name="st_profile_secret">Iniciar Chat Secreto</string>
+    <string name="st_profile_secret">Iniciar chat privado</string>
 
     <string name="st_pick_file_title">Seleccionar un Archivo</string>
 
@@ -382,7 +382,7 @@
     <string name="st_edit_dialog_action_leave">Abandonar grupo</string>
     <string name="st_edit_dialog_action_dialog">Abrir conversación con {0}</string>
     <string name="st_edit_dialog_action_view">Ver el perfil de {0}\</string>
-    <string name="st_edit_dialog_action_remove">Remove {0} from the group</string>
+    <string name="st_edit_dialog_action_remove">Eliminar a {0} del grupo</string>
 
     <string name="st_edit_title_title">Info. de grupo</string>
     <string name="st_edit_title_header">INGRESAR NOMBRE DEL GRUPO</string>
@@ -423,18 +423,18 @@
 
     <string name="st_appearance_font_size">Tamaño de letra: {s}</string>
     <string name="st_appearance_font_size_subtitle">Tamaño de letra para la pantalla de conversación</string>
-    <string name="st_appearance_font_size_tiny">Pequeña</string>
-    <string name="st_appearance_font_size_small">Chica</string>
+    <string name="st_appearance_font_size_tiny">Minúscula</string>
+    <string name="st_appearance_font_size_small">Pequeña</string>
     <string name="st_appearance_font_size_normal">Normal</string>
     <string name="st_appearance_font_size_large">Grande</string>
     <string name="st_appearance_font_size_huge">Enorme</string>
-    <string name="st_appearance_enter">Enviar con enter</string>
-    <string name="st_appearance_enter_subtitle_enable">Enter envía el mensaje</string>
-    <string name="st_appearance_enter_subtitle_disable">Enter añade una línea</string>
+    <string name="st_appearance_enter">Enviar con "intro"</string>
+    <string name="st_appearance_enter_subtitle_enable">Tecla "Intro" envía el mensaje</string>
+    <string name="st_appearance_enter_subtitle_disable">Tecla "Intro" añade una línea</string>
     <string name="st_appearance_background">Fondo</string>
     <string name="st_appearance_background_subtitle">Fondo de Chat</string>
     <string name="st_appearance_bar">Tema (experimental)</string>
-    <string name="st_appearance_bar_subtitle">Esquema de color y estilos</string>
+    <string name="st_appearance_bar_subtitle">Esquema de colores y estilos</string>
     <string name="st_appearance_bar_color_default">Por defecto</string>
     <string name="st_appearance_bar_color_green">Verde</string>
     <string name="st_appearance_bar_color_cyan">Cian</string>
@@ -573,7 +573,7 @@
     <string name="st_bubble_media_download">descargar</string>
     <string name="st_bubble_media_in_progress">en curso</string>
 
-    <string name="st_notification_sent_map">{name} te envió un mapa</string>
+    <string name="st_notification_sent_map">{name} te envió una ubicación</string>
     <string name="st_notification_sent_contact">{name} compartió un contacto contigo</string>
     <string name="st_notification_sent_video">{name} te envió un vídeo</string>
     <string name="st_notification_sent_photo">{name} te envió una foto</string>
@@ -582,29 +582,29 @@
     <string name="st_notification_sent_audio">{name} te envió un audio</string>
     <string name="st_notification_joined">¡{name} se unió a Telegram!</string>
 
-    <string name="st_notification_group_sent_map">{name} envió un mapa al chat {chat}</string>
+    <string name="st_notification_group_sent_map">{name} envió una ubicación al chat {chat}</string>
     <string name="st_notification_group_sent_contact">{name} compartió un contacto en el chat {chat}</string>
     <string name="st_notification_group_sent_video">{name} envió un vídeo al chat {chat}</string>
     <string name="st_notification_group_sent_photo">{name} envió una foto al chat {chat}</string>
     <string name="st_notification_group_sent_document">{name} envió un archivo al chat {chat}</string>
     <string name="st_notification_group_sent_audio">{name} envió un audio al chat {chat}</string>
 
-    <string name="st_notification_secret_requested">Nuevo chat secreto solicitado</string>
-    <string name="st_notification_secret_created">Chat secreto iniciado</string>
-    <string name="st_notification_secret_cancelled">Chat secreto cancelado</string>
+    <string name="st_notification_secret_requested">Nuevo chat privado solicitado</string>
+    <string name="st_notification_secret_created">Chat privado iniciado</string>
+    <string name="st_notification_secret_cancelled">Chat privado cancelado</string>
 
-    <string name="st_notification_secret_sent_message">Envió un mensaje al chat secreto</string>
-    <string name="st_notification_secret_sent_photo">Envió una foto al chat secreto</string>
-    <string name="st_notification_secret_sent_video">Envió un vídeo al chat secreto</string>
-    <string name="st_notification_secret_sent_map">Envió un mapa al chat secreto</string>
-    <string name="st_notification_secret_sent_doc">Envió un archivo al chat secreto</string>
-    <string name="st_notification_secret_sent_audio">Envió un audio al chat secreto</string>
+    <string name="st_notification_secret_sent_message">Envió un mensaje al chat privado</string>
+    <string name="st_notification_secret_sent_photo">Envió una foto al chat privado</string>
+    <string name="st_notification_secret_sent_video">Envió un vídeo al chat privado</string>
+    <string name="st_notification_secret_sent_map">Envió una ubicación al chat privado</string>
+    <string name="st_notification_secret_sent_doc">Envió un archivo al chat privado</string>
+    <string name="st_notification_secret_sent_audio">Envió un audio al chat privado</string>
 
     <string name="st_notification_new_login">Inicio de sesión desde un dispositivo desconocido {device}</string>
     <string name="st_notification_new_login_location">Inicio de sesión desde un dispositivo desconocido {device} de {location}
     </string>
 
-    <string name="st_whats_new_title">Qué hay de nuevo</string>
+    <string name="st_whats_new_title">¿Qué hay de nuevo?</string>
     <string name="st_whats_new_continue">Seguir escribiendo</string>
 
     <string name="st_invite_short">
