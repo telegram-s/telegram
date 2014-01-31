@@ -227,9 +227,9 @@
     <string name="st_settings_chat_subtitle">Fondo, enviar con enter, tamaño de letra...</string>
     <string name="st_settings_background">Fondo de chat</string>
 
-    <string name="st_settings_support">Haz una Pregunta</string>
+    <string name="st_settings_support">Haz una pregunta</string>
     <string name="st_settings_support_subtitle">Nuestro equipo de soporte te ayudará con gusto</string>
-    <string name="st_settings_faq">Preguntas Frecuentes</string>
+    <string name="st_settings_faq">Preguntas frecuentes</string>
     <string name="st_settings_faq_subtitle">Mira nuestra ayuda</string>
     <string name="st_settings_twitter">Twitter</string>
     <string name="st_settings_twitter_subtitle">Suscríbete a nuestras noticias</string>
@@ -274,7 +274,7 @@
     <string name="st_conv_enc_invite_in_title">{name} te invitó a un chat secreto.</string>
 
     <string name="st_conv_enc_info_title">Los Chats Secretos:</string>
-    <string name="st_conv_enc_info_info1">Usan cifrado de fin-a-fin</string>
+    <string name="st_conv_enc_info_info1">Usan cifrado de móvil-a-móvil</string>
     <string name="st_conv_enc_info_info2">No dejan rastro en nuestros servidores</string>
     <string name="st_conv_enc_info_info3">Tienen autodestrucción</string>
     <string name="st_conv_enc_info_info4">No permiten reenvíos de mensajes</string>
@@ -479,7 +479,7 @@
     <string name="st_message_you">Tú</string>
 
     <string name="st_message_enc_self_destruct">{0} activó la autodestrucción en {1}</string>
-    <string name="st_message_enc_self_destruct_you">Activaste la autodestrucción</string>
+    <string name="st_message_enc_self_destruct_you">Activaste la autodestrucción en {1}</string>
     <string name="st_message_enc_self_destruct_off">{0} desactivó la autodestrucción</string>
     <string name="st_message_enc_self_destruct_off_you">Desactivaste la autodestrucción</string>
 
@@ -506,7 +506,7 @@
     <string name="st_message_kicked_user_you">Expulsaste a {1} del grupo</string>
     <string name="st_message_kicked_user_of_you">{0} te expulsó del grupo</string>
 
-    <string name="st_message_left_user">{0} abandonó</string>
+    <string name="st_message_left_user">{0} dejó el grupo</string>
     <string name="st_message_left_user_you">Abandonaste el grupo</string>
 
     <string name="st_message_service">Mensaje de actividad desconocida</string>
