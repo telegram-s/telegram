@@ -112,6 +112,8 @@ public class MessageMediaView extends BaseMsgView {
 
     private boolean scaleUpMedia = false;
 
+    private OptimizedBlur optimizedBlur;
+
     public MessageMediaView(Context context) {
         super(context);
         init();
@@ -129,6 +131,7 @@ public class MessageMediaView extends BaseMsgView {
 
     protected void init() {
         super.init();
+        optimizedBlur = new OptimizedBlur();
         videoIcon = getResources().getDrawable(R.drawable.st_bubble_ic_video);
         mapPoint = getResources().getDrawable(R.drawable.st_map_pin);
         unsupportedMark = getResources().getDrawable(R.drawable.st_bubble_unknown);
@@ -341,38 +344,48 @@ public class MessageMediaView extends BaseMsgView {
             }
 
             if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0 && isDownloadable && previewCached == null) {
-                if (mediaPhoto.isOptimized()) {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
+//                if (mediaPhoto.isOptimized()) {
+//                    BitmapFactory.Options options = new BitmapFactory.Options();
+////                    if (previewBitmapHolder != null) {
+////                        options.inBitmap = previewBitmapHolder;
+////                        previewBitmapHolder = null;
+////                    }
+//                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+//                    // options.inMutable = true;
+//                    options.inDither = false;
+//                    options.inTempStorage = bitmapTmp;
+//
+//                    previewCached = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
+//                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
+//                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
+//                } else {
+//                    BitmapFactory.Options options = new BitmapFactory.Options();
+//                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+//                    // options.inMutable = true;
+//                    options.inDither = false;
+//                    options.inTempStorage = bitmapTmp;
+//                    Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
 //                    if (previewBitmapHolder != null) {
-//                        options.inBitmap = previewBitmapHolder;
+//                        previewCached = previewBitmapHolder;
 //                        previewBitmapHolder = null;
+//                        BitmapUtils.fastblur(img, previewCached, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH(), 3);
+//                    } else {
+//                        previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+//                        BitmapUtils.fastblur(img, previewCached, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH(), 3);
 //                    }
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    // options.inMutable = true;
-                    options.inDither = false;
-                    options.inTempStorage = bitmapTmp;
-
-                    previewCached = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
-                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
-                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
-                } else {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    // options.inMutable = true;
-                    options.inDither = false;
-                    options.inTempStorage = bitmapTmp;
-                    Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
-                    if (previewBitmapHolder != null) {
-                        previewCached = previewBitmapHolder;
-                        previewBitmapHolder = null;
-                        BitmapUtils.fastblur(img, previewCached, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH(), 3);
-                    } else {
-                        previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-                        BitmapUtils.fastblur(img, previewCached, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH(), 3);
-                    }
-                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
-                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
-                }
+//                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
+//                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
+//                }
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                // options.inMutable = true;
+                options.inDither = false;
+                options.inTempStorage = bitmapTmp;
+                Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
+                previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+                optimizedBlur.performBlur(previewCached);
+                fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
+                fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
             }
         } else if (message.message.getExtras() instanceof TLLocalVideo) {
             TLLocalVideo mediaVideo = (TLLocalVideo) message.message.getExtras();
@@ -431,14 +444,19 @@ public class MessageMediaView extends BaseMsgView {
                         options.inDither = false;
                         options.inTempStorage = bitmapTmp;
                         Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, options);
-                        if (previewBitmapHolder != null) {
-                            previewCached = previewBitmapHolder;
-                            previewBitmapHolder = null;
-                            BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
-                        } else {
-                            previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-                            BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
-                        }
+//                        if (previewBitmapHolder != null) {
+//                            previewCached = previewBitmapHolder;
+//                            previewBitmapHolder = null;
+//                            optimizedBlur.performBlur(img);
+//                            //BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+//                        } else {
+//                            previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+//                            optimizedBlur.performBlur(previewCached);
+//                            // BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+//                        }
+
+                        previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+                        optimizedBlur.performBlur(previewCached);
                         fastPreviewWidth = mediaVideo.getPreviewW() - 1;
                         fastPreviewHeight = mediaVideo.getPreviewH() - 1;
                     }
@@ -583,12 +601,13 @@ public class MessageMediaView extends BaseMsgView {
                     if (previewCached == null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                        // options.inMutable = true;
                         options.inDither = false;
                         options.inTempStorage = bitmapTmp;
+                        options.inMutable = true;
                         Bitmap img = BitmapFactory.decodeByteArray(document.getFastPreview(), 0, document.getFastPreview().length, options);
-                        previewCached = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
-                        BitmapUtils.fastblur(img, previewCached, img.getWidth(), img.getHeight(), 3);
+                        previewCached = optimizedBlur.performBlur(img);
+                        // previewCached = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
+                        // BitmapUtils.fastblur(img, previewCached, img.getWidth(), img.getHeight(), 3);
                     }
                     fastPreviewWidth = document.getPreviewW() - 1;
                     fastPreviewHeight = document.getPreviewH() - 1;

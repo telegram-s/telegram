@@ -21,9 +21,9 @@
                   android:icon="@drawable/st_bar_ic_attach_doc"
                   android:title="Document"/>
 
-            <!--<item android:id="@+id/attachAudio"-->
-                  <!--android:icon="@drawable/st_bar_ic_attach_doc"-->
-                  <!--android:title="Audio"/>-->
+            <item android:id="@+id/attachAudio"
+                  android:icon="@drawable/st_bar_ic_attach_doc"
+                  android:title="Audio"/>
         </menu>
     </item>
     <item android:id="@+id/userAvatar"

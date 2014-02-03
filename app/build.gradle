@@ -61,6 +61,13 @@ android {
     defaultConfig {
         versionCode Integer.valueOf(customVersionCode)
         versionName project.version
+
+        ndk {
+            moduleName "timg"
+            cFlags "-DANDROID_NDK -DDISABLE_IMPORTGL"
+            ldLibs "log", "jnigraphics", "m"
+            stl "stlport_static"
+        }
     }
 
     productFlavors {

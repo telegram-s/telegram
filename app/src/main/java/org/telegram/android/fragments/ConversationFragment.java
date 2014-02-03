@@ -1053,7 +1053,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         menu.findItem(R.id.attachVideo).setTitle(highlightMenuText(R.string.st_conv_menu_video));
         menu.findItem(R.id.attachLocation).setTitle(highlightMenuText(R.string.st_conv_menu_location));
         menu.findItem(R.id.attachDocument).setTitle(highlightMenuText(R.string.st_conv_menu_doc));
-        // menu.findItem(R.id.attachAudio).setTitle(highlightMenuText(R.string.st_conv_menu_audio));
+        menu.findItem(R.id.attachAudio).setTitle(highlightMenuText(R.string.st_conv_menu_audio));
 
         MenuItem avatarItem = menu.findItem(R.id.userAvatar);
         View avatarUploadView = avatarItem.getActionView().findViewById(R.id.avatarUploadProgress);
@@ -1231,15 +1231,15 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             return true;
         }
 
-//        if (item.getItemId() == R.id.attachAudio) {
-//            if (!isEnabledInput) {
-//                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
-//                return true;
-//            }
-//
-//            startAudio();
-//            return true;
-//        }
+        if (item.getItemId() == R.id.attachAudio) {
+            if (!isEnabledInput) {
+                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            startAudio();
+            return true;
+        }
 
         return false;
     }
@@ -1655,7 +1655,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         listView.post(new Runnable() {
                             @Override
                             public void run() {
-                                listView.setSelectionFromTop(workingSet.size() - finalIndex, getPx(64));
+                                secureCallbackWeak(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        listView.setSelectionFromTop(workingSet.size() - finalIndex, getPx(64));
+                                    }
+                                });
                             }
                         });
                         isFreshUpdate = false;
