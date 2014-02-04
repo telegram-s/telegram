@@ -74,7 +74,10 @@ public class MessageMediaView extends BaseMsgView {
     private Paint placeholderPaint;
     private Paint clockIconPaint;
 
-    private Rect rect = new Rect();
+    private Path path = new Path();
+    private RectF rectF = new RectF();
+    private Rect rect1 = new Rect();
+    private Rect rect2 = new Rect();
 
     private int databaseId = -1;
     private String key;
@@ -378,7 +381,7 @@ public class MessageMediaView extends BaseMsgView {
                     int[] sizes = buildSize(mediaPhoto.getFullW(), mediaPhoto.getFullH());
                     ScaleTask task = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), sizes[0], sizes[1]);
                     task.setPutInDiskCache(true);
-                    // isBinded = bindPreview(task);
+                    isBinded = bindPreview(task);
                 }
                 isDownloadable = true;
             } else {
@@ -419,39 +422,6 @@ public class MessageMediaView extends BaseMsgView {
 
                 Logger.d(TAG, "Decode picture in " + (SystemClock.uptimeMillis() - start) +
                         " " + img.getWidth() + "x" + img.getHeight() + " :" + (isReused ? "reused" : ""));
-
-//                if (mediaPhoto.isOptimized()) {
-//                    BitmapFactory.Options options = new BitmapFactory.Options();
-////                    if (previewBitmapHolder != null) {
-////                        options.inBitmap = previewBitmapHolder;
-////                        previewBitmapHolder = null;
-////                    }
-//                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//                    // options.inMutable = true;
-//                    options.inDither = false;
-//                    options.inTempStorage = bitmapTmp;
-//
-//                    previewCached = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
-//                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
-//                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
-//                } else {
-//                    BitmapFactory.Options options = new BitmapFactory.Options();
-//                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//                    // options.inMutable = true;
-//                    options.inDither = false;
-//                    options.inTempStorage = bitmapTmp;
-//                    Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
-//                    if (previewBitmapHolder != null) {
-//                        previewCached = previewBitmapHolder;
-//                        previewBitmapHolder = null;
-//                        BitmapUtils.fastblur(img, previewCached, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH(), 3);
-//                    } else {
-//                        previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-//                        BitmapUtils.fastblur(img, previewCached, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH(), 3);
-//                    }
-//                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
-//                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
-//                }
             }
         } else if (message.message.getExtras() instanceof TLLocalVideo) {
             TLLocalVideo mediaVideo = (TLLocalVideo) message.message.getExtras();
@@ -958,7 +928,9 @@ public class MessageMediaView extends BaseMsgView {
             if (animationTime > FADE_ANIMATION_TIME || !isAnimatedProgress) {
                 bitmapPaint.setAlpha(255);
                 if (scaleUpMedia) {
-                    canvas.drawBitmap(preview, new Rect(0, 0, preview.getWidth(), preview.getHeight()), new Rect(0, 0, desiredWidth, desiredHeight), bitmapPaint);
+                    rect1.set(0, 0, preview.getWidth(), preview.getHeight());
+                    rect2.set(0, 0, desiredWidth, desiredHeight);
+                    canvas.drawBitmap(preview, rect1, rect2, bitmapPaint);
                 } else {
                     canvas.drawBitmap(preview, 0, 0, bitmapPaint);
                 }
@@ -968,13 +940,17 @@ public class MessageMediaView extends BaseMsgView {
                 if (oldPreview != null) {
                     bitmapPaint.setAlpha(255);
                     if (scaleUpMedia) {
-                        canvas.drawBitmap(oldPreview, new Rect(0, 0, oldPreview.getWidth(), oldPreview.getHeight()), new Rect(0, 0, desiredWidth, desiredHeight), bitmapPaint);
+                        rect1.set(0, 0, oldPreview.getWidth(), oldPreview.getHeight());
+                        rect2.set(0, 0, desiredWidth, desiredHeight);
+                        canvas.drawBitmap(oldPreview, rect1, rect2, bitmapPaint);
                     } else {
                         canvas.drawBitmap(oldPreview, 0, 0, bitmapPaint);
                     }
                 } else if (previewCached != null) {
                     bitmapFilteredPaint.setAlpha(255);
-                    canvas.drawBitmap(previewCached, new Rect(0, 0, fastPreviewWidth, fastPreviewHeight), new Rect(0, 0, desiredWidth, desiredHeight), bitmapFilteredPaint);
+                    rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
+                    rect2.set(0, 0, desiredWidth, desiredHeight);
+                    canvas.drawBitmap(previewCached, rect1, rect2, bitmapFilteredPaint);
                 } else {
                     canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
                 }
@@ -982,9 +958,11 @@ public class MessageMediaView extends BaseMsgView {
                 bitmapPaint.setAlpha((int) (255 * alpha));
 
                 if (scaleUpMedia) {
-                    canvas.drawBitmap(preview, 0, 0, bitmapPaint);
+                    rect1.set(0, 0, preview.getWidth(), preview.getHeight());
+                    rect2.set(0, 0, desiredWidth, desiredHeight);
+                    canvas.drawBitmap(preview, rect1, rect2, bitmapPaint);
                 } else {
-                    canvas.drawBitmap(preview, new Rect(0, 0, preview.getWidth(), preview.getHeight()), new Rect(0, 0, desiredWidth, desiredHeight), bitmapPaint);
+                    canvas.drawBitmap(preview, 0, 0, bitmapPaint);
                 }
 
                 isAnimated = true;
@@ -992,13 +970,17 @@ public class MessageMediaView extends BaseMsgView {
         } else if (oldPreview != null) {
             bitmapPaint.setAlpha(255);
             if (scaleUpMedia) {
-                canvas.drawBitmap(oldPreview, new Rect(0, 0, oldPreview.getWidth(), oldPreview.getHeight()), new Rect(0, 0, desiredWidth, desiredHeight), bitmapPaint);
+                rect1.set(0, 0, oldPreview.getWidth(), oldPreview.getHeight());
+                rect2.set(0, 0, desiredWidth, desiredHeight);
+                canvas.drawBitmap(oldPreview, rect1, rect2, bitmapPaint);
             } else {
                 canvas.drawBitmap(oldPreview, 0, 0, bitmapPaint);
             }
         } else if (previewCached != null) {
             bitmapFilteredPaint.setAlpha(255);
-            canvas.drawBitmap(previewCached, new Rect(0, 0, fastPreviewWidth, fastPreviewHeight), new Rect(0, 0, desiredWidth, desiredHeight), bitmapFilteredPaint);
+            rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
+            rect2.set(0, 0, desiredWidth, desiredHeight);
+            canvas.drawBitmap(previewCached, rect1, rect2, bitmapFilteredPaint);
 //            if (scaleUpMedia) {
 //                canvas.drawBitmap(previewCached, new Rect(0, 0, previewCached.getWidth(), previewCached.getHeight()), new Rect(0, 0, desiredWidth, desiredHeight), bitmapPaint);
 //            } else {
@@ -1066,20 +1048,20 @@ public class MessageMediaView extends BaseMsgView {
 //                path.addCircle(centerX, centerY, internalR, Path.Direction.CW);
 //                canvas.drawPath(path, downloadBgRect);
 
-                Path bgPath = new Path();
-                bgPath.addRect(0, 0, desiredWidth, desiredHeight, Path.Direction.CW);
-                bgPath.close();
-                bgPath.addCircle(centerX, centerY, outerR, Path.Direction.CW);
-                bgPath.close();
-                bgPath.setFillType(Path.FillType.EVEN_ODD);
-                canvas.drawPath(bgPath, downloadBgRect);
+                path.reset();
+                path.addRect(0, 0, desiredWidth, desiredHeight, Path.Direction.CW);
+                path.close();
+                path.addCircle(centerX, centerY, outerR, Path.Direction.CW);
+                path.close();
+                path.setFillType(Path.FillType.EVEN_ODD);
+                canvas.drawPath(path, downloadBgRect);
 
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgLightRect);
 
-                RectF progressRect = new RectF(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
+                rectF.set(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
                 int progressAngleStart = -90;
                 int progressAngle = (int) (-360 + (currentDownloadProgress * 360 / 100));
-                canvas.drawArc(progressRect, progressAngleStart, progressAngle, true, downloadBgRect);
+                canvas.drawArc(rectF, progressAngleStart, progressAngle, true, downloadBgRect);
                 canvas.restore();
             }
 

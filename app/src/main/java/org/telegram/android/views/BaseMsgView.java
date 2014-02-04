@@ -473,6 +473,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                 handler.removeCallbacks(longClickRunnable);
                 handler.postDelayed(longClickRunnable, ViewConfiguration.getLongPressTimeout());
             }
+            applyDrawingState();
             invalidate();
             return true;
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -494,10 +495,12 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                 contactView.onAddClicked();
             }
             touchedElement = TOUCHED_NONE;
+            applyDrawingState();
             invalidate();
         } else if (event.getAction() == MotionEvent.ACTION_OUTSIDE || event.getAction() == MotionEvent.ACTION_CANCEL) {
             handler.removeCallbacks(longClickRunnable);
             touchedElement = TOUCHED_NONE;
+            applyDrawingState();
             invalidate();
         }
         return super.onTouchEvent(event);
@@ -508,6 +511,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         super.onDetachedFromWindow();
         receiver.onRemovedFromParent();
         avatar = null;
+        applyDrawingState();
         postInvalidate();
     }
 
@@ -516,6 +520,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         super.onAttachedToWindow();
         receiver.onAddedToParent();
         avatar = receiver.getResult();
+        applyDrawingState();
         postInvalidate();
     }
 
@@ -524,6 +529,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         super.drawableStateChanged();
         bubbleOutDrawable.setState(getDrawableState());
         bubbleInDrawable.setState(getDrawableState());
+        applyDrawingState();
         invalidate();
     }
 
@@ -553,7 +559,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     @Override
     protected void onDraw(Canvas canvas) {
 
-        applyDrawingState();
+        // applyDrawingState();
 
         boolean isAnimating = false;
         canvas.save();
