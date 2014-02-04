@@ -221,6 +221,10 @@ public class FileCache {
         fileRecords.remove(fileName);
     }
 
+    public void clearCache() {
+        fileRecords.clear();
+    }
+
     private void onStorageCreated(int storage) {
         Logger.d(TAG, "onStorageCreated: " + (storage == STORAGE_CACHE_EXTERNAL ? "external" : "internal"));
     }

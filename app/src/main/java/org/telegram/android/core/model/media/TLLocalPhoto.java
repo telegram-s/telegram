@@ -17,15 +17,22 @@ import static org.telegram.tl.StreamingUtils.*;
  */
 public class TLLocalPhoto extends TLObject {
 
-    public static final int CLASS_ID = 0x4d7adc15;
+    public static final int FAST_PREVIEW_MAX_W = 90;
+    public static final int FAST_PREVIEW_MAX_H = 90;
+
+    public static final int CLASS_ID = 0x5e711939;
+
+    public static final int OPTIMIZATION_NONE = 0;
+    public static final int OPTIMIZATION_RESIZE = 1;
+    public static final int OPTIMIZATION_BLUR = 2;
+    public static final int OPTIMIZATION_RESIZE_BLUR = OPTIMIZATION_RESIZE | OPTIMIZATION_BLUR;
 
     private int fastPreviewW;
     private int fastPreviewH;
     private byte[] fastPreview;
     private String fastPreviewKey;
-    private boolean isOptimized;
+    private int optimization;
 
-    private boolean isAnimated;
     private int fullW;
     private int fullH;
     private TLAbsLocalFileLocation fullLocation;
@@ -34,12 +41,16 @@ public class TLLocalPhoto extends TLObject {
 
     }
 
-    public boolean isOptimized() {
-        return isOptimized;
+    public boolean hasFastPreview() {
+        return fastPreviewW != 0 && fastPreviewH != 0;
     }
 
-    public void setOptimized(boolean isOptimized) {
-        this.isOptimized = isOptimized;
+    public int getOptimization() {
+        return optimization;
+    }
+
+    public void setOptimization(int optimization) {
+        this.optimization = optimization;
     }
 
     public int getFastPreviewW() {
@@ -109,11 +120,10 @@ public class TLLocalPhoto extends TLObject {
         writeInt(fastPreviewH, stream);
         writeTLBytes(fastPreview, stream);
         writeTLString(fastPreviewKey, stream);
-        writeTLBool(isOptimized, stream);
+        writeInt(optimization, stream);
         writeInt(fullW, stream);
         writeInt(fullH, stream);
         writeTLObject(fullLocation, stream);
-        writeTLBool(isAnimated, stream);
     }
 
     @Override
@@ -122,10 +132,9 @@ public class TLLocalPhoto extends TLObject {
         fastPreviewH = readInt(stream);
         fastPreview = readTLBytes(stream);
         fastPreviewKey = readTLString(stream);
-        isOptimized = readTLBool(stream);
+        optimization = readInt(stream);
         fullW = readInt(stream);
         fullH = readInt(stream);
         fullLocation = (TLAbsLocalFileLocation) readTLObject(stream, context);
-        isAnimated = readTLBool(stream);
     }
 }

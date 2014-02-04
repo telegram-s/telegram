@@ -2,6 +2,8 @@ package org.telegram.android.core;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.os.Build;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
@@ -10,6 +12,7 @@ import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
+import org.telegram.android.media.OptimizedBlur;
 import org.telegram.android.ui.BitmapUtils;
 import org.telegram.api.*;
 import org.telegram.tl.TLObject;
@@ -23,6 +26,8 @@ import java.util.List;
  * Created: 28.07.13 19:28
  */
 public class EngineUtils {
+
+    private static OptimizedBlur optimizedBlur = new OptimizedBlur();
 
     public static TLAbsLocalAvatarPhoto convertAvatarPhoto(TLAbsChatPhoto chatPhoto) {
         if (chatPhoto instanceof TLChatPhoto) {
@@ -252,7 +257,31 @@ public class EngineUtils {
             TLLocalPhoto res = new TLLocalPhoto();
             TLPhotoCachedSize cachedSize = ApiUtils.findCachedSize((TLPhoto) src.getPhoto());
             if (cachedSize != null) {
-                res.setFastPreview(cachedSize.getBytes());
+
+                if (Build.VERSION.SDK_INT >= 11) {
+                    // Resize make sense only for API Level starting from 11
+                    Bitmap sourcePreview = BitmapFactory.decodeByteArray(cachedSize.getBytes(), 0, cachedSize.getBytes().length);
+                    Bitmap destPreview = Bitmap.createBitmap(
+                            TLLocalPhoto.FAST_PREVIEW_MAX_W,
+                            TLLocalPhoto.FAST_PREVIEW_MAX_H,
+                            Bitmap.Config.ARGB_8888);
+
+                    Canvas canvas = new Canvas(destPreview);
+                    canvas.drawBitmap(sourcePreview, 0, 0, null);
+
+                    destPreview = optimizedBlur.performBlur(destPreview);
+
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    destPreview.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
+                    byte[] optimizedPreview = outputStream.toByteArray();
+
+
+                    res.setFastPreview(optimizedPreview);
+                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_BLUR);
+                } else {
+                    res.setFastPreview(cachedSize.getBytes());
+                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);
+                }
                 res.setFastPreviewW(cachedSize.getW());
                 res.setFastPreviewH(cachedSize.getH());
 
@@ -268,7 +297,7 @@ public class EngineUtils {
                 res.setFastPreviewKey("");
                 res.setFastPreviewH(0);
                 res.setFastPreviewW(0);
-                res.setOptimized(false);
+                res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);
             }
 
             TLPhotoSize downloadSize = ApiUtils.findDownloadSize((TLPhoto) src.getPhoto());
@@ -295,7 +324,7 @@ public class EngineUtils {
             res.setFastPreviewKey("");
             res.setFastPreviewH(0);
             res.setFastPreviewW(0);
-            res.setOptimized(false);
+            res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);
             res.setFullH(0);
             res.setFullW(0);
             res.setFullLocation(new TLLocalFileEmpty());

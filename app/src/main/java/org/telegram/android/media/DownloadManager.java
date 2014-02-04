@@ -536,4 +536,8 @@ public class DownloadManager {
             }
         });
     }
+
+    public void clear() {
+        fileCache.clearCache();
+    }
 }

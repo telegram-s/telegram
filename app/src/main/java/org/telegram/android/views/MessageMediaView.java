@@ -23,6 +23,8 @@ import org.telegram.android.ui.*;
 import org.telegram.android.util.IOUtils;
 import org.telegram.api.TLFileLocation;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
@@ -34,6 +36,8 @@ import java.util.concurrent.Executors;
  * Created: 15.08.13 1:14
  */
 public class MessageMediaView extends BaseMsgView {
+
+    private static MediaFastCache fastCache = new MediaFastCache();
 
     private static Movie lastMovie;
     private static long lastMovieStart;
@@ -72,7 +76,7 @@ public class MessageMediaView extends BaseMsgView {
 
     private Rect rect = new Rect();
 
-    private int databaseId;
+    private int databaseId = -1;
     private String key;
     private int state;
     private int prevState;
@@ -83,7 +87,6 @@ public class MessageMediaView extends BaseMsgView {
     private Bitmap oldPreview;
     private Bitmap preview;
     private Bitmap previewCached;
-    private Bitmap previewBitmapHolder;
     private int fastPreviewHeight;
     private int fastPreviewWidth;
     private int previewHeight;
@@ -113,6 +116,8 @@ public class MessageMediaView extends BaseMsgView {
     private boolean scaleUpMedia = false;
 
     private OptimizedBlur optimizedBlur;
+
+    private final BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 
     public MessageMediaView(Context context) {
         super(context);
@@ -302,6 +307,38 @@ public class MessageMediaView extends BaseMsgView {
         postInvalidate();
     }
 
+    private int[] buildSize(int w, int h) {
+        float maxWidth = getPx(160);
+        float maxHeight = getPx(300);
+
+        float scale = maxWidth / previewWidth;
+
+        if (previewHeight * scale > maxHeight) {
+            scale = maxHeight / previewHeight;
+        }
+
+        int scaledW = (int) maxWidth;
+        int scaledH = (int) (previewHeight * scale);
+
+        return new int[]{scaledW, scaledH};
+    }
+
+    private boolean bindPreview(ImageTask task) {
+        if (task != null) {
+            previewTask = task;
+            receiver.receiveImage(previewTask);
+            preview = task.getResult();
+            if (preview != null) {
+                previewAppearTime = 0;
+                return true;
+            }
+        } else {
+            previewTask = null;
+            receiver.receiveImage(null);
+        }
+        return false;
+    }
+
     private void bindMedia(MessageWireframe message) {
         this.previewHeight = 0;
         this.previewWidth = 0;
@@ -318,32 +355,71 @@ public class MessageMediaView extends BaseMsgView {
         if (message.message.getExtras() instanceof TLLocalPhoto) {
             TLLocalPhoto mediaPhoto = (TLLocalPhoto) message.message.getExtras();
 
+            if (mediaPhoto.hasFastPreview()) {
+                if (previewCached == null) {
+                    previewCached = fastCache.findInCache(databaseId);
+                }
+                if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_RESIZE) != 0) {
+                    // Removing last pixels for avoiding artefacts on edges
+                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
+                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
+                } else {
+                    fastPreviewWidth = mediaPhoto.getFastPreviewW();
+                    fastPreviewHeight = mediaPhoto.getFastPreviewH();
+                }
+            }
+
+            boolean isBinded = false;
             if (!(mediaPhoto.getFullLocation() instanceof TLLocalFileEmpty)) {
                 key = DownloadManager.getPhotoKey(mediaPhoto);
                 previewHeight = mediaPhoto.getFullH();
                 previewWidth = mediaPhoto.getFullW();
                 if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-                    float maxWidth = getPx(160);
-                    float maxHeight = getPx(300);
-
-                    float scale = maxWidth / previewWidth;
-
-                    if (previewHeight * scale > maxHeight) {
-                        scale = maxHeight / previewHeight;
-                    }
-
-                    int scaledW = (int) maxWidth;
-                    int scaledH = (int) (previewHeight * scale);
-
-                    previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), scaledW, scaledH);
-                    previewTask.setPutInDiskCache(true);
+                    int[] sizes = buildSize(mediaPhoto.getFullW(), mediaPhoto.getFullH());
+                    ScaleTask task = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), sizes[0], sizes[1]);
+                    task.setPutInDiskCache(true);
+                    // isBinded = bindPreview(task);
                 }
                 isDownloadable = true;
             } else {
                 isDownloadable = false;
             }
 
-            if (mediaPhoto.getFastPreviewW() != 0 && mediaPhoto.getFastPreviewH() != 0 && isDownloadable && previewCached == null) {
+            if (mediaPhoto.hasFastPreview() && !isBinded && previewCached == null) {
+                bitmapOptions.inSampleSize = 1;
+                bitmapOptions.inScaled = false;
+                bitmapOptions.inTempStorage = bitmapTmp;
+                if (Build.VERSION.SDK_INT >= 10) {
+                    bitmapOptions.inPreferQualityOverSpeed = false;
+                }
+
+                boolean isReused = false;
+                if (Build.VERSION.SDK_INT >= 11) {
+                    bitmapOptions.inMutable = true;
+                    Bitmap destBitmap;
+                    if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_RESIZE) != 0) {
+                        destBitmap = fastCache.findInFreeCache(TLLocalPhoto.FAST_PREVIEW_MAX_W, TLLocalPhoto.FAST_PREVIEW_MAX_H);
+                    } else {
+                        destBitmap = fastCache.findInFreeCache(mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH());
+                    }
+                    if (destBitmap != null) {
+                        bitmapOptions.inBitmap = destBitmap;
+                        isReused = true;
+                    } else {
+                        bitmapOptions.inBitmap = null;
+                    }
+                }
+
+                long start = SystemClock.uptimeMillis();
+                Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, bitmapOptions);
+                if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_BLUR) == 0) {
+                    optimizedBlur.performBlur(img);
+                }
+                previewCached = img;
+
+                Logger.d(TAG, "Decode picture in " + (SystemClock.uptimeMillis() - start) +
+                        " " + img.getWidth() + "x" + img.getHeight() + " :" + (isReused ? "reused" : ""));
+
 //                if (mediaPhoto.isOptimized()) {
 //                    BitmapFactory.Options options = new BitmapFactory.Options();
 ////                    if (previewBitmapHolder != null) {
@@ -376,16 +452,6 @@ public class MessageMediaView extends BaseMsgView {
 //                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
 //                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
 //                }
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                // options.inMutable = true;
-                options.inDither = false;
-                options.inTempStorage = bitmapTmp;
-                Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, options);
-                previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-                optimizedBlur.performBlur(previewCached);
-                fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
-                fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
             }
         } else if (message.message.getExtras() instanceof TLLocalVideo) {
             TLLocalVideo mediaVideo = (TLLocalVideo) message.message.getExtras();
@@ -695,6 +761,15 @@ public class MessageMediaView extends BaseMsgView {
             }
         }
         long start = SystemClock.uptimeMillis();
+
+        if (this.previewCached != null) {
+            if (this.databaseId > 0) {
+                fastCache.putToCache(this.databaseId, previewCached);
+            } else {
+                fastCache.putToCache(previewCached);
+            }
+        }
+
         this.databaseId = message.message.getDatabaseId();
         this.isOut = message.message.isOut();
         this.date = TextUtil.formatTime(message.message.getDate(), getContext());
@@ -703,9 +778,7 @@ public class MessageMediaView extends BaseMsgView {
         } else {
             placeholderPaint.setColor(Color.WHITE);
         }
-        if (this.previewCached != null && this.previewCached.getWidth() == 90 && this.previewCached.getHeight() == 90 && this.previewCached.isMutable()) {
-            this.previewBitmapHolder = this.previewCached;
-        }
+
         this.previewCached = null;
         this.state = message.message.getState();
         this.prevState = -1;
@@ -715,16 +788,6 @@ public class MessageMediaView extends BaseMsgView {
 
         this.downloadStateTime = 0;
 
-        if (previewTask != null) {
-            receiver.receiveImage(previewTask);
-            preview = receiver.getResult();
-            Logger.d(TAG, "Bind avatar in " + (SystemClock.uptimeMillis() - start) + " ms");
-            if (preview != null) {
-                previewAppearTime = 0;
-            }
-        } else {
-            receiver.receiveImage(null);
-        }
         Logger.d(TAG, "Bind in " + (SystemClock.uptimeMillis() - start) + " ms");
         requestLayout();
     }

@@ -10,6 +10,7 @@ import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.storage.*;
 import org.telegram.android.kernel.compat.v5.TLDcInfoCompat;
 import org.telegram.android.kernel.compat.v8.TLLocalPhotoCompat8;
+import org.telegram.android.kernel.compat.v9.TLLocalPhotoCompat9;
 import org.telegram.tl.TLContext;
 import org.telegram.tl.TLObject;
 
@@ -84,6 +85,7 @@ public class TLLocalContext extends TLContext {
         // Compat
         registerCompatClass(TLDcInfoCompat.CLASS_ID, TLDcInfoCompat.class);
         registerCompatClass(TLLocalPhotoCompat8.CLASS_ID, TLLocalPhotoCompat8.class);
+        registerCompatClass(TLLocalPhotoCompat9.CLASS_ID, TLLocalPhotoCompat9.class);
 
         // UpdateState
         registerClass(TLUpdateState.CLASS_ID, TLUpdateState.class);
@@ -110,7 +112,19 @@ public class TLLocalContext extends TLContext {
             res.setFullH(localPhoto.getFullH());
             res.setFullW(localPhoto.getFullW());
             res.setFullLocation(localPhoto.getFullLocation());
-            res.setOptimized(false);
+            res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);
+            return res;
+        } else if (src instanceof TLLocalPhotoCompat9) {
+            TLLocalPhotoCompat9 localPhoto = (TLLocalPhotoCompat9) src;
+            TLLocalPhoto res = new TLLocalPhoto();
+            res.setFastPreview(localPhoto.getFastPreview());
+            res.setFastPreviewH(localPhoto.getFastPreviewH());
+            res.setFastPreviewW(localPhoto.getFastPreviewW());
+            res.setFastPreviewKey(localPhoto.getFastPreviewKey());
+            res.setFullH(localPhoto.getFullH());
+            res.setFullW(localPhoto.getFullW());
+            res.setFullLocation(localPhoto.getFullLocation());
+            res.setOptimization(localPhoto.isOptimized() ? TLLocalPhoto.OPTIMIZATION_RESIZE : TLLocalPhoto.OPTIMIZATION_NONE);
             return res;
         }
 

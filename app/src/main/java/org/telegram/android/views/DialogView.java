@@ -463,7 +463,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             }
         }
 
-        canvas.drawText(layout.time, layout.layoutTimeLeft, layout.layoutTimeTop, layout.isUnreadOut ? unreadClockPaint : readClockPaint);
+        canvas.drawText(layout.time, layout.layoutTimeLeft, layout.layoutTimeTop, layout.isUnreadIn ? unreadClockPaint : readClockPaint);
 
         if (typingLayout != null) {
             canvas.save();
@@ -592,7 +592,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         public boolean isEncrypted;
         public boolean isHighlighted;
         public boolean isBodyHighlighted;
-        public boolean isUnreadOut;
+        public boolean isUnreadIn;
 
         public Layout bodyLayout;
         public Layout titleLayout;
@@ -622,10 +622,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
             isBodyHighlighted = description.getContentType() != ContentType.MESSAGE_TEXT;
 
-            if (description.getUnreadCount() != 0 && description.isMine()) {
-                isUnreadOut = true;
+            if (description.getUnreadCount() != 0 && !description.isMine()) {
+                isUnreadIn = true;
             } else {
-                isUnreadOut = false;
+                isUnreadIn = false;
             }
 
             time = org.telegram.android.ui.TextUtil.formatDate(description.getDate(), application);
@@ -786,7 +786,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
                 if (isBodyHighlighted) {
                     bodyTextPaint = bodyHighlightPaint;
                 } else {
-                    if (isUnreadOut) {
+                    if (isUnreadIn) {
                         bodyTextPaint = bodyUnreadPaint;
                     } else {
                         bodyTextPaint = bodyPaint;

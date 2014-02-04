@@ -12,6 +12,11 @@
 
         <Button android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:text="Reset download manager"
+                android:id="@+id/resetDownloadManager"/>
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
                 android:text="Reset Contacts Sync"
                 android:id="@+id/resetContactsSync"/>
 

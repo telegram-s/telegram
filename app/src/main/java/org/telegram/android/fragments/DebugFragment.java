@@ -33,6 +33,12 @@ public class DebugFragment extends TelegramFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.settings_debug, container, false);
+        res.findViewById(R.id.resetDownloadManager).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                application.getDownloadManager().clear();
+            }
+        });
         res.findViewById(R.id.resetContactsSync).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -473,7 +473,7 @@ public class ImageController {
                 l.onTaskEvent(task, id, args);
             }
         }
-        Log.d(TAG, "notify in " + (SystemClock.uptimeMillis() - start) + " ms");
+        // Log.d(TAG, "notify in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
 
     public TaskEvent getLastTaskEvent(String key) {

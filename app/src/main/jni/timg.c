@@ -49,218 +49,144 @@ static int rgb_clamp(int value) {
 }
 
 static void fastBlur(AndroidBitmapInfo* info, void* pixels) {
-    LOGI("Faslt bluring image w=%d, h=%d, s=%d", info->width, info->height, info->stride);
+  LOGI("Fast bluring image w=%d, h=%d, s=%d", info->width, info->height, info->stride);
 
-    uint32_t* pix =(uint32_t*)pixels;
-    int w = info->width;
-    int h = info->height;
-    const int radius = 3;
-    const int div = radius * 2 + 1;
-    int wm = w - 1;
-    int hm = h - 1;
-    int wh = w * h;
+  uint32_t* pix = (uint32_t*)pixels;
+  int w = info->width;
+  int h = info->height;
+  const int radius = 3;
+  const int div = radius * 2 + 1;
 
+  uint32_t* rgb = (uint32_t *)malloc(w * h * sizeof(uint32_t));
 
-    int* r = malloc(SIZE_FULL * sizeof(int));
-    int* g = malloc(SIZE_FULL * sizeof(int));
-    int* b = malloc(SIZE_FULL * sizeof(int));
+  uint32_t rgbsum;
+  int x, y, i;
+  int* vmin = (int *)malloc(MAX(w, h) * sizeof(int));
 
-    int rsum, gsum, bsum, x, y, i, p, yp, yi, yw;
-    int* vmin = malloc(SIZE_FULL * sizeof(uint32_t));
+  uint32_t stack[div];
+  int stackpointer, stackstart;
+  uint32_t rgboutsum, rgbinsum;
 
-    int divsum = (div + 1) >> 1;
-    divsum *= divsum;
-    uint32_t* dv = malloc(256 * divsum * sizeof(uint32_t));
-    for (i = 0; i < 256 * divsum; i++) {
-        dv[i] = (i / divsum);
+  for (x = 0; x < w - radius - 1; x++) {
+    vmin[x] = x + radius + 1;
+  }
+  for (x = w - radius - 1; x < w; x++) {
+    vmin[x] = w - 1;
+  }
+
+  int yw = 0;
+  for (y = 0; y < h; y++) {
+    rgbinsum = rgboutsum = rgbsum = 0;
+    for (i = -radius; i <= radius; i++) {
+      uint32_t p = pix[yw + MIN(w - 1, MAX(i, 0))];
+      stack[i + radius] = ((p & 0x0000FC) >> 2) +
+                           (p & 0x00FC00) +
+                          ((p & 0xFC0000) << 2);
+
+      rgbsum += stack[i + radius] * (radius + 1 - ABS(i));
+
+      if (i > 0) {
+        rgbinsum += stack[i + radius];
+      } else {
+        rgboutsum += stack[i + radius];
+      }
     }
-
-    yw = yi = 0;
-
-    int stack[div][radius];
-    int stackpointer;
-    int stackstart;
-    int* sir;
-    int rbs;
-    int r1 = radius + 1;
-    int routsum, goutsum, boutsum;
-    int rinsum, ginsum, binsum;
-
-    for (y = 0; y < h; y++) {
-        rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
-        for (i = -radius; i <= radius; i++) {
-            p = pix[yi + MIN(wm, MAX(i, 0))];
-            sir = stack[i + radius];
-            sir[0] = R(p);
-            sir[1] = G(p);
-            sir[2] = B(p);
-
-            rbs = r1 - ABS(i);
-            rsum += sir[0] * rbs;
-            gsum += sir[1] * rbs;
-            bsum += sir[2] * rbs;
-
-            if (i > 0) {
-                rinsum += sir[0];
-                ginsum += sir[1];
-                binsum += sir[2];
-            } else {
-                routsum += sir[0];
-                goutsum += sir[1];
-                boutsum += sir[2];
-            }
-        }
-        stackpointer = radius;
-
-        for (x = 0; x < w; x++) {
-            r[yi] = dv[rsum];
-            g[yi] = dv[gsum];
-            b[yi] = dv[bsum];
-
-            rsum -= routsum;
-            gsum -= goutsum;
-            bsum -= boutsum;
-
-            stackstart = stackpointer - radius;
-            if (stackstart < 0)
-            {
-                stackstart += div;
-            }
-
-            sir = stack[stackstart];
-
-            routsum -= sir[0];
-            goutsum -= sir[1];
-            boutsum -= sir[2];
-
-            if (y == 0) {
-                vmin[x] = MIN(x + radius + 1, wm);
-            }
-            p = pix[yw + vmin[x]];
-
-            sir[0] = R(p);
-            sir[1] = G(p);
-            sir[2] = B(p);
-
-            rinsum += sir[0];
-            ginsum += sir[1];
-            binsum += sir[2];
-
-            rsum += rinsum;
-            gsum += ginsum;
-            bsum += binsum;
-
-            stackpointer = stackpointer + 1;
-            if (stackpointer == div) {
-                stackpointer = 0;
-            }
-            sir = stack[stackpointer];
-
-            routsum += sir[0];
-            goutsum += sir[1];
-            boutsum += sir[2];
-
-            rinsum -= sir[0];
-            ginsum -= sir[1];
-            binsum -= sir[2];
-
-            yi++;
-        }
-        yw += w;
-    }
+    stackstart = 0;
+    stackpointer = radius + 1;
 
     for (x = 0; x < w; x++) {
-        rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
-        yp = -radius * w;
-        for (i = -radius; i <= radius; i++) {
-            yi = MAX(0, yp) + x;
+      // rgb[yw + x] = (rgbsum >> 4) & 0x03F0FC3F;
+      rgb[yw + x] = ((rgbsum + 0x00B02C0B) >> 4) & 0x03F0FC3F;
 
-            sir = stack[i + radius];
+      rgbsum -= rgboutsum;
 
-            sir[0] = r[yi];
-            sir[1] = g[yi];
-            sir[2] = b[yi];
+      rgboutsum -= stack[stackstart];
 
-            rbs = r1 - ABS(i);
+      uint32_t p = pix[yw + vmin[x]];
 
-            rsum += r[yi] * rbs;
-            gsum += g[yi] * rbs;
-            bsum += b[yi] * rbs;
+      stack[stackstart] = ((p & 0x0000FC) >> 2) +
+                           (p & 0x00FC00) +
+                          ((p & 0xFC0000) << 2);
 
-            if (i > 0) {
-                rinsum += sir[0];
-                ginsum += sir[1];
-                binsum += sir[2];
-            } else {
-                routsum += sir[0];
-                goutsum += sir[1];
-                boutsum += sir[2];
-            }
+      rgbinsum += stack[stackstart];
 
-            if (i < hm) {
-                yp += w;
-            }
-        }
+      rgbsum += rgbinsum;
 
-        yi = x;
-        stackpointer = radius;
-        for (y = 0; y < h; y++) {
-            pix[yi] = RGBA(A(pix[yi]), dv[rsum], dv[gsum], dv[bsum]);
+      rgboutsum += stack[stackpointer];
 
-            rsum -= routsum;
-            gsum -= goutsum;
-            bsum -= boutsum;
+      rgbinsum -= stack[stackpointer];
 
-            stackstart = stackpointer - radius;
-                        if (stackstart < 0)
-                        {
-                            stackstart += div;
-                        }
-            sir = stack[stackstart];
+      stackstart++;
+      if (stackstart == div) {
+        stackstart = 0;
+      }
 
-            routsum -= sir[0];
-            goutsum -= sir[1];
-            boutsum -= sir[2];
-
-            if (x == 0) {
-                vmin[y] = MIN(y + r1, hm) * w;
-            }
-            p = x + vmin[y];
-
-            sir[0] = r[p];
-            sir[1] = g[p];
-            sir[2] = b[p];
-
-            // LOGI("Fast blur3");
-
-            rinsum += sir[0];
-            ginsum += sir[1];
-            binsum += sir[2];
-
-            rsum += rinsum;
-            gsum += ginsum;
-            bsum += binsum;
-
-            stackpointer = stackpointer + 1;
-            if (stackpointer == div) {
-                stackpointer = 0;
-            }
-            sir = stack[stackpointer];
-
-            // LOGI("Fast blur4");
-
-            routsum += sir[0];
-            goutsum += sir[1];
-            boutsum += sir[2];
-
-            rinsum -= sir[0];
-            ginsum -= sir[1];
-            binsum -= sir[2];
-
-            yi += w;
-        }
+      stackpointer++;
+      if (stackpointer == div) {
+        stackpointer = 0;
+      }
     }
+    yw += w;
+  }
+
+  for (y = 0; y < h - radius - 1; y++) {
+    vmin[y] = (y + radius + 1) * w;
+  }
+  for (y = h - radius - 1; y < h; y++) {
+    vmin[y] = (h - 1) * w;
+  }
+
+  for (x = 0; x < w; x++) {
+    rgbinsum = rgboutsum = rgbsum = 0;
+    for (i = -radius; i <= radius; i++) {
+      stack[i + radius] = rgb[MIN(h - 1, MAX(0, i)) * w + x];
+
+      rgbsum += stack[i + radius] * (radius + 1 - ABS(i));
+
+      if (i > 0) {
+        rgbinsum += stack[i + radius];
+      } else {
+        rgboutsum += stack[i + radius];
+      }
+    }
+    stackstart = 0;
+    stackpointer = radius + 1;
+
+    int yi = x;
+    for (y = 0; y < h; y++) {
+      pix[yi] = (pix[yi] & 0xFF000000) + ((rgbsum & 0x3FC00000) >> 6) + ((rgbsum & 0x000FF000) >> 4) + ((rgbsum & 0x000003FC) >> 2);
+
+      rgbsum -= rgboutsum;
+      rgboutsum -= stack[stackstart];
+
+      stack[stackstart] = rgb[x + vmin[y]];
+
+      rgbinsum += stack[stackstart];
+
+      rgbsum += rgbinsum;
+
+      rgboutsum += stack[stackpointer];
+
+      rgbinsum -= stack[stackpointer];
+
+      stackstart++;
+      if (stackstart == div) {
+        stackstart = 0;
+      }
+
+      stackpointer++;
+      if (stackpointer == div) {
+        stackpointer = 0;
+      }
+
+      yi += w;
+    }
+  }
+
+  free (rgb);
+  free (vmin);
 }
+
 
 static void brightness(AndroidBitmapInfo* info, void* pixels, float brightnessValue){
 	int xx, yy, red, green, blue;
