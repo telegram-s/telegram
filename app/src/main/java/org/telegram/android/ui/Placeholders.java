@@ -32,6 +32,14 @@ public class Placeholders {
         return GROUP_PLACEHOLDERS[Math.abs(index) % GROUP_PLACEHOLDERS.length];
     }
 
+    public static int getGroupPlaceHolderIndex(int index) {
+        return Math.abs(index) % GROUP_PLACEHOLDERS.length;
+    }
+
+    public static int getUserPlaceHolderIndex(int index) {
+        return Math.abs(index) % USER_PLACEHOLDERS.length;
+    }
+
     public static final int[] USER_BG_COLOR = new int[]
             {
                     0xff4495d6, 0xff4BB4D7, 0xff6CCB2F, 0xffD8914B, 0xffDB629E, 0xffAB6BCB, 0xffD8764B, 0xffF0C61D

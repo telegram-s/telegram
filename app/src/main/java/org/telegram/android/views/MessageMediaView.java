@@ -776,15 +776,6 @@ public class MessageMediaView extends BaseMsgView {
         }
         bindMedia(message);
 
-        if (previewTask != null) {
-            receiver.receiveImage(previewTask);
-            preview = receiver.getResult();
-            if (preview != null) {
-                previewAppearTime = 0;
-            }
-        } else {
-            receiver.receiveImage(null);
-        }
         invalidate();
     }
 

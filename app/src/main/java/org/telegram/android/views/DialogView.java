@@ -2,6 +2,7 @@ package org.telegram.android.views;
 
 import android.content.Context;
 import android.graphics.*;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.text.BidiFormatter;
 import android.text.*;
@@ -59,6 +60,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private static TextPaint counterTitlePaint;
 
+    private static Bitmap[] cachedUserPlaceholders = new Bitmap[Placeholders.USER_PLACEHOLDERS.length];
+    private static Bitmap[] cachedGroupPlaceholders = new Bitmap[Placeholders.GROUP_PLACEHOLDERS.length];
+
 //    private static Bitmap userPlaceholder;
 //    private static Bitmap groupPlaceholder;
 
@@ -102,7 +106,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     private int[] typingUids;
     private boolean userTypes;
 
-    private Drawable placeholder;
+    private Rect rect = new Rect();
+    private Rect rect2 = new Rect();
+
+    private Bitmap placeholder;
 
     // Layouting
     private DialogLayout layout;
@@ -299,10 +306,19 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         }
 
         if (description.getPeerType() == PeerType.PEER_CHAT) {
-            placeholder = getResources().getDrawable(Placeholders.getGroupPlaceholder(description.getPeerId()));
+            int index = Placeholders.getGroupPlaceHolderIndex(description.getPeerId());
+            if (cachedGroupPlaceholders[index] == null) {
+                cachedGroupPlaceholders[index] =
+                        ((BitmapDrawable) getResources().getDrawable(Placeholders.GROUP_PLACEHOLDERS[index])).getBitmap();
+            }
+            placeholder = cachedGroupPlaceholders[index];
         } else {
-            placeholder = getResources().getDrawable(Placeholders.getUserPlaceholder(description.getDialogUser().getUid()));
-
+            int index = Placeholders.getUserPlaceHolderIndex(description.getPeerId());
+            if (cachedUserPlaceholders[index] == null) {
+                cachedUserPlaceholders[index] =
+                        ((BitmapDrawable) getResources().getDrawable(Placeholders.USER_PLACEHOLDERS[index])).getBitmap();
+            }
+            placeholder = cachedUserPlaceholders[index];
         }
 
         photo = description.getDialogAvatar();
@@ -480,13 +496,11 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         if (avatar != null) {
             canvas.drawBitmap(avatar, layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
         } else {
-//            canvas.drawRoundRect(layout.avatarRect, getPx(2), getPx(2), avatarBgPaint);
-//            canvas.drawBitmap(empty, layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
-            placeholder.setBounds(layout.layoutAvatarLeft, layout.layoutAvatarTop,
+            rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
+            rect2.set(layout.layoutAvatarLeft, layout.layoutAvatarTop,
                     layout.layoutAvatarLeft + layout.layoutAvatarWidth,
                     layout.layoutAvatarTop + layout.layoutAvatarWidth);
-            placeholder.setAlpha(255);
-            placeholder.draw(canvas);
+            canvas.drawBitmap(placeholder, rect, rect2, avatarPaint);
         }
 
         if (description.isErrorState() ||
