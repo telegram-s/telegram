@@ -1,8 +1,9 @@
 package org.telegram.android.core;
 
+import android.graphics.Typeface;
 import android.os.SystemClock;
-import android.text.Spannable;
-import android.text.TextPaint;
+import android.text.*;
+import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import org.telegram.android.TelegramApplication;
@@ -11,6 +12,7 @@ import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLLocalContact;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.ui.EmojiProcessor;
+import org.telegram.android.ui.StelsTypefaceSpan;
 import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.ui.source.ViewSourceState;
 import org.telegram.android.log.Logger;
@@ -209,6 +211,10 @@ public class MessageSource {
                         res.cachedLayout = MessageView.prepareLayout(res, application);
                     }
                     // res.cachedLayout = MessageView.prepareLayout(res, application);
+                }
+
+                if (item.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
+
                 }
 
                 return res;

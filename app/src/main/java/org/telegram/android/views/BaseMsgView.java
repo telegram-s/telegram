@@ -604,11 +604,13 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                     bubbleContentHeight + currentBubblePadding.top + currentBubblePadding.bottom);
             currentBubbleDrawable.draw(canvas);
             canvas.save();
+            canvas.translate(currentBubblePadding.left, currentBubblePadding.top);
 
             // Logger.d(TAG, "onDraw:bubble in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
             isAnimating = isAnimating | drawBubble(canvas);
             // Logger.d(TAG, "onDraw0 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
             canvas.restore();
+            //canvas.translate(-currentBubblePadding.left, -currentBubblePadding.top);
             // Logger.d(TAG, "onDraw00 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
 
             if (isBubblePressed) {
@@ -653,13 +655,13 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                     bubbleContentWidth + currentBubblePadding.left + currentBubblePadding.right,
                     bubbleContentHeight + currentBubblePadding.top + currentBubblePadding.bottom);
             currentBubbleDrawable.draw(canvas);
-            // canvas.save();
+            canvas.save();
             canvas.translate(currentBubblePadding.left, currentBubblePadding.top);
             // Logger.d(TAG, "onDraw:bubble in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
             isAnimating = isAnimating | drawBubble(canvas);
             // Logger.d(TAG, "onDraw0 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
-            // canvas.restore();
-            canvas.translate(-currentBubblePadding.left, -currentBubblePadding.top);
+            canvas.restore();
+            //canvas.translate(-currentBubblePadding.left, -currentBubblePadding.top);
             // Logger.d(TAG, "onDraw00 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
 
             if (isBubblePressed) {
