@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
@@ -54,10 +55,12 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private static int UNREAD_OFFSET;
     private static boolean isLoaded;
 
+    private static Bitmap[] cachedUserPlaceholders = new Bitmap[Placeholders.USER_PLACEHOLDERS.length];
+
     private TextPaint timeDivPaint;
     private TextPaint newDivPaint;
     private Paint avatarPaint;
-    private Drawable placeholder;
+    private Bitmap placeholder;
     private Bitmap avatar;
     private ImageReceiver receiver;
     private long avatarImageTime;
@@ -304,7 +307,13 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         }
 
         if (showAvatar) {
-            placeholder = getResources().getDrawable(Placeholders.getUserPlaceholder(message.message.getSenderId()));
+            int index = Placeholders.getUserPlaceHolderIndex(message.message.getSenderId());
+            if (cachedUserPlaceholders[index] == null) {
+                cachedUserPlaceholders[index] =
+                        ((BitmapDrawable) getResources().getDrawable(Placeholders.USER_PLACEHOLDERS[index])).getBitmap();
+            }
+            placeholder = cachedUserPlaceholders[index];
+
             User user = message.senderUser;
             if (user != null) {
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
@@ -633,21 +642,20 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                         float animationPercent = fadeEasing((float) animationTime / FADE_ANIMATION_TIME);
                         int placeholderAlpha = (int) ((1 - animationPercent) * 255);
                         int avatarAlpha = (int) (animationPercent * 255);
+                        avatarPaint.setAlpha(placeholderAlpha);
+                        rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
+                        canvas.drawBitmap(placeholder, rect, avatarRect, avatarPaint);
+
                         avatarPaint.setAlpha(avatarAlpha);
-                        placeholder.setAlpha(placeholderAlpha);
-
-                        placeholder.setBounds(avatarRect);
-                        placeholder.draw(canvas);
-
                         canvas.drawBitmap(avatar, avatarRect.left, avatarRect.top, avatarPaint);
                         // canvas.drawBitmap(avatar, new Rect(0, 0, avatar.getWidth(), avatar.getHeight()), avatarRect, avatarPaint);
 
                         isAnimating = true;
                     }
                 } else {
-                    placeholder.setBounds(avatarRect);
-                    placeholder.setAlpha(255);
-                    placeholder.draw(canvas);
+                    avatarPaint.setAlpha(255);
+                    rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
+                    canvas.drawBitmap(placeholder, rect, avatarRect, avatarPaint);
                 }
                 canvas.translate(AVATAR_OFFSET, 0);
             }
@@ -681,11 +689,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         // Logger.d(TAG, "onDraw2 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
 
         if (isAnimating) {
-            if (Build.VERSION.SDK_INT >= 16) {
-                postInvalidateOnAnimation();
-            } else {
-                postInvalidateDelayed(34);
-            }
+            inavalidateForAnimation();
         }
 
         // Logger.d(TAG, "onDraw in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());

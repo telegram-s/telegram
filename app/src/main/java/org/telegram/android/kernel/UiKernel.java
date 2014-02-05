@@ -17,6 +17,7 @@ import org.telegram.android.core.model.PeerType;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.CachedImageWorker;
 import org.telegram.android.media.StelsImageWorker;
+import org.telegram.android.preview.AvatarLoader;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
@@ -32,7 +33,7 @@ public class UiKernel {
     private Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
-            Logger.d(TAG,"notify");
+            Logger.d(TAG, "notify");
             if (msg.what == 0) {
                 checkGoesOffline();
             }
@@ -44,6 +45,8 @@ public class UiKernel {
     private TelegramApplication application;
 
     private ImageController imageController;
+
+    private AvatarLoader avatarLoader;
 
     private Notifications notifications;
 
@@ -103,6 +106,10 @@ public class UiKernel {
         Logger.d(TAG, "ImageController loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         start = SystemClock.uptimeMillis();
+        avatarLoader = new AvatarLoader(application);
+        Logger.d(TAG, "AvatarLoader loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        start = SystemClock.uptimeMillis();
         UiMeasure.METRICS = application.getResources().getDisplayMetrics();
         UiMeasure.DENSITY = UiMeasure.METRICS.density;
         I18nUtil.init(application);
@@ -120,6 +127,10 @@ public class UiKernel {
         ApiUtils.init(application, kernel.getTechKernel().getTechReflection().getScreenSize());
         Logger.d(TAG, "Misc UI4 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
+    }
+
+    public AvatarLoader getAvatarLoader() {
+        return avatarLoader;
     }
 
     public UiResponsibility getResponsibility() {

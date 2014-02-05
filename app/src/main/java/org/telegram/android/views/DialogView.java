@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.SystemClock;
 import android.support.v4.text.BidiFormatter;
 import android.text.*;
 import android.text.style.ForegroundColorSpan;
@@ -20,6 +21,7 @@ import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.wireframes.DialogWireframe;
 import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarReceiver;
 import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
 import org.telegram.mtproto.log.Logger;
@@ -28,7 +30,7 @@ import org.telegram.mtproto.log.Logger;
  * Author: Korshakov Stepan
  * Created: 06.08.13 18:40
  */
-public class DialogView extends BaseView implements TypingStates.TypingListener {
+public class DialogView extends BaseView implements TypingStates.TypingListener, AvatarReceiver {
 
     private static boolean IS_LARGE = false;
 
@@ -37,6 +39,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     }
 
     // private static final String TAG = "DialogView";
+
+    private static final long AVATAR_FADE_TIME = 150;
 
     // Resources
     private static int HIGHLIGHT_COLOR = 0xff3076a4;
@@ -77,7 +81,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     private TelegramApplication application;
 
-    private ImageReceiver avatarReceiver;
+    // private ImageReceiver avatarReceiver;
 
     // Data
 
@@ -92,6 +96,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     // private Drawable emptyDrawable;
     // private Bitmap empty;
     private Bitmap avatar;
+    private long avatarAppearTime;
     private Paint avatarBgPaint;
 
     // Typing
@@ -258,26 +263,26 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         this.application = (TelegramApplication) context.getApplicationContext();
 
         this.currentUserUid = application.getCurrentUid();
-        this.avatarReceiver = new ImageReceiver() {
-            @Override
-            public void onImageLoaded(Bitmap result) {
-                avatar = result;
-                postInvalidate();
-            }
-
-            @Override
-            public void onImageLoadFailure() {
-                avatar = null;
-                postInvalidate();
-            }
-
-            @Override
-            public void onNoImage() {
-                avatar = null;
-                postInvalidate();
-            }
-        };
-        this.avatarReceiver.register(application.getImageController());
+//        this.avatarReceiver = new ImageReceiver() {
+//            @Override
+//            public void onImageLoaded(Bitmap result) {
+//                avatar = result;
+//                postInvalidate();
+//            }
+//
+//            @Override
+//            public void onImageLoadFailure() {
+//                avatar = null;
+//                postInvalidate();
+//            }
+//
+//            @Override
+//            public void onNoImage() {
+//                avatar = null;
+//                postInvalidate();
+//            }
+//        };
+//        this.avatarReceiver.register(application.getImageController());
 
         application.getTypingStates().registerListener(this);
 
@@ -332,19 +337,26 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             // empty = groupPlaceholder;
         }
 
+        avatar = null;
         if (photo instanceof TLLocalAvatarPhoto) {
-            TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) photo;
-            if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                StelsImageTask task = new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
-                int size = IS_LARGE ? getPx(64) : getPx(52);
-                avatarReceiver.receiveImage(new ScaleTask(task, size, size));
-                avatar = avatarReceiver.getResult();
-            } else {
-                avatarReceiver.receiveImage(null);
-            }
+            application.getUiKernel().getAvatarLoader().requestAvatar(description.getPeerType(), description.getPeerId(),
+                    ((TLLocalAvatarPhoto) photo).getPreviewLocation(), this);
         } else {
-            avatarReceiver.receiveImage(null);
+            application.getUiKernel().getAvatarLoader().cancelRequest(this);
         }
+//        if (photo instanceof TLLocalAvatarPhoto) {
+//            TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) photo;
+//            if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
+//                StelsImageTask task = new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
+//                int size = IS_LARGE ? getPx(64) : getPx(52);
+//                avatarReceiver.receiveImage(new ScaleTask(task, size, size));
+//                avatar = avatarReceiver.getResult();
+//            } else {
+//                avatarReceiver.receiveImage(null);
+//            }
+//        } else {
+//            avatarReceiver.receiveImage(null);
+//        }
 
         if (getMeasuredHeight() != 0 || getMeasuredWidth() != 0) {
             buildLayout();
@@ -358,16 +370,16 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        avatarReceiver.onRemovedFromParent();
-        avatar = null;
+        // avatarReceiver.onRemovedFromParent();
+        // avatar = null;
         postInvalidate();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        avatarReceiver.onAddedToParent();
-        avatar = avatarReceiver.getResult();
+        // avatarReceiver.onAddedToParent();
+        // avatar = avatarReceiver.getResult();
         postInvalidate();
     }
 
@@ -497,8 +509,25 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         }
 
         if (avatar != null) {
-            canvas.drawBitmap(avatar, layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
+            long time = SystemClock.uptimeMillis() - avatarAppearTime;
+            if (time > AVATAR_FADE_TIME) {
+                avatarPaint.setAlpha(255);
+                canvas.drawBitmap(avatar, layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
+            } else {
+                float alpha = time / (float) AVATAR_FADE_TIME;
+                avatarPaint.setAlpha(255);
+                rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
+                rect2.set(layout.layoutAvatarLeft, layout.layoutAvatarTop,
+                        layout.layoutAvatarLeft + layout.layoutAvatarWidth,
+                        layout.layoutAvatarTop + layout.layoutAvatarWidth);
+                canvas.drawBitmap(placeholder, rect, rect2, avatarPaint);
+                avatarPaint.setAlpha((int) (255 * alpha));
+                canvas.drawBitmap(avatar, layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
+
+                inavalidateForAnimation();
+            }
         } else {
+            avatarPaint.setAlpha(255);
             rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
             rect2.set(layout.layoutAvatarLeft, layout.layoutAvatarTop,
                     layout.layoutAvatarLeft + layout.layoutAvatarWidth,
@@ -558,6 +587,17 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
         DialogLayout wl = new DialogLayout();
         wl.build(wireframe, UiMeasure.METRICS.heightPixels, px(80), context);
         return new DialogLayout[]{hl, wl};
+    }
+
+    @Override
+    public void onAvatarReceived(Bitmap original, boolean intermediate) {
+        this.avatar = original;
+        if (intermediate) {
+            this.avatarAppearTime = 0;
+        } else {
+            this.avatarAppearTime = SystemClock.uptimeMillis();
+        }
+        invalidate();
     }
 
     private static class DialogLayout {

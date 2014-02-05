@@ -1330,7 +1330,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
             } else {
                 User user = application.getEngine().getUser(peerId);
-                getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(user.getDisplayName()));
+                getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(
+                        application.getEmojiProcessor().processEmojiCutMutable(user.getDisplayName(),0)));
 
                 if (application.getTypingStates().isUserTyping(peerId)) {
                     getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));

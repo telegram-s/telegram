@@ -8,10 +8,7 @@ import android.graphics.drawable.InsetDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.text.BidiFormatter;
-import android.text.Editable;
-import android.text.Html;
-import android.text.SpannableString;
-import android.text.Spanned;
+import android.text.*;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import com.actionbarsherlock.view.Menu;
@@ -116,6 +113,11 @@ public class TelegramFragment extends TelegramBaseFragment {
     protected CharSequence highlightTitleText(String src) {
         // return html("<font color='#006FC8'>" + src + "</font>");
         return html("<font color='#ffffff'>" + src + "</font>");
+    }
+
+    protected CharSequence highlightTitleText(Spannable src) {
+        src.setSpan(new ForegroundColorSpan(Color.WHITE), 0, src.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        return src;
     }
 
     protected CharSequence highlightSubtitleText(int resId) {

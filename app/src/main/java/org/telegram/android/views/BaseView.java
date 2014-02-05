@@ -2,6 +2,7 @@ package org.telegram.android.views;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -66,5 +67,13 @@ public class BaseView extends View {
 
     protected static int sp(float sp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, UiMeasure.METRICS);
+    }
+
+    protected void inavalidateForAnimation() {
+        if (Build.VERSION.SDK_INT >= 16) {
+            postInvalidateOnAnimation();
+        } else {
+            postInvalidateDelayed(16);
+        }
     }
 }

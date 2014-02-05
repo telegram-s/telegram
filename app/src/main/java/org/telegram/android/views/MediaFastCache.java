@@ -8,6 +8,8 @@ import java.util.HashSet;
 
 /**
  * Created by ex3ndr on 04.02.14.
+ * <p/>
+ * Class works correctly only from single UI-Thread
  */
 public class MediaFastCache {
 
@@ -16,10 +18,10 @@ public class MediaFastCache {
 
     private static final int DEFAULT_W = 90;
     private static final int DEFAULT_H = 90;
-    private static final int DEFAULT_CACHE_SIZE = 30;
+    private static final int DEFAULT_CACHE_SIZE = 20;
     private static final int DEFAULT_CACHE_FREE_SIZE = 10;
 
-    private static final int CUSTOM_CACHE_SIZE = 30;
+    private static final int CUSTOM_CACHE_SIZE = 20;
     private static final int CUSTOM_CACHE_FREE_SIZE = 10;
 
     private static boolean USE_FREE_CACHE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;

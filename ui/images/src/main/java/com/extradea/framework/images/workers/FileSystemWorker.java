@@ -125,10 +125,17 @@ public class FileSystemWorker implements ImageWorker {
 
         } else {
             try {
-                VideoThumbTask videoThumbTask = (VideoThumbTask) task;
-                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(videoThumbTask.getFileName());
-                Bitmap res = retriever.getFrameAtTime(0);
+                final VideoThumbTask videoThumbTask = (VideoThumbTask) task;
+
+                Bitmap res = controller.getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
+                    @Override
+                    public Bitmap call() throws Exception {
+                        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                        retriever.setDataSource(videoThumbTask.getFileName());
+                        return retriever.getFrameAtTime(0);
+                    }
+                });
+
                 task.setResult(res);
                 return RESULT_OK;
             } catch (Exception e) {

@@ -1,9 +1,7 @@
 package org.telegram.android.media;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
+import android.graphics.*;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
@@ -13,6 +11,7 @@ import android.provider.MediaStore;
 import com.extradea.framework.images.utils.ImageUtils;
 import org.telegram.android.log.Logger;
 import org.telegram.android.reflection.CrashHandler;
+import org.telegram.android.util.CustomBufferedInputStream;
 import org.telegram.android.util.IOUtils;
 
 import java.io.*;
@@ -91,7 +90,7 @@ public class Optimizer {
     }
 
     public static Point getSize(String fileName) throws IOException {
-        InputStream fis = new FileInputStream(fileName);
+        InputStream fis = new CustomBufferedInputStream(new FileInputStream(fileName));
         BitmapFactory.Options o = new BitmapFactory.Options();
         o.inJustDecodeBounds = true;
         BitmapFactory.decodeStream(fis, null, o);
@@ -106,7 +105,7 @@ public class Optimizer {
     }
 
     public static Point getSize(Uri uri, Context context) throws IOException {
-        InputStream fis = context.getContentResolver().openInputStream(uri);
+        InputStream fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(uri));
         BitmapFactory.Options o = new BitmapFactory.Options();
         o.inJustDecodeBounds = true;
         BitmapFactory.decodeStream(fis, null, o);
@@ -136,6 +135,14 @@ public class Optimizer {
         o.inDither = false;
         o.inScaled = false;
         res = BitmapFactory.decodeStream(stream, null, o);
+        return res;
+    }
+
+    public static byte[] save(Bitmap src) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        src.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
+        byte[] res = outputStream.toByteArray();
+        outputStream.close();
         return res;
     }
 
@@ -237,22 +244,22 @@ public class Optimizer {
     }
 
     public static Bitmap optimize(String uri, Context context) throws IOException {
-        InputStream fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        InputStream fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
         boolean isAnimated = detectGif(fis);
         fis.close();
 
         if (isAnimated) {
-            fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+            fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
             Bitmap res = BitmapFactory.decodeStream(fis);
             fis.close();
             return res;
         }
 
-        fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
         int scale = getScale(fis);
         fis.close();
 
-        fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
         Bitmap res = buildOptimized(fis, scale);
         fis.close();
 
@@ -262,11 +269,11 @@ public class Optimizer {
     }
 
     public static void optimizeHQ(String uri, Context context, String destFile) throws IOException {
-        InputStream fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        InputStream fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
         int scale = getScaleHQ(fis);
         fis.close();
 
-        fis = context.getContentResolver().openInputStream(Uri.parse(uri));
+        fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
         Bitmap res = buildOptimized(fis, scale);
         fis.close();
 
@@ -313,6 +320,25 @@ public class Optimizer {
         int nw = (int) (scale * src.getWidth());
         int nh = (int) (scale * src.getHeight());
         return Bitmap.createScaledBitmap(src, nw, nh, true);
+    }
+
+    public static void scaleTo(Bitmap src, Bitmap dest) {
+        float ratioX = dest.getWidth() / (float) src.getWidth();
+        float ratioY = dest.getHeight() / (float) src.getHeight();
+        float middleX = dest.getWidth() / 2.0f;
+        float middleY = dest.getHeight() / 2.0f;
+
+        Matrix scaleMatrix = new Matrix();
+        scaleMatrix.setScale(ratioX, ratioY, middleX, middleY);
+
+        Canvas canvas = new Canvas(dest);
+        canvas.setMatrix(scaleMatrix);
+        canvas.drawBitmap(src, middleX - src.getWidth() / 2, middleY - src.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG));
+    }
+
+    public static void drawTo(Bitmap src, Bitmap dest) {
+        Canvas canvas = new Canvas(dest);
+        canvas.drawBitmap(src, 0, 0, new Paint(Paint.FILTER_BITMAP_FLAG));
     }
 
     public static VideoMetadata getVideoSize(String fileName) throws Exception {
