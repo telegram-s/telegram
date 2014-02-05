@@ -22,6 +22,7 @@ import org.telegram.android.core.wireframes.DialogWireframe;
 import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
+import org.telegram.mtproto.log.Logger;
 
 /**
  * Author: Korshakov Stepan
@@ -34,6 +35,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     public static void resetSettings() {
         isLoaded = false;
     }
+
+    // private static final String TAG = "DialogView";
 
     // Resources
     private static int HIGHLIGHT_COLOR = 0xff3076a4;
@@ -63,9 +66,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     private static Bitmap[] cachedUserPlaceholders = new Bitmap[Placeholders.USER_PLACEHOLDERS.length];
     private static Bitmap[] cachedGroupPlaceholders = new Bitmap[Placeholders.GROUP_PLACEHOLDERS.length];
 
-//    private static Bitmap userPlaceholder;
-//    private static Bitmap groupPlaceholder;
-
     private Drawable statePending;
     private Drawable stateSent;
     private Drawable stateHalfCheck;
@@ -85,9 +85,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
     private DialogLayout[] preparedLayouts;
 
     // PreparedData
-    private String title;
-    private String body;
-
     private TLAbsLocalAvatarPhoto photo;
 
     private int state;
@@ -376,18 +373,22 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        long start = System.currentTimeMillis();
         if (IS_LARGE) {
             setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), getPx(80));
         } else {
             setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), getPx(68));
         }
+        // Logger.d(TAG, "onMeasure in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        long start = System.currentTimeMillis();
         if (changed) {
             buildLayout();
         }
+        // Logger.d(TAG, "onLayout in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     private void buildLayout() {
@@ -435,6 +436,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
 
     @Override
     protected void onDraw(Canvas canvas) {
+
+        long start = System.currentTimeMillis();
 
         if (layout == null) {
             requestLayout();
@@ -511,6 +514,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener 
             canvas.drawRoundRect(layout.layoutMarkRect, layout.layoutMarkRadius, layout.layoutMarkRadius, counterPaint);
             canvas.drawText(layout.unreadCountText, layout.layoutMarkLeft + layout.layoutMarkTextLeft, layout.layoutMarkTextTop, counterTitlePaint);
         }
+
+        // Logger.d(TAG, "onDraw in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     @Override

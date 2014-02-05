@@ -1,5 +1,6 @@
 package org.telegram.android.core.wireframes;
 
+import android.text.Spannable;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalPhoto;
@@ -21,6 +22,8 @@ public class MessageWireframe {
     public User senderUser;
     public User forwardUser;
     public User relatedUser;
+
+    public Spannable text;
 
     public Object cachedLayout;
 }

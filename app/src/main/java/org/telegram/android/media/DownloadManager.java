@@ -81,6 +81,9 @@ public class DownloadManager {
 
     private final int SMALL_THUMB_SIDE;
 
+    private final int THUMB_MAX_W;
+    private final int THUMB_MAX_H;
+
     private HashSet<String> enqueued = new HashSet<String>();
 
     private class DownloadRecord {
@@ -92,6 +95,7 @@ public class DownloadManager {
         public int downloadedPercent;
         public DownloadState state;
         public int downloadTask;
+        public long lastNotifyTime;
     }
 
     private ExecutorService service;
@@ -113,6 +117,9 @@ public class DownloadManager {
 
         final int margin = (int) (4 * application.getResources().getDisplayMetrics().density);
         SMALL_THUMB_SIDE = ((Math.min(application.getResources().getDisplayMetrics().widthPixels, application.getResources().getDisplayMetrics().heightPixels) - 5 * margin) / 4);
+
+        THUMB_MAX_W = (int) (160 * application.getResources().getDisplayMetrics().density);
+        THUMB_MAX_H = (int) (300 * application.getResources().getDisplayMetrics().density);
     }
 
     public void registerListener(DownloadListener listener) {
@@ -325,6 +332,10 @@ public class DownloadManager {
             dcId = ((TLLocalFileDocument) fileLocation).getDcId();
             size = ((TLLocalFileDocument) fileLocation).getSize();
             location = new TLInputDocumentFileLocation(((TLLocalFileDocument) fileLocation).getId(), ((TLLocalFileDocument) fileLocation).getAccessHash());
+        } else if (fileLocation instanceof TLLocalFileAudio) {
+            dcId = ((TLLocalFileAudio) fileLocation).getDcId();
+            size = ((TLLocalFileAudio) fileLocation).getSize();
+            location = new TLInputAudioFileLocation(((TLLocalFileAudio) fileLocation).getId(), ((TLLocalFileAudio) fileLocation).getAccessHash());
         } else {
             return;
         }
@@ -378,6 +389,7 @@ public class DownloadManager {
                             Logger.d(TAG, "Decrypting file end #" + record.downloadTask);
                         } else {
                             Logger.d(TAG, "Copying file #" + record.downloadTask);
+
                             IOUtils.copy(new File(destFileName), new File(fileName));
                             IOUtils.delete(new File(destFileName));
                             Logger.d(TAG, "Copying file end #" + record.downloadTask);
@@ -447,27 +459,28 @@ public class DownloadManager {
     }
 
     public void saveDownloadImagePreview(String key, final String fileName) throws IOException {
-        Bitmap thumb = application.getImageController().getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
-            @Override
-            public Bitmap call() throws Exception {
-                return ImageUtils.getBitmapThumb(fileName, SMALL_THUMB_SIDE, SMALL_THUMB_SIDE);
-            }
-        });
-        if (thumb == null) {
-            updateState(key, DownloadState.FAILURE, 0, 0, true);
-            return;
-        }
-
-        Logger.d(TAG, "@" + key + " = saving thumb");
-        FileOutputStream outputStream = null;
-        try {
-            outputStream = new FileOutputStream(getPreviewFileName(key));
-            thumb.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
-        } finally {
-            if (outputStream != null) {
-                outputStream.close();
-            }
-        }
+        // return ImageUtils.getBitmapThumb(fileName, SMALL_THUMB_SIDE, SMALL_THUMB_SIDE);
+//        Bitmap thumb = application.getImageController().getBitmapDecoder().executeGuarded(new Callable<Bitmap>() {
+//            @Override
+//            public Bitmap call() throws Exception {
+//                return ImageUtils.getBitmapThumb(fileName, SMALL_THUMB_SIDE, SMALL_THUMB_SIDE);
+//            }
+//        });
+//        if (thumb == null) {
+//            updateState(key, DownloadState.FAILURE, 0, 0, true);
+//            return;
+//        }
+//
+//        Logger.d(TAG, "@" + key + " = saving thumb");
+//        FileOutputStream outputStream = null;
+//        try {
+//            outputStream = new FileOutputStream(getPreviewFileName(key));
+//            thumb.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
+//        } finally {
+//            if (outputStream != null) {
+//                outputStream.close();
+//            }
+//        }
     }
 
     public void saveDownloadVideo(String key, String fileName) throws IOException {
@@ -514,7 +527,7 @@ public class DownloadManager {
     private void updateState(final String key, final DownloadState state, final int percent, int bytes, boolean ignoreCancel) {
         Logger.d(TAG, "State: " + key + " = " + state + " " + percent + "%");
 
-        DownloadRecord record = records.get(key);
+        final DownloadRecord record = records.get(key);
 
         if (!ignoreCancel && record.state == DownloadState.CANCELLED) {
             return;
@@ -527,6 +540,10 @@ public class DownloadManager {
         handler.post(new Runnable() {
             @Override
             public void run() {
+//                if (SystemClock.uptimeMillis() - record.lastNotifyTime < 300) {
+//                    return;
+//                }
+//                record.lastNotifyTime = SystemClock.uptimeMillis();
                 for (WeakReference<DownloadListener> ref : listeners) {
                     DownloadListener listener = ref.get();
                     if (listener != null) {

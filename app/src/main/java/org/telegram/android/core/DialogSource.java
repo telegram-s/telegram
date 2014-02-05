@@ -12,11 +12,11 @@ import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.ui.source.ViewSourceState;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.TextUtil;
+import org.telegram.android.views.DialogView;
 import org.telegram.api.messages.TLAbsDialogs;
 import org.telegram.api.messages.TLDialogs;
 import org.telegram.api.messages.TLDialogsSlice;
 import org.telegram.api.requests.TLRequestMessagesGetDialogs;
-import org.telegram.dao.SecretChat;
 import org.telegram.tl.TLObject;
 
 import java.util.ArrayList;
@@ -520,7 +520,7 @@ public class DialogSource {
 
         res.setUnreadCount(item.getUnreadCount());
 
-        // res.setPreparedLayout(DialogView.prepareLayoutCache(res, application));
+        res.setPreparedLayout(DialogView.prepareLayoutCache(res, application));
 
         return res;
     }

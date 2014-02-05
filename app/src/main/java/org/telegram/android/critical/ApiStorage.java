@@ -307,6 +307,9 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
     @Override
     public synchronized AbsMTProtoState getMtProtoState(final int dcId) {
         return new AbsMTProtoState() {
+
+            private KnownSalt[] knownSalts = null;
+
             @Override
             public byte[] getAuthKey() {
                 return ApiStorage.this.getAuthKey(dcId);
@@ -319,12 +322,16 @@ public class ApiStorage extends TLPersistence<TLStorage> implements AbsApiState 
 
             @Override
             public KnownSalt[] readKnownSalts() {
-                return ApiStorage.this.readKnownSalts(dcId);
+                if (knownSalts == null) {
+                    knownSalts = ApiStorage.this.readKnownSalts(dcId);
+                }
+                return knownSalts;
             }
 
             @Override
             protected void writeKnownSalts(KnownSalt[] salts) {
                 ApiStorage.this.writeKnownSalts(dcId, salts);
+                knownSalts = null;
             }
         };
     }

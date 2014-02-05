@@ -1,11 +1,16 @@
 package org.telegram.android.core;
 
 import android.os.SystemClock;
+import android.text.Spannable;
+import android.text.TextPaint;
+import android.text.style.URLSpan;
+import android.text.util.Linkify;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLLocalContact;
 import org.telegram.android.core.wireframes.MessageWireframe;
+import org.telegram.android.ui.EmojiProcessor;
 import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.ui.source.ViewSourceState;
 import org.telegram.android.log.Logger;
@@ -41,7 +46,7 @@ public class MessageSource {
 
     public static final int PAGE_REQUEST_PADDING = 20;
 
-    public static final int CACHE_MIN_LEN = 1000;
+    public static final int CACHE_MIN_LEN = 500;
 
     private ExecutorService service = Executors.newSingleThreadExecutor(new ThreadFactory() {
         @Override
@@ -195,9 +200,15 @@ public class MessageSource {
                 }
 
                 if (item.getRawContentType() == ContentType.MESSAGE_TEXT) {
+                    Spannable spannable = application.getEmojiProcessor().processEmojiCompatMutable(item.getMessage(), EmojiProcessor.CONFIGURATION_BUBBLES);
+                    Linkify.addLinks(spannable, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS | Linkify.EMAIL_ADDRESSES);
+                    fixLinks(spannable);
+                    res.text = spannable;
+
                     if (item.getMessage().length() > CACHE_MIN_LEN) {
                         res.cachedLayout = MessageView.prepareLayout(res, application);
                     }
+                    // res.cachedLayout = MessageView.prepareLayout(res, application);
                 }
 
                 return res;
@@ -385,6 +396,25 @@ public class MessageSource {
             return true;
         } else {
             return messagesEx.getMessages().size() == 0 || ((TLMessagesSlice) messagesEx).getCount() <= offset + PAGE_SIZE_REMOTE;
+        }
+    }
+
+    private static void fixLinks(Spannable spannable) {
+        for (URLSpan span : spannable.getSpans(0, spannable.length(), URLSpan.class)) {
+            final String url = span.getURL();
+            int start = spannable.getSpanStart(span);
+            int end = spannable.getSpanEnd(span);
+            int flags = spannable.getSpanFlags(span);
+            URLSpan newSpan = new URLSpan(url) {
+                @Override
+                public void updateDrawState(TextPaint paramTextPaint) {
+                    super.updateDrawState(paramTextPaint);
+                    paramTextPaint.setUnderlineText(false);
+                    paramTextPaint.setColor(0xff006FC8);
+                }
+            };
+            spannable.removeSpan(span);
+            spannable.setSpan(newSpan, start, end, flags);
         }
     }
 }

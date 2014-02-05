@@ -95,7 +95,7 @@ public abstract class ImageReceiver implements ImageController.ImageControllerLi
             return;
 
         if (imageTask != null && controller != null) {
-            controller.getReferenceCounter().removeReference(this);
+            // controller.getReferenceCounter().removeReference(this);
             controller.removeTask(imageTask);
         }
 
@@ -107,7 +107,7 @@ public abstract class ImageReceiver implements ImageController.ImageControllerLi
             result = controller.addTask(imageTask);
             if (result != null) {
                 status = STATUS_LOADED;
-                controller.getReferenceCounter().addReference(imageTask.getKey(), this);
+                // controller.getReferenceCounter().addReference(imageTask.getKey(), this);
                 onImageLoaded(result);
             } else {
                 status = STATUS_LOADING;
@@ -131,7 +131,7 @@ public abstract class ImageReceiver implements ImageController.ImageControllerLi
             result = controller.addTask(imageTask);
             if (result != null) {
                 status = STATUS_LOADED;
-                controller.getReferenceCounter().addReference(imageTask.getKey(), this);
+                // controller.getReferenceCounter().addReference(imageTask.getKey(), this);
                 onImageLoaded(result);
             }
         }
@@ -158,7 +158,7 @@ public abstract class ImageReceiver implements ImageController.ImageControllerLi
             if (task.getKey().equals(imageTask.getKey())) {
                 setResult(task.getResult());
                 status = STATUS_LOADED;
-                controller.getReferenceCounter().addReference(imageTask.getKey(), this);
+                // controller.getReferenceCounter().addReference(imageTask.getKey(), this);
                 onImageLoaded(getResult());
             }
         }

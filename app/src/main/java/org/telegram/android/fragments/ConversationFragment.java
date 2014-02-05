@@ -1648,6 +1648,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     } else {
                         workingSet = nWorkingSet;
                         dialogAdapter.notifyDataSetChanged();
+                        //dialogAdapter.notifyDataSetInvalidated();
                         onDataChanged();
 
                         final int finalIndex = index;
@@ -1676,10 +1677,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         int index = listView.getLastVisiblePosition() - 1;
         long id = listView.getItemIdAtPosition(index);
         int count = dialogAdapter.getCount();
-        int top = ((v == null) ? 0 : v.getTop()) - listView.getPaddingTop();
+        final int top = ((v == null) ? 0 : v.getTop()) - listView.getPaddingTop();
 
         workingSet = nWorkingSet;
         dialogAdapter.notifyDataSetChanged();
+        //dialogAdapter.notifyDataSetInvalidated();
 
         int delta = Math.abs(dialogAdapter.getCount() - count);
 
@@ -1699,6 +1701,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
 
             listView.setSelectionFromTop(newIndex, top);
+//            final int finalNewIndex = newIndex;
+//            listView.post(new Runnable() {
+//                @Override
+//                public void run() {
+//                    listView.setSelectionFromTop(finalNewIndex, top);
+//                }
+//            });
         }
 
         onDataChanged();
@@ -2131,9 +2140,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 if (!object.message.isOut() && object.message.getMid() == firstUnreadMessage) {
                     showDiv = true;
                 }
-                long start = SystemClock.uptimeMillis();
+                //long start = SystemClock.uptimeMillis();
                 boolean res = messageView.bind(object, showTime, showDiv, unreadCount);
-                Logger.d(TAG, "Bind #" + object.message.getContentType() + " in " + (SystemClock.uptimeMillis() - start) + " ms \t" + res);
+                //Logger.d(TAG, "Bind #" + object.message.getContentType() + " in " + (SystemClock.uptimeMillis() - start) + " ms \t" + res);
 
                 messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                     @Override

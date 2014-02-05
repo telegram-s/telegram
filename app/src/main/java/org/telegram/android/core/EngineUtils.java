@@ -277,7 +277,7 @@ public class EngineUtils {
 
 
                     res.setFastPreview(optimizedPreview);
-                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_BLUR);
+                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_RESIZE_BLUR);
                 } else {
                     res.setFastPreview(cachedSize.getBytes());
                     res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);

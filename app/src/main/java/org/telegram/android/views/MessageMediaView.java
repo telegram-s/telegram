@@ -210,10 +210,17 @@ public class MessageMediaView extends BaseMsgView {
 
 
         downloadListener = new DownloadListener() {
+            long lastNotify = 0;
+
             @Override
             public void onStateChanged(final String _key, final DownloadState state, final int percent) {
                 if (!_key.equals(key))
                     return;
+
+                if (lastNotify > 0) {
+                    Logger.d(TAG, "Prev notify in " + (lastNotify - SystemClock.uptimeMillis()) + " ms");
+                }
+                lastNotify = SystemClock.uptimeMillis();
 
                 if (downloadProgress != percent) {
                     oldDownloadProgress = downloadProgress;
@@ -418,6 +425,7 @@ public class MessageMediaView extends BaseMsgView {
                 if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_BLUR) == 0) {
                     optimizedBlur.performBlur(img);
                 }
+
                 previewCached = img;
 
                 Logger.d(TAG, "Decode picture in " + (SystemClock.uptimeMillis() - start) +
@@ -476,7 +484,7 @@ public class MessageMediaView extends BaseMsgView {
                     if (previewCached == null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                        // options.inMutable = true;
+                        options.inMutable = true;
                         options.inDither = false;
                         options.inTempStorage = bitmapTmp;
                         Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, options);
@@ -491,8 +499,9 @@ public class MessageMediaView extends BaseMsgView {
 //                            // BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
 //                        }
 
-                        previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-                        optimizedBlur.performBlur(previewCached);
+                        // previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+                        optimizedBlur.performBlur(img);
+                        previewCached = img;
                         fastPreviewWidth = mediaVideo.getPreviewW() - 1;
                         fastPreviewHeight = mediaVideo.getPreviewH() - 1;
                     }
@@ -972,11 +981,6 @@ public class MessageMediaView extends BaseMsgView {
             rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
             rect2.set(0, 0, desiredWidth, desiredHeight);
             canvas.drawBitmap(previewCached, rect1, rect2, bitmapFilteredPaint);
-//            if (scaleUpMedia) {
-//                canvas.drawBitmap(previewCached, new Rect(0, 0, previewCached.getWidth(), previewCached.getHeight()), new Rect(0, 0, desiredWidth, desiredHeight), bitmapPaint);
-//            } else {
-//                canvas.drawBitmap(previewCached, 0, 0, bitmapPaint);
-//            }
         } else {
             canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
         }
@@ -1033,11 +1037,6 @@ public class MessageMediaView extends BaseMsgView {
 
                 int centerX = desiredWidth / 2;
                 int centerY = desiredHeight / 2;
-                //int R = (int) Math.sqrt(centerX * centerX + centerY * centerY);
-
-//                Path path = new Path();
-//                path.addCircle(centerX, centerY, internalR, Path.Direction.CW);
-//                canvas.drawPath(path, downloadBgRect);
 
                 path.reset();
                 path.addRect(0, 0, desiredWidth, desiredHeight, Path.Direction.CW);
@@ -1120,6 +1119,7 @@ public class MessageMediaView extends BaseMsgView {
                 drawable.draw(canvas);
             }
         }
+
         return isAnimated;
     }
 }

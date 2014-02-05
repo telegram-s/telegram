@@ -39,9 +39,11 @@ public class ConversationListView extends ImagingListView {
     private TelegramApplication application;
 
     private String visibleDate = null;
+    private int formattedVisibleDate = -1;
     private int timeDivMeasure;
 
     private String visibleDateNext = null;
+    private int formattedVisibleDateNext = -1;
     private int timeDivMeasureNext;
 
 
@@ -269,18 +271,26 @@ public class ConversationListView extends ImagingListView {
                             offset = Math.min(view.getTop() - getPx(DELTA), 0);
                         }
                         if (!TextUtil.areSameDays(prevDate, System.currentTimeMillis() / 1000)) {
-                            visibleDateNext = TextUtil.formatDateLong(prevDate);
-                            timeDivMeasureNext = (int) timeDivPaint.measureText(visibleDateNext);
+                            if (!TextUtil.areSameDays(prevDate, formattedVisibleDateNext)) {
+                                formattedVisibleDateNext = prevDate;
+                                visibleDateNext = TextUtil.formatDateLong(prevDate);
+                                timeDivMeasureNext = (int) timeDivPaint.measureText(visibleDateNext);
+                            }
                         } else {
                             visibleDateNext = null;
+                            formattedVisibleDateNext = -1;
                         }
                     }
 
                     if (!TextUtil.areSameDays(date, System.currentTimeMillis() / 1000)) {
-                        visibleDate = TextUtil.formatDateLong(date);
-                        timeDivMeasure = (int) timeDivPaint.measureText(visibleDate);
+                        if (!TextUtil.areSameDays(date, formattedVisibleDate)) {
+                            formattedVisibleDate = date;
+                            visibleDate = TextUtil.formatDateLong(date);
+                            timeDivMeasure = (int) timeDivPaint.measureText(visibleDate);
+                        }
                     } else {
                         visibleDate = null;
+                        formattedVisibleDate = -1;
                     }
                 }
             }

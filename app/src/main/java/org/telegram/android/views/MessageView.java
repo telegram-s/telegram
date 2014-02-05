@@ -12,6 +12,7 @@ import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
+import org.telegram.android.log.Logger;
 import org.telegram.android.ui.*;
 
 /**
@@ -213,8 +214,10 @@ public class MessageView extends BaseMsgView {
             }
 
             if (messageLayout == null) {
+                // long start = SystemClock.uptimeMillis();
                 messageLayout = new MessageLayout();
                 messageLayout.build(wireframe, desiredWidth, application);
+                // Logger.d(TAG, "Layout built in " + (SystemClock.uptimeMillis() - start) + " ms");
             }
         }
 
@@ -230,6 +233,7 @@ public class MessageView extends BaseMsgView {
 
         boolean isAnimated = false;
 
+        // long start = SystemClock.uptimeMillis();
         if (messageLayout.isForwarded) {
             canvas.drawText("Forwarded message", 0, getPx(16), messageLayout.forwardingPaint);
             canvas.drawText("From", 0, getPx(35), messageLayout.forwardingPaint);
@@ -249,6 +253,8 @@ public class MessageView extends BaseMsgView {
                 messageLayout.layout.draw(canvas);
             }
         }
+        // Logger.d(TAG, "Text draw in " + (SystemClock.uptimeMillis() - start) + " ms");
+        // start = SystemClock.uptimeMillis();
 
 
         if (messageLayout.showState) {
@@ -311,10 +317,16 @@ public class MessageView extends BaseMsgView {
                     clockOutPaint.setColor(COLOR_NORMAL);
                 }
             }
+            // Logger.d(TAG, "State draw in " + (SystemClock.uptimeMillis() - start) + " ms");
+            // start = SystemClock.uptimeMillis();
         } else {
             clockOutPaint.setColor(COLOR_IN);
         }
+
         canvas.drawText(wireframe.date, messageLayout.layoutRealWidth - messageLayout.timeWidth + getPx(6), messageLayout.layoutHeight - getPx(4), clockOutPaint);
+
+        // Logger.d(TAG, "Date draw in " + (SystemClock.uptimeMillis() - start) + " ms");
+
         return isAnimated;
     }
 
@@ -367,6 +379,8 @@ public class MessageView extends BaseMsgView {
 
             // Logger.d(TAG, "Build layout start");
 
+            // long start = SystemClock.uptimeMillis();
+
             checkResources(application);
 
             senderPaint = initTextPaint();
@@ -417,19 +431,23 @@ public class MessageView extends BaseMsgView {
             }
 
             layoutDesiredWidth = desiredWidth;
-            long start = SystemClock.uptimeMillis();
 
-            this.spannable = application.getEmojiProcessor().processEmojiCompatMutable(wireframe.message.getMessage(), EmojiProcessor.CONFIGURATION_BUBBLES);
-
-            // spannable = new SpannableString(wireframe.message.getMessage());
-            // Logger.d(TAG, "Emoji processed in " + (SystemClock.uptimeMillis() - start) + " ms");
-            start = SystemClock.uptimeMillis();
-            Linkify.addLinks(this.spannable, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS | Linkify.EMAIL_ADDRESSES);
-            fixLinks(spannable);
-            // Logger.d(TAG, "Added links in " + (SystemClock.uptimeMillis() - start) + " ms");
-            start = SystemClock.uptimeMillis();
+            // Logger.d(TAG, "Prepared in " + (SystemClock.uptimeMillis() - start) + " ms");
+            // start = SystemClock.uptimeMillis();
+            if (wireframe.text != null) {
+                this.spannable = wireframe.text;
+            } else {
+                this.spannable = application.getEmojiProcessor().processEmojiCompatMutable(wireframe.message.getMessage(), EmojiProcessor.CONFIGURATION_BUBBLES);
+                // Logger.d(TAG, "Emoji processed in " + (SystemClock.uptimeMillis() - start) + " ms");
+                // start = SystemClock.uptimeMillis();
+                Linkify.addLinks(this.spannable, Linkify.WEB_URLS | Linkify.PHONE_NUMBERS | Linkify.EMAIL_ADDRESSES);
+                fixLinks(spannable);
+                // Logger.d(TAG, "Added links in " + (SystemClock.uptimeMillis() - start) + " ms");
+                // start = SystemClock.uptimeMillis();
+            }
             layout = new StaticLayout(spannable, bodyPaint, desiredWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
             // Logger.d(TAG, "Built base layout in " + (SystemClock.uptimeMillis() - start) + " ms");
+            // start = SystemClock.uptimeMillis();
 
             if (layout.getLineCount() < 20) {
                 int layoutTextWidth = 0;
@@ -440,6 +458,8 @@ public class MessageView extends BaseMsgView {
 
                 if (layoutTextWidth < layout.getWidth() - px(10)) {
                     layout = new StaticLayout(spannable, bodyPaint, layoutTextWidth + px(2), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
+                    // Logger.d(TAG, "Rebuilt base layout in " + (SystemClock.uptimeMillis() - start) + " ms");
+                    // start = SystemClock.uptimeMillis();
                 }
             }
 
@@ -493,6 +513,8 @@ public class MessageView extends BaseMsgView {
                 int width = (int) senderPaintBase.measureText(senderNameMeasured);
                 layoutRealWidth = Math.max(layoutRealWidth, width);
             }
+
+            // Logger.d(TAG, "Complated layout in " + (SystemClock.uptimeMillis() - start) + " ms");
 
             // Logger.d(TAG, "Build layout end");
         }

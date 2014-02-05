@@ -61,7 +61,6 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private Bitmap avatar;
     private ImageReceiver receiver;
     private long avatarImageTime;
-    private boolean placeholderDrawn;
 
     private Paint selectorPaint;
     private Paint newMessagesPaint;
@@ -279,10 +278,12 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         bindCommonInt(message);
         bindCommon(message);
         if (oldId != -1 && message.message.getDatabaseId() == oldId) {
+            Logger.d(TAG, "Bind update");
             bindUpdateInt(message);
             bindUpdate(message);
             isUpdated = true;
         } else {
+            Logger.d(TAG, "Bind new");
             bindNewInt(message);
             bindNewView(message);
         }
@@ -392,6 +393,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // long start = SystemClock.uptimeMillis();
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int bubbleMaxSize = width - BUBBLE_PADDING - currentBubblePadding.left - currentBubblePadding.right;
         if (showAvatar) {
@@ -421,6 +423,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         if (showAvatar) {
             avatarRect.set(AVATAR_LEFT, height - AVATAR_BOTTOM - AVATAR_SIZE, AVATAR_LEFT + AVATAR_SIZE, height - AVATAR_BOTTOM);
         }
+        // Logger.d(TAG, "onMeasure in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
     }
 
     protected void setBubbleMeasuredContent(int w, int h) {
@@ -558,7 +561,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
     @Override
     protected void onDraw(Canvas canvas) {
-
+        // long start = SystemClock.uptimeMillis();
         // applyDrawingState();
 
         boolean isAnimating = false;
@@ -601,9 +604,13 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                     bubbleContentHeight + currentBubblePadding.top + currentBubblePadding.bottom);
             currentBubbleDrawable.draw(canvas);
             canvas.save();
-            canvas.translate(currentBubblePadding.left, currentBubblePadding.top);
+
+            // Logger.d(TAG, "onDraw:bubble in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
             isAnimating = isAnimating | drawBubble(canvas);
+            // Logger.d(TAG, "onDraw0 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
             canvas.restore();
+            // Logger.d(TAG, "onDraw00 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
+
             if (isBubblePressed) {
                 if (bubbleOutDrawableOverlay != null) {
                     bubbleOutDrawableOverlay.setBounds(0, 0,
@@ -646,10 +653,15 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                     bubbleContentWidth + currentBubblePadding.left + currentBubblePadding.right,
                     bubbleContentHeight + currentBubblePadding.top + currentBubblePadding.bottom);
             currentBubbleDrawable.draw(canvas);
-            canvas.save();
+            // canvas.save();
             canvas.translate(currentBubblePadding.left, currentBubblePadding.top);
+            // Logger.d(TAG, "onDraw:bubble in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
             isAnimating = isAnimating | drawBubble(canvas);
-            canvas.restore();
+            // Logger.d(TAG, "onDraw0 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
+            // canvas.restore();
+            canvas.translate(-currentBubblePadding.left, -currentBubblePadding.top);
+            // Logger.d(TAG, "onDraw00 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
+
             if (isBubblePressed) {
                 if (bubbleInDrawableOverlay != null) {
                     bubbleInDrawableOverlay.setBounds(0, 0,
@@ -659,15 +671,22 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                 }
             }
         }
+
+        // Logger.d(TAG, "onDraw1 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
+
         canvas.restore();
+
+        // Logger.d(TAG, "onDraw2 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
 
         if (isAnimating) {
             if (Build.VERSION.SDK_INT >= 16) {
                 postInvalidateOnAnimation();
             } else {
-                postInvalidateDelayed(16);
+                postInvalidateDelayed(34);
             }
         }
+
+        // Logger.d(TAG, "onDraw in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
     }
 
     protected abstract void measureBubbleContent(int width);

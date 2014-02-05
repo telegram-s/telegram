@@ -1,5 +1,6 @@
 package org.telegram.android.core.wireframes;
 
+import android.text.Spannable;
 import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.PeerType;
