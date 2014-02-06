@@ -8,9 +8,9 @@
                                          android:paddingTop="4dp"
                                          android:paddingBottom="4dp">
 
-    <com.extradea.framework.images.ui.FastWebImageView android:layout_height="52dp"
-                                                       android:layout_width="52dp"
-                                                       android:id="@+id/avatar"/>
+    <org.telegram.android.preview.AvatarView android:layout_height="52dp"
+                                             android:layout_width="52dp"
+                                             android:id="@+id/avatar"/>
 
     <LinearLayout android:layout_height="fill_parent"
                   android:layout_width="0dp"

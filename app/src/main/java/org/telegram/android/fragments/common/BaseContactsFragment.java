@@ -7,20 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.ContactSourceListener;
-import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
-import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.wireframes.ContactWireframe;
-import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.ProgressInterface;
 import org.telegram.android.ui.FilterMatcher;
 import org.telegram.android.ui.Placeholders;
-import org.telegram.android.ui.TextUtil;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -415,12 +411,12 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
 
             if (contact.getRelatedUsers().length > 0) {
                 User user = contact.getRelatedUsers()[0];
-                ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(Placeholders.getUserPlaceholder(user.getUid()));
+                ((AvatarView) view.findViewById(R.id.avatar)).setEmptyDrawable(Placeholders.getUserPlaceholder(user.getUid()));
                 if (user.getPhoto() != null && (user.getPhoto() instanceof TLLocalAvatarPhoto)) {
                     TLLocalAvatarPhoto p = (TLLocalAvatarPhoto) user.getPhoto();
-                    ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(new StelsImageTask((TLLocalFileLocation) p.getPreviewLocation()));
+                    ((AvatarView) view.findViewById(R.id.avatar)).requestAvatar(p.getPreviewLocation());
                 } else {
-                    ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
+                    ((AvatarView) view.findViewById(R.id.avatar)).requestAvatar(null);
                 }
 
                 int statusValue = getUserState(user.getStatus());
@@ -440,8 +436,8 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
                     view.findViewById(R.id.shareIcon).setVisibility(View.GONE);
                 }
             } else {
-                ((FastWebImageView) view.findViewById(R.id.avatar)).setLoadingDrawable(R.drawable.st_user_placeholder_grey);
-                ((FastWebImageView) view.findViewById(R.id.avatar)).requestTask(null);
+                ((AvatarView) view.findViewById(R.id.avatar)).setEmptyDrawable(R.drawable.st_user_placeholder_grey);
+                ((AvatarView) view.findViewById(R.id.avatar)).requestAvatar(null);
                 onlineView.setVisibility(View.GONE);
                 if (!isMultiple) {
                     view.findViewById(R.id.shareIcon).setVisibility(View.VISIBLE);
