@@ -78,7 +78,9 @@ public class FragmentScreenController implements RootController {
     }
 
     private void onStartTransaction() {
-        handler.post(addBg);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            handler.post(addBg);
+        }
     }
 
     public Bundle saveState() {
@@ -92,7 +94,7 @@ public class FragmentScreenController implements RootController {
     }
 
     private FragmentTransaction prepareTransaction() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return activity.getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit);
         } else {
@@ -101,7 +103,7 @@ public class FragmentScreenController implements RootController {
     }
 
     private FragmentTransaction prepareBackTransaction() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return activity.getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(R.anim.fragment_close_enter, R.anim.fragment_close_exit);
         } else {

@@ -193,10 +193,37 @@ public class AvatarLoader {
         byte[] m2Size = Optimizer.save(m2Bitmap);
         fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_MEDIUM2, m2Size);
 
-        Bitmap mRes = Bitmap.createBitmap(AVATAR_M_W, AVATAR_M_H, Bitmap.Config.ARGB_8888);
-        Optimizer.drawTo(mBitmap, mRes);
-        avatarCache.putToCache(task.getFileLocation().getUniqKey() + "_" + TYPE_MEDIUM, mRes);
-        notifyAvatarLoaded(task, TYPE_MEDIUM, mRes);
+        Bitmap mRes;
+        if (task.getKind() == TYPE_FULL) {
+            mRes = avatarCache.findFree(TYPE_FULL);
+            if (mRes == null) {
+                mRes = Bitmap.createBitmap(AVATAR_W, AVATAR_H, Bitmap.Config.ARGB_8888);
+            }
+            Optimizer.drawTo(src, mRes);
+        } else if (task.getKind() == TYPE_MEDIUM) {
+            mRes = avatarCache.findFree(TYPE_MEDIUM);
+            if (mRes == null) {
+                mRes = Bitmap.createBitmap(AVATAR_M_W, AVATAR_M_H, Bitmap.Config.ARGB_8888);
+            }
+            Optimizer.drawTo(mBitmap, mRes);
+        } else if (task.getKind() == TYPE_MEDIUM2) {
+            mRes = avatarCache.findFree(TYPE_MEDIUM2);
+            if (mRes == null) {
+                mRes = Bitmap.createBitmap(AVATAR_M2_W, AVATAR_M2_H, Bitmap.Config.ARGB_8888);
+            }
+            Optimizer.drawTo(m2Bitmap, mRes);
+        } else if (task.getKind() == TYPE_SMALL) {
+            mRes = avatarCache.findFree(TYPE_SMALL);
+            if (mRes == null) {
+                mRes = Bitmap.createBitmap(AVATAR_S_W, AVATAR_S_H, Bitmap.Config.ARGB_8888);
+            }
+            Optimizer.drawTo(sBitmap, mRes);
+        } else {
+            return;
+        }
+
+        avatarCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), mRes);
+        notifyAvatarLoaded(task, task.getKind(), mRes);
     }
 
     private abstract class BaseWorker extends QueueWorker<AvatarTask> {
@@ -218,13 +245,14 @@ public class AvatarLoader {
             o.inPreferQualityOverSpeed = false;
         }
 
-//            if (REUSE_BITMAPS) {
-//                o.inBitmap = Bit fullBitmaps.get();
-//            }
+        if (REUSE_BITMAPS) {
+            o.inMutable = true;
+            o.inBitmap = avatarCache.findFree(task.getKind());
+        }
 
         Bitmap res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), o);
         if (res != null) {
-            avatarCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), res);
+            avatarCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), res);
             notifyAvatarLoaded(task, task.getKind(), res);
             return true;
         }
