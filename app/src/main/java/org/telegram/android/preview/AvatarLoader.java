@@ -105,6 +105,10 @@ public class AvatarLoader {
         }
     }
 
+    public AvatarCache getAvatarCache() {
+        return avatarCache;
+    }
+
     private void checkUiThread() {
         if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
             throw new IllegalAccessError("Might be called on UI thread");
@@ -119,7 +123,7 @@ public class AvatarLoader {
         String key = fileLocation.getUniqKey();
         Bitmap cached = avatarCache.getFromCache(key + "_" + kind);
         if (cached != null) {
-            receiver.onAvatarReceived(cached, true);
+            receiver.onAvatarReceived(cached, key + "_" + kind, true);
             return;
         }
 
@@ -164,7 +168,7 @@ public class AvatarLoader {
                         receivers.remove(holder);
                         AvatarReceiver receiver = holder.getReceiverReference().get();
                         if (receiver != null) {
-                            receiver.onAvatarReceived(bitmap, false);
+                            receiver.onAvatarReceived(bitmap, task.getFileLocation().getUniqKey() + "_" + kind, false);
                         }
                     }
                 }

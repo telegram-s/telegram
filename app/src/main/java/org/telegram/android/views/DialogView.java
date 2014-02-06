@@ -42,6 +42,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
     // private static final String TAG = "DialogView";
 
     private static final long AVATAR_FADE_TIME = 150;
+    private static final boolean AVATAR_FADE = false;
 
     // Resources
     private static int HIGHLIGHT_COLOR = 0xff3076a4;
@@ -96,7 +97,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
     // private Drawable emptyDrawable;
     // private Bitmap empty;
+
+    private String avatarKey;
     private Bitmap avatar;
+
     private long avatarAppearTime;
     private Paint avatarBgPaint;
 
@@ -245,14 +249,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             counterPaint = new Paint();
             counterPaint.setColor(0xff8ec85f);
 
-//            if (IS_LARGE) {
-//                userPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
-//                groupPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
-//            } else {
-//                userPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_user_placeholder_common)).getBitmap();
-//                groupPlaceholder = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.st_group_placeholder_common)).getBitmap();
-//            }
-
             isLoaded = true;
         }
     }
@@ -264,26 +260,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         this.application = (TelegramApplication) context.getApplicationContext();
 
         this.currentUserUid = application.getCurrentUid();
-//        this.avatarReceiver = new ImageReceiver() {
-//            @Override
-//            public void onImageLoaded(Bitmap result) {
-//                avatar = result;
-//                postInvalidate();
-//            }
-//
-//            @Override
-//            public void onImageLoadFailure() {
-//                avatar = null;
-//                postInvalidate();
-//            }
-//
-//            @Override
-//            public void onNoImage() {
-//                avatar = null;
-//                postInvalidate();
-//            }
-//        };
-//        this.avatarReceiver.register(application.getImageController());
 
         application.getTypingStates().registerListener(this);
 
@@ -352,7 +328,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             // empty = groupPlaceholder;
         }
 
-        avatar = null;
+        releaseAvatar();
         if (photo instanceof TLLocalAvatarPhoto) {
             application.getUiKernel().getAvatarLoader().requestAvatar(
                     ((TLLocalAvatarPhoto) photo).getPreviewLocation(),
@@ -361,19 +337,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         } else {
             application.getUiKernel().getAvatarLoader().cancelRequest(this);
         }
-//        if (photo instanceof TLLocalAvatarPhoto) {
-//            TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) photo;
-//            if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-//                StelsImageTask task = new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
-//                int size = IS_LARGE ? getPx(64) : getPx(52);
-//                avatarReceiver.receiveImage(new ScaleTask(task, size, size));
-//                avatar = avatarReceiver.getResult();
-//            } else {
-//                avatarReceiver.receiveImage(null);
-//            }
-//        } else {
-//            avatarReceiver.receiveImage(null);
-//        }
 
         if (getMeasuredHeight() != 0 || getMeasuredWidth() != 0) {
             buildLayout();
@@ -526,8 +489,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         }
 
         if (avatar != null) {
+
             long time = SystemClock.uptimeMillis() - avatarAppearTime;
-            if (time > AVATAR_FADE_TIME) {
+            if (time > AVATAR_FADE_TIME || !AVATAR_FADE) {
                 avatarPaint.setAlpha(255);
                 canvas.drawBitmap(avatar, layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
             } else {
@@ -607,14 +571,25 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
     }
 
     @Override
-    public void onAvatarReceived(Bitmap original, boolean intermediate) {
+    public void onAvatarReceived(Bitmap original, String key, boolean intermediate) {
+        releaseAvatar();
         this.avatar = original;
+        this.avatarKey = key;
+        application.getUiKernel().getAvatarLoader().getAvatarCache().incReference(avatarKey);
         if (intermediate) {
             this.avatarAppearTime = 0;
         } else {
             this.avatarAppearTime = SystemClock.uptimeMillis();
         }
         invalidate();
+    }
+
+    private void releaseAvatar() {
+        if (avatar != null) {
+            application.getUiKernel().getAvatarLoader().getAvatarCache().decReference(avatarKey);
+            avatar = null;
+            avatarKey = null;
+        }
     }
 
     private static class DialogLayout {

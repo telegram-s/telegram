@@ -81,7 +81,7 @@ public class AvatarView extends View implements AvatarReceiver {
     }
 
     @Override
-    public void onAvatarReceived(Bitmap original, boolean intermediate) {
+    public void onAvatarReceived(Bitmap original, String key, boolean intermediate) {
         this.avatar = original;
         if (intermediate) {
             this.arriveTime = 0;

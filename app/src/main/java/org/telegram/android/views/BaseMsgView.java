@@ -752,7 +752,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
     }
 
     @Override
-    public void onAvatarReceived(Bitmap original, boolean intermediate) {
+    public void onAvatarReceived(Bitmap original, String key, boolean intermediate) {
         avatar = original;
         if (intermediate) {
             avatarImageTime = 0;

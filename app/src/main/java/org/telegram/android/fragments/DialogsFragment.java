@@ -246,6 +246,21 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                 DialogWireframe description = getItem(i);
                 if (view == null) {
                     view = new DialogView(getActivity());
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                        switch (application.getTechKernel().getDebugSettings().getDialogListItemLayerType()) {
+                            default:
+                            case DebugSettings.LAYER_NONE:
+                                view.setLayerType(View.LAYER_TYPE_NONE, null);
+                                break;
+                            case DebugSettings.LAYER_HARDWARE:
+                                view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                                break;
+                            case DebugSettings.LAYER_SOFTWARE:
+                                view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+                                break;
+                        }
+                    }
                 }
 
                 DialogView dialogView = (DialogView) view;
