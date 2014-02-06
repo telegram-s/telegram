@@ -449,10 +449,11 @@ public class MessageView extends BaseMsgView {
             // Logger.d(TAG, "Built base layout in " + (SystemClock.uptimeMillis() - start) + " ms");
             // start = SystemClock.uptimeMillis();
 
-            if (layout.getLineCount() < 20) {
-                int layoutTextWidth = 0;
+            int lastWidth = (int) layout.getLineWidth(layout.getLineCount() - 1);
+            if (layout.getLineCount() < 3) {
+                int layoutTextWidth = lastWidth;
 
-                for (int i = 0; i < layout.getLineCount(); i++) {
+                for (int i = 0; i < layout.getLineCount() - 1; i++) {
                     layoutTextWidth = (int) Math.max(layout.getLineWidth(i), layoutTextWidth);
                 }
 
@@ -484,11 +485,11 @@ public class MessageView extends BaseMsgView {
                 }
             } else {
                 boolean isLastRtl = layout.getParagraphDirection(layout.getLineCount() - 1) == Layout.DIR_RIGHT_TO_LEFT;
-                if (!isLastRtl && (desiredWidth - layout.getLineWidth(layout.getLineCount() - 1) > timeWidth)) {
-                    layoutRealWidth = (int) Math.max(layoutRealWidth, layout.getLineWidth(layout.getLineCount() - 1) + timeWidth);
+                if (!isLastRtl && (desiredWidth - lastWidth > timeWidth)) {
+                    layoutRealWidth = Math.max(layoutRealWidth, lastWidth + timeWidth);
                     layoutHeight = layout.getHeight() + px(3);
                 } else if (isLastRtl && (desiredWidth - layout.getWidth() > timeWidth)) {
-                    layoutRealWidth = (int) Math.max(layoutRealWidth, layout.getWidth() + timeWidth);
+                    layoutRealWidth = Math.max(layoutRealWidth, layout.getWidth() + timeWidth);
                     layoutHeight = layout.getHeight() + px(3);
                 } else {
                     layoutHeight = layout.getHeight() + px(17);
