@@ -9,5 +9,5 @@ import org.telegram.tl.TLObject;
  * Time: 2:38
  */
 public abstract class TLAbsLocalFileLocation extends TLObject {
-
+   public abstract String getUniqKey();
 }

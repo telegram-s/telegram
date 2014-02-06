@@ -15,6 +15,7 @@ import org.telegram.api.upload.TLFile;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Created by ex3ndr on 05.02.14.
@@ -41,12 +42,47 @@ public class AvatarLoader {
     private static final boolean REUSE_BITMAPS = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     private QueueProcessor<AvatarTask> processor;
     private TelegramApplication application;
-    private DownloadWorker[] downloadWorkers;
+    private QueueWorker[] workers;
     private ArrayList<ReceiverHolder> receivers = new ArrayList<ReceiverHolder>();
+    private AvatarCache avatarCache;
+    private ImageStorage fileStorage;
     private Handler handler = new Handler(Looper.getMainLooper());
+
+    private ThreadLocal<byte[]> bitmapTmp = new ThreadLocal<byte[]>() {
+        @Override
+        protected byte[] initialValue() {
+            return new byte[16 * 1024];
+        }
+    };
+    private ThreadLocal<Bitmap> sBitmaps = new ThreadLocal<Bitmap>() {
+        @Override
+        protected Bitmap initialValue() {
+            return Bitmap.createBitmap(AVATAR_S_W, AVATAR_S_H, Bitmap.Config.ARGB_8888);
+        }
+    };
+    private ThreadLocal<Bitmap> mBitmaps = new ThreadLocal<Bitmap>() {
+        @Override
+        protected Bitmap initialValue() {
+            return Bitmap.createBitmap(AVATAR_M_W, AVATAR_M_H, Bitmap.Config.ARGB_8888);
+        }
+    };
+    private ThreadLocal<Bitmap> m2Bitmaps = new ThreadLocal<Bitmap>() {
+        @Override
+        protected Bitmap initialValue() {
+            return Bitmap.createBitmap(AVATAR_M2_W, AVATAR_M2_H, Bitmap.Config.ARGB_8888);
+        }
+    };
+    private ThreadLocal<Bitmap> fullBitmaps = new ThreadLocal<Bitmap>() {
+        @Override
+        protected Bitmap initialValue() {
+            return Bitmap.createBitmap(AVATAR_W, AVATAR_H, Bitmap.Config.ARGB_8888);
+        }
+    };
 
     public AvatarLoader(TelegramApplication application) {
         this.application = application;
+        this.avatarCache = new AvatarCache();
+        this.fileStorage = new ImageStorage(application, "avatars");
         this.processor = new QueueProcessor<AvatarTask>();
 
         float density = application.getResources().getDisplayMetrics().density;
@@ -60,9 +96,11 @@ public class AvatarLoader {
         AVATAR_M2_W = (int) (density * 64);
         AVATAR_M2_H = (int) (density * 64);
 
-        this.downloadWorkers = new DownloadWorker[]{new DownloadWorker(), new DownloadWorker()};
+        this.workers = new QueueWorker[]{
+                new DownloadWorker(), new DownloadWorker(),
+                new FileWorker(), new FileWorker()};
 
-        for (DownloadWorker w : downloadWorkers) {
+        for (QueueWorker w : workers) {
             w.start();
         }
     }
@@ -73,9 +111,18 @@ public class AvatarLoader {
         }
     }
 
-    public void requestAvatar(int peerType, int peerId, TLAbsLocalFileLocation fileLocation,
+    public void requestAvatar(TLAbsLocalFileLocation fileLocation,
+                              int kind,
                               AvatarReceiver receiver) {
         checkUiThread();
+
+        String key = fileLocation.getUniqKey();
+        Bitmap cached = avatarCache.getFromCache(key + "_" + kind);
+        if (cached != null) {
+            receiver.onAvatarReceived(cached, true);
+            return;
+        }
+
         for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
             if (holder.getReceiverReference().get() == null) {
                 receivers.remove(holder);
@@ -86,8 +133,8 @@ public class AvatarLoader {
                 break;
             }
         }
-        receivers.add(new ReceiverHolder(peerType, peerId, TYPE_MEDIUM, receiver));
-        processor.requestTask(new AvatarTask(peerType, peerId, fileLocation));
+        receivers.add(new ReceiverHolder(key, kind, receiver));
+        processor.requestTask(new AvatarTask(fileLocation, kind));
     }
 
     public void cancelRequest(AvatarReceiver receiver) {
@@ -104,7 +151,7 @@ public class AvatarLoader {
         }
     }
 
-    protected void notifyAvatarLoaded(final AvatarTask task, final Bitmap bitmap) {
+    protected void notifyAvatarLoaded(final AvatarTask task, final int kind, final Bitmap bitmap) {
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -113,7 +160,7 @@ public class AvatarLoader {
                         receivers.remove(holder);
                         continue;
                     }
-                    if (holder.getPeerType() == task.getPeerType() && holder.getPeerId() == task.getPeerId()) {
+                    if (holder.getKey().equals(task.getFileLocation().getUniqKey()) && holder.getKind() == kind) {
                         receivers.remove(holder);
                         AvatarReceiver receiver = holder.getReceiverReference().get();
                         if (receiver != null) {
@@ -125,30 +172,110 @@ public class AvatarLoader {
         });
     }
 
-    private class DownloadWorker extends QueueWorker<AvatarTask> {
-        private Bitmap reuseBitmap;
+    private void onFullBitmapLoaded(Bitmap src, AvatarTask task) throws IOException {
+        Bitmap sBitmap = sBitmaps.get();
+        Bitmap mBitmap = mBitmaps.get();
+        Bitmap m2Bitmap = m2Bitmaps.get();
 
-        private Bitmap sBitmap;
-        private Bitmap mBitmap;
-        private Bitmap m2Bitmap;
+        // Prepare thumbs
+        Optimizer.scaleTo(src, sBitmap);
+        Optimizer.scaleTo(src, mBitmap);
+        Optimizer.scaleTo(src, m2Bitmap);
 
-        private byte[] bitmapTmp;
+        byte[] sSize = Optimizer.save(sBitmap);
+        fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_SMALL, sSize);
+        byte[] mSize = Optimizer.save(mBitmap);
+        fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_MEDIUM, mSize);
+        byte[] m2Size = Optimizer.save(m2Bitmap);
+        fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_MEDIUM2, m2Size);
 
-        public DownloadWorker() {
+        Bitmap mRes = Bitmap.createBitmap(AVATAR_M_W, AVATAR_M_H, Bitmap.Config.ARGB_8888);
+        Optimizer.drawTo(mBitmap, mRes);
+        avatarCache.putToCache(task.getFileLocation().getUniqKey() + "_" + TYPE_MEDIUM, mRes);
+        notifyAvatarLoaded(task, TYPE_MEDIUM, mRes);
+    }
+
+    private abstract class BaseWorker extends QueueWorker<AvatarTask> {
+        protected byte[] bitmapTmp;
+
+        public BaseWorker() {
             super(processor);
 
             bitmapTmp = new byte[16 * 1024];
+        }
+    }
 
-            sBitmap = Bitmap.createBitmap(AVATAR_S_W, AVATAR_S_H, Bitmap.Config.ARGB_8888);
-            mBitmap = Bitmap.createBitmap(AVATAR_M_W, AVATAR_M_H, Bitmap.Config.ARGB_8888);
-            m2Bitmap = Bitmap.createBitmap(AVATAR_M2_W, AVATAR_M2_H, Bitmap.Config.ARGB_8888);
+    private boolean processPreTask(AvatarTask task) {
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        o.inSampleSize = 1;
+        o.inScaled = false;
+        o.inTempStorage = bitmapTmp.get();
+        if (Build.VERSION.SDK_INT >= 10) {
+            o.inPreferQualityOverSpeed = false;
+        }
+
+//            if (REUSE_BITMAPS) {
+//                o.inBitmap = Bit fullBitmaps.get();
+//            }
+
+        Bitmap res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), o);
+        if (res != null) {
+            avatarCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), res);
+            notifyAvatarLoaded(task, task.getKind(), res);
+            return true;
+        }
+
+
+        if (task.getKind() != TYPE_FULL) {
             if (REUSE_BITMAPS) {
-                reuseBitmap = Bitmap.createBitmap(AVATAR_W, AVATAR_H, Bitmap.Config.ARGB_8888);
+                o.inMutable = true;
+                o.inBitmap = fullBitmaps.get();
+            }
+
+            Bitmap fullBitmap = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + TYPE_FULL, o);
+            if (fullBitmap != null) {
+                try {
+                    onFullBitmapLoaded(fullBitmap, task);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private class FileWorker extends BaseWorker {
+
+        @Override
+        protected boolean processTask(AvatarTask task) {
+            boolean pre = processPreTask(task);
+            if (pre) {
+                return true;
+            } else {
+                synchronized (task) {
+                    task.setDownloaded(false);
+                }
+                return false;
             }
         }
 
         @Override
+        public boolean isAccepted(AvatarTask task) {
+            return task.isDownloaded();
+        }
+    }
+
+    private class DownloadWorker extends BaseWorker {
+        @Override
         protected boolean processTask(AvatarTask task) {
+            boolean pre = processPreTask(task);
+            if (pre) {
+                return true;
+            }
+
             TLAbsLocalFileLocation fileLocation = task.getFileLocation();
             TLInputFileLocation location;
             int dcId;
@@ -165,6 +292,8 @@ public class AvatarLoader {
             try {
                 TLFile res = application.getApi().doGetFile(dcId, location, 0, 1024 * 1024 * 1024);
 
+                fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes());
+
                 BitmapFactory.Options o = new BitmapFactory.Options();
                 o.inSampleSize = 1;
                 o.inScaled = false;
@@ -174,24 +303,13 @@ public class AvatarLoader {
                 }
 
                 if (REUSE_BITMAPS) {
-                    o.inBitmap = reuseBitmap;
+                    o.inMutable = true;
+                    o.inBitmap = fullBitmaps.get();
                 }
 
                 Bitmap src = BitmapFactory.decodeByteArray(res.getBytes(), 0, res.getBytes().length, o);
 
-                // Prepare thumbs
-                Optimizer.scaleTo(src, sBitmap);
-                Optimizer.scaleTo(src, mBitmap);
-                Optimizer.scaleTo(src, m2Bitmap);
-
-                byte[] original = res.getBytes();
-                byte[] sSize = Optimizer.save(sBitmap);
-                byte[] mSize = Optimizer.save(mBitmap);
-                byte[] m2Size = Optimizer.save(m2Bitmap);
-
-                Bitmap mRes = Bitmap.createBitmap(AVATAR_M_W, AVATAR_M_H, Bitmap.Config.ARGB_8888);
-                Optimizer.drawTo(mBitmap, mRes);
-                notifyAvatarLoaded(task, mRes);
+                onFullBitmapLoaded(src, task);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -206,24 +324,18 @@ public class AvatarLoader {
     }
 
     private class ReceiverHolder {
-        private int peerType;
-        private int peerId;
+        private String key;
         private int kind;
         private WeakReference<AvatarReceiver> receiverReference;
 
-        private ReceiverHolder(int peerType, int peerId, int kind, AvatarReceiver receiverReference) {
-            this.peerType = peerType;
-            this.peerId = peerId;
+        private ReceiverHolder(String key, int kind, AvatarReceiver receiverReference) {
+            this.key = key;
             this.kind = kind;
             this.receiverReference = new WeakReference<AvatarReceiver>(receiverReference);
         }
 
-        public int getPeerType() {
-            return peerType;
-        }
-
-        public int getPeerId() {
-            return peerId;
+        public String getKey() {
+            return key;
         }
 
         public int getKind() {
@@ -236,22 +348,34 @@ public class AvatarLoader {
     }
 
     private class AvatarTask extends QueueProcessor.BaseTask {
-        private int peerType;
-        private int peerId;
         private TLAbsLocalFileLocation fileLocation;
+        private boolean isDownloaded = true;
+        private boolean isPaused = false;
+        private int kind;
 
-        private AvatarTask(int peerType, int peerId, TLAbsLocalFileLocation fileLocation) {
-            this.peerType = peerType;
-            this.peerId = peerId;
+        private AvatarTask(TLAbsLocalFileLocation fileLocation, int kind) {
             this.fileLocation = fileLocation;
+            this.kind = kind;
         }
 
-        public int getPeerType() {
-            return peerType;
+        public boolean isPaused() {
+            return isPaused;
         }
 
-        public int getPeerId() {
-            return peerId;
+        public void setPaused(boolean isPaused) {
+            this.isPaused = isPaused;
+        }
+
+        public int getKind() {
+            return kind;
+        }
+
+        public boolean isDownloaded() {
+            return isDownloaded;
+        }
+
+        public void setDownloaded(boolean isDownloaded) {
+            this.isDownloaded = isDownloaded;
         }
 
         public TLAbsLocalFileLocation getFileLocation() {
@@ -259,8 +383,8 @@ public class AvatarLoader {
         }
 
         @Override
-        public long getKey() {
-            return peerId * 10L + peerType;
+        public String getKey() {
+            return fileLocation.getUniqKey() + "_" + kind;
         }
     }
 }

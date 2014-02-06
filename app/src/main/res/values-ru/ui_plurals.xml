@@ -22,9 +22,9 @@
     </plurals>
 
     <plurals name="st_dialogs">
-        <item quantity="one">{d} ЧАТ</item>
-        <item quantity="few">{d} ЧАТА</item>
-        <item quantity="many">{d} ЧАТОВ</item>
-        <item quantity="other">{d} ЧАТА</item>
+        <item quantity="one">{d} чат</item>
+        <item quantity="few">{d} чата</item>
+        <item quantity="many">{d} чатов</item>
+        <item quantity="other">{d} чата</item>
     </plurals>
 </resources>

@@ -101,4 +101,9 @@ public class TLLocalFileVideoLocation extends TLAbsLocalFileLocation {
                 videoLocation.accessHash == accessHash &&
                 videoLocation.size == size;
     }
+
+    @Override
+    public String getUniqKey() {
+        return dcId + "_" + videoId;
+    }
 }

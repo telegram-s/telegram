@@ -128,4 +128,9 @@ public class TLLocalEncryptedFileLocation extends TLAbsLocalFileLocation {
                 CryptoUtils.arrayEq(fileLocation.key, key) &&
                 CryptoUtils.arrayEq(fileLocation.iv, iv);
     }
+
+    @Override
+    public String getUniqKey() {
+        return dcId + "_" + id;
+    }
 }

@@ -21,6 +21,7 @@ import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.wireframes.DialogWireframe;
 import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarLoader;
 import org.telegram.android.preview.AvatarReceiver;
 import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
@@ -294,6 +295,20 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         stateHalfCheck = getResources().getDrawable(R.drawable.st_dialogs_halfcheck);
         stateFailure = getResources().getDrawable(R.drawable.st_dialogs_warning);
         secureIcon = getResources().getDrawable(R.drawable.st_ic_lock_green);
+
+        for (int index = 0; index < Placeholders.GROUP_PLACEHOLDERS.length; index++) {
+            if (cachedGroupPlaceholders[index] == null) {
+                cachedGroupPlaceholders[index] =
+                        ((BitmapDrawable) getResources().getDrawable(Placeholders.GROUP_PLACEHOLDERS[index])).getBitmap();
+            }
+        }
+
+        for (int index = 0; index < Placeholders.USER_PLACEHOLDERS.length; index++) {
+            if (cachedUserPlaceholders[index] == null) {
+                cachedUserPlaceholders[index] =
+                        ((BitmapDrawable) getResources().getDrawable(Placeholders.USER_PLACEHOLDERS[index])).getBitmap();
+            }
+        }
     }
 
     public void setDescription(DialogWireframe description, Object preparedLayouts) {
@@ -339,8 +354,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
         avatar = null;
         if (photo instanceof TLLocalAvatarPhoto) {
-            application.getUiKernel().getAvatarLoader().requestAvatar(description.getPeerType(), description.getPeerId(),
-                    ((TLLocalAvatarPhoto) photo).getPreviewLocation(), this);
+            application.getUiKernel().getAvatarLoader().requestAvatar(
+                    ((TLLocalAvatarPhoto) photo).getPreviewLocation(),
+                    AvatarLoader.TYPE_MEDIUM,
+                    this);
         } else {
             application.getUiKernel().getAvatarLoader().cancelRequest(this);
         }

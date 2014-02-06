@@ -67,4 +67,5 @@ public class Placeholders {
     public static final int[] GROUP_PLACEHOLDERS = new int[]{R.drawable.st_group_placeholder_blue, R.drawable.st_group_placeholder_cyan,
             R.drawable.st_group_placeholder_green, R.drawable.st_group_placeholder_orange, R.drawable.st_group_placeholder_pink,
             R.drawable.st_group_placeholder_purple, R.drawable.st_group_placeholder_red, R.drawable.st_group_placeholder_yellow};
+
 }

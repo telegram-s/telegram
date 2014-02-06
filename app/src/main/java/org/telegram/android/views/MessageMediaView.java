@@ -84,7 +84,7 @@ public class MessageMediaView extends BaseMsgView {
     private int state;
     private int prevState;
     private long stateChangeTime;
-    private ImageReceiver receiver;
+    // private ImageReceiver receiver;
     private ImageTask previewTask;
     private long previewAppearTime;
     private Bitmap oldPreview;
@@ -278,42 +278,42 @@ public class MessageMediaView extends BaseMsgView {
         };
         application.getMediaSender().registerListener(senderListener);
 
-        receiver = new ImageReceiver() {
-            @Override
-            public void onImageLoaded(Bitmap result) {
-                preview = result;
-                previewAppearTime = SystemClock.uptimeMillis();
-                postInvalidate();
-            }
-
-            @Override
-            public void onImageLoadFailure() {
-                preview = null;
-                postInvalidate();
-            }
-
-            @Override
-            public void onNoImage() {
-                preview = null;
-                postInvalidate();
-            }
-        };
-        receiver.register(application.getImageController());
+//        receiver = new ImageReceiver() {
+//            @Override
+//            public void onImageLoaded(Bitmap result) {
+//                preview = result;
+//                previewAppearTime = SystemClock.uptimeMillis();
+//                postInvalidate();
+//            }
+//
+//            @Override
+//            public void onImageLoadFailure() {
+//                preview = null;
+//                postInvalidate();
+//            }
+//
+//            @Override
+//            public void onNoImage() {
+//                preview = null;
+//                postInvalidate();
+//            }
+//        };
+//        receiver.register(application.getImageController());
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        receiver.onRemovedFromParent();
-        preview = null;
+//        receiver.onRemovedFromParent();
+//        preview = null;
         postInvalidate();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        receiver.onAddedToParent();
-        preview = receiver.getResult();
+//        receiver.onAddedToParent();
+//        preview = receiver.getResult();
         postInvalidate();
     }
 
@@ -334,18 +334,18 @@ public class MessageMediaView extends BaseMsgView {
     }
 
     private boolean bindPreview(ImageTask task) {
-        if (task != null) {
-            previewTask = task;
-            receiver.receiveImage(previewTask);
-            preview = task.getResult();
-            if (preview != null) {
-                previewAppearTime = 0;
-                return true;
-            }
-        } else {
-            previewTask = null;
-            receiver.receiveImage(null);
-        }
+//        if (task != null) {
+//            previewTask = task;
+//            receiver.receiveImage(previewTask);
+//            preview = task.getResult();
+//            if (preview != null) {
+//                previewAppearTime = 0;
+//                return true;
+//            }
+//        } else {
+//            previewTask = null;
+//            receiver.receiveImage(null);
+//        }
         return false;
     }
 

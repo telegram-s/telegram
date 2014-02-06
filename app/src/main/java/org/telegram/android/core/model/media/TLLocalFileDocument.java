@@ -82,4 +82,9 @@ public class TLLocalFileDocument extends TLAbsLocalFileLocation {
                 document.accessHash == accessHash &&
                 document.size == size;
     }
+
+    @Override
+    public String getUniqKey() {
+        return dcId + "_" + id;
+    }
 }

@@ -19,4 +19,9 @@ public class TLLocalFileEmpty extends TLAbsLocalFileLocation {
     public boolean equals(Object o) {
         return o instanceof TLLocalFileEmpty;
     }
+
+    @Override
+    public String getUniqKey() {
+        return "empty";
+    }
 }

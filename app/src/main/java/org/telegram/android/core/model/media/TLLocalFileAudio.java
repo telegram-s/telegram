@@ -67,4 +67,9 @@ public class TLLocalFileAudio extends TLAbsLocalFileLocation {
         size = readInt(stream);
         dcId = readInt(stream);
     }
+
+    @Override
+    public String getUniqKey() {
+        return dcId + "_" + id;
+    }
 }

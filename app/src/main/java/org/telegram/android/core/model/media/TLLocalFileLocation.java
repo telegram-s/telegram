@@ -115,4 +115,9 @@ public class TLLocalFileLocation extends TLAbsLocalFileLocation implements Seria
                 location.secret == secret &&
                 location.size == size;
     }
+
+    @Override
+    public String getUniqKey() {
+        return dcId + "_" + volumeId + "_" + localId;
+    }
 }

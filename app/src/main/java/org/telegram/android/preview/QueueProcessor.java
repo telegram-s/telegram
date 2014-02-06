@@ -13,7 +13,7 @@ public class QueueProcessor<T extends QueueProcessor.BaseTask> {
     }
 
     private final ArrayList<TaskHolder> taskHolders = new ArrayList<TaskHolder>();
-    private final HashMap<Long, TaskHolder> taskMap = new HashMap<Long, TaskHolder>();
+    private final HashMap<String, TaskHolder> taskMap = new HashMap<String, TaskHolder>();
     private boolean isRunning = true;
 
     public boolean isRunning() {
@@ -134,6 +134,6 @@ public class QueueProcessor<T extends QueueProcessor.BaseTask> {
     }
 
     public abstract static class BaseTask {
-        public abstract long getKey();
+        public abstract String getKey();
     }
 }
