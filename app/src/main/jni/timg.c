@@ -22,10 +22,9 @@
 #include <math.h>
 #include <android/log.h>
 #include <android/bitmap.h>
+#include "log.h"
+#include "libjpeg/jpeglib.h"
 
-#define  LOG_TAG "libtimg"
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 #define  MIN(a,b) (a < b ? a : b)
 #define  MAX(a,b) (a > b ? a : b)
 #define  ABS(a) (a > 0 ? a : -a)
@@ -212,6 +211,7 @@ static void brightness(AndroidBitmapInfo* info, void* pixels, float brightnessVa
 	}
 }
 
+
 void Java_org_telegram_android_media_OptimizedBlur_nativeFastBlur(
         JNIEnv* env,
         jobject thiz,
@@ -239,4 +239,69 @@ void Java_org_telegram_android_media_OptimizedBlur_nativeFastBlur(
         brightness(&info,pixels, 1.5f);
 
         AndroidBitmap_unlockPixels(env, bitmap);
+}
+void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmap(
+                                                             JNIEnv* env,
+                                                             jobject thiz,
+                                                             jstring fileName,
+                                                             jobject bitmap)
+{
+    char * path =  (*env)->GetStringUTFChars( env, fileName , NULL ) ;
+    AndroidBitmapInfo  info;
+    struct jpeg_error_mgr jerr;
+    struct jpeg_decompress_struct cinfo;
+    FILE * infile;		/* source file */
+    JSAMPARRAY buffer;		/* Output row buffer */
+    int row_stride;		/* physical row width in output buffer */
+    int ret;
+    int rowIndex;
+    int i;
+    void* pixels;
+    
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+    
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
+    
+    LOGI("Loading image from path %s", path);
+    
+    if ((infile = fopen(path, "rb")) == NULL) {
+        LOGE("Unable to open file");
+        return;
+    }
+    
+    cinfo.err = jpeg_std_error(&jerr);
+    
+    jpeg_create_decompress(&cinfo);
+    
+    jpeg_stdio_src(&cinfo, infile);
+    (void) jpeg_read_header(&cinfo, TRUE);
+    
+    (void) jpeg_start_decompress(&cinfo);
+    
+    row_stride = cinfo.output_width * cinfo.output_components;
+    
+    buffer = (*cinfo.mem->alloc_sarray)
+    ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+    
+    rowIndex = 0;
+    uint32_t* line = (uint32_t*)pixels;
+    while (cinfo.output_scanline < cinfo.output_height) {
+        (void) jpeg_read_scanlines(&cinfo, buffer, 1);
+        
+        if (rowIndex++ < info.height) {
+            for( i = 0; i < MIN(info.width, cinfo.output_width); i++) {
+                line[i] = RGBA(255, buffer[0][i*3], buffer[0][i*3+1], buffer[0][i*3 + 2]);
+            }
+            line = (char*)line + (info.stride);
+        }
+    }
+    
+    (void) jpeg_finish_decompress(&cinfo);
+    
+    AndroidBitmap_unlockPixels(env, bitmap);
 }

@@ -15,6 +15,7 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
+#include "log.h"
 
 
 /* Private state */
@@ -618,16 +619,20 @@ consume_markers (j_decompress_ptr cinfo)
 METHODDEF(void)
 reset_input_controller (j_decompress_ptr cinfo)
 {
+  LOGD("reset_input_controller");
   my_inputctl_ptr inputctl = (my_inputctl_ptr) cinfo->inputctl;
-
+  LOGD("reset_input_controller:1");
   inputctl->pub.consume_input = consume_markers;
   inputctl->pub.has_multiple_scans = FALSE; /* "unknown" would be better */
   inputctl->pub.eoi_reached = FALSE;
   inputctl->inheaders = 1;
+  LOGD("reset_input_controller:2");
   /* Reset other modules */
   (*cinfo->err->reset_error_mgr) ((j_common_ptr) cinfo);
+  LOGD("reset_input_controller:3");
   (*cinfo->marker->reset_marker_reader) (cinfo);
   /* Reset progression state -- would be cleaner if entropy decoder did this */
+  LOGD("reset_input_controller:4");
   cinfo->coef_bits = NULL;
 }
 
@@ -647,6 +652,7 @@ jinit_input_controller (j_decompress_ptr cinfo)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
 				SIZEOF(my_input_controller));
   cinfo->inputctl = (struct jpeg_input_controller *) inputctl;
+  LOGD("Input %d", (int)inputctl);
   /* Initialize method pointers */
   inputctl->pub.consume_input = consume_markers;
   inputctl->pub.reset_input_controller = reset_input_controller;

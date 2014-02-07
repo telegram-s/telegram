@@ -237,20 +237,32 @@ public class AvatarLoader {
     }
 
     private boolean processPreTask(AvatarTask task) {
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inSampleSize = 1;
-        o.inScaled = false;
-        o.inTempStorage = bitmapTmp.get();
-        if (Build.VERSION.SDK_INT >= 10) {
-            o.inPreferQualityOverSpeed = false;
+
+        Bitmap res;
+
+        Bitmap cached = avatarCache.findFree(task.getKind());
+
+        if (cached == null) {
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inSampleSize = 1;
+            o.inScaled = false;
+            o.inTempStorage = bitmapTmp.get();
+            if (Build.VERSION.SDK_INT >= 10) {
+                o.inPreferQualityOverSpeed = false;
+            }
+
+            if (Build.VERSION.SDK_INT >= 11) {
+                o.inMutable = true;
+            }
+
+            if (REUSE_BITMAPS) {
+                // o.inBitmap = avatarCache.findFree(task.getKind());
+            }
+            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), o);
+        } else {
+            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
         }
 
-        if (REUSE_BITMAPS) {
-            o.inMutable = true;
-            o.inBitmap = avatarCache.findFree(task.getKind());
-        }
-
-        Bitmap res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), o);
         if (res != null) {
             avatarCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), res);
             notifyAvatarLoaded(task, task.getKind(), res);
@@ -259,8 +271,20 @@ public class AvatarLoader {
 
 
         if (task.getKind() != TYPE_FULL) {
-            if (REUSE_BITMAPS) {
+
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inSampleSize = 1;
+            o.inScaled = false;
+            o.inTempStorage = bitmapTmp.get();
+            if (Build.VERSION.SDK_INT >= 10) {
+                o.inPreferQualityOverSpeed = false;
+            }
+
+            if (Build.VERSION.SDK_INT >= 11) {
                 o.inMutable = true;
+            }
+
+            if (REUSE_BITMAPS) {
                 o.inBitmap = fullBitmaps.get();
             }
 

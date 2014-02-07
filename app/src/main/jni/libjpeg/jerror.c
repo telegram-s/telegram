@@ -23,6 +23,7 @@
 #include "jpeglib.h"
 #include "jversion.h"
 #include "jerror.h"
+#include "log.h"
 
 #ifdef USE_WINDOWS_MESSAGEBOX
 #include <windows.h>
@@ -211,6 +212,7 @@ format_message (j_common_ptr cinfo, char * buffer)
 METHODDEF(void)
 reset_error_mgr (j_common_ptr cinfo)
 {
+  LOGD("reset_error_mgr");
   cinfo->err->num_warnings = 0;
   /* trace_level is not reset since it is an application-supplied parameter */
   cinfo->err->msg_code = 0;	/* may be useful as a flag for "no error" */

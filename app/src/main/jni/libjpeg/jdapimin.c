@@ -20,6 +20,7 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
+#include "log.h"
 
 
 /*
@@ -242,13 +243,12 @@ GLOBAL(int)
 jpeg_read_header (j_decompress_ptr cinfo, boolean require_image)
 {
   int retcode;
-
+  LOGD("Call jpeg_read_header");
   if (cinfo->global_state != DSTATE_START &&
       cinfo->global_state != DSTATE_INHEADER)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
-
+  LOGD("Call jpeg_read_header:1");
   retcode = jpeg_consume_input(cinfo);
-
   switch (retcode) {
   case JPEG_REACHED_SOS:
     retcode = JPEG_HEADER_OK;
@@ -287,19 +287,27 @@ jpeg_read_header (j_decompress_ptr cinfo, boolean require_image)
 GLOBAL(int)
 jpeg_consume_input (j_decompress_ptr cinfo)
 {
+  LOGD("jpeg_consume_input");
   int retcode = JPEG_SUSPENDED;
 
   /* NB: every possible DSTATE value should be listed in this switch */
   switch (cinfo->global_state) {
   case DSTATE_START:
+    LOGD("jpeg_consume_input: DSTATE_START");
     /* Start-of-datastream actions: reset appropriate modules */
+    LOGD("jpeg_consume_input: DSTATE_START:0 %d", (int)cinfo->inputctl);
     (*cinfo->inputctl->reset_input_controller) (cinfo);
+    LOGD("jpeg_consume_input: DSTATE_START:1");
     /* Initialize application's data source module */
     (*cinfo->src->init_source) (cinfo);
+    LOGD("jpeg_consume_input: DSTATE_START:2");
     cinfo->global_state = DSTATE_INHEADER;
+    LOGD("jpeg_consume_input: DSTATE_START:3");
     /*FALLTHROUGH*/
   case DSTATE_INHEADER:
+    LOGD("jpeg_consume_input: DSTATE_INHEADER");
     retcode = (*cinfo->inputctl->consume_input) (cinfo);
+    LOGD("jpeg_consume_input: DSTATE_INHEADER:1");
     if (retcode == JPEG_REACHED_SOS) { /* Found SOS, prepare to decompress */
       /* Set up default parameters based on header data */
       default_decompress_parms(cinfo);
@@ -308,6 +316,7 @@ jpeg_consume_input (j_decompress_ptr cinfo)
     }
     break;
   case DSTATE_READY:
+    LOGD("jpeg_consume_input: DSTATE_READY");
     /* Can't advance past first SOS until start_decompress is called */
     retcode = JPEG_REACHED_SOS;
     break;
@@ -318,6 +327,7 @@ jpeg_consume_input (j_decompress_ptr cinfo)
   case DSTATE_BUFIMAGE:
   case DSTATE_BUFPOST:
   case DSTATE_STOPPING:
+    LOGD("jpeg_consume_input: ENDING");
     retcode = (*cinfo->inputctl->consume_input) (cinfo);
     break;
   default:

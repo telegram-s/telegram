@@ -16,6 +16,7 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
+#include "log.h"
 
 
 typedef enum {			/* JPEG marker codes */
@@ -1287,6 +1288,7 @@ jpeg_resync_to_restart (j_decompress_ptr cinfo, int desired)
 METHODDEF(void)
 reset_marker_reader (j_decompress_ptr cinfo)
 {
+  LOGD("reset_marker_reader");
   my_marker_ptr marker = (my_marker_ptr) cinfo->marker;
 
   cinfo->comp_info = NULL;		/* until allocated by get_sof */

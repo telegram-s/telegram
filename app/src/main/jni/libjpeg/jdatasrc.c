@@ -19,6 +19,7 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 #include "jerror.h"
+#include "log.h"
 
 
 /* Expanded data source object for stdio input */
@@ -209,6 +210,7 @@ term_source (j_decompress_ptr cinfo)
 GLOBAL(void)
 jpeg_stdio_src (j_decompress_ptr cinfo, FILE * infile)
 {
+  LOGD("Call jpeg_stdio_src");
   my_src_ptr src;
 
   /* The source object and input buffer are made permanent so that a series
