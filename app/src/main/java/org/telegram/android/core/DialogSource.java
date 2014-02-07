@@ -139,7 +139,7 @@ public class DialogSource {
 
             @Override
             protected long getSortingKey(DialogWireframe obj) {
-                return obj.getDate() * 1000L + Math.abs(obj.getMid()) % 1000;
+                return obj.getSortOrder();
             }
 
             @Override
@@ -521,6 +521,8 @@ public class DialogSource {
         res.setUnreadCount(item.getUnreadCount());
 
         res.setPreparedLayout(DialogView.prepareLayoutCache(res, application));
+
+        res.setSortOrder(res.getDate() * 1000L + Math.abs(res.getMid()) % 1000);
 
         return res;
     }

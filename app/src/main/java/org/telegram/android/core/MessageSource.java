@@ -135,11 +135,7 @@ public class MessageSource {
 
             @Override
             protected long getSortingKey(MessageWireframe obj) {
-                if (obj.message.getMid() <= 0) {
-                    return obj.message.getDate() * 1000000L + 999999L;
-                } else {
-                    return obj.message.getDate() * 1000000L + Math.abs(obj.message.getMid());
-                }
+                return obj.sortingOrder;
             }
 
             @Override
@@ -211,6 +207,12 @@ public class MessageSource {
                         res.cachedLayout = MessageView.prepareLayout(res, application);
                     }
                     // res.cachedLayout = MessageView.prepareLayout(res, application);
+                }
+
+                if (res.message.getMid() <= 0) {
+                    res.sortingOrder = res.message.getDate() * 1000000L + 999999L;
+                } else {
+                    res.sortingOrder = res.message.getDate() * 1000000L + Math.abs(res.message.getMid());
                 }
 
                 if (item.getRawContentType() == ContentType.MESSAGE_SYSTEM) {

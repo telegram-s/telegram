@@ -26,4 +26,6 @@ public class MessageWireframe {
     public Spannable text;
 
     public Object cachedLayout;
+
+    public long sortingOrder;
 }

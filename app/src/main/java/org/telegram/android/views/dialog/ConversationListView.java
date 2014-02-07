@@ -183,29 +183,29 @@ public class ConversationListView extends ImagingListView {
         @Override
         public void onScrollStateChanged(AbsListView absListView, int i) {
 
-            if (i == SCROLL_STATE_FLING || i == SCROLL_STATE_TOUCH_SCROLL) {
-                handler.removeMessages(0);
-            }
-
-            if (i == SCROLL_STATE_IDLE) {
-                application.getImageController().doResume();
-                handler.removeMessages(0);
-                handler.sendEmptyMessageDelayed(0, UI_TIMEOUT);
-            } else {
-                application.getImageController().doPause();
-            }
+//            if (i == SCROLL_STATE_FLING || i == SCROLL_STATE_TOUCH_SCROLL) {
+//                handler.removeMessages(0);
+//            }
+//
+//            if (i == SCROLL_STATE_IDLE) {
+//                application.getImageController().doResume();
+//                handler.removeMessages(0);
+//                handler.sendEmptyMessageDelayed(0, UI_TIMEOUT);
+//            } else {
+//                application.getImageController().doPause();
+//            }
 
             state = i;
         }
 
         @Override
         public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            if (lastScrollY == -1) {
-                lastScrollY = getScrollY();
-            } else if (lastScrollY != getScrollY()) {
-                lastScrollY = getScrollY();
-                application.getImageController().doPause();
-            }
+//            if (lastScrollY == -1) {
+//                lastScrollY = getScrollY();
+//            } else if (lastScrollY != getScrollY()) {
+//                lastScrollY = getScrollY();
+//                application.getImageController().doPause();
+//            }
 
             if (lastVisibleItem == -1 || lastVisibleItem != firstVisibleItem || state == SCROLL_STATE_IDLE) {
                 lastVisibleItem = firstVisibleItem;

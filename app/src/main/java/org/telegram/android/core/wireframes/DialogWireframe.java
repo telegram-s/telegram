@@ -37,10 +37,20 @@ public class DialogWireframe {
     private boolean isErrorState;
     private int unreadCount;
 
+    private long sortOrder;
+
     public DialogWireframe(long databaseId, int peerId, int peerType) {
         this.peerId = peerId;
         this.peerType = peerType;
         this.databaseId = databaseId;
+    }
+
+    public long getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(long sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     public long getDatabaseId() {

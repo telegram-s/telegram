@@ -83,6 +83,11 @@ public class AvatarCache {
 
     private void putHolder(Holder holder) {
         if (holder.referenceCount <= 0) {
+            holder.sourceStrongBitmap = holder.sourceBitmap.get();
+            if (holder.sourceStrongBitmap == null) {
+                return;
+            }
+
             boolean isMoved = false;
             if (references.containsKey(holder.key)) {
                 isMoved = true;
@@ -94,6 +99,9 @@ public class AvatarCache {
             }
             avatarCache.put(holder.key, holder);
         } else {
+
+            holder.sourceStrongBitmap = null;
+
             boolean isMoved = false;
             if (avatarCache.get(holder.key) != null) {
                 isMoved = true;
@@ -164,6 +172,7 @@ public class AvatarCache {
     private class Holder {
         public String key;
         public SoftReference<Bitmap> sourceBitmap;
+        public Bitmap sourceStrongBitmap;
         public int referenceCount;
         public int size;
 
