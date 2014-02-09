@@ -3,6 +3,7 @@ package org.telegram.android.core;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Build;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.*;
@@ -12,6 +13,7 @@ import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
+import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.OptimizedBlur;
 import org.telegram.android.ui.BitmapUtils;
 import org.telegram.api.*;
@@ -26,8 +28,6 @@ import java.util.List;
  * Created: 28.07.13 19:28
  */
 public class EngineUtils {
-
-    private static OptimizedBlur optimizedBlur = new OptimizedBlur();
 
     public static TLAbsLocalAvatarPhoto convertAvatarPhoto(TLAbsChatPhoto chatPhoto) {
         if (chatPhoto instanceof TLChatPhoto) {
@@ -252,36 +252,56 @@ public class EngineUtils {
         }
     }
 
+    private static Object fastPreviewLocker = new Object();
+    private static Bitmap fastPreview;
+
     public static TLLocalPhoto convertPhoto(TLMessageMediaPhoto src) {
         if (src.getPhoto() instanceof TLPhoto) {
             TLLocalPhoto res = new TLLocalPhoto();
             TLPhotoCachedSize cachedSize = ApiUtils.findCachedSize((TLPhoto) src.getPhoto());
             if (cachedSize != null) {
 
-                if (Build.VERSION.SDK_INT >= 11) {
-                    // Resize make sense only for API Level starting from 11
-                    Bitmap sourcePreview = BitmapFactory.decodeByteArray(cachedSize.getBytes(), 0, cachedSize.getBytes().length);
-                    Bitmap destPreview = Bitmap.createBitmap(
-                            TLLocalPhoto.FAST_PREVIEW_MAX_W,
-                            TLLocalPhoto.FAST_PREVIEW_MAX_H,
-                            Bitmap.Config.ARGB_8888);
-
-                    Canvas canvas = new Canvas(destPreview);
-                    canvas.drawBitmap(sourcePreview, 0, 0, null);
-
-                    destPreview = optimizedBlur.performBlur(destPreview);
+                synchronized (fastPreviewLocker) {
+                    if (fastPreview == null) {
+                        fastPreview = Bitmap.createBitmap(
+                                TLLocalPhoto.FAST_PREVIEW_MAX_W,
+                                TLLocalPhoto.FAST_PREVIEW_MAX_H,
+                                Bitmap.Config.ARGB_8888);
+                    }
+                    fastPreview.eraseColor(Color.TRANSPARENT);
+                    BitmapDecoderEx.decodeReuseBitmap(cachedSize.getBytes(), fastPreview);
 
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    destPreview.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
+                    fastPreview.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
                     byte[] optimizedPreview = outputStream.toByteArray();
 
-
                     res.setFastPreview(optimizedPreview);
-                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_RESIZE_BLUR);
-                } else {
-                    res.setFastPreview(cachedSize.getBytes());
-                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);
+                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_RESIZE);
                 }
+//                if (Build.VERSION.SDK_INT >= 11) {
+//                    // Resize make sense only for API Level starting from 11
+//                    Bitmap sourcePreview = BitmapFactory.decodeByteArray(cachedSize.getBytes(), 0, cachedSize.getBytes().length);
+//                    Bitmap destPreview = Bitmap.createBitmap(
+//                            TLLocalPhoto.FAST_PREVIEW_MAX_W,
+//                            TLLocalPhoto.FAST_PREVIEW_MAX_H,
+//                            Bitmap.Config.ARGB_8888);
+//
+//                    Canvas canvas = new Canvas(destPreview);
+//                    canvas.drawBitmap(sourcePreview, 0, 0, null);
+//
+//                    destPreview = optimizedBlur.performBlur(destPreview);
+//
+//                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//                    destPreview.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
+//                    byte[] optimizedPreview = outputStream.toByteArray();
+//
+//
+//                    res.setFastPreview(optimizedPreview);
+//                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_RESIZE_BLUR);
+//                } else {
+//                    res.setFastPreview(cachedSize.getBytes());
+//                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);
+//                }
                 res.setFastPreviewW(cachedSize.getW());
                 res.setFastPreviewH(cachedSize.getH());
 

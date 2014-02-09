@@ -330,10 +330,22 @@ public class Optimizer {
 
         Matrix scaleMatrix = new Matrix();
         scaleMatrix.setScale(ratioX, ratioY, middleX, middleY);
-
+        dest.eraseColor(Color.TRANSPARENT);
         Canvas canvas = new Canvas(dest);
         canvas.setMatrix(scaleMatrix);
         canvas.drawBitmap(src, middleX - src.getWidth() / 2, middleY - src.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG));
+    }
+
+    public static int[] scaleToRatio(Bitmap src, int sourceW, int sourceH, Bitmap dest) {
+        float ratio = Math.min(dest.getWidth() / (float) sourceW, dest.getHeight() / (float) sourceH);
+
+        dest.eraseColor(Color.TRANSPARENT);
+        Canvas canvas = new Canvas(dest);
+        canvas.drawBitmap(src,
+                new Rect(0, 0, sourceW, sourceH),
+                new Rect(0, 0, (int) (sourceW * ratio), (int) (sourceH * ratio)),
+                new Paint(Paint.FILTER_BITMAP_FLAG));
+        return new int[]{(int) (sourceW * ratio), (int) (sourceH * ratio)};
     }
 
     public static void drawTo(Bitmap src, Bitmap dest) {

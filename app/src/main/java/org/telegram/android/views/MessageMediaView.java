@@ -19,6 +19,7 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.*;
+import org.telegram.android.preview.MediaReceiver;
 import org.telegram.android.ui.*;
 import org.telegram.android.util.IOUtils;
 import org.telegram.api.TLFileLocation;
@@ -35,7 +36,7 @@ import java.util.concurrent.Executors;
  * Author: Korshakov Stepan
  * Created: 15.08.13 1:14
  */
-public class MessageMediaView extends BaseMsgView {
+public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     private static MediaFastCache fastCache = new MediaFastCache();
 
@@ -84,16 +85,25 @@ public class MessageMediaView extends BaseMsgView {
     private int state;
     private int prevState;
     private long stateChangeTime;
-    // private ImageReceiver receiver;
+
+    private ImageReceiver receiver;
     private ImageTask previewTask;
     private long previewAppearTime;
+
     private Bitmap oldPreview;
+    private String oldPreviewKey;
+    private int oldPreviewRegionW;
+    private int oldPreviewRegionH;
+
     private Bitmap preview;
-    private Bitmap previewCached;
-    private int fastPreviewHeight;
-    private int fastPreviewWidth;
-    private int previewHeight;
-    private int previewWidth;
+    private String previewKey;
+    private int previewRegionW;
+    private int previewRegionH;
+    // private Bitmap previewCached;
+    // private int fastPreviewHeight;
+    // private int fastPreviewWidth;
+    // private int previewHeight;
+    // private int previewWidth;
     private boolean isOut;
     private boolean isVideo;
     private boolean isDownloadable;
@@ -107,6 +117,7 @@ public class MessageMediaView extends BaseMsgView {
     private String duration;
     private String date;
 
+    private boolean isBindSizeCalled;
     private int desiredHeight;
     private int desiredWidth;
     private int timeWidth;
@@ -117,10 +128,6 @@ public class MessageMediaView extends BaseMsgView {
     private boolean isAnimatedProgress = true;
 
     private boolean scaleUpMedia = false;
-
-    private OptimizedBlur optimizedBlur;
-
-    private final BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 
     public MessageMediaView(Context context) {
         super(context);
@@ -139,7 +146,6 @@ public class MessageMediaView extends BaseMsgView {
 
     protected void init() {
         super.init();
-        optimizedBlur = new OptimizedBlur();
         videoIcon = getResources().getDrawable(R.drawable.st_bubble_ic_video);
         mapPoint = getResources().getDrawable(R.drawable.st_map_pin);
         unsupportedMark = getResources().getDrawable(R.drawable.st_bubble_unknown);
@@ -304,33 +310,58 @@ public class MessageMediaView extends BaseMsgView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-//        receiver.onRemovedFromParent();
-//        preview = null;
+        unbindOldPreview();
+        unbindPreview();
         postInvalidate();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-//        receiver.onAddedToParent();
-//        preview = receiver.getResult();
-        postInvalidate();
+        rebind();
     }
 
     private int[] buildSize(int w, int h) {
         float maxWidth = getPx(160);
         float maxHeight = getPx(300);
 
-        float scale = maxWidth / previewWidth;
+        float scale = Math.min(maxWidth / w, maxHeight / h);
 
-        if (previewHeight * scale > maxHeight) {
-            scale = maxHeight / previewHeight;
-        }
+//        if (h * scale > maxHeight) {
+//            scale = maxHeight / h;
+//        }
 
-        int scaledW = (int) maxWidth;
-        int scaledH = (int) (previewHeight * scale);
+        int scaledW = (int) (w * scale);
+        int scaledH = (int) (h * scale);
 
         return new int[]{scaledW, scaledH};
+    }
+
+    private void bindSize(int w, int h) {
+        int[] sizes = buildSize(w, h);
+        desiredWidth = sizes[0];
+        desiredHeight = sizes[1];
+        isBindSizeCalled = true;
+    }
+
+    private void unbindPreview() {
+        if (preview != null) {
+            application.getUiKernel().getMediaLoader().getImageCache().decReference(previewKey);
+            previewKey = null;
+            preview = null;
+            previewRegionH = 0;
+            previewRegionW = 0;
+        }
+    }
+
+    private void unbindOldPreview() {
+        if (oldPreview != null) {
+            application.getUiKernel().getMediaLoader().getImageCache().decReference(oldPreviewKey);
+            oldPreviewKey = null;
+            oldPreview = null;
+            oldPreviewRegionH = 0;
+            oldPreviewRegionW = 0;
+        }
     }
 
     private boolean bindPreview(ImageTask task) {
@@ -350,9 +381,7 @@ public class MessageMediaView extends BaseMsgView {
     }
 
     private void bindMedia(MessageWireframe message) {
-        this.previewHeight = 0;
-        this.previewWidth = 0;
-        this.previewTask = null;
+        this.isBindSizeCalled = false;
         this.preview = null;
         this.isVideo = false;
         this.isUploadable = false;
@@ -364,75 +393,37 @@ public class MessageMediaView extends BaseMsgView {
 
         if (message.message.getExtras() instanceof TLLocalPhoto) {
             TLLocalPhoto mediaPhoto = (TLLocalPhoto) message.message.getExtras();
-
-            if (mediaPhoto.hasFastPreview()) {
-                if (previewCached == null) {
-                    previewCached = fastCache.findInCache(databaseId);
-                }
-                if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_RESIZE) != 0) {
-                    // Removing last pixels for avoiding artefacts on edges
-                    fastPreviewWidth = mediaPhoto.getFastPreviewW() - 1;
-                    fastPreviewHeight = mediaPhoto.getFastPreviewH() - 1;
-                } else {
-                    fastPreviewWidth = mediaPhoto.getFastPreviewW();
-                    fastPreviewHeight = mediaPhoto.getFastPreviewH();
-                }
-            }
+            bindSize(mediaPhoto.getFullW(), mediaPhoto.getFullH());
 
             boolean isBinded = false;
             if (!(mediaPhoto.getFullLocation() instanceof TLLocalFileEmpty)) {
                 key = DownloadManager.getPhotoKey(mediaPhoto);
-                previewHeight = mediaPhoto.getFullH();
-                previewWidth = mediaPhoto.getFullW();
                 if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-                    int[] sizes = buildSize(mediaPhoto.getFullW(), mediaPhoto.getFullH());
-                    ScaleTask task = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), sizes[0], sizes[1]);
-                    task.setPutInDiskCache(true);
-                    isBinded = bindPreview(task);
+//                    int[] sizes = buildSize(mediaPhoto.getFullW(), mediaPhoto.getFullH());
+//                    ScaleTask task = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), sizes[0], sizes[1]);
+//                    task.setPutInDiskCache(true);
+//                    isBinded = bindPreview(task);
+
+                    application.getUiKernel().getMediaLoader().requestFullLoading(mediaPhoto, application.getDownloadManager().getFileName(key), this);
+                    isBinded = true;
                 }
                 isDownloadable = true;
             } else {
                 isDownloadable = false;
             }
 
-            if (mediaPhoto.hasFastPreview() && !isBinded && previewCached == null) {
-                bitmapOptions.inSampleSize = 1;
-                bitmapOptions.inScaled = false;
-                bitmapOptions.inTempStorage = bitmapTmp;
-                if (Build.VERSION.SDK_INT >= 10) {
-                    bitmapOptions.inPreferQualityOverSpeed = false;
-                }
+            if (!isBinded && mediaPhoto.hasFastPreview()) {
+                isBinded = true;
+                application.getUiKernel().getMediaLoader().requestFastLoading(mediaPhoto, this);
+            }
 
-                boolean isReused = false;
-                if (Build.VERSION.SDK_INT >= 11) {
-                    bitmapOptions.inMutable = true;
-                    Bitmap destBitmap;
-                    if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_RESIZE) != 0) {
-                        destBitmap = fastCache.findInFreeCache(TLLocalPhoto.FAST_PREVIEW_MAX_W, TLLocalPhoto.FAST_PREVIEW_MAX_H);
-                    } else {
-                        destBitmap = fastCache.findInFreeCache(mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH());
-                    }
-                    if (destBitmap != null) {
-                        bitmapOptions.inBitmap = destBitmap;
-                        isReused = true;
-                    } else {
-                        bitmapOptions.inBitmap = null;
-                    }
-                }
-
-                long start = SystemClock.uptimeMillis();
-                Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, bitmapOptions);
-                if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_BLUR) == 0) {
-                    optimizedBlur.performBlur(img);
-                }
-
-                previewCached = img;
-
-                Logger.d(TAG, "Decode picture in " + (SystemClock.uptimeMillis() - start) +
-                        " " + img.getWidth() + "x" + img.getHeight() + " :" + (isReused ? "reused" : ""));
+            if (!isBinded) {
+                application.getUiKernel().getMediaLoader().cancelRequest(this);
             }
         } else if (message.message.getExtras() instanceof TLLocalVideo) {
             TLLocalVideo mediaVideo = (TLLocalVideo) message.message.getExtras();
+            bindSize(mediaVideo.getPreviewW(), mediaVideo.getPreviewH());
+
             isVideo = true;
             duration = TextUtil.formatDuration(mediaVideo.getDuration());
             placeholderPaint.setColor(Color.BLACK);
@@ -442,243 +433,241 @@ public class MessageMediaView extends BaseMsgView {
                 isDownloadable = true;
 
                 if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-                    float maxWidth = getPx(160);
-                    float maxHeight = getPx(300);
-
-                    float scale = maxWidth / mediaVideo.getPreviewW();
-
-                    if (previewHeight * scale > maxHeight) {
-                        scale = maxHeight / mediaVideo.getPreviewH();
-                    }
-
-                    int scaledW = (int) maxWidth;
-                    int scaledH = (int) (mediaVideo.getPreviewH() * scale);
-
-                    previewTask = new ScaleTask(
-                            new VideoThumbTask(application.getDownloadManager().getFileName(key))
-                            , scaledW, scaledH);
-                    previewTask.setPutInDiskCache(true);
-
-                    previewWidth = mediaVideo.getPreviewW();
-                    previewHeight = mediaVideo.getPreviewH();
+//                    float maxWidth = getPx(160);
+//                    float maxHeight = getPx(300);
+//
+//                    float scale = maxWidth / mediaVideo.getPreviewW();
+//
+//                    if (previewHeight * scale > maxHeight) {
+//                        scale = maxHeight / mediaVideo.getPreviewH();
+//                    }
+//
+//                    int scaledW = (int) maxWidth;
+//                    int scaledH = (int) (mediaVideo.getPreviewH() * scale);
+//
+//                    previewTask = new ScaleTask(
+//                            new VideoThumbTask(application.getDownloadManager().getFileName(key))
+//                            , scaledW, scaledH);
+//                    previewTask.setPutInDiskCache(true);
+//
+//                    previewWidth = mediaVideo.getPreviewW();
+//                    previewHeight = mediaVideo.getPreviewH();
                 }
             }
 
-            if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
-                if (mediaVideo.getFastPreview().length != 0) {
-                    float maxWidth = getPx(160);
-                    float maxHeight = getPx(300);
-
-                    float scale = maxWidth / mediaVideo.getPreviewW();
-
-                    if (mediaVideo.getPreviewH() * scale > maxHeight) {
-                        scale = maxHeight / mediaVideo.getPreviewH();
-                    }
-
-                    int scaledW = (int) maxWidth;
-                    int scaledH = (int) (mediaVideo.getPreviewH() * scale);
-
-                    previewHeight = scaledH;
-                    previewWidth = scaledW;
-
-                    if (previewCached == null) {
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                        options.inMutable = true;
-                        options.inDither = false;
-                        options.inTempStorage = bitmapTmp;
-                        Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, options);
-//                        if (previewBitmapHolder != null) {
-//                            previewCached = previewBitmapHolder;
-//                            previewBitmapHolder = null;
-//                            optimizedBlur.performBlur(img);
-//                            //BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
-//                        } else {
-//                            previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-//                            optimizedBlur.performBlur(previewCached);
-//                            // BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+//            if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
+//                if (mediaVideo.getFastPreview().length != 0) {
+//                    float maxWidth = getPx(160);
+//                    float maxHeight = getPx(300);
+//
+//                    float scale = maxWidth / mediaVideo.getPreviewW();
+//
+//                    if (mediaVideo.getPreviewH() * scale > maxHeight) {
+//                        scale = maxHeight / mediaVideo.getPreviewH();
+//                    }
+//
+//                    int scaledW = (int) maxWidth;
+//                    int scaledH = (int) (mediaVideo.getPreviewH() * scale);
+//
+//                    previewHeight = scaledH;
+//                    previewWidth = scaledW;
+//
+//                    if (previewCached == null) {
+//                        BitmapFactory.Options options = new BitmapFactory.Options();
+//                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+//                        options.inMutable = true;
+//                        options.inDither = false;
+//                        options.inTempStorage = bitmapTmp;
+//                        Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, options);
+////                        if (previewBitmapHolder != null) {
+////                            previewCached = previewBitmapHolder;
+////                            previewBitmapHolder = null;
+////                            optimizedBlur.performBlur(img);
+////                            //BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+////                        } else {
+////                            previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+////                            optimizedBlur.performBlur(previewCached);
+////                            // BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
+////                        }
+//
+//                        // previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
+//                        optimizedBlur.performBlur(img);
+//                        previewCached = img;
+//                        fastPreviewWidth = mediaVideo.getPreviewW() - 1;
+//                        fastPreviewHeight = mediaVideo.getPreviewH() - 1;
+//                    }
+//                } else {
+//                    if (previewTask == null) {
+//                        if (mediaVideo.getPreviewLocation() instanceof TLLocalFileLocation) {
+//                            TLLocalFileLocation location = (TLLocalFileLocation) mediaVideo.getPreviewLocation();
+//
+//                            previewWidth = mediaVideo.getPreviewW();
+//                            previewHeight = mediaVideo.getPreviewH();
+//
+//                            float maxWidth = getPx(160);
+//                            float maxHeight = getPx(300);
+//
+//                            float scale = maxWidth / previewWidth;
+//
+//                            if (previewHeight * scale > maxHeight) {
+//                                scale = maxHeight / previewHeight;
+//                            }
+//
+//                            int scaledW = (int) maxWidth;
+//                            int scaledH = (int) (previewHeight * scale);
+//
+//                            StelsImageTask baseTask = new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret()));
+//                            baseTask.enableBlur(3);
+//                            previewTask = new ScaleTask(baseTask, scaledW, scaledH);
 //                        }
-
-                        // previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-                        optimizedBlur.performBlur(img);
-                        previewCached = img;
-                        fastPreviewWidth = mediaVideo.getPreviewW() - 1;
-                        fastPreviewHeight = mediaVideo.getPreviewH() - 1;
-                    }
-                } else {
-                    if (previewTask == null) {
-                        if (mediaVideo.getPreviewLocation() instanceof TLLocalFileLocation) {
-                            TLLocalFileLocation location = (TLLocalFileLocation) mediaVideo.getPreviewLocation();
-
-                            previewWidth = mediaVideo.getPreviewW();
-                            previewHeight = mediaVideo.getPreviewH();
-
-                            float maxWidth = getPx(160);
-                            float maxHeight = getPx(300);
-
-                            float scale = maxWidth / previewWidth;
-
-                            if (previewHeight * scale > maxHeight) {
-                                scale = maxHeight / previewHeight;
-                            }
-
-                            int scaledW = (int) maxWidth;
-                            int scaledH = (int) (previewHeight * scale);
-
-                            StelsImageTask baseTask = new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret()));
-                            baseTask.enableBlur(3);
-                            previewTask = new ScaleTask(baseTask, scaledW, scaledH);
-                        }
-                    }
-                }
-            }
+//                    }
+//                }
+//            }
         } else if (message.message.getExtras() instanceof TLUploadingPhoto) {
             TLUploadingPhoto photo = (TLUploadingPhoto) message.message.getExtras();
-            previewWidth = photo.getWidth();
-            previewHeight = photo.getHeight();
-
-            float maxWidth = getPx(160);
-            float maxHeight = getPx(300);
-
-            float scale = maxWidth / previewWidth;
-
-            if (previewHeight * scale > maxHeight) {
-                scale = maxHeight / previewHeight;
-            }
-
-            int scaledW = (int) maxWidth;
-            int scaledH = (int) (previewHeight * scale);
-
-            if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
-                previewTask = new ScaleTask(new UriImageTask(photo.getFileUri()), scaledW, scaledH);
-            } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
-                previewTask = new ScaleTask(new FileSystemImageTask(photo.getFileName()), scaledW, scaledH);
-            }
+            bindSize(photo.getWidth(), photo.getHeight());
+//            previewWidth = photo.getWidth();
+//            previewHeight = photo.getHeight();
+//
+//            float maxWidth = getPx(160);
+//            float maxHeight = getPx(300);
+//
+//            float scale = maxWidth / previewWidth;
+//
+//            if (previewHeight * scale > maxHeight) {
+//                scale = maxHeight / previewHeight;
+//            }
+//
+//            int scaledW = (int) maxWidth;
+//            int scaledH = (int) (previewHeight * scale);
+//
+//            if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
+//                previewTask = new ScaleTask(new UriImageTask(photo.getFileUri()), scaledW, scaledH);
+//            } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
+//                previewTask = new ScaleTask(new FileSystemImageTask(photo.getFileName()), scaledW, scaledH);
+//            }
 
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLUploadingVideo) {
             TLUploadingVideo video = (TLUploadingVideo) message.message.getExtras();
-            previewWidth = video.getPreviewWidth();
-            previewHeight = video.getPreviewHeight();
-
-
-            float maxWidth = getPx(160);
-            float maxHeight = getPx(300);
-
-            float scale = maxWidth / previewWidth;
-
-            if (previewHeight * scale > maxHeight) {
-                scale = maxHeight / previewHeight;
-            }
-
-            int scaledW = (int) maxWidth;
-            int scaledH = (int) (previewHeight * scale);
-
-            previewTask = new ScaleTask(new VideoThumbTask(video.getFileName()), scaledW, scaledH);
+            bindSize(video.getPreviewWidth(), video.getPreviewHeight());
+//            previewWidth = video.getPreviewWidth();
+//            previewHeight = video.getPreviewHeight();
+//
+//
+//            float maxWidth = getPx(160);
+//            float maxHeight = getPx(300);
+//
+//            float scale = maxWidth / previewWidth;
+//
+//            if (previewHeight * scale > maxHeight) {
+//                scale = maxHeight / previewHeight;
+//            }
+//
+//            int scaledW = (int) maxWidth;
+//            int scaledH = (int) (previewHeight * scale);
+//
+//            previewTask = new ScaleTask(new VideoThumbTask(video.getFileName()), scaledW, scaledH);
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLLocalGeo) {
             TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();
-            previewWidth = getPx(160);
-            previewHeight = getPx(160);
-
-            int imageW = previewWidth / 2;
-            int imageH = previewHeight / 2;
-
-            previewTask = new ScaleTask(new ImageDownloadTask(buildMapUrl(geo.getLatitude(), geo.getLongitude(), imageW, imageH)), previewWidth, previewHeight);
+            bindSize(getPx(160), getPx(160));
+//            previewWidth = getPx(160);
+//            previewHeight = getPx(160);
+//
+//            int imageW = previewWidth / 2;
+//            int imageH = previewHeight / 2;
+//
+//            previewTask = new ScaleTask(new ImageDownloadTask(buildMapUrl(geo.getLatitude(), geo.getLongitude(), imageW, imageH)), previewWidth, previewHeight);
             showMapPoint = true;
         } else if (message.message.getExtras() instanceof TLUploadingDocument) {
 
             TLUploadingDocument doc = (TLUploadingDocument) message.message.getExtras();
 
-            previewWidth = doc.getFullPreviewW();
-            previewHeight = doc.getFullPreviewH();
+            bindSize(doc.getFullPreviewW(), doc.getFullPreviewH());
 
-            float maxWidth = getPx(160);
-            float maxHeight = getPx(300);
-
-            float scale = maxWidth / previewWidth;
-
-            if (previewHeight * scale > maxHeight) {
-                scale = maxHeight / previewHeight;
-            }
-
-            int scaledW = (int) maxWidth;
-            int scaledH = (int) (previewHeight * scale);
-
-            if (doc.getFilePath().length() > 0) {
-                previewTask = new ScaleTask(new FileSystemImageTask(doc.getFilePath()), scaledW, scaledH);
-            } else {
-                previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
-            }
+//            if (doc.getFilePath().length() > 0) {
+//                previewTask = new ScaleTask(new FileSystemImageTask(doc.getFilePath()), scaledW, scaledH);
+//            } else {
+//                previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
+//            }
 
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLLocalDocument) {
             TLLocalDocument document = (TLLocalDocument) message.message.getExtras();
+
+            bindSize(document.getPreviewW(), document.getPreviewH());
+
             key = DownloadManager.getDocumentKey(document);
             isDownloadable = true;
 
-            if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
-                previewWidth = document.getPreviewW();
-                previewHeight = document.getPreviewH();
-
-                if (document.getMimeType().equals("image/gif") ||
-                        document.getMimeType().equals("image/png") ||
-                        document.getMimeType().equals("image/jpeg")) {
-                    if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-                        float maxWidth = getPx(160);
-                        float maxHeight = getPx(300);
-
-                        float scale = maxWidth / previewWidth;
-
-                        if (previewHeight * scale > maxHeight) {
-                            scale = maxHeight / previewHeight;
-                        }
-
-                        int scaledW = (int) maxWidth;
-                        int scaledH = (int) (previewHeight * scale);
-
-                        previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), scaledW, scaledH);
-                        previewTask.setPutInDiskCache(true);
-                    }
-                }
-
-                if (document.getFastPreview().length > 0) {
-                    if (previewCached == null) {
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                        options.inDither = false;
-                        options.inTempStorage = bitmapTmp;
-                        options.inMutable = true;
-                        Bitmap img = BitmapFactory.decodeByteArray(document.getFastPreview(), 0, document.getFastPreview().length, options);
-                        previewCached = optimizedBlur.performBlur(img);
-                        // previewCached = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
-                        // BitmapUtils.fastblur(img, previewCached, img.getWidth(), img.getHeight(), 3);
-                    }
-                    fastPreviewWidth = document.getPreviewW() - 1;
-                    fastPreviewHeight = document.getPreviewH() - 1;
-                } else if (document.getPreviewLocation() instanceof TLLocalFileLocation) {
-                    if (previewTask == null) {
-
-                        float maxWidth = getPx(160);
-                        float maxHeight = getPx(300);
-
-                        float scale = maxWidth / previewWidth;
-
-                        if (previewHeight * scale > maxHeight) {
-                            scale = maxHeight / previewHeight;
-                        }
-
-                        int scaledW = (int) maxWidth;
-                        int scaledH = (int) (previewHeight * scale);
-
-                        StelsImageTask baseTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
-                        baseTask.enableBlur(3);
-                        previewTask = new ScaleTask(baseTask, scaledW, scaledH);
-                    }
-                }
-            }
+//            if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
+//                previewWidth = document.getPreviewW();
+//                previewHeight = document.getPreviewH();
+//
+//                if (document.getMimeType().equals("image/gif") ||
+//                        document.getMimeType().equals("image/png") ||
+//                        document.getMimeType().equals("image/jpeg")) {
+//                    if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
+//                        float maxWidth = getPx(160);
+//                        float maxHeight = getPx(300);
+//
+//                        float scale = maxWidth / previewWidth;
+//
+//                        if (previewHeight * scale > maxHeight) {
+//                            scale = maxHeight / previewHeight;
+//                        }
+//
+//                        int scaledW = (int) maxWidth;
+//                        int scaledH = (int) (previewHeight * scale);
+//
+//                        previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), scaledW, scaledH);
+//                        previewTask.setPutInDiskCache(true);
+//                    }
+//                }
+//
+//                if (document.getFastPreview().length > 0) {
+//                    if (previewCached == null) {
+//                        BitmapFactory.Options options = new BitmapFactory.Options();
+//                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+//                        options.inDither = false;
+//                        options.inTempStorage = bitmapTmp;
+//                        options.inMutable = true;
+//                        Bitmap img = BitmapFactory.decodeByteArray(document.getFastPreview(), 0, document.getFastPreview().length, options);
+//                        previewCached = optimizedBlur.performBlur(img);
+//                        // previewCached = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
+//                        // BitmapUtils.fastblur(img, previewCached, img.getWidth(), img.getHeight(), 3);
+//                    }
+//                    fastPreviewWidth = document.getPreviewW() - 1;
+//                    fastPreviewHeight = document.getPreviewH() - 1;
+//                } else if (document.getPreviewLocation() instanceof TLLocalFileLocation) {
+//                    if (previewTask == null) {
+//
+//                        float maxWidth = getPx(160);
+//                        float maxHeight = getPx(300);
+//
+//                        float scale = maxWidth / previewWidth;
+//
+//                        if (previewHeight * scale > maxHeight) {
+//                            scale = maxHeight / previewHeight;
+//                        }
+//
+//                        int scaledW = (int) maxWidth;
+//                        int scaledH = (int) (previewHeight * scale);
+//
+//                        StelsImageTask baseTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
+//                        baseTask.enableBlur(3);
+//                        previewTask = new ScaleTask(baseTask, scaledW, scaledH);
+//                    }
+//                }
+//            }
         } else {
             isUnsupported = true;
+            bindSize(0, 0);
+        }
+
+        if (!isBindSizeCalled) {
+            throw new RuntimeException("bindSize not called");
         }
 
         if (isDownloadable) {
@@ -741,13 +730,13 @@ public class MessageMediaView extends BaseMsgView {
         }
         long start = SystemClock.uptimeMillis();
 
-        if (this.previewCached != null) {
-            if (this.databaseId > 0) {
-                fastCache.putToCache(this.databaseId, previewCached);
-            } else {
-                fastCache.putToCache(previewCached);
-            }
-        }
+//        if (this.previewCached != null) {
+//            if (this.databaseId > 0) {
+//                fastCache.putToCache(this.databaseId, previewCached);
+//            } else {
+//                fastCache.putToCache(previewCached);
+//            }
+//        }
 
         this.databaseId = message.message.getDatabaseId();
         this.isOut = message.message.isOut();
@@ -758,7 +747,7 @@ public class MessageMediaView extends BaseMsgView {
             placeholderPaint.setColor(Color.WHITE);
         }
 
-        this.previewCached = null;
+//        this.previewCached = null;
         this.state = message.message.getState();
         this.prevState = -1;
         this.oldPreview = null;
@@ -780,9 +769,9 @@ public class MessageMediaView extends BaseMsgView {
             this.stateChangeTime = SystemClock.uptimeMillis();
         }
 
-        if (preview != null && preview != oldPreview) {
-            this.oldPreview = preview;
-        }
+//        if (preview != null && preview != oldPreview) {
+//            this.oldPreview = preview;
+//        }
         bindMedia(message);
 
         invalidate();
@@ -838,22 +827,22 @@ public class MessageMediaView extends BaseMsgView {
 
     @Override
     protected void measureBubbleContent(int width) {
-        float maxWidth = getPx(160);
-        float maxHeight = getPx(300);
+//        float maxWidth = getPx(160);
+//        float maxHeight = getPx(300);
 
-        if (previewWidth != 0 && previewHeight != 0) {
-            float scale = maxWidth / previewWidth;
-
-            if (previewHeight * scale > maxHeight) {
-                scale = maxHeight / previewHeight;
-            }
-
-            desiredWidth = (int) maxWidth;
-            desiredHeight = (int) (previewHeight * scale);
-        } else {
-            desiredWidth = (int) maxWidth;
-            desiredHeight = getPx(115);
-        }
+//        if (previewWidth != 0 && previewHeight != 0) {
+//            float scale = maxWidth / previewWidth;
+//
+//            if (previewHeight * scale > maxHeight) {
+//                scale = maxHeight / previewHeight;
+//            }
+//
+//            desiredWidth = (int) maxWidth;
+//            desiredHeight = (int) (previewHeight * scale);
+//        } else {
+//            desiredWidth = (int) maxWidth;
+//            desiredHeight = getPx(115);
+//        }
 
         timeWidth = (int) timePaint.measureText(date);
         if (isOut) {
@@ -926,44 +915,41 @@ public class MessageMediaView extends BaseMsgView {
             }
         } else if (preview != null) {
             if (animationTime > FADE_ANIMATION_TIME || !isAnimatedProgress) {
-                bitmapPaint.setAlpha(255);
-                if (scaleUpMedia) {
-                    rect1.set(0, 0, preview.getWidth(), preview.getHeight());
-                    rect2.set(0, 0, desiredWidth, desiredHeight);
-                    canvas.drawBitmap(preview, rect1, rect2, bitmapPaint);
-                } else {
-                    canvas.drawBitmap(preview, 0, 0, bitmapPaint);
-                }
+                bitmapFilteredPaint.setAlpha(255);
+                rect1.set(0, 0, previewRegionW, previewRegionH);
+                rect2.set(0, 0, desiredWidth, desiredHeight);
+                canvas.drawBitmap(preview, rect1, rect2, bitmapFilteredPaint);
             } else {
                 float alpha = fadeEasing((float) animationTime / FADE_ANIMATION_TIME);
 
                 if (oldPreview != null) {
-                    bitmapPaint.setAlpha(255);
-                    if (scaleUpMedia) {
-                        rect1.set(0, 0, oldPreview.getWidth(), oldPreview.getHeight());
-                        rect2.set(0, 0, desiredWidth, desiredHeight);
-                        canvas.drawBitmap(oldPreview, rect1, rect2, bitmapPaint);
-                    } else {
-                        canvas.drawBitmap(oldPreview, 0, 0, bitmapPaint);
-                    }
-                } else if (previewCached != null) {
                     bitmapFilteredPaint.setAlpha(255);
-                    rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
+                    rect1.set(0, 0, oldPreviewRegionW, oldPreviewRegionH);
                     rect2.set(0, 0, desiredWidth, desiredHeight);
-                    canvas.drawBitmap(previewCached, rect1, rect2, bitmapFilteredPaint);
+                    canvas.drawBitmap(oldPreview, rect1, rect2, bitmapFilteredPaint);
                 } else {
                     canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
                 }
+//                } else if (previewCached != null) {
+//                    bitmapFilteredPaint.setAlpha(255);
+//                    rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
+//                    rect2.set(0, 0, desiredWidth, desiredHeight);
+//                    canvas.drawBitmap(previewCached, rect1, rect2, bitmapFilteredPaint);
+//                } else {
+//                    canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
+//                }
 
-                bitmapPaint.setAlpha((int) (255 * alpha));
-
-                if (scaleUpMedia) {
-                    rect1.set(0, 0, preview.getWidth(), preview.getHeight());
-                    rect2.set(0, 0, desiredWidth, desiredHeight);
-                    canvas.drawBitmap(preview, rect1, rect2, bitmapPaint);
-                } else {
-                    canvas.drawBitmap(preview, 0, 0, bitmapPaint);
-                }
+                bitmapFilteredPaint.setAlpha((int) (255 * alpha));
+                rect1.set(0, 0, previewRegionW, previewRegionH);
+                rect2.set(0, 0, desiredWidth, desiredHeight);
+                canvas.drawBitmap(preview, rect1, rect2, bitmapFilteredPaint);
+//                if (scaleUpMedia) {
+//                    rect1.set(0, 0, preview.getWidth(), preview.getHeight());
+//                    rect2.set(0, 0, desiredWidth, desiredHeight);
+//                    canvas.drawBitmap(preview, rect1, rect2, bitmapPaint);
+//                } else {
+//                    canvas.drawBitmap(preview, 0, 0, bitmapPaint);
+//                }
 
                 isAnimated = true;
             }
@@ -976,14 +962,17 @@ public class MessageMediaView extends BaseMsgView {
             } else {
                 canvas.drawBitmap(oldPreview, 0, 0, bitmapPaint);
             }
-        } else if (previewCached != null) {
-            bitmapFilteredPaint.setAlpha(255);
-            rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
-            rect2.set(0, 0, desiredWidth, desiredHeight);
-            canvas.drawBitmap(previewCached, rect1, rect2, bitmapFilteredPaint);
         } else {
             canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
         }
+//        } else if (previewCached != null) {
+//            bitmapFilteredPaint.setAlpha(255);
+//            rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
+//            rect2.set(0, 0, desiredWidth, desiredHeight);
+//            canvas.drawBitmap(previewCached, rect1, rect2, bitmapFilteredPaint);
+//        } else {
+//            canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
+//        }
 
         if (showMapPoint) {
             mapPoint.setBounds((desiredWidth - mapPoint.getIntrinsicWidth()) / 2,
@@ -1038,13 +1027,13 @@ public class MessageMediaView extends BaseMsgView {
                 int centerX = desiredWidth / 2;
                 int centerY = desiredHeight / 2;
 
-                path.reset();
-                path.addRect(0, 0, desiredWidth, desiredHeight, Path.Direction.CW);
-                path.close();
-                path.addCircle(centerX, centerY, outerR, Path.Direction.CW);
-                path.close();
-                path.setFillType(Path.FillType.EVEN_ODD);
-                canvas.drawPath(path, downloadBgRect);
+//                path.reset();
+//                path.addRect(0, 0, desiredWidth, desiredHeight, Path.Direction.CW);
+//                path.close();
+//                path.addCircle(centerX, centerY, outerR, Path.Direction.CW);
+//                path.close();
+//                path.setFillType(Path.FillType.EVEN_ODD);
+//                canvas.drawPath(path, downloadBgRect);
 
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgLightRect);
 
@@ -1121,5 +1110,22 @@ public class MessageMediaView extends BaseMsgView {
         }
 
         return isAnimated;
+    }
+
+    @Override
+    public void onMediaReceived(Bitmap preview, int regionW, int regionH, String key, boolean intermediate) {
+        if (this.preview != preview) {
+            unbindOldPreview();
+            this.oldPreview = this.preview;
+            this.oldPreviewKey = this.previewKey;
+            this.oldPreviewRegionW = this.previewRegionW;
+            this.oldPreviewRegionH = this.previewRegionH;
+        }
+        this.preview = preview;
+        this.previewKey = key;
+        this.previewRegionW = regionW;
+        this.previewRegionH = regionH;
+        application.getUiKernel().getMediaLoader().getImageCache().incReference(key);
+        invalidate();
     }
 }

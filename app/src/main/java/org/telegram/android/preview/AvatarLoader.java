@@ -15,7 +15,6 @@ import org.telegram.api.upload.TLFile;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Created by ex3ndr on 05.02.14.
@@ -44,7 +43,7 @@ public class AvatarLoader {
     private TelegramApplication application;
     private QueueWorker[] workers;
     private ArrayList<ReceiverHolder> receivers = new ArrayList<ReceiverHolder>();
-    private AvatarCache avatarCache;
+    private ImageCache imageCache;
     private ImageStorage fileStorage;
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -81,7 +80,7 @@ public class AvatarLoader {
 
     public AvatarLoader(TelegramApplication application) {
         this.application = application;
-        this.avatarCache = new AvatarCache();
+        this.imageCache = new ImageCache();
         this.fileStorage = new ImageStorage(application, "avatars");
         this.processor = new QueueProcessor<AvatarTask>();
 
@@ -105,8 +104,8 @@ public class AvatarLoader {
         }
     }
 
-    public AvatarCache getAvatarCache() {
-        return avatarCache;
+    public ImageCache getImageCache() {
+        return imageCache;
     }
 
     private void checkUiThread() {
@@ -121,7 +120,7 @@ public class AvatarLoader {
         checkUiThread();
 
         String key = fileLocation.getUniqKey();
-        Bitmap cached = avatarCache.getFromCache(key + "_" + kind);
+        Bitmap cached = imageCache.getFromCache(key + "_" + kind);
         if (cached != null) {
             receiver.onAvatarReceived(cached, key + "_" + kind, true);
             return;
@@ -186,34 +185,31 @@ public class AvatarLoader {
         Optimizer.scaleTo(src, mBitmap);
         Optimizer.scaleTo(src, m2Bitmap);
 
-        byte[] sSize = Optimizer.save(sBitmap);
-        fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_SMALL, sSize);
-        byte[] mSize = Optimizer.save(mBitmap);
-        fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_MEDIUM, mSize);
-        byte[] m2Size = Optimizer.save(m2Bitmap);
-        fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_MEDIUM2, m2Size);
+        fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_SMALL, sBitmap);
+        fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_MEDIUM, mBitmap);
+        fileStorage.saveFile(task.getFileLocation().getUniqKey() + "_" + TYPE_MEDIUM2, m2Bitmap);
 
         Bitmap mRes;
         if (task.getKind() == TYPE_FULL) {
-            mRes = avatarCache.findFree(TYPE_FULL);
+            mRes = imageCache.findFree(TYPE_FULL);
             if (mRes == null) {
                 mRes = Bitmap.createBitmap(AVATAR_W, AVATAR_H, Bitmap.Config.ARGB_8888);
             }
             Optimizer.drawTo(src, mRes);
         } else if (task.getKind() == TYPE_MEDIUM) {
-            mRes = avatarCache.findFree(TYPE_MEDIUM);
+            mRes = imageCache.findFree(TYPE_MEDIUM);
             if (mRes == null) {
                 mRes = Bitmap.createBitmap(AVATAR_M_W, AVATAR_M_H, Bitmap.Config.ARGB_8888);
             }
             Optimizer.drawTo(mBitmap, mRes);
         } else if (task.getKind() == TYPE_MEDIUM2) {
-            mRes = avatarCache.findFree(TYPE_MEDIUM2);
+            mRes = imageCache.findFree(TYPE_MEDIUM2);
             if (mRes == null) {
                 mRes = Bitmap.createBitmap(AVATAR_M2_W, AVATAR_M2_H, Bitmap.Config.ARGB_8888);
             }
             Optimizer.drawTo(m2Bitmap, mRes);
         } else if (task.getKind() == TYPE_SMALL) {
-            mRes = avatarCache.findFree(TYPE_SMALL);
+            mRes = imageCache.findFree(TYPE_SMALL);
             if (mRes == null) {
                 mRes = Bitmap.createBitmap(AVATAR_S_W, AVATAR_S_H, Bitmap.Config.ARGB_8888);
             }
@@ -222,7 +218,7 @@ public class AvatarLoader {
             return;
         }
 
-        avatarCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), mRes);
+        imageCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), mRes);
         notifyAvatarLoaded(task, task.getKind(), mRes);
     }
 
@@ -240,7 +236,7 @@ public class AvatarLoader {
 
         Bitmap res;
 
-        Bitmap cached = avatarCache.findFree(task.getKind());
+        Bitmap cached = imageCache.findFree(task.getKind());
 
         if (cached == null) {
             BitmapFactory.Options o = new BitmapFactory.Options();
@@ -256,7 +252,7 @@ public class AvatarLoader {
             }
 
             if (REUSE_BITMAPS) {
-                // o.inBitmap = avatarCache.findFree(task.getKind());
+                // o.inBitmap = imageCache.findFree(task.getKind());
             }
             res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), o);
         } else {
@@ -264,7 +260,7 @@ public class AvatarLoader {
         }
 
         if (res != null) {
-            avatarCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), res);
+            imageCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), res);
             notifyAvatarLoaded(task, task.getKind(), res);
             return true;
         }
@@ -406,20 +402,11 @@ public class AvatarLoader {
     private class AvatarTask extends QueueProcessor.BaseTask {
         private TLAbsLocalFileLocation fileLocation;
         private boolean isDownloaded = true;
-        private boolean isPaused = false;
         private int kind;
 
         private AvatarTask(TLAbsLocalFileLocation fileLocation, int kind) {
             this.fileLocation = fileLocation;
             this.kind = kind;
-        }
-
-        public boolean isPaused() {
-            return isPaused;
-        }
-
-        public void setPaused(boolean isPaused) {
-            this.isPaused = isPaused;
         }
 
         public int getKind() {

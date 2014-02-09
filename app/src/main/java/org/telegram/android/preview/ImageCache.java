@@ -12,47 +12,56 @@ import java.util.HashSet;
 /**
  * Created by ex3ndr on 06.02.14.
  */
-public class AvatarCache {
+public class ImageCache {
 
-    private static final String TAG = "AvatarCache";
+    private static final int DEFAULT_CACHE_SIZE = 10;
+    private static final int DEFAULT_CACHE_FREE_SIZE = 10;
 
-    private static final int CACHE_SIZE = 10;
-    private static final int CACHE_FREE_SIZE = 10;
+    private HashMap<String, Holder> references;
 
-    private static boolean USE_FREE_CACHE = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+    private LruCache<String, Holder> avatarCache;
 
-    private HashMap<String, Holder> references = new HashMap<String, Holder>();
+    private HashMap<Integer, HashSet<Bitmap>> freeBitmaps;
 
-    private LruCache<String, Holder> avatarCache = new LruCache<String, Holder>(CACHE_SIZE) {
-        @Override
-        protected void entryRemoved(boolean evicted, String key, Holder oldValue, Holder newValue) {
-            if (evicted) {
-                Bitmap bitmap = oldValue.sourceBitmap.get();
-                if (bitmap == null) {
-                    return;
-                }
-                if (!bitmap.isMutable()) {
-                    return;
-                }
-                synchronized (freeBitmaps) {
-                    HashSet<Bitmap> bitmaps = freeBitmaps.get(oldValue.size);
-                    if (bitmaps == null) {
-                        bitmaps = new HashSet<Bitmap>();
-                        bitmaps.add(bitmap);
-                        // Logger.d(TAG, "Adding to free cache " + key);
-                        freeBitmaps.put(oldValue.size, bitmaps);
-                    } else {
-                        if (bitmaps.size() < CACHE_FREE_SIZE) {
-                            // Logger.d(TAG, "Adding to free cache " + key);
+    private final int cacheSize;
+    private final int cacheFreeSize;
+
+    public ImageCache() {
+        cacheSize = DEFAULT_CACHE_SIZE;
+        cacheFreeSize = DEFAULT_CACHE_FREE_SIZE;
+
+        avatarCache = new LruCache<String, Holder>(cacheSize) {
+            @Override
+            protected void entryRemoved(boolean evicted, String key, Holder oldValue, Holder newValue) {
+                if (evicted) {
+                    Bitmap bitmap = oldValue.sourceBitmap.get();
+                    if (bitmap == null) {
+                        return;
+                    }
+                    if (!bitmap.isMutable()) {
+                        return;
+                    }
+                    synchronized (freeBitmaps) {
+                        HashSet<Bitmap> bitmaps = freeBitmaps.get(oldValue.size);
+                        if (bitmaps == null) {
+                            bitmaps = new HashSet<Bitmap>();
                             bitmaps.add(bitmap);
+                            // Logger.d(TAG, "Adding to free cache " + key);
+                            freeBitmaps.put(oldValue.size, bitmaps);
+                        } else {
+                            if (bitmaps.size() < cacheFreeSize) {
+                                // Logger.d(TAG, "Adding to free cache " + key);
+                                bitmaps.add(bitmap);
+                            }
                         }
                     }
                 }
             }
-        }
-    };
+        };
+        freeBitmaps = new HashMap<Integer, HashSet<Bitmap>>();
 
-    private HashMap<Integer, HashSet<Bitmap>> freeBitmaps = new HashMap<Integer, HashSet<Bitmap>>();
+        references = new HashMap<String, Holder>();
+    }
 
     public void putToCache(String key, int size, Bitmap bitmap) {
         if (references.get(key) == null && avatarCache.get(key) == null) {

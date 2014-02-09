@@ -20,6 +20,7 @@ public class IOUtils {
         byte[] buf = new byte[1024];
         int len;
         while ((len = in.read(buf)) > 0) {
+            Thread.yield();
             out.write(buf, 0, len);
         }
         in.close();
@@ -33,6 +34,7 @@ public class IOUtils {
         byte[] buf = new byte[1024];
         int len;
         while ((len = in.read(buf)) > 0) {
+            Thread.yield();
             out.write(buf, 0, len);
         }
         out.close();
@@ -52,6 +54,7 @@ public class IOUtils {
         int len;
         try {
             while ((len = in.read(buffer)) >= 0) {
+                Thread.yield();
                 os.write(buffer, 0, len);
             }
         } catch (java.io.IOException e) {

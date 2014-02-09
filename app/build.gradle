@@ -27,7 +27,7 @@ if (project.hasProperty('buildIndex')) {
 }
 
 android {
-    compileSdkVersion 17
+    compileSdkVersion 19
     buildToolsVersion "19.0.0"
 
     if (project.hasProperty("signStorage")) {

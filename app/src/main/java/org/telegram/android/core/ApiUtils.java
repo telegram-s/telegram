@@ -28,13 +28,17 @@ public class ApiUtils {
     protected static final String[] WALLPAPER_PREVIEW_PRIORITY = new String[]{"b", "m", "c", "x"};
     protected static String[] FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT;
 
+    public static int MAX_SIZE;
+
     private static TelegramApplication application;
 
     public static void init(TelegramApplication _application, int screenSize) {
         application = _application;
         if (screenSize <= 320) {
+            MAX_SIZE = 800;
             FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT_320;
         } else {
+            MAX_SIZE = 1280;
             FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT_800;
         }
     }

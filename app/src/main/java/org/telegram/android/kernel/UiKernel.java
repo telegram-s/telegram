@@ -18,6 +18,7 @@ import org.telegram.android.log.Logger;
 import org.telegram.android.media.CachedImageWorker;
 import org.telegram.android.media.StelsImageWorker;
 import org.telegram.android.preview.AvatarLoader;
+import org.telegram.android.preview.MediaLoader;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
@@ -47,6 +48,8 @@ public class UiKernel {
     private ImageController imageController;
 
     private AvatarLoader avatarLoader;
+
+    private MediaLoader mediaLoader;
 
     private Notifications notifications;
 
@@ -110,6 +113,10 @@ public class UiKernel {
         Logger.d(TAG, "AvatarLoader loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         start = SystemClock.uptimeMillis();
+        mediaLoader = new MediaLoader(application);
+        Logger.d(TAG, "MediaLoader loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
+
+        start = SystemClock.uptimeMillis();
         UiMeasure.METRICS = application.getResources().getDisplayMetrics();
         UiMeasure.DENSITY = UiMeasure.METRICS.density;
         I18nUtil.init(application);
@@ -127,6 +134,10 @@ public class UiKernel {
         ApiUtils.init(application, kernel.getTechKernel().getTechReflection().getScreenSize());
         Logger.d(TAG, "Misc UI4 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
+    }
+
+    public MediaLoader getMediaLoader() {
+        return mediaLoader;
     }
 
     public AvatarLoader getAvatarLoader() {
