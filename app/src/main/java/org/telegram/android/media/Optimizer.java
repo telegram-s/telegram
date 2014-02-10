@@ -3,6 +3,7 @@ package org.telegram.android.media;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.*;
+import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
@@ -277,8 +278,13 @@ public class Optimizer {
     }
 
     private static BitmapInfo getInfo(Source source) throws IOException {
+        return getInfo(source, false);
+    }
+
+    private static BitmapInfo getInfo(Source source, boolean ignoreOrientation) throws IOException {
         BitmapFactory.Options o = new BitmapFactory.Options();
         o.inJustDecodeBounds = true;
+        o.inTempStorage = bitmapTmp.get();
 
         InputStream fis = createStream(source);
         try {
@@ -295,10 +301,14 @@ public class Optimizer {
 
         int w = o.outWidth;
         int h = o.outHeight;
-        if (!isVerticalImage(source)) {
-            w = o.outHeight;
-            h = o.outWidth;
+
+        if (!ignoreOrientation) {
+            if (!isVerticalImage(source)) {
+                w = o.outHeight;
+                h = o.outWidth;
+            }
         }
+
         return new BitmapInfo(w, h);
     }
 
@@ -364,13 +374,12 @@ public class Optimizer {
     }
 
     private static BitmapInfo loadTo(Source source, Bitmap dest) throws IOException {
-        BitmapInfo res = getInfo(source);
-        decodeReuse(source, dest);
+        BitmapInfo res = getInfo(source, true);
+        decodeReuse(source, res, dest);
         return res;
     }
 
-    private static void decodeReuse(Source source, Bitmap dest) throws IOException {
-        BitmapInfo info = getInfo(source);
+    private static void decodeReuse(Source source, BitmapInfo info, Bitmap dest) throws IOException {
         if (Build.VERSION.SDK_INT >= 11 && info.getWidth() == dest.getWidth()
                 && info.getHeight() == dest.getHeight()) {
             BitmapFactory.Options options = new BitmapFactory.Options();
@@ -379,12 +388,25 @@ public class Optimizer {
             options.inSampleSize = 1;
             options.inScaled = false;
             options.inBitmap = dest;
+            options.inTempStorage = bitmapTmp.get();
 
             if (source instanceof ByteSource) {
                 byte[] data = ((ByteSource) source).getData();
                 BitmapFactory.decodeByteArray(data, 0, data.length, options);
             } else if (source instanceof FileSource) {
-                BitmapFactory.decodeFile(((FileSource) source).getFileName(), options);
+                InputStream stream = new CustomBufferedInputStream(new FileInputStream(((FileSource) source).getFileName()));
+                try {
+                    BitmapFactory.decodeFile(((FileSource) source).getFileName(), options);
+                } finally {
+                    if (stream != null) {
+                        try {
+
+                            stream.close();
+                        } catch (IOException e) {
+                            // Ignore
+                        }
+                    }
+                }
             } else {
                 throw new UnsupportedOperationException();
             }
@@ -454,20 +476,12 @@ public class Optimizer {
     }
 
 
-    private static String getOrientationTag(String fileName) {
-        try {
-            //ExifInterface exif = new ExifInterface(exifFileName);
-            //String exifOrientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
-            Class clazz = Class.forName("android.media.ExifInterface");
-            Object exifObj = clazz.getConstructor(String.class).newInstance(fileName);
-            return (String) clazz.getMethod("getAttribute", String.class).invoke(exifObj, "Orientation");
-        } catch (Exception e) {
-            Logger.e(TAG, e.getMessage(), e);
-        }
-        return "0";
+    private static String getOrientationTag(String fileName) throws IOException {
+        ExifInterface exif = new ExifInterface(fileName);
+        return exif.getAttribute(ExifInterface.TAG_ORIENTATION);
     }
 
-    private static boolean isVerticalImage(Source source) {
+    private static boolean isVerticalImage(Source source) throws IOException {
         if (source instanceof FileSource) {
             return isVerticalImage(((FileSource) source).getFileName());
         } else if (source instanceof UriSource) {
@@ -477,7 +491,7 @@ public class Optimizer {
         }
     }
 
-    private static boolean isVerticalImage(String fileName) {
+    private static boolean isVerticalImage(String fileName) throws IOException {
         String exifOrientation = getOrientationTag(fileName);
         return (exifOrientation.equals("0") || exifOrientation.equals("1") || exifOrientation.equals("2") || exifOrientation.equals("3") || exifOrientation.equals("4"));
     }
