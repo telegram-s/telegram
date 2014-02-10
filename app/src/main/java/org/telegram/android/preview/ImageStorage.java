@@ -42,9 +42,13 @@ public class ImageStorage {
         if (!new File(fileName).exists()) {
             return null;
         }
-
-        BitmapDecoderEx.decodeReuseBitmap(fileName, reuse);
-        return reuse;
+        try {
+            Optimizer.loadTo(fileName, reuse);
+            return reuse;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public Bitmap tryLoadFile(String key) {

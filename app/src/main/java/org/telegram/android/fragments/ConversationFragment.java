@@ -45,13 +45,10 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.MessageWireframe;
-import org.telegram.android.media.Optimizer;
+import org.telegram.android.media.*;
 import org.telegram.android.ui.source.ViewSourceListener;
 import org.telegram.android.ui.source.ViewSourceState;
 import org.telegram.android.log.Logger;
-import org.telegram.android.media.DownloadManager;
-import org.telegram.android.media.DownloadState;
-import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
@@ -872,9 +869,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         runUiTask(new AsyncAction() {
             @Override
             public void execute() throws AsyncException {
-                Optimizer.VideoMetadata metadata;
+                VideoOptimizer.VideoMetadata metadata;
                 try {
-                    metadata = Optimizer.getVideoSize(fileName);
+                    metadata = VideoOptimizer.getVideoSize(fileName);
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);
@@ -896,9 +893,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             @Override
             public void execute() throws AsyncException {
                 String fileName = getRealPathFromURI(uri);
-                Optimizer.VideoMetadata metadata;
+                VideoOptimizer.VideoMetadata metadata;
                 try {
-                    metadata = Optimizer.getVideoSize(fileName);
+                    metadata = VideoOptimizer.getVideoSize(fileName);
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);

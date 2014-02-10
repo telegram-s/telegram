@@ -28,6 +28,7 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.DialogWireframe;
 import org.telegram.android.log.Logger;
+import org.telegram.android.media.VideoOptimizer;
 import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.ui.source.ViewSourceListener;
@@ -653,9 +654,9 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                     @Override
                                     public void execute() throws AsyncException {
                                         String fileName = getRealPathFromURI(Uri.parse(actionUri));
-                                        Optimizer.VideoMetadata metadata;
+                                        VideoOptimizer.VideoMetadata metadata;
                                         try {
-                                            metadata = Optimizer.getVideoSize(fileName);
+                                            metadata = VideoOptimizer.getVideoSize(fileName);
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                             throw new AsyncException(AsyncException.ExceptionType.UNKNOWN_ERROR);

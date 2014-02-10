@@ -370,12 +370,32 @@ public class Optimizer {
     }
 
     private static void decodeReuse(Source source, Bitmap dest) throws IOException {
-        if (source instanceof ByteSource) {
-            BitmapDecoderEx.decodeReuseBitmap(((ByteSource) source).getData(), dest);
-        } else if (source instanceof FileSource) {
-            BitmapDecoderEx.decodeReuseBitmap(((FileSource) source).getFileName(), dest);
+        BitmapInfo info = getInfo(source);
+        if (Build.VERSION.SDK_INT >= 11 && info.getWidth() == dest.getWidth()
+                && info.getHeight() == dest.getHeight()) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inMutable = true;
+            options.inPreferQualityOverSpeed = false;
+            options.inSampleSize = 1;
+            options.inScaled = false;
+            options.inBitmap = dest;
+
+            if (source instanceof ByteSource) {
+                byte[] data = ((ByteSource) source).getData();
+                BitmapFactory.decodeByteArray(data, 0, data.length, options);
+            } else if (source instanceof FileSource) {
+                BitmapFactory.decodeFile(((FileSource) source).getFileName(), options);
+            } else {
+                throw new UnsupportedOperationException();
+            }
         } else {
-            throw new UnsupportedOperationException();
+            if (source instanceof ByteSource) {
+                BitmapDecoderEx.decodeReuseBitmap(((ByteSource) source).getData(), dest);
+            } else if (source instanceof FileSource) {
+                BitmapDecoderEx.decodeReuseBitmap(((FileSource) source).getFileName(), dest);
+            } else {
+                throw new UnsupportedOperationException();
+            }
         }
     }
 

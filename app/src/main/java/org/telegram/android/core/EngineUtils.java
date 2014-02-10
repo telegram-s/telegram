@@ -15,6 +15,7 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.OptimizedBlur;
+import org.telegram.android.media.Optimizer;
 import org.telegram.android.ui.BitmapUtils;
 import org.telegram.api.*;
 import org.telegram.tl.TLObject;
@@ -269,39 +270,20 @@ public class EngineUtils {
                                 Bitmap.Config.ARGB_8888);
                     }
                     fastPreview.eraseColor(Color.TRANSPARENT);
-                    BitmapDecoderEx.decodeReuseBitmap(cachedSize.getBytes(), fastPreview);
 
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    fastPreview.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
-                    byte[] optimizedPreview = outputStream.toByteArray();
-
-                    res.setFastPreview(optimizedPreview);
-                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_RESIZE);
+                    try {
+                        Optimizer.loadTo(cachedSize.getBytes(), fastPreview);
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        fastPreview.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
+                        byte[] optimizedPreview = outputStream.toByteArray();
+                        res.setFastPreview(optimizedPreview);
+                        res.setOptimization(TLLocalPhoto.OPTIMIZATION_RESIZE);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        res.setFastPreview(cachedSize.getBytes());
+                        res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);
+                    }
                 }
-//                if (Build.VERSION.SDK_INT >= 11) {
-//                    // Resize make sense only for API Level starting from 11
-//                    Bitmap sourcePreview = BitmapFactory.decodeByteArray(cachedSize.getBytes(), 0, cachedSize.getBytes().length);
-//                    Bitmap destPreview = Bitmap.createBitmap(
-//                            TLLocalPhoto.FAST_PREVIEW_MAX_W,
-//                            TLLocalPhoto.FAST_PREVIEW_MAX_H,
-//                            Bitmap.Config.ARGB_8888);
-//
-//                    Canvas canvas = new Canvas(destPreview);
-//                    canvas.drawBitmap(sourcePreview, 0, 0, null);
-//
-//                    destPreview = optimizedBlur.performBlur(destPreview);
-//
-//                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//                    destPreview.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
-//                    byte[] optimizedPreview = outputStream.toByteArray();
-//
-//
-//                    res.setFastPreview(optimizedPreview);
-//                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_RESIZE_BLUR);
-//                } else {
-//                    res.setFastPreview(cachedSize.getBytes());
-//                    res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);
-//                }
                 res.setFastPreviewW(cachedSize.getW());
                 res.setFastPreviewH(cachedSize.getH());
 
