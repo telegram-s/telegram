@@ -1003,7 +1003,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 int centerX = desiredWidth / 2;
                 int centerY = desiredHeight / 2;
 
-                canvas.drawPath(path, downloadBgRect);
+                // canvas.drawPath(path, downloadBgRect);
 
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgLightRect);
 

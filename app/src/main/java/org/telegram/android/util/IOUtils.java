@@ -6,6 +6,13 @@ import java.io.*;
  * Created by ex3ndr on 18.11.13.
  */
 public class IOUtils {
+    private static ThreadLocal<byte[]> buffers = new ThreadLocal<byte[]>() {
+        @Override
+        protected byte[] initialValue() {
+            return new byte[4 * 1024];
+        }
+    };
+
     public static void delete(File src) {
         if (!src.delete()) {
             src.deleteOnExit();
@@ -17,7 +24,7 @@ public class IOUtils {
         OutputStream out = new FileOutputStream(dst);
 
         // Transfer bytes from in to out
-        byte[] buf = new byte[1024];
+        byte[] buf = buffers.get();
         int len;
         while ((len = in.read(buf)) > 0) {
             Thread.yield();
@@ -31,7 +38,7 @@ public class IOUtils {
         OutputStream out = new FileOutputStream(dst);
 
         // Transfer bytes from in to out
-        byte[] buf = new byte[1024];
+        byte[] buf = buffers.get();
         int len;
         while ((len = in.read(buf)) > 0) {
             Thread.yield();
@@ -50,7 +57,7 @@ public class IOUtils {
 
     public static byte[] readAll(InputStream in) throws IOException {
         ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
-        byte[] buffer = new byte[1024];
+        byte[] buffer = buffers.get();
         int len;
         try {
             while ((len = in.read(buffer)) >= 0) {

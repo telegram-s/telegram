@@ -15,7 +15,6 @@ import org.telegram.android.core.Notifications;
 import org.telegram.android.core.TextSaver;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.log.Logger;
-import org.telegram.android.media.CachedImageWorker;
 import org.telegram.android.media.StelsImageWorker;
 import org.telegram.android.preview.AvatarLoader;
 import org.telegram.android.preview.MediaLoader;
@@ -102,7 +101,6 @@ public class UiKernel {
                 new CornersWorker(),
                 new StelsImageWorker(application),
                 new StelsImageWorker(application),
-                new CachedImageWorker(),
                 new ScaleWorker()
         });
 

@@ -22,6 +22,7 @@ import org.telegram.api.engine.RpcException;
 import org.telegram.api.engine.TimeoutException;
 import org.telegram.api.requests.TLRequestAccountGetWallPapers;
 import org.telegram.api.upload.TLFile;
+import org.telegram.tl.TLBytes;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -185,9 +186,9 @@ public class WallpapersFragment extends TelegramFragment {
         getRootController().hidePanel();
     }
 
-    private void saveWallpaper(byte[] src) throws IOException {
+    private void saveWallpaper(TLBytes bytes) throws IOException {
         FileOutputStream stream = application.openFileOutput("current_wallpaper.jpg", Context.MODE_PRIVATE);
-        stream.write(src, 0, src.length);
+        stream.write(bytes.getData(), bytes.getOffset(), bytes.getLength());
         stream.close();
     }
 }

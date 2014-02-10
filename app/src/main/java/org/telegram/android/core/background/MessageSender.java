@@ -16,6 +16,7 @@ import org.telegram.api.engine.RpcCallbackEx;
 import org.telegram.api.messages.*;
 import org.telegram.api.requests.*;
 import org.telegram.mtproto.secure.Entropy;
+import org.telegram.tl.TLBytes;
 import org.telegram.tl.TLIntVector;
 import org.telegram.tl.TLMethod;
 import org.telegram.tl.TLObject;
@@ -62,7 +63,7 @@ public class MessageSender {
 
             TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
             decryptedMessage.setRandomId(message.getRandomId());
-            decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
+            decryptedMessage.setRandomBytes(new TLBytes(Entropy.generateSeed(32)));
 
             if (message.getContentType() == ContentType.MESSAGE_TEXT) {
                 decryptedMessage.setMessage(message.getMessage());
@@ -73,7 +74,7 @@ public class MessageSender {
                 decryptedMessage.setMedia(new TLDecryptedMessageMediaGeoPoint(point.getLatitude(), point.getLongitude()));
             }
 
-            byte[] bundle = new byte[0];
+            byte[] bundle;
             try {
                 bundle = application.getEncryptionController().encryptMessage(decryptedMessage, chat.getId());
             } catch (IOException e) {
@@ -82,7 +83,8 @@ public class MessageSender {
             }
 
 
-            TLRequestMessagesSendEncrypted request = new TLRequestMessagesSendEncrypted(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle);
+            TLRequestMessagesSendEncrypted request = new TLRequestMessagesSendEncrypted(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(),
+                    new TLBytes(bundle));
 
             final long start = SystemClock.uptimeMillis();
             application.getApi().doRpcCall(request, TIMEOUT, new RpcCallbackEx<TLAbsSentEncryptedMessage>() {

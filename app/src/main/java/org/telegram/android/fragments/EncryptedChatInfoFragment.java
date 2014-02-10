@@ -36,6 +36,7 @@ import org.telegram.api.TLInputEncryptedChat;
 import org.telegram.api.requests.TLRequestMessagesSendEncryptedService;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.mtproto.time.TimeOverlord;
+import org.telegram.tl.TLBytes;
 
 import java.io.IOException;
 
@@ -181,7 +182,7 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
             public void execute() throws AsyncException {
                 TLDecryptedMessageService service = new TLDecryptedMessageService();
                 service.setRandomId(randomIntId);
-                service.setRandomBytes(Entropy.generateSeed(32));
+                service.setRandomBytes(new TLBytes(Entropy.generateSeed(32)));
                 service.setAction(new TLDecryptedMessageActionSetMessageTTL(sec));
 
                 byte[] msg;
@@ -192,7 +193,8 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
                 }
 
                 rpc(new TLRequestMessagesSendEncryptedService(
-                        new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), randomId, msg));
+                        new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), randomId,
+                        new TLBytes(msg)));
 
                 application.getEngine().getSecretEngine().setSelfDestructTimer(chatId, sec);
                 application.getEngine().onNewInternalServiceMessage(

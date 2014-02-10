@@ -18,6 +18,7 @@ import org.telegram.api.requests.TLRequestMessagesRequestEncryption;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.tl.StreamingUtils;
+import org.telegram.tl.TLBytes;
 import org.telegram.tl.TLObject;
 
 import java.io.ByteArrayInputStream;
@@ -131,7 +132,7 @@ public class EncryptionController {
             }
 
             try {
-                byte[] rawMessage = decryptMessage(encMsg.getBytes(), encMsg.getChatId());
+                byte[] rawMessage = decryptMessage(encMsg.getBytes().cleanData(), encMsg.getChatId());
 
                 if (rawMessage == null) {
                     return;
@@ -156,7 +157,7 @@ public class EncryptionController {
                             localPhoto.setFastPreviewW(photo.getThumbW());
                             localPhoto.setFastPreviewH(photo.getThumbH());
                             localPhoto.setFastPreviewKey(decryptedMessage.getRandomId() + "_photo");
-                            localPhoto.setFastPreview(photo.getThumb());
+                            localPhoto.setFastPreview(photo.getThumb().cleanData());
                         } else {
                             localPhoto.setFastPreviewW(0);
                             localPhoto.setFastPreviewH(0);
@@ -168,13 +169,13 @@ public class EncryptionController {
                             TLEncryptedFile file = (TLEncryptedFile) encMsg.getFile();
                             localPhoto.setFullW(photo.getW());
                             localPhoto.setFullH(photo.getH());
-                            byte[] digest = MD5Raw(concat(photo.getKey(), photo.getIv()));
+                            byte[] digest = MD5Raw(concat(photo.getKey().cleanData(), photo.getIv().cleanData()));
                             int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)));
                             if (file.getKeyFingerprint() != fingerprint) {
                                 Logger.w(TAG, "Ignoring message: attach fingerprint mismatched");
                                 return;
                             }
-                            localPhoto.setFullLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), photo.getSize(), file.getDcId(), photo.getKey(), photo.getIv()));
+                            localPhoto.setFullLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), photo.getSize(), file.getDcId(), photo.getKey().cleanData(), photo.getIv().cleanData()));
                         } else {
                             localPhoto.setFullH(0);
                             localPhoto.setFullW(0);
@@ -191,19 +192,19 @@ public class EncryptionController {
                         localVideo.setDuration(video.getDuration());
                         if (encMsg.getFile() instanceof TLEncryptedFile) {
                             TLEncryptedFile file = (TLEncryptedFile) encMsg.getFile();
-                            byte[] digest = MD5Raw(concat(video.getKey(), video.getIv()));
+                            byte[] digest = MD5Raw(concat(video.getKey().cleanData(), video.getIv().cleanData()));
                             int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)));
                             if (file.getKeyFingerprint() != fingerprint) {
                                 Logger.w(TAG, "Ignoring message: attach fingerprint mismatched");
                                 return;
                             }
-                            localVideo.setVideoLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), file.getSize(), file.getDcId(), video.getKey(), video.getIv()));
+                            localVideo.setVideoLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), file.getSize(), file.getDcId(), video.getKey().cleanData(), video.getIv().cleanData()));
                         } else {
                             localVideo.setVideoLocation(new TLLocalFileEmpty());
                         }
 
-                        if (video.getThumbH() != 0 && video.getThumbW() != 0 && video.getThumb().length > 0) {
-                            Bitmap src = BitmapFactory.decodeByteArray(video.getThumb(), 0, video.getThumb().length);
+                        if (video.getThumbH() != 0 && video.getThumbW() != 0 && video.getThumb().getLength() > 0) {
+                            Bitmap src = BitmapFactory.decodeByteArray(video.getThumb().getData(), video.getThumb().getOffset(), video.getThumb().getLength());
                             if (src != null && src.getHeight() > 0 && src.getWidth() > 0) {
                                 if (src.getWidth() < 90 && src.getHeight() < 90) {
                                     Bitmap dest = Bitmap.createBitmap(90, 90, Bitmap.Config.ARGB_8888);
@@ -212,7 +213,7 @@ public class EncryptionController {
                                 }
                                 localVideo.setPreviewH(src.getHeight());
                                 localVideo.setPreviewW(src.getWidth());
-                                localVideo.setFastPreview(video.getThumb());
+                                localVideo.setFastPreview(video.getThumb().cleanData());
                             } else {
                                 localVideo.setPreviewH(0);
                                 localVideo.setPreviewW(0);
@@ -233,19 +234,25 @@ public class EncryptionController {
                         TLLocalDocument localDocument = new TLLocalDocument();
                         if (encMsg.getFile() instanceof TLEncryptedFile) {
                             TLEncryptedFile file = (TLEncryptedFile) encMsg.getFile();
-                            byte[] digest = MD5Raw(concat(mediaDocument.getKey(), mediaDocument.getIv()));
+                            byte[] digest = MD5Raw(concat(mediaDocument.getKey().cleanData(), mediaDocument.getIv().cleanData()));
                             int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)));
                             if (file.getKeyFingerprint() != fingerprint) {
                                 Logger.w(TAG, "Ignoring message: attach fingerprint mismatched");
                                 return;
                             }
-                            localDocument.setFileLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), file.getSize(), file.getDcId(), mediaDocument.getKey(), mediaDocument.getIv()));
+                            localDocument.setFileLocation(new TLLocalEncryptedFileLocation(
+                                    file.getId(),
+                                    file.getAccessHash(),
+                                    file.getSize(),
+                                    file.getDcId(),
+                                    mediaDocument.getKey().cleanData(),
+                                    mediaDocument.getIv().cleanData()));
                         } else {
                             localDocument.setFileLocation(new TLLocalFileEmpty());
                         }
 
-                        if (mediaDocument.getThumbH() != 0 && mediaDocument.getThumbW() != 0 && mediaDocument.getThumb().length > 0) {
-                            localDocument.setFastPreview(mediaDocument.getThumb(), mediaDocument.getThumbW(), mediaDocument.getThumbH());
+                        if (mediaDocument.getThumbH() != 0 && mediaDocument.getThumbW() != 0 && mediaDocument.getThumb().getLength() > 0) {
+                            localDocument.setFastPreview(mediaDocument.getThumb().cleanData(), mediaDocument.getThumbW(), mediaDocument.getThumbH());
                         }
 
                         localDocument.setFileName(mediaDocument.getFileName());
@@ -259,13 +266,13 @@ public class EncryptionController {
                         TLLocalAudio localAudio = new TLLocalAudio();
                         if (encMsg.getFile() instanceof TLEncryptedFile) {
                             TLEncryptedFile file = (TLEncryptedFile) encMsg.getFile();
-                            byte[] digest = MD5Raw(concat(mediaDocument.getKey(), mediaDocument.getIv()));
+                            byte[] digest = MD5Raw(concat(mediaDocument.getKey().cleanData(), mediaDocument.getIv().cleanData()));
                             int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)));
                             if (file.getKeyFingerprint() != fingerprint) {
                                 Logger.w(TAG, "Ignoring message: attach fingerprint mismatched");
                                 return;
                             }
-                            localAudio.setFileLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), file.getSize(), file.getDcId(), mediaDocument.getKey(), mediaDocument.getIv()));
+                            localAudio.setFileLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), file.getSize(), file.getDcId(), mediaDocument.getKey().cleanData(), mediaDocument.getIv().cleanData()));
                         } else {
                             localAudio.setDuration(0);
                             localAudio.setFileLocation(new TLLocalFileEmpty());
@@ -302,7 +309,7 @@ public class EncryptionController {
 
             try {
 
-                byte[] rawMessage = decryptMessage(service.getBytes(), service.getChatId());
+                byte[] rawMessage = decryptMessage(service.getBytes().cleanData(), service.getChatId());
 
                 if (rawMessage == null) {
                     return;
@@ -351,7 +358,7 @@ public class EncryptionController {
             return;
         }
         BigInteger a = loadBigInt(rawA);
-        BigInteger gb = loadBigInt(encryptedChat.getGAOrB());
+        BigInteger gb = loadBigInt(encryptedChat.getGAOrB().cleanData());
 
         BigInteger dhPrime = loadBigInt(prime);
 
@@ -364,7 +371,7 @@ public class EncryptionController {
             return;
         }
 
-        byte[] key = xor(alignKeyZero(fromBigInt(gb.modPow(a, dhPrime)), 256), encryptedChat.getNonce());
+        byte[] key = alignKeyZero(fromBigInt(gb.modPow(a, dhPrime)), 256);
         long keyF = readLong(substring(CryptoUtils.SHA1(key), 12, 8), 0);
 
         application.getEngine().getSecretEngine().updateEncryptedChatKey(encryptedChat, key);
@@ -391,7 +398,7 @@ public class EncryptionController {
 
 
         BigInteger g = new BigInteger("" + dhConfig.getG());
-        BigInteger dhPrime = loadBigInt(dhConfig.getP());
+        BigInteger dhPrime = loadBigInt(dhConfig.getP().cleanData());
 
         try {
             checkDhConfig(dhPrime, dhConfig.getG());
@@ -401,7 +408,7 @@ public class EncryptionController {
         }
 
         BigInteger ga = CryptoUtils.loadBigInt(rawGa);
-        BigInteger b = CryptoUtils.loadBigInt(Entropy.generateSeed(dhConfig.getRandom()));
+        BigInteger b = CryptoUtils.loadBigInt(Entropy.generateSeed(dhConfig.getRandom().cleanData()));
         BigInteger gb = g.modPow(b, dhPrime);
         BigInteger pow2 = new BigInteger("2").pow(2048 - 64);
 
@@ -426,7 +433,8 @@ public class EncryptionController {
 
         Logger.d(TAG, "Confirming encryption: " + keyF);
 
-        TLAbsEncryptedChat encryptedChat = application.getApi().doRpcCall(new TLRequestMessagesAcceptEncryption(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), gb.toByteArray(), keyF));
+        TLAbsEncryptedChat encryptedChat = application.getApi().doRpcCall(new TLRequestMessagesAcceptEncryption(new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()),
+                new TLBytes(gb.toByteArray()), keyF));
 
         application.getEngine().getSecretEngine().updateEncryptedChat(encryptedChat);
         application.getEngine().getSecretEngine().updateEncryptedChatKey(encryptedChat, key);
@@ -501,7 +509,7 @@ public class EncryptionController {
         User user = application.getEngine().getUser(uid);
         TLDhConfig dhConfig = (TLDhConfig) application.getApi().doRpcCall(new TLRequestMessagesGetDhConfig(0, 256));
 
-        byte[] prime = dhConfig.getP();
+        byte[] prime = dhConfig.getP().cleanData();
         BigInteger dhPrime = loadBigInt(prime);
 
         long start = SystemClock.uptimeMillis();
@@ -529,7 +537,7 @@ public class EncryptionController {
 
         TLAbsEncryptedChat chat = application.getApi().doRpcCall(
                 new TLRequestMessagesRequestEncryption(
-                        new TLInputUserForeign(user.getUid(), user.getAccessHash()), Entropy.randomInt(), ga.toByteArray()));
+                        new TLInputUserForeign(user.getUid(), user.getAccessHash()), Entropy.randomInt(), new TLBytes(ga.toByteArray())));
         onUpdateEncryption(chat);
 
         byte[] tmpData = concat(StreamingUtils.intToBytes(prime.length), prime, StreamingUtils.intToBytes(rawA.length), rawA);

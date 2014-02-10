@@ -244,18 +244,18 @@ public class ImagePreviewFragment extends TelegramFragment {
                     duration.setVisibility(View.VISIBLE);
                     duration.setText(TextUtil.formatDuration(video.getDuration()));
 
-                    if (video.getPreviewH() != 0 && video.getPreviewW() != 0) {
-                        if (video.getFastPreview().length > 0) {
-                            imageView.requestTask(new CachedImageTask(video));
-                        } else if (video.getPreviewLocation() instanceof TLLocalFileLocation) {
-                            TLLocalFileLocation location = (TLLocalFileLocation) video.getPreviewLocation();
-                            imageView.requestTask(new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret())));
-                        } else {
-                            imageView.requestTask(null);
-                        }
-                    } else {
-                        imageView.requestTask(null);
-                    }
+//                    if (video.getPreviewH() != 0 && video.getPreviewW() != 0) {
+//                        if (video.getFastPreview().length > 0) {
+//                            imageView.requestTask(new CachedImageTask(video));
+//                        } else if (video.getPreviewLocation() instanceof TLLocalFileLocation) {
+//                            TLLocalFileLocation location = (TLLocalFileLocation) video.getPreviewLocation();
+//                            imageView.requestTask(new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret())));
+//                        } else {
+//                            imageView.requestTask(null);
+//                        }
+//                    } else {
+//                        imageView.requestTask(null);
+//                    }
 
                     playButton.setOnClickListener(secure(new View.OnClickListener() {
                         @Override

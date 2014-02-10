@@ -15,15 +15,11 @@ import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.MediaRecord;
-import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
-import org.telegram.android.media.CachedImageTask;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.media.DownloadState;
-import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.ui.FontController;
-import org.telegram.api.TLFileLocation;
 
 import java.util.List;
 
@@ -129,11 +125,11 @@ public class MediaFragment extends TelegramFragment {
                     if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
                         imageView.requestTask(new FileSystemImageTask(application.getDownloadManager().getPreviewFileName(key)));
                     } else {
-                        if (localPhoto.getFastPreviewW() != 0 && localPhoto.getFastPreviewH() != 0) {
-                            imageView.requestTask(new CachedImageTask(localPhoto));
-                        } else {
-                            imageView.requestTask(null);
-                        }
+//                        if (localPhoto.getFastPreviewW() != 0 && localPhoto.getFastPreviewH() != 0) {
+//                            imageView.requestTask(new CachedImageTask(localPhoto));
+//                        } else {
+//                            imageView.requestTask(null);
+//                        }
                     }
                 } else if (object.getPreview() instanceof TLLocalVideo) {
                     timeView.setVisibility(View.VISIBLE);
@@ -142,14 +138,14 @@ public class MediaFragment extends TelegramFragment {
                     timeView.setText(org.telegram.android.ui.TextUtil.formatDuration(video.getDuration()));
 
                     if (video.getPreviewH() != 0 && video.getPreviewW() != 0) {
-                        if (video.getFastPreview().length > 0) {
-                            imageView.requestTask(new CachedImageTask(video));
-                        } else if (video.getPreviewLocation() instanceof TLLocalFileLocation) {
-                            TLLocalFileLocation location = (TLLocalFileLocation) video.getPreviewLocation();
-                            imageView.requestTask(new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret())));
-                        } else {
-                            imageView.requestTask(null);
-                        }
+//                        if (video.getFastPreview().length > 0) {
+//                            imageView.requestTask(new CachedImageTask(video));
+//                        } else if (video.getPreviewLocation() instanceof TLLocalFileLocation) {
+//                            TLLocalFileLocation location = (TLLocalFileLocation) video.getPreviewLocation();
+//                            imageView.requestTask(new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret())));
+//                        } else {
+//                            imageView.requestTask(null);
+//                        }
                     } else {
                         imageView.requestTask(null);
                     }

@@ -152,7 +152,7 @@ dependencies {
     // Telegram api
     compile project(':tl-core')
     compile project(':mtproto')
-    compile files('../libraries/telegram-api/libs/tl-api-v10.jar')
+    compile files('../libraries/telegram-api/libs/tl-api-v11.jar')
     compile project(':telegram-api')
     compile project(':ui:images')
     compile project(':ui:cropping')

@@ -177,10 +177,8 @@ public class SecretEngine {
             chat.setAccessHash(requested.getAccessHash());
             chat.setUserId(requested.getAdminId());
             byte[] tmpKey = CryptoUtils.concat(
-                    StreamingUtils.intToBytes(requested.getGA().length),
-                    requested.getGA(),
-                    StreamingUtils.intToBytes(requested.getNonce().length),
-                    requested.getNonce());
+                    StreamingUtils.intToBytes(requested.getGA().getLength()),
+                    requested.getGA().cleanData());
             chat.setKey(tmpKey);
             chat.setState(EncryptedChatState.REQUESTED);
             chat.setOut(false);

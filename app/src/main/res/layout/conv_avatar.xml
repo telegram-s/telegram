@@ -4,7 +4,7 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              android:background="@drawable/st_list_selector">
-    <com.extradea.framework.images.ui.FastWebImageView
+    <org.telegram.android.preview.AvatarView
             android:layout_height="48dp"
             android:layout_width="48dp"
             android:id="@+id/image"/>

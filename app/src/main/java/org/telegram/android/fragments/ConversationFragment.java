@@ -46,6 +46,7 @@ import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.media.*;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.ui.source.ViewSourceListener;
 import org.telegram.android.ui.source.ViewSourceState;
 import org.telegram.android.log.Logger;
@@ -1068,7 +1069,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         avatarUploadProgress.setVisibility(View.GONE);
         avatarUploadError.setVisibility(View.GONE);
 
-        FastWebImageView imageView = (FastWebImageView) avatarItem.getActionView().findViewById(R.id.image);
+        AvatarView imageView = (AvatarView) avatarItem.getActionView().findViewById(R.id.image);
         View touchLayer = avatarItem.getActionView().findViewById(R.id.avatarTouchLayer);
         int padding = 0;//(int) (getPx(1) * (getBarHeight() / ((float) getPx(48))) + 0.5f);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(getBarHeight() - padding, getBarHeight() - padding, Gravity.TOP | Gravity.RIGHT);
@@ -1082,25 +1083,24 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         if (peerType == PeerType.PEER_USER) {
             if (peerId == 333000) {
-                imageView.setLoadingDrawable(R.drawable.st_support_avatar);
+                imageView.setEmptyDrawable(R.drawable.st_support_avatar);
                 touchLayer.setOnClickListener(null);
             } else {
-                imageView.setLoadingDrawable(Placeholders.USER_PLACEHOLDERS[peerId % Placeholders.USER_PLACEHOLDERS.length]);
+                imageView.setEmptyDrawable(Placeholders.USER_PLACEHOLDERS[peerId % Placeholders.USER_PLACEHOLDERS.length]);
                 User usr = application.getEngine().getUser(peerId);
                 if (usr != null) {
                     if (usr.getPhoto() instanceof TLLocalAvatarPhoto) {
                         TLLocalAvatarPhoto localAvatarPhoto = (TLLocalAvatarPhoto) usr.getPhoto();
                         if (localAvatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                            imageView.requestTask(
-                                    new StelsImageTask((TLLocalFileLocation) localAvatarPhoto.getPreviewLocation()));
+                            imageView.requestAvatar(localAvatarPhoto.getPreviewLocation());
                         } else {
-                            imageView.requestTask(null);
+                            imageView.requestAvatar(null);
                         }
                     } else {
-                        imageView.requestTask(null);
+                        imageView.requestAvatar(null);
                     }
                 } else {
-                    imageView.requestTask(null);
+                    imageView.requestAvatar(null);
                 }
                 touchLayer.setOnClickListener(secure(new View.OnClickListener() {
                     @Override
@@ -1110,7 +1110,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }));
             }
         } else if (peerType == PeerType.PEER_CHAT) {
-            imageView.setLoadingDrawable(Placeholders.GROUP_PLACEHOLDERS[peerId % Placeholders.GROUP_PLACEHOLDERS.length]);
+            imageView.setEmptyDrawable(Placeholders.GROUP_PLACEHOLDERS[peerId % Placeholders.GROUP_PLACEHOLDERS.length]);
             Group group = getEngine().getGroupsEngine().getGroup(peerId);
             int state = application.getSyncKernel().getAvatarUploader().getGroupUploadState(peerId);
             boolean isLoaded = false;
@@ -1118,11 +1118,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getGroupUploadingSource(peerId);
                 if (fileSource != null) {
                     if (fileSource instanceof FileSource) {
-                        imageView.requestTaskSwitch(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
+                        // imageView.requestTaskSwitch(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
                         showView(avatarUploadView, false);
                         isLoaded = true;
                     } else if (fileSource instanceof FileUriSource) {
-                        imageView.requestTaskSwitch(new UriImageTask(((FileUriSource) fileSource).getUri()));
+                        // imageView.requestTaskSwitch(new UriImageTask(((FileUriSource) fileSource).getUri()));
                         showView(avatarUploadView, false);
                         isLoaded = true;
                     }
@@ -1144,15 +1144,15 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
                         TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) group.getAvatar();
                         if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                            imageView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+                            imageView.requestAvatar(avatarPhoto.getPreviewLocation());
                         } else {
-                            imageView.requestTask(null);
+                            imageView.setEmptyDrawable(null);
                         }
                     } else {
-                        imageView.requestTask(null);
+                        imageView.setEmptyDrawable(null);
                     }
                 } else {
-                    imageView.requestTask(null);
+                    imageView.setEmptyDrawable(null);
                 }
             }
 
@@ -1165,25 +1165,24 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         } else {
             final EncryptedChat chat = application.getEngine().getEncryptedChat(peerId);
             if (chat.getUserId() == 333000) {
-                imageView.setLoadingDrawable(R.drawable.st_support_avatar);
+                imageView.setEmptyDrawable(R.drawable.st_support_avatar);
                 touchLayer.setOnClickListener(null);
             } else {
-                imageView.setLoadingDrawable(Placeholders.USER_PLACEHOLDERS[chat.getUserId() % Placeholders.USER_PLACEHOLDERS.length]);
+                imageView.setEmptyDrawable(Placeholders.USER_PLACEHOLDERS[chat.getUserId() % Placeholders.USER_PLACEHOLDERS.length]);
                 User usr = application.getEngine().getUser(chat.getUserId());
                 if (usr != null) {
                     if (usr.getPhoto() instanceof TLLocalAvatarPhoto) {
                         TLLocalAvatarPhoto localAvatarPhoto = (TLLocalAvatarPhoto) usr.getPhoto();
                         if (localAvatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                            imageView.requestTask(
-                                    new StelsImageTask((TLLocalFileLocation) localAvatarPhoto.getPreviewLocation()));
+                            imageView.requestAvatar(localAvatarPhoto.getPreviewLocation());
                         } else {
-                            imageView.requestTask(null);
+                            imageView.requestAvatar(null);
                         }
                     } else {
-                        imageView.requestTask(null);
+                        imageView.requestAvatar(null);
                     }
                 } else {
-                    imageView.requestTask(null);
+                    imageView.requestAvatar(null);
                 }
                 touchLayer.setOnClickListener(secure(new View.OnClickListener() {
                     @Override

@@ -32,6 +32,7 @@ import org.telegram.api.requests.TLRequestMessagesSendMedia;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
 import org.telegram.tl.StreamingUtils;
+import org.telegram.tl.TLBytes;
 
 import java.io.*;
 import java.lang.ref.WeakReference;
@@ -282,9 +283,13 @@ public class MediaSender {
     private EncryptedAudioSent doSendEncAudio(Uploader.UploadResult result, EncryptedFile encryptedFile, TLUploadingAudio audio, ChatMessage message, EncryptedChat chat) throws Exception {
         TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
         decryptedMessage.setRandomId(message.getRandomId());
-        decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
+        decryptedMessage.setRandomBytes(new TLBytes(Entropy.generateSeed(32)));
         decryptedMessage.setMessage("");
-        decryptedMessage.setMedia(new TLDecryptedMessageMediaAudio(audio.getDuration(), (int) new File(audio.getFileName()).length(), encryptedFile.getKey(), encryptedFile.getIv()));
+        decryptedMessage.setMedia(new TLDecryptedMessageMediaAudio(
+                audio.getDuration(),
+                (int) new File(audio.getFileName()).length(),
+                new TLBytes(encryptedFile.getKey()),
+                new TLBytes(encryptedFile.getIv())));
         byte[] digest = MD5Raw(concat(encryptedFile.getKey(), encryptedFile.getIv()));
         int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)), 0);
 
@@ -297,9 +302,11 @@ public class MediaSender {
             inputEncryptedFile = new TLInputEncryptedFileUploaded(result.getFileId(), result.getPartsCount(), result.getHash(), fingerprint);
         }
 
-        TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(
-                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle,
-                inputEncryptedFile), TIMEOUT);
+        TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(
+                new TLRequestMessagesSendEncryptedFile(
+                        new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(),
+                        new TLBytes(bundle),
+                        inputEncryptedFile), TIMEOUT);
 
         TLLocalAudio localAudio = new TLLocalAudio();
         if (encryptedMessage instanceof TLSentEncryptedFile) {
@@ -356,15 +363,27 @@ public class MediaSender {
     private EncryptedDocSent doSendEncDoc(Uploader.UploadResult result, TLUploadingDocument document, Optimizer.FastPreviewResult thumb, EncryptedFile encryptedFile, ChatMessage message, EncryptedChat chat) throws Exception {
         TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
         decryptedMessage.setRandomId(message.getRandomId());
-        decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
+        decryptedMessage.setRandomBytes(new TLBytes(Entropy.generateSeed(32)));
         decryptedMessage.setMessage("");
 
         if (thumb != null) {
-            decryptedMessage.setMedia(new TLDecryptedMessageMediaDocument(thumb.getData(), thumb.getW(), thumb.getH(),
-                    document.getFileName(), document.getMimeType(), document.getFileSize(), encryptedFile.getKey(), encryptedFile.getIv()));
+            decryptedMessage.setMedia(new TLDecryptedMessageMediaDocument(
+                    new TLBytes(thumb.getData()),
+                    thumb.getW(),
+                    thumb.getH(),
+                    document.getFileName(),
+                    document.getMimeType(),
+                    document.getFileSize(),
+                    new TLBytes(encryptedFile.getKey()),
+                    new TLBytes(encryptedFile.getIv())));
         } else {
-            decryptedMessage.setMedia(new TLDecryptedMessageMediaDocument(new byte[0], 0, 0,
-                    document.getFileName(), document.getMimeType(), document.getFileSize(), encryptedFile.getKey(), encryptedFile.getIv()));
+            decryptedMessage.setMedia(new TLDecryptedMessageMediaDocument(
+                    new TLBytes(new byte[0]), 0, 0,
+                    document.getFileName(),
+                    document.getMimeType(),
+                    document.getFileSize(),
+                    new TLBytes(encryptedFile.getKey()),
+                    new TLBytes(encryptedFile.getIv())));
         }
 
         byte[] digest = MD5Raw(concat(encryptedFile.getKey(), encryptedFile.getIv()));
@@ -379,9 +398,12 @@ public class MediaSender {
             inputEncryptedFile = new TLInputEncryptedFileUploaded(result.getFileId(), result.getPartsCount(), result.getHash(), fingerprint);
         }
 
-        TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(
-                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle,
-                inputEncryptedFile), TIMEOUT);
+        TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(
+                new TLRequestMessagesSendEncryptedFile(
+                        new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(),
+                        new TLBytes(bundle),
+                        inputEncryptedFile),
+                TIMEOUT);
 
         TLLocalDocument localDocument = new TLLocalDocument();
         if (encryptedMessage instanceof TLSentEncryptedFile) {
@@ -430,13 +452,16 @@ public class MediaSender {
                                               ChatMessage message, EncryptedChat chat) throws Exception {
         TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
         decryptedMessage.setRandomId(message.getRandomId());
-        decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
+        decryptedMessage.setRandomBytes(new TLBytes(Entropy.generateSeed(32)));
         decryptedMessage.setMessage("");
 
         Optimizer.BitmapInfo info = Optimizer.getInfo(originalFile);
-        decryptedMessage.setMedia(new TLDecryptedMessageMediaPhoto(previewResult.getData(),
-                previewResult.getW(), previewResult.getH(), info.getWidth(), info.getHeight(), (int) new File(originalFile).length(),
-                encryptedFile.getKey(), encryptedFile.getIv()));
+        decryptedMessage.setMedia(new TLDecryptedMessageMediaPhoto(
+                new TLBytes(previewResult.getData()),
+                previewResult.getW(), previewResult.getH(),
+                info.getWidth(), info.getHeight(), (int) new File(originalFile).length(),
+                new TLBytes(encryptedFile.getKey()),
+                new TLBytes(encryptedFile.getIv())));
 
         byte[] digest = MD5Raw(concat(encryptedFile.getKey(), encryptedFile.getIv()));
         int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)), 0);
@@ -450,9 +475,11 @@ public class MediaSender {
             inputEncryptedFile = new TLInputEncryptedFileUploaded(result.getFileId(), result.getPartsCount(), result.getHash(), fingerprint);
         }
 
-        TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(new TLRequestMessagesSendEncryptedFile(
-                new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle,
-                inputEncryptedFile), TIMEOUT);
+        TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(
+                new TLRequestMessagesSendEncryptedFile(
+                        new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(),
+                        new TLBytes(bundle),
+                        inputEncryptedFile), TIMEOUT);
 
         TLLocalPhoto photo = new TLLocalPhoto();
         photo.setFastPreviewW(previewResult.getW());
@@ -502,7 +529,7 @@ public class MediaSender {
     private EncryptedVideoSent doSendEncVideo(Uploader.UploadResult mainResult, EncryptedFile encryptedFile, String srcFile, VideoMetadata metadata, Optimizer.FastPreviewResult previewResult, EncryptedChat chat, ChatMessage message) throws Exception {
         TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
         decryptedMessage.setRandomId(message.getRandomId());
-        decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
+        decryptedMessage.setRandomBytes(new TLBytes(Entropy.generateSeed(32)));
         decryptedMessage.setMessage("");
         TLDecryptedMessageMediaVideo video = new TLDecryptedMessageMediaVideo();
         video.setDuration((int) (metadata.getDuration() / 1000));
@@ -511,9 +538,9 @@ public class MediaSender {
         video.setSize((int) new File(srcFile).length());
         video.setThumbW(previewResult.getW());
         video.setThumbH(previewResult.getH());
-        video.setThumb(previewResult.getData());
-        video.setKey(encryptedFile.getKey());
-        video.setIv(encryptedFile.getIv());
+        video.setThumb(new TLBytes(previewResult.getData()));
+        video.setKey(new TLBytes(encryptedFile.getKey()));
+        video.setIv(new TLBytes(encryptedFile.getIv()));
         decryptedMessage.setMedia(video);
 
         byte[] digest = MD5Raw(concat(encryptedFile.getKey(), encryptedFile.getIv()));
@@ -530,7 +557,12 @@ public class MediaSender {
 
         TLAbsSentEncryptedMessage encryptedMessage = application.getApi().doRpcCall(
                 new TLRequestMessagesSendEncryptedFile(
-                        new TLInputEncryptedChat(chat.getId(), chat.getAccessHash()), message.getRandomId(), bundle, inputFile));
+                        new TLInputEncryptedChat(
+                                chat.getId(),
+                                chat.getAccessHash()),
+                        message.getRandomId(),
+                        new TLBytes(bundle),
+                        inputFile));
 
         TLLocalVideo localVideo = new TLLocalVideo();
         localVideo.setDuration((int) (metadata.getDuration() / 1000));

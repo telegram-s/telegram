@@ -18,7 +18,8 @@ public abstract class QueueWorker<T extends QueueProcessor.BaseTask> extends Thr
 
     @Override
     public void run() {
-        android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        setPriority(MIN_PRIORITY);
+        //android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_m;
         while (processor.isRunning()) {
             T task = processor.waitForTask(this);
             if (task == null) {

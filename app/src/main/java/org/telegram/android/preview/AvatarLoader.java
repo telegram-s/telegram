@@ -305,9 +305,9 @@ public class AvatarLoader {
             try {
                 TLFile res = application.getApi().doGetFile(dcId, location, 0, 1024 * 1024 * 1024);
 
-                fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes());
+                fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes().cleanData());
                 Bitmap src = fullBitmaps.get();
-                Optimizer.loadTo(res.getBytes(), src);
+                Optimizer.loadTo(res.getBytes().cleanData(), src);
                 onFullBitmapLoaded(src, task);
             } catch (IOException e) {
                 e.printStackTrace();

@@ -145,7 +145,7 @@ public class EngineUtils {
                 return new TLLocalGeo(point.getLat(), point.getLon());
             }
         } else if (messageMedia instanceof TLMessageMediaUnsupported) {
-            return new TLLocalUnknown(((TLMessageMediaUnsupported) messageMedia).getBytes());
+            return new TLLocalUnknown(((TLMessageMediaUnsupported) messageMedia).getBytes().cleanData());
         } else if (messageMedia instanceof TLMessageMediaDocument) {
             TLAbsDocument document = ((TLMessageMediaDocument) messageMedia).getDocument();
             if (document instanceof TLDocument) {
@@ -156,7 +156,7 @@ public class EngineUtils {
 
                 if (doc.getThumb() instanceof TLPhotoCachedSize) {
                     TLPhotoCachedSize cachedSize = (TLPhotoCachedSize) doc.getThumb();
-                    res.setFastPreview(cachedSize.getBytes(), cachedSize.getW(), cachedSize.getH());
+                    res.setFastPreview(cachedSize.getBytes().cleanData(), cachedSize.getW(), cachedSize.getH());
                 } else if (doc.getThumb() instanceof TLPhotoSize) {
                     TLPhotoSize photoSize = (TLPhotoSize) doc.getThumb();
                     if (photoSize.getLocation() instanceof TLFileLocation) {
@@ -197,12 +197,12 @@ public class EngineUtils {
             TLLocalVideo res = new TLLocalVideo();
             if (tlVideo.getThumb() instanceof TLPhotoCachedSize) {
                 TLPhotoCachedSize cachedSize = (TLPhotoCachedSize) tlVideo.getThumb();
-                res.setFastPreview(cachedSize.getBytes());
+                res.setFastPreview(cachedSize.getBytes().cleanData());
                 res.setPreviewW(cachedSize.getW());
                 res.setPreviewH(cachedSize.getH());
                 if (cachedSize.getLocation() instanceof TLFileLocation) {
                     TLFileLocation location = (TLFileLocation) cachedSize.getLocation();
-                    res.setPreviewLocation(new TLLocalFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret(), cachedSize.getBytes().length));
+                    res.setPreviewLocation(new TLLocalFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret(), cachedSize.getBytes().getLength()));
                     res.setPreviewKey(location.getVolumeId() + "_" + location.getLocalId());
                 } else if (cachedSize.getLocation() instanceof TLFileLocationUnavailable) {
                     TLFileLocationUnavailable location = (TLFileLocationUnavailable) cachedSize.getLocation();
@@ -272,7 +272,7 @@ public class EngineUtils {
                     fastPreview.eraseColor(Color.TRANSPARENT);
 
                     try {
-                        Optimizer.loadTo(cachedSize.getBytes(), fastPreview);
+                        Optimizer.loadTo(cachedSize.getBytes().cleanData(), fastPreview);
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                         fastPreview.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
                         byte[] optimizedPreview = outputStream.toByteArray();
@@ -280,7 +280,7 @@ public class EngineUtils {
                         res.setOptimization(TLLocalPhoto.OPTIMIZATION_RESIZE);
                     } catch (IOException e) {
                         e.printStackTrace();
-                        res.setFastPreview(cachedSize.getBytes());
+                        res.setFastPreview(cachedSize.getBytes().cleanData());
                         res.setOptimization(TLLocalPhoto.OPTIMIZATION_NONE);
                     }
                 }

@@ -43,12 +43,12 @@ public class StelsImageWorker implements ImageWorker {
                     0, 1024 * 1024 * 1024);
 
             if (res != null) {
-                Bitmap img = controller.getBitmapDecoder().decodeBitmap(res.getBytes());
+                Bitmap img = controller.getBitmapDecoder().decodeBitmap(res.getBytes().cleanData());
                 if (stelsImageTask.isBlur()) {
                     img = BitmapUtils.fastblur(img, stelsImageTask.getBlurRadius());
                 }
                 task.setResult(img);
-                task.setBinaryResult(res.getBytes());
+                task.setBinaryResult(res.getBytes().cleanData());
                 return RESULT_OK;
             }
         } catch (Exception e) {
