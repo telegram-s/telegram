@@ -22,6 +22,7 @@ public class TLLocalFileVideoLocation extends TLAbsLocalFileLocation {
     protected long videoId;
     protected long accessHash;
     protected int size;
+    private String uniqKey;
 
     public TLLocalFileVideoLocation() {
 
@@ -32,38 +33,23 @@ public class TLLocalFileVideoLocation extends TLAbsLocalFileLocation {
         this.videoId = videoId;
         this.accessHash = accessHash;
         this.size = size;
+        this.uniqKey = dcId + "_" + videoId;
     }
 
     public int getDcId() {
         return dcId;
     }
 
-    public void setDcId(int dcId) {
-        this.dcId = dcId;
-    }
-
     public long getVideoId() {
         return videoId;
-    }
-
-    public void setVideoId(long videoId) {
-        this.videoId = videoId;
     }
 
     public long getAccessHash() {
         return accessHash;
     }
 
-    public void setAccessHash(long accessHash) {
-        this.accessHash = accessHash;
-    }
-
     public int getSize() {
         return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
     }
 
     @Override
@@ -85,6 +71,7 @@ public class TLLocalFileVideoLocation extends TLAbsLocalFileLocation {
         videoId = readLong(stream);
         accessHash = readLong(stream);
         size = readInt(stream);
+        this.uniqKey = dcId + "_" + videoId;
     }
 
     @Override
@@ -104,6 +91,6 @@ public class TLLocalFileVideoLocation extends TLAbsLocalFileLocation {
 
     @Override
     public String getUniqKey() {
-        return dcId + "_" + videoId;
+        return uniqKey;
     }
 }

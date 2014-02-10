@@ -25,6 +25,7 @@ public class TLLocalEncryptedFileLocation extends TLAbsLocalFileLocation {
     private int dcId;
     private byte[] key;
     private byte[] iv;
+    private String uniqKey;
 
     public TLLocalEncryptedFileLocation(long id, long accessHash, int size, int dcId, byte[] key, byte[] iv) {
         this.id = id;
@@ -33,6 +34,7 @@ public class TLLocalEncryptedFileLocation extends TLAbsLocalFileLocation {
         this.dcId = dcId;
         this.key = key;
         this.iv = iv;
+        this.uniqKey = dcId + "_" + id;
     }
 
     public TLLocalEncryptedFileLocation() {
@@ -43,48 +45,24 @@ public class TLLocalEncryptedFileLocation extends TLAbsLocalFileLocation {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public long getAccessHash() {
         return accessHash;
-    }
-
-    public void setAccessHash(long accessHash) {
-        this.accessHash = accessHash;
     }
 
     public int getSize() {
         return size;
     }
 
-    public void setSize(int size) {
-        this.size = size;
-    }
-
     public int getDcId() {
         return dcId;
-    }
-
-    public void setDcId(int dcId) {
-        this.dcId = dcId;
     }
 
     public byte[] getKey() {
         return key;
     }
 
-    public void setKey(byte[] key) {
-        this.key = key;
-    }
-
     public byte[] getIv() {
         return iv;
-    }
-
-    public void setIv(byte[] iv) {
-        this.iv = iv;
     }
 
     @Override
@@ -110,6 +88,7 @@ public class TLLocalEncryptedFileLocation extends TLAbsLocalFileLocation {
         dcId = readInt(stream);
         key = readTLBytes(stream);
         iv = readTLBytes(stream);
+        this.uniqKey = dcId + "_" + id;
     }
 
     @Override
@@ -131,6 +110,6 @@ public class TLLocalEncryptedFileLocation extends TLAbsLocalFileLocation {
 
     @Override
     public String getUniqKey() {
-        return dcId + "_" + id;
+        return uniqKey;
     }
 }

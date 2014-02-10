@@ -19,12 +19,14 @@ public class TLLocalFileAudio extends TLAbsLocalFileLocation {
     private long accessHash;
     private int size;
     private int dcId;
+    private String uniqKey;
 
     public TLLocalFileAudio(long id, long accessHash, int size, int dcId) {
         this.id = id;
         this.accessHash = accessHash;
         this.size = size;
         this.dcId = dcId;
+        this.uniqKey = dcId + "_" + id;
     }
 
     public TLLocalFileAudio() {
@@ -66,10 +68,11 @@ public class TLLocalFileAudio extends TLAbsLocalFileLocation {
         accessHash = readLong(stream);
         size = readInt(stream);
         dcId = readInt(stream);
+        uniqKey = dcId + "_" + id;
     }
 
     @Override
     public String getUniqKey() {
-        return dcId + "_" + id;
+        return uniqKey;
     }
 }

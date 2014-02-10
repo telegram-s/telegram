@@ -20,11 +20,15 @@ public class TLLocalFileDocument extends TLAbsLocalFileLocation {
     private int size;
     private int dcId;
 
+    private String uniqKey;
+
     public TLLocalFileDocument(long id, long accessHash, int size, int dcId) {
         this.id = id;
         this.accessHash = accessHash;
         this.size = size;
         this.dcId = dcId;
+
+        this.uniqKey = dcId + "_" + id;
     }
 
     public TLLocalFileDocument() {
@@ -66,6 +70,8 @@ public class TLLocalFileDocument extends TLAbsLocalFileLocation {
         id = readLong(stream);
         accessHash = readLong(stream);
         size = readInt(stream);
+
+        this.uniqKey = dcId + "_" + id;
     }
 
     @Override
@@ -85,6 +91,6 @@ public class TLLocalFileDocument extends TLAbsLocalFileLocation {
 
     @Override
     public String getUniqKey() {
-        return dcId + "_" + id;
+        return uniqKey;
     }
 }

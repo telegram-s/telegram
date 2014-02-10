@@ -24,6 +24,7 @@ public class TLLocalFileLocation extends TLAbsLocalFileLocation implements Seria
     protected int localId;
     protected long secret;
     protected int size;
+    private String uniqKey;
 
     public TLLocalFileLocation() {
 
@@ -35,22 +36,15 @@ public class TLLocalFileLocation extends TLAbsLocalFileLocation implements Seria
         this.localId = localId;
         this.secret = secret;
         this.size = size;
+        this.uniqKey = dcId + "_" + volumeId + "_" + localId;
     }
 
     public int getDcId() {
         return dcId;
     }
 
-    public void setDcId(int dcId) {
-        this.dcId = dcId;
-    }
-
     public long getVolumeId() {
         return volumeId;
-    }
-
-    public void setVolumeId(long volumeId) {
-        this.volumeId = volumeId;
     }
 
     public int getLocalId() {
@@ -65,16 +59,8 @@ public class TLLocalFileLocation extends TLAbsLocalFileLocation implements Seria
         return secret;
     }
 
-    public void setSecret(long secret) {
-        this.secret = secret;
-    }
-
     public int getSize() {
         return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
     }
 
     @Override
@@ -98,6 +84,7 @@ public class TLLocalFileLocation extends TLAbsLocalFileLocation implements Seria
         localId = readInt(stream);
         secret = readLong(stream);
         size = readInt(stream);
+        uniqKey = dcId + "_" + volumeId + "_" + localId;
     }
 
     @Override
@@ -118,6 +105,6 @@ public class TLLocalFileLocation extends TLAbsLocalFileLocation implements Seria
 
     @Override
     public String getUniqKey() {
-        return dcId + "_" + volumeId + "_" + localId;
+        return uniqKey;
     }
 }

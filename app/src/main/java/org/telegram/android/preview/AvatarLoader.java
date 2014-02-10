@@ -232,10 +232,14 @@ public class AvatarLoader {
         Bitmap cached = imageCache.findFree(task.getKind());
 
         if (cached == null) {
-            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind());
-        } else {
-            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
+            cached = Bitmap.createBitmap(AVATAR_W, AVATAR_H, Bitmap.Config.ARGB_8888);
         }
+//        if (cached == null) {
+//            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind());
+//        } else {
+//            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
+//        }
+        res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
 
         if (res != null) {
             imageCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), res);
