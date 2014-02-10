@@ -231,6 +231,14 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             mainContainer.setBackgroundDrawable(drawable);
         }
         listView.setCacheColorHint(0);
+        listView.setRecyclerListener(new AbsListView.RecyclerListener() {
+            @Override
+            public void onMovedToScrapHeap(View view) {
+                if (view instanceof BaseMsgView) {
+                    ((BaseMsgView) view).unbind();
+                }
+            }
+        });
 
         contactsPanel = res.findViewById(R.id.contactsPanel);
 
@@ -1328,7 +1336,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             } else {
                 User user = application.getEngine().getUser(peerId);
                 getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(
-                        application.getEmojiProcessor().processEmojiCutMutable(user.getDisplayName(),0)));
+                        application.getEmojiProcessor().processEmojiCutMutable(user.getDisplayName(), 0)));
 
                 if (application.getTypingStates().isUserTyping(peerId)) {
                     getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));

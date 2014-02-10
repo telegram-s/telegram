@@ -38,8 +38,6 @@ import java.util.concurrent.Executors;
  */
 public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
-    private static MediaFastCache fastCache = new MediaFastCache();
-
     private static Movie lastMovie;
     private static long lastMovieStart;
     private static int lastDatabaseId;
@@ -47,8 +45,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
     private static Executor movieLoader = Executors.newSingleThreadExecutor();
 
     private static final String TAG = "MessageMediaView";
-
-    private static byte[] bitmapTmp = new byte[16 * 1024];
 
     public static String buildMapUrl(double latitude, double longitude, int width, int height) {
         String url = "https://maps.googleapis.com/maps/api/staticmap?center={center}&zoom=12&size=" + width + "x" + height + "&sensor=false";
@@ -291,6 +287,13 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         unbindOldPreview();
         unbindPreview();
         postInvalidate();
+    }
+
+    @Override
+    public void unbind() {
+        super.unbind();
+        unbindOldPreview();
+        unbindPreview();
     }
 
     private int[] buildSize(int w, int h) {
@@ -698,14 +701,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         }
         long start = SystemClock.uptimeMillis();
 
-//        if (this.previewCached != null) {
-//            if (this.databaseId > 0) {
-//                fastCache.putToCache(this.databaseId, previewCached);
-//            } else {
-//                fastCache.putToCache(previewCached);
-//            }
-//        }
-
         this.databaseId = message.message.getDatabaseId();
         this.isOut = message.message.isOut();
         this.date = TextUtil.formatTime(message.message.getDate(), getContext());
@@ -715,7 +710,9 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             placeholderPaint.setColor(Color.WHITE);
         }
 
-//        this.previewCached = null;
+        unbindOldPreview();
+        unbindPreview();
+
         this.state = message.message.getState();
         this.prevState = -1;
         this.oldPreview = null;
@@ -811,6 +808,17 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 //            desiredWidth = (int) maxWidth;
 //            desiredHeight = getPx(115);
 //        }
+
+        int centerX = desiredWidth / 2;
+        int centerY = desiredHeight / 2;
+        int outerR = getPx(20);
+
+        path.reset();
+        path.addRect(0, 0, desiredWidth, desiredHeight, Path.Direction.CW);
+        path.close();
+        path.addCircle(centerX, centerY, outerR, Path.Direction.CW);
+        path.close();
+        path.setFillType(Path.FillType.EVEN_ODD);
 
         timeWidth = (int) timePaint.measureText(date);
         if (isOut) {
@@ -995,13 +1003,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 int centerX = desiredWidth / 2;
                 int centerY = desiredHeight / 2;
 
-//                path.reset();
-//                path.addRect(0, 0, desiredWidth, desiredHeight, Path.Direction.CW);
-//                path.close();
-//                path.addCircle(centerX, centerY, outerR, Path.Direction.CW);
-//                path.close();
-//                path.setFillType(Path.FillType.EVEN_ODD);
-//                canvas.drawPath(path, downloadBgRect);
+                canvas.drawPath(path, downloadBgRect);
 
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgLightRect);
 

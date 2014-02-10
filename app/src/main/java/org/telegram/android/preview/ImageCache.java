@@ -26,9 +26,9 @@ public class ImageCache {
     private final int cacheSize;
     private final int cacheFreeSize;
 
-    public ImageCache() {
-        cacheSize = DEFAULT_CACHE_SIZE;
-        cacheFreeSize = DEFAULT_CACHE_FREE_SIZE;
+    public ImageCache(int _cacheSize, int _cacheFreeSize) {
+        this.cacheSize = _cacheSize;
+        this.cacheFreeSize = _cacheFreeSize;
 
         avatarCache = new LruCache<String, Holder>(cacheSize) {
             @Override
@@ -61,6 +61,10 @@ public class ImageCache {
         freeBitmaps = new HashMap<Integer, HashSet<Bitmap>>();
 
         references = new HashMap<String, Holder>();
+    }
+
+    public ImageCache() {
+        this(DEFAULT_CACHE_SIZE, DEFAULT_CACHE_FREE_SIZE);
     }
 
     public void putToCache(String key, int size, Bitmap bitmap) {

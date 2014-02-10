@@ -530,6 +530,10 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
         return super.onTouchEvent(event);
     }
 
+    public void unbind() {
+        releaseAvatar();
+    }
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();

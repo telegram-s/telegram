@@ -20,7 +20,10 @@ import java.util.ArrayList;
  * Created by ex3ndr on 08.02.14.
  */
 public class MediaLoader {
-    private ImageCache cache;
+
+    private static final int SIZE_FULL_PREVIEW = 0;
+    private static final int SIZE_FAST_PREVIEW = 1;
+
     private TelegramApplication application;
 
     private Handler handler = new Handler(Looper.getMainLooper());
@@ -45,7 +48,7 @@ public class MediaLoader {
     public MediaLoader(TelegramApplication application) {
         this.application = application;
         this.processor = new QueueProcessor<BaseTask>();
-        this.imageCache = new ImageCache();
+        this.imageCache = new ImageCache(2, 3);
 
         float density = application.getResources().getDisplayMetrics().density;
 
@@ -310,9 +313,16 @@ public class MediaLoader {
 
                 BitmapDecoderEx.decodeReuseBitmap(fileTask.fileName, fullImageCached);
 
-                Bitmap res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
+                Bitmap res = imageCache.findFree(SIZE_FULL_PREVIEW);
+                if (res == null) {
+                    res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
+                } else {
+                    res.eraseColor(Color.TRANSPARENT);
+                }
                 int[] sizes = Optimizer.scaleToRatio(fullImageCached,
                         fileTask.getLocalPhoto().getFullW(), fileTask.getLocalPhoto().getFullH(), res);
+
+                imageCache.putToCache(task.getKey(), SIZE_FULL_PREVIEW, res);
 
                 notifyMediaLoaded(task, res, sizes[0], sizes[1]);
             }
