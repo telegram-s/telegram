@@ -3,7 +3,6 @@ package org.telegram.android.preview;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,7 +13,6 @@ import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.OptimizedBlur;
 import org.telegram.android.media.Optimizer;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 

@@ -38,7 +38,6 @@ public class AvatarLoader {
     public static final int TYPE_MEDIUM2 = 2;
     public static final int TYPE_SMALL = 3;
 
-    private static final boolean REUSE_BITMAPS = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     private QueueProcessor<AvatarTask> processor;
     private TelegramApplication application;
     private QueueWorker[] workers;
@@ -47,12 +46,6 @@ public class AvatarLoader {
     private ImageStorage fileStorage;
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    private ThreadLocal<byte[]> bitmapTmp = new ThreadLocal<byte[]>() {
-        @Override
-        protected byte[] initialValue() {
-            return new byte[16 * 1024];
-        }
-    };
     private ThreadLocal<Bitmap> sBitmaps = new ThreadLocal<Bitmap>() {
         @Override
         protected Bitmap initialValue() {
@@ -239,22 +232,7 @@ public class AvatarLoader {
         Bitmap cached = imageCache.findFree(task.getKind());
 
         if (cached == null) {
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inSampleSize = 1;
-            o.inScaled = false;
-            o.inTempStorage = bitmapTmp.get();
-            if (Build.VERSION.SDK_INT >= 10) {
-                o.inPreferQualityOverSpeed = false;
-            }
-
-            if (Build.VERSION.SDK_INT >= 11) {
-                o.inMutable = true;
-            }
-
-            if (REUSE_BITMAPS) {
-                // o.inBitmap = imageCache.findFree(task.getKind());
-            }
-            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), o);
+            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind());
         } else {
             res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
         }
@@ -267,24 +245,7 @@ public class AvatarLoader {
 
 
         if (task.getKind() != TYPE_FULL) {
-
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inSampleSize = 1;
-            o.inScaled = false;
-            o.inTempStorage = bitmapTmp.get();
-            if (Build.VERSION.SDK_INT >= 10) {
-                o.inPreferQualityOverSpeed = false;
-            }
-
-            if (Build.VERSION.SDK_INT >= 11) {
-                o.inMutable = true;
-            }
-
-            if (REUSE_BITMAPS) {
-                o.inBitmap = fullBitmaps.get();
-            }
-
-            Bitmap fullBitmap = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + TYPE_FULL, o);
+            Bitmap fullBitmap = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + TYPE_FULL, fullBitmaps.get());
             if (fullBitmap != null) {
                 try {
                     onFullBitmapLoaded(fullBitmap, task);
@@ -345,22 +306,8 @@ public class AvatarLoader {
                 TLFile res = application.getApi().doGetFile(dcId, location, 0, 1024 * 1024 * 1024);
 
                 fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes());
-
-                BitmapFactory.Options o = new BitmapFactory.Options();
-                o.inSampleSize = 1;
-                o.inScaled = false;
-                o.inTempStorage = bitmapTmp;
-                if (Build.VERSION.SDK_INT >= 10) {
-                    o.inPreferQualityOverSpeed = false;
-                }
-
-                if (REUSE_BITMAPS) {
-                    o.inMutable = true;
-                    o.inBitmap = fullBitmaps.get();
-                }
-
-                Bitmap src = BitmapFactory.decodeByteArray(res.getBytes(), 0, res.getBytes().length, o);
-
+                Bitmap src = fullBitmaps.get();
+                Optimizer.loadTo(res.getBytes(), src);
                 onFullBitmapLoaded(src, task);
             } catch (IOException e) {
                 e.printStackTrace();

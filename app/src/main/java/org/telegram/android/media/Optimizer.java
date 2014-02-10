@@ -1,6 +1,7 @@
 package org.telegram.android.media;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.*;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -8,7 +9,9 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 import com.extradea.framework.images.utils.ImageUtils;
+import org.telegram.android.Manifest;
 import org.telegram.android.log.Logger;
 import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.util.CustomBufferedInputStream;
@@ -22,121 +25,44 @@ import java.io.*;
  */
 public class Optimizer {
 
-    public static class FastPreviewResult {
-        private byte[] data;
-        private int w;
-        private int h;
-
-        public FastPreviewResult(byte[] data, int w, int h) {
-            this.data = data;
-            this.w = w;
-            this.h = h;
-        }
-
-        public byte[] getData() {
-            return data;
-        }
-
-        public int getW() {
-            return w;
-        }
-
-        public int getH() {
-            return h;
-        }
-    }
-
     private static final String TAG = "Optimizer";
 
     private static final int MAX_PIXELS = 1200 * 1200;
     private static final int MAX_PIXELS_HQ = 1500 * 1500;
 
-    private static int getScale(InputStream stream) {
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(stream, null, o);
-
-        int scale = 1;
-        int scaledW = o.outWidth;
-        int scaledH = o.outHeight;
-        while (scaledW * scaledH > MAX_PIXELS) {
-            scale *= 2;
-            scaledH /= 2;
-            scaledW /= 2;
+    private static ThreadLocal<byte[]> bitmapTmp = new ThreadLocal<byte[]>() {
+        @Override
+        protected byte[] initialValue() {
+            return new byte[16 * 1024];
         }
+    };
 
-        Logger.d(TAG, "Image Scale = " + scale + ", width: " + o.outWidth + ", height: " + o.outHeight);
+    // Public methods
 
-        return scale;
+    public static void optimize(String srcFile, String destFile) throws IOException {
+        optimize(new FileSource(srcFile), destFile);
     }
 
-    private static int getScaleHQ(InputStream stream) {
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(stream, null, o);
-
-        int scale = 1;
-        int scaledW = o.outWidth;
-        int scaledH = o.outHeight;
-        while (scaledW * scaledH > MAX_PIXELS_HQ) {
-            scale *= 2;
-            scaledH /= 2;
-            scaledW /= 2;
-        }
-
-        Logger.d(TAG, "Image Scale = " + scale + ", width: " + o.outWidth + ", height: " + o.outHeight);
-
-        return scale;
+    public static void optimize(String uri, Context context, String destFile) throws IOException {
+        optimize(new UriSource(Uri.parse(uri), context), destFile);
     }
 
-    public static Point getSize(String fileName) throws IOException {
-        InputStream fis = new CustomBufferedInputStream(new FileInputStream(fileName));
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(fis, null, o);
-        fis.close();
-        int w = o.outWidth;
-        int h = o.outHeight;
-        if (!ImageUtils.isVerticalImage(fileName)) {
-            w = o.outHeight;
-            h = o.outWidth;
-        }
-        return new Point(w, h);
+    public static Bitmap optimize(String srcFile) throws IOException {
+        return optimize(new FileSource(srcFile));
     }
 
-    public static Point getSize(Uri uri, Context context) throws IOException {
-        InputStream fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(uri));
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(fis, null, o);
-        fis.close();
-        int w = o.outWidth;
-        int h = o.outHeight;
-        if (!ImageUtils.isVerticalImage(uri, context)) {
-            w = o.outHeight;
-            h = o.outWidth;
-        }
-        return new Point(w, h);
+    public static Bitmap optimize(String uri, Context context) throws IOException {
+        return optimize(new UriSource(Uri.parse(uri), context));
     }
 
-    private static void writeOptimized(InputStream stream, int scale, String destFile) throws IOException {
-        Bitmap res = buildOptimized(stream, scale);
-        save(res, destFile);
+    public static void optimizeHQ(String srcFile, String destFile) throws IOException {
+        optimizeHQ(new FileSource(srcFile), destFile);
     }
 
-    private static Bitmap buildOptimized(InputStream stream, int scale) throws IOException {
-        Bitmap res;
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        if (scale > 1) {
-            o.inSampleSize = scale;
-        }
-
-        o.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        o.inDither = false;
-        o.inScaled = false;
-        res = BitmapFactory.decodeStream(stream, null, o);
-        return res;
+    public static void optimizeHQ(String uri, Context context, String destFile) throws IOException {
+        optimizeHQ(new UriSource(Uri.parse(uri), context), destFile);
     }
+
 
     public static byte[] save(Bitmap src) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -150,136 +76,35 @@ public class Optimizer {
         FileOutputStream outputStream = new FileOutputStream(destFile);
         src.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
         outputStream.close();
-
         src.recycle();
     }
 
-    private static boolean detectGif(InputStream stream) throws IOException {
-        char a = (char) stream.read();
-        char b = (char) stream.read();
-        char c = (char) stream.read();
-        if (a == 'G' && b == 'I' && c == 'F') {
-            return true;
-        }
-        return false;
+    public static Bitmap load(String fileName) throws IOException {
+        return load(new FileSource(fileName));
     }
 
-    public static void optimize(String srcFile, String destFile) throws IOException {
-        InputStream fis = new FileInputStream(srcFile);
-        boolean isAnimated = detectGif(fis);
-        fis.close();
-
-        if (isAnimated) {
-            IOUtils.copy(new File(srcFile), new File(destFile));
-            return;
-        }
-
-        fis = new FileInputStream(srcFile);
-        int scale = getScale(fis);
-        fis.close();
-
-        fis = new FileInputStream(srcFile);
-        Bitmap res = buildOptimized(fis, scale);
-        fis.close();
-        res = ImageUtils.fixExifRotation(res, srcFile);
-        save(res, destFile);
+    public static Bitmap load(byte[] data) throws IOException {
+        return load(new ByteSource(data));
     }
 
-    public static Bitmap optimize(String srcFile) throws IOException {
-        InputStream fis = new FileInputStream(srcFile);
-        boolean isAnimated = detectGif(fis);
-        fis.close();
-
-        if (isAnimated) {
-            return BitmapFactory.decodeFile(srcFile);
-        }
-
-        fis = new FileInputStream(srcFile);
-        int scale = getScale(fis);
-        fis.close();
-
-        fis = new FileInputStream(srcFile);
-        Bitmap res = buildOptimized(fis, scale);
-        fis.close();
-        res = ImageUtils.fixExifRotation(res, srcFile);
-        return res;
+    public static Bitmap load(String uri, Context context) throws IOException {
+        return load(new UriSource(Uri.parse(uri), context));
     }
 
-
-    public static void optimizeHQ(String srcFile, String destFile) throws IOException {
-        FileInputStream fis = new FileInputStream(srcFile);
-        int scale = getScaleHQ(fis);
-        fis.close();
-
-        fis = new FileInputStream(srcFile);
-        Bitmap res = buildOptimized(fis, scale);
-        fis.close();
-        res = ImageUtils.fixExifRotation(res, srcFile);
-        save(res, destFile);
+    public static BitmapInfo loadTo(String fileName, Bitmap dest) throws IOException {
+        return loadTo(new FileSource(fileName), dest);
     }
 
-    public static void optimize(String uri, Context context, String destFile) throws IOException {
-        InputStream fis = context.getContentResolver().openInputStream(Uri.parse(uri));
-        boolean isAnimated = detectGif(fis);
-        fis.close();
-
-        if (isAnimated) {
-            fis = context.getContentResolver().openInputStream(Uri.parse(uri));
-            IOUtils.copy(fis, new File(destFile));
-            fis.close();
-            return;
-        }
-
-        fis = context.getContentResolver().openInputStream(Uri.parse(uri));
-        int scale = getScale(fis);
-        fis.close();
-
-        fis = context.getContentResolver().openInputStream(Uri.parse(uri));
-        Bitmap res = buildOptimized(fis, scale);
-        fis.close();
-
-        res = ImageUtils.fixRotation(res, Uri.parse(uri), context);
-
-        save(res, destFile);
+    public static BitmapInfo loadTo(byte[] bytes, Bitmap dest) throws IOException {
+        return loadTo(new ByteSource(bytes), dest);
     }
 
-    public static Bitmap optimize(String uri, Context context) throws IOException {
-        InputStream fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
-        boolean isAnimated = detectGif(fis);
-        fis.close();
-
-        if (isAnimated) {
-            fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
-            Bitmap res = BitmapFactory.decodeStream(fis);
-            fis.close();
-            return res;
-        }
-
-        fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
-        int scale = getScale(fis);
-        fis.close();
-
-        fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
-        Bitmap res = buildOptimized(fis, scale);
-        fis.close();
-
-        res = ImageUtils.fixRotation(res, Uri.parse(uri), context);
-
-        return res;
+    public static BitmapInfo getInfo(String fileName) throws IOException {
+        return getInfo(new FileSource(fileName));
     }
 
-    public static void optimizeHQ(String uri, Context context, String destFile) throws IOException {
-        InputStream fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
-        int scale = getScaleHQ(fis);
-        fis.close();
-
-        fis = new CustomBufferedInputStream(context.getContentResolver().openInputStream(Uri.parse(uri)));
-        Bitmap res = buildOptimized(fis, scale);
-        fis.close();
-
-        res = ImageUtils.fixRotation(res, Uri.parse(uri), context);
-
-        save(res, destFile);
+    public static BitmapInfo getInfo(Uri uri, Context context) throws IOException {
+        return getInfo(new UriSource(uri, context));
     }
 
     public static FastPreviewResult buildPreview(Bitmap bitmap) {
@@ -353,82 +178,455 @@ public class Optimizer {
         canvas.drawBitmap(src, 0, 0, new Paint(Paint.FILTER_BITMAP_FLAG));
     }
 
-    public static VideoMetadata getVideoSize(String fileName) throws Exception {
-        long timeInmillisec;
-        int width;
-        int height;
-        Bitmap img;
-
-        if (Build.VERSION.SDK_INT >= 10) {
-            try {
-                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(fileName);
-                timeInmillisec = Long.parseLong(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-                img = retriever.getFrameAtTime(0);
-                width = img.getWidth();
-                height = img.getHeight();
-            } catch (Exception e) {
-                CrashHandler.logHandledException(e);
-                throw e;
-            }
-        } else {
-            img = ThumbnailUtils.createVideoThumbnail(fileName,
-                    MediaStore.Images.Thumbnails.MINI_KIND);
-
-            MediaPlayer mp = new MediaPlayer();
-            final Object locker = new Object();
-            final int[] sizes = new int[2];
-            try {
-                mp.setDataSource(fileName);
-                mp.prepare();
-                mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-                    @Override
-                    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-                        synchronized (locker) {
-                            sizes[0] = width;
-                            sizes[1] = height;
-                            locker.notify();
-                        }
-                    }
-                });
-
-                synchronized (locker) {
-                    if (sizes[0] == 0 || sizes[1] == 1) {
-                        locker.wait(5000);
-                    }
-                }
-
-                if (sizes[0] == 0 || sizes[1] == 1) {
-                    throw new IOException();
-                }
-
-                timeInmillisec = mp.getDuration() * 1000L;
-                width = sizes[0];
-                height = sizes[1];
-            } catch (Exception e) {
-                CrashHandler.logHandledException(e);
-                throw e;
-            }
-        }
-
-        return new VideoMetadata(timeInmillisec, width, height, img);
+    public static void blur(Bitmap src) {
+        OptimizedBlur blur = new OptimizedBlur();
+        blur.performBlur(src);
     }
 
-    public static class VideoMetadata {
-        private long duration;
-        private int width;
-        private int height;
-        private Bitmap img;
+    // Private methods
 
-        private VideoMetadata(long duration, int width, int height, Bitmap img) {
-            this.duration = duration;
-            this.width = width;
-            this.height = height;
-            this.img = img;
+    private static Bitmap load(Source source) throws IOException {
+        BitmapFactory.Options o = new BitmapFactory.Options();
+
+        o.inSampleSize = 1;
+        o.inScaled = false;
+        o.inTempStorage = bitmapTmp.get();
+
+        if (Build.VERSION.SDK_INT >= 10) {
+            o.inPreferQualityOverSpeed = false;
         }
 
-        public long getDuration() {
-            return duration;
+        if (Build.VERSION.SDK_INT >= 11) {
+            o.inMutable = true;
+        }
+
+        InputStream stream = createStream(source);
+        try {
+
+            return BitmapFactory.decodeStream(stream, null, o);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    private static int getScale(Source source) throws IOException {
+        InputStream stream = createStream(source);
+        try {
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(stream, null, o);
+
+            int scale = 1;
+            int scaledW = o.outWidth;
+            int scaledH = o.outHeight;
+            while (scaledW * scaledH > MAX_PIXELS) {
+                scale *= 2;
+                scaledH /= 2;
+                scaledW /= 2;
+            }
+
+            Logger.d(TAG, "Image Scale = " + scale + ", width: " + o.outWidth + ", height: " + o.outHeight);
+
+            return scale;
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    // Ignore this
+                }
+            }
+        }
+    }
+
+    private static int getScaleHQ(Source source) throws IOException {
+        InputStream stream = createStream(source);
+        try {
+
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(stream, null, o);
+
+            int scale = 1;
+            int scaledW = o.outWidth;
+            int scaledH = o.outHeight;
+            while (scaledW * scaledH > MAX_PIXELS_HQ) {
+                scale *= 2;
+                scaledH /= 2;
+                scaledW /= 2;
+            }
+
+            Logger.d(TAG, "Image Scale = " + scale + ", width: " + o.outWidth + ", height: " + o.outHeight);
+
+            return scale;
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    // Ignore this
+                }
+            }
+        }
+    }
+
+    private static BitmapInfo getInfo(Source source) throws IOException {
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        o.inJustDecodeBounds = true;
+
+        InputStream fis = createStream(source);
+        try {
+            BitmapFactory.decodeStream(fis, null, o);
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    // Ignore this
+                }
+            }
+        }
+
+        int w = o.outWidth;
+        int h = o.outHeight;
+        if (!isVerticalImage(source)) {
+            w = o.outHeight;
+            h = o.outWidth;
+        }
+        return new BitmapInfo(w, h);
+    }
+
+    private static Bitmap buildOptimized(Source source, int scale) throws IOException {
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        if (scale > 1) {
+            o.inSampleSize = scale;
+        }
+
+        o.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        o.inDither = false;
+        o.inScaled = false;
+        o.inTempStorage = bitmapTmp.get();
+        InputStream stream = createStream(source);
+        try {
+            return BitmapFactory.decodeStream(stream, null, o);
+        } finally {
+            if (stream != null) {
+                try {
+
+                    stream.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    private static void optimize(Source source, String destFile) throws IOException {
+        boolean isAnimated = detectGif(source);
+
+        if (isAnimated) {
+            copy(source, destFile);
+            return;
+        }
+
+        int scale = getScale(source);
+
+        Bitmap res = buildOptimized(source, scale);
+        res = fixRotation(res, source);
+        save(res, destFile);
+    }
+
+    private static Bitmap optimize(Source source) throws IOException {
+        boolean isAnimated = detectGif(source);
+
+        if (isAnimated) {
+            return load(source);
+        }
+
+        int scale = getScale(source);
+        Bitmap res = buildOptimized(source, scale);
+        res = fixRotation(res, source);
+        return res;
+    }
+
+
+    private static void optimizeHQ(Source source, String destFile) throws IOException {
+        int scale = getScaleHQ(source);
+        Bitmap res = buildOptimized(source, scale);
+        res = fixRotation(res, source);
+        save(res, destFile);
+    }
+
+    private static BitmapInfo loadTo(Source source, Bitmap dest) throws IOException {
+        BitmapInfo res = getInfo(source);
+        decodeReuse(source, dest);
+        return res;
+    }
+
+    private static void decodeReuse(Source source, Bitmap dest) throws IOException {
+        if (source instanceof ByteSource) {
+            BitmapDecoderEx.decodeReuseBitmap(((ByteSource) source).getData(), dest);
+        } else if (source instanceof FileSource) {
+            BitmapDecoderEx.decodeReuseBitmap(((FileSource) source).getFileName(), dest);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static InputStream createStream(Source source) throws IOException {
+        if (source instanceof FileSource) {
+            return new CustomBufferedInputStream(new FileInputStream(((FileSource) source).getFileName()));
+        } else if (source instanceof UriSource) {
+            return new CustomBufferedInputStream(
+                    ((UriSource) source).getContext().getContentResolver()
+                            .openInputStream(((UriSource) source).getUri()));
+        } else if (source instanceof ByteSource) {
+            return new ByteArrayInputStream(((ByteSource) source).getData());
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static void copy(Source source, String destFile) throws IOException {
+        if (source instanceof FileSource) {
+            IOUtils.copy(new File(((FileSource) source).getFileName()), new File(destFile));
+        } else {
+            InputStream stream = createStream(source);
+            try {
+                IOUtils.copy(stream, new File(destFile));
+            } finally {
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean detectGif(Source source) throws IOException {
+        InputStream stream = createStream(source);
+        try {
+            char a = (char) stream.read();
+            char b = (char) stream.read();
+            char c = (char) stream.read();
+            if (a == 'G' && b == 'I' && c == 'F') {
+                return true;
+            }
+            return false;
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+    private static String getOrientationTag(String fileName) {
+        try {
+            //ExifInterface exif = new ExifInterface(exifFileName);
+            //String exifOrientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            Class clazz = Class.forName("android.media.ExifInterface");
+            Object exifObj = clazz.getConstructor(String.class).newInstance(fileName);
+            return (String) clazz.getMethod("getAttribute", String.class).invoke(exifObj, "Orientation");
+        } catch (Exception e) {
+            Logger.e(TAG, e.getMessage(), e);
+        }
+        return "0";
+    }
+
+    private static boolean isVerticalImage(Source source) {
+        if (source instanceof FileSource) {
+            return isVerticalImage(((FileSource) source).getFileName());
+        } else if (source instanceof UriSource) {
+            return isVerticalImage(((UriSource) source).getUri(), ((UriSource) source).getContext());
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static boolean isVerticalImage(String fileName) {
+        String exifOrientation = getOrientationTag(fileName);
+        return (exifOrientation.equals("0") || exifOrientation.equals("1") || exifOrientation.equals("2") || exifOrientation.equals("3") || exifOrientation.equals("4"));
+    }
+
+    private static boolean isVerticalImage(Uri uri, Context context) {
+        int angle = getContentRotation(uri, context);
+        return angle == 0 || angle == 180;
+    }
+
+    private static int getContentRotation(Uri uri, Context context) {
+        try {
+            String[] projection = {MediaStore.Images.ImageColumns.ORIENTATION};
+            Cursor c = context.getContentResolver().query(
+                    uri, projection, null, null, null);
+            if (c != null && c.moveToFirst()) {
+                return c.getInt(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    private static Bitmap fixRotation(Bitmap bmp, Source source) throws IOException {
+        if (source instanceof FileSource) {
+            return fixExifRotation(bmp, ((FileSource) source).getFileName());
+        } else if (source instanceof UriSource) {
+            return fixRotation(bmp, ((UriSource) source).getUri(), ((UriSource) source).getContext());
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static Bitmap fixRotation(Bitmap bmp, Uri uri, Context context) throws IOException, OutOfMemoryError {
+        if (bmp == null) {
+            return null;
+        }
+        return ImageUtils.fixRotation(bmp, getContentRotation(uri, context));
+    }
+
+    private static Bitmap fixExifRotation(Bitmap bmp, String exifFileName) throws IOException, OutOfMemoryError {
+        if (bmp == null)
+            return null;
+        if (Build.VERSION.SDK_INT >= 5) {
+            int rotation = 0;
+            String exifOrientation = getOrientationTag(exifFileName);
+            if (exifOrientation.equals("6")) {
+                rotation = 90;
+            } else if (exifOrientation.equals("3")) {
+                rotation = 180;
+            } else if (exifOrientation.equals("8")) {
+                rotation = -90;
+            }
+
+            return fixRotation(bmp, rotation);
+        } else {
+            return bmp;
+        }
+    }
+
+    private static Bitmap fixRotation(Bitmap bmp, int angle) {
+        if (angle == 0) {
+            return bmp;
+        }
+
+        int destWidth = bmp.getWidth();
+        int destHeight = bmp.getHeight();
+        if (angle == 90) {
+            destHeight = bmp.getWidth();
+            destWidth = bmp.getHeight();
+        } else if (angle == 180) {
+            // Do nothing
+        } else if (angle == -90) {
+            destHeight = bmp.getWidth();
+            destWidth = bmp.getHeight();
+        } else {
+            return bmp;
+        }
+
+        Bitmap targetBitmap = Bitmap.createBitmap(destWidth, destHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(targetBitmap);
+        Matrix matrix = new Matrix();
+        matrix.postTranslate(-bmp.getWidth() / 2, -bmp.getHeight() / 2);
+        matrix.postRotate(angle);
+        matrix.postTranslate(destWidth / 2, destHeight / 2);
+        canvas.drawBitmap(bmp, matrix, new Paint());
+
+        bmp.recycle();
+
+        return targetBitmap;
+    }
+
+    private static abstract class Source {
+
+    }
+
+    private static class FileSource extends Source {
+        private String fileName;
+
+        private FileSource(String fileName) {
+            this.fileName = fileName;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+    }
+
+    private static class UriSource extends Source {
+        private Uri uri;
+        private Context context;
+
+        private UriSource(Uri uri, Context context) {
+            this.uri = uri;
+            this.context = context;
+        }
+
+        public Uri getUri() {
+            return uri;
+        }
+
+        public Context getContext() {
+            return context;
+        }
+    }
+
+    private static class ByteSource extends Source {
+        private byte[] data;
+
+        private ByteSource(byte[] data) {
+            this.data = data;
+        }
+
+        public byte[] getData() {
+            return data;
+        }
+    }
+
+    public static class FastPreviewResult {
+        private byte[] data;
+        private int w;
+        private int h;
+
+        public FastPreviewResult(byte[] data, int w, int h) {
+            this.data = data;
+            this.w = w;
+            this.h = h;
+        }
+
+        public byte[] getData() {
+            return data;
+        }
+
+        public int getW() {
+            return w;
+        }
+
+        public int getH() {
+            return h;
+        }
+    }
+
+    public static class BitmapInfo {
+        private int width;
+        private int height;
+
+        public BitmapInfo(int width, int height) {
+            this.width = width;
+            this.height = height;
         }
 
         public int getWidth() {
@@ -437,10 +635,6 @@ public class Optimizer {
 
         public int getHeight() {
             return height;
-        }
-
-        public Bitmap getImg() {
-            return img;
         }
     }
 }

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import org.telegram.android.media.BitmapDecoderEx;
+import org.telegram.android.media.Optimizer;
 import org.telegram.android.util.CustomBufferedInputStream;
 
 import java.io.*;
@@ -46,26 +47,17 @@ public class ImageStorage {
         return reuse;
     }
 
-    public Bitmap tryLoadFile(String key, BitmapFactory.Options o) {
+    public Bitmap tryLoadFile(String key) {
         String fileName = getFileName(key);
         if (!new File(fileName).exists()) {
             return null;
         }
-        InputStream inputStream = null;
+
         try {
-            inputStream = new CustomBufferedInputStream(new FileInputStream(fileName));
-            return BitmapFactory.decodeStream(inputStream, null, o);
+            return Optimizer.load(fileName);
         } catch (Throwable t) {
             t.printStackTrace();
             return null;
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 }

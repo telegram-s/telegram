@@ -433,9 +433,9 @@ public class MediaSender {
         decryptedMessage.setRandomBytes(Entropy.generateSeed(32));
         decryptedMessage.setMessage("");
 
-        Point size = Optimizer.getSize(originalFile);
+        Optimizer.BitmapInfo info = Optimizer.getInfo(originalFile);
         decryptedMessage.setMedia(new TLDecryptedMessageMediaPhoto(previewResult.getData(),
-                previewResult.getW(), previewResult.getH(), size.x, size.y, (int) new File(originalFile).length(),
+                previewResult.getW(), previewResult.getH(), info.getWidth(), info.getHeight(), (int) new File(originalFile).length(),
                 encryptedFile.getKey(), encryptedFile.getIv()));
 
         byte[] digest = MD5Raw(concat(encryptedFile.getKey(), encryptedFile.getIv()));
@@ -459,8 +459,8 @@ public class MediaSender {
         photo.setFastPreviewH(previewResult.getH());
         photo.setFastPreview(previewResult.getData());
         photo.setFastPreviewKey(decryptedMessage.getRandomId() + "_photo");
-        photo.setFullW(size.x);
-        photo.setFullH(size.y);
+        photo.setFullW(info.getWidth());
+        photo.setFullH(info.getHeight());
         if (encryptedMessage instanceof TLSentEncryptedFile) {
             TLSentEncryptedFile file = (TLSentEncryptedFile) encryptedMessage;
             if (file.getFile() instanceof TLEncryptedFile) {

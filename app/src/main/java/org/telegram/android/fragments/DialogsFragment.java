@@ -629,16 +629,16 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                 runUiTask(new AsyncAction() {
                                     @Override
                                     public void execute() throws AsyncException {
-                                        Point size;
+                                        Optimizer.BitmapInfo info;
                                         try {
-                                            size = Optimizer.getSize(Uri.parse(actionUri), getActivity());
+                                            info = Optimizer.getInfo(Uri.parse(actionUri), getActivity());
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                             Toast.makeText(getActivity(), R.string.st_error_file_open, Toast.LENGTH_SHORT).show();
                                             getRootController().doBack();
                                             return;
                                         }
-                                        application.getEngine().sendPhoto(peerType, peerId, size.x, size.y, Uri.parse(actionUri));
+                                        application.getEngine().sendPhoto(peerType, peerId, info.getWidth(), info.getHeight(), Uri.parse(actionUri));
                                         application.notifyUIUpdate();
                                     }
 
@@ -718,16 +718,16 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                                     if (ACTION_SEND_IMAGES.equals(action)) {
                                         for (String uri : actionUris) {
 
-                                            Point size;
+                                            Optimizer.BitmapInfo info;
                                             try {
-                                                size = Optimizer.getSize(Uri.parse(uri), getActivity());
+                                                info = Optimizer.getInfo(Uri.parse(uri), getActivity());
                                             } catch (IOException e) {
                                                 e.printStackTrace();
                                                 Toast.makeText(getActivity(), R.string.st_error_file_open, Toast.LENGTH_SHORT).show();
                                                 getRootController().doBack();
                                                 return;
                                             }
-                                            application.getEngine().sendPhoto(peerType, peerId, size.x, size.y, Uri.parse(uri));
+                                            application.getEngine().sendPhoto(peerType, peerId, info.getWidth(), info.getHeight(), Uri.parse(uri));
                                         }
                                     } else {
                                         for (String uri : actionUris) {
