@@ -19,11 +19,14 @@ public class AvatarView extends View implements AvatarReceiver {
 
     private Drawable emptyDrawable;
     private Bitmap avatar;
+    private String avatarKey;
+
     private long arriveTime;
     private TelegramApplication application;
     private Rect rect = new Rect();
     private Rect rect1 = new Rect();
     private Paint avatarPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+    private TLAbsLocalFileLocation fileLocation;
 
     public AvatarView(Context context) {
         super(context);
@@ -53,13 +56,38 @@ public class AvatarView extends View implements AvatarReceiver {
     }
 
     public void requestAvatar(TLAbsLocalFileLocation fileLocation) {
-        this.avatar = null;
+        unbindAvatar();
+        this.fileLocation = fileLocation;
+        bindLocation();
+    }
+
+    private void bindLocation() {
         if (fileLocation == null) {
             this.application.getUiKernel().getAvatarLoader().cancelRequest(null);
         } else {
             this.application.getUiKernel().getAvatarLoader().requestAvatar(fileLocation, AvatarLoader.TYPE_MEDIUM, this);
         }
         invalidate();
+    }
+
+    private void unbindAvatar() {
+        if (avatar != null) {
+            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey);
+            avatar = null;
+            avatarKey = null;
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        bindLocation();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        unbindAvatar();
     }
 
     public void requestAvatarSwitch(TLAbsLocalFileLocation fileLocation) {
@@ -82,7 +110,10 @@ public class AvatarView extends View implements AvatarReceiver {
 
     @Override
     public void onAvatarReceived(Bitmap original, String key, boolean intermediate) {
+        unbindAvatar();
         this.avatar = original;
+        this.avatarKey = key;
+        application.getUiKernel().getAvatarLoader().getImageCache().incReference(key);
         if (intermediate) {
             this.arriveTime = 0;
         } else {

@@ -396,7 +396,7 @@ public class Optimizer {
             } else if (source instanceof FileSource) {
                 InputStream stream = new CustomBufferedInputStream(new FileInputStream(((FileSource) source).getFileName()));
                 try {
-                    BitmapFactory.decodeFile(((FileSource) source).getFileName(), options);
+                    BitmapFactory.decodeStream(stream, null, options);
                 } finally {
                     if (stream != null) {
                         try {

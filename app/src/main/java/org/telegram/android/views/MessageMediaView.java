@@ -283,28 +283,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             }
         };
         application.getMediaSender().registerListener(senderListener);
-
-//        receiver = new ImageReceiver() {
-//            @Override
-//            public void onImageLoaded(Bitmap result) {
-//                preview = result;
-//                previewAppearTime = SystemClock.uptimeMillis();
-//                postInvalidate();
-//            }
-//
-//            @Override
-//            public void onImageLoadFailure() {
-//                preview = null;
-//                postInvalidate();
-//            }
-//
-//            @Override
-//            public void onNoImage() {
-//                preview = null;
-//                postInvalidate();
-//            }
-//        };
-//        receiver.register(application.getImageController());
     }
 
     @Override
@@ -315,21 +293,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         postInvalidate();
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        rebind();
-    }
-
     private int[] buildSize(int w, int h) {
         float maxWidth = getPx(160);
         float maxHeight = getPx(300);
 
         float scale = Math.min(maxWidth / w, maxHeight / h);
-
-//        if (h * scale > maxHeight) {
-//            scale = maxHeight / h;
-//        }
 
         int scaledW = (int) (w * scale);
         int scaledH = (int) (h * scale);

@@ -66,6 +66,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
     private Paint avatarPaint;
     private Bitmap placeholder;
     private Bitmap avatar;
+    private String avatarKey;
     // private ImageReceiver receiver;
     private long avatarImageTime;
 
@@ -336,15 +337,19 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
                                 AvatarLoader.TYPE_SMALL,
                                 this);
                     } else {
+                        releaseAvatar();
                         application.getUiKernel().getAvatarLoader().cancelRequest(this);
                     }
                 } else {
+                    releaseAvatar();
                     application.getUiKernel().getAvatarLoader().cancelRequest(this);
                 }
             } else {
+                releaseAvatar();
                 application.getUiKernel().getAvatarLoader().cancelRequest(this);
             }
         } else {
+            releaseAvatar();
             application.getUiKernel().getAvatarLoader().cancelRequest(this);
         }
     }
@@ -528,8 +533,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-//        receiver.onRemovedFromParent();
-//        avatar = null;
+        releaseAvatar();
         applyDrawingState();
         postInvalidate();
     }
@@ -537,8 +541,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-//        receiver.onAddedToParent();
-//        avatar = receiver.getResult();
+        rebind();
         applyDrawingState();
         postInvalidate();
     }
@@ -751,9 +754,20 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
         return bubbleMaxSize;
     }
 
+    private void releaseAvatar() {
+        if (avatar != null) {
+            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey);
+            avatar = null;
+            avatarKey = null;
+        }
+    }
+
     @Override
     public void onAvatarReceived(Bitmap original, String key, boolean intermediate) {
+        releaseAvatar();
         avatar = original;
+        avatarKey = key;
+        application.getUiKernel().getAvatarLoader().getImageCache().incReference(avatarKey);
         if (intermediate) {
             avatarImageTime = 0;
         } else {
