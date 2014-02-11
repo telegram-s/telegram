@@ -194,7 +194,7 @@ public class Optimizer {
         o.inTempStorage = bitmapTmp.get();
 
         if (Build.VERSION.SDK_INT >= 10) {
-            o.inPreferQualityOverSpeed = false;
+            o.inPreferQualityOverSpeed = true;
         }
 
         if (Build.VERSION.SDK_INT >= 11) {
@@ -322,6 +322,7 @@ public class Optimizer {
         o.inDither = false;
         o.inScaled = false;
         o.inTempStorage = bitmapTmp.get();
+
         InputStream stream = createStream(source);
         try {
             return BitmapFactory.decodeStream(stream, null, o);
@@ -384,7 +385,7 @@ public class Optimizer {
                 && info.getHeight() == dest.getHeight()) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inMutable = true;
-            options.inPreferQualityOverSpeed = false;
+            options.inPreferQualityOverSpeed = true;
             options.inSampleSize = 1;
             options.inScaled = false;
             options.inBitmap = dest;

@@ -236,7 +236,7 @@ void Java_org_telegram_android_media_OptimizedBlur_nativeFastBlur(
         }
 
         fastBlur(&info,pixels);
-        brightness(&info,pixels, 0.8f);
+        // brightness(&info,pixels, 0.8f);
 
         AndroidBitmap_unlockPixels(env, bitmap);
 }

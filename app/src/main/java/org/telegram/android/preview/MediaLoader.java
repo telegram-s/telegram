@@ -6,13 +6,24 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ApiUtils;
+import org.telegram.android.core.model.media.TLLocalGeo;
 import org.telegram.android.core.model.media.TLLocalPhoto;
+import org.telegram.android.core.model.media.TLLocalVideo;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.OptimizedBlur;
 import org.telegram.android.media.Optimizer;
+import org.telegram.android.ui.BitmapUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -21,7 +32,7 @@ import java.util.ArrayList;
  */
 public class MediaLoader {
 
-    private static final int SIZE_FULL_PREVIEW = 0;
+    private static final int SIZE_CHAT_PREVIEW = 0;
     private static final int SIZE_FAST_PREVIEW = 1;
 
     private TelegramApplication application;
@@ -37,6 +48,9 @@ public class MediaLoader {
 
     private final int PREVIEW_MAX_W;
     private final int PREVIEW_MAX_H;
+
+    private final int MAP_W;
+    private final int MAP_H;
 
     private ThreadLocal<byte[]> bitmapTmp = new ThreadLocal<byte[]>() {
         @Override
@@ -55,14 +69,43 @@ public class MediaLoader {
         PREVIEW_MAX_W = (int) (density * 160);
         PREVIEW_MAX_H = (int) (density * 300);
 
+        MAP_H = (int) (density * 160);
+        MAP_W = (int) (density * 160);
+
         this.workers = new QueueWorker[]{
                 new FastWorker(),
-                new FileWorker()
+                new FileWorker(),
+                new MapWorker()
         };
 
         for (QueueWorker w : workers) {
             w.start();
         }
+    }
+
+    public void requestGeo(TLLocalGeo geo, MediaReceiver receiver) {
+        checkUiThread();
+
+        String key = "geo:" + geo.getLatitude() + "," + geo.getLongitude();
+        Bitmap cached = imageCache.getFromCache(key);
+        if (cached != null) {
+            receiver.onMediaReceived(cached, MAP_W, MAP_H, key, true);
+            return;
+        }
+
+        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
+            if (holder.getReceiverReference().get() == null) {
+                receivers.remove(holder);
+                continue;
+            }
+            if (holder.getReceiverReference().get() == receiver) {
+                receivers.remove(holder);
+                break;
+            }
+        }
+        receivers.add(new ReceiverHolder(key, receiver));
+
+        processor.requestTask(new MediaGeoTask(geo.getLatitude(), geo.getLongitude()));
     }
 
     public void requestFastLoading(TLLocalPhoto photo, MediaReceiver receiver) {
@@ -87,7 +130,32 @@ public class MediaLoader {
         }
         receivers.add(new ReceiverHolder(key, receiver));
 
-        processor.requestTask(new MediaFastTask(photo));
+        processor.requestTask(new MediaPhotoFastTask(photo));
+    }
+
+    public void requestFastLoading(TLLocalVideo video, MediaReceiver receiver) {
+        checkUiThread();
+
+        String key = video.getPreviewKey();
+        Bitmap cached = imageCache.getFromCache(key);
+        if (cached != null) {
+            receiver.onMediaReceived(cached, video.getPreviewW(), video.getPreviewH(), key, true);
+            return;
+        }
+
+        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
+            if (holder.getReceiverReference().get() == null) {
+                receivers.remove(holder);
+                continue;
+            }
+            if (holder.getReceiverReference().get() == receiver) {
+                receivers.remove(holder);
+                break;
+            }
+        }
+        receivers.add(new ReceiverHolder(key, receiver));
+
+        processor.requestTask(new MediaVideoFastTask(video));
     }
 
     public void requestFullLoading(TLLocalPhoto photo, String fileName, MediaReceiver receiver) {
@@ -207,11 +275,34 @@ public class MediaLoader {
         }
     }
 
-    private class MediaFastTask extends BaseTask {
+    private class MediaGeoTask extends BaseTask {
+        private double latitude;
+        private double longitude;
+
+        private MediaGeoTask(double latitude, double longitude) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+
+        public double getLatitude() {
+            return latitude;
+        }
+
+        public double getLongitude() {
+            return longitude;
+        }
+
+        @Override
+        public String getKey() {
+            return "geo:" + latitude + "," + longitude;
+        }
+    }
+
+    private class MediaPhotoFastTask extends BaseTask {
 
         private TLLocalPhoto photo;
 
-        private MediaFastTask(TLLocalPhoto photo) {
+        private MediaPhotoFastTask(TLLocalPhoto photo) {
             this.photo = photo;
         }
 
@@ -225,6 +316,24 @@ public class MediaLoader {
         }
     }
 
+    private class MediaVideoFastTask extends BaseTask {
+
+        private TLLocalVideo video;
+
+        private MediaVideoFastTask(TLLocalVideo video) {
+            this.video = video;
+        }
+
+        public TLLocalVideo getVideo() {
+            return video;
+        }
+
+        @Override
+        public String getKey() {
+            return video.getPreviewKey();
+        }
+    }
+
     private class FastWorker extends QueueWorker<BaseTask> {
 
         private OptimizedBlur optimizedBlur = new OptimizedBlur();
@@ -235,13 +344,18 @@ public class MediaLoader {
 
         @Override
         protected boolean processTask(BaseTask task) {
-            if (!(task instanceof MediaFastTask)) {
-                return false;
+            if (task instanceof MediaPhotoFastTask) {
+                return processPhoto((MediaPhotoFastTask) task);
+            } else if (task instanceof MediaVideoFastTask) {
+                return processVideo((MediaVideoFastTask) task);
             }
+            return false;
+        }
 
+        private boolean processPhoto(MediaPhotoFastTask task) {
             BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 
-            TLLocalPhoto mediaPhoto = ((MediaFastTask) task).getPhoto();
+            TLLocalPhoto mediaPhoto = task.getPhoto();
 
             bitmapOptions.inSampleSize = 1;
             bitmapOptions.inScaled = false;
@@ -250,43 +364,39 @@ public class MediaLoader {
                 bitmapOptions.inPreferQualityOverSpeed = false;
             }
 
-            // BitmapDecoderEx.decodeReuseBitmap();
             Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, bitmapOptions);
             if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_BLUR) == 0) {
                 optimizedBlur.performBlur(img);
             }
             notifyMediaLoaded(task, img, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH());
-//            boolean isReused = false;
-//            if (Build.VERSION.SDK_INT >= 11) {
-//                bitmapOptions.inMutable = true;
-//                Bitmap destBitmap;
-//                if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_RESIZE) != 0) {
-//                    destBitmap = fastCache.findInFreeCache(TLLocalPhoto.FAST_PREVIEW_MAX_W, TLLocalPhoto.FAST_PREVIEW_MAX_H);
-//                } else {
-//                    destBitmap = fastCache.findInFreeCache(mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH());
-//                }
-//                if (destBitmap != null) {
-//                    bitmapOptions.inBitmap = destBitmap;
-//                    isReused = true;
-//                } else {
-//                    bitmapOptions.inBitmap = null;
-//                }
-//            }
-//
-//            long start = SystemClock.uptimeMillis();
-//            Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, bitmapOptions);
-//            if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_BLUR) == 0) {
-//                optimizedBlur.performBlur(img);
-//            }
-//
-//            previewCached = img;
+
+            return true;
+        }
+
+        private boolean processVideo(MediaVideoFastTask task) {
+            BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+
+            TLLocalVideo mediaVideo = task.getVideo();
+
+            bitmapOptions.inSampleSize = 1;
+            bitmapOptions.inScaled = false;
+            bitmapOptions.inTempStorage = bitmapTmp.get();
+            if (Build.VERSION.SDK_INT >= 10) {
+                bitmapOptions.inPreferQualityOverSpeed = false;
+            }
+
+            Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, bitmapOptions);
+            // optimizedBlur.performBlur(img);
+            img = BitmapUtils.fastblur(img, 8);
+
+            notifyMediaLoaded(task, img, mediaVideo.getPreviewW(), mediaVideo.getPreviewH());
 
             return true;
         }
 
         @Override
         public boolean isAccepted(BaseTask task) {
-            return task instanceof MediaFastTask;
+            return task instanceof MediaPhotoFastTask || task instanceof MediaVideoFastTask;
         }
     }
 
@@ -302,8 +412,10 @@ public class MediaLoader {
                 return false;
             }
 
-            MediaFileTask fileTask = (MediaFileTask) task;
+            return processFileTask((MediaFileTask) task);
+        }
 
+        private boolean processFileTask(MediaFileTask fileTask) {
             synchronized (fullImageCachedLock) {
                 if (fullImageCached == null) {
                     fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE, ApiUtils.MAX_SIZE, Bitmap.Config.ARGB_8888);
@@ -313,7 +425,7 @@ public class MediaLoader {
 
                 BitmapDecoderEx.decodeReuseBitmap(fileTask.fileName, fullImageCached);
 
-                Bitmap res = imageCache.findFree(SIZE_FULL_PREVIEW);
+                Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
                 if (res == null) {
                     res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
                 } else {
@@ -322,9 +434,9 @@ public class MediaLoader {
                 int[] sizes = Optimizer.scaleToRatio(fullImageCached,
                         fileTask.getLocalPhoto().getFullW(), fileTask.getLocalPhoto().getFullH(), res);
 
-                imageCache.putToCache(task.getKey(), SIZE_FULL_PREVIEW, res);
+                imageCache.putToCache(fileTask.getKey(), SIZE_CHAT_PREVIEW, res);
 
-                notifyMediaLoaded(task, res, sizes[0], sizes[1]);
+                notifyMediaLoaded(fileTask, res, sizes[0], sizes[1]);
             }
             return true;
         }
@@ -332,6 +444,73 @@ public class MediaLoader {
         @Override
         public boolean isAccepted(BaseTask task) {
             return task instanceof MediaFileTask;
+        }
+    }
+
+    private class MapWorker extends QueueWorker<BaseTask> {
+
+        private DefaultHttpClient client;
+
+        private MapWorker() {
+            super(processor);
+            HttpParams httpParams = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
+            HttpConnectionParams.setSoTimeout(httpParams, 5000);
+            client = new DefaultHttpClient(httpParams);
+            client.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
+        }
+
+        @Override
+        protected boolean processTask(BaseTask task) {
+            if (!(task instanceof MediaGeoTask)) {
+                return false;
+            }
+
+            MediaGeoTask geoTask = (MediaGeoTask) task;
+
+            try {
+                String url = "https://maps.googleapis.com/maps/api/staticmap?" +
+                        "center=" + geoTask.getLatitude() + "," + geoTask.getLongitude() +
+                        "&zoom=12" +
+                        "&size=" + MAP_W + "x" + MAP_H + "" +
+                        "&sensor=false";
+
+                HttpGet get = new HttpGet(url.replace(" ", "%20"));
+                HttpResponse response = client.execute(get);
+                if (response.getEntity().getContentLength() == 0)
+                    return false;
+
+                if (response.getStatusLine().getStatusCode() == 404)
+                    return false;
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                response.getEntity().writeTo(outputStream);
+                byte[] data = outputStream.toByteArray();
+
+                Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
+
+                if (res != null) {
+                    Optimizer.loadTo(data, res);
+                } else {
+                    res = Optimizer.load(data);
+                }
+
+                String cacheKey = "geo:" + geoTask.getLatitude() + "," + geoTask.getLongitude();
+                imageCache.putToCache(cacheKey, SIZE_CHAT_PREVIEW, res);
+                notifyMediaLoaded(task, res, MAP_W, MAP_H);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+
+
+            return true;
+        }
+
+        @Override
+        public boolean isAccepted(BaseTask task) {
+            return task instanceof MediaGeoTask;
         }
     }
 }

@@ -41,11 +41,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
     // Resources
     private static int HIGHLIGHT_COLOR = 0xff3076a4;
-    private static int UNREAD_COLOR = 0xff010101;
+    private static int UNREAD_COLOR = 0xff222222;
     private static int READ_COLOR = 0xff969696;
 
     private static int READ_TIME_COLOR = 0xff969696;
-    private static int UNREAD_TIME_COLOR = 0xff6597c4;
+    //private static int UNREAD_TIME_COLOR = 0xff6597c4;
+    private static int UNREAD_TIME_COLOR = 0xff222222;
 
     private static boolean isLoaded = false;
     private static Paint avatarPaint;
@@ -752,9 +753,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                     (description.getMessageState() == MessageState.FAILURE && description.isMine())) {
                 layoutMarkWidth = px(30);
                 if (isRtl) {
-                    layoutMarkLeft = px(8); // getMeasuredWidth() - layoutMarkWidth - getPx(80);
+                    layoutMarkLeft = layoutPadding; // getMeasuredWidth() - layoutMarkWidth - getPx(80);
                 } else {
-                    layoutMarkLeft = w - layoutMarkWidth - px(8);
+                    layoutMarkLeft = w - layoutMarkWidth - layoutPadding;
                 }
             } else {
                 if (description.getUnreadCount() > 0) {
@@ -775,9 +776,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                     layoutMarkTextLeft = (layoutMarkWidth - width) / 2;
 
                     if (isRtl) {
-                        layoutMarkLeft = px(8); //getMeasuredWidth() - layoutMarkWidth - getPx(80);
+                        layoutMarkLeft = layoutPadding; //getMeasuredWidth() - layoutMarkWidth - getPx(80);
                     } else {
-                        layoutMarkLeft = w - layoutMarkWidth - px(8);
+                        layoutMarkLeft = w - layoutMarkWidth - layoutPadding;
                     }
                 } else {
                     layoutMarkLeft = 0;

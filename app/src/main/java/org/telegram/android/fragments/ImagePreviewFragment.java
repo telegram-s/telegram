@@ -262,7 +262,7 @@ public class ImagePreviewFragment extends TelegramFragment {
                         public void onClick(View view) {
                             Intent intent = new Intent(Intent.ACTION_VIEW);
                             intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "video/*");
-                            startActivity(intent);
+                            startPickerActivity(intent);
                         }
                     }));
                     downloadButton.setOnClickListener(secure(new View.OnClickListener() {

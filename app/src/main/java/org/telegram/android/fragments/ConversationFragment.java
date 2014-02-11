@@ -2281,7 +2281,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 if (state == DownloadState.COMPLETED) {
                                     Intent intent = new Intent(Intent.ACTION_VIEW);
                                     intent.setDataAndType(Uri.fromFile(new File(application.getDownloadManager().getFileName(key))), "video/*");
-                                    startActivity(intent);
+                                    startPickerActivity(intent);
                                 } else if (state == DownloadState.PENDING || state == DownloadState.IN_PROGRESS) {
                                     // CANCEL
                                     application.getDownloadManager().abortDownload(key);

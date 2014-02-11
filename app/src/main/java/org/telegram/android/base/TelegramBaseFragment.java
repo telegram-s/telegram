@@ -546,16 +546,27 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         }
     }
 
+    protected void startPickerActivity(Intent intent) {
+        startPickerActivity(intent, "Perform with");
+    }
+
     protected void startPickerActivity(Intent intent, String title) {
         PickIntentItem[] pickIntentItems = createPickIntents(intent);
-        PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, secure(new PickIntentClickListener() {
-            @Override
-            public void onItemClicked(int index, PickIntentItem item) {
-                startActivity(item.getIntent());
-            }
-        }));
-        dialog.setTitle(title);
-        dialog.show();
+        if (pickIntentItems.length == 0) {
+            Toast.makeText(getActivity(), R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();
+            return;
+        } else if (pickIntentItems.length == 1) {
+            startActivity(pickIntentItems[0].getIntent());
+        } else {
+            PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, secure(new PickIntentClickListener() {
+                @Override
+                public void onItemClicked(int index, PickIntentItem item) {
+                    startActivity(item.getIntent());
+                }
+            }));
+            dialog.setTitle(title);
+            dialog.show();
+        }
     }
 
 
@@ -730,7 +741,7 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(uri);
         try {
-            startActivity(intent);
+            startPickerActivity(intent);
         } catch (Exception e) {
             Toast.makeText(application, R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();
         }
@@ -741,12 +752,12 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         intent.setDataAndType(uri, mimeType);
 
         try {
-            startActivity(intent);
+            startPickerActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();
             try {
                 intent.setDataAndType(uri, "*/*");
-                startActivity(intent);
+                startPickerActivity(intent);
             } catch (Exception e1) {
                 e1.printStackTrace();
                 Toast.makeText(application, R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();

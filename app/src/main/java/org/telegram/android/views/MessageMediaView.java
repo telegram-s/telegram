@@ -183,6 +183,27 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         bitmapFilteredPaint.setFilterBitmap(true);
         bitmapFilteredPaint.setDither(true);
 
+        ColorMatrix saturation = new ColorMatrix();
+        saturation.setSaturation(2.2f);
+
+        ColorMatrix scale = new ColorMatrix();
+        scale.setScale(1.7f, 1.7f, 1.7f, 1.0f);
+
+        ColorMatrix white = new ColorMatrix();
+        white.set(new float[]{
+                0.7f, 0, 0, 0, 255 * 0.3f,
+                0, 0.7f, 0, 0, 255 * 0.3f,
+                0, 0, 0.7f, 0, 255 * 0.3f,
+                0, 0, 0, 1, 0,
+        });
+
+        ColorMatrix result = new ColorMatrix();
+        result.set(saturation);
+        result.postConcat(scale);
+        result.postConcat(white);
+
+        bitmapFilteredPaint.setColorFilter(new ColorMatrixColorFilter(result));
+
         timeBgRect = new Paint();
         timeBgRect.setColor(0xb6000000);
 
@@ -335,22 +356,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         }
     }
 
-    private boolean bindPreview(ImageTask task) {
-//        if (task != null) {
-//            previewTask = task;
-//            receiver.receiveImage(previewTask);
-//            preview = task.getResult();
-//            if (preview != null) {
-//                previewAppearTime = 0;
-//                return true;
-//            }
-//        } else {
-//            previewTask = null;
-//            receiver.receiveImage(null);
-//        }
-        return false;
-    }
-
     private void bindMedia(MessageWireframe message) {
         this.isBindSizeCalled = false;
         this.preview = null;
@@ -369,18 +374,12 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             boolean isBinded = false;
             if (!(mediaPhoto.getFullLocation() instanceof TLLocalFileEmpty)) {
                 key = DownloadManager.getPhotoKey(mediaPhoto);
-                if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-//                    int[] sizes = buildSize(mediaPhoto.getFullW(), mediaPhoto.getFullH());
-//                    ScaleTask task = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), sizes[0], sizes[1]);
-//                    task.setPutInDiskCache(true);
-//                    isBinded = bindPreview(task);
+                isDownloadable = true;
 
+                if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
                     application.getUiKernel().getMediaLoader().requestFullLoading(mediaPhoto, application.getDownloadManager().getFileName(key), this);
                     isBinded = true;
                 }
-                isDownloadable = true;
-            } else {
-                isDownloadable = false;
             }
 
             if (!isBinded && mediaPhoto.hasFastPreview()) {
@@ -399,11 +398,14 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             duration = TextUtil.formatDuration(mediaVideo.getDuration());
             placeholderPaint.setColor(Color.BLACK);
 
+            boolean isBinded = false;
+
             if (!(mediaVideo.getVideoLocation() instanceof TLLocalFileEmpty)) {
                 key = DownloadManager.getVideoKey(mediaVideo);
                 isDownloadable = true;
 
                 if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
+                    // isBinded = true;
 //                    float maxWidth = getPx(160);
 //                    float maxHeight = getPx(300);
 //
@@ -425,6 +427,15 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 //                    previewHeight = mediaVideo.getPreviewH();
                 }
             }
+
+            if (!isBinded) {
+                if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
+                    application.getUiKernel().getMediaLoader().requestFastLoading(mediaVideo, this);
+                } else {
+                    application.getUiKernel().getMediaLoader().cancelRequest(this);
+                }
+            }
+
 
 //            if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
 //                if (mediaVideo.getFastPreview().length != 0) {
@@ -543,13 +554,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         } else if (message.message.getExtras() instanceof TLLocalGeo) {
             TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();
             bindSize(getPx(160), getPx(160));
-//            previewWidth = getPx(160);
-//            previewHeight = getPx(160);
-//
-//            int imageW = previewWidth / 2;
-//            int imageH = previewHeight / 2;
-//
-//            previewTask = new ScaleTask(new ImageDownloadTask(buildMapUrl(geo.getLatitude(), geo.getLongitude(), imageW, imageH)), previewWidth, previewHeight);
+            application.getUiKernel().getMediaLoader().requestGeo(geo, this);
             showMapPoint = true;
         } else if (message.message.getExtras() instanceof TLUploadingDocument) {
 
@@ -1095,6 +1100,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         this.previewKey = key;
         this.previewRegionW = regionW;
         this.previewRegionH = regionH;
+        if (!intermediate) {
+            this.previewAppearTime = SystemClock.uptimeMillis();
+        } else {
+            this.previewAppearTime = 0;
+        }
         application.getUiKernel().getMediaLoader().getImageCache().incReference(key);
         invalidate();
     }

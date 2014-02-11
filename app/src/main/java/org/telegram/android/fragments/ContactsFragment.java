@@ -150,11 +150,11 @@ public class ContactsFragment extends BaseContactsFragment {
         } else if (item.getItemId() == R.id.systemContacts) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
-            startActivity(intent);
+            startPickerActivity(intent);
         } else if (item.getItemId() == R.id.addContact) {
             Intent intent = new Intent(Intent.ACTION_INSERT);
             intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
-            startActivity(intent);
+            startPickerActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -182,16 +182,7 @@ public class ContactsFragment extends BaseContactsFragment {
             shareIntent.setType("text/plain");
             shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, getStringSafe(R.string.st_invite_short));
 
-            PickIntentItem[] pickIntentItems = createPickIntents(shareIntent);
-            PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, secure(new PickIntentClickListener() {
-                @Override
-                public void onItemClicked(int index, PickIntentItem item) {
-                    sendEvent("share_pressed", item.getIntent().getComponent().getPackageName());
-                    startActivity(item.getIntent());
-                }
-            }));
-            dialog.setTitle("Share by...");
-            dialog.show();
+            startPickerActivity(shareIntent, "Share by...");
         } else {
             // TODO: Correct fix
             final ContactWireframe contact = (ContactWireframe) adapterView.getItemAtPosition(i);
@@ -231,7 +222,7 @@ public class ContactsFragment extends BaseContactsFragment {
                                         sendSms.putExtra("address", phoneNo);
                                         sendSms.putExtra("sms_body", getStringSafe(R.string.st_invite_short));
                                         sendSms.setType("vnd.android-dir/mms-sms");
-                                        startActivity(sendSms);
+                                        startPickerActivity(sendSms);
                                     } else {
                                         Context context1 = getActivity();
                                         if (context1 != null) {
