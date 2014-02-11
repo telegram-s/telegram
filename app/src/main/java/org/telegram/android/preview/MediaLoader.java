@@ -21,6 +21,7 @@ import org.telegram.android.core.model.media.TLLocalVideo;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.OptimizedBlur;
 import org.telegram.android.media.Optimizer;
+import org.telegram.android.media.VideoOptimizer;
 import org.telegram.android.ui.BitmapUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -183,6 +184,31 @@ public class MediaLoader {
         processor.requestTask(new MediaFileTask(photo, fileName));
     }
 
+    public void requestVideoLoading(String fileName, MediaReceiver receiver) {
+        checkUiThread();
+
+        String key = fileName;
+        Bitmap cached = imageCache.getFromCache(key);
+        if (cached != null) {
+            receiver.onMediaReceived(cached, cached.getWidth(), cached.getHeight(), key, true);
+            return;
+        }
+
+        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
+            if (holder.getReceiverReference().get() == null) {
+                receivers.remove(holder);
+                continue;
+            }
+            if (holder.getReceiverReference().get() == receiver) {
+                receivers.remove(holder);
+                break;
+            }
+        }
+        receivers.add(new ReceiverHolder(key, receiver));
+
+        processor.requestTask(new MediaVideoTask(fileName));
+    }
+
     public void cancelRequest(MediaReceiver receiver) {
         checkUiThread();
         for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
@@ -334,6 +360,23 @@ public class MediaLoader {
         }
     }
 
+    private class MediaVideoTask extends BaseTask {
+        private String fileName;
+
+        private MediaVideoTask(String fileName) {
+            this.fileName = fileName;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+
+        @Override
+        public String getKey() {
+            return fileName;
+        }
+    }
+
     private class FastWorker extends QueueWorker<BaseTask> {
 
         private OptimizedBlur optimizedBlur = new OptimizedBlur();
@@ -408,11 +451,36 @@ public class MediaLoader {
 
         @Override
         protected boolean processTask(BaseTask task) {
-            if (!(task instanceof MediaFileTask)) {
-                return false;
+            if (task instanceof MediaFileTask) {
+                return processFileTask((MediaFileTask) task);
+            } else if (task instanceof MediaVideoTask) {
+                return processVideoTask((MediaVideoTask) task);
             }
 
-            return processFileTask((MediaFileTask) task);
+            return false;
+        }
+
+        private boolean processVideoTask(MediaVideoTask task) {
+            try {
+                VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
+
+                Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
+                if (res == null) {
+                    res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
+                } else {
+                    res.eraseColor(Color.TRANSPARENT);
+                }
+                int[] sizes = Optimizer.scaleToRatio(metadata.getImg(),
+                        metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
+
+                imageCache.putToCache(task.getKey(), SIZE_CHAT_PREVIEW, res);
+
+                notifyMediaLoaded(task, res, sizes[0], sizes[1]);
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+            return true;
         }
 
         private boolean processFileTask(MediaFileTask fileTask) {
@@ -443,7 +511,7 @@ public class MediaLoader {
 
         @Override
         public boolean isAccepted(BaseTask task) {
-            return task instanceof MediaFileTask;
+            return task instanceof MediaFileTask || task instanceof MediaVideoTask;
         }
     }
 

@@ -425,6 +425,12 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 //
 //                    previewWidth = mediaVideo.getPreviewW();
 //                    previewHeight = mediaVideo.getPreviewH();
+
+                    application.getUiKernel().getMediaLoader()
+                            .requestVideoLoading(
+                                    application.getDownloadManager().getFileName(key),
+                                    this);
+                    isBinded = true;
                 }
             }
 
@@ -797,23 +803,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     @Override
     protected void measureBubbleContent(int width) {
-//        float maxWidth = getPx(160);
-//        float maxHeight = getPx(300);
-
-//        if (previewWidth != 0 && previewHeight != 0) {
-//            float scale = maxWidth / previewWidth;
-//
-//            if (previewHeight * scale > maxHeight) {
-//                scale = maxHeight / previewHeight;
-//            }
-//
-//            desiredWidth = (int) maxWidth;
-//            desiredHeight = (int) (previewHeight * scale);
-//        } else {
-//            desiredWidth = (int) maxWidth;
-//            desiredHeight = getPx(115);
-//        }
-
         int centerX = desiredWidth / 2;
         int centerY = desiredHeight / 2;
         int outerR = getPx(20);
@@ -1008,7 +997,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 int centerX = desiredWidth / 2;
                 int centerY = desiredHeight / 2;
 
-                // canvas.drawPath(path, downloadBgRect);
+                canvas.drawPath(path, downloadBgRect);
 
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgLightRect);
 
