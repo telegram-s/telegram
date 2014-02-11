@@ -42,9 +42,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
     // Resources
     private static int HIGHLIGHT_COLOR = 0xff3076a4;
     private static int UNREAD_COLOR = 0xff010101;
-    private static int READ_COLOR = 0xffb1b1b1;
+    private static int READ_COLOR = 0xff969696;
 
-    private static int READ_TIME_COLOR = 0xff898989;
+    private static int READ_TIME_COLOR = 0xff969696;
     private static int UNREAD_TIME_COLOR = 0xff6597c4;
 
     private static boolean isLoaded = false;
@@ -242,7 +242,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             counterTitlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             counterPaint = new Paint();
-            counterPaint.setColor(0xff8ec85f);
+            counterPaint.setColor(0xff8fc478);
+            counterPaint.setAntiAlias(true);
 
             isLoaded = true;
         }
@@ -414,7 +415,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 for (int i = 0; i < names.length; i++) {
                     names[i] = application.getEngine().getUserRuntime(typingUids[i]).getFirstName();
                 }
-                typingLayout = new StaticLayout(TextUtil.formatTyping(names), bodyHighlightPaint, layout.layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+                String typing = TextUtil.formatTyping(names);
+                Spannable spannable = application.getEmojiProcessor().processEmojiCutMutable(typing, EmojiProcessor.CONFIGURATION_DIALOGS);
+                CharSequence sequence = TextUtils.ellipsize(spannable, bodyHighlightPaint, layout.layoutMainWidth, TextUtils.TruncateAt.END);
+                typingLayout = new StaticLayout(sequence, bodyHighlightPaint, layout.layoutMainWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             } else {
                 typingLayout = null;
             }
@@ -444,12 +448,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
         if (layout.titleLayout != null) {
             canvas.save();
-            canvas.translate(layout.layoutTitleLeft, layout.layoutTitleTop);
+            canvas.translate(layout.layoutTitleLeft, layout.layoutTitleLayoutTop);
             layout.titleLayout.draw(canvas);
             canvas.restore();
         } else if (layout.titleString != null) {
             TextPaint paint = layout.isEncrypted ? titleEncryptedPaint : (layout.isHighlighted ? titleHighlightPaint : titlePaint);
-            canvas.drawText(layout.titleString, layout.layoutTitleLeft, layout.layoutTitleTextTop, paint);
+            canvas.drawText(layout.titleString, layout.layoutTitleLeft, layout.layoutTitleTop, paint);
         }
 
         if (state != MessageState.FAILURE && description.getSenderId() == currentUserUid) {
@@ -476,12 +480,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
         if (typingLayout != null) {
             canvas.save();
-            canvas.translate(layout.layoutMainLeft, layout.layoutMainTop);
+            canvas.translate(layout.layoutMainLeft, layout.layoutMainContentTop);
             typingLayout.draw(canvas);
             canvas.restore();
         } else if (layout.bodyLayout != null) {
             canvas.save();
-            canvas.translate(layout.layoutMainLeft, layout.layoutMainTop);
+            canvas.translate(layout.layoutMainLeft, layout.layoutMainContentTop);
             layout.bodyLayout.draw(canvas);
             canvas.restore();
         } else if (layout.bodyString != null) {
@@ -610,7 +614,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         public int layoutTimeLeft;
 
         public int layoutTitleTop;
-        public int layoutTitleTextTop;
+        public int layoutTitleLayoutTop;
         public int layoutTitleLeft;
         public int layoutTitleWidth;
 
@@ -624,6 +628,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         public int layoutMainWidth;
         public int layoutMainLeft;
         public int layoutMainTop;
+        public int layoutMainContentTop;
 
         public int layoutMarkWidth;
         public int layoutMarkLeft;
@@ -692,7 +697,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 layoutBodyPadding = layoutAvatarWidth + layoutPadding + px(10);
                 layoutAvatarTop = px(8);
                 layoutTitleTop = px(16);
-                layoutTitleTextTop = px(24);
+                layoutTitleTop = px(24);
                 layoutMainTop = px(46);
                 layoutTimeTop = px(34);
                 layoutStateTop = px(22);
@@ -702,21 +707,24 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 layoutMarkBottom = layoutMarkTop + px(22);
                 layoutMarkTextTop = layoutMarkTop + px(18);
             } else {
-                layoutAvatarWidth = px(52);
-                layoutPadding = px(8);
-                layoutBodyPadding = layoutAvatarWidth + layoutPadding + px(10);
+                layoutAvatarWidth = px(54);
+                layoutPadding = application.getResources().getDimensionPixelSize(R.dimen.dialogs_padding);
+                layoutBodyPadding = layoutAvatarWidth + layoutPadding + px(12);
                 layoutAvatarTop = px(8);
-                layoutTitleTop = px(12);
-                layoutTitleTextTop = px(24);
-                layoutMainTop = px(38);
-                layoutTimeTop = px(28);
-                layoutStateTop = px(16);
+                layoutTitleTop = px(30);
+                layoutMainTop = px(54);
+                layoutTimeTop = px(30);
+                // layoutStateTop = px(16);
                 layoutEncryptedTop = px(14);
 
                 layoutMarkTop = px(38);
                 layoutMarkBottom = layoutMarkTop + px(22);
                 layoutMarkTextTop = layoutMarkTop + px(18);
             }
+
+            layoutMainContentTop = (int) (layoutMainTop + bodyPaint.getFontMetrics().ascent);
+            layoutTitleLayoutTop = (int) (layoutTitleTop + titlePaint.getFontMetrics().ascent);
+            layoutStateTop = layoutTimeTop - px(12);
 
             if (isRtl) {
                 layoutAvatarLeft = w - layoutPadding - layoutAvatarWidth;
@@ -726,17 +734,17 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
             int timeWidth = (int) unreadClockPaint.measureText(time);
             if (isRtl) {
-                layoutTimeLeft = px(8);
+                layoutTimeLeft = layoutPadding;
             } else {
-                layoutTimeLeft = w - px(8) - timeWidth;
+                layoutTimeLeft = w - layoutPadding - timeWidth;
             }
 
             if (isRtl) {
-                layoutStateLeft = px(8) + timeWidth + px(7);
-                layoutStateLeftDouble = px(8) + timeWidth + px(2);
+                layoutStateLeft = layoutPadding + timeWidth + px(6);
+                layoutStateLeftDouble = layoutPadding + timeWidth + px(2);
             } else {
-                layoutStateLeft = w - px(8) - timeWidth - px(16);
-                layoutStateLeftDouble = w - px(8) - timeWidth - px(21);
+                layoutStateLeft = w - layoutPadding - timeWidth - px(6 + 12);
+                layoutStateLeftDouble = w - layoutPadding - timeWidth - px(12 + 12);
             }
 
             layoutMarkRadius = px(2);

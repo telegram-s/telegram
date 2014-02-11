@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-       android:insetLeft="8dp"
-       android:insetRight="8dp">
+       android:insetLeft="@dimen/dialogs_div_padding"
+       android:insetRight="@dimen/dialogs_div_padding">
 
     <shape android:shape="rectangle">
-        <solid android:color="#f1f1f1"/>
+        <solid android:color="#f3f3f3"/>
     </shape>
 
 </inset>

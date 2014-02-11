@@ -82,8 +82,8 @@ public class AvatarLoader {
         AVATAR_S_W = (int) (density * 42);
         AVATAR_S_H = (int) (density * 42);
 
-        AVATAR_M_W = (int) (density * 52);
-        AVATAR_M_H = (int) (density * 52);
+        AVATAR_M_W = (int) (density * 54);
+        AVATAR_M_H = (int) (density * 54);
 
         AVATAR_M2_W = (int) (density * 64);
         AVATAR_M2_H = (int) (density * 64);
@@ -113,9 +113,10 @@ public class AvatarLoader {
         checkUiThread();
 
         String key = fileLocation.getUniqKey();
-        Bitmap cached = imageCache.getFromCache(key + "_" + kind);
+        String cacheKey = key + "_" + kind;
+        Bitmap cached = imageCache.getFromCache(cacheKey);
         if (cached != null) {
-            receiver.onAvatarReceived(cached, key + "_" + kind, true);
+            receiver.onAvatarReceived(cached, cacheKey, true);
             return;
         }
 
@@ -129,7 +130,7 @@ public class AvatarLoader {
                 break;
             }
         }
-        receivers.add(new ReceiverHolder(key, kind, receiver));
+        receivers.add(new ReceiverHolder(key, cacheKey, kind, receiver));
         processor.requestTask(new AvatarTask(fileLocation, kind));
     }
 
@@ -160,7 +161,7 @@ public class AvatarLoader {
                         receivers.remove(holder);
                         AvatarReceiver receiver = holder.getReceiverReference().get();
                         if (receiver != null) {
-                            receiver.onAvatarReceived(bitmap, task.getFileLocation().getUniqKey() + "_" + kind, false);
+                            receiver.onAvatarReceived(bitmap, holder.getCacheKey(), false);
                         }
                     }
                 }
@@ -232,7 +233,15 @@ public class AvatarLoader {
         Bitmap cached = imageCache.findFree(task.getKind());
 
         if (cached == null) {
-            cached = Bitmap.createBitmap(AVATAR_W, AVATAR_H, Bitmap.Config.ARGB_8888);
+            if (task.getKind() == TYPE_FULL) {
+                cached = Bitmap.createBitmap(AVATAR_W, AVATAR_H, Bitmap.Config.ARGB_8888);
+            } else if (task.getKind() == TYPE_SMALL) {
+                cached = Bitmap.createBitmap(AVATAR_S_W, AVATAR_S_H, Bitmap.Config.ARGB_8888);
+            } else if (task.getKind() == TYPE_MEDIUM) {
+                cached = Bitmap.createBitmap(AVATAR_M_W, AVATAR_M_H, Bitmap.Config.ARGB_8888);
+            } else if (task.getKind() == TYPE_MEDIUM2) {
+                cached = Bitmap.createBitmap(AVATAR_M2_W, AVATAR_M2_H, Bitmap.Config.ARGB_8888);
+            }
         }
 //        if (cached == null) {
 //            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind());
@@ -328,13 +337,19 @@ public class AvatarLoader {
 
     private class ReceiverHolder {
         private String key;
+        private String cacheKey;
         private int kind;
         private WeakReference<AvatarReceiver> receiverReference;
 
-        private ReceiverHolder(String key, int kind, AvatarReceiver receiverReference) {
+        private ReceiverHolder(String key, String cacheKey, int kind, AvatarReceiver receiverReference) {
             this.key = key;
+            this.cacheKey = cacheKey;
             this.kind = kind;
             this.receiverReference = new WeakReference<AvatarReceiver>(receiverReference);
+        }
+
+        public String getCacheKey() {
+            return cacheKey;
         }
 
         public String getKey() {

@@ -3,4 +3,7 @@
     <dimen name="section_header_text">14sp</dimen>
     <dimen name="fast_scroll_padding_left">16dp</dimen>
     <dimen name="fast_scroll_padding_right">32dp</dimen>
+
+    <dimen name="dialogs_padding">8dp</dimen>
+    <dimen name="dialogs_div_padding">0dp</dimen>
 </resources>

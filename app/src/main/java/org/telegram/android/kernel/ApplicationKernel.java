@@ -109,33 +109,33 @@ public class ApplicationKernel {
         org.telegram.api.engine.Logger.registerInterface(new LoggerInterface() {
             @Override
             public void w(String tag, String message) {
-                Logger.w("API|" + tag, message);
+                // Logger.w("API|" + tag, message);
             }
 
             @Override
             public void d(String tag, String message) {
-                Logger.d("API|" + tag, message);
+                // Logger.d("API|" + tag, message);
             }
 
             @Override
             public void e(String tag, Throwable t) {
-                Logger.t("API|" + tag, t);
+                // Logger.t("API|" + tag, t);
             }
         });
         org.telegram.mtproto.log.Logger.registerInterface(new LogInterface() {
             @Override
             public void w(String tag, String message) {
-                Logger.w("MT|" + tag, message);
+                // Logger.w("MT|" + tag, message);
             }
 
             @Override
             public void d(String tag, String message) {
-                Logger.d("MT|" + tag, message);
+                // Logger.d("MT|" + tag, message);
             }
 
             @Override
             public void e(String tag, Throwable t) {
-                Logger.t("MT|" + tag, t);
+                // Logger.t("MT|" + tag, t);
             }
         });
     }
