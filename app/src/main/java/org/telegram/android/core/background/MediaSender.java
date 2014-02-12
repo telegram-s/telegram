@@ -36,6 +36,7 @@ import org.telegram.tl.TLBytes;
 
 import java.io.*;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
@@ -217,9 +218,12 @@ public class MediaSender {
     private void uploadVideo(ChatMessage message) throws Exception {
         TLUploadingVideo srcVideo = (TLUploadingVideo) message.getExtras();
         String fileName = srcVideo.getFileName();
-        // String transcoded = getUploadTempFile();
-        // transcodeVideo(fileName, transcoded);
         VideoMetadata metadata = getVideoMetadata(fileName);
+//        if (Build.VERSION.SDK_INT >= 16) {
+//            String transcoded = getUploadTempFile();
+//            transcodeVideo(fileName, transcoded);
+//            fileName = transcoded;
+//        }
         String fullPreview = writeTempFile(metadata.img);
         Optimizer.FastPreviewResult previewResult = Optimizer.buildPreview(metadata.getImg());
         Uploader.UploadResult thumbResult = uploadFileSilent(writeTempFile(previewResult.getData()), message.getDatabaseId());
@@ -930,7 +934,7 @@ public class MediaSender {
 //        // Set some properties.  Failing to specify some of these can cause the MediaCodec
 //        // configure() call to throw an unhelpful exception.
 //        format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
-//                MediaCodecInfo.CodecCapabilities.COLOR_Format16bitRGB565);
+//                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
 //        format.setInteger(MediaFormat.KEY_BIT_RATE, 60000);
 //        format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
 //        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5);

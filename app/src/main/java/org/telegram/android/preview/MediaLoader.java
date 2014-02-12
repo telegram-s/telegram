@@ -88,9 +88,9 @@ public class MediaLoader {
         checkUiThread();
 
         String key = "geo:" + geo.getLatitude() + "," + geo.getLongitude();
-        Bitmap cached = imageCache.getFromCache(key);
+        BitmapHolder cached = imageCache.getFromCache(key);
         if (cached != null) {
-            receiver.onMediaReceived(cached, MAP_W, MAP_H, key, true);
+            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
             return;
         }
 
@@ -113,9 +113,9 @@ public class MediaLoader {
         checkUiThread();
 
         String key = photo.getFastPreviewKey();
-        Bitmap cached = imageCache.getFromCache(key);
+        BitmapHolder cached = imageCache.getFromCache(key);
         if (cached != null) {
-            receiver.onMediaReceived(cached, photo.getFastPreviewW(), photo.getFastPreviewH(), key, true);
+            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
             return;
         }
 
@@ -138,9 +138,9 @@ public class MediaLoader {
         checkUiThread();
 
         String key = video.getPreviewKey();
-        Bitmap cached = imageCache.getFromCache(key);
+        BitmapHolder cached = imageCache.getFromCache(key);
         if (cached != null) {
-            receiver.onMediaReceived(cached, video.getPreviewW(), video.getPreviewH(), key, true);
+            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
             return;
         }
 
@@ -163,9 +163,9 @@ public class MediaLoader {
         checkUiThread();
 
         String key = fileName;
-        Bitmap cached = imageCache.getFromCache(key);
+        BitmapHolder cached = imageCache.getFromCache(key);
         if (cached != null) {
-            receiver.onMediaReceived(cached, photo.getFullW(), photo.getFullH(), key, true);
+            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
             return;
         }
 
@@ -188,9 +188,9 @@ public class MediaLoader {
         checkUiThread();
 
         String key = fileName;
-        Bitmap cached = imageCache.getFromCache(key);
+        BitmapHolder cached = imageCache.getFromCache(key);
         if (cached != null) {
-            receiver.onMediaReceived(cached, cached.getWidth(), cached.getHeight(), key, true);
+            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
             return;
         }
 
@@ -473,7 +473,7 @@ public class MediaLoader {
                 int[] sizes = Optimizer.scaleToRatio(metadata.getImg(),
                         metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
 
-                imageCache.putToCache(task.getKey(), SIZE_CHAT_PREVIEW, res);
+                imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]));
 
                 notifyMediaLoaded(task, res, sizes[0], sizes[1]);
             } catch (Exception e) {
@@ -502,7 +502,7 @@ public class MediaLoader {
                 int[] sizes = Optimizer.scaleToRatio(fullImageCached,
                         fileTask.getLocalPhoto().getFullW(), fileTask.getLocalPhoto().getFullH(), res);
 
-                imageCache.putToCache(fileTask.getKey(), SIZE_CHAT_PREVIEW, res);
+                imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]));
 
                 notifyMediaLoaded(fileTask, res, sizes[0], sizes[1]);
             }
@@ -539,8 +539,9 @@ public class MediaLoader {
             try {
                 String url = "https://maps.googleapis.com/maps/api/staticmap?" +
                         "center=" + geoTask.getLatitude() + "," + geoTask.getLongitude() +
-                        "&zoom=12" +
-                        "&size=" + MAP_W + "x" + MAP_H + "" +
+                        "&zoom=15" +
+                        "&size=" + MAP_W / 2 + "x" + MAP_H / 2 + "" +
+                        "&scale=2" +
                         "&sensor=false";
 
                 HttpGet get = new HttpGet(url.replace(" ", "%20"));
@@ -564,7 +565,7 @@ public class MediaLoader {
                 }
 
                 String cacheKey = "geo:" + geoTask.getLatitude() + "," + geoTask.getLongitude();
-                imageCache.putToCache(cacheKey, SIZE_CHAT_PREVIEW, res);
+                imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, cacheKey, MAP_W, MAP_H));
                 notifyMediaLoaded(task, res, MAP_W, MAP_H);
 
             } catch (Exception e) {

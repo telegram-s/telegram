@@ -114,9 +114,9 @@ public class AvatarLoader {
 
         String key = fileLocation.getUniqKey();
         String cacheKey = key + "_" + kind;
-        Bitmap cached = imageCache.getFromCache(cacheKey);
+        BitmapHolder cached = imageCache.getFromCache(cacheKey);
         if (cached != null) {
-            receiver.onAvatarReceived(cached, cacheKey, true);
+            receiver.onAvatarReceived(cached.getBitmap(), cacheKey, true);
             return;
         }
 
@@ -212,7 +212,7 @@ public class AvatarLoader {
             return;
         }
 
-        imageCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), mRes);
+        imageCache.putToCache(task.getKind(), new BitmapHolder(mRes, task.getFileLocation().getUniqKey() + "_" + task.getKind()));
         notifyAvatarLoaded(task, task.getKind(), mRes);
     }
 
@@ -251,7 +251,7 @@ public class AvatarLoader {
         res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
 
         if (res != null) {
-            imageCache.putToCache(task.getFileLocation().getUniqKey() + "_" + task.getKind(), task.getKind(), res);
+            imageCache.putToCache(task.getKind(), new BitmapHolder(res, task.getFileLocation().getUniqKey() + "_" + task.getKind()));
             notifyAvatarLoaded(task, task.getKind(), res);
             return true;
         }

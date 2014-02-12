@@ -263,7 +263,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         avatarBgPaint = new Paint();
         avatarBgPaint.setStyle(Paint.Style.FILL);
 
-        statePending = getResources().getDrawable(R.drawable.st_bubble_ic_clock);
+        statePending = getResources().getDrawable(R.drawable.st_dialogs_clock);
         stateSent = getResources().getDrawable(R.drawable.st_dialogs_check);
         stateHalfCheck = getResources().getDrawable(R.drawable.st_dialogs_halfcheck);
         stateFailure = getResources().getDrawable(R.drawable.st_dialogs_warning);

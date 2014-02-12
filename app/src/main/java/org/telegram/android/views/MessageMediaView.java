@@ -46,12 +46,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     private static final String TAG = "MessageMediaView";
 
-    public static String buildMapUrl(double latitude, double longitude, int width, int height) {
-        String url = "https://maps.googleapis.com/maps/api/staticmap?center={center}&zoom=12&size=" + width + "x" + height + "&sensor=false";
-        url = url.replace("{center}", latitude + "," + longitude);
-        return url;
-    }
-
     private Drawable stateSent;
     private Drawable stateHalfCheck;
     private Drawable stateFailure;
@@ -405,27 +399,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 isDownloadable = true;
 
                 if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-                    // isBinded = true;
-//                    float maxWidth = getPx(160);
-//                    float maxHeight = getPx(300);
-//
-//                    float scale = maxWidth / mediaVideo.getPreviewW();
-//
-//                    if (previewHeight * scale > maxHeight) {
-//                        scale = maxHeight / mediaVideo.getPreviewH();
-//                    }
-//
-//                    int scaledW = (int) maxWidth;
-//                    int scaledH = (int) (mediaVideo.getPreviewH() * scale);
-//
-//                    previewTask = new ScaleTask(
-//                            new VideoThumbTask(application.getDownloadManager().getFileName(key))
-//                            , scaledW, scaledH);
-//                    previewTask.setPutInDiskCache(true);
-//
-//                    previewWidth = mediaVideo.getPreviewW();
-//                    previewHeight = mediaVideo.getPreviewH();
-
                     application.getUiKernel().getMediaLoader()
                             .requestVideoLoading(
                                     application.getDownloadManager().getFileName(key),
@@ -438,79 +411,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
                     application.getUiKernel().getMediaLoader().requestFastLoading(mediaVideo, this);
                 } else {
+                    // Should we download preview?
                     application.getUiKernel().getMediaLoader().cancelRequest(this);
                 }
             }
 
-
-//            if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
-//                if (mediaVideo.getFastPreview().length != 0) {
-//                    float maxWidth = getPx(160);
-//                    float maxHeight = getPx(300);
-//
-//                    float scale = maxWidth / mediaVideo.getPreviewW();
-//
-//                    if (mediaVideo.getPreviewH() * scale > maxHeight) {
-//                        scale = maxHeight / mediaVideo.getPreviewH();
-//                    }
-//
-//                    int scaledW = (int) maxWidth;
-//                    int scaledH = (int) (mediaVideo.getPreviewH() * scale);
-//
-//                    previewHeight = scaledH;
-//                    previewWidth = scaledW;
-//
-//                    if (previewCached == null) {
-//                        BitmapFactory.Options options = new BitmapFactory.Options();
-//                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//                        options.inMutable = true;
-//                        options.inDither = false;
-//                        options.inTempStorage = bitmapTmp;
-//                        Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, options);
-////                        if (previewBitmapHolder != null) {
-////                            previewCached = previewBitmapHolder;
-////                            previewBitmapHolder = null;
-////                            optimizedBlur.performBlur(img);
-////                            //BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
-////                        } else {
-////                            previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-////                            optimizedBlur.performBlur(previewCached);
-////                            // BitmapUtils.fastblur(img, previewCached, mediaVideo.getPreviewW(), mediaVideo.getPreviewH(), 3);
-////                        }
-//
-//                        // previewCached = img.copy(Bitmap.Config.ARGB_8888, true);
-//                        optimizedBlur.performBlur(img);
-//                        previewCached = img;
-//                        fastPreviewWidth = mediaVideo.getPreviewW() - 1;
-//                        fastPreviewHeight = mediaVideo.getPreviewH() - 1;
-//                    }
-//                } else {
-//                    if (previewTask == null) {
-//                        if (mediaVideo.getPreviewLocation() instanceof TLLocalFileLocation) {
-//                            TLLocalFileLocation location = (TLLocalFileLocation) mediaVideo.getPreviewLocation();
-//
-//                            previewWidth = mediaVideo.getPreviewW();
-//                            previewHeight = mediaVideo.getPreviewH();
-//
-//                            float maxWidth = getPx(160);
-//                            float maxHeight = getPx(300);
-//
-//                            float scale = maxWidth / previewWidth;
-//
-//                            if (previewHeight * scale > maxHeight) {
-//                                scale = maxHeight / previewHeight;
-//                            }
-//
-//                            int scaledW = (int) maxWidth;
-//                            int scaledH = (int) (previewHeight * scale);
-//
-//                            StelsImageTask baseTask = new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret()));
-//                            baseTask.enableBlur(3);
-//                            previewTask = new ScaleTask(baseTask, scaledW, scaledH);
-//                        }
-//                    }
-//                }
-//            }
         } else if (message.message.getExtras() instanceof TLUploadingPhoto) {
             TLUploadingPhoto photo = (TLUploadingPhoto) message.message.getExtras();
             bindSize(photo.getWidth(), photo.getHeight());
@@ -539,23 +444,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         } else if (message.message.getExtras() instanceof TLUploadingVideo) {
             TLUploadingVideo video = (TLUploadingVideo) message.message.getExtras();
             bindSize(video.getPreviewWidth(), video.getPreviewHeight());
-//            previewWidth = video.getPreviewWidth();
-//            previewHeight = video.getPreviewHeight();
-//
-//
-//            float maxWidth = getPx(160);
-//            float maxHeight = getPx(300);
-//
-//            float scale = maxWidth / previewWidth;
-//
-//            if (previewHeight * scale > maxHeight) {
-//                scale = maxHeight / previewHeight;
-//            }
-//
-//            int scaledW = (int) maxWidth;
-//            int scaledH = (int) (previewHeight * scale);
-//
-//            previewTask = new ScaleTask(new VideoThumbTask(video.getFileName()), scaledW, scaledH);
+
+            application.getUiKernel().getMediaLoader()
+                    .requestVideoLoading(
+                            video.getFileName(),
+                            this);
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLLocalGeo) {
             TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();

@@ -34,24 +34,24 @@ public class ImageCache {
             @Override
             protected void entryRemoved(boolean evicted, String key, Holder oldValue, Holder newValue) {
                 if (evicted) {
-                    Bitmap bitmap = oldValue.sourceBitmap.get();
+                    BitmapHolder bitmap = oldValue.sourceBitmap.get();
                     if (bitmap == null) {
                         return;
                     }
-                    if (!bitmap.isMutable()) {
+                    if (!bitmap.getBitmap().isMutable()) {
                         return;
                     }
                     synchronized (freeBitmaps) {
                         HashSet<Bitmap> bitmaps = freeBitmaps.get(oldValue.size);
                         if (bitmaps == null) {
                             bitmaps = new HashSet<Bitmap>();
-                            bitmaps.add(bitmap);
+                            bitmaps.add(bitmap.getBitmap());
                             // Logger.d(TAG, "Adding to free cache " + key);
                             freeBitmaps.put(oldValue.size, bitmaps);
                         } else {
                             if (bitmaps.size() < cacheFreeSize) {
                                 // Logger.d(TAG, "Adding to free cache " + key);
-                                bitmaps.add(bitmap);
+                                bitmaps.add(bitmap.getBitmap());
                             }
                         }
                     }
@@ -67,9 +67,9 @@ public class ImageCache {
         this(DEFAULT_CACHE_SIZE, DEFAULT_CACHE_FREE_SIZE);
     }
 
-    public void putToCache(String key, int size, Bitmap bitmap) {
-        if (references.get(key) == null && avatarCache.get(key) == null) {
-            avatarCache.put(key, new Holder(key, size, bitmap));
+    public void putToCache(int size, BitmapHolder bitmap) {
+        if (references.get(bitmap.getKey()) == null && avatarCache.get(bitmap.getKey()) == null) {
+            avatarCache.put(bitmap.getKey(), new Holder(bitmap.getKey(), size, bitmap));
         }
     }
 
@@ -135,7 +135,7 @@ public class ImageCache {
         }
 
         if (holder != null) {
-            Bitmap img = holder.sourceBitmap.get();
+            BitmapHolder img = holder.sourceBitmap.get();
             if (img == null) {
                 removeHolder(holder);
                 return null;
@@ -173,7 +173,7 @@ public class ImageCache {
         updateHolder(holder);
     }
 
-    public Bitmap getFromCache(String key) {
+    public BitmapHolder getFromCache(String key) {
         Holder holder = findHolder(key);
         if (holder == null) {
             return null;
@@ -184,15 +184,15 @@ public class ImageCache {
 
     private class Holder {
         public String key;
-        public SoftReference<Bitmap> sourceBitmap;
-        public Bitmap sourceStrongBitmap;
+        public SoftReference<BitmapHolder> sourceBitmap;
+        public BitmapHolder sourceStrongBitmap;
         public int referenceCount;
         public int size;
 
-        private Holder(String key, int size, Bitmap bitmap) {
+        private Holder(String key, int size, BitmapHolder bitmap) {
             this.size = size;
             this.key = key;
-            this.sourceBitmap = new SoftReference<Bitmap>(bitmap);
+            this.sourceBitmap = new SoftReference<BitmapHolder>(bitmap);
         }
     }
 }
