@@ -1,22 +1,18 @@
 package org.telegram.android.util;
 
-import org.telegram.mtproto.secure.AESFastEngine;
-import org.telegram.mtproto.secure.AESImplementation;
-import org.telegram.mtproto.secure.DefaultAESImplementation;
-import org.telegram.mtproto.secure.KeyParameter;
+import org.telegram.mtproto.secure.aes.AESImplementation;
+import org.telegram.mtproto.secure.aes.DefaultAESImplementation;
 
 import java.io.*;
-import java.lang.reflect.Array;
-import java.util.Arrays;
-
-import static org.telegram.mtproto.secure.CryptoUtils.substring;
 
 /**
  * Created by ex3ndr on 12.02.14.
  */
 public class NativeAES implements AESImplementation {
 
-    private DefaultAESImplementation defaultAESImplementation = new DefaultAESImplementation();
+    static {
+        System.loadLibrary("timg");
+    }
 
     @Override
     public void AES256IGEDecrypt(byte[] src, byte[] dest, int len, byte[] iv, byte[] key) {
@@ -48,8 +44,12 @@ public class NativeAES implements AESImplementation {
 
         int count;
         while ((count = inputStream.read(buffer)) > 0) {
-            nativeAesEncryptStreaming(buffer, outBuffer, buffer.length, workIv, key);
-            outputStream.write(outBuffer, 0, count);
+            int realCount = count;
+            if (realCount < 4 * 1024) {
+                realCount += (16 - (realCount % 16) % 16);
+            }
+            nativeAesEncryptStreaming(buffer, outBuffer, realCount, workIv, key);
+            outputStream.write(outBuffer, 0, realCount);
         }
         outputStream.flush();
         outputStream.close();
@@ -75,8 +75,13 @@ public class NativeAES implements AESImplementation {
 
         int count;
         while ((count = inputStream.read(buffer)) > 0) {
-            nativeAesDecryptStreaming(buffer, outBuffer, buffer.length, workIv, key);
-            outputStream.write(outBuffer, 0, count);
+            int realCount = count;
+            if (realCount < 4 * 1024) {
+                realCount += (16 - (realCount % 16) % 16);
+            }
+            nativeAesDecryptStreaming(buffer, outBuffer, realCount, workIv, key);
+
+            outputStream.write(outBuffer, 0, realCount);
         }
         outputStream.flush();
         outputStream.close();
