@@ -2,7 +2,6 @@
  * jccolor.c
  *
  * Copyright (C) 1991-1996, Thomas G. Lane.
- * Modified 2011 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -13,6 +12,8 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 
+// this enables unrolling null_convert's loop, and reading/write ints for speed
+#define ENABLE_ANDROID_NULL_CONVERT
 
 /* Private subobject */
 
@@ -299,39 +300,36 @@ grayscale_convert (j_compress_ptr cinfo,
   }
 }
 
+#ifdef ENABLE_ANDROID_NULL_CONVERT
 
-/*
- * Convert some rows of samples to the JPEG colorspace.
- * No colorspace conversion, but change from interleaved
- * to separate-planes representation.
- */
+typedef unsigned long UINT32;
 
-METHODDEF(void)
-rgb_convert (j_compress_ptr cinfo,
-	     JSAMPARRAY input_buf, JSAMPIMAGE output_buf,
-	     JDIMENSION output_row, int num_rows)
+#define B0(n)   ((n) & 0xFF)
+#define B1(n)   (((n) >> 8) & 0xFF)
+#define B2(n)   (((n) >> 16) & 0xFF)
+#define B3(n)   ((n) >> 24)
+
+#define PACK(a, b, c, d)    ((a) | ((b) << 8) | ((c) << 16) | ((d) << 24))
+
+static int ptr_is_quad(const void* p)
 {
-  register JSAMPROW inptr;
-  register JSAMPROW outptr0, outptr1, outptr2;
-  register JDIMENSION col;
-  JDIMENSION num_cols = cinfo->image_width;
-
-  while (--num_rows >= 0) {
-    inptr = *input_buf++;
-    outptr0 = output_buf[0][output_row];
-    outptr1 = output_buf[1][output_row];
-    outptr2 = output_buf[2][output_row];
-    output_row++;
-    for (col = 0; col < num_cols; col++) {
-      /* We can dispense with GETJSAMPLE() here */
-      outptr0[col] = inptr[RGB_RED];
-      outptr1[col] = inptr[RGB_GREEN];
-      outptr2[col] = inptr[RGB_BLUE];
-      inptr += RGB_PIXELSIZE;
-    }
-  }
+    return (((const char*)p - (const char*)0) & 3) == 0;
 }
 
+static void copyquads(const UINT32 in[], UINT32 out0[], UINT32 out1[], UINT32 out2[], int col4)
+{
+    do {
+        UINT32 src0 = *in++;
+        UINT32 src1 = *in++;
+        UINT32 src2 = *in++;
+        // LEndian
+        *out0++ = PACK(B0(src0), B3(src0), B2(src1), B1(src2));
+        *out1++ = PACK(B1(src0), B0(src1), B3(src1), B2(src2));
+        *out2++ = PACK(B2(src0), B1(src1), B0(src2), B3(src2));
+    } while (--col4 != 0);
+}
+
+#endif
 
 /*
  * Convert some rows of samples to the JPEG colorspace.
@@ -351,6 +349,42 @@ null_convert (j_compress_ptr cinfo,
   int nc = cinfo->num_components;
   JDIMENSION num_cols = cinfo->image_width;
 
+#ifdef ENABLE_ANDROID_NULL_CONVERT
+    if (1 == num_rows && 3 == nc && num_cols > 0) {
+        JSAMPROW inptr = *input_buf;
+        JSAMPROW outptr0 = output_buf[0][output_row];
+        JSAMPROW outptr1 = output_buf[1][output_row];
+        JSAMPROW outptr2 = output_buf[2][output_row];
+        
+        int col = num_cols;
+        int col4 = col >> 2;
+        if (col4 > 0 && ptr_is_quad(inptr) && ptr_is_quad(outptr0) &&
+                        ptr_is_quad(outptr1) && ptr_is_quad(outptr2)) {
+            
+            const UINT32* in = (const UINT32*)inptr;
+            UINT32* out0 = (UINT32*)outptr0;
+            UINT32* out1 = (UINT32*)outptr1;
+            UINT32* out2 = (UINT32*)outptr2;
+            copyquads(in, out0, out1, out2, col4);
+            col &= 3;
+            if (0 == col)
+                return;
+            col4 <<= 2;
+            inptr += col4 * 3;  /* we read this 3 times per in copyquads */
+            outptr0 += col4;
+            outptr1 += col4;
+            outptr2 += col4;
+            /* fall through to while-loop */
+        }
+        do {
+            *outptr0++ = *inptr++;
+            *outptr1++ = *inptr++;
+            *outptr2++ = *inptr++;
+        } while (--col != 0);
+        return;
+    }
+SLOW:
+#endif
   while (--num_rows >= 0) {
     /* It seems fastest to make a separate pass for each component. */
     for (ci = 0; ci < nc; ci++) {
@@ -402,9 +436,11 @@ jinit_color_converter (j_compress_ptr cinfo)
     break;
 
   case JCS_RGB:
+#if RGB_PIXELSIZE != 3
     if (cinfo->input_components != RGB_PIXELSIZE)
       ERREXIT(cinfo, JERR_BAD_IN_COLORSPACE);
     break;
+#endif /* else share code with YCbCr */
 
   case JCS_YCbCr:
     if (cinfo->input_components != 3)
@@ -428,21 +464,22 @@ jinit_color_converter (j_compress_ptr cinfo)
   case JCS_GRAYSCALE:
     if (cinfo->num_components != 1)
       ERREXIT(cinfo, JERR_BAD_J_COLORSPACE);
-    if (cinfo->in_color_space == JCS_GRAYSCALE ||
-	cinfo->in_color_space == JCS_YCbCr)
+    if (cinfo->in_color_space == JCS_GRAYSCALE)
       cconvert->pub.color_convert = grayscale_convert;
     else if (cinfo->in_color_space == JCS_RGB) {
       cconvert->pub.start_pass = rgb_ycc_start;
       cconvert->pub.color_convert = rgb_gray_convert;
-    } else
+    } else if (cinfo->in_color_space == JCS_YCbCr)
+      cconvert->pub.color_convert = grayscale_convert;
+    else
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
     break;
 
   case JCS_RGB:
     if (cinfo->num_components != 3)
       ERREXIT(cinfo, JERR_BAD_J_COLORSPACE);
-    if (cinfo->in_color_space == JCS_RGB)
-      cconvert->pub.color_convert = rgb_convert;
+    if (cinfo->in_color_space == JCS_RGB && RGB_PIXELSIZE == 3)
+      cconvert->pub.color_convert = null_convert;
     else
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
     break;

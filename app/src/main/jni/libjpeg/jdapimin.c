@@ -2,7 +2,6 @@
  * jdapimin.c
  *
  * Copyright (C) 1994-1998, Thomas G. Lane.
- * Modified 2009 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -20,7 +19,6 @@
 #define JPEG_INTERNALS
 #include "jinclude.h"
 #include "jpeglib.h"
-#include "log.h"
 
 
 /*
@@ -55,6 +53,7 @@ jpeg_CreateDecompress (j_decompress_ptr cinfo, int version, size_t structsize)
     cinfo->client_data = client_data;
   }
   cinfo->is_decompressor = TRUE;
+  cinfo->tile_decode = FALSE;
 
   /* Initialize a memory manager instance for this object */
   jinit_memory_mgr((j_common_ptr) cinfo);
@@ -187,8 +186,8 @@ default_decompress_parms (j_decompress_ptr cinfo)
   }
 
   /* Set defaults for other decompression parameters. */
-  cinfo->scale_num = cinfo->block_size;		/* 1:1 scaling */
-  cinfo->scale_denom = cinfo->block_size;
+  cinfo->scale_num = 1;		/* 1:1 scaling */
+  cinfo->scale_denom = 1;
   cinfo->output_gamma = 1.0;
   cinfo->buffered_image = FALSE;
   cinfo->raw_data_out = FALSE;
@@ -243,12 +242,13 @@ GLOBAL(int)
 jpeg_read_header (j_decompress_ptr cinfo, boolean require_image)
 {
   int retcode;
-  LOGD("Call jpeg_read_header");
+
   if (cinfo->global_state != DSTATE_START &&
       cinfo->global_state != DSTATE_INHEADER)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
-  LOGD("Call jpeg_read_header:1");
+
   retcode = jpeg_consume_input(cinfo);
+
   switch (retcode) {
   case JPEG_REACHED_SOS:
     retcode = JPEG_HEADER_OK;
@@ -287,27 +287,19 @@ jpeg_read_header (j_decompress_ptr cinfo, boolean require_image)
 GLOBAL(int)
 jpeg_consume_input (j_decompress_ptr cinfo)
 {
-  LOGD("jpeg_consume_input");
   int retcode = JPEG_SUSPENDED;
 
   /* NB: every possible DSTATE value should be listed in this switch */
   switch (cinfo->global_state) {
   case DSTATE_START:
-    LOGD("jpeg_consume_input: DSTATE_START");
     /* Start-of-datastream actions: reset appropriate modules */
-    LOGD("jpeg_consume_input: DSTATE_START:0 %d", (int)cinfo->inputctl);
     (*cinfo->inputctl->reset_input_controller) (cinfo);
-    LOGD("jpeg_consume_input: DSTATE_START:1");
     /* Initialize application's data source module */
     (*cinfo->src->init_source) (cinfo);
-    LOGD("jpeg_consume_input: DSTATE_START:2");
     cinfo->global_state = DSTATE_INHEADER;
-    LOGD("jpeg_consume_input: DSTATE_START:3");
     /*FALLTHROUGH*/
   case DSTATE_INHEADER:
-    LOGD("jpeg_consume_input: DSTATE_INHEADER");
     retcode = (*cinfo->inputctl->consume_input) (cinfo);
-    LOGD("jpeg_consume_input: DSTATE_INHEADER:1");
     if (retcode == JPEG_REACHED_SOS) { /* Found SOS, prepare to decompress */
       /* Set up default parameters based on header data */
       default_decompress_parms(cinfo);
@@ -316,7 +308,6 @@ jpeg_consume_input (j_decompress_ptr cinfo)
     }
     break;
   case DSTATE_READY:
-    LOGD("jpeg_consume_input: DSTATE_READY");
     /* Can't advance past first SOS until start_decompress is called */
     retcode = JPEG_REACHED_SOS;
     break;
@@ -327,7 +318,6 @@ jpeg_consume_input (j_decompress_ptr cinfo)
   case DSTATE_BUFIMAGE:
   case DSTATE_BUFPOST:
   case DSTATE_STOPPING:
-    LOGD("jpeg_consume_input: ENDING");
     retcode = (*cinfo->inputctl->consume_input) (cinfo);
     break;
   default:
@@ -382,6 +372,9 @@ jpeg_finish_decompress (j_decompress_ptr cinfo)
   if ((cinfo->global_state == DSTATE_SCANNING ||
        cinfo->global_state == DSTATE_RAW_OK) && ! cinfo->buffered_image) {
     /* Terminate final pass of non-buffered mode */
+#ifdef ANDROID_TILE_BASED_DECODE
+    cinfo->output_scanline = cinfo->output_height;
+#endif
     if (cinfo->output_scanline < cinfo->output_height)
       ERREXIT(cinfo, JERR_TOO_LITTLE_DATA);
     (*cinfo->master->finish_output_pass) (cinfo);
@@ -394,10 +387,12 @@ jpeg_finish_decompress (j_decompress_ptr cinfo)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
   }
   /* Read until EOI */
+#ifndef ANDROID_TILE_BASED_DECODE
   while (! cinfo->inputctl->eoi_reached) {
     if ((*cinfo->inputctl->consume_input) (cinfo) == JPEG_SUSPENDED)
       return FALSE;		/* Suspend, come back later */
   }
+#endif
   /* Do final cleanup */
   (*cinfo->src->term_source) (cinfo);
   /* We can use jpeg_abort to release memory and reset global_state */
