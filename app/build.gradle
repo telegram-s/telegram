@@ -69,8 +69,7 @@ android {
                     "-O3 -fstrict-aliasing -fprefetch-loop-arrays " +
                     "-DAVOID_TABLES " +
                     "-DANDROID_TILE_BASED_DECODE " +
-                    "-DANDROID_ARMV6_IDCT " +
-                    "-DANDROID_RGB"
+                    "-DANDROID_ARMV6_IDCT"
             ldLibs "log", "jnigraphics", "m"
             stl "stlport_static"
         }

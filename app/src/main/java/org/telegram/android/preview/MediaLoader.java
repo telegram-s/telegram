@@ -55,13 +55,6 @@ public class MediaLoader {
     private final int MAP_W;
     private final int MAP_H;
 
-    private ThreadLocal<byte[]> bitmapTmp = new ThreadLocal<byte[]>() {
-        @Override
-        protected byte[] initialValue() {
-            return new byte[16 * 1024];
-        }
-    };
-
     public MediaLoader(TelegramApplication application) {
         this.application = application;
         this.processor = new QueueProcessor<BaseTask>();
@@ -494,7 +487,8 @@ public class MediaLoader {
                 }
             }
 
-            img = BitmapUtils.fastblur(img, 8);
+            new OptimizedBlur().performBlur(img);
+            // img = BitmapUtils.fastblur(img, 8);
 
             imageCache.putToCache(SIZE_FAST_PREVIEW, new BitmapHolder(img, key, w, h));
 

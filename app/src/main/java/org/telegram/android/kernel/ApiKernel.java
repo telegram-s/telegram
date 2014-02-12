@@ -9,10 +9,12 @@ import android.os.Build;
 import org.telegram.android.R;
 import org.telegram.android.core.background.UpdateProcessor;
 import org.telegram.android.log.Logger;
+import org.telegram.android.util.NativeAES;
 import org.telegram.api.TLAbsUpdates;
 import org.telegram.api.engine.ApiCallback;
 import org.telegram.api.engine.AppInfo;
 import org.telegram.api.engine.TelegramApi;
+import org.telegram.mtproto.secure.CryptoUtils;
 
 /**
  * Created by ex3ndr on 16.11.13.
@@ -32,6 +34,7 @@ public class ApiKernel {
     }
 
     public void runKernel() {
+        CryptoUtils.setAESImplementation(new NativeAES());
         api = new TelegramApi(kernel.getAuthKernel().getApiStorage(), new AppInfo(5, Build.MODEL, Build.VERSION.RELEASE, kernel.getTechKernel().getTechReflection().getAppVersion(),
                 kernel.getApplication().getString(R.string.st_lang)), new ApiCallback() {
             @Override
