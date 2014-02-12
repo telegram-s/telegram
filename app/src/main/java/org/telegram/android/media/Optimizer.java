@@ -159,7 +159,7 @@ public class Optimizer {
         dest.eraseColor(Color.TRANSPARENT);
         Canvas canvas = new Canvas(dest);
         canvas.setMatrix(scaleMatrix);
-        canvas.drawBitmap(src, middleX - src.getWidth() / 2, middleY - src.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG));
+        canvas.drawBitmap(src, middleX - src.getWidth() / 2, middleY - src.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG|Paint.ANTI_ALIAS_FLAG));
     }
 
     public static int[] scaleToRatio(Bitmap src, int sourceW, int sourceH, Bitmap dest) {
@@ -170,13 +170,13 @@ public class Optimizer {
         canvas.drawBitmap(src,
                 new Rect(0, 0, sourceW, sourceH),
                 new Rect(0, 0, (int) (sourceW * ratio), (int) (sourceH * ratio)),
-                new Paint(Paint.FILTER_BITMAP_FLAG));
+                new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG));
         return new int[]{(int) (sourceW * ratio), (int) (sourceH * ratio)};
     }
 
     public static void drawTo(Bitmap src, Bitmap dest) {
         Canvas canvas = new Canvas(dest);
-        canvas.drawBitmap(src, 0, 0, new Paint(Paint.FILTER_BITMAP_FLAG));
+        canvas.drawBitmap(src, 0, 0, new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG));
     }
 
     public static void blur(Bitmap src) {

@@ -32,7 +32,7 @@
 #define  G(c) ((c & 0x0000ff00) >> 8)
 #define  B(c) ((c & 0x00ff0000) >> 16)
 #define  A(c) ((c & 0xff000000) >> 24)
-#define  RGBA(a,r,g,b) (a << 24 | (b << 16) | (g << 8) | r)
+#define  ARGB(a,r,g,b) (a << 24 | (b << 16) | (g << 8) | r)
 
 #define  SIZE 90
 #define  SIZE_FULL 8100
@@ -205,12 +205,70 @@ static void brightness(AndroidBitmapInfo* info, void* pixels, float brightnessVa
             blue = rgb_clamp((int)(blue * brightnessValue+ (1-brightnessValue)*255));
 
             // set the new pixel back in
-            line[xx] = RGBA(A(line[xx]), red, green, blue);
+            line[xx] = ARGB(A(line[xx]), red, green, blue);
 		}
 		pixels = (char*)pixels + info->stride;
 	}
 }
 
+void Java_org_telegram_android_util_ImageNativeUtils_nativeMergeBitmapAlpha(
+        JNIEnv* env,
+        jclass clazz,
+        jobject source,
+        jobject alpha)
+{
+    AndroidBitmapInfo sinfo, ainfo;
+    int ret;
+    void* sourceP;
+    void* alphaP;
+    int xx, yy;
+
+    if ((ret = AndroidBitmap_getInfo(env, source, &sinfo)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    if (sinfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap format is not RGBA_8888 !");
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, source, &sourceP)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
+
+    if ((ret = AndroidBitmap_getInfo(env, alpha, &ainfo)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    if (ainfo.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap format is not RGBA_8888 !");
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, alpha, &alphaP)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
+
+    uint32_t* sline = sourceP;
+    uint32_t* aline = alphaP;
+
+    for(yy = 0; yy < sinfo.height; yy++){
+        sline = (uint32_t*) sourceP;
+        aline = (uint32_t*) alphaP;
+
+        for(xx =0; xx < sinfo.width; xx++) {
+            sline[xx] = ARGB(R(aline[xx]), R(sline[xx]), G(sline[xx]), B(sline[xx]));
+        }
+        sourceP = (char*)sourceP + sinfo.stride;
+        alphaP = (char*)alphaP + ainfo.stride;
+    }
+
+
+    AndroidBitmap_unlockPixels(env, source);
+    AndroidBitmap_unlockPixels(env, alpha);
+}
 
 void Java_org_telegram_android_media_OptimizedBlur_nativeFastBlur(
         JNIEnv* env,
@@ -240,13 +298,80 @@ void Java_org_telegram_android_media_OptimizedBlur_nativeFastBlur(
 
         AndroidBitmap_unlockPixels(env, bitmap);
 }
+
+void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmapBlend(
+                                                             JNIEnv* env,
+                                                             jobject thiz,
+                                                             jstring fileName,
+                                                             jobject bitmap)
+{
+    char * path =  (*env)->GetStringUTFChars( env, fileName , NULL );
+    AndroidBitmapInfo  info;
+    struct jpeg_error_mgr jerr;
+    struct jpeg_decompress_struct cinfo;
+    FILE * infile;		/* source file */
+    JSAMPARRAY buffer;		/* Output row buffer */
+    int row_stride;		/* physical row width in output buffer */
+    int ret;
+    int rowIndex;
+    int i;
+    void* pixels;
+
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
+
+    LOGI("Loading image from path %s", path);
+
+    if ((infile = fopen(path, "rb")) == NULL) {
+        LOGE("Unable to open file");
+        return;
+    }
+
+    cinfo.err = jpeg_std_error(&jerr);
+
+    jpeg_create_decompress(&cinfo);
+
+    jpeg_stdio_src(&cinfo, infile);
+    (void) jpeg_read_header(&cinfo, TRUE);
+
+    (void) jpeg_start_decompress(&cinfo);
+
+    row_stride = cinfo.output_width * cinfo.output_components;
+
+    buffer = (*cinfo.mem->alloc_sarray)
+    ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+
+    rowIndex = 0;
+    uint32_t* line = (uint32_t*)pixels;
+    while (cinfo.output_scanline < cinfo.output_height) {
+        (void) jpeg_read_scanlines(&cinfo, buffer, 1);
+
+        if (rowIndex++ < info.height) {
+            for( i = 0; i < MIN(info.width, cinfo.output_width); i++) {
+                line[i] = ARGB(buffer[0][i*3], R(line[i]), G(line[i]), B(line[i]));
+            }
+            line = (char*)line + (info.stride);
+        }
+    }
+
+    (void) jpeg_finish_decompress(&cinfo);
+
+    AndroidBitmap_unlockPixels(env, bitmap);
+}
+
 void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmap(
                                                              JNIEnv* env,
                                                              jobject thiz,
                                                              jstring fileName,
                                                              jobject bitmap)
 {
-    char * path =  (*env)->GetStringUTFChars( env, fileName , NULL ) ;
+    char * path =  (*env)->GetStringUTFChars( env, fileName , NULL );
     AndroidBitmapInfo  info;
     struct jpeg_error_mgr jerr;
     struct jpeg_decompress_struct cinfo;
@@ -295,7 +420,7 @@ void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmap(
         
         if (rowIndex++ < info.height) {
             for( i = 0; i < MIN(info.width, cinfo.output_width); i++) {
-                line[i] = RGBA(255, buffer[0][i*3], buffer[0][i*3+1], buffer[0][i*3 + 2]);
+                line[i] = ARGB(255, buffer[0][i*3], buffer[0][i*3+1], buffer[0][i*3 + 2]);
             }
             line = (char*)line + (info.stride);
         }
@@ -357,7 +482,7 @@ void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeArray(
 
         if (rowIndex++ < info.height) {
             for( i = 0; i < MIN(info.width, cinfo.output_width); i++) {
-                line[i] = RGBA(255, buffer[0][i*3], buffer[0][i*3+1], buffer[0][i*3 + 2]);
+                line[i] = ARGB(255, buffer[0][i*3], buffer[0][i*3+1], buffer[0][i*3 + 2]);
             }
             line = (char*)line + (info.stride);
         }
@@ -368,4 +493,77 @@ void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeArray(
     AndroidBitmap_unlockPixels(env, bitmap);
 
     (*env)->ReleaseByteArrayElements(env, array, b, 0 );
+}
+
+void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmapScaled(
+                                                             JNIEnv* env,
+                                                             jobject thiz,
+                                                             jstring fileName,
+                                                             jobject bitmap)
+{
+    char * path =  (*env)->GetStringUTFChars( env, fileName , NULL );
+    AndroidBitmapInfo  info;
+    struct jpeg_error_mgr jerr;
+    struct jpeg_decompress_struct cinfo;
+    FILE * infile;		/* source file */
+    JSAMPARRAY buffer;		/* Output row buffer */
+    int row_stride;		/* physical row width in output buffer */
+    int ret;
+    int rowIndex;
+    int sRowIndex;
+    int i;
+    int ind;
+    void* pixels;
+
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
+
+    LOGI("Loading image from path %s", path);
+
+    if ((infile = fopen(path, "rb")) == NULL) {
+        LOGE("Unable to open file");
+        return;
+    }
+
+    cinfo.err = jpeg_std_error(&jerr);
+
+    jpeg_create_decompress(&cinfo);
+
+    jpeg_stdio_src(&cinfo, infile);
+    (void) jpeg_read_header(&cinfo, TRUE);
+
+    (void) jpeg_start_decompress(&cinfo);
+
+    row_stride = cinfo.output_width * cinfo.output_components;
+
+    buffer = (*cinfo.mem->alloc_sarray)
+    ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+
+    rowIndex = 0;
+    sRowIndex = 0;
+    uint32_t* line = (uint32_t*)pixels;
+    while (cinfo.output_scanline < cinfo.output_height) {
+        (void) jpeg_read_scanlines(&cinfo, buffer, 1);
+
+        if (sRowIndex++ % 2 == 0)
+        {
+            if (rowIndex++ < info.height) {
+                for( i = 0; i < MIN(info.width, cinfo.output_width/2); i++) {
+                    ind = i * 2;
+                    line[i] = ARGB(255, buffer[0][ind*3], buffer[0][ind*3+1], buffer[0][ind*3 + 2]);
+                }
+                line = (char*)line + (info.stride);
+            }
+        }
+    }
+
+    (void) jpeg_finish_decompress(&cinfo);
+
+    AndroidBitmap_unlockPixels(env, bitmap);
 }

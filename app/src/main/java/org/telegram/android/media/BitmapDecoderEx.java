@@ -17,33 +17,27 @@ public class BitmapDecoderEx {
     private BitmapDecoderEx() {
     }
 
+    public static void decodeReuseBitmapBlend(String fileName, Bitmap dest) {
+        new BitmapDecoderEx().nativeDecodeBitmapBlend(fileName, dest);
+    }
 
     public static void decodeReuseBitmap(String fileName, Bitmap dest) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            BitmapFactory.Options options = new BitmapFactory.Options();
-//            options.inMutable = true;
-//            options.inSampleSize = 1;
-//            options.inBitmap = dest;
-//            Bitmap res = BitmapFactory.decodeFile(fileName, options);
-//            res.toString();
-//            return;
-//        }
         new BitmapDecoderEx().nativeDecodeBitmap(fileName, dest);
     }
 
+    public static void decodeReuseBitmapScaled(String fileName, Bitmap dest) {
+        new BitmapDecoderEx().nativeDecodeBitmapScaled(fileName, dest);
+    }
+
     public static void decodeReuseBitmap(byte[] src, Bitmap dest) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            BitmapFactory.Options options = new BitmapFactory.Options();
-//            options.inMutable = true;
-//            options.inSampleSize = 1;
-//            options.inBitmap = dest;
-//            BitmapFactory.decodeByteArray(src, 0, src.length, options);
-//            return;
-//        }
         new BitmapDecoderEx().nativeDecodeArray(src, dest);
     }
+
+    private native void nativeDecodeBitmapScaled(String fileName, Bitmap bitmap);
 
     private native void nativeDecodeBitmap(String fileName, Bitmap bitmap);
 
     private native void nativeDecodeArray(byte[] array, Bitmap bitmap);
+
+    private native void nativeDecodeBitmapBlend(String fileName, Bitmap bitmap);
 }

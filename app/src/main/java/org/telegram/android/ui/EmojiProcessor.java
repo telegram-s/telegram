@@ -12,8 +12,13 @@ import android.util.TypedValue;
 import com.actionbarsherlock.R;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
+import org.telegram.android.media.BitmapDecoderEx;
+import org.telegram.android.media.Optimizer;
+import org.telegram.android.util.IOUtils;
+import org.telegram.android.util.ImageNativeUtils;
 import org.telegram.config.SmileysPack;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -280,16 +285,36 @@ public class EmojiProcessor {
                             break;
                     }
 
-                    InputStream colorsIs = EmojiProcessor.this.application.getAssets().open(fileName);
-                    Bitmap colorsBitmap = BitmapFactory.decodeStream(colorsIs, null, options);
-                    colorsIs.close();
+                    File sourceFile = application.getFileStreamPath("emoji_c.jpg");
+                    if (!sourceFile.exists()) {
+                        InputStream colorsIs = EmojiProcessor.this.application.getAssets().open(fileName);
+                        IOUtils.copy(colorsIs, sourceFile);
+                        colorsIs.close();
+                    }
 
-                    InputStream alphaIs = EmojiProcessor.this.application.getAssets().open(fileNameAlpha);
-                    Bitmap alphaBitmap = BitmapFactory.decodeStream(alphaIs, null, options);
-                    alphaIs.close();
+                    File sourceAlphaFile = application.getFileStreamPath("emoji_a.jpg");
+                    if (!sourceAlphaFile.exists()) {
+                        InputStream colorsIs = EmojiProcessor.this.application.getAssets().open(fileNameAlpha);
+                        IOUtils.copy(colorsIs, sourceAlphaFile);
+                        colorsIs.close();
+                    }
+
+
+                    Bitmap colorsBitmap = Optimizer.load(sourceFile.getAbsolutePath());
+                    colorsBitmap.setHasAlpha(true);
+                    BitmapDecoderEx.decodeReuseBitmapBlend(sourceAlphaFile.getAbsolutePath(), colorsBitmap);
+                    // Bitmap alphaBitmap = Optimizer.load(sourceAlphaFile.getAbsolutePath());
+
+                    Logger.d(TAG, "emoji pre-loaded 1 in " + (System.currentTimeMillis() - start) + " ms");
+
+                    // Bitmap resultBitmap = colorsBitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    // resultBitmap.setHasAlpha(true);
+                    // ImageNativeUtils.mergeBitmapAlpha(colorsBitmap, alphaBitmap);
+
+                    Logger.d(TAG, "emoji pre-loaded in " + (System.currentTimeMillis() - start) + " ms");
 
                     int[] resultColors = new int[rectSize * SECTION_SIDE * rectSize * SECTION_SIDE];
-                    int[] tmpColors = new int[rectSize * SECTION_SIDE * rectSize * SECTION_SIDE];
+                    // int[] tmpColors = new int[rectSize * SECTION_SIDE * rectSize * SECTION_SIDE];
 
                     int[] order = new int[]{8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3, 12, 13, 14, 15};
 
@@ -305,18 +330,21 @@ public class EmojiProcessor {
                             height = colorsBitmap.getHeight() - topOffset;
                         }
 
-                        colorsBitmap.getPixels(tmpColors, 0, rectSize * SECTION_SIDE, leftOffset, topOffset, width, height);
-                        for (int ind = 0; ind < resultColors.length; ind++) {
-                            resultColors[ind] = 0xFFFFFF & tmpColors[ind];
-                        }
-                        alphaBitmap.getPixels(tmpColors, 0, rectSize * SECTION_SIDE, leftOffset, topOffset, width, height);
-                        for (int ind = 0; ind < resultColors.length; ind++) {
-                            resultColors[ind] = resultColors[ind] | ((tmpColors[ind] & 0xFF) << 24);
-                        }
+                        colorsBitmap.getPixels(resultColors, 0, rectSize * SECTION_SIDE, leftOffset, topOffset, width, height);
+                        // for (int ind = 0; ind < resultColors.length; ind++) {
+                        //resultColors[ind] = 0xFFFFFF & tmpColors[ind];
+                        // resultColors[ind] = 0xFFFFFF & tmpColors[ind];
+                        // }
+//                        alphaBitmap.getPixels(tmpColors, 0, rectSize * SECTION_SIDE, leftOffset, topOffset, width, height);
+//                        for (int ind = 0; ind < resultColors.length; ind++) {
+//                            resultColors[ind] = resultColors[ind] | ((tmpColors[ind] & 0xFF) << 24);
+//                        }
 
                         Bitmap section = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                         section.setPixels(resultColors, 0, rectSize * SECTION_SIDE, 0, 0, width, height);
                         emojiMap.put(ordinal, section);
+
+                        Logger.d(TAG, "emoji region loaded in " + (System.currentTimeMillis() - start) + " ms");
                     }
                     isLoaded = true;
                     notifyEmojiUpdated(true);

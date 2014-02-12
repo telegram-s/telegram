@@ -21,12 +21,11 @@ import org.telegram.android.log.Logger;
 import org.telegram.android.media.*;
 import org.telegram.android.preview.MediaReceiver;
 import org.telegram.android.ui.*;
+import org.telegram.android.util.CustomBufferedInputStream;
 import org.telegram.android.util.IOUtils;
 import org.telegram.api.TLFileLocation;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +42,8 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
     private static int lastDatabaseId;
     private static boolean moviePaused;
     private static Executor movieLoader = Executors.newSingleThreadExecutor();
+    private static Bitmap movieDestBitmap;
+    private static Canvas movieDestCanvas;
 
     private static final String TAG = "MessageMediaView";
 
@@ -177,26 +178,26 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         bitmapFilteredPaint.setFilterBitmap(true);
         bitmapFilteredPaint.setDither(true);
 
-        ColorMatrix saturation = new ColorMatrix();
-        saturation.setSaturation(2.2f);
-
-        ColorMatrix scale = new ColorMatrix();
-        scale.setScale(1.7f, 1.7f, 1.7f, 1.0f);
-
-        ColorMatrix white = new ColorMatrix();
-        white.set(new float[]{
-                0.7f, 0, 0, 0, 255 * 0.3f,
-                0, 0.7f, 0, 0, 255 * 0.3f,
-                0, 0, 0.7f, 0, 255 * 0.3f,
-                0, 0, 0, 1, 0,
-        });
-
-        ColorMatrix result = new ColorMatrix();
-        result.set(saturation);
-        result.postConcat(scale);
-        result.postConcat(white);
-
-        bitmapFilteredPaint.setColorFilter(new ColorMatrixColorFilter(result));
+//        ColorMatrix saturation = new ColorMatrix();
+//        saturation.setSaturation(2.2f);
+//
+//        ColorMatrix scale = new ColorMatrix();
+//        scale.setScale(1.7f, 1.7f, 1.7f, 1.0f);
+//
+//        ColorMatrix white = new ColorMatrix();
+//        white.set(new float[]{
+//                0.7f, 0, 0, 0, 255 * 0.3f,
+//                0, 0.7f, 0, 0, 255 * 0.3f,
+//                0, 0, 0.7f, 0, 255 * 0.3f,
+//                0, 0, 0, 1, 0,
+//        });
+//
+//        ColorMatrix result = new ColorMatrix();
+//        result.set(saturation);
+//        result.postConcat(scale);
+//        result.postConcat(white);
+//
+//        bitmapFilteredPaint.setColorFilter(new ColorMatrixColorFilter(result));
 
         timeBgRect = new Paint();
         timeBgRect.setColor(0xb6000000);
@@ -476,6 +477,42 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             key = DownloadManager.getDocumentKey(document);
             isDownloadable = true;
 
+            boolean isBinded = false;
+
+            if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
+                if (document.getMimeType().equals("image/gif") ||
+                        document.getMimeType().equals("image/png") ||
+                        document.getMimeType().equals("image/jpeg")) {
+                    if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
+//                        float maxWidth = getPx(160);
+//                        float maxHeight = getPx(300);
+//
+//                        float scale = maxWidth / previewWidth;
+//
+//                        if (previewHeight * scale > maxHeight) {
+//                            scale = maxHeight / previewHeight;
+//                        }
+//
+//                        int scaledW = (int) maxWidth;
+//                        int scaledH = (int) (previewHeight * scale);
+//
+//                        previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), scaledW, scaledH);
+//                        previewTask.setPutInDiskCache(true);
+
+                        // isBinded = true;
+                    }
+                }
+
+                if (!isBinded && document.getFastPreview().length > 0) {
+                    application.getUiKernel().getMediaLoader().requestFastLoading(document, this);
+                    isBinded = true;
+                }
+
+                if (!isBinded && (!(document.getPreview() instanceof TLLocalFileEmpty))) {
+                    // Bind preview
+                }
+            }
+
 //            if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
 //                previewWidth = document.getPreviewW();
 //                previewHeight = document.getPreviewH();
@@ -596,13 +633,13 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     @Override
     protected void bindNewView(MessageWireframe message) {
-        if (Build.VERSION.SDK_INT >= 11) {
-            if (message.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
-                setLayerType(LAYER_TYPE_SOFTWARE, null);
-            } else {
-                setLayerType(LAYER_TYPE_NONE, null);
-            }
-        }
+//        if (Build.VERSION.SDK_INT >= 11) {
+//            if (message.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
+//                setLayerType(LAYER_TYPE_SOFTWARE, null);
+//            } else {
+//                setLayerType(LAYER_TYPE_NONE, null);
+//            }
+//        }
         long start = SystemClock.uptimeMillis();
 
         this.databaseId = message.message.getDatabaseId();
@@ -666,7 +703,16 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                         e.printStackTrace();
                         return;
                     }
+
                     final Movie fmovie = Movie.decodeByteArray(data, 0, data.length);
+//                    final Movie fmovie;
+//                    try {
+//                        fmovie = Movie.decodeStream(new CustomBufferedInputStream(
+//                                new FileInputStream(application.getDownloadManager().getFileName(key))));
+//                    } catch (FileNotFoundException e) {
+//                        e.printStackTrace();
+//                        return;
+//                    }
 
                     post(new Runnable() {
                         @Override
@@ -766,16 +812,26 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             }
             //}
             canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
-            if (movie.width() != 0 && movie.height() != 0) {
-                canvas.save();
-                float scale = Math.min((float) desiredWidth / movie.width(), (float) desiredHeight / movie.height());
-                canvas.translate((desiredWidth - scale * movie.width()) / 2, (desiredHeight - scale * movie.height()) / 2);
-                canvas.scale(scale, scale);
-                movie.draw(canvas, 0, 0);
-                canvas.restore();
-            } else {
-                movie.draw(canvas, 0, 0);
+
+            if (movieDestBitmap == null) {
+                movieDestBitmap = Bitmap.createBitmap(getPx(160), getPx(300), Bitmap.Config.ARGB_8888);
+                movieDestCanvas = new Canvas(movieDestBitmap);
             }
+
+            if (movie.width() != 0 && movie.height() != 0) {
+                movieDestCanvas.save();
+                float scale = Math.min((float) desiredWidth / movie.width(), (float) desiredHeight / movie.height());
+                movieDestCanvas.translate((desiredWidth - scale * movie.width()) / 2, (desiredHeight - scale * movie.height()) / 2);
+                movieDestCanvas.scale(scale, scale);
+                movie.draw(movieDestCanvas, 0, 0);
+                movieDestCanvas.restore();
+            } else {
+                movie.draw(movieDestCanvas, 0, 0);
+            }
+
+            rect1.set(0, 0, desiredWidth, desiredHeight);
+
+            canvas.drawBitmap(movieDestBitmap, rect1, rect1, bitmapPaint);
         } else if (preview != null) {
             if (animationTime > FADE_ANIMATION_TIME || !isAnimatedProgress) {
                 bitmapFilteredPaint.setAlpha(255);

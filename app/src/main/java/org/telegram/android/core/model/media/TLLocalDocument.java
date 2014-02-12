@@ -104,14 +104,6 @@ public class TLLocalDocument extends TLObject {
         this.previewH = previewH;
     }
 
-    public TLAbsLocalFileLocation getPreviewLocation() {
-        return previewLocation;
-    }
-
-    public void setPreviewLocation(TLAbsLocalFileLocation previewLocation) {
-        this.previewLocation = previewLocation;
-    }
-
     public TLLocalDocument() {
 
     }

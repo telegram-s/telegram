@@ -3,8 +3,6 @@ package org.telegram.android;
 import android.app.ActivityOptions;
 import android.app.FragmentManager;
 import android.content.*;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
@@ -27,16 +25,9 @@ import org.telegram.android.fragments.interfaces.RootController;
 import org.telegram.android.log.Logger;
 import org.telegram.android.screens.FragmentScreenController;
 import org.telegram.android.screens.RootControllerHolder;
-import org.telegram.android.ui.pick.PickIntentClickListener;
-import org.telegram.android.ui.pick.PickIntentDialog;
-import org.telegram.android.ui.pick.PickIntentItem;
-import org.telegram.android.ui.pick.PickPriority;
 import org.telegram.integration.TestIntegration;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * Author: Korshakov Stepan
@@ -506,120 +497,6 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         this.lastResultCode = resultCode;
         this.lastResultData = data;
     }
-
-//    private void superStartActivityForResult(Intent intent, int requestCode) {
-//        super.startActivityForResult(intent, requestCode);
-//    }
-//
-//    private void superStartActivity(Intent intent) {
-//        super.startActivity(intent);
-//    }
-//
-//    @Override
-//    public void startActivity(Intent intent) {
-//        PickIntentItem[] items = createPickIntents(intent);
-//        if (items.length == 0) {
-//            Toast.makeText(this, R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();
-//            return;
-//        } else if (items.length == 1) {
-//            superStartActivity(intent);
-//        } else {
-//            PickIntentItem[] pickIntentItems = createPickIntents(intent);
-//            PickIntentDialog dialog = new PickIntentDialog(this, pickIntentItems, new PickIntentClickListener() {
-//                @Override
-//                public void onItemClicked(int index, PickIntentItem item) {
-//                    superStartActivity(item.getIntent());
-//                }
-//            });
-//            dialog.setTitle("Select?");
-//            dialog.show();
-//        }
-//    }
-//
-//    @Override
-//    public void startActivityForResult(Intent intent, final int requestCode) {
-//        PickIntentItem[] items = createPickIntents(intent);
-//        if (items.length == 0) {
-//            Toast.makeText(this, R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();
-//            return;
-//        } else if (items.length == 1) {
-//            superStartActivityForResult(intent, requestCode);
-//        } else {
-//            PickIntentItem[] pickIntentItems = createPickIntents(intent);
-//            PickIntentDialog dialog = new PickIntentDialog(this, pickIntentItems, new PickIntentClickListener() {
-//                @Override
-//                public void onItemClicked(int index, PickIntentItem item) {
-//                    superStartActivityForResult(item.getIntent(), requestCode);
-//                }
-//            });
-//            dialog.setTitle("Select?");
-//            dialog.show();
-//        }
-//    }
-//
-//    protected PickIntentItem[] createPickIntents(Intent intent) {
-//        PackageManager pm = application.getPackageManager();
-//        List<ResolveInfo> rList = pm.queryIntentActivities(intent, 0);
-//
-//        ArrayList<PickIntentItem> defaultRes = new ArrayList<PickIntentItem>();
-//        ArrayList<PickIntentItem> prioritizedRes = new ArrayList<PickIntentItem>();
-//
-//        for (ResolveInfo info : rList) {
-//
-//            boolean isPrioritized = false;
-//            for (int i = 0; i < PickPriority.PACKAGES_PRIORITY.length; i++) {
-//                if (info.activityInfo.packageName.equals(PickPriority.PACKAGES_PRIORITY[i])) {
-//                    isPrioritized = true;
-//                    break;
-//                }
-//            }
-//
-//            PickIntentItem item = new PickIntentItem(info.loadIcon(pm), info.loadLabel(pm).toString());
-//            Intent activityIntent = (Intent) intent.clone();
-//            activityIntent.setClassName(info.activityInfo.packageName, info.activityInfo.name);
-//            item.setIntent(activityIntent);
-//            item.setTag(info);
-//
-//            if (isPrioritized) {
-//                prioritizedRes.add(item);
-//            } else {
-//                defaultRes.add(item);
-//            }
-//        }
-//
-//        Collections.sort(prioritizedRes, new Comparator<PickIntentItem>() {
-//            @Override
-//            public int compare(PickIntentItem item, PickIntentItem item2) {
-//                int index1 = 0, index2 = 0;
-//                for (int i = 0; i < PickPriority.PACKAGES_PRIORITY.length; i++) {
-//                    if (item.getIntent().getComponent().getPackageName().equals(PickPriority.PACKAGES_PRIORITY[i])) {
-//                        index1 = i;
-//                        break;
-//                    }
-//                }
-//                for (int i = 0; i < PickPriority.PACKAGES_PRIORITY.length; i++) {
-//                    if (item2.getIntent().getComponent().getPackageName().equals(PickPriority.PACKAGES_PRIORITY[i])) {
-//                        index2 = i;
-//                        break;
-//                    }
-//                }
-//                return index1 - index2;
-//            }
-//        });
-//
-//        Collections.sort(defaultRes, new Comparator<PickIntentItem>() {
-//            @Override
-//            public int compare(PickIntentItem item, PickIntentItem item2) {
-//                return item.getTitle().compareTo(item2.getTitle());
-//            }
-//        });
-//
-//
-//        ArrayList<PickIntentItem> res = new ArrayList<PickIntentItem>();
-//        res.addAll(prioritizedRes);
-//        res.addAll(defaultRes);
-//        return res.toArray(new PickIntentItem[res.size()]);
-//    }
 
     @Override
     public int getResultCode() {

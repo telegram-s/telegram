@@ -64,7 +64,7 @@ android {
 
         ndk {
             moduleName "timg"
-            cFlags "-DANDROID_NDK -DDISABLE_IMPORTGL"
+            cFlags "-DANDROID_NDK -DDISABLE_IMPORTGL -O3"
             ldLibs "log", "jnigraphics", "m"
             stl "stlport_static"
         }

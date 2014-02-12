@@ -15,6 +15,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ApiUtils;
+import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLLocalGeo;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
@@ -25,6 +26,7 @@ import org.telegram.android.media.VideoOptimizer;
 import org.telegram.android.ui.BitmapUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -132,6 +134,31 @@ public class MediaLoader {
         receivers.add(new ReceiverHolder(key, receiver));
 
         processor.requestTask(new MediaPhotoFastTask(photo));
+    }
+
+    public void requestFastLoading(TLLocalDocument doc, MediaReceiver receiver) {
+        checkUiThread();
+
+        String key = doc.getPreview().getUniqKey();
+        BitmapHolder cached = imageCache.getFromCache(key);
+        if (cached != null) {
+            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
+            return;
+        }
+
+        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
+            if (holder.getReceiverReference().get() == null) {
+                receivers.remove(holder);
+                continue;
+            }
+            if (holder.getReceiverReference().get() == receiver) {
+                receivers.remove(holder);
+                break;
+            }
+        }
+        receivers.add(new ReceiverHolder(key, receiver));
+
+        processor.requestTask(new MediaDocFastTask(doc));
     }
 
     public void requestFastLoading(TLLocalVideo video, MediaReceiver receiver) {
@@ -342,6 +369,24 @@ public class MediaLoader {
         }
     }
 
+    private class MediaDocFastTask extends BaseTask {
+
+        private TLLocalDocument doc;
+
+        private MediaDocFastTask(TLLocalDocument doc) {
+            this.doc = doc;
+        }
+
+        public TLLocalDocument getDoc() {
+            return doc;
+        }
+
+        @Override
+        public String getKey() {
+            return doc.getPreview().getUniqKey();
+        }
+    }
+
     private class MediaVideoFastTask extends BaseTask {
 
         private TLLocalVideo video;
@@ -391,55 +436,76 @@ public class MediaLoader {
                 return processPhoto((MediaPhotoFastTask) task);
             } else if (task instanceof MediaVideoFastTask) {
                 return processVideo((MediaVideoFastTask) task);
+            } else if (task instanceof MediaDocFastTask) {
+                return processDoc((MediaDocFastTask) task);
             }
             return false;
         }
 
         private boolean processPhoto(MediaPhotoFastTask task) {
-            BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-
             TLLocalPhoto mediaPhoto = task.getPhoto();
 
-            bitmapOptions.inSampleSize = 1;
-            bitmapOptions.inScaled = false;
-            bitmapOptions.inTempStorage = bitmapTmp.get();
-            if (Build.VERSION.SDK_INT >= 10) {
-                bitmapOptions.inPreferQualityOverSpeed = false;
-            }
-
-            Bitmap img = BitmapFactory.decodeByteArray(mediaPhoto.getFastPreview(), 0, mediaPhoto.getFastPreview().length, bitmapOptions);
-            if ((mediaPhoto.getOptimization() & TLLocalPhoto.OPTIMIZATION_BLUR) == 0) {
-                optimizedBlur.performBlur(img);
-            }
-            notifyMediaLoaded(task, img, mediaPhoto.getFastPreviewW(), mediaPhoto.getFastPreviewH());
-
-            return true;
+            return process(
+                    mediaPhoto.getFastPreview(),
+                    mediaPhoto.getFastPreviewW(),
+                    mediaPhoto.getFastPreviewH(),
+                    mediaPhoto.getFastPreviewKey(),
+                    task);
         }
 
         private boolean processVideo(MediaVideoFastTask task) {
-            BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
 
             TLLocalVideo mediaVideo = task.getVideo();
 
-            bitmapOptions.inSampleSize = 1;
-            bitmapOptions.inScaled = false;
-            bitmapOptions.inTempStorage = bitmapTmp.get();
-            if (Build.VERSION.SDK_INT >= 10) {
-                bitmapOptions.inPreferQualityOverSpeed = false;
+            return process(
+                    mediaVideo.getFastPreview(),
+                    mediaVideo.getPreviewW(),
+                    mediaVideo.getPreviewH(),
+                    mediaVideo.getPreviewKey(),
+                    task);
+        }
+
+        private boolean processDoc(MediaDocFastTask task) {
+            TLLocalDocument mediaDoc = task.getDoc();
+
+            return process(
+                    mediaDoc.getFastPreview(),
+                    mediaDoc.getPreviewW(),
+                    mediaDoc.getPreviewH(),
+                    mediaDoc.getPreview().getUniqKey(),
+                    task);
+        }
+
+        private boolean process(byte[] data, int w, int h, String key, BaseTask task) {
+            Bitmap img = imageCache.findFree(SIZE_FAST_PREVIEW);
+            if (img != null) {
+                try {
+                    Optimizer.loadTo(data, img);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            } else {
+                try {
+                    img = Optimizer.load(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
             }
 
-            Bitmap img = BitmapFactory.decodeByteArray(mediaVideo.getFastPreview(), 0, mediaVideo.getFastPreview().length, bitmapOptions);
-            // optimizedBlur.performBlur(img);
             img = BitmapUtils.fastblur(img, 8);
 
-            notifyMediaLoaded(task, img, mediaVideo.getPreviewW(), mediaVideo.getPreviewH());
+            imageCache.putToCache(SIZE_FAST_PREVIEW, new BitmapHolder(img, key, w, h));
+
+            notifyMediaLoaded(task, img, w, h);
 
             return true;
         }
 
         @Override
         public boolean isAccepted(BaseTask task) {
-            return task instanceof MediaPhotoFastTask || task instanceof MediaVideoFastTask;
+            return task instanceof MediaPhotoFastTask || task instanceof MediaVideoFastTask || task instanceof MediaDocFastTask;
         }
     }
 
@@ -486,12 +552,12 @@ public class MediaLoader {
         private boolean processFileTask(MediaFileTask fileTask) {
             synchronized (fullImageCachedLock) {
                 if (fullImageCached == null) {
-                    fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE, ApiUtils.MAX_SIZE, Bitmap.Config.ARGB_8888);
+                    fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
                 }
 
                 fullImageCached.eraseColor(Color.TRANSPARENT);
 
-                BitmapDecoderEx.decodeReuseBitmap(fileTask.fileName, fullImageCached);
+                BitmapDecoderEx.decodeReuseBitmapScaled(fileTask.fileName, fullImageCached);
 
                 Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
                 if (res == null) {
@@ -500,7 +566,7 @@ public class MediaLoader {
                     res.eraseColor(Color.TRANSPARENT);
                 }
                 int[] sizes = Optimizer.scaleToRatio(fullImageCached,
-                        fileTask.getLocalPhoto().getFullW(), fileTask.getLocalPhoto().getFullH(), res);
+                        fileTask.getLocalPhoto().getFullW() / 2, fileTask.getLocalPhoto().getFullH() / 2, res);
 
                 imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]));
 
