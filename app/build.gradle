@@ -64,7 +64,13 @@ android {
 
         ndk {
             moduleName "timg"
-            cFlags "-DANDROID_NDK -DDISABLE_IMPORTGL -O3 -fstrict-aliasing -fprefetch-loop-arrays -DAVOID_TABLES -DANDROID_TILE_BASED_DECODE -DANDROID_ARMV6_IDCT"
+            cFlags "-DANDROID_NDK " +
+                    "-DDISABLE_IMPORTGL " +
+                    "-O3 -fstrict-aliasing -fprefetch-loop-arrays " +
+                    "-DAVOID_TABLES " +
+                    "-DANDROID_TILE_BASED_DECODE " +
+                    "-DANDROID_ARMV6_IDCT " +
+                    "-DANDROID_RGB"
             ldLibs "log", "jnigraphics", "m"
             stl "stlport_static"
         }

@@ -392,7 +392,7 @@ void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmapBlend(
 
         if (rowIndex++ < info.height) {
             for( i = 0; i < MIN(info.width, cinfo.output_width); i++) {
-                line[i] = ARGB(buffer[0][i*3], R(line[i]), G(line[i]), B(line[i]));
+                line[i] = ARGB(buffer[0][i], R(line[i]), G(line[i]), B(line[i]));
             }
             line = (char*)line + (info.stride);
         }
