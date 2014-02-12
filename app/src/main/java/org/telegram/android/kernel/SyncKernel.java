@@ -1,10 +1,7 @@
 package org.telegram.android.kernel;
 
 import org.telegram.android.core.TypingStates;
-import org.telegram.android.core.background.AvatarUploader;
-import org.telegram.android.core.background.MediaSender;
-import org.telegram.android.core.background.MessageSender;
-import org.telegram.android.core.background.UpdateProcessor;
+import org.telegram.android.core.background.*;
 import org.telegram.android.core.background.sync.BackgroundSync;
 import org.telegram.android.core.background.sync.ContactsSync;
 import org.telegram.android.log.Logger;
@@ -27,6 +24,7 @@ public class SyncKernel {
     private MediaSender mediaSender;
     private TypingStates typingStates;
     private AvatarUploader avatarUploader;
+    private SimpleBackground simpleBackground;
 
     public SyncKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
@@ -61,6 +59,10 @@ public class SyncKernel {
         return avatarUploader;
     }
 
+    public SimpleBackground getSimpleBackground() {
+        return simpleBackground;
+    }
+
     private void init() {
         long start = System.currentTimeMillis();
         messageSender = new MessageSender(kernel.getApplication());
@@ -85,6 +87,10 @@ public class SyncKernel {
         start = System.currentTimeMillis();
         contactsSync = new ContactsSync(kernel);
         Logger.d(TAG, "ContactsSync loaded in " + (System.currentTimeMillis() - start) + " ms");
+
+        start = System.currentTimeMillis();
+        simpleBackground = new SimpleBackground();
+        Logger.d(TAG, "SimpleBackground loaded in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     public void runKernel() {
@@ -96,6 +102,7 @@ public class SyncKernel {
         }
         backgroundSync.run();
         contactsSync.run();
+        simpleBackground.run();
 
         if (!Locale.getDefault().getLanguage().equals(kernel.getTechKernel().getSystemConfig().getInviteMessageLang())) {
             backgroundSync.resetInviteSync();

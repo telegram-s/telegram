@@ -16,4 +16,10 @@ public class ImageNativeUtils {
     }
 
     private static native void nativeMergeBitmapAlpha(Bitmap source, Bitmap alpha);
+
+    public static void loadEmoji(String colorFile, String alphaFile) {
+        nativeLoadEmoji(colorFile, alphaFile);
+    }
+
+    private static native void nativeLoadEmoji(String colorFile, String alphaFile);
 }

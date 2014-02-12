@@ -182,21 +182,27 @@ public class UiKernel {
         return isAppActive;
     }
 
-    public void onOpenedChat(int peerType, int peerId) {
+    public void onOpenedChat(final int peerType, final int peerId) {
         this.openedChatPeerType = peerType;
         this.openedChatPeerId = peerId;
-        application.getEngine().getDialogsEngine().markDialogAsNonFailed(peerType, peerId);
 
-        if (peerType != PeerType.PEER_USER_ENCRYPTED) {
-            int maxMid = application.getEngine().getMessagesEngine().getMaxMidInDialog(peerType, peerId);
-            application.getEngine().getDialogsEngine().onMaxLocalViewed(peerType, peerId, maxMid);
-        } else {
-            int maxDate = application.getEngine().getMessagesEngine().getMaxDateInDialog(peerType, peerId);
-            application.getEngine().getDialogsEngine().onMaxLocalViewed(peerType, peerId, maxDate);
-        }
+        kernel.getSyncKernel().getSimpleBackground().postAction(new Runnable() {
+            @Override
+            public void run() {
+                application.getEngine().getDialogsEngine().markDialogAsNonFailed(peerType, peerId);
 
-        application.getSyncKernel().getBackgroundSync().resetHistorySync();
-        application.getDialogSource().getViewSource().invalidateData();
+                if (peerType != PeerType.PEER_USER_ENCRYPTED) {
+                    int maxMid = application.getEngine().getMessagesEngine().getMaxMidInDialog(peerType, peerId);
+                    application.getEngine().getDialogsEngine().onMaxLocalViewed(peerType, peerId, maxMid);
+                } else {
+                    int maxDate = application.getEngine().getMessagesEngine().getMaxDateInDialog(peerType, peerId);
+                    application.getEngine().getDialogsEngine().onMaxLocalViewed(peerType, peerId, maxDate);
+                }
+                application.getSyncKernel().getBackgroundSync().resetHistorySync();
+            }
+        });
+
+        // application.getDialogSource().getViewSource().invalidateData();
         getNotifications().hideChatNotifications(peerType, peerId);
     }
 

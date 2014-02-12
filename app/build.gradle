@@ -66,7 +66,7 @@ android {
             moduleName "timg"
             cFlags "-DANDROID_NDK " +
                     "-DDISABLE_IMPORTGL " +
-                    "-O3 -fstrict-aliasing -fprefetch-loop-arrays " +
+                    "-O3 -fprefetch-loop-arrays -fno-strict-aliasing " +
                     "-DAVOID_TABLES " +
                     "-DANDROID_TILE_BASED_DECODE " +
                     "-DANDROID_ARMV6_IDCT"

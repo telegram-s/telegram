@@ -250,7 +250,7 @@ static void brightness(AndroidBitmapInfo* info, void* pixels, float brightnessVa
 	}
 }
 
-void Java_org_telegram_android_util_ImageNativeUtils_nativeMergeBitmapAlpha(
+JNIEXPORT void Java_org_telegram_android_util_ImageNativeUtils_nativeMergeBitmapAlpha(
         JNIEnv* env,
         jclass clazz,
         jobject source,
@@ -309,7 +309,7 @@ void Java_org_telegram_android_util_ImageNativeUtils_nativeMergeBitmapAlpha(
     AndroidBitmap_unlockPixels(env, alpha);
 }
 
-void Java_org_telegram_android_media_OptimizedBlur_nativeFastBlur(
+JNIEXPORT void Java_org_telegram_android_media_OptimizedBlur_nativeFastBlur(
         JNIEnv* env,
         jobject thiz,
         jobject bitmap)
@@ -338,7 +338,7 @@ void Java_org_telegram_android_media_OptimizedBlur_nativeFastBlur(
         AndroidBitmap_unlockPixels(env, bitmap);
 }
 
-void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmapBlend(
+JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmapBlend(
                                                              JNIEnv* env,
                                                              jobject thiz,
                                                              jstring fileName,
@@ -404,7 +404,7 @@ void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmapBlend(
     AndroidBitmap_unlockPixels(env, bitmap);
 }
 
-void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmap(
+JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmap(
                                                              JNIEnv* env,
                                                              jobject thiz,
                                                              jstring fileName,
@@ -470,7 +470,7 @@ void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmap(
     AndroidBitmap_unlockPixels(env, bitmap);
 }
 
-void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeArray(
+JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeArray(
                                                              JNIEnv* env,
                                                              jobject thiz,
                                                              jbyteArray array,
@@ -534,7 +534,7 @@ void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeArray(
     (*env)->ReleaseByteArrayElements(env, array, b, 0 );
 }
 
-void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmapScaled(
+JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmapScaled(
                                                              JNIEnv* env,
                                                              jobject thiz,
                                                              jstring fileName,
@@ -607,7 +607,7 @@ void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitmapScaled(
     AndroidBitmap_unlockPixels(env, bitmap);
 }
 
-void Java_org_telegram_android_util_NativeAES_nativeAesDecrypt(
+JNIEXPORT void Java_org_telegram_android_util_NativeAES_nativeAesDecrypt(
                                                              JNIEnv* env,
                                                              jobject thiz,
                                                              jbyteArray _source,
@@ -630,7 +630,7 @@ void Java_org_telegram_android_util_NativeAES_nativeAesDecrypt(
     (*env)->ReleaseByteArrayElements(env, _iv, iv, JNI_ABORT);
 }
 
-void Java_org_telegram_android_util_NativeAES_nativeAesDecryptStreaming(
+JNIEXPORT void Java_org_telegram_android_util_NativeAES_nativeAesDecryptStreaming(
                                                              JNIEnv* env,
                                                              jobject thiz,
                                                              jbyteArray _source,
@@ -653,7 +653,7 @@ void Java_org_telegram_android_util_NativeAES_nativeAesDecryptStreaming(
     (*env)->ReleaseByteArrayElements(env, _iv, iv, 0);
 }
 
-void Java_org_telegram_android_util_NativeAES_nativeAesEncrypt(
+JNIEXPORT void Java_org_telegram_android_util_NativeAES_nativeAesEncrypt(
                                                              JNIEnv* env,
                                                              jobject thiz,
                                                              jbyteArray _source,
@@ -677,7 +677,7 @@ void Java_org_telegram_android_util_NativeAES_nativeAesEncrypt(
     (*env)->ReleaseByteArrayElements(env, _iv, iv, JNI_ABORT);
 }
 
-void Java_org_telegram_android_util_NativeAES_nativeAesEncryptStreaming(
+JNIEXPORT void Java_org_telegram_android_util_NativeAES_nativeAesEncryptStreaming(
                                                              JNIEnv* env,
                                                              jobject thiz,
                                                              jbyteArray _source,
@@ -710,7 +710,7 @@ uint64_t gcd(uint64_t a, uint64_t b){
     return b == 0 ? a : b;
 }
 
-void Java_org_telegram_android_util_NativePQ_solvePq(JNIEnv* env, jobject thiz, jlong src)
+JNIEXPORT jlong Java_org_telegram_android_util_NativePQ_solvePq(JNIEnv* env, jobject thiz, jlong src)
 {
     uint64_t what = src;
         int it = 0, i, j;
@@ -741,4 +741,80 @@ void Java_org_telegram_android_util_NativePQ_solvePq(JNIEnv* env, jobject thiz, 
         }
         return g;
 
+}
+
+
+void Java_org_telegram_android_util_ImageNativeUtils_nativeLoadEmoji(
+        JNIEnv* env,
+        jclass clazz,
+        jstring colorPath,
+        jstring alphaPath) {
+    char * cPath =  (*env)->GetStringUTFChars( env, colorPath , NULL );
+    char * aPath =  (*env)->GetStringUTFChars( env, alphaPath , NULL );
+    AndroidBitmapInfo  info;
+    struct jpeg_error_mgr jerr;
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_decompress_struct ainfo;
+    FILE *cFile, *aFile;
+    JSAMPARRAY cBuffer, aBuffer;
+    int strideC, strideA, ret, rowIndex, i;
+    void *cPixels, *aPixels;
+    uint32_t *cData, *aData;
+
+    cinfo.err = jpeg_std_error(&jerr);
+    ainfo.err = jpeg_std_error(&jerr);
+
+    jpeg_create_decompress(&cinfo);
+    jpeg_create_decompress(&ainfo);
+
+    if ((cFile = fopen(cPath, "rb")) == NULL) {
+        LOGE("Unable to open file");
+        return;
+    }
+
+    if ((aFile = fopen(aPath, "rb")) == NULL) {
+        LOGE("Unable to open file");
+        return;
+    }
+
+    jpeg_stdio_src(&cinfo, cFile);
+    jpeg_stdio_src(&ainfo, aFile);
+
+    (void) jpeg_read_header(&cinfo, TRUE);
+    (void) jpeg_read_header(&ainfo, TRUE);
+
+    (void) jpeg_start_decompress(&cinfo);
+    (void) jpeg_start_decompress(&ainfo);
+
+    strideC = cinfo.output_width * cinfo.output_components;
+    strideA = ainfo.output_width * ainfo.output_components;
+
+    cBuffer = (*cinfo.mem->alloc_sarray)
+        ((j_common_ptr) &cinfo, JPOOL_IMAGE, strideC, 1);
+    aBuffer = (*ainfo.mem->alloc_sarray)
+        ((j_common_ptr) &ainfo, JPOOL_IMAGE, strideA, 1);
+
+    jclass java_bitmap_class = (jclass)(*env)->FindClass(env, "android/graphics/Bitmap");
+    jmethodID mid = (*env)->GetStaticMethodID(env, java_bitmap_class, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
+
+    const wchar_t config_name[] = L"ARGB_8888";
+    jstring j_config_name = (*env)->NewString(env, (const jchar*)config_name, wcslen(config_name));
+    jclass bcfg_class = (*env)->FindClass(env, "android/graphics/Bitmap$Config");
+    jobject java_bitmap_config = (*env)->CallStaticObjectMethod(env, bcfg_class, (*env)->GetStaticMethodID(env, bcfg_class, "valueOf", "(Ljava/lang/String;)Landroid/graphics/Bitmap$Config;"), j_config_name);
+
+    // jobject bitmap = (*env)->CallStaticObjectMethod(env, java_bitmap_class, mid, 8 * 54, 8 * 54, java_bitmap_config);
+    // jobject* res =(jobject*) malloc(16 * sizeof(jobject));
+    // for(i = 0; i < 16; i++) {
+        //jobject bitmap = (*env)->CallStaticObjectMethod(env, java_bitmap_class, mid, 8 * 54, 8 * 54, java_bitmap_config);
+    // }
+
+    cData = (uint32_t*)cPixels;
+    aData = (unsigned char*)aPixels;
+    while (cinfo.output_scanline < cinfo.output_height) {
+        (void) jpeg_read_scanlines(&cinfo, cBuffer, 1);
+        (void) jpeg_read_scanlines(&ainfo, aBuffer, 1);
+    }
+
+    (void) jpeg_finish_decompress(&cinfo);
+    (void) jpeg_finish_decompress(&ainfo);
 }

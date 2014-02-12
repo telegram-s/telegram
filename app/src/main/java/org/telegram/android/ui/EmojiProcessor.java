@@ -299,6 +299,9 @@ public class EmojiProcessor {
                         colorsIs.close();
                     }
 
+                    ImageNativeUtils.loadEmoji(sourceFile.getAbsolutePath(), sourceAlphaFile.getAbsolutePath());
+
+                    Logger.d(TAG, "emoji pre-loaded 0 in " + (System.currentTimeMillis() - start) + " ms");
 
                     Bitmap colorsBitmap = Optimizer.load(sourceFile.getAbsolutePath());
                     colorsBitmap.setHasAlpha(true);

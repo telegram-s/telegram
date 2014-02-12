@@ -13,7 +13,9 @@ public class NativePQ implements PQImplementation {
 
     @Override
     public long findDivider(long src) {
-        return 0;
+        long res = solvePq(src);
+        res = Math.min(res, src / res);
+        return res;
     }
 
     private native long solvePq(long src);
