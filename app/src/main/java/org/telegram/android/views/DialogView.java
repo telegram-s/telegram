@@ -349,6 +349,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         super.onDetachedFromWindow();
         // avatarReceiver.onRemovedFromParent();
         // avatar = null;
+        releaseAvatar();
         postInvalidate();
     }
 
