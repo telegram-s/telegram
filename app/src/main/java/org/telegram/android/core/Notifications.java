@@ -436,7 +436,7 @@ public class Notifications {
                         } else {
                             avatarImage.setLoadingDrawable(Placeholders.getUserPlaceholder(senderId));
                             ((TextView) notificationView.findViewById(R.id.name)).setTextColor(0xff67b540);
-                            ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_ic_lock_green, 0, 0, 0);
+                            ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_dialogs_lock, 0, 0, 0);
                         }
 
                         notificationView.findViewById(R.id.container).setOnClickListener(new View.OnClickListener() {

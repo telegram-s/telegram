@@ -267,7 +267,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         stateSent = getResources().getDrawable(R.drawable.st_dialogs_check);
         stateHalfCheck = getResources().getDrawable(R.drawable.st_dialogs_halfcheck);
         stateFailure = getResources().getDrawable(R.drawable.st_dialogs_warning);
-        secureIcon = getResources().getDrawable(R.drawable.st_ic_lock_green);
+        secureIcon = getResources().getDrawable(R.drawable.st_dialogs_lock);
 
         for (int index = 0; index < Placeholders.GROUP_PLACEHOLDERS.length; index++) {
             if (cachedGroupPlaceholders[index] == null) {
@@ -709,8 +709,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 layoutTitleTop = px(24);
                 layoutMainTop = px(46);
                 layoutTimeTop = px(34);
-                layoutStateTop = px(22);
-                layoutEncryptedTop = px(20);
 
                 layoutMarkTop = px(44);
                 layoutMarkBottom = layoutMarkTop + px(22);
@@ -723,8 +721,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 layoutTitleTop = px(30);
                 layoutMainTop = px(54);
                 layoutTimeTop = px(30);
-                // layoutStateTop = px(16);
-                layoutEncryptedTop = px(14);
 
                 layoutMarkTop = px(38);
                 layoutMarkBottom = layoutMarkTop + px(22);
@@ -733,7 +729,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
             layoutMainContentTop = (int) (layoutMainTop + bodyPaint.getFontMetrics().ascent);
             layoutTitleLayoutTop = (int) (layoutTitleTop + titlePaint.getFontMetrics().ascent);
-            layoutStateTop = layoutTimeTop - px(12);
+            layoutStateTop = layoutTimeTop - px(10);
+            layoutEncryptedTop = layoutTimeTop - px(14);
 
             if (isRtl) {
                 layoutAvatarLeft = w - layoutPadding - layoutAvatarWidth;
@@ -749,11 +746,11 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             }
 
             if (isRtl) {
-                layoutStateLeft = layoutPadding + timeWidth + px(6);
                 layoutStateLeftDouble = layoutPadding + timeWidth + px(2);
+                layoutStateLeft = layoutStateLeftDouble + px(6);
             } else {
-                layoutStateLeft = w - layoutPadding - timeWidth - px(12);
-                layoutStateLeftDouble = w - layoutPadding - timeWidth - px(8 + 12);
+                layoutStateLeft = w - layoutPadding - timeWidth - px(16);
+                layoutStateLeftDouble = w - layoutPadding - timeWidth - px(6 + 16);
             }
 
             layoutMarkRadius = px(2);
