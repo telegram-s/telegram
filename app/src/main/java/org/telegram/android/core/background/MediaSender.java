@@ -22,11 +22,13 @@ import org.telegram.android.media.Optimizer;
 import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.util.IOUtils;
 import org.telegram.api.*;
+import org.telegram.api.TLPhoto;
 import org.telegram.api.engine.file.UploadListener;
 import org.telegram.api.engine.file.Uploader;
 import org.telegram.api.messages.TLAbsSentEncryptedMessage;
 import org.telegram.api.messages.TLAbsStatedMessage;
 import org.telegram.api.messages.TLSentEncryptedFile;
+import org.telegram.api.photos.*;
 import org.telegram.api.requests.TLRequestMessagesSendEncryptedFile;
 import org.telegram.api.requests.TLRequestMessagesSendMedia;
 import org.telegram.mtproto.secure.CryptoUtils;
@@ -55,6 +57,8 @@ public class MediaSender {
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final HashMap<Integer, SendState> states = new HashMap<Integer, SendState>();
+
+    private final HashMap<String, UploadedFile> uploaded = new HashMap<String, UploadedFile>();
 
     private static final int TIMEOUT = 5 * 60 * 1000;
 
@@ -197,10 +201,16 @@ public class MediaSender {
     }
 
     private void uploadPhoto(ChatMessage message) throws Exception {
+        String hash = SHA1(message);
         String uploadFileName = preparePhoto(message);
-        Uploader.UploadResult result = uploadFile(uploadFileName, message.getDatabaseId());
-        TLAbsStatedMessage sent = doSendPhoto(result, message);
-        saveUploadedPhoto(sent, uploadFileName);
+        TLAbsStatedMessage sent;
+        if (uploaded.containsKey(hash)) {
+            sent = doSendPhoto(uploaded.get(hash), message);
+        } else {
+            Uploader.UploadResult result = uploadFile(uploadFileName, message.getDatabaseId());
+            sent = doSendPhoto(result, message);
+            saveUploadedPhoto(sent, hash, uploadFileName);
+        }
         completePhotoSending(sent, uploadFileName, message);
     }
 
@@ -262,6 +272,20 @@ public class MediaSender {
             Optimizer.optimize(uploadingPhoto.getFileName(), destFile);
         }
         return destFile;
+    }
+
+    private String SHA1(ChatMessage message) throws Exception {
+        if (!(message.getExtras() instanceof TLUploadingPhoto)) {
+            throw new InvalidObjectException("Expected TLUploadingPhoto extras");
+        }
+
+        TLUploadingPhoto uploadingPhoto = (TLUploadingPhoto) message.getExtras();
+
+        if (uploadingPhoto.getFileUri() != null && uploadingPhoto.getFileUri().length() > 0) {
+            return SHA1Uri(uploadingPhoto.getFileUri());
+        } else {
+            return SHA1File(uploadingPhoto.getFileName());
+        }
     }
 
     private TLAbsStatedMessage doSendAudio(Uploader.UploadResult result, TLUploadingAudio document, ChatMessage message) throws Exception {
@@ -452,6 +476,20 @@ public class MediaSender {
                 new TLRequestMessagesSendMedia(peer, new TLInputMediaUploadedPhoto(inputFile), message.getRandomId()), TIMEOUT);
     }
 
+    private TLAbsStatedMessage doSendPhoto(UploadedFile result, ChatMessage message) throws Exception {
+        TLAbsInputPeer peer;
+        if (message.getPeerType() == PeerType.PEER_USER) {
+            User user = application.getEngine().getUser(message.getPeerId());
+            peer = new TLInputPeerForeign(user.getUid(), user.getAccessHash());
+        } else {
+            peer = new TLInputPeerChat(message.getPeerId());
+        }
+
+        return application.getApi().doRpcCall(
+                new TLRequestMessagesSendMedia(peer, new TLInputMediaPhoto(new TLInputPhoto(result.getId(), result.getAccessHash())),
+                        message.getRandomId()), TIMEOUT);
+    }
+
     private EncryptedPhotoSent doSendPhotoEnc(String originalFile, EncryptedFile encryptedFile, Uploader.UploadResult result, Optimizer.FastPreviewResult previewResult,
                                               ChatMessage message, EncryptedChat chat) throws Exception {
         TLDecryptedMessage decryptedMessage = new TLDecryptedMessage();
@@ -591,8 +629,10 @@ public class MediaSender {
         return new EncryptedVideoSent(encryptedMessage, localVideo);
     }
 
-    private void saveUploadedPhoto(TLAbsStatedMessage sent, String uploadFileName) throws Exception {
+    private void saveUploadedPhoto(TLAbsStatedMessage sent, String hash, String uploadFileName) throws Exception {
         TLMessage msgRes = (TLMessage) sent.getMessage();
+        TLPhoto rawPhoto = (TLPhoto) ((TLMessageMediaPhoto) msgRes.getMedia()).getPhoto();
+        uploaded.put(hash, new UploadedFile(rawPhoto.getId(), rawPhoto.getAccessHash()));
         TLLocalPhoto mediaPhoto = EngineUtils.convertPhoto((TLMessageMediaPhoto) msgRes.getMedia());
         if (!(mediaPhoto.getFullLocation() instanceof TLLocalFileEmpty)) {
             String downloadKey = DownloadManager.getPhotoKey(mediaPhoto);
@@ -928,6 +968,16 @@ public class MediaSender {
         return Optimizer.buildPreview(path);
     }
 
+    private String SHA1File(String fileName) throws IOException {
+        return CryptoUtils.ToHex(CryptoUtils.SHA1(fileName));
+    }
+
+    private String SHA1Uri(String uri) throws IOException {
+        InputStream stream = application.getContentResolver().openInputStream(Uri.parse(uri));
+        return CryptoUtils.ToHex(CryptoUtils.SHA1(stream));
+    }
+
+
 //    private void transcodeVideo(String source, String dest) throws Exception {
 //        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 100, 100);
 //
@@ -1093,6 +1143,25 @@ public class MediaSender {
 
         public Bitmap getImg() {
             return img;
+        }
+    }
+
+    private class UploadedFile {
+        private long id;
+        private long accessHash;
+
+        public long getId() {
+            return id;
+        }
+
+        public long getAccessHash() {
+            return accessHash;
+        }
+
+
+        private UploadedFile(long id, long accessHash) {
+            this.id = id;
+            this.accessHash = accessHash;
         }
     }
 }

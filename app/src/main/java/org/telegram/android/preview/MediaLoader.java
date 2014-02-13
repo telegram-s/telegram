@@ -45,6 +45,7 @@ public class MediaLoader {
     private QueueWorker[] workers;
     private QueueProcessor<BaseTask> processor;
     private ImageCache imageCache;
+    private ImageStorage imageStorage;
 
     private Bitmap fullImageCached = null;
     private Object fullImageCachedLock = new Object();
@@ -59,6 +60,7 @@ public class MediaLoader {
         this.application = application;
         this.processor = new QueueProcessor<BaseTask>();
         this.imageCache = new ImageCache(2, 3);
+        this.imageStorage = new ImageStorage(application, "previews");
 
         float density = application.getResources().getDisplayMetrics().density;
 
@@ -71,7 +73,8 @@ public class MediaLoader {
         this.workers = new QueueWorker[]{
                 new FastWorker(),
                 new FileWorker(),
-                new MapWorker()
+                new MapWorker(),
+                new RawWorker()
         };
 
         for (QueueWorker w : workers) {
@@ -79,138 +82,39 @@ public class MediaLoader {
         }
     }
 
+    public void requestRaw(String fileName, MediaReceiver receiver) {
+        requestTask(new MediaRawTask(fileName), fileName, receiver);
+    }
+
     public void requestGeo(TLLocalGeo geo, MediaReceiver receiver) {
-        checkUiThread();
-
         String key = "geo:" + geo.getLatitude() + "," + geo.getLongitude();
-        BitmapHolder cached = imageCache.getFromCache(key);
-        if (cached != null) {
-            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
-            return;
-        }
-
-        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
-            if (holder.getReceiverReference().get() == null) {
-                receivers.remove(holder);
-                continue;
-            }
-            if (holder.getReceiverReference().get() == receiver) {
-                receivers.remove(holder);
-                break;
-            }
-        }
-        receivers.add(new ReceiverHolder(key, receiver));
-
-        processor.requestTask(new MediaGeoTask(geo.getLatitude(), geo.getLongitude()));
+        requestTask(new MediaGeoTask(geo.getLatitude(), geo.getLongitude()), key, receiver);
     }
 
     public void requestFastLoading(TLLocalPhoto photo, MediaReceiver receiver) {
-        checkUiThread();
-
-        String key = photo.getFastPreviewKey();
-        BitmapHolder cached = imageCache.getFromCache(key);
-        if (cached != null) {
-            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
-            return;
-        }
-
-        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
-            if (holder.getReceiverReference().get() == null) {
-                receivers.remove(holder);
-                continue;
-            }
-            if (holder.getReceiverReference().get() == receiver) {
-                receivers.remove(holder);
-                break;
-            }
-        }
-        receivers.add(new ReceiverHolder(key, receiver));
-
-        processor.requestTask(new MediaPhotoFastTask(photo));
+        requestTask(new MediaPhotoFastTask(photo), photo.getFastPreviewKey(), receiver);
     }
 
     public void requestFastLoading(TLLocalDocument doc, MediaReceiver receiver) {
-        checkUiThread();
-
-        String key = doc.getPreview().getUniqKey();
-        BitmapHolder cached = imageCache.getFromCache(key);
-        if (cached != null) {
-            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
-            return;
-        }
-
-        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
-            if (holder.getReceiverReference().get() == null) {
-                receivers.remove(holder);
-                continue;
-            }
-            if (holder.getReceiverReference().get() == receiver) {
-                receivers.remove(holder);
-                break;
-            }
-        }
-        receivers.add(new ReceiverHolder(key, receiver));
-
-        processor.requestTask(new MediaDocFastTask(doc));
+        requestTask(new MediaDocFastTask(doc), doc.getPreview().getUniqKey(), receiver);
     }
 
     public void requestFastLoading(TLLocalVideo video, MediaReceiver receiver) {
-        checkUiThread();
-
-        String key = video.getPreviewKey();
-        BitmapHolder cached = imageCache.getFromCache(key);
-        if (cached != null) {
-            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
-            return;
-        }
-
-        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
-            if (holder.getReceiverReference().get() == null) {
-                receivers.remove(holder);
-                continue;
-            }
-            if (holder.getReceiverReference().get() == receiver) {
-                receivers.remove(holder);
-                break;
-            }
-        }
-        receivers.add(new ReceiverHolder(key, receiver));
-
-        processor.requestTask(new MediaVideoFastTask(video));
+        requestTask(new MediaVideoFastTask(video), video.getPreviewKey(), receiver);
     }
 
     public void requestFullLoading(TLLocalPhoto photo, String fileName, MediaReceiver receiver) {
-        checkUiThread();
-
-        String key = fileName;
-        BitmapHolder cached = imageCache.getFromCache(key);
-        if (cached != null) {
-            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
-            return;
-        }
-
-        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
-            if (holder.getReceiverReference().get() == null) {
-                receivers.remove(holder);
-                continue;
-            }
-            if (holder.getReceiverReference().get() == receiver) {
-                receivers.remove(holder);
-                break;
-            }
-        }
-        receivers.add(new ReceiverHolder(key, receiver));
-
-        processor.requestTask(new MediaFileTask(photo, fileName));
+        requestTask(new MediaFileTask(photo, fileName), fileName, receiver);
     }
 
     public void requestVideoLoading(String fileName, MediaReceiver receiver) {
+        requestTask(new MediaVideoTask(fileName), fileName, receiver);
+    }
+
+    private void requestTask(BaseTask task, String key, MediaReceiver receiver) {
         checkUiThread();
 
-        String key = fileName;
-        BitmapHolder cached = imageCache.getFromCache(key);
-        if (cached != null) {
-            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
+        if (checkCache(key, receiver)) {
             return;
         }
 
@@ -226,7 +130,16 @@ public class MediaLoader {
         }
         receivers.add(new ReceiverHolder(key, receiver));
 
-        processor.requestTask(new MediaVideoTask(fileName));
+        processor.requestTask(task);
+    }
+
+    private boolean checkCache(String key, MediaReceiver receiver) {
+        BitmapHolder cached = imageCache.getFromCache(key);
+        if (cached != null) {
+            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
+            return true;
+        }
+        return false;
     }
 
     public void cancelRequest(MediaReceiver receiver) {
@@ -415,9 +328,41 @@ public class MediaLoader {
         }
     }
 
-    private class FastWorker extends QueueWorker<BaseTask> {
+    private class MediaRawTask extends BaseTask {
+        private String fileName;
 
-        private OptimizedBlur optimizedBlur = new OptimizedBlur();
+        private MediaRawTask(String fileName) {
+            this.fileName = fileName;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+
+        @Override
+        public String getKey() {
+            return fileName;
+        }
+    }
+
+    private class MediaRawVideoTask extends BaseTask {
+        private String fileName;
+
+        private MediaRawVideoTask(String fileName) {
+            this.fileName = fileName;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+
+        @Override
+        public String getKey() {
+            return fileName;
+        }
+    }
+
+    private class FastWorker extends QueueWorker<BaseTask> {
 
         public FastWorker() {
             super(processor);
@@ -503,6 +448,82 @@ public class MediaLoader {
         }
     }
 
+    private class RawWorker extends QueueWorker<BaseTask> {
+
+        public RawWorker() {
+            super(processor);
+        }
+
+        @Override
+        protected boolean processTask(BaseTask task) {
+            if (task instanceof MediaRawTask) {
+                return processTask((MediaRawTask) task);
+            }
+            return false;
+        }
+
+        private boolean preprocessCached(MediaRawTask task, Bitmap src) {
+            return imageStorage.tryLoadFile(task.getKey(), src) != null;
+        }
+
+        private boolean processTask(MediaRawTask rawTask) {
+            synchronized (fullImageCachedLock) {
+                if (fullImageCached == null) {
+                    fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
+                }
+            }
+
+            try {
+                Optimizer.BitmapInfo info = Optimizer.getInfo(rawTask.fileName);
+
+                Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
+                if (res == null) {
+                    res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
+                } else {
+                    res.eraseColor(Color.TRANSPARENT);
+                }
+
+//                if (preprocessCached(rawTask, res)) {
+//                    return true;
+//                }
+                // int[] sizes;
+
+                if (info.getMimeType() != null && info.getMimeType().equals("image/jpeg")) {
+                    if (info.getHeight() <= fullImageCached.getHeight() && info.getWidth() <= fullImageCached.getWidth()) {
+                        synchronized (fullImageCachedLock) {
+                            BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
+                            int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth(), info.getHeight(), res);
+                            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
+                            notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
+                            return true;
+                        }
+                    } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
+                        synchronized (fullImageCachedLock) {
+                            BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
+                            int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
+                            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
+                            notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
+                            return true;
+                        }
+                    }
+                }
+
+                Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
+                int[] sizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
+                imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
+                notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+
+        @Override
+        public boolean isAccepted(BaseTask task) {
+            return task instanceof MediaRawTask || task instanceof MediaRawVideoTask;
+        }
+    }
+
     private class FileWorker extends QueueWorker<BaseTask> {
 
         private FileWorker() {
@@ -548,10 +569,25 @@ public class MediaLoader {
                 if (fullImageCached == null) {
                     fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
                 }
-
                 fullImageCached.eraseColor(Color.TRANSPARENT);
 
-                BitmapDecoderEx.decodeReuseBitmapScaled(fileTask.fileName, fullImageCached);
+                boolean useScaled = false;
+
+                try {
+                    Optimizer.BitmapInfo info = Optimizer.getInfo(fileTask.fileName);
+                    useScaled = info.getWidth() > fullImageCached.getWidth() || info.getHeight() > fullImageCached.getHeight();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                int scaledW = useScaled ? fileTask.getLocalPhoto().getFullW() / 2 : fileTask.getLocalPhoto().getFullW();
+                int scaledH = useScaled ? fileTask.getLocalPhoto().getFullH() / 2 : fileTask.getLocalPhoto().getFullH();
+
+                if (useScaled) {
+                    BitmapDecoderEx.decodeReuseBitmapScaled(fileTask.fileName, fullImageCached);
+                } else {
+                    BitmapDecoderEx.decodeReuseBitmap(fileTask.fileName, fullImageCached);
+                }
 
                 Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
                 if (res == null) {
@@ -559,8 +595,7 @@ public class MediaLoader {
                 } else {
                     res.eraseColor(Color.TRANSPARENT);
                 }
-                int[] sizes = Optimizer.scaleToRatio(fullImageCached,
-                        fileTask.getLocalPhoto().getFullW() / 2, fileTask.getLocalPhoto().getFullH() / 2, res);
+                int[] sizes = Optimizer.scaleToRatio(fullImageCached, scaledW, scaledH, res);
 
                 imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]));
 
@@ -600,8 +635,7 @@ public class MediaLoader {
                 String url = "https://maps.googleapis.com/maps/api/staticmap?" +
                         "center=" + geoTask.getLatitude() + "," + geoTask.getLongitude() +
                         "&zoom=15" +
-                        "&size=" + MAP_W / 2 + "x" + MAP_H / 2 + "" +
-                        "&scale=2" +
+                        "&size=" + MAP_W + "x" + MAP_H + "" +
                         "&sensor=false";
 
                 HttpGet get = new HttpGet(url.replace(" ", "%20"));

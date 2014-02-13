@@ -412,7 +412,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
                     application.getUiKernel().getMediaLoader().requestFastLoading(mediaVideo, this);
                 } else {
-                    // Should we download preview?
+                    // TODO: Should we download preview?
                     application.getUiKernel().getMediaLoader().cancelRequest(this);
                 }
             }
@@ -420,26 +420,13 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         } else if (message.message.getExtras() instanceof TLUploadingPhoto) {
             TLUploadingPhoto photo = (TLUploadingPhoto) message.message.getExtras();
             bindSize(photo.getWidth(), photo.getHeight());
-//            previewWidth = photo.getWidth();
-//            previewHeight = photo.getHeight();
-//
-//            float maxWidth = getPx(160);
-//            float maxHeight = getPx(300);
-//
-//            float scale = maxWidth / previewWidth;
-//
-//            if (previewHeight * scale > maxHeight) {
-//                scale = maxHeight / previewHeight;
-//            }
-//
-//            int scaledW = (int) maxWidth;
-//            int scaledH = (int) (previewHeight * scale);
-//
-//            if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
-//                previewTask = new ScaleTask(new UriImageTask(photo.getFileUri()), scaledW, scaledH);
-//            } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
-//                previewTask = new ScaleTask(new FileSystemImageTask(photo.getFileName()), scaledW, scaledH);
-//            }
+
+            if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
+                // TODO: Implement
+                // previewTask = new ScaleTask(new UriImageTask(photo.getFileUri()), scaledW, scaledH);
+            } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
+                application.getUiKernel().getMediaLoader().requestRaw(photo.getFileName(), this);
+            }
 
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLUploadingVideo) {
@@ -462,11 +449,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
             bindSize(doc.getFullPreviewW(), doc.getFullPreviewH());
 
-//            if (doc.getFilePath().length() > 0) {
-//                previewTask = new ScaleTask(new FileSystemImageTask(doc.getFilePath()), scaledW, scaledH);
-//            } else {
-//                previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
-//            }
+            if (doc.getFilePath().length() > 0) {
+                application.getUiKernel().getMediaLoader().requestRaw(doc.getFilePath(), this);
+            } else {
+//                 previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
+            }
 
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLLocalDocument) {
@@ -484,22 +471,8 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                         document.getMimeType().equals("image/png") ||
                         document.getMimeType().equals("image/jpeg")) {
                     if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-//                        float maxWidth = getPx(160);
-//                        float maxHeight = getPx(300);
-//
-//                        float scale = maxWidth / previewWidth;
-//
-//                        if (previewHeight * scale > maxHeight) {
-//                            scale = maxHeight / previewHeight;
-//                        }
-//
-//                        int scaledW = (int) maxWidth;
-//                        int scaledH = (int) (previewHeight * scale);
-//
-//                        previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), scaledW, scaledH);
-//                        previewTask.setPutInDiskCache(true);
-
-                        // isBinded = true;
+                        application.getUiKernel().getMediaLoader().requestRaw(application.getDownloadManager().getFileName(key), this);
+                        isBinded = true;
                     }
                 }
 
@@ -509,70 +482,12 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 }
 
                 if (!isBinded && (!(document.getPreview() instanceof TLLocalFileEmpty))) {
-                    // Bind preview
-                }
-            }
-
-//            if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
-//                previewWidth = document.getPreviewW();
-//                previewHeight = document.getPreviewH();
-//
-//                if (document.getMimeType().equals("image/gif") ||
-//                        document.getMimeType().equals("image/png") ||
-//                        document.getMimeType().equals("image/jpeg")) {
-//                    if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-//                        float maxWidth = getPx(160);
-//                        float maxHeight = getPx(300);
-//
-//                        float scale = maxWidth / previewWidth;
-//
-//                        if (previewHeight * scale > maxHeight) {
-//                            scale = maxHeight / previewHeight;
-//                        }
-//
-//                        int scaledW = (int) maxWidth;
-//                        int scaledH = (int) (previewHeight * scale);
-//
-//                        previewTask = new ScaleTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)), scaledW, scaledH);
-//                        previewTask.setPutInDiskCache(true);
-//                    }
-//                }
-//
-//                if (document.getFastPreview().length > 0) {
-//                    if (previewCached == null) {
-//                        BitmapFactory.Options options = new BitmapFactory.Options();
-//                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//                        options.inDither = false;
-//                        options.inTempStorage = bitmapTmp;
-//                        options.inMutable = true;
-//                        Bitmap img = BitmapFactory.decodeByteArray(document.getFastPreview(), 0, document.getFastPreview().length, options);
-//                        previewCached = optimizedBlur.performBlur(img);
-//                        // previewCached = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
-//                        // BitmapUtils.fastblur(img, previewCached, img.getWidth(), img.getHeight(), 3);
-//                    }
-//                    fastPreviewWidth = document.getPreviewW() - 1;
-//                    fastPreviewHeight = document.getPreviewH() - 1;
-//                } else if (document.getPreviewLocation() instanceof TLLocalFileLocation) {
-//                    if (previewTask == null) {
-//
-//                        float maxWidth = getPx(160);
-//                        float maxHeight = getPx(300);
-//
-//                        float scale = maxWidth / previewWidth;
-//
-//                        if (previewHeight * scale > maxHeight) {
-//                            scale = maxHeight / previewHeight;
-//                        }
-//
-//                        int scaledW = (int) maxWidth;
-//                        int scaledH = (int) (previewHeight * scale);
-//
+                    // TODO: Bind preview
 //                        StelsImageTask baseTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
 //                        baseTask.enableBlur(3);
 //                        previewTask = new ScaleTask(baseTask, scaledW, scaledH);
-//                    }
-//                }
-//            }
+                }
+            }
         } else {
             isUnsupported = true;
             bindSize(0, 0);

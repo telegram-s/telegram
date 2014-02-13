@@ -797,16 +797,13 @@ void Java_org_telegram_android_util_ImageNativeUtils_nativeLoadEmoji(
     jclass java_bitmap_class = (jclass)(*env)->FindClass(env, "android/graphics/Bitmap");
     jmethodID mid = (*env)->GetStaticMethodID(env, java_bitmap_class, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
 
-    const wchar_t config_name[] = L"ARGB_8888";
-    jstring j_config_name = (*env)->NewString(env, (const jchar*)config_name, wcslen(config_name));
     jclass bcfg_class = (*env)->FindClass(env, "android/graphics/Bitmap$Config");
-    jobject java_bitmap_config = (*env)->CallStaticObjectMethod(env, bcfg_class, (*env)->GetStaticMethodID(env, bcfg_class, "valueOf", "(Ljava/lang/String;)Landroid/graphics/Bitmap$Config;"), j_config_name);
+    jobject java_bitmap_config = (*env)->CallStaticObjectMethod(env, bcfg_class, (*env)->GetStaticMethodID(env, bcfg_class, "valueOf", "(Ljava/lang/String;)Landroid/graphics/Bitmap$Config;"), (*env)->NewStringUTF(env, "ARGB_8888"));
 
-    // jobject bitmap = (*env)->CallStaticObjectMethod(env, java_bitmap_class, mid, 8 * 54, 8 * 54, java_bitmap_config);
-    // jobject* res =(jobject*) malloc(16 * sizeof(jobject));
-    // for(i = 0; i < 16; i++) {
-        //jobject bitmap = (*env)->CallStaticObjectMethod(env, java_bitmap_class, mid, 8 * 54, 8 * 54, java_bitmap_config);
-    // }
+    jobject* res =(jobject*) malloc(16 * sizeof(jobject));
+    for(i = 0; i < 16; i++) {
+        res[i] = (*env)->CallStaticObjectMethod(env, java_bitmap_class, mid, 8 * 54, 8 * 54, java_bitmap_config);
+    }
 
     cData = (uint32_t*)cPixels;
     aData = (unsigned char*)aPixels;

@@ -4,17 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.*;
 import android.media.ExifInterface;
-import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
-import android.util.Log;
 import com.extradea.framework.images.utils.ImageUtils;
-import org.telegram.android.Manifest;
 import org.telegram.android.log.Logger;
-import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.util.CustomBufferedInputStream;
 import org.telegram.android.util.IOUtils;
 
@@ -159,7 +153,7 @@ public class Optimizer {
         dest.eraseColor(Color.TRANSPARENT);
         Canvas canvas = new Canvas(dest);
         canvas.setMatrix(scaleMatrix);
-        canvas.drawBitmap(src, middleX - src.getWidth() / 2, middleY - src.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG|Paint.ANTI_ALIAS_FLAG));
+        canvas.drawBitmap(src, middleX - src.getWidth() / 2, middleY - src.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG));
     }
 
     public static int[] scaleToRatio(Bitmap src, int sourceW, int sourceH, Bitmap dest) {
@@ -309,7 +303,7 @@ public class Optimizer {
             }
         }
 
-        return new BitmapInfo(w, h);
+        return new BitmapInfo(w, h, o.outMimeType);
     }
 
     private static Bitmap buildOptimized(Source source, int scale) throws IOException {
@@ -658,10 +652,16 @@ public class Optimizer {
     public static class BitmapInfo {
         private int width;
         private int height;
+        private String mimeType;
 
-        public BitmapInfo(int width, int height) {
+        public BitmapInfo(int width, int height, String mimeType) {
             this.width = width;
             this.height = height;
+            this.mimeType = mimeType;
+        }
+
+        public String getMimeType() {
+            return mimeType;
         }
 
         public int getWidth() {
