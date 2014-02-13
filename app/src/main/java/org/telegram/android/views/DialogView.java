@@ -166,7 +166,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             } else {
                 titleEncryptedPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             }
-            titleEncryptedPaint.setColor(0xff3a9d43);
+            titleEncryptedPaint.setColor(0xff368c3e);
             if (IS_LARGE) {
                 titleEncryptedPaint.setTextSize(sp(20f));
                 titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "regular"));
