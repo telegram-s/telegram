@@ -1,5 +1,6 @@
 package org.telegram.android.core.model.service;
 
+import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.tl.TLContext;
 
@@ -19,13 +20,13 @@ public class TLLocalActionChatEditPhoto extends TLAbsLocalAction {
 
     public static final int CLASS_ID = 0x3bb4a31d;
 
-    private TLLocalAvatarPhoto photo;
+    private TLAbsLocalAvatarPhoto photo;
 
-    public TLLocalAvatarPhoto getPhoto() {
+    public TLAbsLocalAvatarPhoto getPhoto() {
         return photo;
     }
 
-    public void setPhoto(TLLocalAvatarPhoto photo) {
+    public void setPhoto(TLAbsLocalAvatarPhoto photo) {
         this.photo = photo;
     }
 
@@ -41,6 +42,6 @@ public class TLLocalActionChatEditPhoto extends TLAbsLocalAction {
 
     @Override
     public void deserializeBody(InputStream stream, TLContext context) throws IOException {
-        photo = (TLLocalAvatarPhoto) readTLObject(stream, context);
+        photo = (TLAbsLocalAvatarPhoto) readTLObject(stream, context);
     }
 }

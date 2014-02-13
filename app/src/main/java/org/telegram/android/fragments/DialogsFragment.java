@@ -287,6 +287,15 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
 
         listView = (ListView) res.findViewById(R.id.dialogsList);
 
+        listView.setRecyclerListener(new AbsListView.RecyclerListener() {
+            @Override
+            public void onMovedToScrapHeap(View view) {
+                if (view instanceof DialogView) {
+                    ((DialogView) view).unbind();
+                }
+            }
+        });
+
 //        TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
 //                new ColorDrawable(getResources().getColor(R.color.st_selector)),
 //                new ColorDrawable(getResources().getColor(R.color.st_selector_end))});

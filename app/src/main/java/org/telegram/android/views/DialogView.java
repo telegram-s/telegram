@@ -325,18 +325,21 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             // empty = groupPlaceholder;
         }
 
-        releaseAvatar();
         if (photo instanceof TLLocalAvatarPhoto) {
-            application.getUiKernel().getAvatarLoader().requestAvatar(
+            if (!application.getUiKernel().getAvatarLoader().requestAvatar(
                     ((TLLocalAvatarPhoto) photo).getPreviewLocation(),
                     AvatarLoader.TYPE_MEDIUM,
-                    this);
+                    this)) {
+                releaseAvatar();
+            }
         } else {
+            releaseAvatar();
             application.getUiKernel().getAvatarLoader().cancelRequest(this);
         }
 
         if (getMeasuredHeight() != 0 || getMeasuredWidth() != 0) {
             buildLayout();
+            invalidate();
         } else {
             requestLayout();
         }
@@ -359,6 +362,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         // avatarReceiver.onAddedToParent();
         // avatar = avatarReceiver.getResult();
         postInvalidate();
+    }
+
+    public void unbind() {
+        releaseAvatar();
     }
 
     @Override
@@ -927,5 +934,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 }
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "DialogView#" + hashCode();
     }
 }

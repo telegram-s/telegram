@@ -1934,25 +1934,31 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     final TLLocalActionChatEditPhoto chatEditPhoto = (TLLocalActionChatEditPhoto) action;
                     messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_photo_change_you : R.string.st_message_photo_change).replace("{0}", senderHtml)));
                     imageView.setVisibility(View.VISIBLE);
-                    if (chatEditPhoto.getPhoto().getPreviewLocation() instanceof TLLocalFileLocation) {
-                        imageView.requestTask(new StelsImageTask((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation()));
+                    if (chatEditPhoto.getPhoto() instanceof TLLocalAvatarPhoto) {
+                        final TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) chatEditPhoto.getPhoto();
+                        if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
+                            imageView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+                        } else {
+                            imageView.requestTask(null);
+                        }
+                        if (avatarPhoto.getFullLocation() instanceof TLLocalFileLocation) {
+                            imageView.setOnClickListener(secure(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    getRootController().openImage((TLLocalFileLocation) avatarPhoto.getFullLocation());
+                                }
+                            }));
+                        } else {
+                            imageView.setOnClickListener(secure(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    getRootController().openImage((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
+                                }
+                            }));
+                        }
                     } else {
                         imageView.requestTask(null);
-                    }
-                    if (chatEditPhoto.getPhoto().getFullLocation() instanceof TLLocalFileLocation) {
-                        imageView.setOnClickListener(secure(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getFullLocation());
-                            }
-                        }));
-                    } else {
-                        imageView.setOnClickListener(secure(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation());
-                            }
-                        }));
+                        imageView.setOnClickListener(null);
                     }
                 } else if (action instanceof TLLocalActionChatCreate) {
                     messageView.setText(fixedHtml(getStringSafe(byMyself ? R.string.st_message_create_group_you : R.string.st_message_create_group).replace("{0}", senderHtml)));

@@ -15,6 +15,9 @@ import java.util.HashSet;
  */
 public class ImageCache {
 
+    private static final String TAG = "ImageCache";
+    private static final boolean IS_LOGGING = true;
+
     private static final int DEFAULT_CACHE_SIZE = 10;
     private static final int DEFAULT_CACHE_FREE_SIZE = 10;
     private static final boolean USE_REFERENCE_TRACK = true;
@@ -48,13 +51,13 @@ public class ImageCache {
                         HashSet<Bitmap> bitmaps = freeBitmaps.get(oldValue.size);
                         if (bitmaps == null) {
                             bitmaps = new HashSet<Bitmap>();
-                            bitmaps.add(bitmap.getBitmap());
                             freeBitmaps.put(oldValue.size, bitmaps);
-                        } else {
-                            if (bitmaps.size() < cacheFreeSize) {
-                                bitmaps.add(bitmap.getBitmap());
-                            }
                         }
+
+                        if (IS_LOGGING) {
+                            Logger.d(TAG, "Moving to free cache: " + bitmap.getBitmap() + ", " + oldValue.key);
+                        }
+                        bitmaps.add(bitmap.getBitmap());
                     }
                 }
             }
@@ -72,10 +75,14 @@ public class ImageCache {
         return 10;
     }
 
-    public void putToCache(int size, BitmapHolder bitmap) {
-        if (references.get(bitmap.getKey()) == null && avatarCache.get(bitmap.getKey()) == null) {
-            avatarCache.put(bitmap.getKey(), new Holder(bitmap.getKey(), size, bitmap));
+    public void putToCache(int size, BitmapHolder bitmap, Object referent) {
+        if (IS_LOGGING) {
+            Logger.d(TAG, "Adding to cache " + bitmap.getKey() + " reference #" + bitmap.getBitmap());
         }
+
+        Holder holder = new Holder(bitmap.getKey(), size, bitmap);
+        holder.references.add(referent);
+        putHolder(holder);
     }
 
     public Bitmap findFree(int size) {
@@ -109,27 +116,34 @@ public class ImageCache {
             boolean isMoved = false;
             if (references.containsKey(holder.key)) {
                 isMoved = true;
-                // Logger.d(TAG, "Move to weak cache -> " + holder.key);
+                if (IS_LOGGING) {
+                    Logger.d(TAG, "Move to weak cache -> " + holder.key);
+                }
                 references.remove(holder.key);
             }
-            if (!isMoved && avatarCache.get(holder.key) == null) {
-                // Logger.d(TAG, "Adding to weak cache -> " + holder.key);
+            if (IS_LOGGING) {
+                if (!isMoved && avatarCache.get(holder.key) == null) {
+                    Logger.d(TAG, "Adding to weak cache -> " + holder.key);
+                }
             }
             avatarCache.put(holder.key, holder);
         } else {
-
-            holder.sourceStrongBitmap = null;
-
             boolean isMoved = false;
             if (avatarCache.get(holder.key) != null) {
                 isMoved = true;
-                // Logger.d(TAG, "Move to strong cache -> " + holder.key);
+                if (IS_LOGGING) {
+                    Logger.d(TAG, "Move to strong cache -> " + holder.key + ", #" + holder.sourceStrongBitmap.getBitmap());
+                }
                 avatarCache.remove(holder.key);
             }
-            if (!isMoved && !references.containsKey(holder.key)) {
-                // Logger.d(TAG, "Adding to strong cache -> " + holder.key);
+            if (IS_LOGGING) {
+                if (!isMoved && !references.containsKey(holder.key)) {
+                    Logger.d(TAG, "Adding to strong cache -> " + holder.key);
+                }
             }
             references.put(holder.key, holder);
+
+            holder.sourceStrongBitmap = null;
         }
     }
 
@@ -142,6 +156,7 @@ public class ImageCache {
         if (holder != null) {
             BitmapHolder img = holder.sourceBitmap.get();
             if (img == null) {
+                Logger.w(TAG, "Reference counter is broken! Bitmap garbage collected: " + holder.key);
                 removeHolder(holder);
                 return null;
             }
@@ -151,34 +166,31 @@ public class ImageCache {
     }
 
     public void incReference(String key, Object referent) {
-
-        // Logger.d(TAG, "incReference -> " + key);
+        if (IS_LOGGING) {
+            Logger.d(TAG, "incReference -> " + key + ", referent:" + referent);
+        }
 
         Holder holder = findHolder(key);
         if (holder == null) {
             return;
         }
 
-        if (holder.references.add(referent)) {
-            Logger.d("BIND", "Binded " + referent + " key " + key);
-        }
+        holder.references.add(referent);
 
         updateHolder(holder);
     }
 
     public void decReference(String key, Object referent) {
-
-        // Logger.d(TAG, "decReference -> " + key);
+        if (IS_LOGGING) {
+            Logger.d(TAG, "decReference -> " + key + ", referent:" + referent);
+        }
 
         Holder holder = findHolder(key);
         if (holder == null) {
             return;
         }
 
-        if (holder.references.remove(referent)) {
-            Logger.d("BIND", "Unbinded " + referent + " key " + key);
-        }
-
+        holder.references.remove(referent);
 
         updateHolder(holder);
     }

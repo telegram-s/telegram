@@ -415,7 +415,7 @@ public class MediaLoader {
             // new OptimizedBlur().performBlur(img);
             // img = BitmapUtils.fastblur(img, 8);
 
-            imageCache.putToCache(SIZE_FAST_PREVIEW, new BitmapHolder(img, key, w, h));
+            imageCache.putToCache(SIZE_FAST_PREVIEW, new BitmapHolder(img, key, w, h), MediaLoader.this);
 
             notifyMediaLoaded(task, img, w, h);
 
@@ -467,14 +467,16 @@ public class MediaLoader {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
                         int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth(), info.getHeight(), res);
-                        imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
+                        imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]),
+                                MediaLoader.this);
                         notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
                     }
                 } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
                         int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
-                        imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
+                        imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]),
+                                MediaLoader.this);
                         notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
                     }
                 }
@@ -482,7 +484,8 @@ public class MediaLoader {
 
             Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
             int[] sizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]),
+                    MediaLoader.this);
             notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
         }
 
@@ -520,7 +523,8 @@ public class MediaLoader {
             int[] sizes = Optimizer.scaleToRatio(metadata.getImg(),
                     metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
 
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]));
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]),
+                    MediaLoader.this);
 
             notifyMediaLoaded(task, res, sizes[0], sizes[1]);
         }
@@ -559,7 +563,8 @@ public class MediaLoader {
                 try {
                     int[] sizes = Optimizer.scaleToRatio(fullImageCached, scaledW, scaledH, res);
 
-                    imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]));
+                    imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]),
+                            MediaLoader.this);
 
                     notifyMediaLoaded(fileTask, res, sizes[0], sizes[1]);
                 } finally {
@@ -636,7 +641,8 @@ public class MediaLoader {
             }
 
             String cacheKey = "geo:" + geoTask.getLatitude() + "," + geoTask.getLongitude();
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, cacheKey, MAP_W, MAP_H));
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, cacheKey, MAP_W, MAP_H),
+                    MediaLoader.this);
             notifyMediaLoaded(task, res, MAP_W, MAP_H);
 
             return true;

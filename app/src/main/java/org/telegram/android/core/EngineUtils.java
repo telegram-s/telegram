@@ -110,7 +110,7 @@ public class EngineUtils {
             return new TLLocalActionChatDeletePhoto();
         } else if (action instanceof TLMessageActionChatEditPhoto) {
             TLLocalActionChatEditPhoto photo = new TLLocalActionChatEditPhoto();
-            photo.setPhoto((TLLocalAvatarPhoto) convertAvatarPhoto((((TLMessageActionChatEditPhoto) action).getPhoto())));
+            photo.setPhoto(convertAvatarPhoto((((TLMessageActionChatEditPhoto) action).getPhoto())));
             return photo;
         } else if (action instanceof TLMessageActionChatEditTitle) {
             return new TLLocalActionChatEditTitle(((TLMessageActionChatEditTitle) action).getTitle());
