@@ -1146,13 +1146,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
                             imageView.requestAvatar(avatarPhoto.getPreviewLocation());
                         } else {
-                            imageView.setEmptyDrawable(null);
+                            imageView.requestAvatar(null);
                         }
                     } else {
-                        imageView.setEmptyDrawable(null);
+                        imageView.requestAvatar(null);
                     }
                 } else {
-                    imageView.setEmptyDrawable(null);
+                    imageView.requestAvatar(null);
                 }
             }
 

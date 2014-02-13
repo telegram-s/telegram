@@ -48,7 +48,7 @@ public class MediaLoader {
     private ImageStorage imageStorage;
 
     private Bitmap fullImageCached = null;
-    private Object fullImageCachedLock = new Object();
+    private final Object fullImageCachedLock = new Object();
 
     private final int PREVIEW_MAX_W;
     private final int PREVIEW_MAX_H;
@@ -345,23 +345,6 @@ public class MediaLoader {
         }
     }
 
-    private class MediaRawVideoTask extends BaseTask {
-        private String fileName;
-
-        private MediaRawVideoTask(String fileName) {
-            this.fileName = fileName;
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        @Override
-        public String getKey() {
-            return fileName;
-        }
-    }
-
     private class FastWorker extends QueueWorker<BaseTask> {
 
         public FastWorker() {
@@ -520,7 +503,7 @@ public class MediaLoader {
 
         @Override
         public boolean isAccepted(BaseTask task) {
-            return task instanceof MediaRawTask || task instanceof MediaRawVideoTask;
+            return task instanceof MediaRawTask;
         }
     }
 
@@ -559,7 +542,6 @@ public class MediaLoader {
                 notifyMediaLoaded(task, res, sizes[0], sizes[1]);
             } catch (Exception e) {
                 e.printStackTrace();
-
             }
             return true;
         }
@@ -632,10 +614,20 @@ public class MediaLoader {
             MediaGeoTask geoTask = (MediaGeoTask) task;
 
             try {
+
+                int scale = 1;
+                float density = application.getResources().getDisplayMetrics().density;
+                if (density >= 1.5f) {
+                    scale = 2;
+                } else if (density >= 3.0f) {
+                    scale = 3;
+                }
+
                 String url = "https://maps.googleapis.com/maps/api/staticmap?" +
                         "center=" + geoTask.getLatitude() + "," + geoTask.getLongitude() +
                         "&zoom=15" +
-                        "&size=" + MAP_W + "x" + MAP_H + "" +
+                        "&size=" + (MAP_W / scale) + "x" + (MAP_H / scale) +
+                        "&scale=" + scale +
                         "&sensor=false";
 
                 HttpGet get = new HttpGet(url.replace(" ", "%20"));

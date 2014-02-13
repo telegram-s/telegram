@@ -452,6 +452,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             if (doc.getFilePath().length() > 0) {
                 application.getUiKernel().getMediaLoader().requestRaw(doc.getFilePath(), this);
             } else {
+                // TODO: Implement
 //                 previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
             }
 
