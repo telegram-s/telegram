@@ -72,7 +72,7 @@ public class AvatarView extends View implements AvatarReceiver {
 
     private void unbindAvatar() {
         if (avatar != null) {
-            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey);
+            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey, this);
             avatar = null;
             avatarKey = null;
         }
@@ -113,7 +113,7 @@ public class AvatarView extends View implements AvatarReceiver {
         unbindAvatar();
         this.avatar = original;
         this.avatarKey = key;
-        application.getUiKernel().getAvatarLoader().getImageCache().incReference(key);
+        application.getUiKernel().getAvatarLoader().getImageCache().incReference(key, this);
         if (intermediate) {
             this.arriveTime = 0;
         } else {

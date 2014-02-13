@@ -1,9 +1,7 @@
 package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import org.apache.http.HttpResponse;
@@ -20,10 +18,8 @@ import org.telegram.android.core.model.media.TLLocalGeo;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
 import org.telegram.android.media.BitmapDecoderEx;
-import org.telegram.android.media.OptimizedBlur;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
-import org.telegram.android.ui.BitmapUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -352,15 +348,15 @@ public class MediaLoader {
         }
 
         @Override
-        protected boolean processTask(BaseTask task) {
+        protected boolean processTask(BaseTask task) throws Exception {
             if (task instanceof MediaPhotoFastTask) {
-                return processPhoto((MediaPhotoFastTask) task);
+                processPhoto((MediaPhotoFastTask) task);
             } else if (task instanceof MediaVideoFastTask) {
-                return processVideo((MediaVideoFastTask) task);
+                processVideo((MediaVideoFastTask) task);
             } else if (task instanceof MediaDocFastTask) {
-                return processDoc((MediaDocFastTask) task);
+                processDoc((MediaDocFastTask) task);
             }
-            return false;
+            return true;
         }
 
         private boolean processPhoto(MediaPhotoFastTask task) {
@@ -415,7 +411,8 @@ public class MediaLoader {
                 }
             }
 
-            new OptimizedBlur().performBlur(img);
+            Optimizer.blur(img);
+            // new OptimizedBlur().performBlur(img);
             // img = BitmapUtils.fastblur(img, 8);
 
             imageCache.putToCache(SIZE_FAST_PREVIEW, new BitmapHolder(img, key, w, h));
@@ -438,67 +435,55 @@ public class MediaLoader {
         }
 
         @Override
-        protected boolean processTask(BaseTask task) {
+        protected boolean processTask(BaseTask task) throws Exception {
             if (task instanceof MediaRawTask) {
-                return processTask((MediaRawTask) task);
+                processTask((MediaRawTask) task);
             }
-            return false;
+            return true;
         }
 
         private boolean preprocessCached(MediaRawTask task, Bitmap src) {
             return imageStorage.tryLoadFile(task.getKey(), src) != null;
         }
 
-        private boolean processTask(MediaRawTask rawTask) {
+        private void processTask(MediaRawTask rawTask) throws Exception {
             synchronized (fullImageCachedLock) {
                 if (fullImageCached == null) {
                     fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
                 }
             }
 
-            try {
-                Optimizer.BitmapInfo info = Optimizer.getInfo(rawTask.fileName);
+            Optimizer.BitmapInfo info = Optimizer.getInfo(rawTask.fileName);
 
-                Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
-                if (res == null) {
-                    res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
-                } else {
-                    res.eraseColor(Color.TRANSPARENT);
-                }
+            Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
+            if (res == null) {
+                res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
+            } else {
+                res.eraseColor(Color.TRANSPARENT);
+            }
 
-//                if (preprocessCached(rawTask, res)) {
-//                    return true;
-//                }
-                // int[] sizes;
-
-                if (info.getMimeType() != null && info.getMimeType().equals("image/jpeg")) {
-                    if (info.getHeight() <= fullImageCached.getHeight() && info.getWidth() <= fullImageCached.getWidth()) {
-                        synchronized (fullImageCachedLock) {
-                            BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
-                            int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth(), info.getHeight(), res);
-                            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
-                            notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
-                            return true;
-                        }
-                    } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
-                        synchronized (fullImageCachedLock) {
-                            BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
-                            int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
-                            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
-                            notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
-                            return true;
-                        }
+            if (info.getMimeType() != null && info.getMimeType().equals("image/jpeg")) {
+                if (info.getHeight() <= fullImageCached.getHeight() && info.getWidth() <= fullImageCached.getWidth()) {
+                    synchronized (fullImageCachedLock) {
+                        BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
+                        int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth(), info.getHeight(), res);
+                        imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
+                        notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
+                    }
+                } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
+                    synchronized (fullImageCachedLock) {
+                        BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
+                        int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
+                        imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
+                        notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
                     }
                 }
-
-                Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
-                int[] sizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
-                imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
-                notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            return true;
+
+            Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
+            int[] sizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]));
+            notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
         }
 
         @Override
@@ -514,39 +499,33 @@ public class MediaLoader {
         }
 
         @Override
-        protected boolean processTask(BaseTask task) {
+        protected boolean processTask(BaseTask task) throws Exception {
             if (task instanceof MediaFileTask) {
-                return processFileTask((MediaFileTask) task);
+                processFileTask((MediaFileTask) task);
             } else if (task instanceof MediaVideoTask) {
-                return processVideoTask((MediaVideoTask) task);
-            }
-
-            return false;
-        }
-
-        private boolean processVideoTask(MediaVideoTask task) {
-            try {
-                VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
-
-                Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
-                if (res == null) {
-                    res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
-                } else {
-                    res.eraseColor(Color.TRANSPARENT);
-                }
-                int[] sizes = Optimizer.scaleToRatio(metadata.getImg(),
-                        metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
-
-                imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]));
-
-                notifyMediaLoaded(task, res, sizes[0], sizes[1]);
-            } catch (Exception e) {
-                e.printStackTrace();
+                processVideoTask((MediaVideoTask) task);
             }
             return true;
         }
 
-        private boolean processFileTask(MediaFileTask fileTask) {
+        private void processVideoTask(MediaVideoTask task) throws Exception {
+            VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
+
+            Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
+            if (res == null) {
+                res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
+            } else {
+                res.eraseColor(Color.TRANSPARENT);
+            }
+            int[] sizes = Optimizer.scaleToRatio(metadata.getImg(),
+                    metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
+
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]));
+
+            notifyMediaLoaded(task, res, sizes[0], sizes[1]);
+        }
+
+        private void processFileTask(MediaFileTask fileTask) throws Exception {
             synchronized (fullImageCachedLock) {
                 if (fullImageCached == null) {
                     fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
@@ -577,13 +556,16 @@ public class MediaLoader {
                 } else {
                     res.eraseColor(Color.TRANSPARENT);
                 }
-                int[] sizes = Optimizer.scaleToRatio(fullImageCached, scaledW, scaledH, res);
+                try {
+                    int[] sizes = Optimizer.scaleToRatio(fullImageCached, scaledW, scaledH, res);
 
-                imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]));
+                    imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]));
 
-                notifyMediaLoaded(fileTask, res, sizes[0], sizes[1]);
+                    notifyMediaLoaded(fileTask, res, sizes[0], sizes[1]);
+                } finally {
+                    // imageCache.putToCache(SIZE_CHAT_PREVIEW,res);
+                }
             }
-            return true;
         }
 
         @Override
@@ -606,59 +588,56 @@ public class MediaLoader {
         }
 
         @Override
-        protected boolean processTask(BaseTask task) {
+        protected boolean needRepeatOnError() {
+            return true;
+        }
+
+        @Override
+        protected boolean processTask(BaseTask task) throws Exception {
             if (!(task instanceof MediaGeoTask)) {
-                return false;
+                return true;
             }
 
             MediaGeoTask geoTask = (MediaGeoTask) task;
 
-            try {
-
-                int scale = 1;
-                float density = application.getResources().getDisplayMetrics().density;
-                if (density >= 1.5f) {
-                    scale = 2;
-                } else if (density >= 3.0f) {
-                    scale = 3;
-                }
-
-                String url = "https://maps.googleapis.com/maps/api/staticmap?" +
-                        "center=" + geoTask.getLatitude() + "," + geoTask.getLongitude() +
-                        "&zoom=15" +
-                        "&size=" + (MAP_W / scale) + "x" + (MAP_H / scale) +
-                        "&scale=" + scale +
-                        "&sensor=false";
-
-                HttpGet get = new HttpGet(url.replace(" ", "%20"));
-                HttpResponse response = client.execute(get);
-                if (response.getEntity().getContentLength() == 0)
-                    return false;
-
-                if (response.getStatusLine().getStatusCode() == 404)
-                    return false;
-
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                response.getEntity().writeTo(outputStream);
-                byte[] data = outputStream.toByteArray();
-
-                Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
-
-                if (res != null) {
-                    Optimizer.loadTo(data, res);
-                } else {
-                    res = Optimizer.load(data);
-                }
-
-                String cacheKey = "geo:" + geoTask.getLatitude() + "," + geoTask.getLongitude();
-                imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, cacheKey, MAP_W, MAP_H));
-                notifyMediaLoaded(task, res, MAP_W, MAP_H);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
+            int scale = 1;
+            float density = application.getResources().getDisplayMetrics().density;
+            if (density >= 1.5f) {
+                scale = 2;
             }
 
+            String url = "https://maps.googleapis.com/maps/api/staticmap?" +
+                    "center=" + geoTask.getLatitude() + "," + geoTask.getLongitude() +
+                    "&zoom=15" +
+                    "&size=" + (MAP_W / scale) + "x" + (MAP_H / scale) +
+                    "&scale=" + scale +
+                    "&sensor=false";
+
+            HttpGet get = new HttpGet(url.replace(" ", "%20"));
+            HttpResponse response = client.execute(get);
+            if (response.getEntity().getContentLength() == 0) {
+                throw new IOException();
+            }
+
+            if (response.getStatusLine().getStatusCode() == 404) {
+                throw new IOException();
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            response.getEntity().writeTo(outputStream);
+            byte[] data = outputStream.toByteArray();
+
+            Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
+
+            if (res != null) {
+                Optimizer.loadTo(data, res);
+            } else {
+                res = Optimizer.load(data);
+            }
+
+            String cacheKey = "geo:" + geoTask.getLatitude() + "," + geoTask.getLongitude();
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, cacheKey, MAP_W, MAP_H));
+            notifyMediaLoaded(task, res, MAP_W, MAP_H);
 
             return true;
         }

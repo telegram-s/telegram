@@ -1,6 +1,7 @@
 package org.telegram.android.util;
 
 import android.graphics.Bitmap;
+import org.telegram.android.ui.BitmapUtils;
 
 /**
  * Created by ex3ndr on 12.02.14.
@@ -15,11 +16,16 @@ public class ImageNativeUtils {
         nativeMergeBitmapAlpha(source, alpha);
     }
 
-    private static native void nativeMergeBitmapAlpha(Bitmap source, Bitmap alpha);
+    public static Bitmap performBlur(Bitmap src) {
+        if (src.getWidth() <= 90 && src.getHeight() <= 90) {
+            nativeFastBlur(src);
+            return src;
+        }
 
-    public static void loadEmoji(String colorFile, String alphaFile) {
-        nativeLoadEmoji(colorFile, alphaFile);
+        return BitmapUtils.fastblur(src, 3);
     }
 
-    private static native void nativeLoadEmoji(String colorFile, String alphaFile);
+    private static native boolean nativeFastBlur(Bitmap src);
+
+    private static native boolean nativeMergeBitmapAlpha(Bitmap source, Bitmap alpha);
 }

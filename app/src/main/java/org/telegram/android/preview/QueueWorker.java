@@ -14,7 +14,11 @@ public abstract class QueueWorker<T extends QueueProcessor.BaseTask> extends Thr
         this.processor = processor;
     }
 
-    protected abstract boolean processTask(T task);
+    protected abstract boolean processTask(T task) throws Exception;
+
+    protected boolean needRepeatOnError() {
+        return false;
+    }
 
     @Override
     public void run() {
@@ -26,10 +30,17 @@ public abstract class QueueWorker<T extends QueueProcessor.BaseTask> extends Thr
                 continue;
             }
 
-            if (processTask(task)) {
-                processor.taskCompleted(task);
-            } else {
-                processor.returnTaskToQueue(task);
+            try {
+                if (processTask(task)) {
+                    processor.taskCompleted(task);
+                } else {
+                    processor.returnTaskToQueue(task);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (needRepeatOnError()) {
+                    processor.returnTaskToQueue(task);
+                }
             }
         }
     }

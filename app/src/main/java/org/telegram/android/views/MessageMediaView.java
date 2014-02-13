@@ -333,7 +333,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     private void unbindPreview() {
         if (preview != null) {
-            application.getUiKernel().getMediaLoader().getImageCache().decReference(previewKey);
+            application.getUiKernel().getMediaLoader().getImageCache().decReference(previewKey, this);
             previewKey = null;
             preview = null;
             previewRegionH = 0;
@@ -343,7 +343,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     private void unbindOldPreview() {
         if (oldPreview != null) {
-            application.getUiKernel().getMediaLoader().getImageCache().decReference(oldPreviewKey);
+            application.getUiKernel().getMediaLoader().getImageCache().decReference(oldPreviewKey, this);
             oldPreviewKey = null;
             oldPreview = null;
             oldPreviewRegionH = 0;
@@ -959,7 +959,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         } else {
             this.previewAppearTime = 0;
         }
-        application.getUiKernel().getMediaLoader().getImageCache().incReference(key);
+        application.getUiKernel().getMediaLoader().getImageCache().incReference(key, this);
         invalidate();
     }
 }

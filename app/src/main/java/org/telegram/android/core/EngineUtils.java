@@ -1,10 +1,7 @@
 package org.telegram.android.core;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.os.Build;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.local.TLAbsLocalUserStatus;
@@ -13,10 +10,7 @@ import org.telegram.android.core.model.local.TLLocalUserStatusOffline;
 import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
-import org.telegram.android.media.BitmapDecoderEx;
-import org.telegram.android.media.OptimizedBlur;
 import org.telegram.android.media.Optimizer;
-import org.telegram.android.ui.BitmapUtils;
 import org.telegram.api.*;
 import org.telegram.tl.TLObject;
 

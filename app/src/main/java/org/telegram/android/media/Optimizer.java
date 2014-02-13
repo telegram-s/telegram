@@ -11,6 +11,7 @@ import com.extradea.framework.images.utils.ImageUtils;
 import org.telegram.android.log.Logger;
 import org.telegram.android.util.CustomBufferedInputStream;
 import org.telegram.android.util.IOUtils;
+import org.telegram.android.util.ImageNativeUtils;
 
 import java.io.*;
 
@@ -174,8 +175,7 @@ public class Optimizer {
     }
 
     public static void blur(Bitmap src) {
-        OptimizedBlur blur = new OptimizedBlur();
-        blur.performBlur(src);
+        ImageNativeUtils.performBlur(src);
     }
 
     // Private methods

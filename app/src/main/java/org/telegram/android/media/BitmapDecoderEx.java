@@ -6,6 +6,8 @@ import android.os.Build;
 import com.extradea.framework.images.BitmapDecoder;
 import org.telegram.android.log.Logger;
 
+import java.io.IOException;
+
 /**
  * Created by ex3ndr on 07.02.14.
  */
@@ -20,31 +22,27 @@ public class BitmapDecoderEx {
     private BitmapDecoderEx() {
     }
 
-    public static void decodeReuseBitmapBlend(String fileName, Bitmap dest) {
-        new BitmapDecoderEx().nativeDecodeBitmapBlend(fileName, dest);
+    public static void decodeReuseBitmapBlend(String fileName, Bitmap dest) throws IOException {
+        nativeDecodeBitmapBlend(fileName, dest);
     }
 
-    public static void decodeReuseBitmap(String fileName, Bitmap dest) {
-        new BitmapDecoderEx().nativeDecodeBitmap(fileName, dest);
+    public static void decodeReuseBitmap(String fileName, Bitmap dest) throws IOException {
+        nativeDecodeBitmap(fileName, dest);
     }
 
-    public static void decodeReuseBitmapScaled(String fileName, Bitmap dest) {
-        long start = System.currentTimeMillis();
-        new BitmapDecoderEx().nativeDecodeBitmapScaled(fileName, dest);
-        Logger.d(TAG, "Decoded file in " + (System.currentTimeMillis() - start) + " ms");
+    public static void decodeReuseBitmapScaled(String fileName, Bitmap dest) throws IOException {
+        nativeDecodeBitmapScaled(fileName, dest);
     }
 
-    public static void decodeReuseBitmap(byte[] src, Bitmap dest) {
-        long start = System.currentTimeMillis();
-        new BitmapDecoderEx().nativeDecodeArray(src, dest);
-        Logger.d(TAG, "Decoded memory in " + (System.currentTimeMillis() - start) + " ms");
+    public static void decodeReuseBitmap(byte[] src, Bitmap dest) throws IOException {
+        nativeDecodeArray(src, dest);
     }
 
-    private native void nativeDecodeBitmapScaled(String fileName, Bitmap bitmap);
+    private static native void nativeDecodeBitmapScaled(String fileName, Bitmap bitmap) throws IOException;
 
-    private native void nativeDecodeBitmap(String fileName, Bitmap bitmap);
+    private static native void nativeDecodeBitmap(String fileName, Bitmap bitmap) throws IOException;
 
-    private native void nativeDecodeArray(byte[] array, Bitmap bitmap);
+    private static native void nativeDecodeArray(byte[] array, Bitmap bitmap) throws IOException;
 
-    private native void nativeDecodeBitmapBlend(String fileName, Bitmap bitmap);
+    private static native void nativeDecodeBitmapBlend(String fileName, Bitmap bitmap) throws IOException;
 }

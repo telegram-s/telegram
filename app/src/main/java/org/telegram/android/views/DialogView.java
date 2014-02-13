@@ -581,7 +581,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         releaseAvatar();
         this.avatar = original;
         this.avatarKey = key;
-        application.getUiKernel().getAvatarLoader().getImageCache().incReference(avatarKey);
+        application.getUiKernel().getAvatarLoader().getImageCache().incReference(avatarKey, this);
         if (intermediate) {
             this.avatarAppearTime = 0;
         } else {
@@ -592,7 +592,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
     private void releaseAvatar() {
         if (avatar != null) {
-            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey);
+            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey, this);
             avatar = null;
             avatarKey = null;
         }

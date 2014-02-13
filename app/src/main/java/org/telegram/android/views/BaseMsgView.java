@@ -760,7 +760,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
 
     private void releaseAvatar() {
         if (avatar != null) {
-            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey);
+            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey, this);
             avatar = null;
             avatarKey = null;
         }
@@ -771,7 +771,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
         releaseAvatar();
         avatar = original;
         avatarKey = key;
-        application.getUiKernel().getAvatarLoader().getImageCache().incReference(avatarKey);
+        application.getUiKernel().getAvatarLoader().getImageCache().incReference(avatarKey, this);
         if (intermediate) {
             avatarImageTime = 0;
         } else {

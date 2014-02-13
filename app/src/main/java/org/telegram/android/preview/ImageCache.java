@@ -3,6 +3,7 @@ package org.telegram.android.preview;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.v4.util.LruCache;
+import com.actionbarsherlock.R;
 import org.telegram.android.log.Logger;
 
 import java.lang.ref.SoftReference;
@@ -16,8 +17,10 @@ public class ImageCache {
 
     private static final int DEFAULT_CACHE_SIZE = 10;
     private static final int DEFAULT_CACHE_FREE_SIZE = 10;
+    private static final boolean USE_REFERENCE_TRACK = true;
 
     private HashMap<String, Holder> references;
+    private HashMap<String, Integer> movedBitmaps;
 
     private LruCache<String, Holder> avatarCache;
 
@@ -46,11 +49,9 @@ public class ImageCache {
                         if (bitmaps == null) {
                             bitmaps = new HashSet<Bitmap>();
                             bitmaps.add(bitmap.getBitmap());
-                            // Logger.d(TAG, "Adding to free cache " + key);
                             freeBitmaps.put(oldValue.size, bitmaps);
                         } else {
                             if (bitmaps.size() < cacheFreeSize) {
-                                // Logger.d(TAG, "Adding to free cache " + key);
                                 bitmaps.add(bitmap.getBitmap());
                             }
                         }
@@ -65,6 +66,10 @@ public class ImageCache {
 
     public ImageCache() {
         this(DEFAULT_CACHE_SIZE, DEFAULT_CACHE_FREE_SIZE);
+    }
+
+    protected int getCacheMaxSize(int size) {
+        return 10;
     }
 
     public void putToCache(int size, BitmapHolder bitmap) {
@@ -95,7 +100,7 @@ public class ImageCache {
     }
 
     private void putHolder(Holder holder) {
-        if (holder.referenceCount <= 0) {
+        if (holder.references.size() <= 0) {
             holder.sourceStrongBitmap = holder.sourceBitmap.get();
             if (holder.sourceStrongBitmap == null) {
                 return;
@@ -145,7 +150,7 @@ public class ImageCache {
         return holder;
     }
 
-    public void incReference(String key) {
+    public void incReference(String key, Object referent) {
 
         // Logger.d(TAG, "incReference -> " + key);
 
@@ -154,12 +159,14 @@ public class ImageCache {
             return;
         }
 
-        holder.referenceCount++;
+        if (holder.references.add(referent)) {
+            Logger.d("BIND", "Binded " + referent + " key " + key);
+        }
 
         updateHolder(holder);
     }
 
-    public void decReference(String key) {
+    public void decReference(String key, Object referent) {
 
         // Logger.d(TAG, "decReference -> " + key);
 
@@ -168,7 +175,10 @@ public class ImageCache {
             return;
         }
 
-        holder.referenceCount--;
+        if (holder.references.remove(referent)) {
+            Logger.d("BIND", "Unbinded " + referent + " key " + key);
+        }
+
 
         updateHolder(holder);
     }
@@ -186,13 +196,14 @@ public class ImageCache {
         public String key;
         public SoftReference<BitmapHolder> sourceBitmap;
         public BitmapHolder sourceStrongBitmap;
-        public int referenceCount;
+        public HashSet<Object> references;
         public int size;
 
         private Holder(String key, int size, BitmapHolder bitmap) {
             this.size = size;
             this.key = key;
             this.sourceBitmap = new SoftReference<BitmapHolder>(bitmap);
+            this.references = new HashSet<Object>();
         }
     }
 }

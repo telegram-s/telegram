@@ -276,14 +276,14 @@ public class AvatarLoader {
     private class FileWorker extends BaseWorker {
 
         @Override
-        protected boolean processTask(AvatarTask task) {
+        protected boolean processTask(AvatarTask task) throws Exception {
             boolean pre = processPreTask(task);
-            if (pre) {
-                return true;
-            } else {
+            if (!pre) {
                 synchronized (task) {
                     task.setDownloaded(false);
                 }
+                return true;
+            } else {
                 return false;
             }
         }
@@ -296,7 +296,7 @@ public class AvatarLoader {
 
     private class DownloadWorker extends BaseWorker {
         @Override
-        protected boolean processTask(AvatarTask task) {
+        protected boolean processTask(AvatarTask task) throws Exception {
             boolean pre = processPreTask(task);
             if (pre) {
                 return true;
@@ -315,17 +315,18 @@ public class AvatarLoader {
                 throw new UnsupportedOperationException();
             }
 
-            try {
-                TLFile res = application.getApi().doGetFile(dcId, location, 0, 1024 * 1024 * 1024);
+            TLFile res = application.getApi().doGetFile(dcId, location, 0, 1024 * 1024 * 1024);
 
-                fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes().cleanData());
-                Bitmap src = fullBitmaps.get();
-                Optimizer.loadTo(res.getBytes().cleanData(), src);
-                onFullBitmapLoaded(src, task);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
+            fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes().cleanData());
+            Bitmap src = fullBitmaps.get();
+            Optimizer.loadTo(res.getBytes().cleanData(), src);
+            onFullBitmapLoaded(src, task);
+
+            return true;
+        }
+
+        @Override
+        protected boolean needRepeatOnError() {
             return true;
         }
 
