@@ -137,74 +137,79 @@ JNIEXPORT jboolean Java_org_telegram_android_util_ImageNativeUtils_nativeFastBlu
     return JNI_TRUE;
 }
 
-//void Java_org_telegram_android_util_ImageNativeUtils_nativeLoadEmoji(
-//        JNIEnv* env,
-//        jclass clazz,
-//        jstring colorPath,
-//        jstring alphaPath) {
-//    char * cPath =  (*env)->GetStringUTFChars( env, colorPath , NULL );
-//    char * aPath =  (*env)->GetStringUTFChars( env, alphaPath , NULL );
-//    AndroidBitmapInfo  info;
-//    struct jpeg_error_mgr jerr;
-//    struct jpeg_decompress_struct cinfo;
-//    struct jpeg_decompress_struct ainfo;
-//    FILE *cFile, *aFile;
-//    JSAMPARRAY cBuffer, aBuffer;
-//    int strideC, strideA, ret, rowIndex, i;
-//    void *cPixels, *aPixels;
-//    uint32_t *cData, *aData;
-//
-//    cinfo.err = jpeg_std_error(&jerr);
-//    ainfo.err = jpeg_std_error(&jerr);
-//
-//    jpeg_create_decompress(&cinfo);
-//    jpeg_create_decompress(&ainfo);
-//
-//    if ((cFile = fopen(cPath, "rb")) == NULL) {
-//        LOGE("Unable to open file");
-//        return;
-//    }
-//
-//    if ((aFile = fopen(aPath, "rb")) == NULL) {
-//        LOGE("Unable to open file");
-//        return;
-//    }
-//
-//    jpeg_stdio_src(&cinfo, cFile);
-//    jpeg_stdio_src(&ainfo, aFile);
-//
-//    (void) jpeg_read_header(&cinfo, TRUE);
-//    (void) jpeg_read_header(&ainfo, TRUE);
-//
-//    (void) jpeg_start_decompress(&cinfo);
-//    (void) jpeg_start_decompress(&ainfo);
-//
-//    strideC = cinfo.output_width * cinfo.output_components;
-//    strideA = ainfo.output_width * ainfo.output_components;
-//
-//    cBuffer = (*cinfo.mem->alloc_sarray)
-//        ((j_common_ptr) &cinfo, JPOOL_IMAGE, strideC, 1);
-//    aBuffer = (*ainfo.mem->alloc_sarray)
-//        ((j_common_ptr) &ainfo, JPOOL_IMAGE, strideA, 1);
-//
-//    jclass java_bitmap_class = (jclass)(*env)->FindClass(env, "android/graphics/Bitmap");
-//    jmethodID mid = (*env)->GetStaticMethodID(env, java_bitmap_class, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
-//
-//    jclass bcfg_class = (*env)->FindClass(env, "android/graphics/Bitmap$Config");
-//    jobject java_bitmap_config = (*env)->CallStaticObjectMethod(env, bcfg_class, (*env)->GetStaticMethodID(env, bcfg_class, "valueOf", "(Ljava/lang/String;)Landroid/graphics/Bitmap$Config;"), (*env)->NewStringUTF(env, "ARGB_8888"));
-//
-//    jobject* res =(jobject*) malloc(16 * sizeof(jobject));
-//    for(i = 0; i < 16; i++) {
-//        res[i] = (*env)->CallStaticObjectMethod(env, java_bitmap_class, mid, 8 * 54, 8 * 54, java_bitmap_config);
-//    }
-//
-//    cData = (uint32_t*)cPixels;
-//    aData = (unsigned char*)aPixels;
-//    while (cinfo.output_scanline < cinfo.output_height) {
-//        (void) jpeg_read_scanlines(&cinfo, cBuffer, 1);
-//        (void) jpeg_read_scanlines(&ainfo, aBuffer, 1);
-//    }
-//
-//    (void) jpeg_finish_decompress(&cinfo);
-//    (void) jpeg_finish_decompress(&ainfo);
-//}
+JNIEXPORT jobjectArray Java_org_telegram_android_util_ImageNativeUtils_nativeLoadEmoji(
+        JNIEnv* env,
+        jclass clazz,
+        jstring colorPath,
+        jstring alphaPath) {
+    char * cPath =  (*env)->GetStringUTFChars( env, colorPath , NULL );
+    char * aPath =  (*env)->GetStringUTFChars( env, alphaPath , NULL );
+    AndroidBitmapInfo  info;
+    struct jpeg_error_mgr jerr;
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_decompress_struct ainfo;
+    FILE *cFile, *aFile;
+    JSAMPARRAY cBuffer, aBuffer;
+    int strideC, strideA, ret, rowIndex, i;
+    void *cPixels, *aPixels;
+    uint32_t *cData, *aData;
+
+    cinfo.err = jpeg_std_error(&jerr);
+    ainfo.err = jpeg_std_error(&jerr);
+
+    jpeg_create_decompress(&cinfo);
+    jpeg_create_decompress(&ainfo);
+
+    if ((cFile = fopen(cPath, "rb")) == NULL) {
+        LOGE("Unable to open file");
+        return;
+    }
+
+    if ((aFile = fopen(aPath, "rb")) == NULL) {
+        LOGE("Unable to open file");
+        return;
+    }
+
+    jpeg_stdio_src(&cinfo, cFile);
+    jpeg_stdio_src(&ainfo, aFile);
+
+    (void) jpeg_read_header(&cinfo, TRUE);
+    (void) jpeg_read_header(&ainfo, TRUE);
+
+    (void) jpeg_start_decompress(&cinfo);
+    (void) jpeg_start_decompress(&ainfo);
+
+    strideC = cinfo.output_width * cinfo.output_components;
+    strideA = ainfo.output_width * ainfo.output_components;
+
+    cBuffer = (*cinfo.mem->alloc_sarray)
+        ((j_common_ptr) &cinfo, JPOOL_IMAGE, strideC, 1);
+    aBuffer = (*ainfo.mem->alloc_sarray)
+        ((j_common_ptr) &ainfo, JPOOL_IMAGE, strideA, 1);
+
+    jclass java_bitmap_class = (jclass)(*env)->FindClass(env, "android/graphics/Bitmap");
+    jmethodID mid = (*env)->GetStaticMethodID(env, java_bitmap_class, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
+
+    jclass bcfg_class = (*env)->FindClass(env, "android/graphics/Bitmap$Config");
+    jobject java_bitmap_config = (*env)->CallStaticObjectMethod(env, bcfg_class, (*env)->GetStaticMethodID(env, bcfg_class, "valueOf", "(Ljava/lang/String;)Landroid/graphics/Bitmap$Config;"), (*env)->NewStringUTF(env, "ARGB_8888"));
+
+    jobjectArray res = (*env)->NewObjectArray(env, 16, java_bitmap_class, 0 );
+
+    // jobject* res =(jobject*) malloc(16 * sizeof(jobject));
+    //for(i = 0; i < 16; i++) {
+    //    (*env)->SetObjectArrayElement(env,
+    //        res, i, (*env)->CallStaticObjectMethod(env, java_bitmap_class, mid, 8 * 54, 8 * 54, java_bitmap_config));
+    //}
+
+    cData = (uint32_t*)cPixels;
+    aData = (unsigned char*)aPixels;
+    while (cinfo.output_scanline < cinfo.output_height) {
+        (void) jpeg_read_scanlines(&cinfo, cBuffer, 1);
+        (void) jpeg_read_scanlines(&ainfo, aBuffer, 1);
+    }
+
+    (void) jpeg_finish_decompress(&cinfo);
+    (void) jpeg_finish_decompress(&ainfo);
+
+    return res;
+}

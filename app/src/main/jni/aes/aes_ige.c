@@ -56,6 +56,9 @@
 #include <assert.h>
 #define OPENSSL_assert assert
 
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
 #define N_WORDS (AES_BLOCK_SIZE / sizeof(unsigned long))
 typedef struct {
         unsigned long data[N_WORDS];
@@ -323,3 +326,5 @@ void AES_bi_ige_encrypt(const unsigned char *in, unsigned char *out,
 			}
 		}
 	}
+
+#pragma GCC pop_options

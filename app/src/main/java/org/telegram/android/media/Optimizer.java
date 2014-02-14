@@ -79,6 +79,10 @@ public class Optimizer {
         return load(new FileSource(fileName));
     }
 
+    public static Bitmap loadX2(String fileName) throws IOException {
+        return load(new FileSource(fileName), 2);
+    }
+
     public static Bitmap load(byte[] data) throws IOException {
         return load(new ByteSource(data));
     }
@@ -209,6 +213,38 @@ public class Optimizer {
             }
         }
     }
+
+    private static Bitmap load(Source source, int scale) throws IOException {
+        BitmapFactory.Options o = new BitmapFactory.Options();
+
+        o.inSampleSize = 1;
+        o.inScaled = false;
+        o.inTempStorage = bitmapTmp.get();
+        o.inSampleSize = scale;
+
+        if (Build.VERSION.SDK_INT >= 10) {
+            o.inPreferQualityOverSpeed = true;
+        }
+
+        if (Build.VERSION.SDK_INT >= 11) {
+            o.inMutable = true;
+        }
+
+        InputStream stream = createStream(source);
+        try {
+
+            return BitmapFactory.decodeStream(stream, null, o);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
 
     private static int getScale(Source source) throws IOException {
         InputStream stream = createStream(source);

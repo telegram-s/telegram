@@ -12,6 +12,10 @@ public class ImageNativeUtils {
         System.loadLibrary("timg");
     }
 
+    public static Bitmap[] loadEmoji(String color, String alpha) {
+        return nativeLoadEmoji(color, alpha);
+    }
+
     public static void mergeBitmapAlpha(Bitmap source, Bitmap alpha) {
         nativeMergeBitmapAlpha(source, alpha);
     }
@@ -28,4 +32,6 @@ public class ImageNativeUtils {
     private static native boolean nativeFastBlur(Bitmap src);
 
     private static native boolean nativeMergeBitmapAlpha(Bitmap source, Bitmap alpha);
+
+    private static native Bitmap[] nativeLoadEmoji(String colorPath, String alphaPath);
 }

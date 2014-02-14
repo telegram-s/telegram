@@ -22,8 +22,8 @@ public class BitmapDecoderEx {
     private BitmapDecoderEx() {
     }
 
-    public static void decodeReuseBitmapBlend(String fileName, Bitmap dest) throws IOException {
-        nativeDecodeBitmapBlend(fileName, dest);
+    public static void decodeReuseBitmapBlend(String fileName, Bitmap dest, boolean scale) throws IOException {
+        nativeDecodeBitmapBlend(fileName, dest, scale);
     }
 
     public static void decodeReuseBitmap(String fileName, Bitmap dest) throws IOException {
@@ -44,5 +44,5 @@ public class BitmapDecoderEx {
 
     private static native void nativeDecodeArray(byte[] array, Bitmap bitmap) throws IOException;
 
-    private static native void nativeDecodeBitmapBlend(String fileName, Bitmap bitmap) throws IOException;
+    private static native void nativeDecodeBitmapBlend(String fileName, Bitmap bitmap, boolean scale) throws IOException;
 }

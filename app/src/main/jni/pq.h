@@ -1,5 +1,8 @@
 #include <stdio.h>
 
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
 uint64_t gcd(uint64_t a, uint64_t b){
     while(a != 0 && b != 0) {
         while((b & 1) == 0) b >>= 1;
@@ -9,7 +12,7 @@ uint64_t gcd(uint64_t a, uint64_t b){
     return b == 0 ? a : b;
 }
 
-long solvePQ(long src)
+uint64_t solvePQ(uint64_t src)
 {
  uint64_t what = src;
         int it = 0, i, j;
@@ -45,3 +48,5 @@ JNIEXPORT jlong Java_org_telegram_android_util_NativePQ_solvePq(JNIEnv* env, job
 {
    return solvePQ(src);
 }
+
+#pragma GCC pop_options

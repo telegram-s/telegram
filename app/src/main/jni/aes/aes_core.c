@@ -39,6 +39,9 @@
 #include "aes.h"
 #include "aes_locl.h"
 
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
 #ifndef AES_ASM
 /*
 Te0[x] = S [x].[02, 01, 01, 03];
@@ -1356,3 +1359,5 @@ int private_AES_set_decrypt_key(const unsigned char *userKey, const int bits,
 }
 
 #endif /* AES_ASM */
+
+#pragma GCC pop_options

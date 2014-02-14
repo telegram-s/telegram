@@ -63,7 +63,8 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
                                                              JNIEnv* env,
                                                              jclass clazz,
                                                              jstring fileName,
-                                                             jobject bitmap)
+                                                             jobject bitmap,
+                                                             jboolean scale)
 {
     char * path =  (*env)->GetStringUTFChars( env, fileName , NULL );
     AndroidBitmapInfo  info;
@@ -71,7 +72,7 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
     struct jpeg_decompress_struct cinfo;
     FILE * infile;
     JSAMPARRAY buffer;
-    int row_stride, ret, rowIndex, i, a, r, g, b;
+    int row_stride, ret, rowIndex, i, a, r, g, b, rw;
     void* pixels;
 
     if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
@@ -128,16 +129,35 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
 
     rowIndex = 0;
     uint32_t* line = (uint32_t*)pixels;
+    rw = cinfo.output_width;
+    if (scale == JNI_TRUE)
+    {
+        rw = rw >> 1;
+    }
     while (cinfo.output_scanline < cinfo.output_height) {
+        if (scale) {
+            (void) jpeg_read_scanlines(&cinfo, buffer, 1);
+        }
         (void) jpeg_read_scanlines(&cinfo, buffer, 1);
 
         if (rowIndex++ < info.height) {
-            for( i = 0; i < MIN(info.width, cinfo.output_width); i++) {
-                a = buffer[0][i];
-                r = (R(line[i]) * a) >> 8;
-                g = (G(line[i]) * a) >> 8;
-                b = (B(line[i]) * a) >> 8;
-                line[i] = ARGB(a, r, g, b);
+            if (scale == JNI_TRUE) {
+                for(i = 0; i < MIN(info.width, rw); i++) {
+                    a = buffer[0][i * 2];
+                    r = (R(line[i]) * a) >> 8;
+                    g = (G(line[i]) * a) >> 8;
+                    b = (B(line[i]) * a) >> 8;
+                    line[i] = ARGB(a, r, g, b);
+                }
+            }
+            else{
+                for(i = 0; i < MIN(info.width, rw); i++) {
+                    a = buffer[0][i];
+                    r = (R(line[i]) * a) >> 8;
+                    g = (G(line[i]) * a) >> 8;
+                    b = (B(line[i]) * a) >> 8;
+                    line[i] = ARGB(a, r, g, b);
+                }
             }
             line = (char*)line + (info.stride);
         }

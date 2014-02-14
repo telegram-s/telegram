@@ -253,35 +253,37 @@ public class EmojiProcessor {
                 Logger.d(TAG, "emoji loading start");
                 try {
 
-                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    boolean useScale = false;
                     String fileName = null;
                     String fileNameAlpha = null;
+
 
                     switch (layoutType) {
                         default:
                         case LAYOUT_1X:
                             fileName = "emoji_c_1.jpg";
                             fileNameAlpha = "emoji_a_1.jpg";
+                            useScale = false;
                             break;
                         case LAYOUT_15X_1:
                             fileName = "emoji_c_15.jpg";
                             fileNameAlpha = "emoji_a_15.jpg";
-                            options.inSampleSize = 1;
+                            useScale = false;
                             break;
                         case LAYOUT_15X_2:
                             fileName = "emoji_c_15.jpg";
                             fileNameAlpha = "emoji_a_15.jpg";
-                            options.inSampleSize = 2;
+                            useScale = true;
                             break;
                         case LAYOUT_2X_1:
                             fileName = "emoji_c_2.jpg";
                             fileNameAlpha = "emoji_a_2.jpg";
-                            options.inSampleSize = 1;
+                            useScale = false;
                             break;
                         case LAYOUT_2X_2:
                             fileName = "emoji_c_2.jpg";
                             fileNameAlpha = "emoji_a_2.jpg";
-                            options.inSampleSize = 2;
+                            useScale = true;
                             break;
                     }
 
@@ -299,19 +301,12 @@ public class EmojiProcessor {
                         colorsIs.close();
                     }
 
-                    // ImageNativeUtils.loadEmoji(sourceFile.getAbsolutePath(), sourceAlphaFile.getAbsolutePath());
-                    // Logger.d(TAG, "emoji pre-loaded 0 in " + (System.currentTimeMillis() - start) + " ms");
-
-                    Bitmap colorsBitmap = Optimizer.load(sourceFile.getAbsolutePath());
+                    Bitmap colorsBitmap = !useScale
+                            ? Optimizer.load(sourceFile.getAbsolutePath())
+                            : Optimizer.loadX2(sourceFile.getAbsolutePath());
                     colorsBitmap.setHasAlpha(true);
-                    BitmapDecoderEx.decodeReuseBitmapBlend(sourceAlphaFile.getAbsolutePath(), colorsBitmap);
-                    // Bitmap alphaBitmap = Optimizer.load(sourceAlphaFile.getAbsolutePath());
 
-                    Logger.d(TAG, "emoji pre-loaded 1 in " + (System.currentTimeMillis() - start) + " ms");
-
-                    // Bitmap resultBitmap = colorsBitmap.copy(Bitmap.Config.ARGB_8888, true);
-                    // resultBitmap.setHasAlpha(true);
-                    // ImageNativeUtils.mergeBitmapAlpha(colorsBitmap, alphaBitmap);
+                    BitmapDecoderEx.decodeReuseBitmapBlend(sourceAlphaFile.getAbsolutePath(), colorsBitmap, useScale);
 
                     Logger.d(TAG, "emoji pre-loaded in " + (System.currentTimeMillis() - start) + " ms");
 
@@ -332,7 +327,7 @@ public class EmojiProcessor {
                             height = colorsBitmap.getHeight() - topOffset;
                         }
 
-                        colorsBitmap.getPixels(resultColors, 0, rectSize * SECTION_SIDE, leftOffset, topOffset, width, height);
+                        // colorsBitmap.getPixels(resultColors, 0, rectSize * SECTION_SIDE, leftOffset, topOffset, width, height);
                         // for (int ind = 0; ind < resultColors.length; ind++) {
                         //resultColors[ind] = 0xFFFFFF & tmpColors[ind];
                         // resultColors[ind] = 0xFFFFFF & tmpColors[ind];
@@ -343,7 +338,10 @@ public class EmojiProcessor {
 //                        }
 
                         Bitmap section = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                        section.setPixels(resultColors, 0, rectSize * SECTION_SIDE, 0, 0, width, height);
+                        Canvas canvas = new Canvas(section);
+                        canvas.drawBitmap(colorsBitmap, new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height),
+                                new Rect(0, 0, width, height), new Paint());
+                        // section.setPixels(resultColors, 0, rectSize * SECTION_SIDE, 0, 0, width, height);
                         emojiMap.put(ordinal, section);
 
                         Logger.d(TAG, "emoji region loaded in " + (System.currentTimeMillis() - start) + " ms");
