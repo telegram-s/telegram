@@ -71,7 +71,7 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
     struct jpeg_decompress_struct cinfo;
     FILE * infile;
     JSAMPARRAY buffer;
-    int row_stride, ret, rowIndex, i;
+    int row_stride, ret, rowIndex, i, a, r, g, b;
     void* pixels;
 
     if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
@@ -133,7 +133,11 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
 
         if (rowIndex++ < info.height) {
             for( i = 0; i < MIN(info.width, cinfo.output_width); i++) {
-                line[i] = ARGB(CLAMP(buffer[0][i]), R(line[i]), G(line[i]), B(line[i]));
+                a = buffer[0][i];
+                r = (R(line[i]) * a) >> 8;
+                g = (G(line[i]) * a) >> 8;
+                b = (B(line[i]) * a) >> 8;
+                line[i] = ARGB(a, r, g, b);
             }
             line = (char*)line + (info.stride);
         }
