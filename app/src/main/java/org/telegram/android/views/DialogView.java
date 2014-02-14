@@ -469,7 +469,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             switch (state) {
                 default:
                 case MessageState.PENDING:
-                    bound(statePending, layout.layoutStateLeft, layout.layoutStateTop);
+                    bound(statePending, layout.layoutClockLeft, layout.layoutClockTop);
                     statePending.draw(canvas);
                     break;
                 case MessageState.SENT:
@@ -634,6 +634,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         public int layoutStateLeft;
         public int layoutStateLeftDouble;
 
+        public int layoutClockLeft;
+        public int layoutClockTop;
+
         public int layoutMainWidth;
         public int layoutMainLeft;
         public int layoutMainTop;
@@ -730,6 +733,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             layoutMainContentTop = (int) (layoutMainTop + bodyPaint.getFontMetrics().ascent);
             layoutTitleLayoutTop = (int) (layoutTitleTop + titlePaint.getFontMetrics().ascent);
             layoutStateTop = layoutTimeTop - px(10);
+            layoutClockTop = layoutTimeTop - px(12);
             layoutEncryptedTop = layoutTimeTop - px(14);
 
             if (isRtl) {
@@ -741,14 +745,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             int timeWidth = (int) unreadClockPaint.measureText(time);
             if (isRtl) {
                 layoutTimeLeft = layoutPadding;
-            } else {
-                layoutTimeLeft = w - layoutPadding - timeWidth;
-            }
-
-            if (isRtl) {
                 layoutStateLeftDouble = layoutPadding + timeWidth + px(2);
                 layoutStateLeft = layoutStateLeftDouble + px(6);
+                layoutClockLeft = layoutPadding + timeWidth + px(2);
             } else {
+                layoutTimeLeft = w - layoutPadding - timeWidth;
+                layoutClockLeft = w - layoutPadding - timeWidth - px(14);
                 layoutStateLeft = w - layoutPadding - timeWidth - px(16);
                 layoutStateLeftDouble = w - layoutPadding - timeWidth - px(6 + 16);
             }

@@ -8,7 +8,8 @@
 #define  G(c) ((c & 0x0000ff00) >> 8)
 #define  B(c) ((c & 0x00ff0000) >> 16)
 #define  A(c) ((c & 0xff000000) >> 24)
-#define  ARGB(a,r,g,b) (a << 24 | (b << 16) | (g << 8) | r)
+#define  ARGB(a,r,g,b) ((a << 24) | (b << 16) | (g << 8) | r)
+#define CLAMP(a) (a < 0 ? 0 : (a > 255 ? 255 : a))
 
 struct my_error_mgr {
   struct jpeg_error_mgr pub;	/* "public" fields */
@@ -132,7 +133,7 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
 
         if (rowIndex++ < info.height) {
             for( i = 0; i < MIN(info.width, cinfo.output_width); i++) {
-                line[i] = ARGB(buffer[0][i], R(line[i]), G(line[i]), B(line[i]));
+                line[i] = ARGB(CLAMP(buffer[0][i]), R(line[i]), G(line[i]), B(line[i]));
             }
             line = (char*)line + (info.stride);
         }
