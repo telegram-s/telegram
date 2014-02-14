@@ -182,7 +182,7 @@ public class ContactsFragment extends BaseContactsFragment {
             shareIntent.setType("text/plain");
             shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, getStringSafe(R.string.st_invite_short));
 
-            startPickerActivity(shareIntent, "Share by...");
+            startPickerActivity(shareIntent, null, "Share by...");
         } else {
             // TODO: Correct fix
             final ContactWireframe contact = (ContactWireframe) adapterView.getItemAtPosition(i);

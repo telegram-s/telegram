@@ -547,12 +547,20 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
     }
 
     protected void startPickerActivity(Intent intent) {
-        startPickerActivity(intent, "Perform with");
+        startPickerActivity(intent, null, "Perform with");
     }
 
-    protected void startPickerActivity(Intent intent, String title) {
+    protected void startPickerActivity(Intent intent, Intent fallBackIntent) {
+        startPickerActivity(intent, fallBackIntent, "Perform with");
+    }
+
+    protected void startPickerActivity(Intent intent, Intent fallBackIntent, String title) {
         PickIntentItem[] pickIntentItems = createPickIntents(intent);
         if (pickIntentItems.length == 0) {
+            if (fallBackIntent != null) {
+                startPickerActivity(fallBackIntent, null, title);
+                return;
+            }
             Toast.makeText(getActivity(), R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();
             return;
         } else if (pickIntentItems.length == 1) {
@@ -751,18 +759,10 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, mimeType);
 
-        try {
-            startPickerActivity(intent);
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                intent.setDataAndType(uri, "*/*");
-                startPickerActivity(intent);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-                Toast.makeText(application, R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();
-            }
-        }
+        Intent fallbackIntent = new Intent(Intent.ACTION_VIEW);
+        fallbackIntent.setDataAndType(uri, "*/*");
+
+        startPickerActivity(intent, fallbackIntent);
     }
 
     protected void openInternalFile(String key, String mimeType) {
