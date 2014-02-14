@@ -382,13 +382,13 @@ public class EncryptionController {
         EncryptedChat chat = application.getEngine().getEncryptedChat(chatId);
 
         byte[] rawGa;
-        byte[] nonce;
+        // byte[] nonce;
         try {
             ByteArrayInputStream stream = new ByteArrayInputStream(chat.getKey());
             int primeLen = StreamingUtils.readInt(stream);
             rawGa = StreamingUtils.readBytes(primeLen, stream);
-            int aLen = StreamingUtils.readInt(stream);
-            nonce = StreamingUtils.readBytes(aLen, stream);
+            // int aLen = StreamingUtils.readInt(stream);
+            // nonce = StreamingUtils.readBytes(aLen, stream);
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -428,7 +428,7 @@ public class EncryptionController {
             return;
         }
 
-        byte[] key = xor(alignKeyZero(CryptoUtils.fromBigInt(ga.modPow(b, dhPrime)), 256), nonce);
+        byte[] key = alignKeyZero(CryptoUtils.fromBigInt(ga.modPow(b, dhPrime)), 256);
         long keyF = readLong(substring(CryptoUtils.SHA1(key), 12, 8), 0);
 
         Logger.d(TAG, "Confirming encryption: " + keyF);
