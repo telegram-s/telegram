@@ -712,6 +712,7 @@ public class ModelEngine {
         messagesEngine.update(msg);
         usersEngine.onUsers(statedMessages.getUsers());
         groupsEngine.onGroupsUpdated(statedMessages.getChats());
+        mediaEngine.saveMedia(msg);
         onUpdatedMessages(statedMessages.getMessages());
 
         dialogsEngine.updateDescriptorSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), mid, msg.getDatabaseId());
