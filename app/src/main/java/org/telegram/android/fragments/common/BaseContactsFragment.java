@@ -509,8 +509,8 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
 
         @Override
         public int getSectionForPosition(int ind) {
-            for (int i = 0; i < headerStart.length; i++) {
-                if (headerStart[i] <= ind) {
+            for (int i = 0; i < headerStart.length - 1; i++) {
+                if (headerStart[i] <= ind && ind < headerStart[i + 1]) {
                     return i;
                 }
             }

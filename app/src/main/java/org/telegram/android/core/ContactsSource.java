@@ -138,9 +138,9 @@ public class ContactsSource implements ContactsSync.ContactSyncListener {
             @Override
             public int compare(User user, User user2) {
                 if (sortOrder == SORT_ORDER_FIRST_NAME) {
-                    return user.getFirstName().compareTo(user2.getFirstName());
+                    return user.getFirstName().compareToIgnoreCase(user2.getFirstName());
                 } else {
-                    return user.getLastName().compareTo(user2.getLastName());
+                    return user.getLastName().compareToIgnoreCase(user2.getLastName());
                 }
             }
         });

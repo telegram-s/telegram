@@ -17,6 +17,7 @@ import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLLocalGeo;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
+import org.telegram.android.log.Logger;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
@@ -30,6 +31,8 @@ import java.util.ArrayList;
  * Created by ex3ndr on 08.02.14.
  */
 public class MediaLoader {
+
+    private static final String TAG = "MediaLoader";
 
     private static final int SIZE_CHAT_PREVIEW = 0;
     private static final int SIZE_FAST_PREVIEW = 1;
@@ -163,6 +166,9 @@ public class MediaLoader {
     }
 
     protected void notifyMediaLoaded(final QueueProcessor.BaseTask task, final Bitmap bitmap, final int regionW, final int regionH) {
+        if (bitmap == null) {
+            Logger.w(TAG, "Received null bitmap!");
+        }
         handler.post(new Runnable() {
             @Override
             public void run() {
