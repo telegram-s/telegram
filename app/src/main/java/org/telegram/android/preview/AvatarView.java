@@ -121,4 +121,9 @@ public class AvatarView extends View implements AvatarReceiver {
         }
         invalidate();
     }
+
+    @Override
+    public String toString() {
+        return "AvatarView#" + hashCode();
+    }
 }

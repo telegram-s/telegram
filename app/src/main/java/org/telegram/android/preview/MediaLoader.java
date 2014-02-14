@@ -179,6 +179,7 @@ public class MediaLoader {
                         }
                     }
                 }
+                imageCache.decReference(task.getKey(), MediaLoader.this);
             }
         });
     }

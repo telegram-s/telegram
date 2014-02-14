@@ -962,4 +962,9 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         application.getUiKernel().getMediaLoader().getImageCache().incReference(key, this);
         invalidate();
     }
+
+    @Override
+    public String toString() {
+        return "MessageMediaView#" + hashCode();
+    }
 }

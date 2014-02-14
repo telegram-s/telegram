@@ -1,9 +1,7 @@
 package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.support.v4.util.LruCache;
-import com.actionbarsherlock.R;
 import org.telegram.android.log.Logger;
 
 import java.lang.ref.SoftReference;
@@ -25,7 +23,7 @@ public class ImageCache {
     private HashMap<String, Holder> references;
     private HashMap<String, Integer> movedBitmaps;
 
-    private LruCache<String, Holder> avatarCache;
+    private LruCache<String, Holder> lruCache;
 
     private HashMap<Integer, HashSet<Bitmap>> freeBitmaps;
 
@@ -36,7 +34,7 @@ public class ImageCache {
         this.cacheSize = _cacheSize;
         this.cacheFreeSize = _cacheFreeSize;
 
-        avatarCache = new LruCache<String, Holder>(cacheSize) {
+        lruCache = new LruCache<String, Holder>(cacheSize) {
             @Override
             protected void entryRemoved(boolean evicted, String key, Holder oldValue, Holder newValue) {
                 if (evicted) {
@@ -71,21 +69,28 @@ public class ImageCache {
         this(DEFAULT_CACHE_SIZE, DEFAULT_CACHE_FREE_SIZE);
     }
 
-    protected int getCacheMaxSize(int size) {
-        return 10;
-    }
-
-    public void putToCache(int size, BitmapHolder bitmap, Object referent) {
+    public synchronized void putToCache(int size, BitmapHolder bitmap, Object referent) {
         if (IS_LOGGING) {
             Logger.d(TAG, "Adding to cache " + bitmap.getKey() + " reference #" + bitmap.getBitmap());
         }
 
+
         Holder holder = new Holder(bitmap.getKey(), size, bitmap);
         holder.references.add(referent);
+
+        if (lruCache.get(holder.key) != null) {
+            Logger.w(TAG, "Was in lru cache");
+        }
+        if (references.get(holder.key) != null) {
+            Logger.w(TAG, "Was in reference cache");
+        }
+
+        lruCache.remove(holder.key);
+        references.remove(holder.key);
         putHolder(holder);
     }
 
-    public Bitmap findFree(int size) {
+    public synchronized Bitmap findFree(int size) {
         synchronized (freeBitmaps) {
             HashSet<Bitmap> freeSet = freeBitmaps.get(size);
             if (freeSet == null || freeSet.size() == 0) {
@@ -97,16 +102,16 @@ public class ImageCache {
         }
     }
 
-    private void removeHolder(Holder holder) {
-        avatarCache.remove(holder.key);
+    private synchronized void removeHolder(Holder holder) {
+        lruCache.remove(holder.key);
         references.remove(holder.key);
     }
 
-    private void updateHolder(Holder holder) {
+    private synchronized void updateHolder(Holder holder) {
         putHolder(holder);
     }
 
-    private void putHolder(Holder holder) {
+    private synchronized void putHolder(Holder holder) {
         if (holder.references.size() <= 0) {
             holder.sourceStrongBitmap = holder.sourceBitmap.get();
             if (holder.sourceStrongBitmap == null) {
@@ -122,19 +127,19 @@ public class ImageCache {
                 references.remove(holder.key);
             }
             if (IS_LOGGING) {
-                if (!isMoved && avatarCache.get(holder.key) == null) {
+                if (!isMoved && lruCache.get(holder.key) == null) {
                     Logger.d(TAG, "Adding to weak cache -> " + holder.key);
                 }
             }
-            avatarCache.put(holder.key, holder);
+            lruCache.put(holder.key, holder);
         } else {
             boolean isMoved = false;
-            if (avatarCache.get(holder.key) != null) {
+            if (lruCache.get(holder.key) != null) {
                 isMoved = true;
                 if (IS_LOGGING) {
                     Logger.d(TAG, "Move to strong cache -> " + holder.key + ", #" + holder.sourceStrongBitmap.getBitmap());
                 }
-                avatarCache.remove(holder.key);
+                lruCache.remove(holder.key);
             }
             if (IS_LOGGING) {
                 if (!isMoved && !references.containsKey(holder.key)) {
@@ -147,10 +152,10 @@ public class ImageCache {
         }
     }
 
-    private Holder findHolder(String key) {
+    private synchronized Holder findHolder(String key) {
         Holder holder = references.get(key);
         if (holder == null) {
-            holder = avatarCache.get(key);
+            holder = lruCache.get(key);
         }
 
         if (holder != null) {
@@ -165,7 +170,7 @@ public class ImageCache {
         return holder;
     }
 
-    public void incReference(String key, Object referent) {
+    public synchronized void incReference(String key, Object referent) {
         if (IS_LOGGING) {
             Logger.d(TAG, "incReference -> " + key + ", referent:" + referent);
         }
@@ -180,7 +185,7 @@ public class ImageCache {
         updateHolder(holder);
     }
 
-    public void decReference(String key, Object referent) {
+    public synchronized void decReference(String key, Object referent) {
         if (IS_LOGGING) {
             Logger.d(TAG, "decReference -> " + key + ", referent:" + referent);
         }
@@ -195,7 +200,7 @@ public class ImageCache {
         updateHolder(holder);
     }
 
-    public BitmapHolder getFromCache(String key) {
+    public synchronized BitmapHolder getFromCache(String key) {
         Holder holder = findHolder(key);
         if (holder == null) {
             return null;
