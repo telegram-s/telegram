@@ -91,7 +91,7 @@ public class MediaSender {
         mediaExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+                Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
                 if (message.getExtras() instanceof TLUploadingPhoto
                         || message.getExtras() instanceof TLUploadingVideo
                         || message.getExtras() instanceof TLUploadingDocument

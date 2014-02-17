@@ -1,4 +1,4 @@
-package org.telegram.android.core.video;
+package org.telegram.android.core.video.gl;
 
 /*
  * Copyright (C) 2013 The Android Open Source Project
