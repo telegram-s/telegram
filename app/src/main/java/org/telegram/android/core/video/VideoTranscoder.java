@@ -2,12 +2,25 @@ package org.telegram.android.core.video;
 
 import android.media.*;
 import android.util.Log;
+import com.coremedia.iso.boxes.*;
+import com.googlecode.mp4parser.DataSource;
+import com.googlecode.mp4parser.FileDataSourceImpl;
+import com.googlecode.mp4parser.authoring.Movie;
+import com.googlecode.mp4parser.authoring.Sample;
+import com.googlecode.mp4parser.authoring.Track;
+import com.googlecode.mp4parser.authoring.TrackMetaData;
+import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
+import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
+import com.googlecode.mp4parser.authoring.tracks.H264TrackImpl;
 import org.telegram.android.log.Logger;
 import org.telegram.android.util.IOUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.List;
 
 /**
  * Created by ex3ndr on 15.02.14.
@@ -33,15 +46,15 @@ public class VideoTranscoder {
 
         // chunks.saveToFile(new File("/sdcard/out_1.h264"));
 
-        // saveVideo(chunks, "/sdcard/out_2.mp4");
+        // saveVideo2(chunks, "/sdcard/out_2.mp4");
 
         VideoChunks edited = editVideo(chunks);
 
-        // saveVideo(edited, "/sdcard/out_3.mp4");
+        saveVideo2(edited, "/sdcard/out_3.mp4");
 
         saveVideo(edited, dest);
 
-        IOUtils.copy(new File(dest), new File("/sdcard/out.mp4"));
+        // IOUtils.copy(new File(dest), new File("/sdcard/out.mp4"));
 
         return true;
     }
@@ -74,7 +87,14 @@ public class VideoTranscoder {
 
             // outputData.setMediaFormat(outputFormat);
 
+            int count = MediaCodecList.getCodecCount();
+            for (int i = 0; i < count; i++) {
+                MediaCodecInfo info = MediaCodecList.getCodecInfoAt(i);
+                Logger.d(TAG, "Codec: " + info.getName());
+            }
+
             encoder = MediaCodec.createEncoderByType("video/avc");
+            // Logger.d(TAG, "Encoding with codec: " + encoder.getName());
             encoder.configure(outputFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             //outputData.setMediaFormat(encoder.getOutputFormat());
             inputSurface = new InputSurface(encoder.createInputSurface());
@@ -279,21 +299,47 @@ public class VideoTranscoder {
         mediaMuxer.release();
     }
 
+    private static void saveVideo2(VideoChunks chunks, String fileName) throws IOException {
+        CompatMuxer.mux(chunks, fileName);
+//        chunks.saveToFile(new File("/sdcard/tmp.h264"));
+//        H264TrackImpl h264Track = new H264TrackImpl(new FileDataSourceImpl("/sdcard/tmp.h264"));
+//        Movie m = new Movie();
+//        m.addTrack(h264Track);
+//        Container out = new DefaultMp4Builder().build(m);
+//        FileOutputStream fos = new FileOutputStream(new File(fileName));
+//        FileChannel fc = fos.getChannel();
+//        out.writeContainer(fc);
+//        fos.close();
+
+//        MediaMuxer mediaMuxer = new MediaMuxer(fileName, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+//        int track = mediaMuxer.addTrack(chunks.getMediaFormat());
+//        mediaMuxer.start();
+//        ByteBuffer buffer = ByteBuffer.allocate(5 * 1024 * 1024);
+//        for (int i = 0; i < chunks.getNumChunks(); i++) {
+//            chunks.getChunkData(i, buffer);
+//            MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+//            bufferInfo.flags = chunks.getChunkFlags(i);
+//            bufferInfo.presentationTimeUs = chunks.getChunkTime(i);
+//            bufferInfo.size = chunks.getChunkSize(i);
+//            bufferInfo.offset = 0;
+//            mediaMuxer.writeSampleData(track, buffer, bufferInfo);
+//        }
+//        mediaMuxer.stop();
+//        mediaMuxer.release();
+    }
+
     private static VideoChunks extractVideo(MediaExtractor extractor, int track) {
         VideoChunks dest = new VideoChunks();
         dest.setMediaFormat(extractor.getTrackFormat(track));
         ByteBuffer inputBuffer = ByteBuffer.allocate(5 * 1024 * 1024);
         int size = 0;
         while ((size = extractor.readSampleData(inputBuffer, 0)) >= 0) {
-            inputBuffer.limit(size);
-
             long presentationTimeUs = extractor.getSampleTime();
             int flags = extractor.getSampleFlags();
-
             dest.addChunk(inputBuffer, size, flags, presentationTimeUs);
-
+            inputBuffer.clear();
             extractor.advance();
-            inputBuffer.position(0);
+
         }
         return dest;
     }
