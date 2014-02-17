@@ -6,6 +6,7 @@ import android.media.*;
 import android.net.Uri;
 import android.os.*;
 import android.provider.MediaStore;
+import android.util.Log;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.ChatMessage;
@@ -16,6 +17,7 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.update.TLLocalMessageSentDoc;
 import org.telegram.android.core.model.update.TLLocalMessageSentPhoto;
 import org.telegram.android.core.model.update.TLLocalMessageSentStated;
+import org.telegram.android.core.video.VideoTranscoder;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.media.Optimizer;
@@ -229,11 +231,12 @@ public class MediaSender {
         TLUploadingVideo srcVideo = (TLUploadingVideo) message.getExtras();
         String fileName = srcVideo.getFileName();
         VideoMetadata metadata = getVideoMetadata(fileName);
-//        if (Build.VERSION.SDK_INT >= 16) {
-//            String transcoded = getUploadTempFile();
-//            transcodeVideo(fileName, transcoded);
-//            fileName = transcoded;
-//        }
+        if (Build.VERSION.SDK_INT >= 16) {
+            String transcoded = getUploadTempFile();
+            if (transcodeVideo(fileName, transcoded)) {
+                fileName = transcoded;
+            }
+        }
         String fullPreview = writeTempFile(metadata.img);
         Optimizer.FastPreviewResult previewResult = Optimizer.buildPreview(metadata.getImg());
         Uploader.UploadResult thumbResult = uploadFileSilent(writeTempFile(previewResult.getData()), message.getDatabaseId());
@@ -978,23 +981,14 @@ public class MediaSender {
     }
 
 
-//    private void transcodeVideo(String source, String dest) throws Exception {
-//        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 100, 100);
-//
-//        // Set some properties.  Failing to specify some of these can cause the MediaCodec
-//        // configure() call to throw an unhelpful exception.
-//        format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
-//                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
-//        format.setInteger(MediaFormat.KEY_BIT_RATE, 60000);
-//        format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
-//        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5);
-//
-//        MediaCodec mediaCodec = MediaCodec.createEncoderByType("video/avc");
-//        mediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-//
-//        ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
-//        ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
-//    }
+    private boolean transcodeVideo(String source, String dest) throws Exception {
+        long start = SystemClock.uptimeMillis();
+        try {
+            return VideoTranscoder.transcodeVideo(source, dest);
+        } finally {
+            Logger.d(TAG, "Transcoded in " + (SystemClock.uptimeMillis() - start) + " ms");
+        }
+    }
 
     public class SendState {
         private boolean isSent;

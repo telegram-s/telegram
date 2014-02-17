@@ -21,6 +21,7 @@ import org.telegram.android.log.Logger;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
+import org.telegram.android.ui.BitmapUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -418,9 +419,9 @@ public class MediaLoader {
                 }
             }
 
-            Optimizer.blur(img);
+            // Optimizer.blur(img);
             // new OptimizedBlur().performBlur(img);
-            // img = BitmapUtils.fastblur(img, 8);
+            img = BitmapUtils.fastblur(img, w, h, 8);
 
             imageCache.putToCache(SIZE_FAST_PREVIEW, new BitmapHolder(img, key, w, h), MediaLoader.this);
 

@@ -7,6 +7,12 @@ import android.graphics.Bitmap;
  * Created: 20.08.13 0:44
  */
 public class BitmapUtils {
+    public static Bitmap fastblur(Bitmap sentBitmap, int w, int h, int radius) {
+        Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
+        fastblur(sentBitmap, bitmap, w, h, radius);
+        return bitmap;
+    }
+
     public static Bitmap fastblur(Bitmap sentBitmap, int radius) {
         int w = sentBitmap.getWidth();
         int h = sentBitmap.getHeight();

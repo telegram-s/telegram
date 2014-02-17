@@ -862,7 +862,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 int centerX = desiredWidth / 2;
                 int centerY = desiredHeight / 2;
 
-                canvas.drawPath(path, downloadBgRect);
+                // canvas.drawPath(path, downloadBgRect);
 
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgLightRect);
 
@@ -873,11 +873,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 canvas.restore();
             }
 
-            if (downloadString != null) {
-                int textW = (int) downloadPaint.measureText(downloadString);
-                Paint.FontMetricsInt metricsInt = downloadPaint.getFontMetricsInt();
-                canvas.drawText(downloadString, (desiredWidth - textW) / 2, desiredHeight / 2 + (/*metricsInt.bottom*/ -metricsInt.ascent) / 2 + getPx(24), downloadPaint);
-            }
+//            if (downloadString != null) {
+//                int textW = (int) downloadPaint.measureText(downloadString);
+//                Paint.FontMetricsInt metricsInt = downloadPaint.getFontMetricsInt();
+//                canvas.drawText(downloadString, (desiredWidth - textW) / 2, desiredHeight / 2 + (/*metricsInt.bottom*/ -metricsInt.ascent) / 2 + getPx(24), downloadPaint);
+//            }
         }
 
         if (isVideo) {
@@ -954,11 +954,12 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         this.previewKey = key;
         this.previewRegionW = regionW;
         this.previewRegionH = regionH;
-        if (!intermediate) {
-            this.previewAppearTime = SystemClock.uptimeMillis();
-        } else {
-            this.previewAppearTime = 0;
-        }
+//        if (!intermediate) {
+//            this.previewAppearTime = SystemClock.uptimeMillis();
+//        } else {
+//            this.previewAppearTime = 0;
+//        }
+        this.previewAppearTime = 0;
         application.getUiKernel().getMediaLoader().getImageCache().incReference(key, this);
         invalidate();
     }
