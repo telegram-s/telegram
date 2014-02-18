@@ -116,7 +116,7 @@ public class AvatarLoader {
         String cacheKey = key + "_" + kind;
         BitmapHolder cached = imageCache.getFromCache(cacheKey);
         if (cached != null) {
-            receiver.onAvatarReceived(new AvatarHolder(cacheKey, cached, this), true);
+            receiver.onAvatarReceived(new AvatarHolder(cached, this), true);
             return true;
         }
 
@@ -163,7 +163,7 @@ public class AvatarLoader {
                         receivers.remove(holder);
                         AvatarReceiver receiver = holder.getReceiverReference().get();
                         if (receiver != null) {
-                            receiver.onAvatarReceived(new AvatarHolder(holder.getKey(), bitmap, AvatarLoader.this), false);
+                            receiver.onAvatarReceived(new AvatarHolder(bitmap, AvatarLoader.this), false);
                         }
                     }
                 }

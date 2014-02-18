@@ -19,6 +19,8 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.*;
+import org.telegram.android.preview.MediaHolder;
+import org.telegram.android.preview.MediaLoader;
 import org.telegram.android.preview.MediaReceiver;
 import org.telegram.android.ui.*;
 import org.telegram.android.util.CustomBufferedInputStream;
@@ -46,6 +48,9 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
     private static Canvas movieDestCanvas;
 
     private static final String TAG = "MessageMediaView";
+
+    private MediaLoader loader;
+    private DownloadManager downloadManager;
 
     private Drawable stateSent;
     private Drawable stateHalfCheck;
@@ -81,15 +86,9 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
     private ImageTask previewTask;
     private long previewAppearTime;
 
-    private Bitmap oldPreview;
-    private String oldPreviewKey;
-    private int oldPreviewRegionW;
-    private int oldPreviewRegionH;
+    private MediaHolder oldPreview;
+    private MediaHolder preview;
 
-    private Bitmap preview;
-    private String previewKey;
-    private int previewRegionW;
-    private int previewRegionH;
     // private Bitmap previewCached;
     // private int fastPreviewHeight;
     // private int fastPreviewWidth;
@@ -137,6 +136,8 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     protected void init() {
         super.init();
+        loader = application.getUiKernel().getMediaLoader();
+        downloadManager = application.getDownloadManager();
         videoIcon = getResources().getDrawable(R.drawable.st_bubble_ic_video);
         mapPoint = getResources().getDrawable(R.drawable.st_map_pin);
         unsupportedMark = getResources().getDrawable(R.drawable.st_bubble_unknown);
@@ -333,27 +334,20 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     private void unbindPreview() {
         if (preview != null) {
-            application.getUiKernel().getMediaLoader().getImageCache().decReference(previewKey, this);
-            previewKey = null;
+            preview.release();
             preview = null;
-            previewRegionH = 0;
-            previewRegionW = 0;
         }
     }
 
     private void unbindOldPreview() {
         if (oldPreview != null) {
-            application.getUiKernel().getMediaLoader().getImageCache().decReference(oldPreviewKey, this);
-            oldPreviewKey = null;
+            oldPreview.release();
             oldPreview = null;
-            oldPreviewRegionH = 0;
-            oldPreviewRegionW = 0;
         }
     }
 
     private void bindMedia(MessageWireframe message) {
         this.isBindSizeCalled = false;
-        this.preview = null;
         this.isVideo = false;
         this.isUploadable = false;
         this.isDownloadable = false;
@@ -362,28 +356,24 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         this.key = null;
         this.isUnsupported = false;
 
+        boolean isBinded = false;
         if (message.message.getExtras() instanceof TLLocalPhoto) {
             TLLocalPhoto mediaPhoto = (TLLocalPhoto) message.message.getExtras();
             bindSize(mediaPhoto.getFullW(), mediaPhoto.getFullH());
 
-            boolean isBinded = false;
             if (!(mediaPhoto.getFullLocation() instanceof TLLocalFileEmpty)) {
                 key = DownloadManager.getPhotoKey(mediaPhoto);
                 isDownloadable = true;
 
-                if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-                    application.getUiKernel().getMediaLoader().requestFullLoading(mediaPhoto, application.getDownloadManager().getFileName(key), this);
+                if (downloadManager.getState(key) == DownloadState.COMPLETED) {
+                    loader.requestFullLoading(mediaPhoto, downloadManager.getFileName(key), this);
                     isBinded = true;
                 }
             }
 
             if (!isBinded && mediaPhoto.hasFastPreview()) {
                 isBinded = true;
-                application.getUiKernel().getMediaLoader().requestFastLoading(mediaPhoto, this);
-            }
-
-            if (!isBinded) {
-                application.getUiKernel().getMediaLoader().cancelRequest(this);
+                loader.requestFastLoading(mediaPhoto, this);
             }
         } else if (message.message.getExtras() instanceof TLLocalVideo) {
             TLLocalVideo mediaVideo = (TLLocalVideo) message.message.getExtras();
@@ -393,28 +383,24 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             duration = TextUtil.formatDuration(mediaVideo.getDuration());
             placeholderPaint.setColor(Color.BLACK);
 
-            boolean isBinded = false;
-
             if (!(mediaVideo.getVideoLocation() instanceof TLLocalFileEmpty)) {
                 key = DownloadManager.getVideoKey(mediaVideo);
                 isDownloadable = true;
 
-                if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-                    application.getUiKernel().getMediaLoader()
-                            .requestVideoLoading(
-                                    application.getDownloadManager().getFileName(key),
-                                    this);
+                if (downloadManager.getState(key) == DownloadState.COMPLETED) {
+                    loader.requestVideoLoading(downloadManager.getFileName(key), this);
                     isBinded = true;
                 }
             }
 
             if (!isBinded) {
                 if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
-                    application.getUiKernel().getMediaLoader().requestFastLoading(mediaVideo, this);
+                    loader.requestFastLoading(mediaVideo, this);
                 } else {
                     // TODO: Should we download preview?
-                    application.getUiKernel().getMediaLoader().cancelRequest(this);
+                    loader.cancelRequest(this);
                 }
+                isBinded = true;
             }
 
         } else if (message.message.getExtras() instanceof TLUploadingPhoto) {
@@ -425,7 +411,8 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 // TODO: Implement
                 // previewTask = new ScaleTask(new UriImageTask(photo.getFileUri()), scaledW, scaledH);
             } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
-                application.getUiKernel().getMediaLoader().requestRaw(photo.getFileName(), this);
+                loader.requestRaw(photo.getFileName(), this);
+                isBinded = true;
             }
 
             isUploadable = true;
@@ -433,15 +420,15 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             TLUploadingVideo video = (TLUploadingVideo) message.message.getExtras();
             bindSize(video.getPreviewWidth(), video.getPreviewHeight());
 
-            application.getUiKernel().getMediaLoader()
-                    .requestVideoLoading(
-                            video.getFileName(),
-                            this);
+            loader.requestVideoLoading(video.getFileName(), this);
+            isBinded = true;
+
             isUploadable = true;
         } else if (message.message.getExtras() instanceof TLLocalGeo) {
             TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();
             bindSize(getPx(160), getPx(160));
-            application.getUiKernel().getMediaLoader().requestGeo(geo, this);
+            loader.requestGeo(geo, this);
+            isBinded = true;
             showMapPoint = true;
         } else if (message.message.getExtras() instanceof TLUploadingDocument) {
 
@@ -450,7 +437,8 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             bindSize(doc.getFullPreviewW(), doc.getFullPreviewH());
 
             if (doc.getFilePath().length() > 0) {
-                application.getUiKernel().getMediaLoader().requestRaw(doc.getFilePath(), this);
+                loader.requestRaw(doc.getFilePath(), this);
+                isBinded = true;
             } else {
                 // TODO: Implement
 //                 previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
@@ -465,20 +453,18 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             key = DownloadManager.getDocumentKey(document);
             isDownloadable = true;
 
-            boolean isBinded = false;
-
             if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
                 if (document.getMimeType().equals("image/gif") ||
                         document.getMimeType().equals("image/png") ||
                         document.getMimeType().equals("image/jpeg")) {
-                    if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-                        application.getUiKernel().getMediaLoader().requestRaw(application.getDownloadManager().getFileName(key), this);
+                    if (downloadManager.getState(key) == DownloadState.COMPLETED) {
+                        loader.requestRaw(downloadManager.getFileName(key), this);
                         isBinded = true;
                     }
                 }
 
                 if (!isBinded && document.getFastPreview().length > 0) {
-                    application.getUiKernel().getMediaLoader().requestFastLoading(document, this);
+                    loader.requestFastLoading(document, this);
                     isBinded = true;
                 }
 
@@ -492,6 +478,10 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         } else {
             isUnsupported = true;
             bindSize(0, 0);
+        }
+
+        if (!isBinded) {
+            application.getUiKernel().getMediaLoader().cancelRequest(this);
         }
 
         if (!isBindSizeCalled) {
@@ -549,13 +539,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     @Override
     protected void bindNewView(MessageWireframe message) {
-//        if (Build.VERSION.SDK_INT >= 11) {
-//            if (message.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
-//                setLayerType(LAYER_TYPE_SOFTWARE, null);
-//            } else {
-//                setLayerType(LAYER_TYPE_NONE, null);
-//            }
-//        }
         long start = SystemClock.uptimeMillis();
 
         this.databaseId = message.message.getDatabaseId();
@@ -572,7 +555,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
         this.state = message.message.getState();
         this.prevState = -1;
-        this.oldPreview = null;
 
         bindMedia(message);
 
@@ -584,16 +566,12 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     @Override
     protected void bindUpdate(MessageWireframe message) {
-
         if (this.state != message.message.getState()) {
             this.prevState = this.state;
             this.state = message.message.getState();
             this.stateChangeTime = SystemClock.uptimeMillis();
         }
 
-//        if (preview != null && preview != oldPreview) {
-//            this.oldPreview = preview;
-//        }
         bindMedia(message);
 
         invalidate();
@@ -621,14 +599,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                     }
 
                     final Movie fmovie = Movie.decodeByteArray(data, 0, data.length);
-//                    final Movie fmovie;
-//                    try {
-//                        fmovie = Movie.decodeStream(new CustomBufferedInputStream(
-//                                new FileInputStream(application.getDownloadManager().getFileName(key))));
-//                    } catch (FileNotFoundException e) {
-//                        e.printStackTrace();
-//                        return;
-//                    }
 
                     post(new Runnable() {
                         @Override
@@ -751,17 +721,17 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         } else if (preview != null) {
             if (animationTime > FADE_ANIMATION_TIME || !isAnimatedProgress) {
                 bitmapFilteredPaint.setAlpha(255);
-                rect1.set(0, 0, previewRegionW, previewRegionH);
+                rect1.set(0, 0, preview.getW(), preview.getH());
                 rect2.set(0, 0, desiredWidth, desiredHeight);
-                canvas.drawBitmap(preview, rect1, rect2, bitmapFilteredPaint);
+                canvas.drawBitmap(preview.getBitmap(), rect1, rect2, bitmapFilteredPaint);
             } else {
                 float alpha = fadeEasing((float) animationTime / FADE_ANIMATION_TIME);
 
                 if (oldPreview != null) {
                     bitmapFilteredPaint.setAlpha(255);
-                    rect1.set(0, 0, oldPreviewRegionW, oldPreviewRegionH);
+                    rect1.set(0, 0, preview.getW(), preview.getH());
                     rect2.set(0, 0, desiredWidth, desiredHeight);
-                    canvas.drawBitmap(oldPreview, rect1, rect2, bitmapFilteredPaint);
+                    canvas.drawBitmap(oldPreview.getBitmap(), rect1, rect2, bitmapFilteredPaint);
                 } else {
                     canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
                 }
@@ -775,9 +745,9 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 //                }
 
                 bitmapFilteredPaint.setAlpha((int) (255 * alpha));
-                rect1.set(0, 0, previewRegionW, previewRegionH);
+                rect1.set(0, 0, preview.getW(), preview.getH());
                 rect2.set(0, 0, desiredWidth, desiredHeight);
-                canvas.drawBitmap(preview, rect1, rect2, bitmapFilteredPaint);
+                canvas.drawBitmap(preview.getBitmap(), rect1, rect2, bitmapFilteredPaint);
 //                if (scaleUpMedia) {
 //                    rect1.set(0, 0, preview.getWidth(), preview.getHeight());
 //                    rect2.set(0, 0, desiredWidth, desiredHeight);
@@ -791,11 +761,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         } else if (oldPreview != null) {
             bitmapPaint.setAlpha(255);
             if (scaleUpMedia) {
-                rect1.set(0, 0, oldPreview.getWidth(), oldPreview.getHeight());
+                rect1.set(0, 0, oldPreview.getW(), oldPreview.getH());
                 rect2.set(0, 0, desiredWidth, desiredHeight);
-                canvas.drawBitmap(oldPreview, rect1, rect2, bitmapPaint);
+                canvas.drawBitmap(oldPreview.getBitmap(), rect1, rect2, bitmapPaint);
             } else {
-                canvas.drawBitmap(oldPreview, 0, 0, bitmapPaint);
+                canvas.drawBitmap(oldPreview.getBitmap(), 0, 0, bitmapPaint);
             }
         } else {
             canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
@@ -942,25 +912,20 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
     }
 
     @Override
-    public void onMediaReceived(Bitmap preview, int regionW, int regionH, String key, boolean intermediate) {
-        if (this.preview != preview) {
+    public void onMediaReceived(MediaHolder holder, boolean intermediate) {
+        if (this.preview != holder && this.preview != null) {
             unbindOldPreview();
             this.oldPreview = this.preview;
-            this.oldPreviewKey = this.previewKey;
-            this.oldPreviewRegionW = this.previewRegionW;
-            this.oldPreviewRegionH = this.previewRegionH;
+            this.preview = null;
         }
-        this.preview = preview;
-        this.previewKey = key;
-        this.previewRegionW = regionW;
-        this.previewRegionH = regionH;
+        unbindPreview();
+        this.preview = holder;
 //        if (!intermediate) {
 //            this.previewAppearTime = SystemClock.uptimeMillis();
 //        } else {
 //            this.previewAppearTime = 0;
 //        }
         this.previewAppearTime = 0;
-        application.getUiKernel().getMediaLoader().getImageCache().incReference(key, this);
         invalidate();
     }
 

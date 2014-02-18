@@ -6,16 +6,30 @@ import org.telegram.android.log.Logger;
 /**
  * Created by ex3ndr on 18.02.14.
  */
-public class AvatarHolder {
+public class MediaHolder {
     private static final String TAG = "ImageCache";
     private BitmapHolder bitmap;
-    private AvatarLoader loader;
+    private MediaLoader loader;
     private boolean isReleased = false;
 
-    public AvatarHolder(BitmapHolder bitmap, AvatarLoader loader) {
+    public MediaHolder(BitmapHolder bitmap, MediaLoader loader) {
         this.bitmap = bitmap;
         this.loader = loader;
         loader.getImageCache().incReference(bitmap.getKey(), this);
+    }
+
+    public int getW() {
+        if (isReleased) {
+            throw new UnsupportedOperationException();
+        }
+        return bitmap.getRealW();
+    }
+
+    public int getH() {
+        if (isReleased) {
+            throw new UnsupportedOperationException();
+        }
+        return bitmap.getRealH();
     }
 
     public Bitmap getBitmap() {
@@ -26,13 +40,12 @@ public class AvatarHolder {
     }
 
     public void release() {
+        Logger.d(TAG, "Releasing holder " + bitmap.getKey() + ":" + bitmap);
         if (isReleased) {
             throw new UnsupportedOperationException();
         }
-        Logger.d(TAG, "Releasing holder " + bitmap.getKey() + ":" + bitmap);
         isReleased = true;
         loader.getImageCache().decReference(bitmap.getKey(), this);
         bitmap = null;
     }
-
 }

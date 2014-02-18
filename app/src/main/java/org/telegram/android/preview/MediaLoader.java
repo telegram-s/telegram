@@ -114,6 +114,8 @@ public class MediaLoader {
     private void requestTask(BaseTask task, String key, MediaReceiver receiver) {
         checkUiThread();
 
+        Logger.d(TAG, "requestTask #" + key + ", receiver:" + receiver);
+
         if (checkCache(key, receiver)) {
             return;
         }
@@ -136,13 +138,15 @@ public class MediaLoader {
     private boolean checkCache(String key, MediaReceiver receiver) {
         BitmapHolder cached = imageCache.getFromCache(key);
         if (cached != null) {
-            receiver.onMediaReceived(cached.getBitmap(), cached.getRealW(), cached.getRealH(), key, true);
+            Logger.d(TAG, "checkCache #" + key + ", receiver:" + receiver);
+            receiver.onMediaReceived(new MediaHolder(cached, this), true);
             return true;
         }
         return false;
     }
 
     public void cancelRequest(MediaReceiver receiver) {
+        Logger.d(TAG, "cancelRequest receiver:" + receiver);
         checkUiThread();
         for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
             if (holder.getReceiverReference().get() == null) {
@@ -166,7 +170,7 @@ public class MediaLoader {
         }
     }
 
-    protected void notifyMediaLoaded(final QueueProcessor.BaseTask task, final Bitmap bitmap, final int regionW, final int regionH) {
+    protected void notifyMediaLoaded(final QueueProcessor.BaseTask task, final BitmapHolder bitmap) {
         if (bitmap == null) {
             Logger.w(TAG, "Received null bitmap!");
         }
@@ -182,7 +186,8 @@ public class MediaLoader {
                         receivers.remove(holder);
                         MediaReceiver receiver = holder.getReceiverReference().get();
                         if (receiver != null) {
-                            receiver.onMediaReceived(bitmap, regionW, regionH, task.getKey(), false);
+                            Logger.d(TAG, "notifyMediaLoaded #" + task.getKey() + ", receiver:" + receiver);
+                            receiver.onMediaReceived(new MediaHolder(bitmap, MediaLoader.this), false);
                         }
                     }
                 }
@@ -423,9 +428,9 @@ public class MediaLoader {
             // new OptimizedBlur().performBlur(img);
             img = BitmapUtils.fastblur(img, w, h, 8);
 
-            imageCache.putToCache(SIZE_FAST_PREVIEW, new BitmapHolder(img, key, w, h), MediaLoader.this);
-
-            notifyMediaLoaded(task, img, w, h);
+            BitmapHolder holder = new BitmapHolder(img, key, w, h);
+            imageCache.putToCache(SIZE_FAST_PREVIEW, holder, MediaLoader.this);
+            notifyMediaLoaded(task, holder);
 
             return true;
         }
@@ -475,26 +480,26 @@ public class MediaLoader {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
                         int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth(), info.getHeight(), res);
-                        imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]),
-                                MediaLoader.this);
-                        notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
+                        BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
+                        imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+                        notifyMediaLoaded(rawTask, holder);
                     }
                 } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
                         int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
-                        imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]),
-                                MediaLoader.this);
-                        notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
+                        BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
+                        imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+                        notifyMediaLoaded(rawTask, holder);
                     }
                 }
             }
 
             Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
             int[] sizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]),
-                    MediaLoader.this);
-            notifyMediaLoaded(rawTask, res, sizes[0], sizes[1]);
+            BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+            notifyMediaLoaded(rawTask, holder);
         }
 
         @Override
@@ -531,10 +536,9 @@ public class MediaLoader {
             int[] sizes = Optimizer.scaleToRatio(metadata.getImg(),
                     metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
 
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]),
-                    MediaLoader.this);
-
-            notifyMediaLoaded(task, res, sizes[0], sizes[1]);
+            BitmapHolder holder = new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]);
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+            notifyMediaLoaded(task, holder);
         }
 
         private void processFileTask(MediaFileTask fileTask) throws Exception {
@@ -571,10 +575,9 @@ public class MediaLoader {
                 try {
                     int[] sizes = Optimizer.scaleToRatio(fullImageCached, scaledW, scaledH, res);
 
-                    imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]),
-                            MediaLoader.this);
-
-                    notifyMediaLoaded(fileTask, res, sizes[0], sizes[1]);
+                    BitmapHolder holder = new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]);
+                    imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+                    notifyMediaLoaded(fileTask, holder);
                 } finally {
                     // imageCache.putToCache(SIZE_CHAT_PREVIEW,res);
                 }
@@ -649,9 +652,9 @@ public class MediaLoader {
             }
 
             String cacheKey = "geo:" + geoTask.getLatitude() + "," + geoTask.getLongitude();
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, new BitmapHolder(res, cacheKey, MAP_W, MAP_H),
-                    MediaLoader.this);
-            notifyMediaLoaded(task, res, MAP_W, MAP_H);
+            BitmapHolder holder = new BitmapHolder(res, cacheKey, MAP_W, MAP_H);
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+            notifyMediaLoaded(task, holder);
 
             return true;
         }
