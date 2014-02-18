@@ -18,11 +18,11 @@ import org.telegram.android.core.model.media.TLAbsLocalFileLocation;
 public class AvatarView extends View implements AvatarReceiver {
 
     private Drawable emptyDrawable;
-    private Bitmap avatar;
-    private String avatarKey;
+    private AvatarHolder holder;
 
     private long arriveTime;
     private TelegramApplication application;
+    private AvatarLoader loader;
     private Rect rect = new Rect();
     private Rect rect1 = new Rect();
     private Paint avatarPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
@@ -31,16 +31,19 @@ public class AvatarView extends View implements AvatarReceiver {
     public AvatarView(Context context) {
         super(context);
         application = (TelegramApplication) context.getApplicationContext();
+        loader = application.getUiKernel().getAvatarLoader();
     }
 
     public AvatarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         application = (TelegramApplication) context.getApplicationContext();
+        loader = application.getUiKernel().getAvatarLoader();
     }
 
     public AvatarView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         application = (TelegramApplication) context.getApplicationContext();
+        loader = application.getUiKernel().getAvatarLoader();
     }
 
     public Drawable getEmptyDrawable() {
@@ -63,18 +66,17 @@ public class AvatarView extends View implements AvatarReceiver {
 
     private void bindLocation() {
         if (fileLocation == null) {
-            this.application.getUiKernel().getAvatarLoader().cancelRequest(null);
+            loader.cancelRequest(null);
         } else {
-            this.application.getUiKernel().getAvatarLoader().requestAvatar(fileLocation, AvatarLoader.TYPE_MEDIUM, this);
+            loader.requestAvatar(fileLocation, AvatarLoader.TYPE_MEDIUM, this);
         }
         invalidate();
     }
 
     private void unbindAvatar() {
-        if (avatar != null) {
-            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey, this);
-            avatar = null;
-            avatarKey = null;
+        if (holder != null) {
+            holder.release();
+            holder = null;
         }
     }
 
@@ -88,6 +90,7 @@ public class AvatarView extends View implements AvatarReceiver {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         unbindAvatar();
+        loader.cancelRequest(this);
     }
 
     public void requestAvatarSwitch(TLAbsLocalFileLocation fileLocation) {
@@ -101,19 +104,17 @@ public class AvatarView extends View implements AvatarReceiver {
             emptyDrawable.setBounds(0, 0, getWidth(), getHeight());
             emptyDrawable.draw(canvas);
         }
-        if (avatar != null) {
-            rect.set(0, 0, avatar.getWidth(), avatar.getHeight());
+        if (holder != null) {
+            rect.set(0, 0, holder.getBitmap().getWidth(), holder.getBitmap().getHeight());
             rect1.set(0, 0, getWidth(), getHeight());
-            canvas.drawBitmap(avatar, rect, rect1, avatarPaint);
+            canvas.drawBitmap(holder.getBitmap(), rect, rect1, avatarPaint);
         }
     }
 
     @Override
-    public void onAvatarReceived(Bitmap original, String key, boolean intermediate) {
+    public void onAvatarReceived(AvatarHolder avatarHolder, boolean intermediate) {
         unbindAvatar();
-        this.avatar = original;
-        this.avatarKey = key;
-        application.getUiKernel().getAvatarLoader().getImageCache().incReference(key, this);
+        holder = avatarHolder;
         if (intermediate) {
             this.arriveTime = 0;
         } else {

@@ -27,6 +27,7 @@ import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarHolder;
 import org.telegram.android.preview.AvatarLoader;
 import org.telegram.android.preview.AvatarReceiver;
 import org.telegram.android.ui.FontController;
@@ -65,8 +66,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
     private TextPaint newDivPaint;
     private Paint avatarPaint;
     private Bitmap placeholder;
-    private Bitmap avatar;
-    private String avatarKey;
+    private AvatarHolder avatarHolder;
     // private ImageReceiver receiver;
     private long avatarImageTime;
 
@@ -327,15 +327,16 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
             placeholder = cachedUserPlaceholders[index];
 
             User user = message.senderUser;
-            avatar = null;
             if (user != null) {
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
                     TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) user.getPhoto();
                     if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                        application.getUiKernel().getAvatarLoader().requestAvatar(
+                        if (!application.getUiKernel().getAvatarLoader().requestAvatar(
                                 profilePhoto.getPreviewLocation(),
                                 AvatarLoader.TYPE_SMALL,
-                                this);
+                                this)) {
+                            releaseAvatar();
+                        }
                     } else {
                         releaseAvatar();
                         application.getUiKernel().getAvatarLoader().cancelRequest(this);
@@ -646,11 +647,11 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
             }
         } else {
             if (showAvatar) {
-                if (avatar != null) {
+                if (avatarHolder != null) {
                     long animationTime = SystemClock.uptimeMillis() - avatarImageTime;
                     if (animationTime > AVATAR_FADE_TIME) {
                         avatarPaint.setAlpha(255);
-                        canvas.drawBitmap(avatar, avatarRect.left, avatarRect.top, avatarPaint);
+                        canvas.drawBitmap(avatarHolder.getBitmap(), avatarRect.left, avatarRect.top, avatarPaint);
                         // canvas.drawBitmap(avatar, new Rect(0, 0, avatar.getWidth(), avatar.getHeight()), avatarRect, avatarPaint);
                     } else {
                         float animationPercent = fadeEasing((float) animationTime / AVATAR_FADE_TIME);
@@ -661,7 +662,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
                         canvas.drawBitmap(placeholder, rect, avatarRect, avatarPaint);
 
                         avatarPaint.setAlpha(avatarAlpha);
-                        canvas.drawBitmap(avatar, avatarRect.left, avatarRect.top, avatarPaint);
+                        canvas.drawBitmap(avatarHolder.getBitmap(), avatarRect.left, avatarRect.top, avatarPaint);
                         // canvas.drawBitmap(avatar, new Rect(0, 0, avatar.getWidth(), avatar.getHeight()), avatarRect, avatarPaint);
 
                         isAnimating = true;
@@ -759,19 +760,16 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
     }
 
     private void releaseAvatar() {
-        if (avatar != null) {
-            application.getUiKernel().getAvatarLoader().getImageCache().decReference(avatarKey, this);
-            avatar = null;
-            avatarKey = null;
+        if (avatarHolder != null) {
+            avatarHolder.release();
+            avatarHolder = null;
         }
     }
 
     @Override
-    public void onAvatarReceived(Bitmap original, String key, boolean intermediate) {
+    public void onAvatarReceived(AvatarHolder avatarHolder, boolean intermediate) {
         releaseAvatar();
-        avatar = original;
-        avatarKey = key;
-        application.getUiKernel().getAvatarLoader().getImageCache().incReference(avatarKey, this);
+        this.avatarHolder = avatarHolder;
         if (intermediate) {
             avatarImageTime = 0;
         } else {

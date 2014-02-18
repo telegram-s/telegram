@@ -116,7 +116,7 @@ public class AvatarLoader {
         String cacheKey = key + "_" + kind;
         BitmapHolder cached = imageCache.getFromCache(cacheKey);
         if (cached != null) {
-            receiver.onAvatarReceived(cached.getBitmap(), cacheKey, true);
+            receiver.onAvatarReceived(new AvatarHolder(cacheKey, cached, this), true);
             return true;
         }
 
@@ -150,7 +150,7 @@ public class AvatarLoader {
         }
     }
 
-    protected void notifyAvatarLoaded(final AvatarTask task, final int kind, final Bitmap bitmap) {
+    protected void notifyAvatarLoaded(final AvatarTask task, final int kind, final BitmapHolder bitmap) {
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -163,7 +163,7 @@ public class AvatarLoader {
                         receivers.remove(holder);
                         AvatarReceiver receiver = holder.getReceiverReference().get();
                         if (receiver != null) {
-                            receiver.onAvatarReceived(bitmap, holder.getCacheKey(), false);
+                            receiver.onAvatarReceived(new AvatarHolder(holder.getKey(), bitmap, AvatarLoader.this), false);
                         }
                     }
                 }
@@ -214,10 +214,9 @@ public class AvatarLoader {
         } else {
             return;
         }
-
-        imageCache.putToCache(task.getKind(), new BitmapHolder(mRes, task.getFileLocation().getUniqKey() + "_" + task.getKind()),
-                AvatarLoader.this);
-        notifyAvatarLoaded(task, task.getKind(), mRes);
+        BitmapHolder holder = new BitmapHolder(mRes, task.getFileLocation().getUniqKey() + "_" + task.getKind());
+        imageCache.putToCache(task.getKind(), holder, AvatarLoader.this);
+        notifyAvatarLoaded(task, task.getKind(), holder);
     }
 
     private abstract class BaseWorker extends QueueWorker<AvatarTask> {
@@ -255,9 +254,9 @@ public class AvatarLoader {
         res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
 
         if (res != null) {
-            imageCache.putToCache(task.getKind(), new BitmapHolder(res, task.getFileLocation().getUniqKey() + "_" + task.getKind()),
-                    AvatarLoader.this);
-            notifyAvatarLoaded(task, task.getKind(), res);
+            BitmapHolder holder = new BitmapHolder(res, task.getFileLocation().getUniqKey() + "_" + task.getKind());
+            imageCache.putToCache(task.getKind(), holder, AvatarLoader.this);
+            notifyAvatarLoaded(task, task.getKind(), holder);
             return true;
         }
 
