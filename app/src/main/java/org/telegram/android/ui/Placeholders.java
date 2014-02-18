@@ -68,4 +68,8 @@ public class Placeholders {
             R.drawable.st_group_placeholder_green, R.drawable.st_group_placeholder_orange, R.drawable.st_group_placeholder_pink,
             R.drawable.st_group_placeholder_purple, R.drawable.st_group_placeholder_red, R.drawable.st_group_placeholder_yellow};
 
+    public static final int[] BG_COLOR = new int[]
+            {
+                    0xff8abae7, 0xff99d4e6, 0xff9096e7, 0xffabd683, 0xffda866f, 0xffedcd82, 0xfff5ad6e, 0xfff79db7
+            };
 }

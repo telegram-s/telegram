@@ -85,6 +85,38 @@ public class DialogWireframe {
         }
     }
 
+    public String getDialogName() {
+        if (peerType == PeerType.PEER_USER && peerId == 333000) {
+            return "T";
+        } else if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
+            String res = "";
+            char first = dialogUser.getFirstName().charAt(0);
+            if (Character.isLetter(first)) {
+                res += Character.toUpperCase(first);
+            } else {
+                return "";
+            }
+
+            if (dialogUser.getLastName() != null && dialogUser.getLastName().length() > 0) {
+                char second = dialogUser.getLastName().charAt(0);
+                if (Character.isLetter(second)) {
+                    res += "\u200D" + Character.toUpperCase(second);
+                }
+            }
+
+            return res;
+        } else if (peerType == PeerType.PEER_CHAT) {
+            char value = dialogGroup.getTitle().charAt(0);
+            if (Character.isLetter(value)) {
+                return "" + value;
+            } else {
+                return "";
+            }
+        } else {
+            throw new RuntimeException("Unknown peer type: " + peerType);
+        }
+    }
+
     public TLAbsLocalAvatarPhoto getDialogAvatar() {
         if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
             return dialogUser.getPhoto();

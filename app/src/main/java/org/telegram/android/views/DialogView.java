@@ -51,6 +51,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
     private static boolean isLoaded = false;
     private static Paint avatarPaint;
     private static Paint counterPaint;
+    private static Paint placeholderPaint;
+    private static TextPaint placeholderTextPaint;
     private static TextPaint titlePaint;
     private static TextPaint titleHighlightPaint;
     private static TextPaint titleEncryptedPaint;
@@ -245,6 +247,19 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             counterPaint = new Paint();
             counterPaint.setColor(0xff8fc478);
             counterPaint.setAntiAlias(true);
+
+            placeholderPaint = new Paint();
+            placeholderPaint.setAntiAlias(true);
+
+            if (FontController.USE_SUBPIXEL) {
+                placeholderTextPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+            } else {
+                placeholderTextPaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            }
+            placeholderTextPaint.setColor(0xffffffff);
+            placeholderTextPaint.setTextSize(px(28f));
+            placeholderTextPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+            placeholderTextPaint.setTextAlign(Paint.Align.CENTER);
 
             isLoaded = true;
         }
@@ -524,12 +539,19 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 inavalidateForAnimation();
             }
         } else {
-            avatarPaint.setAlpha(255);
-            rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
-            rect2.set(layout.layoutAvatarLeft, layout.layoutAvatarTop,
+
+            rect.set(layout.layoutAvatarLeft, layout.layoutAvatarTop,
                     layout.layoutAvatarLeft + layout.layoutAvatarWidth,
                     layout.layoutAvatarTop + layout.layoutAvatarWidth);
-            canvas.drawBitmap(placeholder, rect, rect2, avatarPaint);
+            if (layout.usePlaceholder) {
+                placeholderPaint.setColor(layout.placeHolderColor);
+                canvas.drawRect(rect, placeholderPaint);
+                canvas.drawText(layout.placeHolderName, layout.placeholderLeft, layout.placeholderTop, placeholderTextPaint);
+            } else {
+                avatarPaint.setAlpha(255);
+                rect2.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
+                canvas.drawBitmap(placeholder, rect2, rect, avatarPaint);
+            }
         }
 
         if (description.isErrorState() ||
@@ -668,6 +690,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         public String bodyString;
         public Layout titleLayout;
         public String titleString;
+
+        public String placeHolderName;
+        public int placeHolderColor;
+        public float placeholderLeft;
+        public float placeholderTop;
+        public boolean usePlaceholder;
 
         public void build(DialogWireframe description, int w, int h, TelegramApplication application) {
             layoutH = h;
@@ -931,6 +959,20 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                     titleString = TextUtils.ellipsize(title, paint, layoutTitleWidth, TextUtils.TruncateAt.END).toString();
                     titleLayout = null;
                 }
+            }
+
+            // Placeholder
+            placeHolderName = description.getDialogName();
+
+            if (placeHolderName.length() > 0) {
+                usePlaceholder = true;
+                placeHolderColor = Placeholders.BG_COLOR[Math.abs(description.getPeerId()) % Placeholders.BG_COLOR.length];
+                placeholderLeft = layoutAvatarLeft + layoutAvatarWidth / 2;
+                Rect rect = new Rect();
+                placeholderTextPaint.getTextBounds(placeHolderName, 0, placeHolderName.length(), rect);
+                placeholderTop = layoutAvatarTop + (layoutAvatarWidth / 2 + ((rect.bottom - rect.top) / 2));
+            } else {
+                usePlaceholder = false;
             }
         }
     }
