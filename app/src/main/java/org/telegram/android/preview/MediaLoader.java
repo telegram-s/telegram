@@ -39,6 +39,7 @@ public class MediaLoader {
     private static final String TAG = "MediaLoader";
 
     private static final int SIZE_CHAT_PREVIEW = 0;
+    private static final int SIZE_MAP_PREVIEW = 1;
     // private static final int SIZE_FAST_PREVIEW = 1;
 
     private TelegramApplication application;
@@ -211,7 +212,17 @@ public class MediaLoader {
     private Bitmap fetchChatPreview() {
         Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
         if (res == null) {
-            res = Bitmap.createBitmap(PreviewConfig.MAX_PREVIEW_W, PreviewConfig.MAX_PREVIEW_H, Bitmap.Config.ARGB_8888);
+            res = Bitmap.createBitmap(PreviewConfig.MAX_PREVIEW_BITMAP_W, PreviewConfig.MAX_PREVIEW_BITMAP_H, Bitmap.Config.ARGB_8888);
+        } else {
+            res.eraseColor(Color.TRANSPARENT);
+        }
+        return res;
+    }
+
+    private Bitmap fetchMapPreview() {
+        Bitmap res = imageCache.findFree(SIZE_MAP_PREVIEW);
+        if (res == null) {
+            res = Bitmap.createBitmap(PreviewConfig.MAP_W, PreviewConfig.MAP_H, Bitmap.Config.ARGB_8888);
         } else {
             res.eraseColor(Color.TRANSPARENT);
         }
@@ -623,11 +634,11 @@ public class MediaLoader {
 
             MediaGeoTask geoTask = (MediaGeoTask) task;
 
-            Bitmap res = fetchChatPreview();
+            Bitmap res = fetchMapPreview();
             Optimizer.BitmapInfo info = tryToLoadFromCache(geoTask.getKey(), res);
             if (info != null) {
                 BitmapHolder holder = new BitmapHolder(res, task.getKey(), info.getWidth(), info.getWidth());
-                imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+                imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
                 notifyMediaLoaded(task, holder);
                 return true;
             }
@@ -665,7 +676,7 @@ public class MediaLoader {
             putToDiskCache(task.getKey(), res, MAP_W, MAP_H);
 
             BitmapHolder holder = new BitmapHolder(res, task.getKey(), MAP_W, MAP_H);
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+            imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
             notifyMediaLoaded(task, holder);
 
             return true;

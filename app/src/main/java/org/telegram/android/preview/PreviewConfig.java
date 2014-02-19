@@ -12,18 +12,24 @@ public class PreviewConfig {
     private static final int MIN_PREVIEW_H_DP = 40;
 
     private static final int MAX_PREVIEW_W_DP = 260;
-    private static final int MAX_PREVIEW_H_DP = 500;
+    private static final int MAX_PREVIEW_H_DP = 400;
+
+    private static final int MAX_PREVIEW_BITMAP_W_DP = MAX_PREVIEW_W_DP;
+    private static final int MAX_PREVIEW_BITMAP_H_DP = MAX_PREVIEW_H_DP;
 
     private static final int MAP_W_DP = 160;
     private static final int MAP_H_DP = 160;
 
-    private static final int ROUND_RADIUS_DP = 2;
+    private static final int ROUND_RADIUS_DP = 3;
 
     public static int MIN_PREVIEW_W = MIN_PREVIEW_W_DP;
     public static int MIN_PREVIEW_H = MIN_PREVIEW_H_DP;
 
     public static int MAX_PREVIEW_W = MAX_PREVIEW_W_DP;
     public static int MAX_PREVIEW_H = MAX_PREVIEW_H_DP;
+
+    public static int MAX_PREVIEW_BITMAP_W = MAX_PREVIEW_BITMAP_W_DP;
+    public static int MAX_PREVIEW_BITMAP_H = MAX_PREVIEW_BITMAP_H_DP;
 
     public static int MAP_W = MAP_W_DP;
     public static int MAP_H = MAP_H_DP;
@@ -39,6 +45,9 @@ public class PreviewConfig {
 
         MAP_W = (int) (MAP_W_DP * density);
         MAP_H = (int) (MAP_H_DP * density);
+
+        MAX_PREVIEW_BITMAP_W = (int) (MAX_PREVIEW_BITMAP_W_DP * density);
+        MAX_PREVIEW_BITMAP_H = (int) (MAX_PREVIEW_BITMAP_H_DP * density);
 
         ROUND_RADIUS = (int) (ROUND_RADIUS_DP * density);
     }

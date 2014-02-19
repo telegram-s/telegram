@@ -90,6 +90,17 @@ public class ImageCache {
         putHolder(holder);
     }
 
+    public synchronized void putFree(Bitmap bmp, int size) {
+        synchronized (freeBitmaps) {
+            HashSet<Bitmap> freeSet = freeBitmaps.get(size);
+            if (freeSet == null) {
+                freeSet = new HashSet<Bitmap>();
+                freeBitmaps.put(size, freeSet);
+            }
+            freeSet.add(bmp);
+        }
+    }
+
     public synchronized Bitmap findFree(int size) {
         synchronized (freeBitmaps) {
             HashSet<Bitmap> freeSet = freeBitmaps.get(size);

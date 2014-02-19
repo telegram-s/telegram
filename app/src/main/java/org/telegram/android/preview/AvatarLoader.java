@@ -253,6 +253,8 @@ public class AvatarLoader {
             imageCache.putToCache(task.getKind(), holder, AvatarLoader.this);
             notifyAvatarLoaded(task, task.getKind(), holder);
             return true;
+        } else {
+            imageCache.putFree(cached, task.getKind());
         }
 
 
@@ -317,7 +319,7 @@ public class AvatarLoader {
 
             TLFile res = application.getApi().doGetFile(dcId, location, 0, 1024 * 1024 * 1024);
 
-            fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes().cleanData());
+            fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes());
             Bitmap src = fullBitmaps.get();
             Optimizer.loadTo(res.getBytes().cleanData(), src);
             onFullBitmapLoaded(src, task);

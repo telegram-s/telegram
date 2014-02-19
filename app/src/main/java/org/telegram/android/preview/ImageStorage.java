@@ -7,6 +7,7 @@ import android.os.Build;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.util.CustomBufferedInputStream;
+import org.telegram.tl.TLBytes;
 
 import java.io.*;
 
@@ -23,6 +24,12 @@ public class ImageStorage {
 
     private String getFileName(String key) {
         return folder.getAbsolutePath() + "/" + key;
+    }
+
+    public void saveFile(String key, TLBytes file) throws IOException {
+        FileOutputStream outputStream = new FileOutputStream(getFileName(key));
+        outputStream.write(file.getData(), file.getOffset(), file.getLength());
+        outputStream.close();
     }
 
     public void saveFile(String key, byte[] file) throws IOException {
