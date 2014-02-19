@@ -304,7 +304,7 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeArray
         jpeg_destroy_decompress(&cinfo);
         AndroidBitmap_unlockPixels(env, bitmap);
         (*env)->ReleaseByteArrayElements(env, array, b, JNI_ABORT);
-        throwIOException(env,"Unable to open JPEG");
+        throwIOException(env,"Unable to open JPEG: internal error");
         return;
     }
 

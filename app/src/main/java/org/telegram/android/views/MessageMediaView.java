@@ -337,6 +337,14 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         isBindSizeCalled = true;
     }
 
+    private void bindSizeManual(int w, int h) {
+        desiredWidth = w;
+        desiredHeight = h;
+        desiredPaddingH = 0;
+        desiredPaddingV = 0;
+        isBindSizeCalled = true;
+    }
+
     private void unbindPreview() {
         if (preview != null) {
             preview.release();
@@ -402,185 +410,184 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
                     loader.requestFastLoading(mediaVideo, this);
                 } else {
-                    // TODO: Should we download preview?
-                    loader.cancelRequest(this);
+//                    if (downloadManager.getState(key) != DownloadState.IN_PROGRESS &&
+//                            downloadManager.getState(key) != DownloadState.PENDING) {
+//                        // TODO: Should we download preview?
+//                    }
                 }
-                isBinded = true;
-            }
+            } else if (message.message.getExtras() instanceof TLUploadingPhoto) {
+                TLUploadingPhoto photo = (TLUploadingPhoto) message.message.getExtras();
+                bindSize(photo.getWidth(), photo.getHeight());
 
-        } else if (message.message.getExtras() instanceof TLUploadingPhoto) {
-            TLUploadingPhoto photo = (TLUploadingPhoto) message.message.getExtras();
-            bindSize(photo.getWidth(), photo.getHeight());
-
-            if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
-                // TODO: Implement
-                // previewTask = new ScaleTask(new UriImageTask(photo.getFileUri()), scaledW, scaledH);
-            } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
-                loader.requestRaw(photo.getFileName(), this);
-                isBinded = true;
-            }
-
-            isUploadable = true;
-        } else if (message.message.getExtras() instanceof TLUploadingVideo) {
-            TLUploadingVideo video = (TLUploadingVideo) message.message.getExtras();
-            bindSize(video.getPreviewWidth(), video.getPreviewHeight());
-
-            loader.requestVideoLoading(video.getFileName(), this);
-            isBinded = true;
-
-            isUploadable = true;
-        } else if (message.message.getExtras() instanceof TLLocalGeo) {
-            TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();
-            bindSize(getPx(160), getPx(160));
-            loader.requestGeo(geo, this);
-            isBinded = true;
-            showMapPoint = true;
-        } else if (message.message.getExtras() instanceof TLUploadingDocument) {
-
-            TLUploadingDocument doc = (TLUploadingDocument) message.message.getExtras();
-
-            bindSize(doc.getFullPreviewW(), doc.getFullPreviewH());
-
-            if (doc.getFilePath().length() > 0) {
-                loader.requestRaw(doc.getFilePath(), this);
-                isBinded = true;
-            } else {
-                // TODO: Implement
-//                 previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
-            }
-
-            isUploadable = true;
-        } else if (message.message.getExtras() instanceof TLLocalDocument) {
-            TLLocalDocument document = (TLLocalDocument) message.message.getExtras();
-
-            bindSize(document.getPreviewW(), document.getPreviewH());
-
-            key = DownloadManager.getDocumentKey(document);
-            isDownloadable = true;
-
-            if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
-                if (document.getMimeType().equals("image/gif") ||
-                        document.getMimeType().equals("image/png") ||
-                        document.getMimeType().equals("image/jpeg")) {
-                    if (downloadManager.getState(key) == DownloadState.COMPLETED) {
-                        loader.requestRaw(downloadManager.getFileName(key), this);
-                        isBinded = true;
-                    }
-                }
-
-                if (!isBinded && document.getFastPreview().length > 0) {
-                    loader.requestFastLoading(document, this);
+                if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
+                    // TODO: Implement
+                    // previewTask = new ScaleTask(new UriImageTask(photo.getFileUri()), scaledW, scaledH);
+                } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
+                    loader.requestRaw(photo.getFileName(), this);
                     isBinded = true;
                 }
 
-                if (!isBinded && (!(document.getPreview() instanceof TLLocalFileEmpty))) {
-                    // TODO: Bind preview
+                isUploadable = true;
+            } else if (message.message.getExtras() instanceof TLUploadingVideo) {
+                TLUploadingVideo video = (TLUploadingVideo) message.message.getExtras();
+                bindSize(video.getPreviewWidth(), video.getPreviewHeight());
+
+                loader.requestVideoLoading(video.getFileName(), this);
+                isBinded = true;
+
+                isUploadable = true;
+            } else if (message.message.getExtras() instanceof TLLocalGeo) {
+                TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();
+                bindSizeManual(PreviewConfig.MAP_W, PreviewConfig.MAP_H);
+                loader.requestGeo(geo, this);
+                isBinded = true;
+                showMapPoint = true;
+            } else if (message.message.getExtras() instanceof TLUploadingDocument) {
+
+                TLUploadingDocument doc = (TLUploadingDocument) message.message.getExtras();
+
+                bindSize(doc.getFullPreviewW(), doc.getFullPreviewH());
+
+                if (doc.getFilePath().length() > 0) {
+                    loader.requestRaw(doc.getFilePath(), this);
+                    isBinded = true;
+                } else {
+                    // TODO: Implement
+//                 previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
+                }
+
+                isUploadable = true;
+            } else if (message.message.getExtras() instanceof TLLocalDocument) {
+                TLLocalDocument document = (TLLocalDocument) message.message.getExtras();
+
+                bindSize(document.getPreviewW(), document.getPreviewH());
+
+                key = DownloadManager.getDocumentKey(document);
+                isDownloadable = true;
+
+                if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
+                    if (document.getMimeType().equals("image/gif") ||
+                            document.getMimeType().equals("image/png") ||
+                            document.getMimeType().equals("image/jpeg")) {
+                        if (downloadManager.getState(key) == DownloadState.COMPLETED) {
+                            loader.requestRaw(downloadManager.getFileName(key), this);
+                            isBinded = true;
+                        }
+                    }
+
+                    if (!isBinded && document.getFastPreview().length > 0) {
+                        loader.requestFastLoading(document, this);
+                        isBinded = true;
+                    }
+
+                    if (!isBinded && (!(document.getPreview() instanceof TLLocalFileEmpty))) {
+                        // TODO: Bind preview
 //                        StelsImageTask baseTask = new StelsImageTask((TLLocalFileLocation) document.getPreviewLocation());
 //                        baseTask.enableBlur(3);
 //                        previewTask = new ScaleTask(baseTask, scaledW, scaledH);
+                    }
+                }
+            } else {
+                isUnsupported = true;
+                bindSize(0, 0);
+            }
+
+            if (!isBinded) {
+                loader.cancelRequest(this);
+            }
+
+            if (!isBindSizeCalled) {
+                throw new RuntimeException("bindSize not called");
+            }
+
+            if (isDownloadable) {
+                if (key != null) {
+                    DownloadState state = application.getDownloadManager().getState(key);
+                    if (downloadProgress != application.getDownloadManager().getDownloadProgress(key)) {
+                        oldDownloadProgress = downloadProgress;
+                        downloadProgress = application.getDownloadManager().getDownloadProgress(key);
+                        downloadStateTime = SystemClock.uptimeMillis();
+                    }
+
+                    switch (state) {
+                        case CANCELLED:
+                            downloadString = getResources().getString(R.string.st_bubble_media_cancelled);
+                            break;
+                        case FAILURE:
+                            downloadString = getResources().getString(R.string.st_bubble_media_try_again);
+                            break;
+                        case NONE:
+                            downloadString = getResources().getString(R.string.st_bubble_media_download);
+                            break;
+                        case IN_PROGRESS:
+                        case PENDING:
+                            downloadString = getResources().getString(R.string.st_bubble_media_in_progress);
+                            break;
+                        case COMPLETED:
+                            downloadString = null;
+                            break;
+                    }
                 }
             }
-        } else {
-            isUnsupported = true;
-            bindSize(0, 0);
-        }
 
-        if (!isBinded) {
-            loader.cancelRequest(this);
-        }
-
-        if (!isBindSizeCalled) {
-            throw new RuntimeException("bindSize not called");
-        }
-
-        if (isDownloadable) {
-            if (key != null) {
-                DownloadState state = application.getDownloadManager().getState(key);
-                if (downloadProgress != application.getDownloadManager().getDownloadProgress(key)) {
-                    oldDownloadProgress = downloadProgress;
-                    downloadProgress = application.getDownloadManager().getDownloadProgress(key);
-                    downloadStateTime = SystemClock.uptimeMillis();
-                }
-
-                switch (state) {
-                    case CANCELLED:
+            if (isUploadable) {
+                MediaSender.SendState state = application.getMediaSender().getSendState(databaseId);
+                if (state != null) {
+                    if (downloadProgress != state.getUploadProgress()) {
+                        oldDownloadProgress = downloadProgress;
+                        downloadProgress = state.getUploadProgress();
+                        downloadStateTime = SystemClock.uptimeMillis();
+                    }
+                    if (state.isCanceled()) {
                         downloadString = getResources().getString(R.string.st_bubble_media_cancelled);
-                        break;
-                    case FAILURE:
-                        downloadString = getResources().getString(R.string.st_bubble_media_try_again);
-                        break;
-                    case NONE:
-                        downloadString = getResources().getString(R.string.st_bubble_media_download);
-                        break;
-                    case IN_PROGRESS:
-                    case PENDING:
-                        downloadString = getResources().getString(R.string.st_bubble_media_in_progress);
-                        break;
-                    case COMPLETED:
+                    } else if (state.isUploaded()) {
                         downloadString = null;
-                        break;
+                    } else {
+                        downloadString = getResources().getString(R.string.st_bubble_media_in_progress);
+                    }
                 }
             }
         }
 
-        if (isUploadable) {
-            MediaSender.SendState state = application.getMediaSender().getSendState(databaseId);
-            if (state != null) {
-                if (downloadProgress != state.getUploadProgress()) {
-                    oldDownloadProgress = downloadProgress;
-                    downloadProgress = state.getUploadProgress();
-                    downloadStateTime = SystemClock.uptimeMillis();
-                }
-                if (state.isCanceled()) {
-                    downloadString = getResources().getString(R.string.st_bubble_media_cancelled);
-                } else if (state.isUploaded()) {
-                    downloadString = null;
-                } else {
-                    downloadString = getResources().getString(R.string.st_bubble_media_in_progress);
-                }
+        @Override
+        protected void bindNewView (MessageWireframe message){
+            long start = SystemClock.uptimeMillis();
+
+            this.databaseId = message.message.getDatabaseId();
+            this.isOut = message.message.isOut();
+            this.date = TextUtil.formatTime(message.message.getDate(), getContext());
+            if (isOut) {
+                placeholderPaint.setColor(0xffe6ffd1);
+            } else {
+                placeholderPaint.setColor(Color.WHITE);
             }
-        }
-    }
 
-    @Override
-    protected void bindNewView(MessageWireframe message) {
-        long start = SystemClock.uptimeMillis();
+            unbindOldPreview();
+            unbindPreview();
 
-        this.databaseId = message.message.getDatabaseId();
-        this.isOut = message.message.isOut();
-        this.date = TextUtil.formatTime(message.message.getDate(), getContext());
-        if (isOut) {
-            placeholderPaint.setColor(0xffe6ffd1);
-        } else {
-            placeholderPaint.setColor(Color.WHITE);
-        }
-
-        unbindOldPreview();
-        unbindPreview();
-
-        this.state = message.message.getState();
-        this.prevState = -1;
-
-        bindMedia(message);
-
-        this.downloadStateTime = 0;
-
-        Logger.d(TAG, "Bind in " + (SystemClock.uptimeMillis() - start) + " ms");
-        requestLayout();
-    }
-
-    @Override
-    protected void bindUpdate(MessageWireframe message) {
-        if (this.state != message.message.getState()) {
-            this.prevState = this.state;
             this.state = message.message.getState();
-            this.stateChangeTime = SystemClock.uptimeMillis();
+            this.prevState = -1;
+
+            bindMedia(message);
+
+            this.downloadStateTime = 0;
+
+            Logger.d(TAG, "Bind in " + (SystemClock.uptimeMillis() - start) + " ms");
+            requestLayout();
         }
 
-        bindMedia(message);
+        @Override
+        protected void bindUpdate (MessageWireframe message){
+            if (this.state != message.message.getState()) {
+                this.prevState = this.state;
+                this.state = message.message.getState();
+                this.stateChangeTime = SystemClock.uptimeMillis();
+            }
 
-        invalidate();
-    }
+            bindMedia(message);
+
+            invalidate();
+        }
 
     public void toggleMovie() {
         if (lastDatabaseId != databaseId) {

@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import static org.telegram.android.preview.PreviewConfig.*;
 
@@ -146,15 +147,28 @@ public class MediaLoader {
     public void cancelRequest(MediaReceiver receiver) {
         Logger.d(TAG, "cancelRequest receiver:" + receiver);
         checkUiThread();
+        HashSet<String> removedKey = new HashSet<String>();
         for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
             if (holder.getReceiverReference().get() == null) {
                 receivers.remove(holder);
+                removedKey.add(holder.getKey());
                 continue;
             }
             if (holder.getReceiverReference().get() == receiver) {
                 receivers.remove(holder);
+                removedKey.add(holder.getKey());
                 break;
             }
+        }
+
+        for (ReceiverHolder holder : receivers) {
+            if (removedKey.contains(holder.getKey())) {
+                removedKey.remove(holder.getKey());
+            }
+        }
+
+        for (String s : removedKey) {
+            processor.removeTask(s);
         }
     }
 
@@ -621,7 +635,8 @@ public class MediaLoader {
                     "&zoom=15" +
                     "&size=" + (MAP_W / scale) + "x" + (MAP_H / scale) +
                     "&scale=" + scale +
-                    "&sensor=false";
+                    "&sensor=false" +
+                    "&format=jpg";
 
             HttpGet get = new HttpGet(url.replace(" ", "%20"));
             HttpResponse response = client.execute(get);

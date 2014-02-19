@@ -42,15 +42,15 @@ public class QueueProcessor<T extends QueueProcessor.BaseTask> {
         }
     }
 
-    public void removeTask(T task) {
+    public void removeTask(String taskKey) {
         synchronized (taskHolders) {
-            TaskHolder holder = taskMap.get(task.getKey());
+            TaskHolder holder = taskMap.get(taskKey);
             if (holder != null) {
                 synchronized (holder) {
                     if (holder.isAcquired) {
                         holder.isRemoved = true;
                     } else {
-                        taskMap.remove(task.getKey());
+                        taskMap.remove(taskKey);
                         taskHolders.remove(holder);
                     }
                 }
