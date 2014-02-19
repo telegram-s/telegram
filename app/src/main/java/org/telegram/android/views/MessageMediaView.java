@@ -22,6 +22,7 @@ import org.telegram.android.media.*;
 import org.telegram.android.preview.MediaHolder;
 import org.telegram.android.preview.MediaLoader;
 import org.telegram.android.preview.MediaReceiver;
+import org.telegram.android.preview.PreviewConfig;
 import org.telegram.android.ui.*;
 import org.telegram.android.util.CustomBufferedInputStream;
 import org.telegram.android.util.IOUtils;
@@ -110,6 +111,8 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
     private boolean isBindSizeCalled;
     private int desiredHeight;
     private int desiredWidth;
+    private int desiredPaddingH;
+    private int desiredPaddingV;
     private int timeWidth;
 
     private DownloadListener downloadListener;
@@ -326,9 +329,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
     }
 
     private void bindSize(int w, int h) {
-        int[] sizes = buildSize(w, h);
+        int[] sizes = PreviewConfig.getSizes(w, h);
         desiredWidth = sizes[0];
         desiredHeight = sizes[1];
+        desiredPaddingH = sizes[2];
+        desiredPaddingV = sizes[3];
         isBindSizeCalled = true;
     }
 
@@ -481,7 +486,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         }
 
         if (!isBinded) {
-            application.getUiKernel().getMediaLoader().cancelRequest(this);
+            loader.cancelRequest(this);
         }
 
         if (!isBindSizeCalled) {
@@ -644,7 +649,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             timeWidth += getPx(18);
         }
 
-        setBubbleMeasuredContent(desiredWidth, desiredHeight);
+        setBubbleMeasuredContent(desiredWidth + desiredPaddingH * 2, desiredHeight + desiredPaddingV * 2);
     }
 
     @Override
@@ -684,6 +689,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
     protected boolean drawBubble(Canvas canvas) {
         boolean isAnimated = false;
 
+
+        // Start Main content
+        canvas.save();
+        canvas.translate(desiredPaddingH, desiredPaddingV);
+
         long animationTime = SystemClock.uptimeMillis() - previewAppearTime;
         Movie movie = lastMovie;
         if (movie != null && lastDatabaseId == databaseId) {
@@ -697,14 +707,15 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 isAnimated = true;
             }
             //}
-            canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
+            // canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
 
             if (movieDestBitmap == null) {
-                movieDestBitmap = Bitmap.createBitmap(getPx(160), getPx(300), Bitmap.Config.ARGB_8888);
+                movieDestBitmap = Bitmap.createBitmap(PreviewConfig.MAX_PREVIEW_W, PreviewConfig.MAX_PREVIEW_H, Bitmap.Config.ARGB_8888);
                 movieDestCanvas = new Canvas(movieDestBitmap);
             }
 
             if (movie.width() != 0 && movie.height() != 0) {
+                movieDestBitmap.eraseColor(Color.TRANSPARENT);
                 movieDestCanvas.save();
                 float scale = Math.min((float) desiredWidth / movie.width(), (float) desiredHeight / movie.height());
                 movieDestCanvas.translate((desiredWidth - scale * movie.width()) / 2, (desiredHeight - scale * movie.height()) / 2);
@@ -767,9 +778,10 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             } else {
                 canvas.drawBitmap(oldPreview.getBitmap(), 0, 0, bitmapPaint);
             }
-        } else {
-            canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
         }
+//        else {
+//            canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
+//        }
 //        } else if (previewCached != null) {
 //            bitmapFilteredPaint.setAlpha(255);
 //            rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
@@ -856,12 +868,16 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             canvas.drawText(duration, getPx(27), getPx(18), videoDurationPaint);
         }
 
-        canvas.drawRect(desiredWidth - timeWidth - getPx(17), desiredHeight - getPx(25), desiredWidth - getPx(3), desiredHeight - getPx(3), timeBgRect);
-        canvas.drawText(date, desiredWidth - timeWidth - getPx(10), desiredHeight - getPx(9), timePaint);
+        canvas.restore();
+
+        int bottom = desiredHeight + desiredPaddingV * 2;
+        int right = desiredWidth + desiredPaddingH * 2;
+        canvas.drawRect(right - timeWidth - getPx(17), bottom - getPx(25), right - getPx(3), bottom - getPx(3), timeBgRect);
+        canvas.drawText(date, right - timeWidth - getPx(10), bottom - getPx(9), timePaint);
         if (isOut) {
             if (state == MessageState.PENDING) {
                 canvas.save();
-                canvas.translate(desiredWidth - getPx(12 + 8), desiredHeight - getPx(19));
+                canvas.translate(right - getPx(12 + 8), bottom - getPx(19));
                 canvas.drawCircle(getPx(6), getPx(6), getPx(6), clockIconPaint);
                 double time = (System.currentTimeMillis() / 15.0) % (12 * 60);
                 double angle = (time / (6 * 60)) * Math.PI;
@@ -881,13 +897,13 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 int offset = (int) (getPx(5) * progress);
                 int alphaNew = (int) (progress * 255);
 
-                bounds(stateSent, desiredWidth - getPx(8) - stateSent.getIntrinsicWidth() - offset,
-                        desiredHeight - getPx(8) - stateSent.getIntrinsicHeight());
+                bounds(stateSent, right - getPx(8) - stateSent.getIntrinsicWidth() - offset,
+                        bottom - getPx(8) - stateSent.getIntrinsicHeight());
                 stateSent.setAlpha(255);
                 stateSent.draw(canvas);
 
-                bounds(stateHalfCheck, desiredWidth - getPx(8) - stateHalfCheck.getIntrinsicWidth(),
-                        desiredHeight - getPx(8) - stateHalfCheck.getIntrinsicHeight());
+                bounds(stateHalfCheck, right - getPx(8) - stateHalfCheck.getIntrinsicWidth(),
+                        bottom - getPx(8) - stateHalfCheck.getIntrinsicHeight());
                 stateHalfCheck.setAlpha(alphaNew);
                 stateHalfCheck.draw(canvas);
 
@@ -896,13 +912,13 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 Drawable drawable = getStateDrawable(state);
 
                 if (state == MessageState.READED) {
-                    bounds(stateSent, desiredWidth - getPx(8) - stateSent.getIntrinsicWidth() - getPx(5),
-                            desiredHeight - getPx(8) - stateSent.getIntrinsicHeight());
+                    bounds(stateSent, right - getPx(8) - stateSent.getIntrinsicWidth() - getPx(5),
+                            bottom - getPx(8) - stateSent.getIntrinsicHeight());
                     stateSent.setAlpha(255);
                     stateSent.draw(canvas);
                 }
 
-                bounds(drawable, desiredWidth - getPx(8) - drawable.getIntrinsicWidth(), desiredHeight - getPx(8) - drawable.getIntrinsicHeight());
+                bounds(drawable, right - getPx(8) - drawable.getIntrinsicWidth(), bottom - getPx(8) - drawable.getIntrinsicHeight());
                 drawable.setAlpha(255);
                 drawable.draw(canvas);
             }
@@ -920,12 +936,11 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         }
         unbindPreview();
         this.preview = holder;
-//        if (!intermediate) {
-//            this.previewAppearTime = SystemClock.uptimeMillis();
-//        } else {
-//            this.previewAppearTime = 0;
-//        }
-        this.previewAppearTime = 0;
+        if (!intermediate) {
+            this.previewAppearTime = SystemClock.uptimeMillis();
+        } else {
+            this.previewAppearTime = 0;
+        }
         invalidate();
     }
 

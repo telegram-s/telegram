@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import static org.telegram.android.preview.PreviewConfig.*;
+
 /**
  * Created by ex3ndr on 08.02.14.
  */
@@ -36,7 +38,7 @@ public class MediaLoader {
     private static final String TAG = "MediaLoader";
 
     private static final int SIZE_CHAT_PREVIEW = 0;
-    private static final int SIZE_FAST_PREVIEW = 1;
+    // private static final int SIZE_FAST_PREVIEW = 1;
 
     private TelegramApplication application;
 
@@ -50,25 +52,21 @@ public class MediaLoader {
     private Bitmap fullImageCached = null;
     private final Object fullImageCachedLock = new Object();
 
-    private final int PREVIEW_MAX_W;
-    private final int PREVIEW_MAX_H;
+    private final int FAST_MAX_W = 90;
+    private final int FAST_MAX_H = 90;
 
-    private final int MAP_W;
-    private final int MAP_H;
+    private ThreadLocal<Bitmap> fastBitmaps = new ThreadLocal<Bitmap>() {
+        @Override
+        protected Bitmap initialValue() {
+            return Bitmap.createBitmap(FAST_MAX_W, FAST_MAX_H, Bitmap.Config.ARGB_8888);
+        }
+    };
 
     public MediaLoader(TelegramApplication application) {
         this.application = application;
         this.processor = new QueueProcessor<BaseTask>();
-        this.imageCache = new ImageCache(2, 3);
+        this.imageCache = new ImageCache(10, 10);
         this.imageStorage = new ImageStorage(application, "previews");
-
-        float density = application.getResources().getDisplayMetrics().density;
-
-        PREVIEW_MAX_W = (int) (density * 160);
-        PREVIEW_MAX_H = (int) (density * 300);
-
-        MAP_H = (int) (density * 160);
-        MAP_W = (int) (density * 160);
 
         this.workers = new QueueWorker[]{
                 new FastWorker(),
@@ -96,7 +94,7 @@ public class MediaLoader {
     }
 
     public void requestFastLoading(TLLocalDocument doc, MediaReceiver receiver) {
-        requestTask(new MediaDocFastTask(doc), doc.getPreview().getUniqKey(), receiver);
+        requestTask(new MediaDocFastTask(doc), "preview:" + doc.getFileLocation().getUniqKey(), receiver);
     }
 
     public void requestFastLoading(TLLocalVideo video, MediaReceiver receiver) {
@@ -194,6 +192,20 @@ public class MediaLoader {
                 imageCache.decReference(task.getKey(), MediaLoader.this);
             }
         });
+    }
+
+    private Bitmap fetchChatPreview() {
+        Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
+        if (res == null) {
+            res = Bitmap.createBitmap(PreviewConfig.MAX_PREVIEW_W, PreviewConfig.MAX_PREVIEW_H, Bitmap.Config.ARGB_8888);
+        } else {
+            res.eraseColor(Color.TRANSPARENT);
+        }
+        return res;
+    }
+
+    private void drawPreview(Bitmap src, int w, int h, Bitmap dest) {
+
     }
 
 
@@ -407,29 +419,25 @@ public class MediaLoader {
         }
 
         private boolean process(byte[] data, int w, int h, String key, BaseTask task) {
-            Bitmap img = imageCache.findFree(SIZE_FAST_PREVIEW);
-            if (img != null) {
-                try {
-                    Optimizer.loadTo(data, img);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            } else {
-                try {
-                    img = Optimizer.load(data);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return false;
-                }
+            Bitmap img = fastBitmaps.get();
+            try {
+                Optimizer.loadTo(data, img);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
             }
+            //img = BitmapUtils.fastblur(img, w, h, 8);
+            Optimizer.blur(img);
 
-            // Optimizer.blur(img);
+            Bitmap destPreview = fetchChatPreview();
+            int[] sizes = Optimizer.scaleToRatioRounded(img, w, h,
+                    destPreview, PreviewConfig.MIN_PREVIEW_W, PreviewConfig.MIN_PREVIEW_H,
+                    PreviewConfig.ROUND_RADIUS);
+
             // new OptimizedBlur().performBlur(img);
-            img = BitmapUtils.fastblur(img, w, h, 8);
 
-            BitmapHolder holder = new BitmapHolder(img, key, w, h);
-            imageCache.putToCache(SIZE_FAST_PREVIEW, holder, MediaLoader.this);
+            BitmapHolder holder = new BitmapHolder(destPreview, key, sizes[0], sizes[1]);
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
             notifyMediaLoaded(task, holder);
 
             return true;
@@ -468,12 +476,7 @@ public class MediaLoader {
 
             Optimizer.BitmapInfo info = Optimizer.getInfo(rawTask.fileName);
 
-            Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
-            if (res == null) {
-                res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
-            } else {
-                res.eraseColor(Color.TRANSPARENT);
-            }
+            Bitmap res = fetchChatPreview();
 
             if (info.getMimeType() != null && info.getMimeType().equals("image/jpeg")) {
                 if (info.getHeight() <= fullImageCached.getHeight() && info.getWidth() <= fullImageCached.getWidth()) {
@@ -527,12 +530,8 @@ public class MediaLoader {
         private void processVideoTask(MediaVideoTask task) throws Exception {
             VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
 
-            Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
-            if (res == null) {
-                res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
-            } else {
-                res.eraseColor(Color.TRANSPARENT);
-            }
+            Bitmap res = fetchChatPreview();
+
             int[] sizes = Optimizer.scaleToRatio(metadata.getImg(),
                     metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
 
@@ -566,12 +565,7 @@ public class MediaLoader {
                     BitmapDecoderEx.decodeReuseBitmap(fileTask.fileName, fullImageCached);
                 }
 
-                Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
-                if (res == null) {
-                    res = Bitmap.createBitmap(PREVIEW_MAX_W, PREVIEW_MAX_H, Bitmap.Config.ARGB_8888);
-                } else {
-                    res.eraseColor(Color.TRANSPARENT);
-                }
+                Bitmap res = fetchChatPreview();
                 try {
                     int[] sizes = Optimizer.scaleToRatio(fullImageCached, scaledW, scaledH, res);
 
@@ -643,13 +637,9 @@ public class MediaLoader {
             response.getEntity().writeTo(outputStream);
             byte[] data = outputStream.toByteArray();
 
-            Bitmap res = imageCache.findFree(SIZE_CHAT_PREVIEW);
+            Bitmap res = fetchChatPreview();
 
-            if (res != null) {
-                Optimizer.loadTo(data, res);
-            } else {
-                res = Optimizer.load(data);
-            }
+            Optimizer.loadTo(data, res);
 
             String cacheKey = "geo:" + geoTask.getLatitude() + "," + geoTask.getLongitude();
             BitmapHolder holder = new BitmapHolder(res, cacheKey, MAP_W, MAP_H);

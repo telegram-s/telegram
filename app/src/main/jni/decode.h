@@ -433,3 +433,45 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
     AndroidBitmap_unlockPixels(env, bitmap);
     fclose(infile);
 }
+
+JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_saveBitmap(
+                                                             JNIEnv* env,
+                                                             jclass clazz,
+                                                             jobject bitmap,
+                                                             jint w, jint h,
+                                                             jstring fileName)
+{
+    char * path =  (*env)->GetStringUTFChars( env, fileName , NULL );
+    AndroidBitmapInfo  info;
+    struct my_error_mgr jerr;
+    struct jpeg_compress_struct cinfo;
+    FILE * infile;		/* source file */
+    JSAMPARRAY buffer;		/* Output row buffer */
+    int row_stride;		/* physical row width in output buffer */
+    int ret;
+    int rowIndex;
+    int sRowIndex;
+    int i;
+    int ind;
+    void* pixels;
+
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        (*env)->ReleaseStringUTFChars(env, fileName, path);
+        throwUnsupported(env, "AndroidBitmap_getInfo() failed");
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        (*env)->ReleaseStringUTFChars(env, fileName, path);
+        throwUnsupported(env, "AndroidBitmap_lockPixels() failed ! error=%d");
+        return;
+    }
+
+    if ((infile = fopen(path, "rb")) == NULL) {
+        (*env)->ReleaseStringUTFChars(env, fileName, path);
+        AndroidBitmap_unlockPixels(env, bitmap);
+        throwIOException(env,"Unable to open JPEG");
+        return;
+    }
+    (*env)->ReleaseStringUTFChars(env, fileName, path);
+}

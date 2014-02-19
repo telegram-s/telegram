@@ -173,6 +173,29 @@ public class Optimizer {
         return new int[]{(int) (sourceW * ratio), (int) (sourceH * ratio)};
     }
 
+    public static int[] scaleToRatioRounded(Bitmap src, int sourceW, int sourceH, Bitmap dest, int minDestW, int minDestH, int destRadius) {
+        float ratio = Math.min(dest.getWidth() / (float) sourceW, dest.getHeight() / (float) sourceH);
+
+        int destW = (int) (sourceW * ratio);
+        int destH = (int) (sourceH * ratio);
+
+        dest.eraseColor(Color.TRANSPARENT);
+        Canvas canvas = new Canvas(dest);
+
+        Path clipPath = new Path();
+        int paddingH = Math.max(minDestW - destW, 0);
+        int paddingV = Math.max(minDestH - destH, 0);
+        RectF rect = new RectF(-paddingH, -paddingV, destW + paddingH, destH + paddingV);
+        clipPath.addRoundRect(rect, destRadius, destRadius, Path.Direction.CW);
+        canvas.clipPath(clipPath);
+
+        canvas.drawBitmap(src,
+                new Rect(0, 0, sourceW, sourceH),
+                new Rect(0, 0, destW, destH),
+                new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG));
+        return new int[]{(int) (sourceW * ratio), (int) (sourceH * ratio)};
+    }
+
     public static void drawTo(Bitmap src, Bitmap dest) {
         Canvas canvas = new Canvas(dest);
         canvas.drawBitmap(src, 0, 0, new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG));

@@ -8,6 +8,7 @@ import org.telegram.android.config.SystemConfig;
 import org.telegram.android.core.ConnectionMonitor;
 import org.telegram.android.core.VersionHolder;
 import org.telegram.android.log.Logger;
+import org.telegram.android.preview.PreviewConfig;
 import org.telegram.android.reflection.TechReflection;
 
 /**
@@ -70,6 +71,10 @@ public class TechKernel {
 
         this.systemConfig = new SystemConfig(application);
         Logger.d(TAG, "SystemConfig in " + (System.currentTimeMillis() - start) + " ms");
+
+        start = System.currentTimeMillis();
+        PreviewConfig.init(application);
+        Logger.d(TAG, "PreviewConfig in " + (System.currentTimeMillis() - start) + " ms");
     }
 
     public SystemConfig getSystemConfig() {

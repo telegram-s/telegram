@@ -38,6 +38,10 @@ public class BitmapDecoderEx {
         nativeDecodeArray(src, dest);
     }
 
+    public static void saveBitmap(Bitmap dest, int w, int h, String fileName) throws IOException {
+        nativeSaveBitmap(dest, w, h, fileName);
+    }
+
     private static native void nativeDecodeBitmapScaled(String fileName, Bitmap bitmap) throws IOException;
 
     private static native void nativeDecodeBitmap(String fileName, Bitmap bitmap) throws IOException;
@@ -45,4 +49,6 @@ public class BitmapDecoderEx {
     private static native void nativeDecodeArray(byte[] array, Bitmap bitmap) throws IOException;
 
     private static native void nativeDecodeBitmapBlend(String fileName, Bitmap bitmap, boolean scale) throws IOException;
+
+    private static native void nativeSaveBitmap(Bitmap bitmap, int w, int h, String fileName) throws IOException;
 }
