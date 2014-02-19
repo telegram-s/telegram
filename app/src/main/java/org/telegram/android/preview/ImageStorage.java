@@ -11,6 +11,9 @@ import org.telegram.tl.TLBytes;
 
 import java.io.*;
 
+import static org.telegram.mtproto.secure.CryptoUtils.SHA1;
+import static org.telegram.mtproto.secure.CryptoUtils.ToHex;
+
 /**
  * Created by ex3ndr on 05.02.14.
  */
@@ -23,7 +26,7 @@ public class ImageStorage {
     }
 
     private String getFileName(String key) {
-        return folder.getAbsolutePath() + "/" + key;
+        return folder.getAbsolutePath() + "/" + ToHex(SHA1(key.getBytes()));
     }
 
     public void saveFile(String key, TLBytes file) throws IOException {

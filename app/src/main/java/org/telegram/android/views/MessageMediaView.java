@@ -409,6 +409,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             if (!isBinded) {
                 if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
                     loader.requestFastLoading(mediaVideo, this);
+                    isBinded = true;
                 } else {
 //                    if (downloadManager.getState(key) != DownloadState.IN_PROGRESS &&
 //                            downloadManager.getState(key) != DownloadState.PENDING) {
@@ -421,8 +422,8 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             bindSize(photo.getWidth(), photo.getHeight());
 
             if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
-                // TODO: Implement
-                // previewTask = new ScaleTask(new UriImageTask(photo.getFileUri()), scaledW, scaledH);
+                loader.requestRawUri(photo.getFileUri(), this);
+                isBinded = true;
             } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
                 loader.requestRaw(photo.getFileName(), this);
                 isBinded = true;
@@ -453,8 +454,8 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                 loader.requestRaw(doc.getFilePath(), this);
                 isBinded = true;
             } else {
-                // TODO: Implement
-//                 previewTask = new ScaleTask(new UriImageTask(doc.getFileUri()), scaledW, scaledH);
+                loader.requestRawUri(doc.getFileUri(), this);
+                isBinded = true;
             }
 
             isUploadable = true;

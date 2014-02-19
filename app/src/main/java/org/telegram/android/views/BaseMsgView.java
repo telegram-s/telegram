@@ -150,11 +150,11 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
             return;
         }
 
-        AVATAR_OFFSET = px(39);
+        AVATAR_OFFSET = px(40);
         AVATAR_SIZE = px(42);
         AVATAR_LEFT = px(6);
         AVATAR_BOTTOM = px(4);
-        BUBBLE_PADDING = px(39);
+        BUBBLE_PADDING = px(40);
         UNREAD_HEIGHT = px(24);
         UNREAD_OFFSET = px(18);
 

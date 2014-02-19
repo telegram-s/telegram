@@ -2,6 +2,7 @@ package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import org.apache.http.HttpResponse;
@@ -21,7 +22,6 @@ import org.telegram.android.log.Logger;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
-import org.telegram.android.ui.BitmapUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -84,6 +84,10 @@ public class MediaLoader {
 
     public void requestRaw(String fileName, MediaReceiver receiver) {
         requestTask(new MediaRawTask(fileName), fileName, receiver);
+    }
+
+    public void requestRawUri(String fileName, MediaReceiver receiver) {
+        requestTask(new MediaRawUriTask(fileName), fileName, receiver);
     }
 
     public void requestGeo(TLLocalGeo geo, MediaReceiver receiver) {
@@ -405,6 +409,23 @@ public class MediaLoader {
         }
     }
 
+    private class MediaRawUriTask extends BaseTask {
+        private String uri;
+
+        private MediaRawUriTask(String uri) {
+            this.uri = uri;
+        }
+
+        public String getUri() {
+            return uri;
+        }
+
+        @Override
+        public String getKey() {
+            return uri;
+        }
+    }
+
     private class FastWorker extends QueueWorker<BaseTask> {
 
         public FastWorker() {
@@ -496,8 +517,20 @@ public class MediaLoader {
         protected boolean processTask(BaseTask task) throws Exception {
             if (task instanceof MediaRawTask) {
                 processTask((MediaRawTask) task);
+            } else if (task instanceof MediaRawUriTask) {
+                processTask((MediaRawUriTask) task);
             }
             return true;
+        }
+
+        private void processTask(MediaRawUriTask rawTask) throws Exception {
+            Bitmap res = fetchChatPreview();
+            Bitmap tmp = Optimizer.optimize(rawTask.getUri(), application);
+            int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res);
+            putToDiskCache(rawTask.getKey(), tmp, sizes[0], sizes[1]);
+            BitmapHolder holder = new BitmapHolder(tmp, rawTask.getKey(), sizes[0], sizes[1]);
+            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+            notifyMediaLoaded(rawTask, holder);
         }
 
         private void processTask(MediaRawTask rawTask) throws Exception {
@@ -507,9 +540,17 @@ public class MediaLoader {
                 }
             }
 
-            Optimizer.BitmapInfo info = Optimizer.getInfo(rawTask.fileName);
-
             Bitmap res = fetchChatPreview();
+
+            Optimizer.BitmapInfo info = tryToLoadFromCache(rawTask.getKey(), res);
+            if (info != null) {
+                BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), info.getWidth(), info.getWidth());
+                imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
+                notifyMediaLoaded(rawTask, holder);
+                return;
+            }
+
+            info = Optimizer.getInfo(rawTask.fileName);
 
             if (info.getMimeType() != null && info.getMimeType().equals("image/jpeg")) {
                 if (info.getHeight() <= fullImageCached.getHeight() && info.getWidth() <= fullImageCached.getWidth()) {
@@ -519,6 +560,7 @@ public class MediaLoader {
                         BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
                         imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
                         notifyMediaLoaded(rawTask, holder);
+                        return;
                     }
                 } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
                     synchronized (fullImageCachedLock) {
@@ -527,12 +569,14 @@ public class MediaLoader {
                         BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
                         imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
                         notifyMediaLoaded(rawTask, holder);
+                        return;
                     }
                 }
             }
 
             Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
             int[] sizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
+            putToDiskCache(rawTask.getKey(), tmp, sizes[0], sizes[1]);
             BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
             imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
             notifyMediaLoaded(rawTask, holder);
@@ -561,9 +605,19 @@ public class MediaLoader {
         }
 
         private void processVideoTask(MediaVideoTask task) throws Exception {
-            VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
             Bitmap res = fetchChatPreview();
+            Optimizer.BitmapInfo info = tryToLoadFromCache(task.getKey(), res);
+            if (info != null) {
+                BitmapHolder holder = new BitmapHolder(res, task.getKey(), info.getWidth(), info.getWidth());
+                imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+                notifyMediaLoaded(task, holder);
+                return;
+            }
+
+            VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
             int[] sizes = drawPreview(metadata.getImg(), metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
+            // BitmapDecoderEx.saveBitmap(res, sizes[0], sizes[1], "/sdcard/exported.jpg");
+            putToDiskCache(task.getKey(), res, sizes[0], sizes[1]);
             BitmapHolder holder = new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]);
             imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
             notifyMediaLoaded(task, holder);

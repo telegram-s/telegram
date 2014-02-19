@@ -14,7 +14,7 @@ import java.util.HashSet;
 public class ImageCache {
 
     private static final String TAG = "ImageCache";
-    private static final boolean IS_LOGGING = false;
+    public static final boolean IS_LOGGING = false;
 
     private static final int DEFAULT_CACHE_SIZE = 10;
     private static final int DEFAULT_CACHE_FREE_SIZE = 10;

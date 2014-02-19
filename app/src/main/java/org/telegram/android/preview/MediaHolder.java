@@ -40,9 +40,11 @@ public class MediaHolder {
     }
 
     public void release() {
-        Logger.d(TAG, "Releasing holder " + bitmap.getKey() + ":" + bitmap);
         if (isReleased) {
             throw new UnsupportedOperationException();
+        }
+        if (ImageCache.IS_LOGGING) {
+            Logger.d(TAG, "Releasing holder " + bitmap.getKey() + ":" + bitmap);
         }
         isReleased = true;
         loader.getImageCache().decReference(bitmap.getKey(), this);

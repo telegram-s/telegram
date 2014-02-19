@@ -29,7 +29,9 @@ public class AvatarHolder {
         if (isReleased) {
             throw new UnsupportedOperationException();
         }
-        Logger.d(TAG, "Releasing holder " + bitmap.getKey() + ":" + bitmap);
+        if (ImageCache.IS_LOGGING) {
+            Logger.d(TAG, "Releasing holder " + bitmap.getKey() + ":" + bitmap);
+        }
         isReleased = true;
         loader.getImageCache().decReference(bitmap.getKey(), this);
         bitmap = null;
