@@ -534,7 +534,7 @@ public class MediaLoader {
             }
             Bitmap tmp = Optimizer.optimize(rawTask.getUri(), application);
             int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res);
-            putToDiskCache(rawTask.getKey(), tmp, sizes[0], sizes[1]);
+            putToDiskCache(rawTask.getKey(), res, sizes[0], sizes[1]);
             BitmapHolder holder = new BitmapHolder(tmp, rawTask.getKey(), sizes[0], sizes[1]);
             imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
             notifyMediaLoaded(rawTask, holder);
@@ -583,7 +583,7 @@ public class MediaLoader {
 
             Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
             int[] sizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
-            putToDiskCache(rawTask.getKey(), tmp, sizes[0], sizes[1]);
+            putToDiskCache(rawTask.getKey(), res, sizes[0], sizes[1]);
             BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
             imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
             notifyMediaLoaded(rawTask, holder);
