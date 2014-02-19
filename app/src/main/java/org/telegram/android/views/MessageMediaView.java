@@ -120,8 +120,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     private boolean isAnimatedProgress = true;
 
-    private boolean scaleUpMedia = false;
-
     public MessageMediaView(Context context) {
         super(context);
         init();
@@ -753,7 +751,7 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
                     rect2.set(0, 0, desiredWidth, desiredHeight);
                     canvas.drawBitmap(oldPreview.getBitmap(), rect1, rect2, bitmapFilteredPaint);
                 } else {
-                    canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
+                    // canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
                 }
 //                } else if (previewCached != null) {
 //                    bitmapFilteredPaint.setAlpha(255);
@@ -780,13 +778,9 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             }
         } else if (oldPreview != null) {
             bitmapPaint.setAlpha(255);
-            if (scaleUpMedia) {
-                rect1.set(0, 0, oldPreview.getW(), oldPreview.getH());
-                rect2.set(0, 0, desiredWidth, desiredHeight);
-                canvas.drawBitmap(oldPreview.getBitmap(), rect1, rect2, bitmapPaint);
-            } else {
-                canvas.drawBitmap(oldPreview.getBitmap(), 0, 0, bitmapPaint);
-            }
+            rect1.set(0, 0, oldPreview.getW(), oldPreview.getH());
+            rect2.set(0, 0, desiredWidth, desiredHeight);
+            canvas.drawBitmap(oldPreview.getBitmap(), rect1, rect2, bitmapPaint);
         }
 //        else {
 //            canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);

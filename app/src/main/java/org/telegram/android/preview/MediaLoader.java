@@ -525,6 +525,13 @@ public class MediaLoader {
 
         private void processTask(MediaRawUriTask rawTask) throws Exception {
             Bitmap res = fetchChatPreview();
+            Optimizer.BitmapInfo info = tryToLoadFromCache(rawTask.getKey(), res);
+            if (info != null) {
+                BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), info.getWidth(), info.getHeight());
+                imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
+                notifyMediaLoaded(rawTask, holder);
+                return;
+            }
             Bitmap tmp = Optimizer.optimize(rawTask.getUri(), application);
             int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res);
             putToDiskCache(rawTask.getKey(), tmp, sizes[0], sizes[1]);
@@ -544,7 +551,7 @@ public class MediaLoader {
 
             Optimizer.BitmapInfo info = tryToLoadFromCache(rawTask.getKey(), res);
             if (info != null) {
-                BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), info.getWidth(), info.getWidth());
+                BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), info.getWidth(), info.getHeight());
                 imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
                 notifyMediaLoaded(rawTask, holder);
                 return;
@@ -608,7 +615,7 @@ public class MediaLoader {
             Bitmap res = fetchChatPreview();
             Optimizer.BitmapInfo info = tryToLoadFromCache(task.getKey(), res);
             if (info != null) {
-                BitmapHolder holder = new BitmapHolder(res, task.getKey(), info.getWidth(), info.getWidth());
+                BitmapHolder holder = new BitmapHolder(res, task.getKey(), info.getWidth(), info.getHeight());
                 imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
                 notifyMediaLoaded(task, holder);
                 return;
@@ -616,7 +623,6 @@ public class MediaLoader {
 
             VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
             int[] sizes = drawPreview(metadata.getImg(), metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
-            // BitmapDecoderEx.saveBitmap(res, sizes[0], sizes[1], "/sdcard/exported.jpg");
             putToDiskCache(task.getKey(), res, sizes[0], sizes[1]);
             BitmapHolder holder = new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]);
             imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
@@ -691,7 +697,7 @@ public class MediaLoader {
             Bitmap res = fetchMapPreview();
             Optimizer.BitmapInfo info = tryToLoadFromCache(geoTask.getKey(), res);
             if (info != null) {
-                BitmapHolder holder = new BitmapHolder(res, task.getKey(), info.getWidth(), info.getWidth());
+                BitmapHolder holder = new BitmapHolder(res, task.getKey(), info.getWidth(), info.getHeight());
                 imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
                 notifyMediaLoaded(task, holder);
                 return true;
