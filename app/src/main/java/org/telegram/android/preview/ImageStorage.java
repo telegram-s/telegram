@@ -32,19 +32,20 @@ public class ImageStorage {
     }
 
     public void saveFile(String key, Bitmap bitmap) throws IOException {
-        FileOutputStream outputStream = new FileOutputStream(getFileName(key));
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
-        outputStream.close();
+        BitmapDecoderEx.saveBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), getFileName(key));
     }
 
-    public Bitmap tryLoadFile(String key, Bitmap reuse) {
+    public void saveFile(String key, Bitmap bitmap, int w, int h) throws IOException {
+        BitmapDecoderEx.saveBitmap(bitmap, w, h, getFileName(key));
+    }
+
+    public Optimizer.BitmapInfo tryLoadFile(String key, Bitmap reuse) {
         String fileName = getFileName(key);
         if (!new File(fileName).exists()) {
             return null;
         }
         try {
-            Optimizer.loadTo(fileName, reuse);
-            return reuse;
+            return Optimizer.loadTo(fileName, reuse);
         } catch (IOException e) {
             e.printStackTrace();
             return null;

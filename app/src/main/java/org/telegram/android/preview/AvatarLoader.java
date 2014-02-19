@@ -230,9 +230,6 @@ public class AvatarLoader {
     }
 
     private boolean processPreTask(AvatarTask task) {
-
-        Bitmap res;
-
         Bitmap cached = imageCache.findFree(task.getKind());
 
         if (cached == null) {
@@ -251,10 +248,8 @@ public class AvatarLoader {
 //        } else {
 //            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
 //        }
-        res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
-
-        if (res != null) {
-            BitmapHolder holder = new BitmapHolder(res, task.getFileLocation().getUniqKey() + "_" + task.getKind());
+        if (fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached) != null) {
+            BitmapHolder holder = new BitmapHolder(cached, task.getFileLocation().getUniqKey() + "_" + task.getKind());
             imageCache.putToCache(task.getKind(), holder, AvatarLoader.this);
             notifyAvatarLoaded(task, task.getKind(), holder);
             return true;
@@ -262,8 +257,9 @@ public class AvatarLoader {
 
 
         if (task.getKind() != TYPE_FULL) {
-            Bitmap fullBitmap = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + TYPE_FULL, fullBitmaps.get());
-            if (fullBitmap != null) {
+            Bitmap fullBitmap = fullBitmaps.get();
+            Optimizer.BitmapInfo info = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + TYPE_FULL, fullBitmap);
+            if (info != null) {
                 try {
                     onFullBitmapLoaded(fullBitmap, task);
                 } catch (IOException e) {

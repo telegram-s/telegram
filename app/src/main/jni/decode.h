@@ -434,7 +434,7 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
     fclose(infile);
 }
 
-JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_saveBitmap(
+JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeSaveBitmap(
                                                              JNIEnv* env,
                                                              jclass clazz,
                                                              jobject bitmap,
@@ -445,7 +445,7 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_saveBitmap(
     AndroidBitmapInfo  info;
     struct my_error_mgr jerr;
     struct jpeg_compress_struct cinfo;
-    FILE * infile;		/* source file */
+    FILE * outfile;		/* source file */
     JSAMPARRAY buffer;		/* Output row buffer */
     int row_stride;		/* physical row width in output buffer */
     int ret;
@@ -467,11 +467,68 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_saveBitmap(
         return;
     }
 
-    if ((infile = fopen(path, "rb")) == NULL) {
+    if ((outfile = fopen(path, "wb")) == NULL) {
         (*env)->ReleaseStringUTFChars(env, fileName, path);
         AndroidBitmap_unlockPixels(env, bitmap);
         throwIOException(env,"Unable to open JPEG");
         return;
     }
     (*env)->ReleaseStringUTFChars(env, fileName, path);
+
+    cinfo.err = jpeg_std_error(&jerr.pub);
+
+    jerr.pub.error_exit = my_error_exit;
+    /* Establish the setjmp return context for my_error_exit to use. */
+    if (setjmp(jerr.setjmp_buffer)) {
+        /* If we get here, the JPEG code has signaled an error.
+        * We need to clean up the JPEG object, close the input file, and return.
+        */
+        LOGE("Jpeg error1");
+        jpeg_destroy_compress(&cinfo);
+        LOGE("Jpeg error2");
+        AndroidBitmap_unlockPixels(env, bitmap);
+        LOGE("Jpeg error3");
+        fclose(outfile);
+        LOGE("Jpeg error4");
+        throwIOException(env,"Unable to save JPEG");
+        return;
+    }
+
+    jpeg_create_compress(&cinfo);
+
+    jpeg_stdio_dest(&cinfo, outfile);
+
+    cinfo.image_width = w; 	/* image width and height, in pixels */
+    cinfo.image_height = h;
+    cinfo.input_components = 3;		/* # of color components per pixel */
+    cinfo.in_color_space = JCS_RGB; 	/* colorspace of input image */
+
+    jpeg_set_defaults(&cinfo);
+
+    jpeg_set_quality(&cinfo, 87, TRUE /* limit to baseline-JPEG values */);
+
+    jpeg_start_compress(&cinfo, TRUE);
+
+    row_stride = info.stride;	/* JSAMPLEs per row in image_buffer */
+    buffer = (*cinfo.mem->alloc_sarray)
+                 ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+    // Writing
+    uint32_t* line;
+    while (cinfo.next_scanline < cinfo.image_height) {
+        line = (uint32_t*)(pixels + (cinfo.next_scanline * row_stride));
+        for(i = 0; i < w; i++) {
+             buffer[0][i * 3 + 0] = R(line[i]);
+             buffer[0][i * 3 + 1] = G(line[i]);
+             buffer[0][i * 3 + 2] = B(line[i]);
+        }
+       // buffer[0] = (void*)(pixels + (cinfo.next_scanline * row_stride));
+        (void) jpeg_write_scanlines(&cinfo, buffer, 1);
+    }
+
+    jpeg_finish_compress(&cinfo);
+    jpeg_destroy_compress(&cinfo);
+
+    AndroidBitmap_unlockPixels(env, bitmap);
+
+    fclose(outfile);
 }

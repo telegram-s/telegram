@@ -66,7 +66,7 @@ public class MediaLoader {
     public MediaLoader(TelegramApplication application) {
         this.application = application;
         this.processor = new QueueProcessor<BaseTask>();
-        this.imageCache = new ImageCache(10, 10);
+        this.imageCache = new ImageCache(5, 10);
         this.imageStorage = new ImageStorage(application, "previews");
 
         this.workers = new QueueWorker[]{
@@ -218,8 +218,22 @@ public class MediaLoader {
         return res;
     }
 
-    private void drawPreview(Bitmap src, int w, int h, Bitmap dest) {
+    private int[] drawPreview(Bitmap src, int w, int h, Bitmap dest) {
+        return Optimizer.scaleToRatioRounded(src, w, h,
+                dest, PreviewConfig.MIN_PREVIEW_W, PreviewConfig.MIN_PREVIEW_H,
+                PreviewConfig.ROUND_RADIUS);
+    }
 
+    private void putToDiskCache(String key, Bitmap src, int w, int h) {
+        try {
+            imageStorage.saveFile(key, src, w, h);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Optimizer.BitmapInfo tryToLoadFromCache(String key, Bitmap dest) {
+        return imageStorage.tryLoadFile(key, dest);
     }
 
 
@@ -444,11 +458,9 @@ public class MediaLoader {
             Optimizer.blur(img);
 
             Bitmap destPreview = fetchChatPreview();
-            int[] sizes = Optimizer.scaleToRatioRounded(img, w, h,
-                    destPreview, PreviewConfig.MIN_PREVIEW_W, PreviewConfig.MIN_PREVIEW_H,
-                    PreviewConfig.ROUND_RADIUS);
 
-            // new OptimizedBlur().performBlur(img);
+
+            int[] sizes = drawPreview(img, w, h, destPreview);
 
             BitmapHolder holder = new BitmapHolder(destPreview, key, sizes[0], sizes[1]);
             imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
@@ -475,10 +487,6 @@ public class MediaLoader {
                 processTask((MediaRawTask) task);
             }
             return true;
-        }
-
-        private boolean preprocessCached(MediaRawTask task, Bitmap src) {
-            return imageStorage.tryLoadFile(task.getKey(), src) != null;
         }
 
         private void processTask(MediaRawTask rawTask) throws Exception {
@@ -543,12 +551,8 @@ public class MediaLoader {
 
         private void processVideoTask(MediaVideoTask task) throws Exception {
             VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
-
             Bitmap res = fetchChatPreview();
-
-            int[] sizes = Optimizer.scaleToRatio(metadata.getImg(),
-                    metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
-
+            int[] sizes = drawPreview(metadata.getImg(), metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
             BitmapHolder holder = new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]);
             imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
             notifyMediaLoaded(task, holder);
@@ -580,15 +584,10 @@ public class MediaLoader {
                 }
 
                 Bitmap res = fetchChatPreview();
-                try {
-                    int[] sizes = Optimizer.scaleToRatio(fullImageCached, scaledW, scaledH, res);
-
-                    BitmapHolder holder = new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]);
-                    imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
-                    notifyMediaLoaded(fileTask, holder);
-                } finally {
-                    // imageCache.putToCache(SIZE_CHAT_PREVIEW,res);
-                }
+                int[] sizes = drawPreview(fullImageCached, scaledW, scaledH, res);
+                BitmapHolder holder = new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]);
+                imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+                notifyMediaLoaded(fileTask, holder);
             }
         }
 
@@ -624,6 +623,15 @@ public class MediaLoader {
 
             MediaGeoTask geoTask = (MediaGeoTask) task;
 
+            Bitmap res = fetchChatPreview();
+            Optimizer.BitmapInfo info = tryToLoadFromCache(geoTask.getKey(), res);
+            if (info != null) {
+                BitmapHolder holder = new BitmapHolder(res, task.getKey(), info.getWidth(), info.getWidth());
+                imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
+                notifyMediaLoaded(task, holder);
+                return true;
+            }
+
             int scale = 1;
             float density = application.getResources().getDisplayMetrics().density;
             if (density >= 1.5f) {
@@ -652,12 +660,11 @@ public class MediaLoader {
             response.getEntity().writeTo(outputStream);
             byte[] data = outputStream.toByteArray();
 
-            Bitmap res = fetchChatPreview();
-
             Optimizer.loadTo(data, res);
 
-            String cacheKey = "geo:" + geoTask.getLatitude() + "," + geoTask.getLongitude();
-            BitmapHolder holder = new BitmapHolder(res, cacheKey, MAP_W, MAP_H);
+            putToDiskCache(task.getKey(), res, MAP_W, MAP_H);
+
+            BitmapHolder holder = new BitmapHolder(res, task.getKey(), MAP_W, MAP_H);
             imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
             notifyMediaLoaded(task, holder);
 
