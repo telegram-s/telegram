@@ -36,8 +36,8 @@ public class ApiKernel {
     }
 
     public void runKernel() {
-        // CryptoUtils.setAESImplementation(new NativeAES());
-        // PQSolver.setCurrentImplementation(new NativePQ());
+        CryptoUtils.setAESImplementation(new NativeAES());
+        PQSolver.setCurrentImplementation(new NativePQ());
 
         api = new TelegramApi(kernel.getAuthKernel().getApiStorage(), new AppInfo(5, Build.MODEL, Build.VERSION.RELEASE, kernel.getTechKernel().getTechReflection().getAppVersion(),
                 kernel.getApplication().getString(R.string.st_lang)), new ApiCallback() {

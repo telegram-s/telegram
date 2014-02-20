@@ -26,9 +26,9 @@
 #include "libjpeg/jpeglib.h"
 #include "libjpeg/jerror.h"
 #include "jmemsource.h"
+#include "aes/aes.h"
 #include "pq.h"
 #include "blur.h"
-#include "aes.h"
 #include "decode.h"
 
 #define  MIN(a,b) (a < b ? a : b)
@@ -212,4 +212,139 @@ JNIEXPORT jobjectArray Java_org_telegram_android_util_ImageNativeUtils_nativeLoa
     (void) jpeg_finish_decompress(&ainfo);
 
     return res;
+}
+
+JNIEXPORT void Java_org_telegram_android_util_NativeAES_nativeAesDecrypt(
+                                                             JNIEnv* env,
+                                                             jobject thiz,
+                                                             jbyteArray _source,
+                                                             jbyteArray _dest,
+                                                             jint len,
+                                                             jbyteArray _iv,
+                                                             jbyteArray _key) {
+    unsigned char *source = (unsigned char *)(*env)->GetByteArrayElements(env, _source, NULL);
+    unsigned char *dest = (unsigned char *)(*env)->GetByteArrayElements(env, _dest, NULL);
+    unsigned char *key = (unsigned char *)(*env)->GetByteArrayElements(env, _key, NULL);
+    unsigned char *iv = (unsigned char *)(*env)->GetByteArrayElements(env, _iv, NULL);
+
+    AES_KEY akey;
+    AES_set_decrypt_key(key, (*env)->GetArrayLength(env, _key) * 8, &akey);
+    AES_ige_encrypt(source, dest, len, &akey, iv, AES_DECRYPT);
+
+    (*env)->ReleaseByteArrayElements(env, _source, source, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, _dest, dest, 0);
+    (*env)->ReleaseByteArrayElements(env, _key, key, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, _iv, iv, JNI_ABORT);
+}
+
+JNIEXPORT void Java_org_telegram_android_util_NativeAES_nativeAesDecryptStreaming(
+                                                             JNIEnv* env,
+                                                             jobject thiz,
+                                                             jbyteArray _source,
+                                                             jbyteArray _dest,
+                                                             jint len,
+                                                             jbyteArray _iv,
+                                                             jbyteArray _key) {
+    unsigned char *source = (unsigned char *)(*env)->GetByteArrayElements(env, _source, NULL);
+    unsigned char *dest = (unsigned char *)(*env)->GetByteArrayElements(env, _dest, NULL);
+    unsigned char *key = (unsigned char *)(*env)->GetByteArrayElements(env, _key, NULL);
+    unsigned char *iv = (unsigned char *)(*env)->GetByteArrayElements(env, _iv, NULL);
+
+    AES_KEY akey;
+    AES_set_decrypt_key(key, (*env)->GetArrayLength(env, _key) * 8, &akey);
+    AES_ige_encrypt(source, dest, len, &akey, iv, AES_DECRYPT);
+
+    (*env)->ReleaseByteArrayElements(env, _source, source, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, _dest, dest, 0);
+    (*env)->ReleaseByteArrayElements(env, _key, key, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, _iv, iv, 0);
+}
+
+JNIEXPORT void Java_org_telegram_android_util_NativeAES_nativeAesEncrypt(
+                                                             JNIEnv* env,
+                                                             jobject thiz,
+                                                             jbyteArray _source,
+                                                             jbyteArray _dest,
+                                                             jint len,
+                                                             jbyteArray _iv,
+                                                             jbyteArray _key) {
+
+    unsigned char *source = (unsigned char *)(*env)->GetByteArrayElements(env, _source, NULL);
+    unsigned char *dest = (unsigned char *)(*env)->GetByteArrayElements(env, _dest, NULL);
+    unsigned char *key = (unsigned char *)(*env)->GetByteArrayElements(env, _key, NULL);
+    unsigned char *iv = (unsigned char *)(*env)->GetByteArrayElements(env, _iv, NULL);
+
+    AES_KEY akey;
+    AES_set_encrypt_key(key, (*env)->GetArrayLength(env, _key) * 8, &akey);
+    AES_ige_encrypt(source, dest, len, &akey, iv, AES_ENCRYPT);
+
+    (*env)->ReleaseByteArrayElements(env, _source, source, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, _dest, dest, 0);
+    (*env)->ReleaseByteArrayElements(env, _key, key, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, _iv, iv, JNI_ABORT);
+}
+
+JNIEXPORT void Java_org_telegram_android_util_NativeAES_nativeAesEncryptStreaming(
+                                                             JNIEnv* env,
+                                                             jobject thiz,
+                                                             jbyteArray _source,
+                                                             jbyteArray _dest,
+                                                             jint len,
+                                                             jbyteArray _iv,
+                                                             jbyteArray _key) {
+
+    unsigned char *source = (unsigned char *)(*env)->GetByteArrayElements(env, _source, NULL);
+    unsigned char *dest = (unsigned char *)(*env)->GetByteArrayElements(env, _dest, NULL);
+    unsigned char *key = (unsigned char *)(*env)->GetByteArrayElements(env, _key, NULL);
+    unsigned char *iv = (unsigned char *)(*env)->GetByteArrayElements(env, _iv, NULL);
+
+    AES_KEY akey;
+    AES_set_encrypt_key(key, (*env)->GetArrayLength(env, _key) * 8, &akey);
+    AES_ige_encrypt(dest, source, len, &akey, iv, AES_ENCRYPT);
+
+    (*env)->ReleaseByteArrayElements(env, _source, source, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, _dest, dest, 0);
+    (*env)->ReleaseByteArrayElements(env, _key, key, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, _iv, iv, 0);
+}
+
+uint64_t gcd(uint64_t a, uint64_t b){
+    while(a != 0 && b != 0) {
+        while((b & 1) == 0) b >>= 1;
+        while((a & 1) == 0) a >>= 1;
+        if(a > b) a -= b; else b -= a;
+    }
+    return b == 0 ? a : b;
+}
+
+JNIEXPORT jlong Java_org_telegram_android_util_NativePQ_solvePq(JNIEnv* env, jobject thiz, jlong src)
+{
+   uint64_t what = src;
+           int it = 0, i, j;
+           uint64_t g = 0;
+           for (i = 0; i < 3 || it < 1000; i++){
+               int q = ((lrand48() & 15) + 17) % what;
+               uint64_t x = (long long)lrand48() % (what - 1) + 1, y = x;
+               int lim = 1 << (i + 18), j;
+               for(j = 1; j < lim; j++){
+                   ++it;
+                   uint64_t a = x, b = x, c = q;
+                   while(b){
+                       if(b & 1){
+                           c += a;
+                           if(c >= what) c -= what;
+                       }
+                       a += a;
+                       if(a >= what) a -= what;
+                       b >>= 1;
+                   }
+                   x = c;
+                   uint64_t z = x < y ? what + x - y : x - y;
+                   g = gcd(z, what);
+                   if(g != 1) break;
+                   if(!(j & (j - 1))) y = x;
+               }
+               if(g > 1 && g < what) break;
+           }
+           return g;
 }

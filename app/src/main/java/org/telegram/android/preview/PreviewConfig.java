@@ -14,6 +14,15 @@ public class PreviewConfig {
     private static final int MAX_PREVIEW_W_DP = 220;
     private static final int MAX_PREVIEW_H_DP = 300;
 
+//    private static final int MAX_PREVIEW_LARGE_W_DP = 260;
+//    private static final int MAX_PREVIEW_LARGE_H_DP = 400;
+//
+//    private static final int MAX_PREVIEW_NORMAL_W_DP = 220;
+//    private static final int MAX_PREVIEW_NORMAL_H_DP = 300;
+//
+//    private static final int MAX_PREVIEW_SMALL_W_DP = 160;
+//    private static final int MAX_PREVIEW_SMALL_H_DP = 300;
+
     private static final int MAX_PREVIEW_BITMAP_W_DP = MAX_PREVIEW_W_DP;
     private static final int MAX_PREVIEW_BITMAP_H_DP = MAX_PREVIEW_H_DP;
 

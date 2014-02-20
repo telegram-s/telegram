@@ -23,6 +23,10 @@ public class UserSettings {
     public static final int DIALOG_SIZE_NORMAL = 0;
     public static final int DIALOG_SIZE_LARGE = 1;
 
+    public static final int PHOTO_SIZE_NORMAL = 0;
+    public static final int PHOTO_SIZE_SMALL = 1;
+    public static final int PHOTO_SIZE_LARGE = 2;
+
     public static final int BUBBLE_FONT_NORMAL = 0;
     public static final int BUBBLE_FONT_NORMAL_VALUE = 18;
     public static final int BUBBLE_FONT_NORMAL_VALUE_CLOCK = 14;

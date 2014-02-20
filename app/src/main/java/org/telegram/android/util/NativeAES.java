@@ -1,14 +1,19 @@
 package org.telegram.android.util;
 
+import org.telegram.android.log.Logger;
+import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.aes.AESImplementation;
 import org.telegram.mtproto.secure.aes.DefaultAESImplementation;
 
 import java.io.*;
+import java.util.Arrays;
 
 /**
  * Created by ex3ndr on 12.02.14.
  */
 public class NativeAES implements AESImplementation {
+
+    private static final String TAG = "NativeAES";
 
     static {
         System.loadLibrary("timg");
