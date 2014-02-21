@@ -212,7 +212,8 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
 
         @Override
         public String getKey() {
-            return "preview:" + doc.getPreview().getUniqKey();
+            // Work-around: documents with fast cache doesn't contain preview location
+            return "preview:" + doc.getFileLocation().getUniqKey();
         }
     }
 

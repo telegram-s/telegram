@@ -813,9 +813,9 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
                     downloadBgRect.setAlpha(0xB6);
                     downloadBgLightRect.setAlpha((int) (0x30 * (1 - alpha)));
 
-                    int maxR = (int) Math.sqrt((desiredWidth * desiredWidth + desiredHeight * desiredHeight) / 4);
-                    outerR = (int) (getPx(20) + (maxR * (scale)));
-                    internalR = (int) (getPx(16) * (1 - scale));
+                    // int maxR = (int) Math.sqrt((desiredWidth * desiredWidth + desiredHeight * desiredHeight) / 4);
+                    // outerR = (int) (getPx(20) + (maxR * (scale)));
+                    // internalR = (int) (getPx(16) * (1 - scale));
                 } else {
                     downloadBgRect.setAlpha(0xB6);
                     downloadBgLightRect.setAlpha(0x30);
