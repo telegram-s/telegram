@@ -122,29 +122,6 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
         contactsAdapter = new ContactsAdapter();
         listView.setAdapter(contactsAdapter);
 
-        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-
-            boolean isScrolling = false;
-
-            @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
-                if (i == SCROLL_STATE_IDLE) {
-                    application.getImageController().doResume();
-                    isScrolling = false;
-                } else {
-                    application.getImageController().doPause();
-                    isScrolling = true;
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView absListView, int i, int i2, int i3) {
-                if (isScrolling) {
-                    application.getImageController().doPause();
-                }
-            }
-        });
-
         reloadData();
 
         if (selectedIndex != -1) {

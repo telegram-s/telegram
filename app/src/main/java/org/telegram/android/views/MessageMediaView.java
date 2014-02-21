@@ -3,14 +3,9 @@ package org.telegram.android.views;
 import android.content.Context;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Build;
 import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import com.extradea.framework.images.ImageReceiver;
-import com.extradea.framework.images.tasks.*;
 import org.telegram.android.R;
 import org.telegram.android.core.background.MediaSender;
 import org.telegram.android.core.background.SenderListener;
@@ -24,14 +19,10 @@ import org.telegram.android.preview.MediaLoader;
 import org.telegram.android.preview.MediaReceiver;
 import org.telegram.android.preview.PreviewConfig;
 import org.telegram.android.ui.*;
-import org.telegram.android.util.CustomBufferedInputStream;
 import org.telegram.android.util.IOUtils;
-import org.telegram.api.TLFileLocation;
 
 import java.io.*;
-import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -83,8 +74,6 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
     private int prevState;
     private long stateChangeTime;
 
-    private ImageReceiver receiver;
-    private ImageTask previewTask;
     private long previewAppearTime;
 
     private MediaHolder oldPreview;

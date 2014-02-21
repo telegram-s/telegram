@@ -3,20 +3,14 @@ package org.telegram.android.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Point;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.view.*;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.*;
 import com.actionbarsherlock.view.MenuItem;
-import com.extradea.framework.images.ui.FastWebImageView;
 import com.nineoldandroids.animation.ObjectAnimator;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
@@ -29,16 +23,15 @@ import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.wireframes.DialogWireframe;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.VideoOptimizer;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.ui.source.ViewSourceListener;
 import org.telegram.android.ui.source.ViewSourceState;
-import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.FilterMatcher;
 import org.telegram.android.ui.Placeholders;
-import org.telegram.android.ui.TextUtil;
 import org.telegram.android.views.DialogView;
 import org.telegram.api.TLAbsInputPeer;
 import org.telegram.api.TLInputPeerChat;
@@ -428,41 +421,23 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                     ((TextView) view.findViewById(R.id.name)).setText(wireframe.getTitle());
                 }
 
-                FastWebImageView avatarView = (FastWebImageView) view.findViewById(R.id.avatar);
+                AvatarView avatarView = (AvatarView) view.findViewById(R.id.avatar);
 
                 if (wireframe.getPeerType() == PeerType.PEER_USER) {
-                    avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(wireframe.getPeerId()));
+                    avatarView.setEmptyDrawable(Placeholders.getUserPlaceholder(wireframe.getPeerId()));
                 } else {
-                    avatarView.setLoadingDrawable(Placeholders.getGroupPlaceholder(wireframe.getPeerId()));
+                    avatarView.setEmptyDrawable(Placeholders.getGroupPlaceholder(wireframe.getPeerId()));
                 }
 
                 if (wireframe.getPhoto() instanceof TLLocalAvatarPhoto) {
                     TLLocalAvatarPhoto localAvatarPhoto = (TLLocalAvatarPhoto) wireframe.getPhoto();
                     if (localAvatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                        avatarView.requestTask(new StelsImageTask((TLLocalFileLocation) localAvatarPhoto.getPreviewLocation()));
+                        avatarView.requestAvatar(localAvatarPhoto.getPreviewLocation());
                     } else {
-                        avatarView.requestTask(null);
+                        avatarView.requestAvatar(null);
                     }
                 } else {
-                    avatarView.requestTask(null);
-                }
-
-                if (wireframe.getPeerType() == PeerType.PEER_USER) {
-                    int status = getUserState(wireframe.getStatus());
-                    if (status < 0) {
-                        ((TextView) view.findViewById(R.id.status)).setText(R.string.st_offline);
-                        ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                    } else if (status == 0) {
-                        ((TextView) view.findViewById(R.id.status)).setText(R.string.st_online);
-                        ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_blue_bright));
-                    } else {
-                        ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_grey_text));
-                        ((TextView) view.findViewById(R.id.status)).setText(formatLastSeen(status));
-                    }
-                } else {
-                    ((TextView) view.findViewById(R.id.status)).setText(
-                            getQuantityString(R.plurals.st_members, wireframe.getMembers()).replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(wireframe.getMembers())));
-                    ((TextView) view.findViewById(R.id.status)).setTextColor(context.getResources().getColor(R.color.st_grey_text));
+                    avatarView.requestAvatar(null);
                 }
 
                 return view;
@@ -473,7 +448,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 SearchWireframe wireframe = (SearchWireframe) adapterView.getItemAtPosition(i);
-                onItemClicked(wireframe.getPeerType(), wireframe.getPeerId(), wireframe.getTitle());
+                onItemClicked(wireframe.getPeerType(), wireframe.getPeerId(), wireframe.getTitle().toString());
             }
         });
 

@@ -90,9 +90,13 @@ public class DialogWireframe {
             return "T";
         } else if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
             String res = "";
-            char first = dialogUser.getFirstName().charAt(0);
-            if (Character.isLetter(first)) {
-                res += Character.toUpperCase(first);
+            if (dialogUser.getFirstName() != null && dialogUser.getFirstName().length() > 0) {
+                char first = dialogUser.getFirstName().charAt(0);
+                if (Character.isLetter(first)) {
+                    res += Character.toUpperCase(first);
+                } else {
+                    return "";
+                }
             } else {
                 return "";
             }

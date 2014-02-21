@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.EncryptedChat;
@@ -25,7 +24,7 @@ import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.service.TLLocalActionEncryptedTtl;
-import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.Placeholders;
@@ -58,7 +57,7 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
 
     private TextView nameView;
     private TextView onlineView;
-    private FastWebImageView avatarView;
+    private AvatarView avatarView;
     private TextView phoneView;
     private ImageView enabledView;
     private View notifications;
@@ -88,7 +87,7 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.secret_fragment, container, false);
-        avatarView = (FastWebImageView) res.findViewById(R.id.avatar);
+        avatarView = (AvatarView) res.findViewById(R.id.avatar);
         nameView = (TextView) res.findViewById(R.id.name);
         onlineView = (TextView) res.findViewById(R.id.online);
         phoneView = (TextView) res.findViewById(R.id.phone);
@@ -251,11 +250,11 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
             selfDestructTimerValue.setText("");
         }
 
+        avatarView.setEmptyDrawable(Placeholders.getUserPlaceholder(user.getUid()));
         if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
             final TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) user.getPhoto();
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(user.getUid()));
-                avatarView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+                avatarView.requestAvatar(avatarPhoto.getPreviewLocation());
                 if (avatarPhoto.getFullLocation() instanceof TLLocalFileLocation) {
                     avatarView.setOnClickListener(secure(new View.OnClickListener() {
                         @Override
@@ -267,13 +266,11 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
                     avatarView.setOnClickListener(null);
                 }
             } else {
-                avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(user.getUid()));
-                avatarView.requestTask(null);
+                avatarView.requestAvatar(null);
                 avatarView.setOnClickListener(null);
             }
         } else {
-            avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(user.getUid()));
-            avatarView.requestTask(null);
+            avatarView.requestAvatar(null);
             avatarView.setOnClickListener(null);
         }
 

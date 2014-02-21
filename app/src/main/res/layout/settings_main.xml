@@ -21,7 +21,7 @@
                                                  ext:gravity="center_vertical">
             <FrameLayout android:layout_width="64dp"
                          android:layout_height="64dp">
-                <com.extradea.framework.images.ui.FastWebImageView
+                <org.telegram.android.preview.AvatarView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:id="@+id/avatar"/>

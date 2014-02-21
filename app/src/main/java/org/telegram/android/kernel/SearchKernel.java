@@ -1,5 +1,6 @@
 package org.telegram.android.kernel;
 
+import android.text.Spannable;
 import android.text.SpannableString;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ContactsSource;
@@ -9,6 +10,7 @@ import org.telegram.android.core.model.SearchWireframe;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.wireframes.ContactWireframe;
 import org.telegram.android.core.wireframes.DialogWireframe;
+import org.telegram.android.ui.EmojiProcessor;
 import org.telegram.android.ui.FilterMatcher;
 
 import java.util.ArrayList;
@@ -42,12 +44,12 @@ public class SearchKernel {
             }
             if (matcher.isMatched(description.getDialogTitle())) {
                 founded.add(id);
-                SpannableString spannableString = new SpannableString(description.getDialogTitle());
+                Spannable title = application.getEmojiProcessor().processEmojiCutMutable(description.getDialogTitle(), EmojiProcessor.CONFIGURATION_DIALOGS);
                 if (description.getPeerType() == PeerType.PEER_USER) {
                     User usr = application.getEngine().getUser(description.getPeerId());
-                    wireframes.add(new SearchWireframe(description.getPeerId(), description.getPeerType(), description.getDialogTitle(), spannableString, description.getDialogAvatar(), usr.getStatus(), 0));
+                    wireframes.add(new SearchWireframe(description.getPeerId(), description.getPeerType(), title, description.getDialogAvatar()));
                 } else if (description.getPeerType() == PeerType.PEER_CHAT) {
-                    wireframes.add(new SearchWireframe(description.getPeerId(), description.getPeerType(), description.getDialogTitle(), spannableString, description.getDialogAvatar(), null, 0));
+                    wireframes.add(new SearchWireframe(description.getPeerId(), description.getPeerType(), title, description.getDialogAvatar()));
                 }
             }
         }
@@ -63,8 +65,8 @@ public class SearchKernel {
                 }
                 if (matcher.isMatched(u.getDisplayName())) {
                     founded.add(id);
-                    SpannableString spannableString = new SpannableString(u.getDisplayName());
-                    wireframes.add(new SearchWireframe(u.getUid(), PeerType.PEER_USER, u.getDisplayName(), spannableString, u.getPhoto(), u.getStatus(), 0));
+                    Spannable title = application.getEmojiProcessor().processEmojiCutMutable(u.getDisplayName(), EmojiProcessor.CONFIGURATION_DIALOGS);
+                    wireframes.add(new SearchWireframe(u.getUid(), PeerType.PEER_USER, title, u.getPhoto()));
                 }
             }
         }

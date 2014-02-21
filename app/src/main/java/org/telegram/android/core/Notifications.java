@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.widget.TextView;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
 import org.telegram.android.TelegramApplication;
@@ -32,7 +31,7 @@ import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.log.Logger;
-import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.screens.RootControllerHolder;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.tl.TLObject;
@@ -327,12 +326,13 @@ public class Notifications {
             builder.setContentIntent(PendingIntent.getActivity(application, rnd.nextInt(), intent, 0));
             Bitmap bigPhoto = null;
             if (photo != null) {
-                if (photo instanceof TLLocalAvatarPhoto) {
-                    TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) photo;
-                    if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                        bigPhoto = application.getImageController().addTask(new StelsImageTask((TLLocalFileLocation) profilePhoto.getPreviewLocation()));
-                    }
-                }
+//                if (photo instanceof TLLocalAvatarPhoto) {
+//                    TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) photo;
+//                    if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
+//                        bigPhoto = application.getImageController().addTask(new StelsImageTask((TLLocalFileLocation) profilePhoto.getPreviewLocation()));
+//                    }
+//                }
+                // TODO: Implement
             }
 
             if (bigPhoto == null) {
@@ -424,17 +424,17 @@ public class Notifications {
                         ((TextView) notificationView.findViewById(R.id.name)).setText(finalSenderTitle);
                         ((TextView) notificationView.findViewById(R.id.title)).setText(finalMessage);
 
-                        FastWebImageView avatarImage = (FastWebImageView) notificationView.findViewById(R.id.avatar);
+                        AvatarView avatarImage = (AvatarView) notificationView.findViewById(R.id.avatar);
                         if (peerType == PeerType.PEER_USER) {
-                            avatarImage.setLoadingDrawable(Placeholders.getUserPlaceholder(peerId));
+                            avatarImage.setEmptyDrawable(Placeholders.getUserPlaceholder(peerId));
                             ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getUserTitleColor(peerId));
                             ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawables(null, null, null, null);
                         } else if (peerType == PeerType.PEER_CHAT) {
-                            avatarImage.setLoadingDrawable(Placeholders.getGroupPlaceholder(peerId));
+                            avatarImage.setEmptyDrawable(Placeholders.getGroupPlaceholder(peerId));
                             ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getGroupTitleColor(peerId));
                             ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawables(null, null, null, null);
                         } else {
-                            avatarImage.setLoadingDrawable(Placeholders.getUserPlaceholder(senderId));
+                            avatarImage.setEmptyDrawable(Placeholders.getUserPlaceholder(senderId));
                             ((TextView) notificationView.findViewById(R.id.name)).setTextColor(0xff67b540);
                             ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_dialogs_lock, 0, 0, 0);
                         }
@@ -447,20 +447,20 @@ public class Notifications {
                             }
                         });
 
-                        avatarImage.requestTask(null);
+                        avatarImage.requestAvatar(null);
                         if (photo != null) {
                             if (photo instanceof TLLocalAvatarPhoto) {
                                 TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) photo;
                                 if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                                    avatarImage.requestTask(new StelsImageTask((TLLocalFileLocation) profilePhoto.getPreviewLocation()));
+                                    avatarImage.requestAvatar(profilePhoto.getPreviewLocation());
                                 } else {
-                                    avatarImage.requestTask(null);
+                                    avatarImage.requestAvatar(null);
                                 }
                             } else {
-                                avatarImage.requestTask(null);
+                                avatarImage.requestAvatar(null);
                             }
                         } else {
-                            avatarImage.requestTask(null);
+                            avatarImage.requestAvatar(null);
                         }
 
 

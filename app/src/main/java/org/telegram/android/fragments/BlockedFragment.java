@@ -10,14 +10,13 @@ import android.widget.*;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.EngineUtils;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
-import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.tasks.ProgressInterface;
@@ -209,17 +208,17 @@ public class BlockedFragment extends TelegramFragment {
 
                     ((TextView) view.findViewById(R.id.name)).setText(object.getDisplayName());
 
-                    FastWebImageView imageView = (FastWebImageView) view.findViewById(R.id.avatar);
-                    imageView.setLoadingDrawable(Placeholders.USER_PLACEHOLDERS[object.getUid() % Placeholders.USER_PLACEHOLDERS.length]);
+                    AvatarView imageView = (AvatarView) view.findViewById(R.id.avatar);
+                    imageView.setEmptyDrawable(Placeholders.USER_PLACEHOLDERS[object.getUid() % Placeholders.USER_PLACEHOLDERS.length]);
                     if (object.getPhoto() instanceof TLLocalAvatarPhoto) {
                         TLLocalAvatarPhoto userPhoto = (TLLocalAvatarPhoto) object.getPhoto();
                         if (userPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                            imageView.requestTask(new StelsImageTask((TLLocalFileLocation) userPhoto.getPreviewLocation()));
+                            imageView.requestAvatar(userPhoto.getPreviewLocation());
                         } else {
-                            imageView.requestTask(null);
+                            imageView.requestAvatar(null);
                         }
                     } else {
-                        imageView.requestTask(null);
+                        imageView.requestAvatar(null);
                     }
 
                     if (object.getPhone() == null || object.getPhone().trim().length() == 0) {

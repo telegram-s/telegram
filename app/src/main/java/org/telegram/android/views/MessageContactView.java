@@ -1,7 +1,6 @@
 package org.telegram.android.views;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
@@ -9,12 +8,9 @@ import android.os.SystemClock;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import com.extradea.framework.images.ImageReceiver;
 import org.telegram.android.R;
-import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.MessageState;
-import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalContact;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.ui.FontController;
@@ -47,8 +43,6 @@ public class MessageContactView extends BaseMsgView {
     private static final int COLOR_IN = 0xffA1AAB3;
 
     private Drawable placeholder;
-    private Bitmap avatar;
-    private ImageReceiver receiver;
 
     private String title;
     private String phone;
@@ -122,27 +116,6 @@ public class MessageContactView extends BaseMsgView {
         stateHalfCheck = getResources().getDrawable(R.drawable.st_bubble_ic_halfcheck);
         stateFailure = getResources().getDrawable(R.drawable.st_bubble_ic_warning);
         addContactResource = getResources().getDrawable(R.drawable.st_bubble_ic_contact);
-
-        receiver = new ImageReceiver() {
-            @Override
-            public void onImageLoaded(Bitmap result) {
-                avatar = result;
-                postInvalidate();
-            }
-
-            @Override
-            public void onImageLoadFailure() {
-                avatar = null;
-                postInvalidate();
-            }
-
-            @Override
-            public void onNoImage() {
-                avatar = null;
-                postInvalidate();
-            }
-        };
-        receiver.register(application.getImageController());
     }
 
     public OnClickListener getOnAddContactClick() {

@@ -7,11 +7,11 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
-import com.extradea.framework.images.utils.ImageUtils;
 import org.telegram.android.log.Logger;
 import org.telegram.android.util.CustomBufferedInputStream;
 import org.telegram.android.util.IOUtils;
 import org.telegram.android.util.ImageNativeUtils;
+import org.telegram.mtproto.secure.Entropy;
 
 import java.io.*;
 
@@ -91,6 +91,10 @@ public class Optimizer {
         return load(new UriSource(Uri.parse(uri), context));
     }
 
+    public static BitmapInfo loadTo(String uri, Context context, Bitmap dest) throws IOException {
+        return loadTo(new UriSource(Uri.parse(uri), context), dest);
+    }
+
     public static BitmapInfo loadTo(String fileName, Bitmap dest) throws IOException {
         return loadTo(new FileSource(fileName), dest);
     }
@@ -105,6 +109,10 @@ public class Optimizer {
 
     public static BitmapInfo getInfo(Uri uri, Context context) throws IOException {
         return getInfo(new UriSource(uri, context));
+    }
+
+    public static BitmapInfo getInfo(byte[] data) throws IOException {
+        return getInfo(new ByteSource(data));
     }
 
     public static FastPreviewResult buildPreview(Bitmap bitmap) {
@@ -356,9 +364,11 @@ public class Optimizer {
         int h = o.outHeight;
 
         if (!ignoreOrientation) {
-            if (!isVerticalImage(source)) {
-                w = o.outHeight;
-                h = o.outWidth;
+            if (source instanceof FileSource || source instanceof UriSource) {
+                if (!isVerticalImage(source)) {
+                    w = o.outHeight;
+                    h = o.outWidth;
+                }
             }
         }
 
@@ -461,6 +471,22 @@ public class Optimizer {
                         }
                     }
                 }
+            } else if (source instanceof UriSource) {
+                UriSource uriSource = (UriSource) source;
+                InputStream stream = new CustomBufferedInputStream(
+                        uriSource.getContext().getContentResolver().openInputStream(uriSource.getUri()));
+                try {
+                    BitmapFactory.decodeStream(stream, null, options);
+                } finally {
+                    if (stream != null) {
+                        try {
+
+                            stream.close();
+                        } catch (IOException e) {
+                            // Ignore
+                        }
+                    }
+                }
             } else {
                 throw new UnsupportedOperationException();
             }
@@ -469,6 +495,27 @@ public class Optimizer {
                 BitmapDecoderEx.decodeReuseBitmap(((ByteSource) source).getData(), dest);
             } else if (source instanceof FileSource) {
                 BitmapDecoderEx.decodeReuseBitmap(((FileSource) source).getFileName(), dest);
+            } else if (source instanceof UriSource) {
+                UriSource uriSource = (UriSource) source;
+                InputStream stream = uriSource.getContext().getContentResolver().openInputStream(uriSource.getUri());
+
+                File tempFile = new File(uriSource.context.getFilesDir().getAbsoluteFile() + "/tmp/convert_tmp" + Entropy.generateRandomId());
+                tempFile.mkdirs();
+                IOUtils.copy(stream, tempFile);
+                try {
+                    BitmapDecoderEx.decodeReuseBitmap(tempFile.getName(), dest);
+                } finally {
+                    if (stream != null) {
+                        try {
+
+                            stream.close();
+                        } catch (IOException e) {
+                            // Ignore
+                        }
+                    }
+                    IOUtils.delete(tempFile);
+                }
+
             } else {
                 throw new UnsupportedOperationException();
             }
@@ -583,7 +630,7 @@ public class Optimizer {
         if (bmp == null) {
             return null;
         }
-        return ImageUtils.fixRotation(bmp, getContentRotation(uri, context));
+        return fixRotation(bmp, getContentRotation(uri, context));
     }
 
     private static Bitmap fixExifRotation(Bitmap bmp, String exifFileName) throws IOException, OutOfMemoryError {
@@ -729,6 +776,10 @@ public class Optimizer {
 
         public int getHeight() {
             return height;
+        }
+
+        public boolean isJpeg() {
+            return mimeType != null && mimeType.equals("image/jpeg");
         }
     }
 }

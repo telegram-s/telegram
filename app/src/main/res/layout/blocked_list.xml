@@ -5,14 +5,14 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:background="@color/st_settings_bg">
-    <com.extradea.framework.images.ui.ImagingListView android:layout_height="fill_parent"
-                                                      android:layout_width="fill_parent"
-                                                      android:paddingLeft="16dp"
-                                                      android:paddingRight="16dp"
-                                                      android:scrollbarStyle="insideOverlay"
-                                                      android:clipToPadding="false"
-                                                      android:cacheColorHint="@color/st_settings_bg"
-                                                      android:id="@+id/usersList"/>
+    <ListView android:layout_height="fill_parent"
+              android:layout_width="fill_parent"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp"
+              android:scrollbarStyle="insideOverlay"
+              android:clipToPadding="false"
+              android:cacheColorHint="@color/st_settings_bg"
+              android:id="@+id/usersList"/>
 
     <TextView android:layout_width="wrap_content"
               android:layout_height="wrap_content"

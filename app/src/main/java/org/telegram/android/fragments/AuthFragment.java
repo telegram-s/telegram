@@ -22,8 +22,6 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.extradea.framework.images.tasks.UriImageTask;
-import com.extradea.framework.images.ui.FastWebImageView;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
@@ -33,6 +31,7 @@ import org.telegram.android.StartActivity;
 import org.telegram.android.activity.PickCountryActivity;
 import org.telegram.android.login.ActivationController;
 import org.telegram.android.login.ActivationListener;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.ui.TextUtil;
 
 import java.io.File;
@@ -291,10 +290,8 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
             }
         }));
 
-        FastWebImageView avatar = ((FastWebImageView) signupPage.findViewById(R.id.avatar));
-        avatar.setLoadingDrawable(getResources().getDrawable(R.drawable.st_user_placeholder_grey));
-        avatar.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
-        avatar.setScaleTypeEmpty(FastWebImageView.SCALE_TYPE_FIT_CROP);
+        AvatarView avatar = ((AvatarView) signupPage.findViewById(R.id.avatar));
+        avatar.setEmptyDrawable(getResources().getDrawable(R.drawable.st_user_placeholder_grey));
 
         signupPage.findViewById(R.id.changeAvatarButton).setOnClickListener(secure(new View.OnClickListener() {
             @Override
@@ -502,13 +499,13 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
     @Override
     protected void onPhotoCropped(Uri uri, int requestId) {
         application.getKernel().getActivationController().setManualAvatarUri(uri.toString());
-        ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(new UriImageTask(uri.toString()));
+        ((AvatarView) signupPage.findViewById(R.id.avatar)).requestAvatar(null);
     }
 
     @Override
     protected void onPhotoDeleted(int requestId) {
         application.getKernel().getActivationController().setManualAvatarUri(null);
-        ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(null);
+        ((AvatarView) signupPage.findViewById(R.id.avatar)).requestAvatar(null);
     }
 
     @Override
@@ -758,9 +755,10 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
             }
 
             if (application.getKernel().getActivationController().getManualAvatarUri() != null) {
-                ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(new UriImageTask(application.getKernel().getActivationController().getManualAvatarUri()));
+                ((AvatarView) signupPage.findViewById(R.id.avatar)).requestRawAvatar(
+                        Uri.parse(application.getKernel().getActivationController().getManualAvatarUri()));
             } else {
-                ((FastWebImageView) signupPage.findViewById(R.id.avatar)).requestTask(null);
+                ((AvatarView) signupPage.findViewById(R.id.avatar)).removeAvatar();
             }
 
             showView(signupPage, currentState != ActivationController.STATE_START);

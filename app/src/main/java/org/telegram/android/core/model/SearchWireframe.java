@@ -11,19 +11,14 @@ import org.telegram.tl.TLObject;
 public class SearchWireframe {
     private int peerId;
     private int peerType;
-    private String title;
-    private Spanned highlightedTitle;
+    private CharSequence title;
     private TLObject photo;
-    private TLAbsLocalUserStatus status;
-    private int members;
 
-    public SearchWireframe(int peerId, int peerType, String title, Spanned highlightedTitle, TLObject photo, TLAbsLocalUserStatus status, int members) {
+    public SearchWireframe(int peerId, int peerType, CharSequence title, TLObject photo) {
         this.peerId = peerId;
         this.peerType = peerType;
         this.title = title;
         this.photo = photo;
-        this.status = status;
-        this.members = members;
     }
 
     public int getPeerId() {
@@ -34,19 +29,11 @@ public class SearchWireframe {
         return peerType;
     }
 
-    public String getTitle() {
+    public CharSequence getTitle() {
         return title;
     }
 
     public TLObject getPhoto() {
         return photo;
-    }
-
-    public TLAbsLocalUserStatus getStatus() {
-        return status;
-    }
-
-    public int getMembers() {
-        return members;
     }
 }

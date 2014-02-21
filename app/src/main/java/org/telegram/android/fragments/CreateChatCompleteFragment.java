@@ -10,26 +10,18 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 import com.actionbarsherlock.view.MenuItem;
-import com.extradea.framework.images.tasks.FileSystemImageTask;
-import com.extradea.framework.images.tasks.UriImageTask;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
-import org.telegram.android.core.EngineUtils;
-import org.telegram.android.core.files.UploadResult;
 import org.telegram.android.core.model.file.FileSource;
 import org.telegram.android.core.model.file.FileUriSource;
 import org.telegram.android.core.model.update.TLLocalCreateChat;
-import org.telegram.android.core.model.update.TLLocalUpdateChatPhoto;
-import org.telegram.android.media.Optimizer;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.api.*;
 import org.telegram.api.messages.TLAbsStatedMessage;
 import org.telegram.api.messages.TLStatedMessage;
 import org.telegram.api.requests.TLRequestMessagesCreateChat;
-import org.telegram.api.requests.TLRequestMessagesEditChatPhoto;
-import org.telegram.mtproto.secure.Entropy;
 import org.telegram.tl.TLVector;
 
 import java.io.*;
@@ -45,7 +37,7 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
     private String imageFileName;
     private Uri imageUri;
 
-    private FastWebImageView avatarImage;
+    private AvatarView avatarImage;
 
     private EditText chatTitleView;
 
@@ -66,7 +58,7 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
         } else {
             imageFileName = fileName;
             imageUri = null;
-            avatarImage.requestTask(new FileSystemImageTask(fileName));
+            avatarImage.requestRawAvatar(fileName);
         }
     }
 
@@ -77,7 +69,7 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
         } else {
             imageFileName = null;
             imageUri = uri;
-            avatarImage.requestTask(new UriImageTask(uri.toString()));
+            avatarImage.requestRawAvatar(imageUri);
         }
     }
 
@@ -85,14 +77,14 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
     protected void onPhotoCropped(Uri uri, int requestId) {
         imageFileName = null;
         imageUri = uri;
-        avatarImage.requestTask(new UriImageTask(uri.toString()));
+        avatarImage.requestRawAvatar(uri);
     }
 
     @Override
     protected void onPhotoDeleted(int requestId) {
         imageFileName = null;
         imageUri = null;
-        avatarImage.requestTask(null);
+        avatarImage.removeAvatar();
     }
 
     @Override
@@ -120,9 +112,9 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
         View res = inflater.inflate(R.layout.create_chat_complete, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
 
-        avatarImage = (FastWebImageView) res.findViewById(R.id.avatar);
-        avatarImage.setLoadingDrawable(R.drawable.st_group_placeholder_cyan);
-        avatarImage.requestTask(null);
+        avatarImage = (AvatarView) res.findViewById(R.id.avatar);
+        avatarImage.setEmptyDrawable(R.drawable.st_group_placeholder_cyan);
+        avatarImage.removeAvatar();
 
         chatTitleView = (EditText) res.findViewById(R.id.title);
 

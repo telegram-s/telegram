@@ -1,10 +1,6 @@
 package org.telegram.android.media;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Build;
-import com.extradea.framework.images.BitmapDecoder;
-import org.telegram.android.log.Logger;
 
 import java.io.IOException;
 

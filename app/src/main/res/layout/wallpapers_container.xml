@@ -5,9 +5,10 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:background="@android:color/white">
-    <com.extradea.framework.images.ui.FastWebImageView android:layout_width="fill_parent"
-                                                       android:layout_height="fill_parent"
-                                                       android:id="@+id/preview"/>
+    <!-- // TODO: Implement -->
+    <!--<com.extradea.framework.images.ui.FastWebImageView android:layout_width="fill_parent"-->
+                                                       <!--android:layout_height="fill_parent"-->
+                                                       <!--android:id="@+id/preview"/>-->
     <Gallery android:layout_width="fill_parent"
              android:layout_height="100dp"
              android:layout_marginBottom="48dp"

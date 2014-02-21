@@ -8,11 +8,11 @@
                                          android:paddingTop="8dp"
                                          android:paddingBottom="8dp">
 
-    <com.extradea.framework.images.ui.FastWebImageView android:layout_height="50dp"
-                                                       android:layout_width="50dp"
-                                                       android:id="@+id/avatar"
-                                                       android:layout_marginRight="8dp"
-                                                       android:layout_marginLeft="8dp"/>
+    <org.telegram.android.preview.AvatarView android:layout_height="50dp"
+                                             android:layout_width="50dp"
+                                             android:id="@+id/avatar"
+                                             android:layout_marginRight="8dp"
+                                             android:layout_marginLeft="8dp"/>
 
     <LinearLayout android:layout_height="fill_parent"
                   android:layout_width="0dp"
@@ -34,7 +34,6 @@
                   android:textColor="@color/st_grey_text"
                   android:maxLines="1"
                   android:singleLine="true"
-                  ext:customFont="light"
                   android:id="@+id/phone"/>
     </LinearLayout>
 </org.telegram.android.ui.RtlLinearLayout>

@@ -6,11 +6,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.View;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.media.TLAbsLocalFileLocation;
+import org.telegram.android.log.Logger;
 
 /**
  * Created by ex3ndr on 06.02.14.
@@ -26,7 +28,11 @@ public class AvatarView extends View implements AvatarReceiver {
     private Rect rect = new Rect();
     private Rect rect1 = new Rect();
     private Paint avatarPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+
+    private boolean isBinded = false;
     private TLAbsLocalFileLocation fileLocation;
+    private String fileName;
+    private Uri fileUri;
 
     public AvatarView(Context context) {
         super(context);
@@ -61,14 +67,53 @@ public class AvatarView extends View implements AvatarReceiver {
     public void requestAvatar(TLAbsLocalFileLocation fileLocation) {
         unbindAvatar();
         this.fileLocation = fileLocation;
+        this.fileName = null;
+        this.fileUri = null;
         bindLocation();
     }
 
+    public void requestRawAvatar(String fileName) {
+        unbindAvatar();
+        this.fileLocation = null;
+        this.fileName = fileName;
+        this.fileUri = null;
+        bindLocation();
+    }
+
+    public void requestRawAvatar(Uri uri) {
+        unbindAvatar();
+        this.fileLocation = null;
+        this.fileName = null;
+        this.fileUri = uri;
+        bindLocation();
+    }
+
+    public void removeAvatar() {
+        requestAvatar(null);
+    }
+
     private void bindLocation() {
-        if (fileLocation == null) {
-            loader.cancelRequest(null);
+        if (fileLocation != null) {
+            if (!loader.requestAvatar(fileLocation, AvatarLoader.TYPE_MEDIUM, this)) {
+                unbindAvatar();
+            }
+            isBinded = true;
+        } else if (fileName != null) {
+            if (!loader.requestRawAvatar(fileName, this)) {
+                unbindAvatar();
+            }
+            isBinded = true;
+        } else if (fileUri != null) {
+            if (!loader.requestRawAvatar(fileUri, this)) {
+                unbindAvatar();
+            }
+            isBinded = true;
         } else {
-            loader.requestAvatar(fileLocation, AvatarLoader.TYPE_MEDIUM, this);
+            if (isBinded) {
+                unbindAvatar();
+                loader.cancelRequest(this);
+                isBinded = false;
+            }
         }
         invalidate();
     }
@@ -83,18 +128,33 @@ public class AvatarView extends View implements AvatarReceiver {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        bindLocation();
+        if (!isBinded) {
+            bindLocation();
+        }
+        invalidate();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         unbindAvatar();
-        loader.cancelRequest(this);
+        if (isBinded) {
+            loader.cancelRequest(this);
+            isBinded = false;
+        }
+        invalidate();
     }
 
     public void requestAvatarSwitch(TLAbsLocalFileLocation fileLocation) {
         requestAvatar(fileLocation);
+    }
+
+    public void requestRawAvatarSwitch(String fileName) {
+        requestRawAvatar(fileName);
+    }
+
+    public void requestRawAvatarSwitch(Uri uri) {
+        requestRawAvatar(uri);
     }
 
     @Override

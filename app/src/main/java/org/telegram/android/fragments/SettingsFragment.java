@@ -15,9 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import com.extradea.framework.images.tasks.FileSystemImageTask;
-import com.extradea.framework.images.tasks.UriImageTask;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.UserSourceListener;
@@ -31,7 +28,7 @@ import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.log.Logger;
 import org.telegram.android.core.model.User;
-import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.Placeholders;
@@ -49,7 +46,7 @@ import java.io.*;
  */
 public class SettingsFragment extends MediaReceiverFragment implements UserSourceListener, AvatarUploader.AvatarUserUploadListener {
 
-    private FastWebImageView avatar;
+    private AvatarView avatar;
     private TextView nameView;
     private TextView phoneView;
     private View avatarUploadView;
@@ -255,8 +252,8 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
             res.findViewById(R.id.developmentDiv).setVisibility(View.GONE);
         }
 
-        avatar = (FastWebImageView) res.findViewById(R.id.avatar);
-        avatar.setLoadingDrawable(Placeholders.getUserPlaceholder(application.getCurrentUid()));
+        avatar = (AvatarView) res.findViewById(R.id.avatar);
+        avatar.setEmptyDrawable(Placeholders.getUserPlaceholder(application.getCurrentUid()));
 
         nameView = (TextView) res.findViewById(R.id.userName);
         phoneView = (TextView) res.findViewById(R.id.phone);
@@ -291,11 +288,11 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getAvatarUploadingSource();
                 if (fileSource != null) {
                     if (fileSource instanceof FileSource) {
-                        avatar.requestTaskSwitch(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
+                        avatar.requestRawAvatarSwitch(((FileSource) fileSource).getFileName());
                         showView(avatarUploadView);
                         isLoaded = true;
                     } else if (fileSource instanceof FileUriSource) {
-                        avatar.requestTaskSwitch(new UriImageTask(((FileUriSource) fileSource).getUri()));
+                        avatar.requestRawAvatarSwitch(Uri.parse(((FileUriSource) fileSource).getUri()));
                         showView(avatarUploadView);
                         isLoaded = true;
                     }
@@ -316,12 +313,12 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
                     TLLocalAvatarPhoto photo = (TLLocalAvatarPhoto) user.getPhoto();
                     if (photo.getPreviewLocation() instanceof TLLocalFileLocation) {
-                        avatar.requestTaskSwitch(new StelsImageTask((TLLocalFileLocation) photo.getPreviewLocation()));
+                        avatar.requestAvatarSwitch(photo.getPreviewLocation());
                     } else {
-                        avatar.requestTaskSwitch(null);
+                        avatar.requestAvatarSwitch(null);
                     }
                 } else {
-                    avatar.requestTaskSwitch(null);
+                    avatar.requestAvatarSwitch(null);
                 }
             }
 
@@ -329,7 +326,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
 
             phoneView.setText(unicodeWrap(TextUtil.formatPhone(user.getPhone())));
         } else {
-            avatar.requestTask(null);
+            avatar.requestAvatar(null);
             nameView.setText("Loading...");
             phoneView.setText("Loading...");
         }

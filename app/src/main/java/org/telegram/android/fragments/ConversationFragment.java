@@ -10,10 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaRecorder;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.*;
-import android.provider.MediaStore;
 import android.text.*;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
@@ -27,9 +25,6 @@ import android.widget.*;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.extradea.framework.images.tasks.FileSystemImageTask;
-import com.extradea.framework.images.tasks.UriImageTask;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
@@ -1118,11 +1113,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getGroupUploadingSource(peerId);
                 if (fileSource != null) {
                     if (fileSource instanceof FileSource) {
-                        // imageView.requestTaskSwitch(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
+                        imageView.requestRawAvatarSwitch(((FileSource) fileSource).getFileName());
                         showView(avatarUploadView, false);
                         isLoaded = true;
                     } else if (fileSource instanceof FileUriSource) {
-                        // imageView.requestTaskSwitch(new UriImageTask(((FileUriSource) fileSource).getUri()));
+                        imageView.requestRawAvatarSwitch(Uri.parse(((FileUriSource) fileSource).getUri()));
                         showView(avatarUploadView, false);
                         isLoaded = true;
                     }
@@ -1684,13 +1679,15 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         int count = dialogAdapter.getCount();
         final int top = ((v == null) ? 0 : v.getTop()) - listView.getPaddingTop();
 
+        Logger.d(TAG, "Pre-Update " + index + ", " + count + "," + id + ", " + top);
+
         workingSet = nWorkingSet;
         dialogAdapter.notifyDataSetChanged();
         //dialogAdapter.notifyDataSetInvalidated();
 
         int delta = Math.abs(dialogAdapter.getCount() - count);
 
-        if (delta != 0) {
+        // if (delta != 0) {
             int newIndex = index + (dialogAdapter.getCount() - count) + 1;
 
             for (int i = index - delta; i < index + delta + 1; i++) {
@@ -1713,7 +1710,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 //                    listView.setSelectionFromTop(finalNewIndex, top);
 //                }
 //            });
-        }
+        // }
 
         onDataChanged();
 
@@ -1904,7 +1901,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
                 TextView messageView = (TextView) view.findViewById(R.id.message);
                 messageView.setMovementMethod(LinkMovementMethod.getInstance());
-                FastWebImageView imageView = (FastWebImageView) view.findViewById(R.id.image);
+                AvatarView imageView = (AvatarView) view.findViewById(R.id.image);
 
                 TLAbsLocalAction action = (TLAbsLocalAction) object.message.getExtras();
                 User sender = getEngine().getUser(object.message.getSenderId());
@@ -1916,9 +1913,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     messageView.setText(fixedHtml(getStringSafe(R.string.st_message_user_photo_change).replace("{0}", senderHtml)));
                     imageView.setVisibility(View.VISIBLE);
                     if (chatEditPhoto.getPhoto().getPreviewLocation() instanceof TLLocalFileLocation) {
-                        imageView.requestTask(new StelsImageTask((TLLocalFileLocation) chatEditPhoto.getPhoto().getPreviewLocation()));
+                        imageView.requestAvatar(chatEditPhoto.getPhoto().getPreviewLocation());
                     } else {
-                        imageView.requestTask(null);
+                        imageView.removeAvatar();
                     }
                     if (chatEditPhoto.getPhoto().getFullLocation() instanceof TLLocalFileLocation) {
                         imageView.setOnClickListener(secure(new View.OnClickListener() {
@@ -1937,9 +1934,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     if (chatEditPhoto.getPhoto() instanceof TLLocalAvatarPhoto) {
                         final TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) chatEditPhoto.getPhoto();
                         if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                            imageView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+                            imageView.requestAvatar(avatarPhoto.getPreviewLocation());
                         } else {
-                            imageView.requestTask(null);
+                            imageView.removeAvatar();
                         }
                         if (avatarPhoto.getFullLocation() instanceof TLLocalFileLocation) {
                             imageView.setOnClickListener(secure(new View.OnClickListener() {
@@ -1957,7 +1954,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             }));
                         }
                     } else {
-                        imageView.requestTask(null);
+                        imageView.requestAvatar(null);
                         imageView.setOnClickListener(null);
                     }
                 } else if (action instanceof TLLocalActionChatCreate) {

@@ -5,13 +5,13 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:background="@color/st_settings_bg">
-    <com.extradea.framework.images.ui.ImagingListView android:layout_width="fill_parent"
-                                                      android:layout_height="fill_parent"
-                                                      android:paddingLeft="8dp"
-                                                      android:paddingRight="8dp"
-                                                      android:clipToPadding="false"
-                                                      android:scrollbarStyle="outsideOverlay"
-                                                      android:id="@+id/mainListView"/>
+    <ListView android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:paddingLeft="8dp"
+              android:paddingRight="8dp"
+              android:clipToPadding="false"
+              android:scrollbarStyle="outsideOverlay"
+              android:id="@+id/mainListView"/>
 
     <FrameLayout android:layout_height="fill_parent"
                  android:layout_width="fill_parent"

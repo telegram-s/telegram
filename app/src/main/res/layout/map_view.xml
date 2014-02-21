@@ -19,7 +19,7 @@
                                              android:paddingTop="4dp"
                                              ext:gravity="center_vertical"
                                              android:id="@+id/bottomPanel">
-        <com.extradea.framework.images.ui.FastWebImageView
+        <org.telegram.android.preview.AvatarView
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:id="@+id/avatar"/>

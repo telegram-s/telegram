@@ -32,9 +32,9 @@
                      android:layout_marginRight="10dp"
                      android:layout_marginLeft="10dp"
                      ext:layout_gravity="center_vertical">
-            <com.extradea.framework.images.ui.FastWebImageView android:layout_height="fill_parent"
-                                                               android:layout_width="fill_parent"
-                                                               android:id="@+id/avatar"/>
+            <org.telegram.android.preview.AvatarView android:layout_height="fill_parent"
+                                                     android:layout_width="fill_parent"
+                                                     android:id="@+id/avatar"/>
             <ImageButton android:layout_width="fill_parent"
                          android:layout_height="fill_parent"
                          android:id="@+id/changeAvatar"

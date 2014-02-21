@@ -39,10 +39,10 @@
               android:gravity="center_horizontal"
               android:id="@+id/message"/>
 
-    <com.extradea.framework.images.ui.FastWebImageView android:layout_width="64dp"
-                                                       android:layout_height="64dp"
-                                                       android:layout_marginTop="-2dp"
-                                                       android:layout_marginBottom="10dp"
-                                                       android:layout_gravity="center_horizontal"
-                                                       android:id="@+id/image"/>
+    <org.telegram.android.preview.AvatarView android:layout_width="64dp"
+                                             android:layout_height="64dp"
+                                             android:layout_marginTop="-2dp"
+                                             android:layout_marginBottom="10dp"
+                                             android:layout_gravity="center_horizontal"
+                                             android:id="@+id/image"/>
 </LinearLayout>

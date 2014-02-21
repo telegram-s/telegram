@@ -16,7 +16,7 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
-import com.extradea.framework.images.ui.ImagingListView;
+import android.widget.ListView;
 import org.telegram.android.R;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
@@ -26,7 +26,7 @@ import org.telegram.android.ui.TextUtil;
 /**
  * Created by ex3ndr on 15.11.13.
  */
-public class ConversationListView extends ImagingListView {
+public class ConversationListView extends ListView {
 
     private static final String TAG = "ConversationListView";
 

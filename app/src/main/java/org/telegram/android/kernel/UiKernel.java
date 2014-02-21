@@ -5,8 +5,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import com.extradea.framework.images.ImageController;
-import com.extradea.framework.images.workers.*;
 import org.telegram.android.base.TelegramActivity;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.WallpaperHolder;
@@ -15,7 +13,6 @@ import org.telegram.android.core.Notifications;
 import org.telegram.android.core.TextSaver;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.log.Logger;
-import org.telegram.android.media.StelsImageWorker;
 import org.telegram.android.preview.AvatarLoader;
 import org.telegram.android.preview.MediaLoader;
 import org.telegram.android.tasks.AsyncException;
@@ -43,8 +40,6 @@ public class UiKernel {
     private ApplicationKernel kernel;
 
     private TelegramApplication application;
-
-    private ImageController imageController;
 
     private AvatarLoader avatarLoader;
 
@@ -91,20 +86,9 @@ public class UiKernel {
         start = SystemClock.uptimeMillis();
         this.wallpaperHolder = new WallpaperHolder(application);
         Logger.d(TAG, "WallpaperHolder loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
-        start = SystemClock.uptimeMillis();
+
         this.isAppActive = false;
         this.isAppActive = false;
-
-        imageController = new ImageController(application, new ImageWorker[]{
-                new FileSystemWorker(application),
-                new DownloadWorker(),
-                new CornersWorker(),
-                new StelsImageWorker(application),
-                new StelsImageWorker(application),
-                new ScaleWorker()
-        });
-
-        Logger.d(TAG, "ImageController loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         start = SystemClock.uptimeMillis();
         avatarLoader = new AvatarLoader(application);
@@ -160,10 +144,6 @@ public class UiKernel {
 
     public TextSaver getTextSaver() {
         return textSaver;
-    }
-
-    public ImageController getImageController() {
-        return imageController;
     }
 
     public WallpaperHolder getWallpaperHolder() {

@@ -4,14 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.Toast;
-import com.extradea.framework.images.utils.ImageUtils;
 import org.telegram.android.R;
 import org.telegram.android.activity.CropImageActivity;
 import org.telegram.android.media.Optimizer;
@@ -276,19 +273,11 @@ public class MediaReceiverFragment extends TelegramFragment {
                     int height = 0;
 
                     try {
-                        BitmapFactory.Options o = new BitmapFactory.Options();
-                        o.inJustDecodeBounds = true;
-                        BitmapFactory.decodeFile(imageFileName, o);
-                        width = o.outWidth;
-                        height = o.outHeight;
-                    } catch (OutOfMemoryError e) {
-
-                    }
-
-                    if (!ImageUtils.isVerticalImage(imageFileName)) {
-                        int tmp = height;
-                        height = width;
-                        width = tmp;
+                        Optimizer.BitmapInfo info = Optimizer.getInfo(imageFileName);
+                        width = info.getWidth();
+                        height = info.getHeight();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
 
                     final int finalWidth = width;
@@ -309,20 +298,11 @@ public class MediaReceiverFragment extends TelegramFragment {
                     int height = 0;
 
                     try {
-                        InputStream stream = application.getContentResolver().openInputStream(selectedImageUri);
-                        BitmapFactory.Options o = new BitmapFactory.Options();
-                        o.inJustDecodeBounds = true;
-                        BitmapFactory.decodeStream(stream, new Rect(), o);
-                        width = o.outWidth;
-                        height = o.outHeight;
-                    } catch (FileNotFoundException e) {
+                        Optimizer.BitmapInfo info = Optimizer.getInfo(selectedImageUri, application);
+                        width = info.getWidth();
+                        height = info.getHeight();
+                    } catch (IOException e) {
                         e.printStackTrace();
-                    }
-
-                    if (!ImageUtils.isVerticalImage(selectedImageUri, getActivity())) {
-                        int tmp = height;
-                        height = width;
-                        width = tmp;
                     }
 
                     final int finalWidth = width;

@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.actionbarsherlock.view.Menu;
-import com.extradea.framework.images.ui.FastWebImageView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -19,7 +18,7 @@ import org.telegram.android.R;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
-import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
 
@@ -32,7 +31,7 @@ public class ViewLocationFragment extends TelegramMapFragment {
     private double latitude;
     private double longitude;
 
-    private FastWebImageView avatarImage;
+    private AvatarView avatarImage;
     private TextView userNameView;
     private TextView locationView;
 
@@ -54,7 +53,7 @@ public class ViewLocationFragment extends TelegramMapFragment {
             uid = savedInstanceState.getInt("uid");
         }
         View res = createMapView(R.layout.map_view, inflater, container, savedInstanceState);
-        avatarImage = (FastWebImageView) res.findViewById(R.id.avatar);
+        avatarImage = (AvatarView) res.findViewById(R.id.avatar);
         userNameView = (TextView) res.findViewById(R.id.name);
         locationView = (TextView) res.findViewById(R.id.location);
         res.findViewById(R.id.bottomPanel).setOnClickListener(secure(new View.OnClickListener() {
@@ -66,16 +65,16 @@ public class ViewLocationFragment extends TelegramMapFragment {
         User user = getEngine().getUser(uid);
         userNameView.setText(user.getDisplayName());
         locationView.setText(R.string.st_location_unavailable);
-        avatarImage.setLoadingDrawable(Placeholders.getUserPlaceholder(uid));
+        avatarImage.setEmptyDrawable(Placeholders.getUserPlaceholder(uid));
         if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
             TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) user.getPhoto();
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                avatarImage.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+                avatarImage.requestAvatar(avatarPhoto.getPreviewLocation());
             } else {
-                avatarImage.requestTask(null);
+                avatarImage.requestAvatar(null);
             }
         } else {
-            avatarImage.requestTask(null);
+            avatarImage.requestAvatar(null);
         }
         return res;
     }

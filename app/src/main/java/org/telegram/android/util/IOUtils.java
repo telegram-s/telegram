@@ -14,8 +14,10 @@ public class IOUtils {
     };
 
     public static void delete(File src) {
-        if (!src.delete()) {
-            src.deleteOnExit();
+        if (src.exists()) {
+            if (!src.delete()) {
+                src.deleteOnExit();
+            }
         }
     }
 

@@ -434,7 +434,7 @@
             <FrameLayout android:layout_width="108dp"
                          android:layout_height="108dp"
                          android:layout_marginTop="8dp">
-                <com.extradea.framework.images.ui.FastWebImageView
+                <org.telegram.android.preview.AvatarView
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
                         android:id="@+id/avatar"/>

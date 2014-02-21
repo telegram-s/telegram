@@ -7,9 +7,6 @@ import android.view.ViewGroup;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
-import org.telegram.android.media.StelsImageTask;
-import org.telegram.android.ui.PhotoImageView;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
  * Author: Korshakov Stepan
@@ -40,20 +37,21 @@ public class SingleImagePreviewFragment extends TelegramFragment {
             location = (TLLocalFileLocation) savedInstanceState.getSerializable("location");
         }
         View res = inflater.inflate(R.layout.view_image, container, false);
-        PhotoImageView photoImageView = (PhotoImageView) res.findViewById(R.id.previewImage);
-        photoImageView.setImageTask(new StelsImageTask(location));
-        photoImageView.getPhotoViewAttacher().setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
-            @Override
-            public void onViewTap(View view, float x, float y) {
-                if (getSherlockActivity() != null && getSherlockActivity().getSupportActionBar() != null) {
-                    if (getSherlockActivity().getSupportActionBar().isShowing()) {
-                        getSherlockActivity().getSupportActionBar().hide();
-                    } else {
-                        getSherlockActivity().getSupportActionBar().show();
-                    }
-                }
-            }
-        });
+        // TODO: Implement
+//        PhotoImageView photoImageView = (PhotoImageView) res.findViewById(R.id.previewImage);
+//        photoImageView.setImageTask(new StelsImageTask(location));
+//        photoImageView.getPhotoViewAttacher().setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
+//            @Override
+//            public void onViewTap(View view, float x, float y) {
+//                if (getSherlockActivity() != null && getSherlockActivity().getSupportActionBar() != null) {
+//                    if (getSherlockActivity().getSupportActionBar().isShowing()) {
+//                        getSherlockActivity().getSupportActionBar().hide();
+//                    } else {
+//                        getSherlockActivity().getSupportActionBar().show();
+//                    }
+//                }
+//            }
+//        });
         return res;
     }
 

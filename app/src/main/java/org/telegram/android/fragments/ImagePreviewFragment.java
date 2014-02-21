@@ -2,7 +2,6 @@ package org.telegram.android.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
@@ -17,22 +16,16 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.extradea.framework.images.tasks.FileSystemImageTask;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLLocalFileEmpty;
-import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
 import org.telegram.android.media.*;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
-import org.telegram.android.ui.PhotoImageView;
 import org.telegram.android.ui.TextUtil;
-import org.telegram.api.TLFileLocation;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 import java.io.File;
 import java.io.IOException;
@@ -229,14 +222,15 @@ public class ImagePreviewFragment extends TelegramFragment {
 
                 if (record.getPreview() instanceof TLLocalVideo) {
                     final ImageButton playButton = (ImageButton) res.findViewById(R.id.play);
-                    FastWebImageView imageView = (FastWebImageView) res.findViewById(R.id.previewImage);
-                    imageView.setOnClickListener(secure(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            onImageTap();
-                        }
-                    }));
-                    imageView.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT);
+                    // TODO: Implement
+//                    FastWebImageView imageView = (FastWebImageView) res.findViewById(R.id.previewImage);
+//                    imageView.setOnClickListener(secure(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            onImageTap();
+//                        }
+//                    }));
+//                    imageView.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT);
 
                     final TLLocalVideo video = (TLLocalVideo) record.getPreview();
                     final String key = DownloadManager.getVideoKey(video);
@@ -321,16 +315,17 @@ public class ImagePreviewFragment extends TelegramFragment {
                             application.getDownloadManager().requestDownload(photo);
                         }
                         //}
-                        final PhotoImageView imageView = (PhotoImageView) res.findViewById(R.id.previewImage);
-                        imageView.getPhotoViewAttacher().setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
-                            @Override
-                            public void onViewTap(View view, float x, float y) {
-                                onImageTap();
-                            }
-                        });
-                        if (photo.getFastPreviewH() != 0 && photo.getFastPreviewW() != 0) {
-                            imageView.setImageBitmap(BitmapFactory.decodeByteArray(photo.getFastPreview(), 0, photo.getFastPreview().length));
-                        }
+                        // TODO: Implement
+//                        final PhotoImageView imageView = (PhotoImageView) res.findViewById(R.id.previewImage);
+//                        imageView.getPhotoViewAttacher().setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
+//                            @Override
+//                            public void onViewTap(View view, float x, float y) {
+//                                onImageTap();
+//                            }
+//                        });
+//                        if (photo.getFastPreviewH() != 0 && photo.getFastPreviewW() != 0) {
+//                            imageView.setImageBitmap(BitmapFactory.decodeByteArray(photo.getFastPreview(), 0, photo.getFastPreview().length));
+//                        }
 
                         downloadButton.setOnClickListener(secure(new View.OnClickListener() {
                             @Override
@@ -351,7 +346,8 @@ public class ImagePreviewFragment extends TelegramFragment {
                                 }
 
                                 if (state == DownloadState.COMPLETED) {
-                                    imageView.setImageTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)));
+                                    // TODO: Implement
+                                    // imageView.setImageTask(new FileSystemImageTask(application.getDownloadManager().getFileName(key)));
                                     downloadButton.setVisibility(View.GONE);
                                     progressBar.setVisibility(View.GONE);
                                 } else if (state == DownloadState.IN_PROGRESS | state == DownloadState.PENDING) {
@@ -380,10 +376,11 @@ public class ImagePreviewFragment extends TelegramFragment {
             @Override
             public void destroyItem(ViewGroup collection, int position, Object view) {
                 ((View) view).setTag(null);
-                View previewImage = ((View) view).findViewById(R.id.previewImage);
-                if (previewImage != null && previewImage instanceof PhotoImageView) {
-                    ((PhotoImageView) previewImage).getPhotoViewAttacher().cleanup();
-                }
+                // TODO: Implement
+                //View previewImage = ((View) view).findViewById(R.id.previewImage);
+//                if (previewImage != null && previewImage instanceof PhotoImageView) {
+//                    ((PhotoImageView) previewImage).getPhotoViewAttacher().cleanup();
+//                }
                 collection.removeView((View) view);
             }
 

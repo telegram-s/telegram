@@ -2,16 +2,15 @@ package org.telegram.android.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import com.extradea.framework.images.ui.ImagingListView;
+import android.widget.ListView;
 import org.telegram.android.log.Logger;
 
 /**
  * Author: Korshakov Stepan
  * Created: 12.08.13 13:48
  */
-public class ObservableListView extends ImagingListView {
+public class ObservableListView extends ListView {
 
     private static final String TAG = "ObservableList";
 

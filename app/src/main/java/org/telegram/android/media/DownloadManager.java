@@ -1,14 +1,10 @@
 package org.telegram.android.media;
 
-import android.graphics.*;
 import android.media.MediaScannerConnection;
 import android.os.*;
-import com.extradea.framework.images.BitmapDecoder;
-import com.extradea.framework.images.utils.ImageUtils;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.log.Logger;
-import org.telegram.android.ui.UiNotifier;
 import org.telegram.android.util.IOUtils;
 import org.telegram.api.*;
 import org.telegram.api.engine.file.Downloader;

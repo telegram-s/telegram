@@ -10,11 +10,11 @@
                                          android:paddingLeft="2dp"
                                          android:paddingRight="2dp">
 
-    <com.extradea.framework.images.ui.FastWebImageView android:layout_height="50dp"
-                                                       android:layout_width="50dp"
-                                                       android:id="@+id/avatar"
-                                                       android:layout_marginLeft="5dp"
-                                                       android:layout_marginRight="5dp"/>
+    <org.telegram.android.preview.AvatarView android:layout_height="50dp"
+                                             android:layout_width="50dp"
+                                             android:id="@+id/avatar"
+                                             android:layout_marginLeft="5dp"
+                                             android:layout_marginRight="5dp"/>
 
     <LinearLayout android:layout_height="fill_parent"
                   android:layout_width="0dp"

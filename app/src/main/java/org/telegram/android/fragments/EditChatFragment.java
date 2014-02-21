@@ -16,9 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.actionbarsherlock.view.MenuItem;
-import com.extradea.framework.images.tasks.FileSystemImageTask;
-import com.extradea.framework.images.tasks.UriImageTask;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.core.ChatSourceListener;
@@ -37,12 +34,11 @@ import org.telegram.android.core.model.update.TLLocalAddChatUser;
 import org.telegram.android.core.model.update.TLLocalAffectedHistory;
 import org.telegram.android.core.model.update.TLLocalRemoveChatUser;
 import org.telegram.android.core.model.update.TLLocalUpdateChatPhoto;
-import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.tasks.ProgressInterface;
 import org.telegram.android.ui.Placeholders;
-import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
 import org.telegram.api.engine.RpcException;
 import org.telegram.api.messages.TLAbsStatedMessage;
@@ -69,7 +65,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
     private View headerView;
     private TextView titleView;
-    private FastWebImageView avatarView;
+    private AvatarView avatarView;
     private View avatarUploadView;
     private View avatarUploadProgress;
     private View avatarUploadError;
@@ -145,7 +141,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         }));
 
         headerView = inflater.inflate(R.layout.chat_edit_header, null);
-        avatarView = (FastWebImageView) headerView.findViewById(R.id.avatar);
+        avatarView = (AvatarView) headerView.findViewById(R.id.avatar);
         titleView = (TextView) headerView.findViewById(R.id.name);
         onlineView = (TextView) headerView.findViewById(R.id.online);
         enabledView = (ImageView) headerView.findViewById(R.id.notificationsCheck);
@@ -262,7 +258,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
         forbidden.setVisibility(View.GONE);
 
-        avatarView.setLoadingDrawable(Placeholders.getGroupPlaceholder(chatId));
+        avatarView.setEmptyDrawable(Placeholders.getGroupPlaceholder(chatId));
         boolean isLoaded = false;
 
         int state = application.getSyncKernel().getAvatarUploader().getGroupUploadState(chatId);
@@ -270,11 +266,11 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
             AbsFileSource fileSource = application.getSyncKernel().getAvatarUploader().getGroupUploadingSource(chatId);
             if (fileSource != null) {
                 if (fileSource instanceof FileSource) {
-                    avatarView.requestTaskSwitch(new FileSystemImageTask(((FileSource) fileSource).getFileName()));
+                    avatarView.requestRawAvatarSwitch(((FileSource) fileSource).getFileName());
                     showView(avatarUploadView);
                     isLoaded = true;
                 } else if (fileSource instanceof FileUriSource) {
-                    avatarView.requestTaskSwitch(new UriImageTask(((FileUriSource) fileSource).getUri()));
+                    avatarView.requestRawAvatarSwitch(Uri.parse(((FileUriSource) fileSource).getUri()));
                     showView(avatarUploadView);
                     isLoaded = true;
                 }
@@ -295,12 +291,12 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
             if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
                 TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) group.getAvatar();
                 if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                    avatarView.requestTaskSwitch(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+                    avatarView.requestAvatarSwitch(avatarPhoto.getPreviewLocation());
                 } else {
-                    avatarView.requestTaskSwitch(null);
+                    avatarView.requestAvatarSwitch(null);
                 }
             } else {
-                avatarView.requestTaskSwitch(null);
+                avatarView.requestAvatarSwitch(null);
             }
         }
 
@@ -439,18 +435,18 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 }
                 final User user = getItem(i);
 
-                FastWebImageView imageView = (FastWebImageView) row.findViewById(R.id.avatar);
-                imageView.setLoadingDrawable(Placeholders.USER_PLACEHOLDERS[user.getUid() % Placeholders.USER_PLACEHOLDERS.length]);
+                AvatarView imageView = (AvatarView) row.findViewById(R.id.avatar);
+                imageView.setEmptyDrawable(Placeholders.USER_PLACEHOLDERS[user.getUid() % Placeholders.USER_PLACEHOLDERS.length]);
 
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
                     TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) user.getPhoto();
                     if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-                        imageView.requestTask(new StelsImageTask((TLLocalFileLocation) avatarPhoto.getPreviewLocation()));
+                        imageView.requestAvatar(avatarPhoto.getPreviewLocation());
                     } else {
-                        imageView.requestTask(null);
+                        imageView.requestAvatar(null);
                     }
                 } else {
-                    imageView.requestTask(null);
+                    imageView.requestAvatar(null);
                 }
 
                 ((TextView) row.findViewById(R.id.name)).setText(user.getFirstName() + " " + user.getLastName());

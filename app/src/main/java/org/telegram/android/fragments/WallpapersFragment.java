@@ -2,7 +2,6 @@ package org.telegram.android.fragments;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,11 +9,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Gallery;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.ApiUtils;
-import org.telegram.android.media.StelsImageTask;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.api.*;
@@ -36,14 +33,17 @@ import java.io.IOException;
 public class WallpapersFragment extends TelegramFragment {
     private TLAbsWallPaper[] wallPapers;
     private Gallery gallery;
-    private FastWebImageView preview;
+
+    // TODO: Implement
+    // private FastWebImageView preview;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.wallpapers_container, container, false);
         gallery = (Gallery) res.findViewById(R.id.previewGallery);
-        preview = (FastWebImageView) res.findViewById(R.id.preview);
-        preview.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
+        // TODO: Implement
+//        preview = (FastWebImageView) res.findViewById(R.id.preview);
+//        preview.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
         res.findViewById(R.id.cancel).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,18 +137,21 @@ public class WallpapersFragment extends TelegramFragment {
             public View getView(int position, View view, ViewGroup parent) {
                 if (view == null) {
                     view = context.getLayoutInflater().inflate(R.layout.wallpapers_item, parent, false);
-                    ((FastWebImageView) view.findViewById(R.id.preview)).setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
+                    // TODO: Implement
+                    // ((FastWebImageView) view.findViewById(R.id.preview)).setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
                 }
                 TLAbsWallPaper wallPaper = getItem(position);
                 if (wallPaper instanceof TLWallPaper) {
                     TLWallPaper tlWallPaper = (TLWallPaper) wallPaper;
                     TLPhotoSize size = ApiUtils.getWallpaperPreview(tlWallPaper.getSizes());
-                    StelsImageTask task = new StelsImageTask((TLFileLocation) size.getLocation());
-                    ((FastWebImageView) view.findViewById(R.id.preview)).requestTask(task);
-                    ((FastWebImageView) view.findViewById(R.id.preview)).setBackgroundDrawable(null);
+                    // TODO: Implement
+//                    StelsImageTask task = new StelsImageTask((TLFileLocation) size.getLocation());
+//                    ((FastWebImageView) view.findViewById(R.id.preview)).requestTask(task);
+//                    ((FastWebImageView) view.findViewById(R.id.preview)).setBackgroundDrawable(null);
                 } else {
-                    ((FastWebImageView) view.findViewById(R.id.preview)).requestTask(null);
-                    ((FastWebImageView) view.findViewById(R.id.preview)).setBackgroundDrawable(new ColorDrawable(((TLWallPaperSolid) wallPaper).getBgColor() | 0xFF000000));
+                    // TODO: Implement
+//                    ((FastWebImageView) view.findViewById(R.id.preview)).requestTask(null);
+//                    ((FastWebImageView) view.findViewById(R.id.preview)).setBackgroundDrawable(new ColorDrawable(((TLWallPaperSolid) wallPaper).getBgColor() | 0xFF000000));
                 }
                 return view;
             }
@@ -158,12 +161,14 @@ public class WallpapersFragment extends TelegramFragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (wallPapers[position] instanceof TLWallPaper) {
                     TLPhotoSize size = ApiUtils.getWallpaperFull(((TLWallPaper) wallPapers[position]).getSizes());
-                    StelsImageTask task = new StelsImageTask((TLFileLocation) size.getLocation());
-                    preview.requestTask(task);
-                    preview.setBackgroundDrawable(null);
+                    // TODO: Implement
+//                    StelsImageTask task = new StelsImageTask((TLFileLocation) size.getLocation());
+//                    preview.requestTask(task);
+//                    preview.setBackgroundDrawable(null);
                 } else {
-                    preview.requestTask(null);
-                    preview.setBackgroundDrawable(new ColorDrawable(((TLWallPaperSolid) wallPapers[position]).getBgColor() | 0xFF000000));
+                    // TODO: Implement
+//                    preview.requestTask(null);
+//                    preview.setBackgroundDrawable(new ColorDrawable(((TLWallPaperSolid) wallPapers[position]).getBgColor() | 0xFF000000));
                 }
             }
 

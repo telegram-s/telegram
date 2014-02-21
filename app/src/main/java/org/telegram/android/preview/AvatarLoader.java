@@ -2,16 +2,20 @@ package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.media.TLAbsLocalFileLocation;
+import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.log.Logger;
 import org.telegram.android.media.Optimizer;
 import org.telegram.api.TLInputFileLocation;
 import org.telegram.api.upload.TLFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -38,7 +42,7 @@ public class AvatarLoader {
     public static final int TYPE_MEDIUM2 = 2;
     public static final int TYPE_SMALL = 3;
 
-    private QueueProcessor<AvatarTask> processor;
+    private QueueProcessor<BaseAvatarTask> processor;
     private TelegramApplication application;
     private QueueWorker[] workers;
     private ArrayList<ReceiverHolder> receivers = new ArrayList<ReceiverHolder>();
@@ -75,7 +79,7 @@ public class AvatarLoader {
         this.application = application;
         this.imageCache = new ImageCache();
         this.fileStorage = new ImageStorage(application, "avatars");
-        this.processor = new QueueProcessor<AvatarTask>();
+        this.processor = new QueueProcessor<BaseAvatarTask>();
 
         float density = application.getResources().getDisplayMetrics().density;
 
@@ -105,6 +109,41 @@ public class AvatarLoader {
         if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
             throw new IllegalAccessError("Might be called on UI thread");
         }
+    }
+
+    public boolean requestRawAvatar(String fileName,
+                                    AvatarReceiver receiver) {
+        Uri sourceUri = Uri.fromFile(new File(fileName));
+        return requestRawAvatar(sourceUri, receiver);
+    }
+
+    public boolean requestRawAvatar(Uri fileUri,
+                                    AvatarReceiver receiver) {
+        checkUiThread();
+
+        String key = fileUri.toString();
+        String cacheKey = key + "_" + TYPE_FULL;
+
+        BitmapHolder cached = imageCache.getFromCache(cacheKey);
+        if (cached != null) {
+            receiver.onAvatarReceived(new AvatarHolder(cached, this), true);
+            return true;
+        }
+
+        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
+            if (holder.getReceiverReference().get() == null) {
+                receivers.remove(holder);
+                continue;
+            }
+            if (holder.getReceiverReference().get() == receiver) {
+                receivers.remove(holder);
+                break;
+            }
+        }
+        receivers.add(new ReceiverHolder(key, cacheKey, TYPE_FULL, receiver));
+        processor.requestTask(new RawAvatarTask(fileUri));
+
+        return false;
     }
 
     public boolean requestAvatar(TLAbsLocalFileLocation fileLocation,
@@ -150,7 +189,7 @@ public class AvatarLoader {
         }
     }
 
-    protected void notifyAvatarLoaded(final AvatarTask task, final int kind, final BitmapHolder bitmap) {
+    protected void notifyAvatarLoaded(final BaseAvatarTask task, final int kind, final BitmapHolder bitmap) {
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -159,11 +198,21 @@ public class AvatarLoader {
                         receivers.remove(holder);
                         continue;
                     }
-                    if (holder.getKey().equals(task.getFileLocation().getUniqKey()) && holder.getKind() == kind) {
-                        receivers.remove(holder);
-                        AvatarReceiver receiver = holder.getReceiverReference().get();
-                        if (receiver != null) {
-                            receiver.onAvatarReceived(new AvatarHolder(bitmap, AvatarLoader.this), false);
+                    if (task instanceof AvatarTask) {
+                        if (holder.getKey().equals(((AvatarTask) task).getFileLocation().getUniqKey()) && holder.getKind() == kind) {
+                            receivers.remove(holder);
+                            AvatarReceiver receiver = holder.getReceiverReference().get();
+                            if (receiver != null) {
+                                receiver.onAvatarReceived(new AvatarHolder(bitmap, AvatarLoader.this), false);
+                            }
+                        }
+                    } else if (task instanceof RawAvatarTask) {
+                        if (holder.getKey().equals(((RawAvatarTask) task).getFileUri().toString()) && holder.getKind() == kind) {
+                            receivers.remove(holder);
+                            AvatarReceiver receiver = holder.getReceiverReference().get();
+                            if (receiver != null) {
+                                receiver.onAvatarReceived(new AvatarHolder(bitmap, AvatarLoader.this), false);
+                            }
                         }
                     }
                 }
@@ -219,7 +268,7 @@ public class AvatarLoader {
         notifyAvatarLoaded(task, task.getKind(), holder);
     }
 
-    private abstract class BaseWorker extends QueueWorker<AvatarTask> {
+    private abstract class BaseWorker extends QueueWorker<BaseAvatarTask> {
         protected byte[] bitmapTmp;
 
         public BaseWorker() {
@@ -229,25 +278,29 @@ public class AvatarLoader {
         }
     }
 
-    private boolean processPreTask(AvatarTask task) {
-        Bitmap cached = imageCache.findFree(task.getKind());
+    private Bitmap fetchDestBitmap(int kind) {
+        Bitmap cached = imageCache.findFree(kind);
 
         if (cached == null) {
-            if (task.getKind() == TYPE_FULL) {
+            if (kind == TYPE_FULL) {
                 cached = Bitmap.createBitmap(AVATAR_W, AVATAR_H, Bitmap.Config.ARGB_8888);
-            } else if (task.getKind() == TYPE_SMALL) {
+            } else if (kind == TYPE_SMALL) {
                 cached = Bitmap.createBitmap(AVATAR_S_W, AVATAR_S_H, Bitmap.Config.ARGB_8888);
-            } else if (task.getKind() == TYPE_MEDIUM) {
+            } else if (kind == TYPE_MEDIUM) {
                 cached = Bitmap.createBitmap(AVATAR_M_W, AVATAR_M_H, Bitmap.Config.ARGB_8888);
-            } else if (task.getKind() == TYPE_MEDIUM2) {
+            } else if (kind == TYPE_MEDIUM2) {
                 cached = Bitmap.createBitmap(AVATAR_M2_W, AVATAR_M2_H, Bitmap.Config.ARGB_8888);
+            } else {
+                throw new UnsupportedOperationException();
             }
         }
-//        if (cached == null) {
-//            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind());
-//        } else {
-//            res = fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached);
-//        }
+
+        return cached;
+    }
+
+    private boolean processPreTask(AvatarTask task) {
+        Bitmap cached = fetchDestBitmap(task.getKind());
+
         if (fileStorage.tryLoadFile(task.getFileLocation().getUniqKey() + "_" + task.getKind(), cached) != null) {
             BitmapHolder holder = new BitmapHolder(cached, task.getFileLocation().getUniqKey() + "_" + task.getKind());
             imageCache.putToCache(task.getKind(), holder, AvatarLoader.this);
@@ -256,7 +309,6 @@ public class AvatarLoader {
         } else {
             imageCache.putFree(cached, task.getKind());
         }
-
 
         if (task.getKind() != TYPE_FULL) {
             Bitmap fullBitmap = fullBitmaps.get();
@@ -278,27 +330,58 @@ public class AvatarLoader {
     private class FileWorker extends BaseWorker {
 
         @Override
-        protected boolean processTask(AvatarTask task) throws Exception {
-            boolean pre = processPreTask(task);
-            if (!pre) {
-                synchronized (task) {
-                    task.setDownloaded(false);
+        protected boolean processTask(BaseAvatarTask baseTask) throws Exception {
+            if (baseTask instanceof AvatarTask) {
+                AvatarTask task = (AvatarTask) baseTask;
+                boolean pre = processPreTask(task);
+                if (!pre) {
+                    synchronized (task) {
+                        task.setDownloaded(false);
+                    }
+                    return false;
                 }
-                return false;
+            } else if (baseTask instanceof RawAvatarTask) {
+                processRawTask((RawAvatarTask) baseTask);
+                return true;
             }
 
             return true;
         }
 
+        private void processRawTask(RawAvatarTask rawAvatarTask) throws IOException {
+            Optimizer.BitmapInfo info = Optimizer.getInfo(rawAvatarTask.getFileUri(), application);
+
+            Bitmap src = fullBitmaps.get();
+            if (info.getWidth() != AVATAR_W || info.getHeight() != AVATAR_H || !info.isJpeg()) {
+                Bitmap tmp = Optimizer.load(rawAvatarTask.getFileUri().toString(), application);
+                Optimizer.scaleTo(tmp, src);
+            } else {
+                Optimizer.loadTo(rawAvatarTask.getFileUri().toString(), application, src);
+            }
+
+            Bitmap res = fetchDestBitmap(TYPE_FULL);
+            Optimizer.drawTo(src, res);
+
+            BitmapHolder holder = new BitmapHolder(res, rawAvatarTask.getFileUri() + "_" + TYPE_FULL);
+            imageCache.putToCache(TYPE_FULL, holder, AvatarLoader.this);
+            notifyAvatarLoaded(rawAvatarTask, TYPE_FULL, holder);
+        }
+
         @Override
-        public boolean isAccepted(AvatarTask task) {
-            return task.isDownloaded();
+        protected boolean needRepeatOnError() {
+            return false;
+        }
+
+        @Override
+        public boolean isAccepted(BaseAvatarTask task) {
+            return task instanceof RawAvatarTask || (task instanceof AvatarTask && ((AvatarTask) task).isDownloaded());
         }
     }
 
     private class DownloadWorker extends BaseWorker {
         @Override
-        protected boolean processTask(AvatarTask task) throws Exception {
+        protected boolean processTask(BaseAvatarTask baseTask) throws Exception {
+            AvatarTask task = (AvatarTask) baseTask;
             boolean pre = processPreTask(task);
             if (pre) {
                 return true;
@@ -319,9 +402,17 @@ public class AvatarLoader {
 
             TLFile res = application.getApi().doGetFile(dcId, location, 0, 1024 * 1024 * 1024);
 
-            fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes());
             Bitmap src = fullBitmaps.get();
-            Optimizer.loadTo(res.getBytes().cleanData(), src);
+            Optimizer.BitmapInfo info = Optimizer.getInfo(res.getBytes().cleanData());
+            if (info.getWidth() != AVATAR_W || info.getHeight() != AVATAR_H) {
+                Bitmap tmp = Optimizer.load(res.getBytes().cleanData());
+                Optimizer.scaleTo(tmp, src);
+                fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, src);
+            } else {
+                Optimizer.loadTo(res.getBytes().cleanData(), src);
+                fileStorage.saveFile(fileLocation.getUniqKey() + "_" + TYPE_FULL, res.getBytes());
+            }
+
             onFullBitmapLoaded(src, task);
 
             return true;
@@ -333,8 +424,8 @@ public class AvatarLoader {
         }
 
         @Override
-        public boolean isAccepted(AvatarTask task) {
-            return true;
+        public boolean isAccepted(BaseAvatarTask task) {
+            return task instanceof AvatarTask;
         }
     }
 
@@ -351,10 +442,6 @@ public class AvatarLoader {
             this.receiverReference = new WeakReference<AvatarReceiver>(receiverReference);
         }
 
-        public String getCacheKey() {
-            return cacheKey;
-        }
-
         public String getKey() {
             return key;
         }
@@ -368,7 +455,29 @@ public class AvatarLoader {
         }
     }
 
-    private class AvatarTask extends QueueProcessor.BaseTask {
+    private abstract class BaseAvatarTask extends QueueProcessor.BaseTask {
+
+    }
+
+    private class RawAvatarTask extends BaseAvatarTask {
+
+        private Uri fileUri;
+
+        private RawAvatarTask(Uri fileUri) {
+            this.fileUri = fileUri;
+        }
+
+        public Uri getFileUri() {
+            return fileUri;
+        }
+
+        @Override
+        public String getKey() {
+            return fileUri.toString();
+        }
+    }
+
+    private class AvatarTask extends BaseAvatarTask {
         private TLAbsLocalFileLocation fileLocation;
         private boolean isDownloaded = true;
         private int kind;

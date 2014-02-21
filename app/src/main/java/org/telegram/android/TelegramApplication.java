@@ -1,9 +1,6 @@
 package org.telegram.android;
 
 import android.app.Application;
-import android.os.SystemClock;
-import com.extradea.framework.images.ImageController;
-import com.extradea.framework.images.ImageSupport;
 import org.telegram.android.config.NotificationSettings;
 import org.telegram.android.core.engines.ModelEngine;
 import org.telegram.android.config.WallpaperHolder;
@@ -13,7 +10,6 @@ import org.telegram.android.core.files.UploadController;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.critical.ApiStorage;
 import org.telegram.android.kernel.*;
-import org.telegram.android.log.Logger;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.ui.*;
@@ -23,7 +19,7 @@ import org.telegram.api.engine.TelegramApi;
  * Author: Korshakov Stepan
  * Created: 22.07.13 0:55
  */
-public class TelegramApplication extends Application implements ImageSupport {
+public class TelegramApplication extends Application {
 
     private ApplicationKernel kernel;
     private KernelsLoader kernelsLoader;
@@ -193,11 +189,5 @@ public class TelegramApplication extends Application implements ImageSupport {
 
     public SyncKernel getSyncKernel() {
         return kernel.getSyncKernel();
-    }
-
-
-    @Override
-    public ImageController getImageController() {
-        return kernel.getUiKernel().getImageController();
     }
 }

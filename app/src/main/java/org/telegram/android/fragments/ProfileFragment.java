@@ -18,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
-import com.extradea.framework.images.ui.FastWebImageView;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.UserSourceListener;
@@ -27,7 +26,7 @@ import org.telegram.android.core.model.PeerType;
 import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
-import org.telegram.android.media.StelsImageTask;
+import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.tasks.ProgressInterface;
@@ -60,7 +59,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
     private View progress;
     private TextView nameView;
     private TextView onlineView;
-    private FastWebImageView avatarView;
+    private AvatarView avatarView;
     private TextView phoneView;
     private ImageView enabledView;
     private View notifications;
@@ -90,7 +89,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
         View res = inflater.inflate(R.layout.profile_fragment, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
         progress = res.findViewById(R.id.progress);
-        avatarView = (FastWebImageView) res.findViewById(R.id.avatar);
+        avatarView = (AvatarView) res.findViewById(R.id.avatar);
         nameView = (TextView) res.findViewById(R.id.name);
         onlineView = (TextView) res.findViewById(R.id.online);
         phoneView = (TextView) res.findViewById(R.id.phone);
@@ -212,9 +211,9 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
     }
 
     private void bindUi() {
+        avatarView.setEmptyDrawable(Placeholders.getUserPlaceholder(userId));
         if (user.getPhoto() instanceof TLLocalAvatarPhoto && ((TLLocalAvatarPhoto) user.getPhoto()).getPreviewLocation() instanceof TLLocalFileLocation) {
-            avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(userId));
-            avatarView.requestTask(new StelsImageTask((TLLocalFileLocation) ((TLLocalAvatarPhoto) user.getPhoto()).getPreviewLocation()));
+            avatarView.requestAvatar(((TLLocalAvatarPhoto) user.getPhoto()).getPreviewLocation());
             if (((TLLocalAvatarPhoto) user.getPhoto()).getFullLocation() instanceof TLLocalFileLocation) {
                 avatarView.setOnClickListener(secure(new View.OnClickListener() {
                     @Override
@@ -226,8 +225,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
                 avatarView.setOnClickListener(null);
             }
         } else {
-            avatarView.setLoadingDrawable(Placeholders.getUserPlaceholder(userId));
-            avatarView.requestTask(null);
+            avatarView.requestAvatar(null);
             avatarView.setOnClickListener(null);
         }
 

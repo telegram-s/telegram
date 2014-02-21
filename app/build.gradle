@@ -161,7 +161,7 @@ dependencies {
     compile project(':mtproto')
     compile files('../libraries/telegram-api/libs/tl-api-v11.jar')
     compile project(':telegram-api')
-    compile project(':ui:images')
+    // compile project(':ui:images')
     compile project(':ui:cropping')
 
     // Ui dependencies

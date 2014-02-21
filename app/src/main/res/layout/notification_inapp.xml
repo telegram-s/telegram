@@ -10,11 +10,11 @@
             android:background="@android:color/white"
             android:id="@+id/mainContainer">
 
-        <com.extradea.framework.images.ui.FastWebImageView android:layout_width="48dp"
-                                                           android:layout_height="48dp"
-                                                           android:layout_marginRight="8dp"
-                                                           android:layout_marginLeft="8dp"
-                                                           android:id="@+id/avatar"/>
+        <org.telegram.android.preview.AvatarView android:layout_width="48dp"
+                                                 android:layout_height="48dp"
+                                                 android:layout_marginRight="8dp"
+                                                 android:layout_marginLeft="8dp"
+                                                 android:id="@+id/avatar"/>
 
         <LinearLayout android:layout_height="wrap_content"
                       android:layout_width="0dp"
