@@ -130,7 +130,7 @@ JNIEXPORT jboolean Java_org_telegram_android_util_ImageNativeUtils_nativeFastBlu
         return JNI_FALSE;
     }
 
-    fastBlur3(&info, pixels);
+    fastBlur7_2(&info, pixels);
 
     AndroidBitmap_unlockPixels(env, bitmap);
 

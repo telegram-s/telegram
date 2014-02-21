@@ -803,22 +803,16 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
             long downloadProgressAnimationTime = SystemClock.uptimeMillis() - downloadStateTime;
             if (downloadProgress < 100 || downloadProgressAnimationTime < FADE_ANIMATION_TIME) {
                 isAnimated = true;
-                int internalR = getPx(16);
-                int outerR = getPx(20);
+                int internalR = getPx(18);
+                int outerR = getPx(22);
 
                 if (downloadProgress == 100 && isAnimatedProgress) {
                     float alpha = fadeEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
-                    float scale = scaleEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
-//                    downloadBgRect.setAlpha((int) (0xB6 * (1 - alpha)));
-                    downloadBgRect.setAlpha(0xB6);
-                    downloadBgLightRect.setAlpha((int) (0x30 * (1 - alpha)));
-
-                    // int maxR = (int) Math.sqrt((desiredWidth * desiredWidth + desiredHeight * desiredHeight) / 4);
-                    // outerR = (int) (getPx(20) + (maxR * (scale)));
-                    // internalR = (int) (getPx(16) * (1 - scale));
+                    downloadBgRect.setAlpha((int) (0xB2 * (1 - alpha)));
+                    downloadBgLightRect.setAlpha((int) (0xB2 * (1 - alpha)));
                 } else {
-                    downloadBgRect.setAlpha(0xB6);
-                    downloadBgLightRect.setAlpha(0x30);
+                    downloadBgRect.setAlpha(0xB2);
+                    downloadBgLightRect.setAlpha(0xB2);
                 }
 
                 canvas.save();
@@ -838,12 +832,12 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
 
                 // canvas.drawPath(path, downloadBgRect);
 
-                canvas.drawCircle(centerX, centerY, outerR, downloadBgLightRect);
+                canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
 
                 rectF.set(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
                 int progressAngleStart = -90;
                 int progressAngle = (int) (-360 + (currentDownloadProgress * 360 / 100));
-                canvas.drawArc(rectF, progressAngleStart, progressAngle, true, downloadBgRect);
+                canvas.drawArc(rectF, progressAngleStart, progressAngle, true, downloadBgLightRect);
                 canvas.restore();
             }
 

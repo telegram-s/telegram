@@ -37,7 +37,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private static final String TAG = "BaseMsgView";
 
     private static final long AVATAR_FADE_TIME = 150;
-    protected static final long FADE_ANIMATION_TIME = 300;
+    protected static final long FADE_ANIMATION_TIME = 150;
     protected static final long STATE_ANIMATION_TIME = 160;
 
     private static final int TOUCHED_NONE = 0;

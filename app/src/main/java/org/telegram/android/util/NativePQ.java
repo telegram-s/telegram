@@ -19,8 +19,8 @@ public class NativePQ implements PQImplementation {
     public long findDivider(long src) {
         long res = solvePq(src);
         res = Math.min(res, src / res);
-        // long javaRes = new PQLopatin().findDivider(src);
-        // Logger.d(TAG, "pq:" + res + ", " + javaRes);
+        long javaRes = new PQLopatin().findDivider(src);
+        Logger.d(TAG, "pq:" + res + ", " + javaRes);
         return res;
     }
 
