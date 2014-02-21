@@ -9,9 +9,15 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Gallery;
+import android.widget.ImageView;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.ApiUtils;
+import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.preview.ImageHolder;
+import org.telegram.android.preview.ImageReceiver;
+import org.telegram.android.preview.WallpaperPreview;
+import org.telegram.android.preview.cache.ImageStorage;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.api.*;
@@ -33,6 +39,7 @@ import java.io.IOException;
 public class WallpapersFragment extends TelegramFragment {
     private TLAbsWallPaper[] wallPapers;
     private Gallery gallery;
+    private ImageStorage storage;
 
     // TODO: Implement
     // private FastWebImageView preview;
@@ -40,6 +47,7 @@ public class WallpapersFragment extends TelegramFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.wallpapers_container, container, false);
+        storage = new ImageStorage(getActivity(), "wallpapers");
         gallery = (Gallery) res.findViewById(R.id.previewGallery);
         // TODO: Implement
 //        preview = (FastWebImageView) res.findViewById(R.id.preview);
@@ -137,13 +145,23 @@ public class WallpapersFragment extends TelegramFragment {
             public View getView(int position, View view, ViewGroup parent) {
                 if (view == null) {
                     view = context.getLayoutInflater().inflate(R.layout.wallpapers_item, parent, false);
-                    // TODO: Implement
-                    // ((FastWebImageView) view.findViewById(R.id.preview)).setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
                 }
                 TLAbsWallPaper wallPaper = getItem(position);
                 if (wallPaper instanceof TLWallPaper) {
                     TLWallPaper tlWallPaper = (TLWallPaper) wallPaper;
                     TLPhotoSize size = ApiUtils.getWallpaperPreview(tlWallPaper.getSizes());
+
+                    if (size.getLocation() instanceof TLFileLocation) {
+                        TLFileLocation location = (TLFileLocation) size.getLocation();
+                        TLLocalFileLocation localFileLocation = new TLLocalFileLocation(
+                                location.getDcId(),
+                                location.getVolumeId(),
+                                location.getLocalId(),
+                                location.getSecret(),
+                                size.getSize());
+                        ((WallpaperPreview) view.findViewById(R.id.preview)).requestPreview(localFileLocation);
+                    }
+
                     // TODO: Implement
 //                    StelsImageTask task = new StelsImageTask((TLFileLocation) size.getLocation());
 //                    ((FastWebImageView) view.findViewById(R.id.preview)).requestTask(task);
@@ -177,6 +195,12 @@ public class WallpapersFragment extends TelegramFragment {
 
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        storage = null;
     }
 
     @Override

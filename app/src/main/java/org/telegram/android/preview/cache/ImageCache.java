@@ -1,4 +1,4 @@
-package org.telegram.android.preview;
+package org.telegram.android.preview.cache;
 
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
@@ -17,22 +17,15 @@ public class ImageCache {
     public static final boolean IS_LOGGING = false;
 
     private static final int DEFAULT_CACHE_SIZE = 10;
-    private static final int DEFAULT_CACHE_FREE_SIZE = 10;
-    private static final boolean USE_REFERENCE_TRACK = true;
 
     private HashMap<String, Holder> references;
-    private HashMap<String, Integer> movedBitmaps;
-
     private LruCache<String, Holder> lruCache;
-
     private HashMap<Integer, HashSet<Bitmap>> freeBitmaps;
 
     private final int cacheSize;
-    private final int cacheFreeSize;
 
-    public ImageCache(int _cacheSize, int _cacheFreeSize) {
+    public ImageCache(int _cacheSize) {
         this.cacheSize = _cacheSize;
-        this.cacheFreeSize = _cacheFreeSize;
 
         lruCache = new LruCache<String, Holder>(cacheSize) {
             @Override
@@ -66,7 +59,7 @@ public class ImageCache {
     }
 
     public ImageCache() {
-        this(DEFAULT_CACHE_SIZE, DEFAULT_CACHE_FREE_SIZE);
+        this(DEFAULT_CACHE_SIZE);
     }
 
     public synchronized void putToCache(int size, BitmapHolder bitmap, Object referent) {

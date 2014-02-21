@@ -1,7 +1,4 @@
-package org.telegram.android.preview;
-
-import android.os.*;
-import android.os.Process;
+package org.telegram.android.preview.queue;
 
 /**
  * Created by ex3ndr on 05.02.14.

@@ -8,6 +8,9 @@ import android.content.Context;
 public class PreviewConfig {
     // DANGER! Changing this settings may break generated preview cache!
 
+    private static final int WALLPAPER_S_W_DP = 100;
+    private static final int WALLPAPER_S_H_DP = 100;
+
     private static final int MIN_PREVIEW_W_DP = 100;
     private static final int MIN_PREVIEW_H_DP = 40;
 
@@ -26,10 +29,16 @@ public class PreviewConfig {
     private static final int MAX_PREVIEW_BITMAP_W_DP = MAX_PREVIEW_W_DP;
     private static final int MAX_PREVIEW_BITMAP_H_DP = MAX_PREVIEW_H_DP;
 
+    private static int WALL_S_MAX_W_DP = 100;
+    private static int WALL_S_MAX_H_DP = 100;
+
     private static final int MAP_W_DP = 160;
     private static final int MAP_H_DP = 160;
 
     private static final int ROUND_RADIUS_DP = 3;
+
+    public static int WALLPAPER_S_W = WALLPAPER_S_W_DP;
+    public static int WALLPAPER_S_H = WALLPAPER_S_H_DP;
 
     public static int MIN_PREVIEW_W = MIN_PREVIEW_W_DP;
     public static int MIN_PREVIEW_H = MIN_PREVIEW_H_DP;
@@ -42,6 +51,16 @@ public class PreviewConfig {
 
     public static int MAP_W = MAP_W_DP;
     public static int MAP_H = MAP_H_DP;
+
+    public static final int FAST_MAX_W = 90;
+    public static final int FAST_MAX_H = 90;
+
+    // Maximum expected download image size
+    public static int WALL_D_MAX_W = 320;
+    public static int WALL_D_MAX_H = 320;
+
+    public static int WALL_S_MAX_W = WALL_S_MAX_W_DP;
+    public static int WALL_S_MAX_H = WALL_S_MAX_H_DP;
 
     public static int ROUND_RADIUS = 2;
 
@@ -59,6 +78,12 @@ public class PreviewConfig {
         MAX_PREVIEW_BITMAP_H = (int) (MAX_PREVIEW_BITMAP_H_DP * density);
 
         ROUND_RADIUS = (int) (ROUND_RADIUS_DP * density);
+
+        WALLPAPER_S_W = (int) (WALLPAPER_S_W_DP * density);
+        WALLPAPER_S_H = (int) (WALLPAPER_S_H_DP * density);
+
+        WALL_S_MAX_W = (int) (WALL_S_MAX_W_DP * density);
+        WALL_S_MAX_H = (int) (WALL_S_MAX_H_DP * density);
     }
 
     public static int[] getSizes(int w, int h) {

@@ -17,9 +17,9 @@ import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.wireframes.DialogWireframe;
-import org.telegram.android.preview.AvatarHolder;
 import org.telegram.android.preview.AvatarLoader;
-import org.telegram.android.preview.AvatarReceiver;
+import org.telegram.android.preview.ImageHolder;
+import org.telegram.android.preview.ImageReceiver;
 import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
 
@@ -27,7 +27,7 @@ import org.telegram.i18n.I18nUtil;
  * Author: Korshakov Stepan
  * Created: 06.08.13 18:40
  */
-public class DialogView extends BaseView implements TypingStates.TypingListener, AvatarReceiver {
+public class DialogView extends BaseView implements TypingStates.TypingListener, ImageReceiver {
 
     private static boolean IS_LARGE = false;
 
@@ -98,7 +98,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
     // private Drawable emptyDrawable;
     // private Bitmap empty;
 
-    private AvatarHolder avatarHolder;
+    private ImageHolder avatarHolder;
 
     private long avatarAppearTime;
     private Paint avatarBgPaint;
@@ -606,8 +606,15 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         return new DialogLayout[]{hl, wl};
     }
 
+    private void releaseAvatar() {
+        if (avatarHolder != null) {
+            avatarHolder.release();
+            avatarHolder = null;
+        }
+    }
+
     @Override
-    public void onAvatarReceived(AvatarHolder holder, boolean intermediate) {
+    public void onImageReceived(ImageHolder holder, boolean intermediate) {
         releaseAvatar();
         avatarHolder = holder;
         if (intermediate) {
@@ -616,13 +623,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             this.avatarAppearTime = SystemClock.uptimeMillis();
         }
         invalidate();
-    }
-
-    private void releaseAvatar() {
-        if (avatarHolder != null) {
-            avatarHolder.release();
-            avatarHolder = null;
-        }
     }
 
     private static class DialogLayout {
@@ -972,10 +972,5 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 usePlaceholder = false;
             }
         }
-    }
-
-    @Override
-    public String toString() {
-        return "DialogView#" + hashCode();
     }
 }

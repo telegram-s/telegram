@@ -53,7 +53,7 @@ public class MediaFragment extends TelegramFragment {
         final List<MediaRecord> lazyList = application.getEngine().getMediaEngine().lazyQueryMedia(peerType, peerId);
 
         final int margin = (int) (4 * getResources().getDisplayMetrics().density);
-        final int cellWidth = ((Math.min(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels) - 5 * margin) / 4);
+        final int cellWidth = ((Math.min(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels) - 4 * margin) / 3);
 
         final Context context = getActivity();
         BaseAdapter adapter = new BaseAdapter() {

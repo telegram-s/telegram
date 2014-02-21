@@ -2,7 +2,6 @@ package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import org.apache.http.HttpResponse;
@@ -22,6 +21,11 @@ import org.telegram.android.log.Logger;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
+import org.telegram.android.preview.cache.BitmapHolder;
+import org.telegram.android.preview.cache.ImageCache;
+import org.telegram.android.preview.cache.ImageStorage;
+import org.telegram.android.preview.queue.QueueProcessor;
+import org.telegram.android.preview.queue.QueueWorker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,28 +38,13 @@ import static org.telegram.android.preview.PreviewConfig.*;
 /**
  * Created by ex3ndr on 08.02.14.
  */
-public class MediaLoader {
-
-    private static final String TAG = "MediaLoader";
+public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
 
     private static final int SIZE_CHAT_PREVIEW = 0;
     private static final int SIZE_MAP_PREVIEW = 1;
-    // private static final int SIZE_FAST_PREVIEW = 1;
-
-    private TelegramApplication application;
-
-    private Handler handler = new Handler(Looper.getMainLooper());
-    private ArrayList<ReceiverHolder> receivers = new ArrayList<ReceiverHolder>();
-    private QueueWorker[] workers;
-    private QueueProcessor<BaseTask> processor;
-    private ImageCache imageCache;
-    private ImageStorage imageStorage;
 
     private Bitmap fullImageCached = null;
     private final Object fullImageCachedLock = new Object();
-
-    private final int FAST_MAX_W = 90;
-    private final int FAST_MAX_H = 90;
 
     private ThreadLocal<Bitmap> fastBitmaps = new ThreadLocal<Bitmap>() {
         @Override
@@ -65,152 +54,53 @@ public class MediaLoader {
     };
 
     public MediaLoader(TelegramApplication application) {
-        this.application = application;
-        this.processor = new QueueProcessor<BaseTask>();
-        this.imageCache = new ImageCache(5, 10);
-        this.imageStorage = new ImageStorage(application, "previews");
+        super("previews", 5, application);
+    }
 
-        this.workers = new QueueWorker[]{
+    @Override
+    protected QueueWorker<BaseTask>[] createWorkers() {
+        return new QueueWorker[]{
                 new FastWorker(),
                 new FileWorker(),
                 new MapWorker(),
                 new RawWorker()
         };
-
-        for (QueueWorker w : workers) {
-            w.start();
-        }
     }
 
-    public void requestRaw(String fileName, MediaReceiver receiver) {
-        requestTask(new MediaRawTask(fileName), fileName, receiver);
+    public void requestRaw(String fileName, ImageReceiver receiver) {
+        requestTask(new MediaRawTask(fileName), receiver);
     }
 
-    public void requestRawUri(String fileName, MediaReceiver receiver) {
-        requestTask(new MediaRawUriTask(fileName), fileName, receiver);
+    public void requestRawUri(String fileName, ImageReceiver receiver) {
+        requestTask(new MediaRawUriTask(fileName), receiver);
     }
 
-    public void requestGeo(TLLocalGeo geo, MediaReceiver receiver) {
-        String key = "geo:" + geo.getLatitude() + "," + geo.getLongitude();
-        requestTask(new MediaGeoTask(geo.getLatitude(), geo.getLongitude()), key, receiver);
+    public void requestGeo(TLLocalGeo geo, ImageReceiver receiver) {
+        requestTask(new MediaGeoTask(geo.getLatitude(), geo.getLongitude()), receiver);
     }
 
-    public void requestFastLoading(TLLocalPhoto photo, MediaReceiver receiver) {
-        requestTask(new MediaPhotoFastTask(photo), photo.getFastPreviewKey(), receiver);
+    public void requestFastLoading(TLLocalPhoto photo, ImageReceiver receiver) {
+        requestTask(new MediaPhotoFastTask(photo), receiver);
     }
 
-    public void requestFastLoading(TLLocalDocument doc, MediaReceiver receiver) {
-        requestTask(new MediaDocFastTask(doc), "preview:" + doc.getFileLocation().getUniqKey(), receiver);
+    public void requestFastLoading(TLLocalDocument doc, ImageReceiver receiver) {
+        requestTask(new MediaDocFastTask(doc), receiver);
     }
 
-    public void requestFastLoading(TLLocalVideo video, MediaReceiver receiver) {
-        requestTask(new MediaVideoFastTask(video), video.getPreviewKey(), receiver);
+    public void requestFastLoading(TLLocalVideo video, ImageReceiver receiver) {
+        requestTask(new MediaVideoFastTask(video), receiver);
     }
 
-    public void requestFullLoading(TLLocalPhoto photo, String fileName, MediaReceiver receiver) {
-        requestTask(new MediaFileTask(photo, fileName), fileName, receiver);
+    public void requestFullLoading(TLLocalPhoto photo, String fileName, ImageReceiver receiver) {
+        requestTask(new MediaFileTask(photo, fileName), receiver);
     }
 
-    public void requestVideoLoading(String fileName, MediaReceiver receiver) {
-        requestTask(new MediaVideoTask(fileName), fileName, receiver);
+    public void requestVideoLoading(String fileName, ImageReceiver receiver) {
+        requestTask(new MediaVideoTask(fileName), receiver);
     }
 
-    private void requestTask(BaseTask task, String key, MediaReceiver receiver) {
-        checkUiThread();
-
-        Logger.d(TAG, "requestTask #" + key + ", receiver:" + receiver);
-
-        if (checkCache(key, receiver)) {
-            return;
-        }
-
-        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
-            if (holder.getReceiverReference().get() == null) {
-                receivers.remove(holder);
-                continue;
-            }
-            if (holder.getReceiverReference().get() == receiver) {
-                receivers.remove(holder);
-                break;
-            }
-        }
-        receivers.add(new ReceiverHolder(key, receiver));
-
-        processor.requestTask(task);
-    }
-
-    private boolean checkCache(String key, MediaReceiver receiver) {
-        BitmapHolder cached = imageCache.getFromCache(key);
-        if (cached != null) {
-            Logger.d(TAG, "checkCache #" + key + ", receiver:" + receiver);
-            receiver.onMediaReceived(new MediaHolder(cached, this), true);
-            return true;
-        }
-        return false;
-    }
-
-    public void cancelRequest(MediaReceiver receiver) {
-        Logger.d(TAG, "cancelRequest receiver:" + receiver);
-        checkUiThread();
-        HashSet<String> removedKey = new HashSet<String>();
-        for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
-            if (holder.getReceiverReference().get() == null) {
-                receivers.remove(holder);
-                removedKey.add(holder.getKey());
-                continue;
-            }
-            if (holder.getReceiverReference().get() == receiver) {
-                receivers.remove(holder);
-                removedKey.add(holder.getKey());
-                break;
-            }
-        }
-
-        for (ReceiverHolder holder : receivers) {
-            if (removedKey.contains(holder.getKey())) {
-                removedKey.remove(holder.getKey());
-            }
-        }
-
-        for (String s : removedKey) {
-            processor.removeTask(s);
-        }
-    }
-
-    public ImageCache getImageCache() {
-        return imageCache;
-    }
-
-    private void checkUiThread() {
-        if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
-            throw new IllegalAccessError("Might be called on UI thread");
-        }
-    }
-
-    protected void notifyMediaLoaded(final QueueProcessor.BaseTask task, final BitmapHolder bitmap) {
-        if (bitmap == null) {
-            Logger.w(TAG, "Received null bitmap!");
-        }
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
-                    if (holder.getReceiverReference().get() == null) {
-                        receivers.remove(holder);
-                        continue;
-                    }
-                    if (holder.getKey().equals(task.getKey())) {
-                        receivers.remove(holder);
-                        MediaReceiver receiver = holder.getReceiverReference().get();
-                        if (receiver != null) {
-                            Logger.d(TAG, "notifyMediaLoaded #" + task.getKey() + ", receiver:" + receiver);
-                            receiver.onMediaReceived(new MediaHolder(bitmap, MediaLoader.this), false);
-                        }
-                    }
-                }
-                imageCache.decReference(task.getKey(), MediaLoader.this);
-            }
-        });
+    public void cancelRequest(ImageReceiver receiver) {
+        super.cancelRequest(receiver);
     }
 
     private Bitmap fetchChatPreview() {
@@ -239,42 +129,11 @@ public class MediaLoader {
                 PreviewConfig.ROUND_RADIUS);
     }
 
-    private void putToDiskCache(String key, Bitmap src, int w, int h) {
-        try {
-            imageStorage.saveFile(key, src, w, h);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Optimizer.BitmapInfo tryToLoadFromCache(String key, Bitmap dest) {
-        return imageStorage.tryLoadFile(key, dest);
-    }
-
-
-    private class ReceiverHolder {
-        private String key;
-        private WeakReference<MediaReceiver> receiverReference;
-
-        private ReceiverHolder(String key, MediaReceiver receiverReference) {
-            this.key = key;
-            this.receiverReference = new WeakReference<MediaReceiver>(receiverReference);
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public WeakReference<MediaReceiver> getReceiverReference() {
-            return receiverReference;
-        }
-    }
-
-    private abstract class BaseTask extends QueueProcessor.BaseTask {
+    public abstract class BaseTask extends QueueProcessor.BaseTask {
 
     }
 
-    private class MediaFileTask extends BaseTask {
+    public class MediaFileTask extends BaseTask {
 
         private TLLocalPhoto localPhoto;
         private String fileName;
@@ -298,7 +157,7 @@ public class MediaLoader {
         }
     }
 
-    private class MediaGeoTask extends BaseTask {
+    public class MediaGeoTask extends BaseTask {
         private double latitude;
         private double longitude;
 
@@ -321,7 +180,7 @@ public class MediaLoader {
         }
     }
 
-    private class MediaPhotoFastTask extends BaseTask {
+    public class MediaPhotoFastTask extends BaseTask {
 
         private TLLocalPhoto photo;
 
@@ -339,7 +198,7 @@ public class MediaLoader {
         }
     }
 
-    private class MediaDocFastTask extends BaseTask {
+    public class MediaDocFastTask extends BaseTask {
 
         private TLLocalDocument doc;
 
@@ -353,11 +212,11 @@ public class MediaLoader {
 
         @Override
         public String getKey() {
-            return doc.getPreview().getUniqKey();
+            return "preview:" + doc.getPreview().getUniqKey();
         }
     }
 
-    private class MediaVideoFastTask extends BaseTask {
+    public class MediaVideoFastTask extends BaseTask {
 
         private TLLocalVideo video;
 
@@ -375,7 +234,7 @@ public class MediaLoader {
         }
     }
 
-    private class MediaVideoTask extends BaseTask {
+    public class MediaVideoTask extends BaseTask {
         private String fileName;
 
         private MediaVideoTask(String fileName) {
@@ -494,9 +353,7 @@ public class MediaLoader {
 
             int[] sizes = drawPreview(img, w, h, destPreview);
 
-            BitmapHolder holder = new BitmapHolder(destPreview, key, sizes[0], sizes[1]);
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
-            notifyMediaLoaded(task, holder);
+            onImageLoaded(destPreview, sizes[0], sizes[1], task, SIZE_CHAT_PREVIEW);
 
             return true;
         }
@@ -527,17 +384,14 @@ public class MediaLoader {
             Bitmap res = fetchChatPreview();
             Optimizer.BitmapInfo info = tryToLoadFromCache(rawTask.getKey(), res);
             if (info != null) {
-                BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), info.getWidth(), info.getHeight());
-                imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
-                notifyMediaLoaded(rawTask, holder);
+                onImageLoaded(res, info.getWidth(), info.getHeight(), rawTask, SIZE_CHAT_PREVIEW);
                 return;
             }
             Bitmap tmp = Optimizer.optimize(rawTask.getUri(), application);
             int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res);
             putToDiskCache(rawTask.getKey(), res, sizes[0], sizes[1]);
-            BitmapHolder holder = new BitmapHolder(tmp, rawTask.getKey(), sizes[0], sizes[1]);
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
-            notifyMediaLoaded(rawTask, holder);
+
+            onImageLoaded(tmp, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
         }
 
         private void processTask(MediaRawTask rawTask) throws Exception {
@@ -551,9 +405,7 @@ public class MediaLoader {
 
             Optimizer.BitmapInfo info = tryToLoadFromCache(rawTask.getKey(), res);
             if (info != null) {
-                BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), info.getWidth(), info.getHeight());
-                imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
-                notifyMediaLoaded(rawTask, holder);
+                onImageLoaded(res, info.getWidth(), info.getHeight(), rawTask, SIZE_CHAT_PREVIEW);
                 return;
             }
 
@@ -564,18 +416,14 @@ public class MediaLoader {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
                         int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth(), info.getHeight(), res);
-                        BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
-                        imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
-                        notifyMediaLoaded(rawTask, holder);
+                        onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
                         return;
                     }
                 } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
                         int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
-                        BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
-                        imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
-                        notifyMediaLoaded(rawTask, holder);
+                        onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
                         return;
                     }
                 }
@@ -584,9 +432,7 @@ public class MediaLoader {
             Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
             int[] sizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
             putToDiskCache(rawTask.getKey(), res, sizes[0], sizes[1]);
-            BitmapHolder holder = new BitmapHolder(res, rawTask.getKey(), sizes[0], sizes[1]);
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
-            notifyMediaLoaded(rawTask, holder);
+            onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
         }
 
         @Override
@@ -615,18 +461,15 @@ public class MediaLoader {
             Bitmap res = fetchChatPreview();
             Optimizer.BitmapInfo info = tryToLoadFromCache(task.getKey(), res);
             if (info != null) {
-                BitmapHolder holder = new BitmapHolder(res, task.getKey(), info.getWidth(), info.getHeight());
-                imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
-                notifyMediaLoaded(task, holder);
+                onImageLoaded(res, info.getWidth(), info.getHeight(), task, SIZE_CHAT_PREVIEW);
                 return;
             }
 
             VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
             int[] sizes = drawPreview(metadata.getImg(), metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
             putToDiskCache(task.getKey(), res, sizes[0], sizes[1]);
-            BitmapHolder holder = new BitmapHolder(res, task.getKey(), sizes[0], sizes[1]);
-            imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
-            notifyMediaLoaded(task, holder);
+
+            onImageLoaded(res, sizes[0], sizes[1], task, SIZE_CHAT_PREVIEW);
         }
 
         private void processFileTask(MediaFileTask fileTask) throws Exception {
@@ -656,9 +499,8 @@ public class MediaLoader {
 
                 Bitmap res = fetchChatPreview();
                 int[] sizes = drawPreview(fullImageCached, scaledW, scaledH, res);
-                BitmapHolder holder = new BitmapHolder(res, fileTask.getKey(), sizes[0], sizes[1]);
-                imageCache.putToCache(SIZE_CHAT_PREVIEW, holder, MediaLoader.this);
-                notifyMediaLoaded(fileTask, holder);
+
+                onImageLoaded(res, sizes[0], sizes[1], fileTask, SIZE_CHAT_PREVIEW);
             }
         }
 
@@ -697,9 +539,7 @@ public class MediaLoader {
             Bitmap res = fetchMapPreview();
             Optimizer.BitmapInfo info = tryToLoadFromCache(geoTask.getKey(), res);
             if (info != null) {
-                BitmapHolder holder = new BitmapHolder(res, task.getKey(), info.getWidth(), info.getHeight());
-                imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
-                notifyMediaLoaded(task, holder);
+                onImageLoaded(res, info.getWidth(), info.getHeight(), task, SIZE_MAP_PREVIEW);
                 return true;
             }
 
@@ -735,10 +575,7 @@ public class MediaLoader {
 
             putToDiskCache(task.getKey(), res, MAP_W, MAP_H);
 
-            BitmapHolder holder = new BitmapHolder(res, task.getKey(), MAP_W, MAP_H);
-            imageCache.putToCache(SIZE_MAP_PREVIEW, holder, MediaLoader.this);
-            notifyMediaLoaded(task, holder);
-
+            onImageLoaded(res, MAP_W, MAP_H, task, SIZE_MAP_PREVIEW);
             return true;
         }
 

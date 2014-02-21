@@ -1,4 +1,4 @@
-package org.telegram.android.preview;
+package org.telegram.android.preview.cache;
 
 import android.graphics.Bitmap;
 

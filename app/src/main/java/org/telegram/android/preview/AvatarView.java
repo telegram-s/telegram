@@ -17,10 +17,10 @@ import org.telegram.android.log.Logger;
 /**
  * Created by ex3ndr on 06.02.14.
  */
-public class AvatarView extends View implements AvatarReceiver {
+public class AvatarView extends View implements ImageReceiver {
 
     private Drawable emptyDrawable;
-    private AvatarHolder holder;
+    private ImageHolder holder;
 
     private long arriveTime;
     private TelegramApplication application;
@@ -171,8 +171,9 @@ public class AvatarView extends View implements AvatarReceiver {
         }
     }
 
+
     @Override
-    public void onAvatarReceived(AvatarHolder avatarHolder, boolean intermediate) {
+    public void onImageReceived(ImageHolder avatarHolder, boolean intermediate) {
         unbindAvatar();
         holder = avatarHolder;
         if (intermediate) {
@@ -181,10 +182,5 @@ public class AvatarView extends View implements AvatarReceiver {
             this.arriveTime = SystemClock.uptimeMillis();
         }
         invalidate();
-    }
-
-    @Override
-    public String toString() {
-        return "AvatarView#" + hashCode();
     }
 }

@@ -1,17 +1,18 @@
 package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.media.TLAbsLocalFileLocation;
-import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
-import org.telegram.android.log.Logger;
 import org.telegram.android.media.Optimizer;
+import org.telegram.android.preview.cache.BitmapHolder;
+import org.telegram.android.preview.cache.ImageCache;
+import org.telegram.android.preview.cache.ImageStorage;
+import org.telegram.android.preview.queue.QueueProcessor;
+import org.telegram.android.preview.queue.QueueWorker;
 import org.telegram.api.TLInputFileLocation;
 import org.telegram.api.upload.TLFile;
 
@@ -112,13 +113,13 @@ public class AvatarLoader {
     }
 
     public boolean requestRawAvatar(String fileName,
-                                    AvatarReceiver receiver) {
+                                    ImageReceiver receiver) {
         Uri sourceUri = Uri.fromFile(new File(fileName));
         return requestRawAvatar(sourceUri, receiver);
     }
 
     public boolean requestRawAvatar(Uri fileUri,
-                                    AvatarReceiver receiver) {
+                                    ImageReceiver receiver) {
         checkUiThread();
 
         String key = fileUri.toString();
@@ -126,7 +127,7 @@ public class AvatarLoader {
 
         BitmapHolder cached = imageCache.getFromCache(cacheKey);
         if (cached != null) {
-            receiver.onAvatarReceived(new AvatarHolder(cached, this), true);
+            receiver.onImageReceived(new ImageHolder(cached, imageCache), true);
             return true;
         }
 
@@ -140,7 +141,7 @@ public class AvatarLoader {
                 break;
             }
         }
-        receivers.add(new ReceiverHolder(key, cacheKey, TYPE_FULL, receiver));
+        receivers.add(new ReceiverHolder(key, TYPE_FULL, receiver));
         processor.requestTask(new RawAvatarTask(fileUri));
 
         return false;
@@ -148,14 +149,14 @@ public class AvatarLoader {
 
     public boolean requestAvatar(TLAbsLocalFileLocation fileLocation,
                                  int kind,
-                                 AvatarReceiver receiver) {
+                                 ImageReceiver receiver) {
         checkUiThread();
 
         String key = fileLocation.getUniqKey();
         String cacheKey = key + "_" + kind;
         BitmapHolder cached = imageCache.getFromCache(cacheKey);
         if (cached != null) {
-            receiver.onAvatarReceived(new AvatarHolder(cached, this), true);
+            receiver.onImageReceived(new ImageHolder(cached, imageCache), true);
             return true;
         }
 
@@ -169,13 +170,13 @@ public class AvatarLoader {
                 break;
             }
         }
-        receivers.add(new ReceiverHolder(key, cacheKey, kind, receiver));
+        receivers.add(new ReceiverHolder(key, kind, receiver));
         processor.requestTask(new AvatarTask(fileLocation, kind));
 
         return false;
     }
 
-    public void cancelRequest(AvatarReceiver receiver) {
+    public void cancelRequest(ImageReceiver receiver) {
         checkUiThread();
         for (ReceiverHolder holder : receivers.toArray(new ReceiverHolder[0])) {
             if (holder.getReceiverReference().get() == null) {
@@ -201,17 +202,17 @@ public class AvatarLoader {
                     if (task instanceof AvatarTask) {
                         if (holder.getKey().equals(((AvatarTask) task).getFileLocation().getUniqKey()) && holder.getKind() == kind) {
                             receivers.remove(holder);
-                            AvatarReceiver receiver = holder.getReceiverReference().get();
+                            ImageReceiver receiver = holder.getReceiverReference().get();
                             if (receiver != null) {
-                                receiver.onAvatarReceived(new AvatarHolder(bitmap, AvatarLoader.this), false);
+                                receiver.onImageReceived(new ImageHolder(bitmap, imageCache), false);
                             }
                         }
                     } else if (task instanceof RawAvatarTask) {
                         if (holder.getKey().equals(((RawAvatarTask) task).getFileUri().toString()) && holder.getKind() == kind) {
                             receivers.remove(holder);
-                            AvatarReceiver receiver = holder.getReceiverReference().get();
+                            ImageReceiver receiver = holder.getReceiverReference().get();
                             if (receiver != null) {
-                                receiver.onAvatarReceived(new AvatarHolder(bitmap, AvatarLoader.this), false);
+                                receiver.onImageReceived(new ImageHolder(bitmap, imageCache), false);
                             }
                         }
                     }
@@ -431,15 +432,13 @@ public class AvatarLoader {
 
     private class ReceiverHolder {
         private String key;
-        private String cacheKey;
         private int kind;
-        private WeakReference<AvatarReceiver> receiverReference;
+        private WeakReference<ImageReceiver> receiverReference;
 
-        private ReceiverHolder(String key, String cacheKey, int kind, AvatarReceiver receiverReference) {
+        private ReceiverHolder(String key, int kind, ImageReceiver receiverReference) {
             this.key = key;
-            this.cacheKey = cacheKey;
             this.kind = kind;
-            this.receiverReference = new WeakReference<AvatarReceiver>(receiverReference);
+            this.receiverReference = new WeakReference<ImageReceiver>(receiverReference);
         }
 
         public String getKey() {
@@ -450,7 +449,7 @@ public class AvatarLoader {
             return kind;
         }
 
-        public WeakReference<AvatarReceiver> getReceiverReference() {
+        public WeakReference<ImageReceiver> getReceiverReference() {
             return receiverReference;
         }
     }

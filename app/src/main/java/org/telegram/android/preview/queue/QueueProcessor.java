@@ -1,4 +1,4 @@
-package org.telegram.android.preview;
+package org.telegram.android.preview.queue;
 
 import java.util.ArrayList;
 import java.util.HashMap;

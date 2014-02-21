@@ -14,9 +14,9 @@ import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.log.Logger;
 import org.telegram.android.media.*;
-import org.telegram.android.preview.MediaHolder;
+import org.telegram.android.preview.ImageHolder;
+import org.telegram.android.preview.ImageReceiver;
 import org.telegram.android.preview.MediaLoader;
-import org.telegram.android.preview.MediaReceiver;
 import org.telegram.android.preview.PreviewConfig;
 import org.telegram.android.ui.*;
 import org.telegram.android.util.IOUtils;
@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
  * Author: Korshakov Stepan
  * Created: 15.08.13 1:14
  */
-public class MessageMediaView extends BaseMsgView implements MediaReceiver {
+public class MessageMediaView extends BaseMsgView implements ImageReceiver {
 
     private static Movie lastMovie;
     private static long lastMovieStart;
@@ -76,8 +76,8 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
 
     private long previewAppearTime;
 
-    private MediaHolder oldPreview;
-    private MediaHolder preview;
+    private ImageHolder oldPreview;
+    private ImageHolder preview;
 
     // private Bitmap previewCached;
     // private int fastPreviewHeight;
@@ -919,8 +919,9 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
         return isAnimated;
     }
 
+
     @Override
-    public void onMediaReceived(MediaHolder holder, boolean intermediate) {
+    public void onImageReceived(ImageHolder holder, boolean intermediate) {
         if (this.preview != holder && this.preview != null) {
             unbindOldPreview();
             this.oldPreview = this.preview;
@@ -934,10 +935,5 @@ public class MessageMediaView extends BaseMsgView implements MediaReceiver {
             this.previewAppearTime = 0;
         }
         invalidate();
-    }
-
-    @Override
-    public String toString() {
-        return "MessageMediaView#" + hashCode();
     }
 }

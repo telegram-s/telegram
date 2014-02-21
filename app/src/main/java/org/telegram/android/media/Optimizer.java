@@ -181,6 +181,21 @@ public class Optimizer {
         return new int[]{(int) (sourceW * ratio), (int) (sourceH * ratio)};
     }
 
+    public static void scaleToFill(Bitmap src, int sourceW, int sourceH, Bitmap dest) {
+        float ratio = Math.max(dest.getWidth() / (float) sourceW, dest.getHeight() / (float) sourceH);
+
+        dest.eraseColor(Color.TRANSPARENT);
+        Canvas canvas = new Canvas(dest);
+        canvas.drawBitmap(src,
+                new Rect(0, 0, sourceW, sourceH),
+                new Rect(
+                        (dest.getWidth() - (int) (sourceW * ratio)) / 2,
+                        (dest.getHeight() - (int) (sourceH * ratio)) / 2,
+                        (int) (sourceW * ratio),
+                        (int) (sourceH * ratio)),
+                new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG));
+    }
+
     public static int[] scaleToRatioRounded(Bitmap src, int sourceW, int sourceH, Bitmap dest, int minDestW, int minDestH, int destRadius) {
         float ratio = Math.min(dest.getWidth() / (float) sourceW, dest.getHeight() / (float) sourceH);
 

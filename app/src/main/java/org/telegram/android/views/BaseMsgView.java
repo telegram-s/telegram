@@ -22,9 +22,9 @@ import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.log.Logger;
-import org.telegram.android.preview.AvatarHolder;
 import org.telegram.android.preview.AvatarLoader;
-import org.telegram.android.preview.AvatarReceiver;
+import org.telegram.android.preview.ImageHolder;
+import org.telegram.android.preview.ImageReceiver;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.i18n.I18nUtil;
@@ -33,7 +33,7 @@ import org.telegram.i18n.I18nUtil;
  * Author: Korshakov Stepan
  * Created: 18.08.13 19:36
  */
-public abstract class BaseMsgView extends BaseView implements Checkable, AvatarReceiver {
+public abstract class BaseMsgView extends BaseView implements Checkable {
     private static final String TAG = "BaseMsgView";
 
     private static final long AVATAR_FADE_TIME = 150;
@@ -61,7 +61,8 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
     private TextPaint newDivPaint;
     private Paint avatarPaint;
     private Bitmap placeholder;
-    private AvatarHolder avatarHolder;
+    private ImageReceiver receiver;
+    private ImageHolder avatarHolder;
     // private ImageReceiver receiver;
     private long avatarImageTime;
 
@@ -245,6 +246,20 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
                         ((BitmapDrawable) getResources().getDrawable(Placeholders.USER_PLACEHOLDERS[i])).getBitmap();
             }
         }
+
+        receiver = new ImageReceiver() {
+            @Override
+            public void onImageReceived(ImageHolder mediaHolder, boolean intermediate) {
+                releaseAvatar();
+                avatarHolder = mediaHolder;
+                if (intermediate) {
+                    avatarImageTime = 0;
+                } else {
+                    avatarImageTime = SystemClock.uptimeMillis();
+                }
+                invalidate();
+            }
+        };
     }
 
     protected float scaleEasing(float src) {
@@ -329,24 +344,24 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
                         if (!application.getUiKernel().getAvatarLoader().requestAvatar(
                                 profilePhoto.getPreviewLocation(),
                                 AvatarLoader.TYPE_SMALL,
-                                this)) {
+                                receiver)) {
                             releaseAvatar();
                         }
                     } else {
                         releaseAvatar();
-                        application.getUiKernel().getAvatarLoader().cancelRequest(this);
+                        application.getUiKernel().getAvatarLoader().cancelRequest(receiver);
                     }
                 } else {
                     releaseAvatar();
-                    application.getUiKernel().getAvatarLoader().cancelRequest(this);
+                    application.getUiKernel().getAvatarLoader().cancelRequest(receiver);
                 }
             } else {
                 releaseAvatar();
-                application.getUiKernel().getAvatarLoader().cancelRequest(this);
+                application.getUiKernel().getAvatarLoader().cancelRequest(receiver);
             }
         } else {
             releaseAvatar();
-            application.getUiKernel().getAvatarLoader().cancelRequest(this);
+            application.getUiKernel().getAvatarLoader().cancelRequest(receiver);
         }
     }
 
@@ -759,17 +774,5 @@ public abstract class BaseMsgView extends BaseView implements Checkable, AvatarR
             avatarHolder.release();
             avatarHolder = null;
         }
-    }
-
-    @Override
-    public void onAvatarReceived(AvatarHolder avatarHolder, boolean intermediate) {
-        releaseAvatar();
-        this.avatarHolder = avatarHolder;
-        if (intermediate) {
-            avatarImageTime = 0;
-        } else {
-            avatarImageTime = SystemClock.uptimeMillis();
-        }
-        invalidate();
     }
 }
