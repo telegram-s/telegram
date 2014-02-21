@@ -7,6 +7,7 @@ import android.os.Build;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.util.CustomBufferedInputStream;
+import org.telegram.android.util.IOUtils;
 import org.telegram.tl.TLBytes;
 
 import java.io.*;
@@ -70,6 +71,20 @@ public class ImageStorage {
 
         try {
             return Optimizer.load(fileName);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return null;
+        }
+    }
+
+    public byte[] tryLoadData(String key) {
+        String fileName = getFileName(key);
+        if (!new File(fileName).exists()) {
+            return null;
+        }
+
+        try {
+            return IOUtils.readAll(fileName);
         } catch (Throwable t) {
             t.printStackTrace();
             return null;

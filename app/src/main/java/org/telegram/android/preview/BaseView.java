@@ -26,6 +26,8 @@ public abstract class BaseView<T extends BaseLoader> extends View implements Ima
 
     private boolean isBinded = false;
 
+    private boolean useFillMode = true;
+
     public BaseView(Context context) {
         super(context);
         application = (TelegramApplication) context.getApplicationContext();
@@ -104,8 +106,17 @@ public abstract class BaseView<T extends BaseLoader> extends View implements Ima
             emptyDrawable.draw(canvas);
         }
         if (holder != null) {
-            rect.set(0, 0, holder.getBitmap().getWidth(), holder.getBitmap().getHeight());
-            rect1.set(0, 0, getWidth(), getHeight());
+            if (useFillMode) {
+                float scale = Math.max(getWidth() / (float) holder.getW(), getHeight() / (float) holder.getH());
+                rect1.set((int) ((getWidth() - scale * holder.getW()) / 2),
+                        (int) ((getHeight() - scale * holder.getH()) / 2),
+                        (int) (scale * holder.getW()),
+                        (int) (scale * holder.getH()));
+            } else {
+                rect1.set(0, 0, getWidth(), getHeight());
+            }
+
+            rect.set(0, 0, holder.getW(), holder.getH());
             canvas.drawBitmap(holder.getBitmap(), rect, rect1, avatarPaint);
         }
     }

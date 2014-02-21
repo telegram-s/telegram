@@ -1,6 +1,7 @@
 package org.telegram.android.preview;
 
 import android.content.Context;
+import android.util.DisplayMetrics;
 
 /**
  * Created by ex3ndr on 19.02.14.
@@ -62,10 +63,14 @@ public class PreviewConfig {
     public static int WALL_S_MAX_W = WALL_S_MAX_W_DP;
     public static int WALL_S_MAX_H = WALL_S_MAX_H_DP;
 
+    public static int WALL_MAX_W = 600;
+    public static int WALL_MAX_H = 200;
+
     public static int ROUND_RADIUS = 2;
 
     public static void init(Context context) {
-        float density = context.getResources().getDisplayMetrics().density;
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        float density = metrics.density;
         MIN_PREVIEW_W = (int) (MIN_PREVIEW_W_DP * density);
         MIN_PREVIEW_H = (int) (MIN_PREVIEW_H_DP * density);
         MAX_PREVIEW_W = (int) (MAX_PREVIEW_W_DP * density);
@@ -84,6 +89,9 @@ public class PreviewConfig {
 
         WALL_S_MAX_W = (int) (WALL_S_MAX_W_DP * density);
         WALL_S_MAX_H = (int) (WALL_S_MAX_H_DP * density);
+
+        WALL_MAX_W = Math.min(metrics.widthPixels, metrics.heightPixels);
+        WALL_MAX_H = Math.max(metrics.widthPixels, metrics.heightPixels);
     }
 
     public static int[] getSizes(int w, int h) {

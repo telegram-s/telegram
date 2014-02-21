@@ -313,6 +313,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
             bindNewView(message);
         }
         oldId = message.message.getDatabaseId();
+        refreshDrawableState();
         return isUpdated;
     }
 

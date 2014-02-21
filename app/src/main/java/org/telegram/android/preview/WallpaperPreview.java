@@ -10,6 +10,7 @@ import org.telegram.android.core.model.media.TLAbsLocalFileLocation;
 public class WallpaperPreview extends BaseView<WallpaperLoader> {
 
     private TLAbsLocalFileLocation fileLocation;
+    private boolean fullPreview;
 
     public WallpaperPreview(Context context) {
         super(context);
@@ -30,6 +31,18 @@ public class WallpaperPreview extends BaseView<WallpaperLoader> {
 
     public void requestPreview(TLAbsLocalFileLocation localFileLocation) {
         fileLocation = localFileLocation;
+        fullPreview = false;
+        requestBind();
+    }
+
+    public void requestFull(TLAbsLocalFileLocation localFileLocation) {
+        fileLocation = localFileLocation;
+        fullPreview = true;
+        requestBind();
+    }
+
+    public void cancel() {
+        fileLocation = null;
         requestBind();
     }
 
@@ -38,7 +51,11 @@ public class WallpaperPreview extends BaseView<WallpaperLoader> {
         if (fileLocation == null) {
             getLoader().cancelRequest(this);
         } else {
-            getLoader().requestPreview(fileLocation, this);
+            if (fullPreview) {
+                getLoader().requestFullPreview(fileLocation, this);
+            } else {
+                getLoader().requestPreview(fileLocation, this);
+            }
         }
     }
 }

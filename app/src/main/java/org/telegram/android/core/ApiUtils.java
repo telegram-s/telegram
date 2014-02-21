@@ -22,8 +22,8 @@ public class ApiUtils {
     protected static final String[] LARGEST_PRIORITY = new String[]{"w", "d", "y", "x", "c", "b", "m", "a", "s"};
 
     protected static final String[] FULL_IMAGE_PRIORITY_DEFAULT = new String[]{"x", "m", "s"};
-    protected static final String[] FULL_IMAGE_PRIORITY_DEFAULT_320 = new String[]{"x", "m", "s"};
-    protected static final String[] FULL_IMAGE_PRIORITY_DEFAULT_800 = new String[]{"y", "x", "m", "s"};
+    protected static final String[] FULL_IMAGE_PRIORITY_DEFAULT_800 = new String[]{"x", "m", "s"};
+    protected static final String[] FULL_IMAGE_PRIORITY_DEFAULT_1280 = new String[]{"y", "x", "m", "s"};
 
     protected static final String[] WALLPAPER_PREVIEW_PRIORITY = new String[]{"b", "m", "c", "x"};
     protected static String[] FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT;
@@ -36,10 +36,10 @@ public class ApiUtils {
         application = _application;
         if (screenSize <= 320) {
             MAX_SIZE = 800;
-            FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT_320;
+            FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT_800;
         } else {
             MAX_SIZE = 1280;
-            FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT_800;
+            FULL_IMAGE_PRIORITY = FULL_IMAGE_PRIORITY_DEFAULT_1280;
         }
     }
 

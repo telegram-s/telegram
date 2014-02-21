@@ -2,6 +2,7 @@ package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.model.media.TLAbsLocalFileLocation;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.media.Optimizer;
@@ -9,14 +10,16 @@ import org.telegram.android.preview.cache.BitmapHolder;
 import org.telegram.android.preview.queue.QueueProcessor;
 import org.telegram.android.preview.queue.QueueWorker;
 import org.telegram.api.TLInputFileLocation;
+import org.telegram.api.engine.file.Downloader;
 import org.telegram.api.upload.TLFile;
 
 /**
  * Created by ex3ndr on 21.02.14.
  */
-public class WallpaperLoader extends BaseLoader<WallpaperLoader.PreviewTask> {
+public class WallpaperLoader extends BaseLoader<QueueProcessor.BaseTask> {
 
     private static final int SIZE_SMALL = 0;
+    private static final int SIZE_FULL = 1;
 
     public WallpaperLoader(TelegramApplication application) {
         super("wallpapers", 3, application);
@@ -26,10 +29,15 @@ public class WallpaperLoader extends BaseLoader<WallpaperLoader.PreviewTask> {
         requestTask(new PreviewTask(fileLocation), receiver);
     }
 
+    public void requestFullPreview(TLAbsLocalFileLocation fileLocation, ImageReceiver receiver) {
+        requestTask(new FullTask(fileLocation), receiver);
+    }
+
     @Override
-    protected QueueWorker<PreviewTask>[] createWorkers() {
+    protected QueueWorker<QueueProcessor.BaseTask>[] createWorkers() {
         return new QueueWorker[]{
-                new PreviewWorker()
+                new PreviewWorker(),
+                new FullWorker()
         };
     }
 
@@ -41,7 +49,85 @@ public class WallpaperLoader extends BaseLoader<WallpaperLoader.PreviewTask> {
         return res;
     }
 
-    private class PreviewWorker extends QueueWorker<PreviewTask> {
+    private Bitmap fetchFullBitmap() {
+        Bitmap res = imageCache.findFree(SIZE_FULL);
+        if (res == null) {
+            res = Bitmap.createBitmap(PreviewConfig.WALL_MAX_W, PreviewConfig.WALL_MAX_H, Bitmap.Config.ARGB_8888);
+        }
+        return res;
+    }
+
+    public byte[] findCached(TLAbsLocalFileLocation fileLocation) {
+        return imageStorage.tryLoadData(fileLocation.getUniqKey());
+    }
+
+    private class FullWorker extends QueueWorker<QueueProcessor.BaseTask> {
+
+        private Bitmap destBitmap = null;
+
+        public FullWorker() {
+            super(processor);
+        }
+
+        @Override
+        protected boolean processTask(QueueProcessor.BaseTask baseTask) throws Exception {
+            FullTask task = (FullTask) baseTask;
+
+            if (destBitmap == null) {
+                destBitmap = Bitmap.createBitmap(ApiUtils.MAX_SIZE, ApiUtils.MAX_SIZE, Bitmap.Config.ARGB_8888);
+            }
+
+            Optimizer.BitmapInfo info = tryToLoadFromCache(baseTask.getKey(), destBitmap);
+            if (info != null) {
+                Bitmap dest = fetchFullBitmap();
+                Optimizer.scaleToFill(destBitmap, info.getWidth(), info.getHeight(), dest);
+                onImageLoaded(dest, task, SIZE_FULL);
+                return true;
+            }
+
+            TLAbsLocalFileLocation fileLocation = task.getFileLocation();
+            TLInputFileLocation location;
+            int dcId;
+            if (fileLocation instanceof TLLocalFileLocation) {
+                dcId = ((TLLocalFileLocation) fileLocation).getDcId();
+                location = new TLInputFileLocation(
+                        ((TLLocalFileLocation) fileLocation).getVolumeId(),
+                        ((TLLocalFileLocation) fileLocation).getLocalId(),
+                        ((TLLocalFileLocation) fileLocation).getSecret());
+            } else {
+                throw new UnsupportedOperationException();
+            }
+            TLFile res;
+            try {
+                res = application.getApi().doGetFile(dcId, location, 0, 1024 * 1024 * 1024);
+            } catch (Exception e) {
+                // imageCache.putFree(dest, SIZE_SMALL);
+                throw e;
+            }
+
+            byte[] imgData = res.getBytes().cleanData();
+
+            info = Optimizer.loadTo(imgData, destBitmap);
+
+            putToDiskCache(task.getKey(), destBitmap, info.getWidth(), info.getHeight());
+
+            Bitmap dest = fetchFullBitmap();
+            Optimizer.scaleToFill(destBitmap, info.getWidth(), info.getHeight(), dest);
+
+            // Bitmap img = Optimizer.load(imgData);
+
+            onImageLoaded(dest, task, SIZE_FULL);
+
+            return true;
+        }
+
+        @Override
+        public boolean isAccepted(QueueProcessor.BaseTask task) {
+            return task instanceof FullTask;
+        }
+    }
+
+    private class PreviewWorker extends QueueWorker<QueueProcessor.BaseTask> {
 
         private Bitmap destBitmap = null;
 
@@ -50,7 +136,8 @@ public class WallpaperLoader extends BaseLoader<WallpaperLoader.PreviewTask> {
         }
 
         @Override
-        protected boolean processTask(PreviewTask task) throws Exception {
+        protected boolean processTask(QueueProcessor.BaseTask baseTask) throws Exception {
+            PreviewTask task = (PreviewTask) baseTask;
             Bitmap dest = fetchPreviewBitmap();
             Optimizer.BitmapInfo cached = imageStorage.tryLoadFile(task.getKey() + "_preview", dest);
             if (cached != null) {
@@ -99,8 +186,8 @@ public class WallpaperLoader extends BaseLoader<WallpaperLoader.PreviewTask> {
         }
 
         @Override
-        public boolean isAccepted(PreviewTask task) {
-            return true;
+        public boolean isAccepted(QueueProcessor.BaseTask task) {
+            return task instanceof PreviewTask;
         }
     }
 
@@ -109,6 +196,24 @@ public class WallpaperLoader extends BaseLoader<WallpaperLoader.PreviewTask> {
         private TLAbsLocalFileLocation fileLocation;
 
         public PreviewTask(TLAbsLocalFileLocation fileLocation) {
+            this.fileLocation = fileLocation;
+        }
+
+        public TLAbsLocalFileLocation getFileLocation() {
+            return fileLocation;
+        }
+
+        @Override
+        public String getKey() {
+            return fileLocation.getUniqKey();
+        }
+    }
+
+    public class FullTask extends QueueProcessor.BaseTask {
+
+        private TLAbsLocalFileLocation fileLocation;
+
+        public FullTask(TLAbsLocalFileLocation fileLocation) {
             this.fileLocation = fileLocation;
         }
 
