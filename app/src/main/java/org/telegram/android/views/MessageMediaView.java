@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
  * Author: Korshakov Stepan
  * Created: 15.08.13 1:14
  */
-public class MessageMediaView extends BaseMsgView implements ImageReceiver {
+public class MessageMediaView extends BaseDownloadView implements ImageReceiver {
 
     private static Movie lastMovie;
     private static long lastMovieStart;
@@ -69,7 +69,7 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
     private Rect rect2 = new Rect();
 
     private int databaseId = -1;
-    private String key;
+    // private String key;
     private int state;
     private int prevState;
     private long stateChangeTime;
@@ -86,14 +86,11 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
     // private int previewWidth;
     private boolean isOut;
     private boolean isVideo;
-    private boolean isDownloadable;
-    private boolean isUploadable;
+    // private boolean isDownloadable;
+    // private boolean isUploadable;
     private boolean showMapPoint;
     private boolean isUnsupported;
-    private int downloadProgress;
-    private int oldDownloadProgress;
-    private long downloadStateTime;
-    private String downloadString;
+
     private String duration;
     private String date;
 
@@ -103,9 +100,6 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
     private int desiredPaddingH;
     private int desiredPaddingV;
     private int timeWidth;
-
-    private DownloadListener downloadListener;
-    private SenderListener senderListener;
 
     private boolean isAnimatedProgress = true;
 
@@ -216,76 +210,6 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
         clockIconPaint.setStrokeWidth(getPx(1));
         clockIconPaint.setAntiAlias(true);
         clockIconPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-
-
-        downloadListener = new DownloadListener() {
-            long lastNotify = 0;
-
-            @Override
-            public void onStateChanged(final String _key, final DownloadState state, final int percent) {
-                if (!_key.equals(key))
-                    return;
-
-                if (lastNotify > 0) {
-                    Logger.d(TAG, "Prev notify in " + (lastNotify - SystemClock.uptimeMillis()) + " ms");
-                }
-                lastNotify = SystemClock.uptimeMillis();
-
-                if (downloadProgress != percent) {
-                    oldDownloadProgress = downloadProgress;
-                    downloadProgress = percent;
-                    downloadStateTime = SystemClock.uptimeMillis();
-                }
-                switch (state) {
-                    case CANCELLED:
-                        downloadString = getResources().getString(R.string.st_bubble_media_cancelled);
-                        break;
-                    case FAILURE:
-                        downloadString = getResources().getString(R.string.st_bubble_media_try_again);
-                        break;
-                    case NONE:
-                        downloadString = getResources().getString(R.string.st_bubble_media_download);
-                        break;
-                    case IN_PROGRESS:
-                    case PENDING:
-                        downloadString = getResources().getString(R.string.st_bubble_media_in_progress);
-                        break;
-                    case COMPLETED:
-                        downloadString = null;
-                        rebind();
-                        break;
-                }
-                postInvalidate();
-            }
-        };
-        application.getDownloadManager().registerListener(downloadListener);
-
-        senderListener = new SenderListener() {
-            @Override
-            public void onUploadStateChanged(int localId, MediaSender.SendState state) {
-                if (databaseId != localId)
-                    return;
-
-                if (downloadProgress != state.getUploadProgress()) {
-                    oldDownloadProgress = downloadProgress;
-                    downloadProgress = state.getUploadProgress();
-                    downloadStateTime = SystemClock.uptimeMillis();
-                }
-
-                if (state.isCanceled()) {
-                    downloadString = getResources().getString(R.string.st_bubble_media_cancelled);
-                } else if (state.isUploaded()) {
-                    downloadString = null;
-                } else if (state.isSent()) {
-                    downloadString = null;
-                    //rebind();
-                } else {
-                    downloadString = getResources().getString(R.string.st_bubble_media_in_progress);
-                }
-                postInvalidate();
-            }
-        };
-        application.getMediaSender().registerListener(senderListener);
     }
 
     @Override
@@ -347,13 +271,10 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
     }
 
     private void bindMedia(MessageWireframe message) {
+        clearBinding();
         this.isBindSizeCalled = false;
         this.isVideo = false;
-        this.isUploadable = false;
-        this.isDownloadable = false;
-        this.downloadString = null;
         this.showMapPoint = false;
-        this.key = null;
         this.isUnsupported = false;
 
         boolean isBinded = false;
@@ -362,9 +283,9 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
             bindSize(mediaPhoto.getFullW(), mediaPhoto.getFullH());
 
             if (!(mediaPhoto.getFullLocation() instanceof TLLocalFileEmpty)) {
-                key = DownloadManager.getPhotoKey(mediaPhoto);
-                isDownloadable = true;
+                bindDownload(DownloadManager.getPhotoKey(mediaPhoto));
 
+                String key = DownloadManager.getPhotoKey(mediaPhoto);
                 if (downloadManager.getState(key) == DownloadState.COMPLETED) {
                     loader.requestFullLoading(mediaPhoto, downloadManager.getFileName(key), this);
                     isBinded = true;
@@ -384,9 +305,9 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
             placeholderPaint.setColor(Color.BLACK);
 
             if (!(mediaVideo.getVideoLocation() instanceof TLLocalFileEmpty)) {
-                key = DownloadManager.getVideoKey(mediaVideo);
-                isDownloadable = true;
+                bindDownload(DownloadManager.getVideoKey(mediaVideo));
 
+                String key = DownloadManager.getVideoKey(mediaVideo);
                 if (downloadManager.getState(key) == DownloadState.COMPLETED) {
                     loader.requestVideoLoading(downloadManager.getFileName(key), this);
                     isBinded = true;
@@ -416,7 +337,7 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
                 isBinded = true;
             }
 
-            isUploadable = true;
+            bindUpload(message.databaseId);
         } else if (message.message.getExtras() instanceof TLUploadingVideo) {
             TLUploadingVideo video = (TLUploadingVideo) message.message.getExtras();
             bindSize(video.getPreviewWidth(), video.getPreviewHeight());
@@ -424,7 +345,7 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
             loader.requestVideoLoading(video.getFileName(), this);
             isBinded = true;
 
-            isUploadable = true;
+            bindUpload(message.databaseId);
         } else if (message.message.getExtras() instanceof TLLocalGeo) {
             TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();
             bindSizeManual(PreviewConfig.MAP_W, PreviewConfig.MAP_H);
@@ -445,14 +366,14 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
                 isBinded = true;
             }
 
-            isUploadable = true;
+            bindUpload(message.databaseId);
         } else if (message.message.getExtras() instanceof TLLocalDocument) {
             TLLocalDocument document = (TLLocalDocument) message.message.getExtras();
 
             bindSize(document.getPreviewW(), document.getPreviewH());
 
-            key = DownloadManager.getDocumentKey(document);
-            isDownloadable = true;
+            String key = DownloadManager.getDocumentKey(document);
+            bindDownload(key);
 
             if (document.getPreviewW() != 0 && document.getPreviewH() != 0) {
                 if (document.getMimeType().equals("image/gif") ||
@@ -487,54 +408,6 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
 
         if (!isBindSizeCalled) {
             throw new RuntimeException("bindSize not called");
-        }
-
-        if (isDownloadable) {
-            if (key != null) {
-                DownloadState state = application.getDownloadManager().getState(key);
-                if (downloadProgress != application.getDownloadManager().getDownloadProgress(key)) {
-                    oldDownloadProgress = downloadProgress;
-                    downloadProgress = application.getDownloadManager().getDownloadProgress(key);
-                    downloadStateTime = SystemClock.uptimeMillis();
-                }
-
-                switch (state) {
-                    case CANCELLED:
-                        downloadString = getResources().getString(R.string.st_bubble_media_cancelled);
-                        break;
-                    case FAILURE:
-                        downloadString = getResources().getString(R.string.st_bubble_media_try_again);
-                        break;
-                    case NONE:
-                        downloadString = getResources().getString(R.string.st_bubble_media_download);
-                        break;
-                    case IN_PROGRESS:
-                    case PENDING:
-                        downloadString = getResources().getString(R.string.st_bubble_media_in_progress);
-                        break;
-                    case COMPLETED:
-                        downloadString = null;
-                        break;
-                }
-            }
-        }
-
-        if (isUploadable) {
-            MediaSender.SendState state = application.getMediaSender().getSendState(databaseId);
-            if (state != null) {
-                if (downloadProgress != state.getUploadProgress()) {
-                    oldDownloadProgress = downloadProgress;
-                    downloadProgress = state.getUploadProgress();
-                    downloadStateTime = SystemClock.uptimeMillis();
-                }
-                if (state.isCanceled()) {
-                    downloadString = getResources().getString(R.string.st_bubble_media_cancelled);
-                } else if (state.isUploaded()) {
-                    downloadString = null;
-                } else {
-                    downloadString = getResources().getString(R.string.st_bubble_media_in_progress);
-                }
-            }
         }
     }
 
@@ -593,7 +466,7 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
 
                     byte[] data;
                     try {
-                        data = IOUtils.readAll(application.getDownloadManager().getFileName(key));
+                        data = IOUtils.readAll(application.getDownloadManager().getFileName(getDownloadKey()));
                     } catch (IOException e) {
                         e.printStackTrace();
                         return;
@@ -713,9 +586,17 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
             if (movie.width() != 0 && movie.height() != 0) {
                 movieDestBitmap.eraseColor(Color.TRANSPARENT);
                 movieDestCanvas.save();
-                float scale = Math.min((float) desiredWidth / movie.width(), (float) desiredHeight / movie.height());
-                movieDestCanvas.translate((desiredWidth - scale * movie.width()) / 2, (desiredHeight - scale * movie.height()) / 2);
-                movieDestCanvas.scale(scale, scale);
+                float scaleX = (float) desiredWidth / movie.width();
+                float scaleY = (float) desiredHeight / movie.height();
+
+                Path clipPath = new Path();
+                RectF rect = new RectF(0, 0, desiredWidth, desiredHeight);
+                clipPath.addRoundRect(rect, PreviewConfig.ROUND_RADIUS, PreviewConfig.ROUND_RADIUS, Path.Direction.CW);
+                movieDestCanvas.clipPath(clipPath);
+
+                // float scale = Math.min((float) desiredWidth / movie.width(), (float) desiredHeight / movie.height());
+                movieDestCanvas.translate((desiredWidth - scaleX * movie.width()) / 2, (desiredHeight - scaleY * movie.height()) / 2);
+                movieDestCanvas.scale(scaleX, scaleY);
                 movie.draw(movieDestCanvas, 0, 0);
                 movieDestCanvas.restore();
             } else {
@@ -799,12 +680,15 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
             unsupportedMark.draw(canvas);
         }
 
-        if (isDownloadable || isUploadable) {
-            long downloadProgressAnimationTime = SystemClock.uptimeMillis() - downloadStateTime;
-            if (downloadProgress < 100 || downloadProgressAnimationTime < FADE_ANIMATION_TIME) {
+        if (mode != MODE_NONE) {
+            int centerX = desiredWidth / 2;
+            int centerY = desiredHeight / 2;
+            int internalR = getPx(18);
+            int outerR = getPx(22);
+
+            if (getState() == STATE_IN_PROGRESS) {
+                long downloadProgressAnimationTime = SystemClock.uptimeMillis() - downloadStateTime;
                 isAnimated = true;
-                int internalR = getPx(18);
-                int outerR = getPx(22);
 
                 if (downloadProgress == 100 && isAnimatedProgress) {
                     float alpha = fadeEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
@@ -819,18 +703,11 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
                 canvas.clipRect(0, 0, desiredWidth, desiredHeight);
 
                 float currentDownloadProgress = downloadProgress;
-
-
                 if (downloadProgressAnimationTime < STATE_ANIMATION_TIME && isAnimatedProgress) {
                     float alpha = fadeEasing((float) downloadProgressAnimationTime / STATE_ANIMATION_TIME);
                     isAnimated = true;
                     currentDownloadProgress = oldDownloadProgress + (downloadProgress - oldDownloadProgress) * alpha;
                 }
-
-                int centerX = desiredWidth / 2;
-                int centerY = desiredHeight / 2;
-
-                // canvas.drawPath(path, downloadBgRect);
 
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
 
@@ -839,13 +716,11 @@ public class MessageMediaView extends BaseMsgView implements ImageReceiver {
                 int progressAngle = (int) (-360 + (currentDownloadProgress * 360 / 100));
                 canvas.drawArc(rectF, progressAngleStart, progressAngle, true, downloadBgLightRect);
                 canvas.restore();
+            } else if (getState() == STATE_ERROR) {
+                canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
+            } else if (getState() == STATE_PENDING) {
+                canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
             }
-
-//            if (downloadString != null) {
-//                int textW = (int) downloadPaint.measureText(downloadString);
-//                Paint.FontMetricsInt metricsInt = downloadPaint.getFontMetricsInt();
-//                canvas.drawText(downloadString, (desiredWidth - textW) / 2, desiredHeight / 2 + (/*metricsInt.bottom*/ -metricsInt.ascent) / 2 + getPx(24), downloadPaint);
-//            }
         }
 
         if (isVideo) {

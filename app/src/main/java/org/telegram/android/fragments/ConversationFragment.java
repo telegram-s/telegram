@@ -788,7 +788,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (message.message.getState() == MessageState.FAILURE &&
                 (message.message.getRawContentType() == ContentType.MESSAGE_VIDEO ||
                         message.message.getRawContentType() == ContentType.MESSAGE_PHOTO ||
-                        message.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT) && !(message.message.isForwarded())) {
+                        message.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT ||
+                        message.message.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED ||
+                        message.message.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW) && !(message.message.isForwarded())) {
             items.add(getStringSafe(R.string.st_conv_action_try_again));
             actions.add(new Runnable() {
                 @Override

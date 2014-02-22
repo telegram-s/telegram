@@ -392,7 +392,7 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
             int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res);
             putToDiskCache(rawTask.getKey(), res, sizes[0], sizes[1]);
 
-            onImageLoaded(tmp, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
+            onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
         }
 
         private void processTask(MediaRawTask rawTask) throws Exception {
@@ -416,14 +416,14 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                 if (info.getHeight() <= fullImageCached.getHeight() && info.getWidth() <= fullImageCached.getWidth()) {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
-                        int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth(), info.getHeight(), res);
+                        int[] sizes = drawPreview(fullImageCached, info.getWidth(), info.getHeight(), res);
                         onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
                         return;
                     }
                 } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
-                        int[] sizes = Optimizer.scaleToRatio(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
+                        int[] sizes = drawPreview(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
                         onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
                         return;
                     }
@@ -431,14 +431,14 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
             }
 
             Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
-            int[] sizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
+            int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res);
             putToDiskCache(rawTask.getKey(), res, sizes[0], sizes[1]);
             onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
         }
 
         @Override
         public boolean isAccepted(BaseTask task) {
-            return task instanceof MediaRawTask;
+            return task instanceof MediaRawTask || task instanceof MediaRawUriTask;
         }
     }
 
