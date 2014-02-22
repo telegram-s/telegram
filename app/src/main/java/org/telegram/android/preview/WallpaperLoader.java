@@ -41,6 +41,10 @@ public class WallpaperLoader extends BaseLoader<QueueProcessor.BaseTask> {
         };
     }
 
+    public void clearCache() {
+
+    }
+
     private Bitmap fetchPreviewBitmap() {
         Bitmap res = imageCache.findFree(SIZE_SMALL);
         if (res == null) {

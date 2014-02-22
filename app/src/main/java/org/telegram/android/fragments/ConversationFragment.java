@@ -359,14 +359,14 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (getSmileysController().areSmileysVisible()) {
             smileButton.setImageResource(R.drawable.st_conv_panel_kb);
         } else {
-            smileButton.setImageResource(R.drawable.st_conv_panel_smiles);
+            smileButton.setImageResource(R.drawable.st_conv_panel_smileys_selector);
         }
 
         smileButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (getSmileysController().areSmileysVisible()) {
-                    smileButton.setImageResource(R.drawable.st_conv_panel_smiles);
+                    smileButton.setImageResource(R.drawable.st_conv_panel_smileys_selector);
                 } else {
                     smileButton.setImageResource(R.drawable.st_conv_panel_kb);
                 }
@@ -1688,21 +1688,21 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         int delta = Math.abs(dialogAdapter.getCount() - count);
 
         // if (delta != 0) {
-            int newIndex = index + (dialogAdapter.getCount() - count) + 1;
+        int newIndex = index + (dialogAdapter.getCount() - count) + 1;
 
-            for (int i = index - delta; i < index + delta + 1; i++) {
-                if (i < 0)
-                    continue;
-                if (i >= dialogAdapter.getCount())
-                    break;
+        for (int i = index - delta; i < index + delta + 1; i++) {
+            if (i < 0)
+                continue;
+            if (i >= dialogAdapter.getCount())
+                break;
 
-                if (listView.getItemIdAtPosition(i) == id) {
-                    newIndex = i;
-                    break;
-                }
+            if (listView.getItemIdAtPosition(i) == id) {
+                newIndex = i;
+                break;
             }
+        }
 
-            listView.setSelectionFromTop(newIndex, top);
+        listView.setSelectionFromTop(newIndex, top);
 //            final int finalNewIndex = newIndex;
 //            listView.post(new Runnable() {
 //                @Override
