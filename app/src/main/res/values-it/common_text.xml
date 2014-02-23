@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lang_common_typing">sta scrivendo...</string>
+    <string name="lang_common_typing_single">{content} sta scrivendo...</string>
+    <string name="lang_common_typing_multiple">{content} stanno scrivendo...</string>
+    <string name="lang_common_and">{content1} e {content2}</string>
+    <string name="lang_common_and_short">{content1}, {content2}</string>
+
+    <string name="lang_common_online_templates">ultimamente visto {time}</string>
+    <string name="lang_common_online_now">ora</string>
+    <string name="lang_common_online_ago">{time} fa</string>
+</resources>

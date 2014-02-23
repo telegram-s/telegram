@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lang_month_pattern">{month} {day}</string>
+    <string name="lang_january">Gennaio</string>
+    <string name="lang_february">Febbraio</string>
+    <string name="lang_march">Marzo</string>
+    <string name="lang_april">Aprile</string>
+    <string name="lang_may">Maggio</string>
+    <string name="lang_june">Giugno</string>
+    <string name="lang_july">Luglio</string>
+    <string name="lang_august">Agosto</string>
+    <string name="lang_september">Settembre</string>
+    <string name="lang_october">Ottobre</string>
+    <string name="lang_november">Novembre</string>
+    <string name="lang_december">Dicembre</string>
+
+    <string name="lang_january_s">gennaio</string>
+    <string name="lang_february_s">febbraio</string>
+    <string name="lang_march_s">marzo</string>
+    <string name="lang_april_s">aprile</string>
+    <string name="lang_may_s">maggio</string>
+    <string name="lang_june_s">giugno</string>
+    <string name="lang_july_s">luglio</string>
+    <string name="lang_august_s">agosto</string>
+    <string name="lang_september_s">settembre</string>
+    <string name="lang_october_s">ottobre</string>
+    <string name="lang_november_s">novembre</string>
+    <string name="lang_december_s">dicembre</string>
+
+    <string name="lang_january_short">Gen</string>
+    <string name="lang_february_short">Feb</string>
+    <string name="lang_march_short">Mar</string>
+    <string name="lang_april_short">Apr</string>
+    <string name="lang_may_short">Mag</string>
+    <string name="lang_june_short">Giu</string>
+    <string name="lang_july_short">Lug</string>
+    <string name="lang_august_short">Ago</string>
+    <string name="lang_september_short">Set</string>
+    <string name="lang_october_short">Ott</string>
+    <string name="lang_november_short">Nov</string>
+    <string name="lang_december_short">Dic</string>
+
+    <string name="lang_january_short_s">gen</string>
+    <string name="lang_february_short_s">feb</string>
+    <string name="lang_march_short_s">mar</string>
+    <string name="lang_april_short_s">apr</string>
+    <string name="lang_may_short_s">mag</string>
+    <string name="lang_june_short_s">giu</string>
+    <string name="lang_july_short_s">lug</string>
+    <string name="lang_august_short_s">ago</string>
+    <string name="lang_september_short_s">set</string>
+    <string name="lang_october_short_s">ott</string>
+    <string name="lang_november_short_s">nov</string>
+    <string name="lang_december_short_s">dic</string>
+</resources>
