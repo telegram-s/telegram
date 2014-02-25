@@ -7,6 +7,6 @@
     <string name="lang_common_and_short">{content1}, {content2}</string>
 
     <string name="lang_common_online_templates">zuletzt gesehen {time}</string>
-    <string name="lang_common_online_now">gerade jetzt</string>
+    <string name="lang_common_online_now">gerade eben</string>
     <string name="lang_common_online_ago">vor {time}</string>
 </resources>
