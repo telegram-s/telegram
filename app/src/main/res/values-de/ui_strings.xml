@@ -46,7 +46,7 @@
     <string name="st_error_file_open">Datei konnte nicht geöffnet werden</string>
     <string name="st_error_unable_sms">Fehler beim Senden der SMS</string>
     <string name="st_error_title">Fehler</string>
-    <string name="st_error_unsupported">Auf diesem Gerät micht unterstützt</string>
+    <string name="st_error_unsupported">Auf diesem Gerät nicht unterstützt</string>
     <string name="st_error_unknown">Unbekannter Anwendungsfehler :-(</string>
     <string name="st_error_connection">Keine Netzwerkverbindung. Bitte versuchen Sie es erneut.</string>
     <string name="st_error_server">Interner Serverfehler. Bitte versuchen Sie es erneut.</string>
