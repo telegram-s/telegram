@@ -33,7 +33,7 @@
     <plurals name="lang_month">
         <item quantity="zero">Monat</item>
         <item quantity="one">ein Monat</item>
-        <item quantity="other">{d} Monat</item>
+        <item quantity="other">{d} Monate</item>
     </plurals>
 
     <plurals name="lang_year">
