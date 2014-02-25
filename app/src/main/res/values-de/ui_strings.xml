@@ -54,8 +54,8 @@
     <string name="st_error_code_incorrect">Aktivierungscode nicht korrekt.</string>
     <string name="st_error_expired">Aktivierungscode abgelaufen</string>
     <string name="st_error_invalid_phone">Falsche Telefonnummer</string>
-    <string name="st_error_first_name_incorrect">Falsche Vorname.</string>
-    <string name="st_error_last_name_incorrect">Falsche Nachname.</string>
+    <string name="st_error_first_name_incorrect">Falscher Vorname.</string>
+    <string name="st_error_last_name_incorrect">Falscher Nachname.</string>
     <string name="st_error_too_few_users">Zu wenige Benutzer.</string>
     <string name="st_error_too_much_users">Zu viele Benutzer.</string>
     <string name="st_error_name_not_modified">Name nicht verändert.</string>
