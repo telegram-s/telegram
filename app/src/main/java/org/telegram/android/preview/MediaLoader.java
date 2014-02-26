@@ -86,6 +86,10 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         requestTask(new SmallPhotoTask(photo), receiver);
     }
 
+    public void requestFastSmallLoading(TLLocalDocument doc, ImageReceiver receiver) {
+        requestTask(new SmallDocFastTask(doc), receiver);
+    }
+
     public void requestFastSmallLoading(TLLocalVideo video, ImageReceiver receiver) {
         requestTask(new SmallVideoTask(video), receiver);
     }
@@ -174,6 +178,8 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 processPhotoSmall((SmallPhotoTask) task);
             } else if (task instanceof SmallVideoTask) {
                 processVideoSmall((SmallVideoTask) task);
+            } else if (task instanceof SmallDocFastTask) {
+                processDocSmall((SmallDocFastTask) task);
             }
             return true;
         }
@@ -190,6 +196,16 @@ public class MediaLoader extends BaseLoader<BaseTask> {
 
         private boolean processVideoSmall(SmallVideoTask task) {
             TLLocalVideo mediaVideo = task.getVideo();
+
+            return processMedia(
+                    mediaVideo.getFastPreview(),
+                    mediaVideo.getPreviewW(),
+                    mediaVideo.getPreviewH(),
+                    task);
+        }
+
+        private boolean processDocSmall(SmallDocFastTask task) {
+            TLLocalDocument mediaVideo = task.getDoc();
 
             return processMedia(
                     mediaVideo.getFastPreview(),
@@ -262,7 +278,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         @Override
         public boolean isAccepted(BaseTask task) {
             return task instanceof MediaPhotoFastTask || task instanceof MediaVideoFastTask || task instanceof MediaDocFastTask
-                    || task instanceof SmallPhotoTask || task instanceof SmallVideoTask;
+                    || task instanceof SmallPhotoTask || task instanceof SmallVideoTask || task instanceof SmallDocFastTask;
         }
     }
 

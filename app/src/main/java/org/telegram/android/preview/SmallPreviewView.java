@@ -3,6 +3,7 @@ package org.telegram.android.preview;
 import android.content.Context;
 import android.util.AttributeSet;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
 
@@ -13,6 +14,7 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
 
     private TLLocalPhoto fastPhotoTask;
     private TLLocalVideo fastVideoTask;
+    private TLLocalDocument fastDocTask;
     private String photoFileName;
 
     public SmallPreviewView(Context context) {
@@ -35,6 +37,7 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
     public void requestFast(TLLocalPhoto photo) {
         fastPhotoTask = photo;
         fastVideoTask = null;
+        fastDocTask = null;
         photoFileName = null;
         requestBind();
     }
@@ -42,6 +45,15 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
     public void requestFast(TLLocalVideo video) {
         fastPhotoTask = null;
         fastVideoTask = video;
+        fastDocTask = null;
+        photoFileName = null;
+        requestBind();
+    }
+
+    public void requestFast(TLLocalDocument document) {
+        fastPhotoTask = null;
+        fastVideoTask = null;
+        fastDocTask = document;
         photoFileName = null;
         requestBind();
     }
@@ -49,6 +61,7 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
     public void requestFile(String fileName) {
         fastPhotoTask = null;
         fastVideoTask = null;
+        fastDocTask = null;
         photoFileName = fileName;
         requestBind();
     }
@@ -56,6 +69,7 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
     public void clearImage() {
         fastPhotoTask = null;
         fastVideoTask = null;
+        fastDocTask = null;
         photoFileName = null;
         requestBind();
     }
@@ -66,6 +80,8 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
             getLoader().requestFastSmallLoading(fastPhotoTask, this);
         } else if (fastVideoTask != null) {
             getLoader().requestFastSmallLoading(fastVideoTask, this);
+        } else if (fastDocTask != null) {
+            getLoader().requestFastSmallLoading(fastDocTask, this);
         } else if (photoFileName != null) {
             getLoader().requestRawSmall(photoFileName, this);
         } else {

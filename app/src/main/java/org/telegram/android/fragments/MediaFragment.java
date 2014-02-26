@@ -13,6 +13,7 @@ import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.MediaRecord;
+import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
 import org.telegram.android.media.DownloadManager;
@@ -112,8 +113,14 @@ public class MediaFragment extends TelegramFragment {
             public void bindView(View view, Context context, MediaRecord object, int index) {
                 SmallPreviewView imageView = (SmallPreviewView) ((ViewGroup) view).getChildAt(0);
                 View videoView = ((ViewGroup) view).getChildAt(1);
-                if (object.getPreview() instanceof TLLocalPhoto) {
+
+                if (object.getPreview() instanceof TLLocalVideo) {
+                    videoView.setVisibility(View.VISIBLE);
+                } else {
                     videoView.setVisibility(View.INVISIBLE);
+                }
+
+                if (object.getPreview() instanceof TLLocalPhoto) {
                     TLLocalPhoto localPhoto = (TLLocalPhoto) object.getPreview();
                     String key = DownloadManager.getPhotoKey(localPhoto);
                     if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
@@ -126,13 +133,21 @@ public class MediaFragment extends TelegramFragment {
                         }
                     }
                 } else if (object.getPreview() instanceof TLLocalVideo) {
-                    videoView.setVisibility(View.VISIBLE);
                     TLLocalVideo localVideo = (TLLocalVideo) object.getPreview();
                     if (localVideo.getFastPreview().length > 0) {
                         imageView.requestFast(localVideo);
                     } else {
                         imageView.clearImage();
                     }
+                } else if (object.getPreview() instanceof TLLocalDocument) {
+                    TLLocalDocument localVideo = (TLLocalDocument) object.getPreview();
+                    if (localVideo.getFastPreview().length > 0) {
+                        imageView.requestFast(localVideo);
+                    } else {
+                        imageView.clearImage();
+                    }
+                } else {
+                    imageView.clearImage();
                 }
             }
         };

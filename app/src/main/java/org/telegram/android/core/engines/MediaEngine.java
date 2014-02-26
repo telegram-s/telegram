@@ -40,7 +40,11 @@ public class MediaEngine {
 
     public synchronized void saveMedia(ChatMessage sourceMessage) {
         if (sourceMessage.getRawContentType() != ContentType.MESSAGE_PHOTO
-                && sourceMessage.getRawContentType() != ContentType.MESSAGE_VIDEO) {
+                && sourceMessage.getRawContentType() != ContentType.MESSAGE_VIDEO
+                && sourceMessage.getRawContentType() != ContentType.MESSAGE_AUDIO
+                && sourceMessage.getRawContentType() != ContentType.MESSAGE_DOCUMENT
+                && sourceMessage.getRawContentType() != ContentType.MESSAGE_DOC_ANIMATED
+                && sourceMessage.getRawContentType() != ContentType.MESSAGE_DOC_PREVIEW) {
             return;
         }
 
@@ -53,11 +57,15 @@ public class MediaEngine {
         record.setDate(sourceMessage.getDate());
         record.setPeerId(sourceMessage.getPeerId());
         record.setPeerType(sourceMessage.getPeerType());
-        if (sourceMessage.getRawContentType() == ContentType.MESSAGE_PHOTO) {
-            record.setPreview(sourceMessage.getExtras());
-        } else if (sourceMessage.getRawContentType() == ContentType.MESSAGE_VIDEO) {
+        if (sourceMessage.getRawContentType() == ContentType.MESSAGE_PHOTO
+                || sourceMessage.getRawContentType() == ContentType.MESSAGE_VIDEO
+                || sourceMessage.getRawContentType() == ContentType.MESSAGE_AUDIO
+                || sourceMessage.getRawContentType() == ContentType.MESSAGE_DOCUMENT
+                || sourceMessage.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED
+                || sourceMessage.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW) {
             record.setPreview(sourceMessage.getExtras());
         }
+
         if (sourceMessage.getForwardSenderId() != 0) {
             record.setSenderId(sourceMessage.getForwardSenderId());
         } else {
