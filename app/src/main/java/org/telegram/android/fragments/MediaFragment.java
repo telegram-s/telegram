@@ -92,88 +92,43 @@ public class MediaFragment extends TelegramFragment {
                 FrameLayout frameLayout = new FrameLayout(context);
                 frameLayout.setLayoutParams(layoutParams);
 
-                // TODO: Implement
                 SmallPreviewView smallPreviewView = new SmallPreviewView(context);
-//                FastWebImageView res = new FastWebImageView(context);
                 FrameLayout.LayoutParams imageParams = new FrameLayout.LayoutParams(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW);
-                // imageParams.topMargin = imageParams.leftMargin = imageParams.rightMargin = imageParams.bottomMargin = margin / 2;
                 smallPreviewView.setLayoutParams(imageParams);
-//                res.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
 
-                TextView timeView = new TextView(context);
-                timeView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_media_ic_play, 0, 0, 0);
-                timeView.setCompoundDrawablePadding(getPx(6));
-                timeView.setTextColor(0xE6FFFFFF);
-                timeView.setTextSize(15);
-                timeView.setTypeface(FontController.loadTypeface(context, "light"));
+                ImageView videoLogo = new ImageView(context);
+                videoLogo.setImageResource(R.drawable.st_media_ic_play);
 
                 FrameLayout.LayoutParams timeParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                timeParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
-                timeParams.bottomMargin = getPx(6);
-                timeParams.leftMargin = getPx(8);
-                timeView.setLayoutParams(timeParams);
+                timeParams.gravity = Gravity.CENTER;
+                videoLogo.setLayoutParams(timeParams);
 
-                // TODO: Implement
                 frameLayout.addView(smallPreviewView);
-                frameLayout.addView(timeView);
+                frameLayout.addView(videoLogo);
 
                 return frameLayout;
             }
 
             public void bindView(View view, Context context, MediaRecord object, int index) {
                 SmallPreviewView imageView = (SmallPreviewView) ((ViewGroup) view).getChildAt(0);
+                View videoView = ((ViewGroup) view).getChildAt(1);
                 if (object.getPreview() instanceof TLLocalPhoto) {
+                    videoView.setVisibility(View.INVISIBLE);
                     TLLocalPhoto localPhoto = (TLLocalPhoto) object.getPreview();
                     String key = DownloadManager.getPhotoKey(localPhoto);
-                    // timeView.setVisibility(View.GONE);
-                    imageView.setBackgroundColor(0xffffff);
                     if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
                         imageView.requestFile(application.getDownloadManager().getFileName(key));
                     } else {
-
                         if (localPhoto.getFastPreviewW() != 0 && localPhoto.getFastPreviewH() != 0) {
                             imageView.requestFast(localPhoto);
                         } else {
                             imageView.clearImage();
                         }
                     }
+                } else {
+                    videoView.setVisibility(View.VISIBLE);
+                    imageView.clearImage();
                 }
-//                TextView timeView = (TextView) ((ViewGroup) view).getChildAt(1);
-//                if (object.getPreview() instanceof TLLocalPhoto) {
-//                    TLLocalPhoto localPhoto = (TLLocalPhoto) object.getPreview();
-//                    String key = DownloadManager.getPhotoKey(localPhoto);
-//                    timeView.setVisibility(View.GONE);
-//                    imageView.setBackgroundColor(0xffE6E6E6);
-//                    if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
-//                        imageView.requestTask(new FileSystemImageTask(application.getDownloadManager().getPreviewFileName(key)));
-//                    } else {
-////                        if (localPhoto.getFastPreviewW() != 0 && localPhoto.getFastPreviewH() != 0) {
-////                            imageView.requestTask(new CachedImageTask(localPhoto));
-////                        } else {
-////                            imageView.requestTask(null);
-////                        }
-//                    }
-//                } else if (object.getPreview() instanceof TLLocalVideo) {
-//                    timeView.setVisibility(View.VISIBLE);
-//                    imageView.setBackgroundColor(0xff000000);
-//                    TLLocalVideo video = (TLLocalVideo) object.getPreview();
-//                    timeView.setText(org.telegram.android.ui.TextUtil.formatDuration(video.getDuration()));
-//
-//                    if (video.getPreviewH() != 0 && video.getPreviewW() != 0) {
-////                        if (video.getFastPreview().length > 0) {
-////                            imageView.requestTask(new CachedImageTask(video));
-////                        } else if (video.getPreviewLocation() instanceof TLLocalFileLocation) {
-////                            TLLocalFileLocation location = (TLLocalFileLocation) video.getPreviewLocation();
-////                            imageView.requestTask(new StelsImageTask(new TLFileLocation(location.getDcId(), location.getVolumeId(), location.getLocalId(), location.getSecret())));
-////                        } else {
-////                            imageView.requestTask(null);
-////                        }
-//                    } else {
-//                        imageView.requestTask(null);
-//                    }
-//                } else {
-//                    imageView.requestTask(null);
-//                }
             }
         };
         if (adapter.getCount() == 0)

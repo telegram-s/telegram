@@ -198,8 +198,8 @@ public class Optimizer {
                 new Rect(1, 1, sourceW - 1, sourceH - 1),
                 new Rect(-paddingLeft,
                         -paddingTop,
-                        (int) (sourceW * ratio) + paddingLeft,
-                        (int) (sourceH * ratio) + paddingTop),
+                        (int) (sourceW * ratio) - paddingLeft,
+                        (int) (sourceH * ratio) - paddingTop),
                 new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG));
     }
 

@@ -9,7 +9,7 @@
               android:layout_height="fill_parent"
               android:drawSelectorOnTop="true"
               android:gravity="center_horizontal"
-              android:listSelector="@null"
+              android:listSelector="@drawable/st_list_selector"
               android:clipToPadding="false"
               android:id="@+id/mediaGrid"/>
 

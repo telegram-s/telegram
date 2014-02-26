@@ -51,6 +51,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private Drawable mapPoint;
     private Drawable unsupportedMark;
     private Drawable downloadIcon;
+    private Drawable tryAgainIcon;
     private TextPaint videoDurationPaint;
     private TextPaint downloadPaint;
     private TextPaint timePaint;
@@ -123,7 +124,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         super.init();
         loader = application.getUiKernel().getMediaLoader();
         downloadManager = application.getDownloadManager();
-        videoIcon = getResources().getDrawable(R.drawable.st_media_ic_play);
+        videoIcon = getResources().getDrawable(R.drawable.st_bubble_media_play);
         mapPoint = getResources().getDrawable(R.drawable.st_map_pin);
         unsupportedMark = getResources().getDrawable(R.drawable.st_bubble_unknown);
 
@@ -201,7 +202,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         stateSent = getResources().getDrawable(R.drawable.st_bubble_ic_check_photo);
         stateHalfCheck = getResources().getDrawable(R.drawable.st_bubble_ic_halfcheck_photo);
         stateFailure = getResources().getDrawable(R.drawable.st_bubble_ic_warning);
+
         downloadIcon = getResources().getDrawable(R.drawable.st_bubble_ic_download);
+        tryAgainIcon = getResources().getDrawable(R.drawable.st_bubble_media_retry);
 
         placeholderPaint = new Paint();
         placeholderPaint.setColor(Color.WHITE);
@@ -694,11 +697,11 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
                 if (downloadProgress == 100 && isAnimatedProgress) {
                     float alpha = fadeEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
-                    downloadBgRect.setAlpha((int) (0xB2 * (1 - alpha)));
-                    downloadBgLightRect.setAlpha((int) (0xB2 * (1 - alpha)));
+                    downloadBgRect.setAlpha((int) (0xA5 * (1 - alpha)));
+                    downloadBgLightRect.setAlpha((int) (0xA5 * (1 - alpha)));
                 } else {
-                    downloadBgRect.setAlpha(0xB2);
-                    downloadBgLightRect.setAlpha(0xB2);
+                    downloadBgRect.setAlpha(0xA5);
+                    downloadBgLightRect.setAlpha(0xA5);
                 }
 
                 canvas.save();
@@ -715,11 +718,15 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
                 rectF.set(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
                 int progressAngleStart = -90;
-                int progressAngle = (int) (-360 + (currentDownloadProgress * 360 / 100));
+                int progressAngle = (int) ((currentDownloadProgress * 360 / 100));
                 canvas.drawArc(rectF, progressAngleStart, progressAngle, true, downloadBgLightRect);
                 canvas.restore();
             } else if (getState() == STATE_ERROR) {
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
+                tryAgainIcon.setBounds(
+                        centerX - tryAgainIcon.getIntrinsicWidth() / 2, centerY - tryAgainIcon.getIntrinsicHeight() / 2,
+                        centerX + tryAgainIcon.getIntrinsicWidth() / 2, centerY + tryAgainIcon.getIntrinsicHeight() / 2);
+                tryAgainIcon.draw(canvas);
             } else if (getState() == STATE_PENDING) {
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
                 downloadIcon.setBounds(
