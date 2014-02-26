@@ -24,7 +24,7 @@
 
     <string name="st_continue">Continua</string>
     <string name="st_back">Indietro</string>
-    <string name="st_start_again">Reincomincia daccapo</string>
+    <string name="st_start_again">Riprova</string>
 
     <string name="st_receiver_pick_wallpaper">Cambia Wallpaper</string>
     <string name="st_receiver_pick_photo">Scegli una foto</string>
@@ -36,8 +36,8 @@
 
     <string name="st_avatar_changed">Foto del profilo cambiata</string>
     <string name="st_avatar_removed">Foto del profilo eliminata</string>
-    <string name="st_avatar_change_error">Problema nell\' upload della foto del profilo</string>
-    <string name="st_avatar_change_error_title">Errore nell\' upload</string>
+    <string name="st_avatar_change_error">Problema nell\'upload della foto del profilo</string>
+    <string name="st_avatar_change_error_title">Errore nell\'upload</string>
     <string name="st_avatar_change_error_message">Impossibile caricare l\'avatar. Riprovare?</string>
 
     <string name="st_avatar_group_changed">Foto del gruppo cambiata</string>
@@ -53,7 +53,7 @@
     <string name="st_support_hint">Piacere di conoscerti</string>
 
     <string name="st_error_file_open">Impossibile aprire il file</string>
-    <string name="st_error_unable_sms">Impossibile inviare l\' SMS.</string>
+    <string name="st_error_unable_sms">Impossibile inviare l\'SMS.</string>
 
     <string name="st_error_title">Errore</string>
 
@@ -68,7 +68,7 @@
     <string name="st_error_invalid_phone">Numero di telefono non valido</string>
     <string name="st_error_first_name_incorrect">Nome sbagliato.</string>
     <string name="st_error_last_name_incorrect">Cognome sbagliato.</string>
-    <string name="st_error_too_few_users">Troppi pochi utenti.</string>
+    <string name="st_error_too_few_users">Troppo pochi utenti.</string>
     <string name="st_error_too_much_users">Troppi utenti.</string>
     <string name="st_error_name_not_modified">Nome non modificato.</string>
     <string name="st_error_title_not_modified">Nome del gruppo non modificato.</string>
@@ -129,7 +129,7 @@
     <string name="st_auth_not_activating_code_ticker">Attivazione manuale richiesta</string>
     <string name="st_auth_not_activating_code_content">Per favore, inserisci il codice di attivazione</string>
 
-    <string name="st_auth_not_activating_signup_ticker">Richede la registazione</string>
+    <string name="st_auth_not_activating_signup_ticker">Richiede la registazione</string>
     <string name="st_auth_not_activating_signup_content">Telefono attivato! Per favore, registrati.</string>
 
     <string name="st_auth_not_activating_complete_ticker">Telegram attivato</string>
@@ -144,7 +144,7 @@
     <string name="st_auth_phone_hint">Numero di telefono</string>
 
     <string name="st_auth_activating_manual">Inserisci codice</string>
-    <string name="st_auth_activating_title">Attivando il telefono...</string>
+    <string name="st_auth_activating_title">Attivazione in corso...</string>
     <string name="st_auth_activating_subtitle">Questo potrebbe richiedere un minuto. Per favore, aspetta.</string>
 
     <string name="st_auth_request_call">Richiedi chiamata</string>
@@ -186,7 +186,7 @@
     <string name="st_dialogs_search_empty">Non ho trovato niente.</string>
 
     <string name="st_dialogs_write_to_friend">Scrivi ad un amico</string>
-    <string name="st_dialogs_empty">Non hai nessun messaggio...</string>
+    <string name="st_dialogs_empty">Non hai messaggi...</string>
 
     <string name="st_dialogs_share_to_secret">Impossibile condividere contatti in una chat segreta</string>
     <string name="st_dialogs_forward_to_secret">Impossibile reinviare messaggi in una chat segreta</string>
@@ -196,12 +196,12 @@
     <string name="st_dialogs_menu_group">Nuovo gruppo</string>
     <string name="st_dialogs_menu_secret">Nuova chat segreta</string>
     <string name="st_dialogs_menu_write_contact">Scrivi ad un contatto</string>
-    <string name="st_dialogs_menu_appearance">Apparenza</string>
+    <string name="st_dialogs_menu_appearance">Aspetto</string>
 
     <string name="st_settings_title">Impostazioni</string>
     <string name="st_settings_header_phone">IL TUO NUMERO DI TELEFONO</string>
     <string name="st_settings_header_settings">IMPOSTAZIONI</string>
-    <string name="st_settings_header_support">SUPPORTO</string>
+    <string name="st_settings_header_support">ASSISTENZA</string>
     <string name="st_settings_header_about">INFORMAZIONI SU</string>
     <string name="st_settings_header_account">ACCOUNT</string>
     <string name="st_settings_logout">Disconnettiti</string>
@@ -209,7 +209,7 @@
     <string name="st_settings_version">Versione app</string>
     <string name="st_settings_play">Google Play</string>
     <string name="st_settings_play_subtitle">Per favore, recensisci la nosta app</string>
-    <string name="st_settings_blocked">Untenti bloccati</string>
+    <string name="st_settings_blocked">Utenti bloccati</string>
     <string name="st_settings_blocked_subtitle">Lista degli utenti bloccati</string>
     <string name="st_settings_reset">Annulla sessioni</string>
     <string name="st_settings_reset_subtitle">Disconnettiti su tutti gli altri dispositivi</string>
@@ -225,7 +225,7 @@
     <string name="st_settings_support">Fai una domanda</string>
     <string name="st_settings_support_subtitle">Il nostro team di supporto è felice di aiutarti (in Inglese)</string>
     <string name="st_settings_faq">Domande Frequenti</string>
-    <string name="st_settings_faq_subtitle">Dai un occhiata alla giuda (in Inglese)</string>
+    <string name="st_settings_faq_subtitle">Dai un occhiata alla guida (in Inglese)</string>
     <string name="st_settings_twitter">Twitter</string>
     <string name="st_settings_twitter_subtitle">Iscrivetevi per ricevere le nostre notizie (in Inglese)</string>
 
@@ -236,8 +236,8 @@
 
     <string name="st_settings_advanced_title">Avanzate</string>
     <string name="st_settings_advanced_background">BACKGROUND</string>
-    <string name="st_settings_advanced_send_time">Message send time</string>
-    <string name="st_settings_advanced_life_time">Keep app active</string>
+    <string name="st_settings_advanced_send_time">Tempo invio messaggio</string>
+    <string name="st_settings_advanced_life_time">Mantieni l\'app attiva</string>
 
     <string name="st_settings_name_title">IL TUO NOME E COGNOME</string>
     <string name="st_settings_name_changed">Nome cambiato</string>
@@ -259,8 +259,8 @@
     <string name="st_conv_empty_support">Hai una domanda su Telegram?</string>
 
     <string name="st_conv_chat_closed_title">Non hai più accesso a questa chat</string>
-    <string name="st_conv_enc_exchanging_keys">Scambiando chiavi di crittazione...</string>
-    <string name="st_conv_enc_waiting">Aspettando che {name} si connetta...</string>
+    <string name="st_conv_enc_exchanging_keys">Scambio chiavi di crittazione...</string>
+    <string name="st_conv_enc_waiting">In attesa che {name} si connetta...</string>
     <string name="st_conv_enc_cancelled">Chat segreta cancellata</string>
 
     <string name="st_conv_enc_invite_out_title">Hai invitato {name} a una chat segreta.</string>
@@ -268,10 +268,10 @@
     <string name="st_conv_enc_invite_in_title">{name} ti ha invitato ad una chat segreta.</string>
 
     <string name="st_conv_enc_info_title">Le chat segrete:</string>
-    <string name="st_conv_enc_info_info1">Usano crittazione end-to-end</string>
+    <string name="st_conv_enc_info_info1">Usano crittografia punto-punto</string>
     <string name="st_conv_enc_info_info2">Non lasciano tracce sui nostri server</string>
-    <string name="st_conv_enc_info_info3">Hanno un timer per l\' auto-distruzione</string>
-    <string name="st_conv_enc_info_info4">Non permettono il reinvio dei messaggi</string>
+    <string name="st_conv_enc_info_info3">Hanno un timer per l\'auto-distruzione</string>
+    <string name="st_conv_enc_info_info4">Non permettono l\'inoltro dei messaggi</string>
 
     <string name="st_conv_support_name">Telegram</string>
 
@@ -280,7 +280,7 @@
     <string name="st_conv_delete_chat">ELIMINA QUESTA CHAT</string>
     <string name="st_conv_hint">Scrivi un messaggio</string>
     <string name="st_conv_removed">hai abbandonato il gruppo</string>
-    <string name="st_conv_action_title">Massagio</string>
+    <string name="st_conv_action_title">Messaggio</string>
     <string name="st_conv_action_delete">Elimina</string>
     <string name="st_conv_action_forward">Reinvia</string>
     <string name="st_conv_action_copy">Copia</string>
@@ -289,7 +289,7 @@
     <string name="st_conv_action_try_again">Riprova</string>
     <string name="st_conv_copied">Testo copiato</string>
     <string name="st_conv_cancel_title">Conferma</string>
-    <string name="st_conv_cancel_message">Sei sicuro/a di voler cancellare l\' upload?</string>
+    <string name="st_conv_cancel_message">Sei sicuro/a di voler cancellare l\'upload?</string>
     <string name="st_conv_menu_photo">Foto</string>
     <string name="st_conv_menu_gallery">Galleria</string>
     <string name="st_conv_menu_video">Video</string>
@@ -321,7 +321,7 @@
 
     <string name="st_contacts_header_unregistered">Utenti non registrati</string>
 
-    <string name="st_contacts_action_view">Vedi nell\' app Contatti</string>
+    <string name="st_contacts_action_view">Vedi nell\'app Contatti</string>
     <string name="st_contacts_action_share">Condividi contatto</string>
     <string name="st_contacts_action_delete">Elimina contatto</string>
     <string name="st_contacts_action_block">Blocca contatto</string>
@@ -341,14 +341,14 @@
 
     <string name="st_profile_notifications">Notifiche</string>
     <string name="st_profile_notifications_sound">Personalizza tono</string>
-    <string name="st_profile_media">Media condivisi con l\' utente</string>
+    <string name="st_profile_media">Media condivisi con l\'utente</string>
 
     <string name="st_profile_phone_hidden">nascosto</string>
     <string name="st_profile_phone_copied">Numero copiato</string>
     <string name="st_profile_menu_block">Blocca utente</string>
 
-    <string name="st_profile_menu_add_phone">Aggiungi all\' app Contatti</string>
-    <string name="st_profile_menu_view">Vedi nell\' app Contatti</string>
+    <string name="st_profile_menu_add_phone">Aggiungi all\'app Contatti</string>
+    <string name="st_profile_menu_view">Vedi nell\'app Contatti</string>
 
     <string name="st_profile_menu_add">Aggiungi ai contatti</string>
     <string name="st_profile_menu_remove">Rimuovi dai contatti</string>
@@ -395,7 +395,7 @@
     <string name="st_media_empty">Nessun media.</string>
 
     <string name="st_map_unavailable">Mappe non disponibili</string>
-    <string name="st_map_hybrid">Ibrido</string>
+    <string name="st_map_hybrid">Ibrida</string>
     <string name="st_map_normal">Normale</string>
     <string name="st_map_satellite">Satellite</string>
     <string name="st_map_location_unavailable">La tua posizione non è disponibile</string>
@@ -417,7 +417,7 @@
     <string name="st_blocked_phone_hidden">nascosto</string>
 
     <string name="st_appearance_title">Impostazioni della chat</string>
-    <string name="st_appearance_header_common">APPARENZE</string>
+    <string name="st_appearance_header_common">ASPETTO</string>
     <string name="st_appearance_header_chat">FINESTRA DEL MESSAGGIO</string>
 
     <string name="st_appearance_header_dialogs">LISTA DELLE CHAT</string>
@@ -429,9 +429,9 @@
     <string name="st_appearance_font_size_normal">Normale</string>
     <string name="st_appearance_font_size_large">Grande</string>
     <string name="st_appearance_font_size_huge">Enorme</string>
-    <string name="st_appearance_enter">Invia premendo il tasto invio</string>
-    <string name="st_appearance_enter_subtitle_enable">Il tasto invio spedisce il messaggio</string>
-    <string name="st_appearance_enter_subtitle_disable">Il tasto invio inserisce una nuova linea di testo</string>
+    <string name="st_appearance_enter">Invia premendo il tasto Invio</string>
+    <string name="st_appearance_enter_subtitle_enable">Il tasto Invio spedisce il messaggio</string>
+    <string name="st_appearance_enter_subtitle_disable">Il tasto Invio inserisce una nuova linea di testo</string>
     <string name="st_appearance_background">Sfondo</string>
     <string name="st_appearance_background_subtitle">Sfondo della chat</string>
     <string name="st_appearance_bar">Tema (sperimentale)</string>
@@ -456,7 +456,7 @@
     <string name="st_notifications_header_in_app">NOTIFICHE IN-APP</string>
     <string name="st_notifications_header_reset">RESETTA</string>
     <string name="st_notifications_alert">Avviso</string>
-    <string name="st_notifications_vibrate">VIbrazione</string>
+    <string name="st_notifications_vibrate">Vibrazione</string>
     <string name="st_notifications_sound">Suoni</string>
     <string name="st_notifications_sound_custom">Suoni personalizzati</string>
     <string name="st_notifications_in_app_sound">Suoni in-app</string>
@@ -518,7 +518,7 @@
     <string name="st_dialog_user_add_avatar">{sender} ha aggiunto una nuova foto del profilo</string>
     <string name="st_dialog_user_joined_app">{sender} è entrato in Telegram</string>
 
-    <string name="st_dialog_encrypted_switched_off">{sender} ha disattivato il timer di aut-distruzione</string>
+    <string name="st_dialog_encrypted_switched_off">{sender} ha disattivato il timer di auto-distruzione</string>
     <string name="st_dialog_encrypted_switched_off_you">Hai disattivato l\'auto-distruzione</string>
     <string name="st_dialog_encrypted_switched">{sender} ha attivato l\'auto-distruzione in {time}</string>
     <string name="st_dialog_encrypted_switched_you">Hai attivato l\'auto-distruzione</string>
@@ -529,7 +529,7 @@
     <string name="st_dialog_encrypted_cancelled">Chat segreta cancellata</string>
     <string name="st_dialog_encrypted_created">Chat segreta iniziata</string>
 
-    <string name="st_dialog_created_group">{sender} ha creato el grupo</string>
+    <string name="st_dialog_created_group">{sender} ha creato il gruppo</string>
     <string name="st_dialog_created_group_you">Hai creato il gruppo</string>
 
     <string name="st_dialog_changed_photo">{sender} ha cambiato la foto del gruppo</string>
@@ -617,11 +617,11 @@
 
         Ho appena scaricato Telegram sul mio Android.
 
-        Telegram è un app di messaggistica veloce, sicura e gratuita che rimpiazza gli SMS. Con questa app puoi creare gruppi fino a 200
+        Telegram è un app di messaggistica veloce, sicura e gratuita che sostituisce gli SMS. Con questa app puoi creare gruppi fino a 200
 		persone, inviare messaggi, foto e video molto grandi!
 
         Telegram è disponibile per Android ed iPhone. Non c\'è nessun PIN o username da ricordare - funziona come
-		gli SMS ed utilizza la tua connessione ad Internet.
+		gli SMS ed utilizza la tua connessione Internet.
 
         Scaricalo ora da http://telegram.org/dl e dì addio agli SMS!
     </string>
