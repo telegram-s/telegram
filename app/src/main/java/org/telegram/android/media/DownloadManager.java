@@ -511,10 +511,6 @@ public class DownloadManager {
         return fileCache.getFullPath(key);
     }
 
-    public String getPreviewFileName(String key) {
-        return fileCache.getFullPath("thumb_" + key);
-    }
-
     private String getDownloadTempFile() {
         return fileCache.getFullPath("download_" + Entropy.generateRandomId() + ".bin");
     }

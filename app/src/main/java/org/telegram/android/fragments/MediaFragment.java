@@ -17,6 +17,8 @@ import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.media.DownloadState;
+import org.telegram.android.preview.PreviewConfig;
+import org.telegram.android.preview.SmallPreviewView;
 import org.telegram.android.ui.FontController;
 
 import java.util.List;
@@ -52,8 +54,11 @@ public class MediaFragment extends TelegramFragment {
 
         final List<MediaRecord> lazyList = application.getEngine().getMediaEngine().lazyQueryMedia(peerType, peerId);
 
-        final int margin = (int) (4 * getResources().getDisplayMetrics().density);
-        final int cellWidth = ((Math.min(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels) - 4 * margin) / 3);
+        gridView.setPadding(0, PreviewConfig.MEDIA_SPACING, 0, PreviewConfig.MEDIA_SPACING);
+        gridView.setNumColumns(PreviewConfig.MEDIA_ROW_COUNT);
+        gridView.setColumnWidth(PreviewConfig.MEDIA_PREVIEW);
+        gridView.setVerticalSpacing(PreviewConfig.MEDIA_SPACING);
+        gridView.setHorizontalSpacing(PreviewConfig.MEDIA_SPACING);
 
         final Context context = getActivity();
         BaseAdapter adapter = new BaseAdapter() {
@@ -83,19 +88,20 @@ public class MediaFragment extends TelegramFragment {
             }
 
             public View newView(Context context, MediaRecord object, ViewGroup parent) {
-                GridView.LayoutParams layoutParams = new GridView.LayoutParams(cellWidth + margin, cellWidth + margin);
+                GridView.LayoutParams layoutParams = new GridView.LayoutParams(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW);
                 FrameLayout frameLayout = new FrameLayout(context);
                 frameLayout.setLayoutParams(layoutParams);
 
                 // TODO: Implement
+                SmallPreviewView smallPreviewView = new SmallPreviewView(context);
 //                FastWebImageView res = new FastWebImageView(context);
-//                FrameLayout.LayoutParams imageParams = new FrameLayout.LayoutParams(cellWidth, cellWidth);
-//                imageParams.topMargin = imageParams.leftMargin = imageParams.rightMargin = imageParams.bottomMargin = margin / 2;
-//                res.setLayoutParams(imageParams);
+                FrameLayout.LayoutParams imageParams = new FrameLayout.LayoutParams(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW);
+                // imageParams.topMargin = imageParams.leftMargin = imageParams.rightMargin = imageParams.bottomMargin = margin / 2;
+                smallPreviewView.setLayoutParams(imageParams);
 //                res.setScaleTypeImage(FastWebImageView.SCALE_TYPE_FIT_CROP);
 
                 TextView timeView = new TextView(context);
-                timeView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_bubble_ic_video, 0, 0, 0);
+                timeView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_media_ic_play, 0, 0, 0);
                 timeView.setCompoundDrawablePadding(getPx(6));
                 timeView.setTextColor(0xE6FFFFFF);
                 timeView.setTextSize(15);
@@ -108,15 +114,30 @@ public class MediaFragment extends TelegramFragment {
                 timeView.setLayoutParams(timeParams);
 
                 // TODO: Implement
-                // frameLayout.addView(res);
+                frameLayout.addView(smallPreviewView);
                 frameLayout.addView(timeView);
 
                 return frameLayout;
             }
 
             public void bindView(View view, Context context, MediaRecord object, int index) {
-                // TODO: Implement
-//                FastWebImageView imageView = (FastWebImageView) ((ViewGroup) view).getChildAt(0);
+                SmallPreviewView imageView = (SmallPreviewView) ((ViewGroup) view).getChildAt(0);
+                if (object.getPreview() instanceof TLLocalPhoto) {
+                    TLLocalPhoto localPhoto = (TLLocalPhoto) object.getPreview();
+                    String key = DownloadManager.getPhotoKey(localPhoto);
+                    // timeView.setVisibility(View.GONE);
+                    imageView.setBackgroundColor(0xffffff);
+                    if (application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
+                        imageView.requestFile(application.getDownloadManager().getFileName(key));
+                    } else {
+
+                        if (localPhoto.getFastPreviewW() != 0 && localPhoto.getFastPreviewH() != 0) {
+                            imageView.requestFast(localPhoto);
+                        } else {
+                            imageView.clearImage();
+                        }
+                    }
+                }
 //                TextView timeView = (TextView) ((ViewGroup) view).getChildAt(1);
 //                if (object.getPreview() instanceof TLLocalPhoto) {
 //                    TLLocalPhoto localPhoto = (TLLocalPhoto) object.getPreview();
@@ -155,10 +176,14 @@ public class MediaFragment extends TelegramFragment {
 //                }
             }
         };
-        if (adapter.getCount() == 0) {
+        if (adapter.getCount() == 0)
+
+        {
             gridView.setVisibility(View.GONE);
             res.findViewById(R.id.empty).setVisibility(View.VISIBLE);
-        } else {
+        } else
+
+        {
             gridView.setVisibility(View.VISIBLE);
             res.findViewById(R.id.empty).setVisibility(View.GONE);
             gridView.setAdapter(adapter);
@@ -170,6 +195,7 @@ public class MediaFragment extends TelegramFragment {
                 }
             });
         }
+
         return res;
     }
 

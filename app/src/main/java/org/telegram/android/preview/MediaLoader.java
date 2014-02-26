@@ -2,8 +2,6 @@ package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.Handler;
-import android.os.Looper;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -17,31 +15,28 @@ import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLLocalGeo;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
-import org.telegram.android.log.Logger;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
-import org.telegram.android.preview.cache.BitmapHolder;
-import org.telegram.android.preview.cache.ImageCache;
-import org.telegram.android.preview.cache.ImageStorage;
-import org.telegram.android.preview.queue.QueueProcessor;
+import org.telegram.android.preview.media.*;
+import org.telegram.android.preview.media.MediaPhotoFastTask;
 import org.telegram.android.preview.queue.QueueWorker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 import static org.telegram.android.preview.PreviewConfig.*;
 
 /**
  * Created by ex3ndr on 08.02.14.
  */
-public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
+public class MediaLoader extends BaseLoader<BaseTask> {
 
     private static final int SIZE_CHAT_PREVIEW = 0;
     private static final int SIZE_MAP_PREVIEW = 1;
+    private static final int SIZE_FULL_PREVIEW = 2;
+    private static final int SIZE_FAST_PREVIEW = 3;
+    private static final int SIZE_SMALL_PREVIEW = 4;
 
     private Bitmap fullImageCached = null;
     private final Object fullImageCachedLock = new Object();
@@ -75,12 +70,20 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
         requestTask(new MediaRawUriTask(fileName), receiver);
     }
 
+    public void requestRawSmall(String fileName, ImageReceiver receiver) {
+        requestTask(new SmallRawTask(fileName), receiver);
+    }
+
     public void requestGeo(TLLocalGeo geo, ImageReceiver receiver) {
         requestTask(new MediaGeoTask(geo.getLatitude(), geo.getLongitude()), receiver);
     }
 
     public void requestFastLoading(TLLocalPhoto photo, ImageReceiver receiver) {
         requestTask(new MediaPhotoFastTask(photo), receiver);
+    }
+
+    public void requestFastSmallLoading(TLLocalPhoto photo, ImageReceiver receiver) {
+        requestTask(new SmallPhotoTask(photo), receiver);
     }
 
     public void requestFastLoading(TLLocalDocument doc, ImageReceiver receiver) {
@@ -113,6 +116,26 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
         return res;
     }
 
+    private Bitmap fetchMediaPreview() {
+        Bitmap res = imageCache.findFree(SIZE_SMALL_PREVIEW);
+        if (res == null) {
+            res = Bitmap.createBitmap(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW, Bitmap.Config.ARGB_8888);
+        } else {
+            res.eraseColor(Color.TRANSPARENT);
+        }
+        return res;
+    }
+
+    private Bitmap fetchFastPreview() {
+        Bitmap res = imageCache.findFree(SIZE_FAST_PREVIEW);
+        if (res == null) {
+            res = Bitmap.createBitmap(PreviewConfig.FAST_MAX_W, PreviewConfig.FAST_MAX_H, Bitmap.Config.ARGB_8888);
+        } else {
+            res.eraseColor(Color.TRANSPARENT);
+        }
+        return res;
+    }
+
     private Bitmap fetchMapPreview() {
         Bitmap res = imageCache.findFree(SIZE_MAP_PREVIEW);
         if (res == null) {
@@ -129,163 +152,6 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                 PreviewConfig.ROUND_RADIUS);
     }
 
-    public abstract class BaseTask extends QueueProcessor.BaseTask {
-
-    }
-
-    public class MediaFileTask extends BaseTask {
-
-        private TLLocalPhoto localPhoto;
-        private String fileName;
-
-        public MediaFileTask(TLLocalPhoto localPhoto, String fileName) {
-            this.localPhoto = localPhoto;
-            this.fileName = fileName;
-        }
-
-        public TLLocalPhoto getLocalPhoto() {
-            return localPhoto;
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        @Override
-        public String getKey() {
-            return fileName;
-        }
-    }
-
-    public class MediaGeoTask extends BaseTask {
-        private double latitude;
-        private double longitude;
-
-        private MediaGeoTask(double latitude, double longitude) {
-            this.latitude = latitude;
-            this.longitude = longitude;
-        }
-
-        public double getLatitude() {
-            return latitude;
-        }
-
-        public double getLongitude() {
-            return longitude;
-        }
-
-        @Override
-        public String getKey() {
-            return "geo:" + latitude + "," + longitude;
-        }
-    }
-
-    public class MediaPhotoFastTask extends BaseTask {
-
-        private TLLocalPhoto photo;
-
-        private MediaPhotoFastTask(TLLocalPhoto photo) {
-            this.photo = photo;
-        }
-
-        public TLLocalPhoto getPhoto() {
-            return photo;
-        }
-
-        @Override
-        public String getKey() {
-            return photo.getFastPreviewKey();
-        }
-    }
-
-    public class MediaDocFastTask extends BaseTask {
-
-        private TLLocalDocument doc;
-
-        private MediaDocFastTask(TLLocalDocument doc) {
-            this.doc = doc;
-        }
-
-        public TLLocalDocument getDoc() {
-            return doc;
-        }
-
-        @Override
-        public String getKey() {
-            // Work-around: documents with fast cache doesn't contain preview location
-            return "preview:" + doc.getFileLocation().getUniqKey();
-        }
-    }
-
-    public class MediaVideoFastTask extends BaseTask {
-
-        private TLLocalVideo video;
-
-        private MediaVideoFastTask(TLLocalVideo video) {
-            this.video = video;
-        }
-
-        public TLLocalVideo getVideo() {
-            return video;
-        }
-
-        @Override
-        public String getKey() {
-            return video.getPreviewKey();
-        }
-    }
-
-    public class MediaVideoTask extends BaseTask {
-        private String fileName;
-
-        private MediaVideoTask(String fileName) {
-            this.fileName = fileName;
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        @Override
-        public String getKey() {
-            return fileName;
-        }
-    }
-
-    private class MediaRawTask extends BaseTask {
-        private String fileName;
-
-        private MediaRawTask(String fileName) {
-            this.fileName = fileName;
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        @Override
-        public String getKey() {
-            return fileName;
-        }
-    }
-
-    private class MediaRawUriTask extends BaseTask {
-        private String uri;
-
-        private MediaRawUriTask(String uri) {
-            this.uri = uri;
-        }
-
-        public String getUri() {
-            return uri;
-        }
-
-        @Override
-        public String getKey() {
-            return uri;
-        }
-    }
-
     private class FastWorker extends QueueWorker<BaseTask> {
 
         public FastWorker() {
@@ -300,8 +166,20 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                 processVideo((MediaVideoFastTask) task);
             } else if (task instanceof MediaDocFastTask) {
                 processDoc((MediaDocFastTask) task);
+            } else if (task instanceof SmallPhotoTask) {
+                processPhotoSmall((SmallPhotoTask) task);
             }
             return true;
+        }
+
+        private boolean processPhotoSmall(SmallPhotoTask task) {
+            TLLocalPhoto mediaPhoto = task.getPhoto();
+
+            return processMedia(
+                    mediaPhoto.getFastPreview(),
+                    mediaPhoto.getFastPreviewW(),
+                    mediaPhoto.getFastPreviewH(),
+                    task);
         }
 
         private boolean processPhoto(MediaPhotoFastTask task) {
@@ -311,7 +189,6 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                     mediaPhoto.getFastPreview(),
                     mediaPhoto.getFastPreviewW(),
                     mediaPhoto.getFastPreviewH(),
-                    mediaPhoto.getFastPreviewKey(),
                     task);
         }
 
@@ -323,7 +200,6 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                     mediaVideo.getFastPreview(),
                     mediaVideo.getPreviewW(),
                     mediaVideo.getPreviewH(),
-                    mediaVideo.getPreviewKey(),
                     task);
         }
 
@@ -334,11 +210,10 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                     mediaDoc.getFastPreview(),
                     mediaDoc.getPreviewW(),
                     mediaDoc.getPreviewH(),
-                    mediaDoc.getPreview().getUniqKey(),
                     task);
         }
 
-        private boolean process(byte[] data, int w, int h, String key, BaseTask task) {
+        private boolean process(byte[] data, int w, int h, BaseTask task) {
             Bitmap img = fastBitmaps.get();
             try {
                 Optimizer.loadTo(data, img);
@@ -346,22 +221,32 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                 e.printStackTrace();
                 return false;
             }
-            //img = BitmapUtils.fastblur(img, w, h, 8);
             Optimizer.blur(img);
-
             Bitmap destPreview = fetchChatPreview();
-
-
             int[] sizes = drawPreview(img, w, h, destPreview);
-
             onImageLoaded(destPreview, sizes[0], sizes[1], task, SIZE_CHAT_PREVIEW);
+            return true;
+        }
 
+        private boolean processMedia(byte[] data, int w, int h, BaseTask task) {
+            Bitmap img = fastBitmaps.get();
+            try {
+                Optimizer.loadTo(data, img);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+            Optimizer.blur(img, w, h);
+            Bitmap destPreview = fetchMediaPreview();
+            Optimizer.scaleToFill(img, w, h, destPreview);
+            onImageLoaded(destPreview, destPreview.getWidth(), destPreview.getHeight(), task, SIZE_SMALL_PREVIEW);
             return true;
         }
 
         @Override
         public boolean isAccepted(BaseTask task) {
-            return task instanceof MediaPhotoFastTask || task instanceof MediaVideoFastTask || task instanceof MediaDocFastTask;
+            return task instanceof MediaPhotoFastTask || task instanceof MediaVideoFastTask || task instanceof MediaDocFastTask
+                    || task instanceof SmallPhotoTask;
         }
     }
 
@@ -410,19 +295,19 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                 return;
             }
 
-            info = Optimizer.getInfo(rawTask.fileName);
+            info = Optimizer.getInfo(rawTask.getFileName());
 
             if (info.getMimeType() != null && info.getMimeType().equals("image/jpeg")) {
                 if (info.getHeight() <= fullImageCached.getHeight() && info.getWidth() <= fullImageCached.getWidth()) {
                     synchronized (fullImageCachedLock) {
-                        BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
+                        BitmapDecoderEx.decodeReuseBitmap(rawTask.getFileName(), fullImageCached);
                         int[] sizes = drawPreview(fullImageCached, info.getWidth(), info.getHeight(), res);
                         onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
                         return;
                     }
                 } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
                     synchronized (fullImageCachedLock) {
-                        BitmapDecoderEx.decodeReuseBitmap(rawTask.fileName, fullImageCached);
+                        BitmapDecoderEx.decodeReuseBitmap(rawTask.getFileName(), fullImageCached);
                         int[] sizes = drawPreview(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
                         onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
                         return;
@@ -454,8 +339,44 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                 processFileTask((MediaFileTask) task);
             } else if (task instanceof MediaVideoTask) {
                 processVideoTask((MediaVideoTask) task);
+            } else if (task instanceof SmallRawTask) {
+                processSmallTask((SmallRawTask) task);
             }
             return true;
+        }
+
+        private void processSmallTask(SmallRawTask task) throws Exception {
+            synchronized (fullImageCachedLock) {
+                if (fullImageCached == null) {
+                    fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
+                }
+                fullImageCached.eraseColor(Color.TRANSPARENT);
+
+                boolean useScaled = false;
+
+                Optimizer.BitmapInfo info;
+                try {
+                    info = Optimizer.getInfo(task.getFileName());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+                }
+
+                useScaled = info.getWidth() > fullImageCached.getWidth() || info.getHeight() > fullImageCached.getHeight();
+
+                int scaledW = useScaled ? info.getWidth() / 2 : info.getWidth();
+                int scaledH = useScaled ? info.getHeight() / 2 : info.getHeight();
+
+                if (useScaled) {
+                    BitmapDecoderEx.decodeReuseBitmapScaled(task.getFileName(), fullImageCached);
+                } else {
+                    BitmapDecoderEx.decodeReuseBitmap(task.getFileName(), fullImageCached);
+                }
+
+                Bitmap res = fetchMediaPreview();
+                Optimizer.scaleToFill(fullImageCached, scaledW, scaledH, res);
+                onImageLoaded(res, res.getWidth(), res.getHeight(), task, SIZE_SMALL_PREVIEW);
+            }
         }
 
         private void processVideoTask(MediaVideoTask task) throws Exception {
@@ -483,7 +404,7 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                 boolean useScaled = false;
 
                 try {
-                    Optimizer.BitmapInfo info = Optimizer.getInfo(fileTask.fileName);
+                    Optimizer.BitmapInfo info = Optimizer.getInfo(fileTask.getFileName());
                     useScaled = info.getWidth() > fullImageCached.getWidth() || info.getHeight() > fullImageCached.getHeight();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -493,9 +414,9 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
                 int scaledH = useScaled ? fileTask.getLocalPhoto().getFullH() / 2 : fileTask.getLocalPhoto().getFullH();
 
                 if (useScaled) {
-                    BitmapDecoderEx.decodeReuseBitmapScaled(fileTask.fileName, fullImageCached);
+                    BitmapDecoderEx.decodeReuseBitmapScaled(fileTask.getFileName(), fullImageCached);
                 } else {
-                    BitmapDecoderEx.decodeReuseBitmap(fileTask.fileName, fullImageCached);
+                    BitmapDecoderEx.decodeReuseBitmap(fileTask.getFileName(), fullImageCached);
                 }
 
                 Bitmap res = fetchChatPreview();
@@ -507,7 +428,7 @@ public class MediaLoader extends BaseLoader<MediaLoader.BaseTask> {
 
         @Override
         public boolean isAccepted(BaseTask task) {
-            return task instanceof MediaFileTask || task instanceof MediaVideoTask;
+            return task instanceof MediaFileTask || task instanceof MediaVideoTask || task instanceof SmallRawTask;
         }
     }
 

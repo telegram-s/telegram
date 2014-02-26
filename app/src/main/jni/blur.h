@@ -156,10 +156,8 @@ static inline uint64_t get_colors_64 (const uint8_t *p) {
   return p[0] + (p[1] << 16) + ((uint64_t)p[2] << 32);
 }
 
-static void fastBlur7 (AndroidBitmapInfo *info, void *pixels) {
+static void fastBlur7 (AndroidBitmapInfo *info, const int w, const int h, void *pixels) {
   uint8_t *pix = (uint8_t *)pixels;
-  const int w = info->width;
-  const int h = info->height;
   const int stride = info->stride;
   const int radius = 7;
   const int r1 = radius + 1;
@@ -249,10 +247,8 @@ static void fastBlur7 (AndroidBitmapInfo *info, void *pixels) {
 }
 
 
-static void fastBlur7_2 (AndroidBitmapInfo *info, void *pixels) {
+static void fastBlur7_2 (AndroidBitmapInfo *info,const int w, const int h, void *pixels) {
   uint8_t *pix = (uint8_t *)pixels;
-  const int w = info->width;
-  const int h = info->height;
   const int stride = info->stride;
   const int radius = 7;
   const int r1 = radius + 1;

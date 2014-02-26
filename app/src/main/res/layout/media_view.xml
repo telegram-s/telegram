@@ -8,13 +8,9 @@
     <GridView android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:drawSelectorOnTop="true"
-              android:paddingLeft="2dp"
-              android:paddingRight="2dp"
-              android:paddingTop="4dp"
-              android:paddingBottom="2dp"
-              android:clipToPadding="false"
               android:gravity="center_horizontal"
-              android:numColumns="4"
+              android:listSelector="@null"
+              android:clipToPadding="false"
               android:id="@+id/mediaGrid"/>
 
     <TextView android:layout_width="wrap_content"

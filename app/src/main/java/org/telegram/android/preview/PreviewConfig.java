@@ -18,14 +18,8 @@ public class PreviewConfig {
     private static final int MAX_PREVIEW_W_DP = 220;
     private static final int MAX_PREVIEW_H_DP = 300;
 
-//    private static final int MAX_PREVIEW_LARGE_W_DP = 260;
-//    private static final int MAX_PREVIEW_LARGE_H_DP = 400;
-//
-//    private static final int MAX_PREVIEW_NORMAL_W_DP = 220;
-//    private static final int MAX_PREVIEW_NORMAL_H_DP = 300;
-//
-//    private static final int MAX_PREVIEW_SMALL_W_DP = 160;
-//    private static final int MAX_PREVIEW_SMALL_H_DP = 300;
+    private static final int MAX_MEDIA_PREVIEW_DP = 120;
+    private static final int MIN_MEDIA_PREVIEW_MARGIN_DP = 2;
 
     private static final int MAX_PREVIEW_BITMAP_W_DP = MAX_PREVIEW_W_DP;
     private static final int MAX_PREVIEW_BITMAP_H_DP = MAX_PREVIEW_H_DP;
@@ -68,6 +62,10 @@ public class PreviewConfig {
 
     public static int ROUND_RADIUS = 2;
 
+    public static final int MEDIA_ROW_COUNT = 3;
+    public static int MEDIA_PREVIEW = MAX_MEDIA_PREVIEW_DP;
+    public static int MEDIA_SPACING = MIN_MEDIA_PREVIEW_MARGIN_DP;
+
     public static void init(Context context) {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         float density = metrics.density;
@@ -92,6 +90,19 @@ public class PreviewConfig {
 
         WALL_MAX_W = Math.min(metrics.widthPixels, metrics.heightPixels);
         WALL_MAX_H = Math.max(metrics.widthPixels, metrics.heightPixels);
+
+        int side = Math.min(metrics.widthPixels, metrics.heightPixels);
+
+        int margin = (int) (MIN_MEDIA_PREVIEW_MARGIN_DP * metrics.density);
+        int cellWidth = ((side - (MEDIA_ROW_COUNT - 1) * margin) / MEDIA_ROW_COUNT);
+
+        if (cellWidth >= (MAX_MEDIA_PREVIEW_DP * metrics.density)) {
+            MEDIA_PREVIEW = (int) (MAX_MEDIA_PREVIEW_DP * metrics.density);
+            MEDIA_SPACING = (int) (MIN_MEDIA_PREVIEW_MARGIN_DP * metrics.density);
+        } else {
+            MEDIA_PREVIEW = cellWidth;
+            MEDIA_SPACING = margin;
+        }
     }
 
     public static int[] getSizes(int w, int h) {

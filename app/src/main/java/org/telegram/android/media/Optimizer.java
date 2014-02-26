@@ -155,6 +155,12 @@ public class Optimizer {
         return Bitmap.createScaledBitmap(src, nw, nh, true);
     }
 
+    public static Bitmap crop(Bitmap src, int w, int h) {
+        Bitmap res = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        drawTo(src, res);
+        return res;
+    }
+
     public static void scaleTo(Bitmap src, Bitmap dest) {
         float ratioX = dest.getWidth() / (float) src.getWidth();
         float ratioY = dest.getHeight() / (float) src.getHeight();
@@ -186,13 +192,14 @@ public class Optimizer {
 
         dest.eraseColor(Color.TRANSPARENT);
         Canvas canvas = new Canvas(dest);
+        int paddingTop = -(dest.getHeight() - (int) (sourceH * ratio)) / 2;
+        int paddingLeft = -(dest.getWidth() - (int) (sourceW * ratio)) / 2;
         canvas.drawBitmap(src,
-                new Rect(0, 0, sourceW, sourceH),
-                new Rect(
-                        (dest.getWidth() - (int) (sourceW * ratio)) / 2,
-                        (dest.getHeight() - (int) (sourceH * ratio)) / 2,
-                        (int) (sourceW * ratio),
-                        (int) (sourceH * ratio)),
+                new Rect(1, 1, sourceW - 1, sourceH - 1),
+                new Rect(-paddingLeft,
+                        -paddingTop,
+                        (int) (sourceW * ratio) + paddingLeft,
+                        (int) (sourceH * ratio) + paddingTop),
                 new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG));
     }
 
@@ -226,6 +233,10 @@ public class Optimizer {
 
     public static void blur(Bitmap src) {
         ImageNativeUtils.performBlur(src);
+    }
+
+    public static void blur(Bitmap src, int w, int h) {
+        ImageNativeUtils.performBlur(src, w, h);
     }
 
     // Private methods

@@ -22,14 +22,23 @@ public class ImageNativeUtils {
 
     public static Bitmap performBlur(Bitmap src) {
         if (src.getWidth() <= 90 && src.getHeight() <= 90) {
-            nativeFastBlur(src);
+            nativeFastBlur(src, src.getWidth(), src.getHeight());
             return src;
         }
 
-        return BitmapUtils.fastblur(src, 3);
+        return BitmapUtils.fastblur(src, 7);
     }
 
-    private static native boolean nativeFastBlur(Bitmap src);
+    public static Bitmap performBlur(Bitmap src, int w, int h) {
+        if (src.getWidth() <= 90 && src.getHeight() <= 90) {
+            nativeFastBlur(src, w, h);
+            return src;
+        }
+
+        return BitmapUtils.fastblur(src, w, h, 7);
+    }
+
+    private static native boolean nativeFastBlur(Bitmap src, int w, int h);
 
     private static native boolean nativeMergeBitmapAlpha(Bitmap source, Bitmap alpha);
 

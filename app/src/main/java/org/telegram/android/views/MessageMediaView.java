@@ -50,6 +50,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private Drawable videoIcon;
     private Drawable mapPoint;
     private Drawable unsupportedMark;
+    private Drawable downloadIcon;
     private TextPaint videoDurationPaint;
     private TextPaint downloadPaint;
     private TextPaint timePaint;
@@ -122,7 +123,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         super.init();
         loader = application.getUiKernel().getMediaLoader();
         downloadManager = application.getDownloadManager();
-        videoIcon = getResources().getDrawable(R.drawable.st_bubble_ic_video);
+        videoIcon = getResources().getDrawable(R.drawable.st_media_ic_play);
         mapPoint = getResources().getDrawable(R.drawable.st_map_pin);
         unsupportedMark = getResources().getDrawable(R.drawable.st_bubble_unknown);
 
@@ -200,6 +201,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         stateSent = getResources().getDrawable(R.drawable.st_bubble_ic_check_photo);
         stateHalfCheck = getResources().getDrawable(R.drawable.st_bubble_ic_halfcheck_photo);
         stateFailure = getResources().getDrawable(R.drawable.st_bubble_ic_warning);
+        downloadIcon = getResources().getDrawable(R.drawable.st_bubble_ic_download);
 
         placeholderPaint = new Paint();
         placeholderPaint.setColor(Color.WHITE);
@@ -720,13 +722,23 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
             } else if (getState() == STATE_PENDING) {
                 canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
+                downloadIcon.setBounds(
+                        centerX - downloadIcon.getIntrinsicWidth() / 2, centerY - downloadIcon.getIntrinsicHeight() / 2,
+                        centerX + downloadIcon.getIntrinsicWidth() / 2, centerY + downloadIcon.getIntrinsicHeight() / 2);
+                downloadIcon.draw(canvas);
             }
         }
 
         if (isVideo) {
-            videoIcon.setBounds(getPx(8), getPx(6), getPx(8) + videoIcon.getIntrinsicWidth(), getPx(6) + videoIcon.getIntrinsicHeight());
-            videoIcon.draw(canvas);
-            canvas.drawText(duration, getPx(27), getPx(18), videoDurationPaint);
+            if ((getState() == STATE_NONE || getState() == STATE_DOWNLOADED)) {
+                int centerX = desiredWidth / 2;
+                int centerY = desiredHeight / 2;
+                videoIcon.setBounds(
+                        centerX - videoIcon.getIntrinsicWidth() / 2, centerY - videoIcon.getIntrinsicHeight() / 2,
+                        centerX + videoIcon.getIntrinsicWidth() / 2, centerY + videoIcon.getIntrinsicHeight() / 2);
+                videoIcon.draw(canvas);
+            }
+            canvas.drawText(duration, getPx(8), getPx(18), videoDurationPaint);
         }
 
         canvas.restore();

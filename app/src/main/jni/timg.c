@@ -109,7 +109,8 @@ JNIEXPORT jboolean Java_org_telegram_android_util_ImageNativeUtils_nativeMergeBi
 JNIEXPORT jboolean Java_org_telegram_android_util_ImageNativeUtils_nativeFastBlur(
         JNIEnv* env,
         jclass clazz,
-        jobject bitmap)
+        jobject bitmap,
+        jint w, jint h)
 {
     AndroidBitmapInfo  info;
     int ret;
@@ -130,7 +131,7 @@ JNIEXPORT jboolean Java_org_telegram_android_util_ImageNativeUtils_nativeFastBlu
         return JNI_FALSE;
     }
 
-    fastBlur7_2(&info, pixels);
+    fastBlur7_2(&info, w, h, pixels);
 
     AndroidBitmap_unlockPixels(env, bitmap);
 

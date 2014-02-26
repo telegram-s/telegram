@@ -2,17 +2,16 @@ package org.telegram.android.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -23,9 +22,14 @@ import org.telegram.android.core.model.media.TLLocalFileEmpty;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
 import org.telegram.android.media.*;
+import org.telegram.android.preview.ImageHolder;
+import org.telegram.android.preview.ImageReceiver;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
+import org.telegram.android.ui.DepthPageTransformer;
 import org.telegram.android.ui.TextUtil;
+import org.telegram.android.ui.ZoomOutPageTransformer;
+import uk.co.senab.photoview.PhotoView;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,6 +132,9 @@ public class ImagePreviewFragment extends TelegramFragment {
         }
 
         imagesPager = (ViewPager) res.findViewById(R.id.imagesPager);
+        if (Build.VERSION.SDK_INT >= 11) {
+            imagesPager.setPageTransformer(true, new DepthPageTransformer());
+        }
 
         senderNameView = (TextView) res.findViewById(R.id.senderName);
         recordDateView = (TextView) res.findViewById(R.id.date);
@@ -207,9 +214,76 @@ public class ImagePreviewFragment extends TelegramFragment {
                 return POSITION_NONE;
             }
 
+            private View createPhotoView(MediaRecord record) {
+                TLLocalPhoto photo = (TLLocalPhoto) record.getPreview();
+                final View res = View.inflate(getActivity(), R.layout.media_image, null);
+                final ProgressBar progressBar = (ProgressBar) res.findViewById(R.id.loading);
+                final ImageButton downloadButton = (ImageButton) res.findViewById(R.id.download);
+                final ImageView fastImageView = (ImageView) res.findViewById(R.id.fastPreview);
+                final PhotoView fullView = (PhotoView) res.findViewById(R.id.fullImage);
+                final String downloadKey = DownloadManager.getPhotoKey(photo);
+
+                progressBar.setVisibility(View.GONE);
+                downloadButton.setVisibility(View.GONE);
+
+                if (!(photo.getFullLocation() instanceof TLLocalFileEmpty)) {
+                    boolean hasFastPreview = false;
+                    if (photo.getFastPreviewH() != 0 && photo.getFastPreviewW() != 0) {
+                        try {
+                            Bitmap fast = Optimizer.load(photo.getFastPreview());
+                            fast = Optimizer.crop(fast, photo.getFastPreviewW(), photo.getFastPreviewH());
+                            Optimizer.blur(fast);
+                            fastImageView.setImageBitmap(fast);
+                            hasFastPreview = true;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if (hasFastPreview) {
+                        fastImageView.setVisibility(View.VISIBLE);
+                    } else {
+                        fastImageView.setVisibility(View.GONE);
+                    }
+
+                    if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                try {
+                                    final Bitmap bitmap = Optimizer.load(application.getDownloadManager().getFileName(downloadKey));
+                                    fullView.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            fullView.setImageBitmap(bitmap);
+                                            showView(fullView);
+                                            goneView(fastImageView);
+                                        }
+                                    });
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.start();
+                    }
+                } else {
+                    fastImageView.setVisibility(View.GONE);
+                    fullView.setVisibility(View.GONE);
+                }
+
+                return res;
+            }
+
+
             @Override
             public Object instantiateItem(ViewGroup collection, int position) {
                 final MediaRecord record = records == null ? mainRecord : records[position];
+                if (record.getPreview() instanceof TLLocalPhoto) {
+                    View res = createPhotoView(record);
+                    collection.addView(res);
+                    return res;
+                }
+
                 final View res;
                 if (record.getPreview() instanceof TLLocalVideo) {
                     res = View.inflate(getActivity(), R.layout.media_video, null);
@@ -323,9 +397,18 @@ public class ImagePreviewFragment extends TelegramFragment {
 //                                onImageTap();
 //                            }
 //                        });
-//                        if (photo.getFastPreviewH() != 0 && photo.getFastPreviewW() != 0) {
-//                            imageView.setImageBitmap(BitmapFactory.decodeByteArray(photo.getFastPreview(), 0, photo.getFastPreview().length));
-//                        }
+                        ImageView fastImageView = (ImageView) res.findViewById(R.id.fastPreview);
+
+                        if (photo.getFastPreviewH() != 0 && photo.getFastPreviewW() != 0) {
+                            try {
+                                Bitmap fast = Optimizer.load(photo.getFastPreview());
+                                fast = Optimizer.crop(fast, photo.getFastPreviewW(), photo.getFastPreviewH());
+                                Optimizer.blur(fast);
+                                fastImageView.setImageBitmap(fast);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
 
                         downloadButton.setOnClickListener(secure(new View.OnClickListener() {
                             @Override
