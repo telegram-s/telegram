@@ -86,6 +86,10 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         requestTask(new SmallPhotoTask(photo), receiver);
     }
 
+    public void requestFastSmallLoading(TLLocalVideo video, ImageReceiver receiver) {
+        requestTask(new SmallVideoTask(video), receiver);
+    }
+
     public void requestFastLoading(TLLocalDocument doc, ImageReceiver receiver) {
         requestTask(new MediaDocFastTask(doc), receiver);
     }
@@ -168,6 +172,8 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 processDoc((MediaDocFastTask) task);
             } else if (task instanceof SmallPhotoTask) {
                 processPhotoSmall((SmallPhotoTask) task);
+            } else if (task instanceof SmallVideoTask) {
+                processVideoSmall((SmallVideoTask) task);
             }
             return true;
         }
@@ -179,6 +185,16 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                     mediaPhoto.getFastPreview(),
                     mediaPhoto.getFastPreviewW(),
                     mediaPhoto.getFastPreviewH(),
+                    task);
+        }
+
+        private boolean processVideoSmall(SmallVideoTask task) {
+            TLLocalVideo mediaVideo = task.getVideo();
+
+            return processMedia(
+                    mediaVideo.getFastPreview(),
+                    mediaVideo.getPreviewW(),
+                    mediaVideo.getPreviewH(),
                     task);
         }
 
@@ -246,7 +262,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         @Override
         public boolean isAccepted(BaseTask task) {
             return task instanceof MediaPhotoFastTask || task instanceof MediaVideoFastTask || task instanceof MediaDocFastTask
-                    || task instanceof SmallPhotoTask;
+                    || task instanceof SmallPhotoTask || task instanceof SmallVideoTask;
         }
     }
 
@@ -428,7 +444,8 @@ public class MediaLoader extends BaseLoader<BaseTask> {
 
         @Override
         public boolean isAccepted(BaseTask task) {
-            return task instanceof MediaFileTask || task instanceof MediaVideoTask || task instanceof SmallRawTask;
+            return task instanceof MediaFileTask || task instanceof MediaVideoTask || task instanceof SmallRawTask
+                    || task instanceof SmallFullVideoTask;
         }
     }
 

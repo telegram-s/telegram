@@ -125,9 +125,14 @@ public class MediaFragment extends TelegramFragment {
                             imageView.clearImage();
                         }
                     }
-                } else {
+                } else if (object.getPreview() instanceof TLLocalVideo) {
                     videoView.setVisibility(View.VISIBLE);
-                    imageView.clearImage();
+                    TLLocalVideo localVideo = (TLLocalVideo) object.getPreview();
+                    if (localVideo.getFastPreview().length > 0) {
+                        imageView.requestFast(localVideo);
+                    } else {
+                        imageView.clearImage();
+                    }
                 }
             }
         };
