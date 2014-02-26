@@ -731,6 +731,7 @@ public class ModelEngine {
         usersEngine.onUsers(statedMessage.getUsers());
         groupsEngine.onGroupsUpdated(statedMessage.getChats());
         onUpdatedMessage(statedMessage.getMessage());
+        mediaEngine.saveMedia(msg);
         dialogsEngine.updateDescriptorSent(msg.getPeerType(), msg.getPeerId(), msg.getDate(), mid, msg.getDatabaseId());
     }
 
