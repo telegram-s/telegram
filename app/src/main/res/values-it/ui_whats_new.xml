@@ -2,7 +2,7 @@
 <resources>
     <string name="whats_contacts_title">Miglioramenti nei contatti e nell\'avvio</string>
     <string name="whats_contacts_0">Eliminazione contatti</string>
-    <string name="whats_contacts_1">L\' ordinazione dei contatti (nome \ cognome) ora utilizza le impostazioni del telefono</string>
+    <string name="whats_contacts_1">L\'ordinazione dei contatti (nome \ cognome) ora utilizza le impostazioni del telefono</string>
     <string name="whats_contacts_2">Miglioramenti nella velocità dei caricamenti</string>
 
     <string name="whats_new_design_title">Design, velocità e stabilità</string>
@@ -15,7 +15,7 @@
     <string name="whats_new_secret_hint">Inizia una chat segreta dal menu "Scrivi a" o dal profilo di un contatto.
         
     </string>
-    <string name="whats_new_secret_0">Usa crittazione end-to-end</string>
+    <string name="whats_new_secret_0">Usa crittografia punto-punto</string>
     <string name="whats_new_secret_1">Non lascia traccia sui nostri server</string>
     <string name="whats_new_secret_2">Si autodistrugge</string>
     <string name="whats_new_secret_3">Non permette il reinvio dei messaggi</string>
@@ -33,7 +33,7 @@
 		Se hai qualche problema con la traduzione Russa, per favore dillo al nostro supporto tecnico in Impostazioni - Fai una domanda.
     </string>
     <string name="whats_new_gif_0">Invio e ricezione di GIF</string>
-    <string name="whats_new_gif_1">Preview dei documenti (ora visibile solo nella S-Edition)</string>
+    <string name="whats_new_gif_1">Anteprima dei documenti (ora visibile solo nella S-Edition)</string>
     <string name="whats_new_gif_2">Invio e ricezione di file audio (dal menu File)</string>
     <string name="whats_new_gif_3">Migliorato il download delle animazioni</string>
     <string name="whats_new_gif_4">Traduzione russa</string>
