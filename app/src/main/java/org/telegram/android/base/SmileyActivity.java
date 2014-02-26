@@ -254,7 +254,7 @@ public class SmileyActivity extends TelegramActivity implements SmileysControlle
 
                     SmileysView mainSmileys = new SmileysView(SmileyActivity.this, application.getEmojiProcessor(),
                             smileys,
-                            countInRow, getPx(48), getPx(10));
+                            countInRow, getPx(50), getPx(8));
                     mainSmileys.setOnSmileClickedListener(new SmileysView.OnSmileClickedListener() {
                         @Override
                         public void onSmileClicked(long smileId) {
