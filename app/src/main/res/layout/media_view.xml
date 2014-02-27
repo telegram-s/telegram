@@ -11,6 +11,8 @@
               android:gravity="center_horizontal"
               android:listSelector="@drawable/st_list_selector"
               android:clipToPadding="false"
+              android:stackFromBottom="false"
+              android:transcriptMode="disabled"
               android:id="@+id/mediaGrid"/>
 
     <TextView android:layout_width="wrap_content"

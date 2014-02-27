@@ -84,7 +84,12 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
 
             @Override
             public long getItemId(int i) {
-                return getItem(i).getDatabaseId();
+                return records.get(i).getDatabaseId();
+            }
+
+            @Override
+            public boolean hasStableIds() {
+                return true;
             }
 
             @Override
@@ -162,6 +167,7 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
                 }
             }
         };
+        gridView.setAdapter(adapter);
 
         return res;
     }
@@ -221,7 +227,6 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
         } else {
             gridView.setVisibility(View.VISIBLE);
             getView().findViewById(R.id.empty).setVisibility(View.GONE);
-            gridView.setAdapter(adapter);
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {

@@ -42,19 +42,19 @@ public class MediaEngine {
         return mediaDatabase.lazyQueryMedia(peerType, peerId);
     }
 
-    public synchronized void saveMedia(ChatMessage sourceMessage) {
+    public synchronized MediaRecord saveMedia(ChatMessage sourceMessage) {
         if (sourceMessage.getRawContentType() != ContentType.MESSAGE_PHOTO
                 && sourceMessage.getRawContentType() != ContentType.MESSAGE_VIDEO
                 && sourceMessage.getRawContentType() != ContentType.MESSAGE_AUDIO
                 && sourceMessage.getRawContentType() != ContentType.MESSAGE_DOCUMENT
                 && sourceMessage.getRawContentType() != ContentType.MESSAGE_DOC_ANIMATED
                 && sourceMessage.getRawContentType() != ContentType.MESSAGE_DOC_PREVIEW) {
-            return;
+            return null;
         }
 
         MediaRecord record = findMedia(sourceMessage.getMid());
         if (record != null)
-            return;
+            return record;
 
         record = new MediaRecord();
         record.setMid(sourceMessage.getMid());
@@ -76,6 +76,7 @@ public class MediaEngine {
             record.setSenderId(sourceMessage.getSenderId());
         }
         mediaDatabase.saveMedia(record);
+        return record;
     }
 
     public synchronized void deleteMedia(int mid) {
