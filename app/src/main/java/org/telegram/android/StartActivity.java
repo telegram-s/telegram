@@ -14,6 +14,7 @@ import android.view.*;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
+import com.crashlytics.android.Crashlytics;
 import com.google.analytics.tracking.android.EasyTracker;
 import org.telegram.android.activity.ViewImageActivity;
 import org.telegram.android.activity.ViewImagesActivity;

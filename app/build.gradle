@@ -1,20 +1,25 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'http://download.crashlytics.com/maven' }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:0.7.+'
+        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
     }
 }
 
 repositories {
     mavenCentral()
+    maven { url 'http://download.crashlytics.com/maven' }
 }
 
 project.group = "org.telegram"
 
 apply plugin: 'android'
+
+apply plugin: 'crashlytics'
 
 def basicVersion = '1.3'
 def customVersionCode = '10240';
@@ -155,6 +160,7 @@ dependencies {
     compile 'se.emilsjolander:stickylistheaders:2.1.3'
     compile 'de.greenrobot:greendao:1.3.+'
     compile 'com.googlecode.mp4parser:isoparser:1.0-RC-27'
+    compile 'com.crashlytics.android:crashlytics:1.+'
 
     // Telegram api
     compile project(':tl-core')
@@ -171,7 +177,6 @@ dependencies {
     // Jars
     compile files('libs/libGoogleAnalyticsServices.jar')
     compile files('libs/libphonenumber-5.9.jar')
-    compile files('libs/bugsense-3.6.jar')
     compile files('libs/HockeySDK-3.0.1.jar')
 }
 

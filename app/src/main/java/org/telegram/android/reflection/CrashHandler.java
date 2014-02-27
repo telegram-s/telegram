@@ -1,6 +1,6 @@
 package org.telegram.android.reflection;
 
-import com.bugsense.trace.BugSenseHandler;
+import com.crashlytics.android.Crashlytics;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.log.Logger;
 
@@ -12,7 +12,8 @@ import org.telegram.android.log.Logger;
  */
 public class CrashHandler {
     public static void init(TelegramApplication application) {
-        BugSenseHandler.initAndStartSession(application, "e6d19090");
+
+        Crashlytics.start(application);
 
         // Flushing logs to disk
         final Thread.UncaughtExceptionHandler originalHandler = Thread.getDefaultUncaughtExceptionHandler();
@@ -31,10 +32,10 @@ public class CrashHandler {
     }
 
     public static void logHandledException(Exception e) {
-        BugSenseHandler.sendException(e);
+        Crashlytics.logException(e);
     }
 
     public static void setUid(int uid) {
-        BugSenseHandler.setUserIdentifier("u" + uid);
+        Crashlytics.setUserIdentifier("" + uid);
     }
 }

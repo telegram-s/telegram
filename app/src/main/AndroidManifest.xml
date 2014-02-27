@@ -142,5 +142,6 @@
         <provider android:authorities="@string/app_package"
                   android:name=".app.MediaProvider"
                   android:exported="true"/>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="d78e94b0dcd206307a64bfe0bbfaaf6b4713aea6"/>
     </application>
 </manifest> 
