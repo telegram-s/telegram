@@ -39,6 +39,21 @@ public class MediaDatabase {
         return res;
     }
 
+    public MediaRecord[] queryMedia(int peerType, int peerId, int offset, int limit) {
+        List<org.telegram.dao.MediaRecord> dbRes = mediaRecordDao.queryBuilder()
+                .where(MediaRecordDao.Properties.PeerUniq.eq(uniq(peerType, peerId)))
+                .orderDesc(MediaRecordDao.Properties.Date)
+                .offset(offset)
+                .limit(limit)
+                .list();
+        MediaRecord[] res = new MediaRecord[dbRes.size()];
+        int index = 0;
+        for (org.telegram.dao.MediaRecord db : dbRes) {
+            res[index++] = convert(db);
+        }
+        return res;
+    }
+
     public List<MediaRecord> lazyQueryMedia(int peerType, int peerId) {
         return new ConvertList(mediaRecordDao.queryBuilder()
                 .where(MediaRecordDao.Properties.PeerUniq.eq(uniq(peerType, peerId)))

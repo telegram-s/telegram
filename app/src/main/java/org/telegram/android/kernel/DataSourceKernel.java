@@ -3,6 +3,7 @@ package org.telegram.android.kernel;
 import org.telegram.android.core.*;
 import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.ChatMessage;
+import org.telegram.android.core.model.MediaRecord;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.log.Logger;
@@ -23,6 +24,7 @@ public class DataSourceKernel {
     private volatile boolean wasInited = false;
     private volatile DialogSource dialogSource;
     private volatile HashMap<Long, MessageSource> messageSources = new HashMap<Long, MessageSource>();
+    private volatile HashMap<Long, MediaSource> mediaSources = new HashMap<Long, MediaSource>();
     private volatile UserSource userSource;
     private volatile ContactsSource contactsSource;
     private volatile ChatSource chatSource;
@@ -71,6 +73,18 @@ public class DataSourceKernel {
         return encryptedChatSource;
     }
 
+    public synchronized MediaSource getMediaSource(int peerType, int peerId) {
+        long id = peerType + peerId * 10;
+        if (mediaSources.containsKey(id)) {
+            return mediaSources.get(id);
+        } else {
+            MediaSource source = new MediaSource(peerType, peerId, kernel.getApplication());
+            kernel.getUiKernel().getResponsibility().doPause(50);
+            // source.startSyncIfRequired();
+            mediaSources.put(id, source);
+            return source;
+        }
+    }
 
     public synchronized MessageSource getMessageSource(int peerType, int peerId) {
         long id = peerType + peerId * 10;

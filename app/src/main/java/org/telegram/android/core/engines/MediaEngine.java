@@ -30,6 +30,10 @@ public class MediaEngine {
         }
     }
 
+    public synchronized MediaRecord[] queryMedia(int peerType, int peerId, int offset, int limit) {
+        return mediaDatabase.queryMedia(peerType, peerId, offset, limit);
+    }
+
     public synchronized MediaRecord[] queryMedia(int peerType, int peerId) {
         return mediaDatabase.queryMedia(peerType, peerId);
     }

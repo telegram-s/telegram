@@ -11,6 +11,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
+import org.telegram.android.core.MediaSource;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.MediaRecord;
 import org.telegram.android.core.model.media.TLLocalDocument;
@@ -21,18 +22,23 @@ import org.telegram.android.media.DownloadState;
 import org.telegram.android.preview.PreviewConfig;
 import org.telegram.android.preview.SmallPreviewView;
 import org.telegram.android.ui.FontController;
+import org.telegram.android.ui.source.ViewSourceListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Author: Korshakov Stepan
  * Created: 07.08.13 17:13
  */
-public class MediaFragment extends TelegramFragment {
+public class MediaFragment extends TelegramFragment implements ViewSourceListener {
     private int peerType;
     private int peerId;
 
     private GridView gridView;
+    private MediaSource mediaSource;
+    private ArrayList<MediaRecord> records;
+    private BaseAdapter adapter;
 
     public MediaFragment(int peerType, int peerId) {
         this.peerType = peerType;
@@ -53,7 +59,10 @@ public class MediaFragment extends TelegramFragment {
         View res = inflater.inflate(R.layout.media_view, container, false);
         gridView = (GridView) res.findViewById(R.id.mediaGrid);
 
-        final List<MediaRecord> lazyList = application.getEngine().getMediaEngine().lazyQueryMedia(peerType, peerId);
+        mediaSource = application.getDataSourceKernel().getMediaSource(peerType, peerId);
+        mediaSource.getSource().onConnected();
+        records = mediaSource.getSource().getCurrentWorkingSet();
+        // final List<MediaRecord> lazyList = application.getEngine().getMediaEngine().lazyQueryMedia(peerType, peerId);
 
         gridView.setPadding(0, PreviewConfig.MEDIA_SPACING, 0, PreviewConfig.MEDIA_SPACING);
         gridView.setNumColumns(PreviewConfig.MEDIA_ROW_COUNT);
@@ -62,15 +71,15 @@ public class MediaFragment extends TelegramFragment {
         gridView.setHorizontalSpacing(PreviewConfig.MEDIA_SPACING);
 
         final Context context = getActivity();
-        BaseAdapter adapter = new BaseAdapter() {
+        adapter = new BaseAdapter() {
             @Override
             public int getCount() {
-                return lazyList.size();
+                return records.size();
             }
 
             @Override
             public MediaRecord getItem(int i) {
-                return lazyList.get(i);
+                return records.get(i);
             }
 
             @Override
@@ -80,6 +89,8 @@ public class MediaFragment extends TelegramFragment {
 
             @Override
             public View getView(int i, View view, ViewGroup viewGroup) {
+                mediaSource.getSource().onItemsShown(i);
+
                 MediaRecord record = getItem(i);
                 if (view == null) {
                     view = newView(context, record, viewGroup);
@@ -151,27 +162,26 @@ public class MediaFragment extends TelegramFragment {
                 }
             }
         };
-        if (adapter.getCount() == 0)
-
-        {
-            gridView.setVisibility(View.GONE);
-            res.findViewById(R.id.empty).setVisibility(View.VISIBLE);
-        } else
-
-        {
-            gridView.setVisibility(View.VISIBLE);
-            res.findViewById(R.id.empty).setVisibility(View.GONE);
-            gridView.setAdapter(adapter);
-            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    MediaRecord record = (MediaRecord) adapterView.getItemAtPosition(i);
-                    getRootController().openImage(record.getMid(), peerType, peerId);
-                }
-            });
-        }
 
         return res;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mediaSource != null) {
+            mediaSource.getSource().addListener(this);
+            onSourceDataChanged();
+            onSourceStateChanged();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaSource != null) {
+            mediaSource.getSource().removeListener(this);
+        }
     }
 
     @Override
@@ -201,5 +211,30 @@ public class MediaFragment extends TelegramFragment {
     public void onDestroyView() {
         super.onDestroyView();
         gridView = null;
+    }
+
+    @Override
+    public void onSourceStateChanged() {
+        if (adapter.getCount() == 0) {
+            gridView.setVisibility(View.GONE);
+            getView().findViewById(R.id.empty).setVisibility(View.VISIBLE);
+        } else {
+            gridView.setVisibility(View.VISIBLE);
+            getView().findViewById(R.id.empty).setVisibility(View.GONE);
+            gridView.setAdapter(adapter);
+            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    MediaRecord record = (MediaRecord) adapterView.getItemAtPosition(i);
+                    getRootController().openImage(record.getMid(), peerType, peerId);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onSourceDataChanged() {
+        records = mediaSource.getSource().getCurrentWorkingSet();
+        adapter.notifyDataSetChanged();
     }
 }
