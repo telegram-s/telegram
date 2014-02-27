@@ -407,6 +407,11 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             }
 
             @Override
+            public boolean hasStableIds() {
+                return true;
+            }
+
+            @Override
             public View getView(int i, View view, ViewGroup viewGroup) {
                 if (view == null) {
                     view = View.inflate(context, R.layout.item_search_item, null);

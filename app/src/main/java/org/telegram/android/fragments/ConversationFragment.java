@@ -2501,6 +2501,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         public int getItemDate(int id) {
             return getItem(id).message.getDate();
         }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
     }
 
     @Override
