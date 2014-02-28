@@ -80,7 +80,7 @@ public class DataSourceKernel {
         } else {
             MediaSource source = new MediaSource(peerType, peerId, kernel.getApplication());
             kernel.getUiKernel().getResponsibility().doPause(50);
-            // source.startSyncIfRequired();
+            source.startSyncIfRequired();
             mediaSources.put(id, source);
             return source;
         }

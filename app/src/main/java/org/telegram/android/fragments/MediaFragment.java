@@ -23,6 +23,7 @@ import org.telegram.android.preview.PreviewConfig;
 import org.telegram.android.preview.SmallPreviewView;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.source.ViewSourceListener;
+import org.telegram.android.ui.source.ViewSourceState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +37,14 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
     private int peerId;
 
     private GridView gridView;
+    private View loading;
+    private View empty;
+
     private MediaSource mediaSource;
     private ArrayList<MediaRecord> records;
     private BaseAdapter adapter;
+    private boolean isLoading = false;
+    private boolean isLoadingError = false;
 
     public MediaFragment(int peerType, int peerId) {
         this.peerType = peerType;
@@ -50,7 +56,7 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             peerType = savedInstanceState.getInt("peerType");
             peerId = savedInstanceState.getInt("peerId");
@@ -58,6 +64,11 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
 
         View res = inflater.inflate(R.layout.media_view, container, false);
         gridView = (GridView) res.findViewById(R.id.mediaGrid);
+        loading = res.findViewById(R.id.loading);
+        empty = res.findViewById(R.id.empty);
+        gridView.setVisibility(View.GONE);
+        empty.setVisibility(View.GONE);
+        loading.setVisibility(View.GONE);
 
         mediaSource = application.getDataSourceKernel().getMediaSource(peerType, peerId);
         mediaSource.getSource().onConnected();
@@ -69,22 +80,41 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
         gridView.setColumnWidth(PreviewConfig.MEDIA_PREVIEW);
         gridView.setVerticalSpacing(PreviewConfig.MEDIA_SPACING);
         gridView.setHorizontalSpacing(PreviewConfig.MEDIA_SPACING);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                MediaRecord record = (MediaRecord) adapterView.getItemAtPosition(i);
+                getRootController().openImage(record.getMid(), peerType, peerId);
+            }
+        });
 
         final Context context = getActivity();
         adapter = new BaseAdapter() {
             @Override
             public int getCount() {
-                return records.size();
+                if (isLoading) {
+                    return records.size() + 1;
+                } else {
+                    return records.size();
+                }
             }
 
             @Override
             public MediaRecord getItem(int i) {
-                return records.get(i);
+                if (i >= 0 && i < records.size()) {
+                    return records.get(i);
+                } else {
+                    return null;
+                }
             }
 
             @Override
             public long getItemId(int i) {
-                return records.get(i).getDatabaseId();
+                if (i >= 0 && i < records.size()) {
+                    return records.get(i).getDatabaseId();
+                } else {
+                    return 0;
+                }
             }
 
             @Override
@@ -93,15 +123,57 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
             }
 
             @Override
-            public View getView(int i, View view, ViewGroup viewGroup) {
-                mediaSource.getSource().onItemsShown(i);
-
-                MediaRecord record = getItem(i);
-                if (view == null) {
-                    view = newView(context, record, viewGroup);
+            public int getItemViewType(int i) {
+                if (i >= 0 && i < records.size()) {
+                    return 0;
+                } else {
+                    return 1;
                 }
-                bindView(view, context, record, i);
-                return view;
+            }
+
+            @Override
+            public int getViewTypeCount() {
+                return 2;
+            }
+
+            @Override
+            public boolean areAllItemsEnabled() {
+                return false;
+            }
+
+            @Override
+            public boolean isEnabled(int i) {
+                return i >= 0 && i < records.size() || isLoadingError;
+            }
+
+            @Override
+            public View getView(int i, View view, ViewGroup viewGroup) {
+                if (i >= 0 && i < records.size()) {
+                    mediaSource.getSource().onItemsShown(i);
+
+                    MediaRecord record = getItem(i);
+                    if (view == null) {
+                        view = newView(context, record, viewGroup);
+                    }
+                    bindView(view, context, record, i);
+                    return view;
+                } else {
+                    if (view == null) {
+                        view = inflater.inflate(R.layout.media_loading, viewGroup, false);
+                        ViewGroup.LayoutParams imageParams = new ViewGroup.LayoutParams(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW);
+                        view.setLayoutParams(imageParams);
+                    }
+
+                    if (isLoadingError) {
+                        view.findViewById(R.id.progress).setVisibility(View.GONE);
+                        view.findViewById(R.id.retry).setVisibility(View.VISIBLE);
+                    } else {
+                        view.findViewById(R.id.progress).setVisibility(View.VISIBLE);
+                        view.findViewById(R.id.retry).setVisibility(View.GONE);
+                    }
+
+                    return view;
+                }
             }
 
             public View newView(Context context, MediaRecord object, ViewGroup parent) {
@@ -221,20 +293,23 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
 
     @Override
     public void onSourceStateChanged() {
-        if (adapter.getCount() == 0) {
-            gridView.setVisibility(View.GONE);
-            getView().findViewById(R.id.empty).setVisibility(View.VISIBLE);
+        isLoadingError = mediaSource.getSource().getState() == ViewSourceState.LOAD_MORE_ERROR;
+        isLoading = mediaSource.getSource().getState() == ViewSourceState.IN_PROGRESS || isLoadingError;
+        if (records.size() == 0) {
+            goneView(gridView);
+            if (isLoading) {
+                showView(loading);
+                goneView(empty);
+            } else {
+                goneView(loading);
+                showView(empty);
+            }
         } else {
-            gridView.setVisibility(View.VISIBLE);
-            getView().findViewById(R.id.empty).setVisibility(View.GONE);
-            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    MediaRecord record = (MediaRecord) adapterView.getItemAtPosition(i);
-                    getRootController().openImage(record.getMid(), peerType, peerId);
-                }
-            });
+            showView(gridView);
+            goneView(loading);
+            goneView(empty);
         }
+        adapter.notifyDataSetChanged();
     }
 
     @Override

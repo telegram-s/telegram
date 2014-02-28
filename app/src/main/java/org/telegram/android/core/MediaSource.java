@@ -1,7 +1,9 @@
 package org.telegram.android.core;
 
 import android.os.SystemClock;
+import org.aspectj.internal.lang.annotation.ajcDeclarePrecedence;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.MediaRecord;
 import org.telegram.android.log.Logger;
@@ -52,13 +54,24 @@ public class MediaSource {
 
     private final String TAG;
 
+    private SyncStateEngine syncStateEngine;
+    private int persistenceState;
+
     public MediaSource(int _peerType, int _peerId, TelegramApplication _application) {
         TAG = "MediaSource#" + _peerType + "@" + _peerId;
         this.application = _application;
         this.peerType = _peerType;
         this.peerId = _peerId;
+        this.syncStateEngine = application.getEngine().getSyncStateEngine();
 
-        this.state = MediaSourceState.UNSYNCED;
+        this.persistenceState = syncStateEngine.getMediaSyncState(peerType, peerId, STATE_UNLOADED);
+        if (persistenceState == STATE_COMPLETED) {
+            this.state = MediaSourceState.COMPLETED;
+        } else if (persistenceState == STATE_LOADED) {
+            this.state = MediaSourceState.SYNCED;
+        } else {
+            this.state = MediaSourceState.UNSYNCED;
+        }
 
         mediaSource = new ViewSource<MediaRecord, MediaRecord>() {
             @Override
@@ -88,12 +101,26 @@ public class MediaSource {
 
             @Override
             protected ViewSourceState getInternalState() {
-                return ViewSourceState.COMPLETED;
+                switch (state) {
+                    default:
+                    case UNSYNCED:
+                        return ViewSourceState.UNSYNCED;
+                    case COMPLETED:
+                        return ViewSourceState.COMPLETED;
+                    case LOAD_MORE_ERROR:
+                        return ViewSourceState.LOAD_MORE_ERROR;
+                    case LOAD_MORE:
+                        return ViewSourceState.IN_PROGRESS;
+                    case FULL_SYNC:
+                        return ViewSourceState.IN_PROGRESS;
+                    case SYNCED:
+                        return ViewSourceState.SYNCED;
+                }
             }
 
             @Override
             protected void onItemRequested(int index) {
-                if (index > getItemsCount() - PAGE_REQUEST_PADDING) {
+                if (index > getItemsCount() - PAGE_REQUEST_PADDING && state != MediaSourceState.LOAD_MORE_ERROR) {
                     requestLoadMore(getItemsCount());
                 }
             }
@@ -103,7 +130,12 @@ public class MediaSource {
                 return item;
             }
         };
-        mediaSource.invalidateState();
+    }
+
+    public void startSyncIfRequired() {
+        if (state == MediaSourceState.UNSYNCED) {
+            startSync();
+        }
     }
 
     public ViewSource<MediaRecord, MediaRecord> getSource() {
@@ -116,10 +148,56 @@ public class MediaSource {
         }
         long start = SystemClock.uptimeMillis();
         state = nState;
-        // preferences.edit().putString("state", state.name()).commit();
         mediaSource.invalidateState();
         Logger.d(TAG, "Media state: " + nState + " in " + (SystemClock.uptimeMillis() - start) + " ms");
     }
+
+    public void startSync() {
+        synchronized (stateSync) {
+            if (state != MediaSourceState.FULL_SYNC && state != MediaSourceState.LOAD_MORE && state != MediaSourceState.COMPLETED) {
+                synchronized (stateSync) {
+                    setState(MediaSourceState.FULL_SYNC);
+                }
+                service.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        long start = SystemClock.uptimeMillis();
+                        try {
+                            boolean isCompleted = false;
+                            try {
+                                while (application.isLoggedIn()) {
+                                    try {
+                                        isCompleted = loadMore(0);
+                                        application.getResponsibility().waitForResume();
+                                        mediaSource.invalidateDataIfRequired();
+                                        return;
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } finally {
+                                synchronized (stateSync) {
+                                    if (state == MediaSourceState.FULL_SYNC) {
+                                        if (isCompleted) {
+                                            setState(MediaSourceState.COMPLETED);
+                                            onCompleted();
+                                        } else {
+                                            setState(MediaSourceState.SYNCED);
+                                            onLoaded();
+                                        }
+                                    }
+                                }
+                            }
+                            setState(MediaSourceState.UNSYNCED);
+                        } finally {
+                            Logger.d(TAG, "Messages sync time: " + (SystemClock.uptimeMillis() - start) + " ms");
+                        }
+                    }
+                });
+            }
+        }
+    }
+
 
     public void requestLoadMore(final int offset) {
         synchronized (stateSync) {
@@ -131,27 +209,16 @@ public class MediaSource {
                     @Override
                     public void run() {
                         try {
-                            TLAbsMessages tlAbsMessages = application.getApi()
-                                    .doRpcCall(new TLRequestMessagesSearch(
-                                            new TLInputPeerChat(peerId), "", new TLInputMessagesFilterPhotoVideo(), 0, 0, offset, 0, PAGE_SIZE_REMOTE));
-                            if (tlAbsMessages.getMessages().size() == 0) {
-                                synchronized (stateSync) {
+                            boolean isCompleted = loadMore(offset);
+                            mediaSource.invalidateDataIfRequired();
+                            synchronized (stateSync) {
+                                if (isCompleted) {
                                     setState(MediaSourceState.COMPLETED);
-                                }
-                            } else {
-                                for (TLAbsMessage message : tlAbsMessages.getMessages()) {
-                                    ChatMessage msg = EngineUtils.fromTlMessage(message, application);
-                                    MediaRecord record = application.getEngine().getMediaEngine().saveMedia(msg);
-                                    if (record != null) {
-                                        mediaSource.addItem(record);
-                                    }
-                                }
-                                mediaSource.invalidateData();
-                                synchronized (stateSync) {
+                                } else {
                                     setState(MediaSourceState.SYNCED);
                                 }
                             }
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                             synchronized (stateSync) {
                                 if (state == MediaSourceState.LOAD_MORE) {
@@ -163,49 +230,39 @@ public class MediaSource {
                 });
             }
         }
-//        if (destroyed) {
-//            return;
-//        }
-//        synchronized (stateSync) {
-//            if (state != MessagesSourceState.FULL_SYNC && state != MessagesSourceState.LOAD_MORE
-//                    && state != MessagesSourceState.COMPLETED) {
-//                synchronized (stateSync) {
-//                    setState(MessagesSourceState.LOAD_MORE);
-//                }
-//                service.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        long start = SystemClock.uptimeMillis();
-//                        try {
-//                            try {
-//                                application.getResponsibility().waitForResume();
-//                                boolean isCompleted = requestLoad(offset);
-//                                application.getResponsibility().waitForResume();
-//                                messagesSource.invalidateDataIfRequired();
-//                                synchronized (stateSync) {
-//                                    if (state == MessagesSourceState.LOAD_MORE) {
-//                                        if (isCompleted) {
-//                                            setState(MessagesSourceState.COMPLETED);
-//                                            onCompleted();
-//                                        } else {
-//                                            setState(MessagesSourceState.SYNCED);
-//                                        }
-//                                    }
-//                                }
-//                            } catch (Exception e) {
-//                                e.printStackTrace();
-//                                synchronized (stateSync) {
-//                                    if (state == MessagesSourceState.LOAD_MORE) {
-//                                        setState(MessagesSourceState.LOAD_MORE_ERROR);
-//                                    }
-//                                }
-//                            }
-//                        } finally {
-//                            Logger.d(TAG, "Messages load more: " + (SystemClock.uptimeMillis() - start) + " ms");
-//                        }
-//                    }
-//                });
-//            }
-//        }
+    }
+
+    private boolean loadMore(int offset) throws Exception {
+        TLAbsMessages tlAbsMessages = application.getApi()
+                .doRpcCall(new TLRequestMessagesSearch(
+                        new TLInputPeerChat(peerId), "", new TLInputMessagesFilterPhotoVideo(), 0, 0, offset, 0, PAGE_SIZE_REMOTE));
+        if (tlAbsMessages.getMessages().size() == 0) {
+            return true;
+        } else {
+            for (TLAbsMessage message : tlAbsMessages.getMessages()) {
+                ChatMessage msg = EngineUtils.fromTlMessage(message, application);
+                MediaRecord record = application.getEngine().getMediaEngine().saveMedia(msg);
+                if (record != null) {
+                    mediaSource.addItem(record);
+                }
+            }
+            return false;
+        }
+    }
+
+    private void onCompleted() {
+        if (destroyed) {
+            return;
+        }
+        persistenceState = STATE_COMPLETED;
+        syncStateEngine.setMediaSyncState(peerType, peerId, persistenceState);
+    }
+
+    private void onLoaded() {
+        if (destroyed) {
+            return;
+        }
+        persistenceState = STATE_LOADED;
+        syncStateEngine.setMediaSyncState(peerType, peerId, persistenceState);
     }
 }

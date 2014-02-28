@@ -31,6 +31,14 @@ public class SyncStateEngine {
         syncPrefs.edit().putInt("msg_" + (peerType + peerId * 10L), state).commit();
     }
 
+    public synchronized int getMediaSyncState(int peerType, int peerId, int def) {
+        return syncPrefs.getInt("media_" + (peerType + peerId * 10L), def);
+    }
+
+    public synchronized void setMediaSyncState(int peerType, int peerId, int state) {
+        syncPrefs.edit().putInt("media_" + (peerType + peerId * 10L), state).commit();
+    }
+
     public synchronized int getDialogsSyncState(int def) {
         return syncPrefs.getInt("dialog_state", def);
     }
