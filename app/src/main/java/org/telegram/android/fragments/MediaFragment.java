@@ -83,8 +83,11 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                MediaRecord record = (MediaRecord) adapterView.getItemAtPosition(i);
-                getRootController().openImage(record.getMid(), peerType, peerId);
+                if (i >= 0 && i < records.size()) {
+                    getRootController().openImage(records.get(i).getMid(), peerType, peerId);
+                } else {
+                    mediaSource.requestLoadMore(records.size());
+                }
             }
         });
 
