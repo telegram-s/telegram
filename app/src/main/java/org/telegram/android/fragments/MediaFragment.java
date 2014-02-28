@@ -21,12 +21,10 @@ import org.telegram.android.media.DownloadManager;
 import org.telegram.android.media.DownloadState;
 import org.telegram.android.preview.PreviewConfig;
 import org.telegram.android.preview.SmallPreviewView;
-import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.source.ViewSourceListener;
 import org.telegram.android.ui.source.ViewSourceState;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Author: Korshakov Stepan
@@ -62,7 +60,7 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
             peerId = savedInstanceState.getInt("peerId");
         }
 
-        View res = inflater.inflate(R.layout.media_view, container, false);
+        View res = inflater.inflate(R.layout.media_main, container, false);
         gridView = (GridView) res.findViewById(R.id.mediaGrid);
         loading = res.findViewById(R.id.loading);
         empty = res.findViewById(R.id.empty);

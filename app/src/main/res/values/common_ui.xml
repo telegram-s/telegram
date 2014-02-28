@@ -33,4 +33,7 @@
     <color name="st_section_subtitle">#4b4b4b</color>
     <color name="st_section_value">#999999</color>
     <color name="st_section_value_disabled">#e1e1e1</color>
+
+    <!-- Preview -->
+    <color name="st_preview_bg">#1a1a1a</color>
 </resources>

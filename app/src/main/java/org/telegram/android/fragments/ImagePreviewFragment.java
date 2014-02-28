@@ -22,14 +22,12 @@ import org.telegram.android.core.model.media.TLLocalFileEmpty;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
 import org.telegram.android.media.*;
-import org.telegram.android.preview.ImageHolder;
-import org.telegram.android.preview.ImageReceiver;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.DepthPageTransformer;
 import org.telegram.android.ui.TextUtil;
-import org.telegram.android.ui.ZoomOutPageTransformer;
 import uk.co.senab.photoview.PhotoView;
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 import java.io.File;
 import java.io.IOException;
@@ -123,7 +121,7 @@ public class ImagePreviewFragment extends TelegramFragment {
 
         setDefaultProgressInterface(null);
 
-        View res = inflater.inflate(R.layout.media_images, container, false);
+        View res = inflater.inflate(R.layout.media_full_main, container, false);
         bottomPanel = res.findViewById(R.id.bottomPanel);
         if (getSherlockActivity().getSupportActionBar().isShowing()) {
             bottomPanel.setVisibility(View.VISIBLE);
@@ -214,20 +212,30 @@ public class ImagePreviewFragment extends TelegramFragment {
                 return POSITION_NONE;
             }
 
-            private View createPhotoView(MediaRecord record) {
+            private View createPhotoView(final MediaRecord record) {
                 TLLocalPhoto photo = (TLLocalPhoto) record.getPreview();
-                final View res = View.inflate(getActivity(), R.layout.media_image, null);
+                final View res = View.inflate(getActivity(), R.layout.media_full_image, null);
                 final ProgressBar progressBar = (ProgressBar) res.findViewById(R.id.loading);
                 final ImageButton downloadButton = (ImageButton) res.findViewById(R.id.download);
                 final ImageView fastImageView = (ImageView) res.findViewById(R.id.fastPreview);
                 final PhotoView fullView = (PhotoView) res.findViewById(R.id.fullImage);
-                final String downloadKey = DownloadManager.getPhotoKey(photo);
+                fullView.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
+                    @Override
+                    public void onPhotoTap(View view, float x, float y) {
+                        onImageTap();
+                    }
+                });
 
                 progressBar.setVisibility(View.GONE);
                 downloadButton.setVisibility(View.GONE);
 
                 if (!(photo.getFullLocation() instanceof TLLocalFileEmpty)) {
+                    final String downloadKey = DownloadManager.getPhotoKey(photo);
                     boolean hasFastPreview = false;
+                    DownloadState state = application.getDownloadManager().getState(downloadKey);
+                    if (state == DownloadState.FAILURE || state == DownloadState.NONE) {
+                        application.getDownloadManager().requestDownload(photo);
+                    }
                     if (photo.getFastPreviewH() != 0 && photo.getFastPreviewW() != 0) {
                         try {
                             Bitmap fast = Optimizer.load(photo.getFastPreview());
@@ -246,27 +254,63 @@ public class ImagePreviewFragment extends TelegramFragment {
                         fastImageView.setVisibility(View.GONE);
                     }
 
-                    if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    final Bitmap bitmap = Optimizer.load(application.getDownloadManager().getFileName(downloadKey));
-                                    fullView.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            fullView.setImageBitmap(bitmap);
-                                            showView(fullView);
-                                            goneView(fastImageView);
-                                        }
-                                    });
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+                    downloadButton.setOnClickListener(secure(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            application.getDownloadManager().requestDownload((TLLocalPhoto) record.getPreview());
+                        }
+                    }));
+
+                    DownloadListener listener = new DownloadListener() {
+                        @Override
+                        public void onStateChanged(String _key, DownloadState state, int percent) {
+                            if (res.getTag() != this) {
+                                application.getDownloadManager().unregisterListener(this);
+                                return;
                             }
-                        }.start();
-                    }
+                            if (!_key.equals(downloadKey)) {
+                                return;
+                            }
+
+                            if (state == DownloadState.COMPLETED) {
+                                new Thread() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            final Bitmap bitmap = Optimizer.load(application.getDownloadManager().getFileName(downloadKey));
+                                            fullView.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    fullView.setImageBitmap(bitmap);
+                                                    showView(fullView);
+                                                    goneView(fastImageView);
+                                                }
+                                            });
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }.start();
+                                downloadButton.setVisibility(View.GONE);
+                                progressBar.setVisibility(View.GONE);
+                            } else if (state == DownloadState.IN_PROGRESS | state == DownloadState.PENDING) {
+                                downloadButton.setVisibility(View.GONE);
+                                progressBar.setVisibility(View.VISIBLE);
+                                progressBar.setProgress(percent);
+                            } else {
+                                downloadButton.setVisibility(View.VISIBLE);
+                                progressBar.setVisibility(View.GONE);
+                            }
+                        }
+                    };
+
+                    res.setTag(listener);
+                    application.getDownloadManager().registerListener(listener);
+                    listener.onStateChanged(downloadKey, application.getDownloadManager().getState(downloadKey),
+                            application.getDownloadManager().getDownloadProgress(downloadKey));
+
                 } else {
+                    res.setTag(null);
                     fastImageView.setVisibility(View.GONE);
                     fullView.setVisibility(View.GONE);
                 }
@@ -286,9 +330,9 @@ public class ImagePreviewFragment extends TelegramFragment {
 
                 final View res;
                 if (record.getPreview() instanceof TLLocalVideo) {
-                    res = View.inflate(getActivity(), R.layout.media_video, null);
+                    res = View.inflate(getActivity(), R.layout.media_full_video, null);
                 } else {
-                    res = View.inflate(getActivity(), R.layout.media_image, null);
+                    res = View.inflate(getActivity(), R.layout.media_full_image, null);
                 }
 
                 final ProgressBar progressBar = (ProgressBar) res.findViewById(R.id.loading);
@@ -296,6 +340,7 @@ public class ImagePreviewFragment extends TelegramFragment {
 
                 if (record.getPreview() instanceof TLLocalVideo) {
                     final ImageButton playButton = (ImageButton) res.findViewById(R.id.play);
+                    final ImageView imageView = (ImageView) res.findViewById(R.id.preview);
                     // TODO: Implement
 //                    FastWebImageView imageView = (FastWebImageView) res.findViewById(R.id.previewImage);
 //                    imageView.setOnClickListener(secure(new View.OnClickListener() {
@@ -308,9 +353,17 @@ public class ImagePreviewFragment extends TelegramFragment {
 
                     final TLLocalVideo video = (TLLocalVideo) record.getPreview();
                     final String key = DownloadManager.getVideoKey(video);
-                    TextView duration = (TextView) res.findViewById(R.id.duration);
-                    duration.setVisibility(View.VISIBLE);
-                    duration.setText(TextUtil.formatDuration(video.getDuration()));
+
+                    if (video.getPreviewW() != 0 && video.getPreviewH() != 0 && video.getFastPreview().length > 0) {
+                        try {
+                            Bitmap fast = Optimizer.load(video.getFastPreview());
+                            fast = Optimizer.crop(fast, video.getPreviewW(), video.getPreviewH());
+                            Optimizer.blur(fast);
+                            imageView.setImageBitmap(fast);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
 //                    if (video.getPreviewH() != 0 && video.getPreviewW() != 0) {
 //                        if (video.getFastPreview().length > 0) {
@@ -352,6 +405,22 @@ public class ImagePreviewFragment extends TelegramFragment {
                             }
 
                             if (state == DownloadState.COMPLETED) {
+                                new Thread() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            final VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(application.getDownloadManager().getFileName(key));
+                                            imageView.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    imageView.setImageBitmap(metadata.getImg());
+                                                }
+                                            });
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }.start();
                                 if (playButton != null) {
                                     playButton.setVisibility(View.VISIBLE);
                                 }
