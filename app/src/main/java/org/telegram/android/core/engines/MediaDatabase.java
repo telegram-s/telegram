@@ -74,7 +74,8 @@ public class MediaDatabase {
     }
 
     public void saveMedia(MediaRecord record) {
-        mediaRecordDao.insert(convert(record));
+        long id = mediaRecordDao.insert(convert(record));
+        record.setDatabaseId(id);
     }
 
     public void deleteMedia(int mid) {

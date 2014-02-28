@@ -86,6 +86,20 @@ public class DataSourceKernel {
         }
     }
 
+    public void onSourceAddMedia(MediaRecord record) {
+        ViewSource<MediaRecord, MediaRecord> res = getMediaSource(record.getPeerType(), record.getPeerId()).getSource();
+        if (res == null)
+            return;
+        res.addItem(record);
+    }
+
+    public void onSourceRemoveMedia(MediaRecord record) {
+        ViewSource<MediaRecord, MediaRecord> res = getMediaSource(record.getPeerType(), record.getPeerId()).getSource();
+        if (res == null)
+            return;
+        res.removeItem(record);
+    }
+
     public synchronized MessageSource getMessageSource(int peerType, int peerId) {
         long id = peerType + peerId * 10;
         if (messageSources.containsKey(id)) {
@@ -202,6 +216,13 @@ public class DataSourceKernel {
             for (MessageSource source : messageSources.values()) {
                 if (source.getMessagesSource() != null) {
                     source.getMessagesSource().invalidateDataIfRequired();
+                }
+            }
+        }
+        if (mediaSources != null) {
+            for (MediaSource source : mediaSources.values()) {
+                if (source.getSource() != null) {
+                    source.getSource().invalidateDataIfRequired();
                 }
             }
         }

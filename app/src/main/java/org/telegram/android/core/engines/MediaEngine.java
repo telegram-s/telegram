@@ -1,5 +1,6 @@
 package org.telegram.android.core.engines;
 
+import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.ContentType;
 import org.telegram.android.core.model.MediaRecord;
@@ -11,9 +12,11 @@ import java.util.List;
  */
 public class MediaEngine {
     private MediaDatabase mediaDatabase;
+    private TelegramApplication application;
 
     public MediaEngine(ModelEngine engine) {
         this.mediaDatabase = new MediaDatabase(engine);
+        this.application = engine.getApplication();
     }
 
     public synchronized int getMediaCount(int peerType, int peerId) {
@@ -38,19 +41,15 @@ public class MediaEngine {
         return mediaDatabase.queryMedia(peerType, peerId);
     }
 
-    public List<MediaRecord> lazyQueryMedia(int peerType, int peerId) {
-        return mediaDatabase.lazyQueryMedia(peerType, peerId);
-    }
-
-    public synchronized MediaRecord saveMedia(ChatMessage sourceMessage) {
+    public synchronized boolean saveMedia(ChatMessage sourceMessage) {
         if (sourceMessage.getRawContentType() != ContentType.MESSAGE_PHOTO
                 && sourceMessage.getRawContentType() != ContentType.MESSAGE_VIDEO) {
-            return null;
+            return false;
         }
 
         MediaRecord record = findMedia(sourceMessage.getMid());
         if (record != null)
-            return record;
+            return false;
 
         record = new MediaRecord();
         record.setMid(sourceMessage.getMid());
@@ -68,11 +67,16 @@ public class MediaEngine {
             record.setSenderId(sourceMessage.getSenderId());
         }
         mediaDatabase.saveMedia(record);
-        return record;
+        application.getDataSourceKernel().onSourceAddMedia(record);
+        return true;
     }
 
     public synchronized void deleteMedia(int mid) {
-        mediaDatabase.deleteMedia(mid);
+        MediaRecord record = findMedia(mid);
+        if (record != null) {
+            mediaDatabase.deleteMedia(mid);
+            application.getDataSourceKernel().onSourceRemoveMedia(record);
+        }
     }
 
     public synchronized void deleteMediaFromChat(int peerType, int peerId) {

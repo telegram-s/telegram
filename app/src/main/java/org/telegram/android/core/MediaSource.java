@@ -6,6 +6,8 @@ import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.MediaRecord;
+import org.telegram.android.core.model.PeerType;
+import org.telegram.android.core.model.User;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.ui.source.ViewSourceState;
@@ -65,13 +67,14 @@ public class MediaSource {
         this.syncStateEngine = application.getEngine().getSyncStateEngine();
 
         this.persistenceState = syncStateEngine.getMediaSyncState(peerType, peerId, STATE_UNLOADED);
-        if (persistenceState == STATE_COMPLETED) {
-            this.state = MediaSourceState.COMPLETED;
-        } else if (persistenceState == STATE_LOADED) {
-            this.state = MediaSourceState.SYNCED;
-        } else {
-            this.state = MediaSourceState.UNSYNCED;
-        }
+//        if (persistenceState == STATE_COMPLETED) {
+//            this.state = MediaSourceState.COMPLETED;
+//        } else if (persistenceState == STATE_LOADED) {
+//            this.state = MediaSourceState.SYNCED;
+//        } else {
+//            this.state = MediaSourceState.UNSYNCED;
+//        }
+        this.state = MediaSourceState.UNSYNCED;
 
         mediaSource = new ViewSource<MediaRecord, MediaRecord>() {
             @Override
@@ -233,20 +236,31 @@ public class MediaSource {
     }
 
     private boolean loadMore(int offset) throws Exception {
+        TLAbsInputPeer peer;
+        if (peerType == PeerType.PEER_CHAT) {
+            peer = new TLInputPeerChat(peerId);
+        } else if (peerType == PeerType.PEER_USER) {
+            User u = application.getEngine().getUser(peerId);
+            peer = new TLInputPeerForeign(u.getUid(), u.getAccessHash());
+        } else {
+            //throw new UnsupportedOperationException();
+            return true;
+        }
         TLAbsMessages tlAbsMessages = application.getApi()
                 .doRpcCall(new TLRequestMessagesSearch(
-                        new TLInputPeerChat(peerId), "", new TLInputMessagesFilterPhotoVideo(), 0, 0, offset, 0, PAGE_SIZE_REMOTE));
+                        peer, "", new TLInputMessagesFilterPhotoVideo(), 0, 0, offset, 0, PAGE_SIZE_REMOTE));
+        application.getEngine().getUsersEngine().onUsers(tlAbsMessages.getUsers());
+        application.getEngine().getGroupsEngine().onGroupsUpdated(tlAbsMessages.getChats());
         if (tlAbsMessages.getMessages().size() == 0) {
             return true;
         } else {
+            boolean added = false;
             for (TLAbsMessage message : tlAbsMessages.getMessages()) {
                 ChatMessage msg = EngineUtils.fromTlMessage(message, application);
-                MediaRecord record = application.getEngine().getMediaEngine().saveMedia(msg);
-                if (record != null) {
-                    mediaSource.addItem(record);
-                }
+                added |= application.getEngine().getMediaEngine().saveMedia(msg);
             }
-            return false;
+            application.notifyUIUpdate();
+            return !added;
         }
     }
 
