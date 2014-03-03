@@ -3,14 +3,15 @@ package org.telegram.android.preview.media;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 
 /**
-* Created by ex3ndr on 22.02.14.
-*/
+ * Created by ex3ndr on 22.02.14.
+ */
 public class MediaFileTask extends BaseTask {
 
     private TLLocalPhoto localPhoto;
     private String fileName;
 
-    public MediaFileTask(TLLocalPhoto localPhoto, String fileName) {
+    public MediaFileTask(TLLocalPhoto localPhoto, String fileName, boolean isOut) {
+        super(isOut);
         this.localPhoto = localPhoto;
         this.fileName = fileName;
     }
@@ -24,7 +25,7 @@ public class MediaFileTask extends BaseTask {
     }
 
     @Override
-    public String getKey() {
+    public String getStorageKey() {
         return fileName;
     }
 }

@@ -292,14 +292,14 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
                 String key = DownloadManager.getPhotoKey(mediaPhoto);
                 if (downloadManager.getState(key) == DownloadState.COMPLETED) {
-                    loader.requestFullLoading(mediaPhoto, downloadManager.getFileName(key), this);
+                    loader.requestFullLoading(mediaPhoto, downloadManager.getFileName(key), isOut, this);
                     isBinded = true;
                 }
             }
 
             if (!isBinded && mediaPhoto.hasFastPreview()) {
                 isBinded = true;
-                loader.requestFastLoading(mediaPhoto, this);
+                loader.requestFastLoading(mediaPhoto, isOut, this);
             }
         } else if (message.message.getExtras() instanceof TLLocalVideo) {
             TLLocalVideo mediaVideo = (TLLocalVideo) message.message.getExtras();
@@ -314,14 +314,14 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
                 String key = DownloadManager.getVideoKey(mediaVideo);
                 if (downloadManager.getState(key) == DownloadState.COMPLETED) {
-                    loader.requestVideoLoading(downloadManager.getFileName(key), this);
+                    loader.requestVideoLoading(downloadManager.getFileName(key), isOut, this);
                     isBinded = true;
                 }
             }
 
             if (!isBinded) {
                 if (mediaVideo.getPreviewW() != 0 && mediaVideo.getPreviewH() != 0) {
-                    loader.requestFastLoading(mediaVideo, this);
+                    loader.requestFastLoading(mediaVideo, isOut, this);
                     isBinded = true;
                 } else {
 //                    if (downloadManager.getState(key) != DownloadState.IN_PROGRESS &&
@@ -335,10 +335,10 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             bindSize(photo.getWidth(), photo.getHeight());
 
             if (photo.getFileUri() != null && photo.getFileUri().length() > 0) {
-                loader.requestRawUri(photo.getFileUri(), this);
+                loader.requestRawUri(photo.getFileUri(), isOut, this);
                 isBinded = true;
             } else if (photo.getFileName() != null && photo.getFileName().length() > 0) {
-                loader.requestRaw(photo.getFileName(), this);
+                loader.requestRaw(photo.getFileName(), isOut, this);
                 isBinded = true;
             }
 
@@ -347,14 +347,14 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             TLUploadingVideo video = (TLUploadingVideo) message.message.getExtras();
             bindSize(video.getPreviewWidth(), video.getPreviewHeight());
 
-            loader.requestVideoLoading(video.getFileName(), this);
+            loader.requestVideoLoading(video.getFileName(), isOut, this);
             isBinded = true;
 
             bindUpload(message.databaseId);
         } else if (message.message.getExtras() instanceof TLLocalGeo) {
             TLLocalGeo geo = (TLLocalGeo) message.message.getExtras();
             bindSizeManual(PreviewConfig.MAP_W, PreviewConfig.MAP_H);
-            loader.requestGeo(geo, this);
+            loader.requestGeo(geo, isOut, this);
             isBinded = true;
             showMapPoint = true;
         } else if (message.message.getExtras() instanceof TLUploadingDocument) {
@@ -364,10 +364,10 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             bindSize(doc.getFullPreviewW(), doc.getFullPreviewH());
 
             if (doc.getFilePath().length() > 0) {
-                loader.requestRaw(doc.getFilePath(), this);
+                loader.requestRaw(doc.getFilePath(), isOut, this);
                 isBinded = true;
             } else {
-                loader.requestRawUri(doc.getFileUri(), this);
+                loader.requestRawUri(doc.getFileUri(), isOut, this);
                 isBinded = true;
             }
 
@@ -385,13 +385,13 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
                         document.getMimeType().equals("image/png") ||
                         document.getMimeType().equals("image/jpeg")) {
                     if (downloadManager.getState(key) == DownloadState.COMPLETED) {
-                        loader.requestRaw(downloadManager.getFileName(key), this);
+                        loader.requestRaw(downloadManager.getFileName(key), isOut, this);
                         isBinded = true;
                     }
                 }
 
                 if (!isBinded && document.getFastPreview().length > 0) {
-                    loader.requestFastLoading(document, this);
+                    loader.requestFastLoading(document, isOut, this);
                     isBinded = true;
                 }
 
@@ -590,7 +590,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             }
 
             if (movie.width() != 0 && movie.height() != 0) {
-                movieDestBitmap.eraseColor(Color.TRANSPARENT);
+                Optimizer.clearBitmap(movieDestBitmap);
                 movieDestCanvas.save();
                 float scaleX = (float) desiredWidth / movie.width();
                 float scaleY = (float) desiredHeight / movie.height();

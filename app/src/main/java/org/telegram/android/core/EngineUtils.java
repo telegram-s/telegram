@@ -263,7 +263,6 @@ public class EngineUtils {
                                 TLLocalPhoto.FAST_PREVIEW_MAX_H,
                                 Bitmap.Config.ARGB_8888);
                     }
-                    fastPreview.eraseColor(Color.TRANSPARENT);
 
                     try {
                         Optimizer.loadTo(cachedSize.getBytes().cleanData(), fastPreview);

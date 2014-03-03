@@ -10,6 +10,7 @@ public class SmallDocFastTask extends BaseTask {
     private TLLocalDocument doc;
 
     public SmallDocFastTask(TLLocalDocument doc) {
+        super(true);
         this.doc = doc;
     }
 
@@ -18,7 +19,7 @@ public class SmallDocFastTask extends BaseTask {
     }
 
     @Override
-    public String getKey() {
+    public String getStorageKey() {
         // Work-around: documents with fast cache doesn't contain preview location
         return "s:" + doc.getFileLocation().getUniqKey();
     }

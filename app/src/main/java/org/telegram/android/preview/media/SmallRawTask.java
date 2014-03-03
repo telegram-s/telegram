@@ -7,6 +7,7 @@ public class SmallRawTask extends BaseTask {
     private String fileName;
 
     public SmallRawTask(String fileName) {
+        super(true);
         this.fileName = fileName;
     }
 
@@ -15,7 +16,7 @@ public class SmallRawTask extends BaseTask {
     }
 
     @Override
-    public String getKey() {
+    public String getStorageKey() {
         return "s:" + fileName;
     }
 }

@@ -9,6 +9,7 @@ public class SmallPhotoTask extends BaseTask {
     private TLLocalPhoto photo;
 
     public SmallPhotoTask(TLLocalPhoto photo) {
+        super(true);
         this.photo = photo;
     }
 
@@ -17,7 +18,7 @@ public class SmallPhotoTask extends BaseTask {
     }
 
     @Override
-    public String getKey() {
+    public String getStorageKey() {
         return "s:" + photo.getFastPreviewKey();
     }
 }

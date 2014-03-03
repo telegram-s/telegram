@@ -1,9 +1,7 @@
 package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -23,7 +21,6 @@ import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
 import org.telegram.android.preview.media.*;
-import org.telegram.android.preview.media.MediaPhotoFastTask;
 import org.telegram.android.preview.queue.QueueWorker;
 
 import java.io.ByteArrayOutputStream;
@@ -45,6 +42,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
     private final Object fullImageCachedLock = new Object();
 
     private NinePatchDrawable outMediaMask;
+    private NinePatchDrawable inMediaMask;
 
     private ThreadLocal<Bitmap> fastBitmaps = new ThreadLocal<Bitmap>() {
         @Override
@@ -56,6 +54,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
     public MediaLoader(TelegramApplication application) {
         super("previews", 5, application);
         outMediaMask = (NinePatchDrawable) application.getResources().getDrawable(R.drawable.st_bubble_out_media_content);
+        inMediaMask = (NinePatchDrawable) application.getResources().getDrawable(R.drawable.st_bubble_in_media_content);
     }
 
     @Override
@@ -68,24 +67,24 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         };
     }
 
-    public void requestRaw(String fileName, ImageReceiver receiver) {
-        requestTask(new MediaRawTask(fileName), receiver);
+    public void requestRaw(String fileName, boolean isOut, ImageReceiver receiver) {
+        requestTask(new MediaRawTask(fileName, isOut), receiver);
     }
 
-    public void requestRawUri(String fileName, ImageReceiver receiver) {
-        requestTask(new MediaRawUriTask(fileName), receiver);
+    public void requestRawUri(String fileName, boolean isOut, ImageReceiver receiver) {
+        requestTask(new MediaRawUriTask(fileName, isOut), receiver);
     }
 
     public void requestRawSmall(String fileName, ImageReceiver receiver) {
         requestTask(new SmallRawTask(fileName), receiver);
     }
 
-    public void requestGeo(TLLocalGeo geo, ImageReceiver receiver) {
-        requestTask(new MediaGeoTask(geo.getLatitude(), geo.getLongitude()), receiver);
+    public void requestGeo(TLLocalGeo geo, boolean isOut, ImageReceiver receiver) {
+        requestTask(new MediaGeoTask(geo.getLatitude(), geo.getLongitude(), isOut), receiver);
     }
 
-    public void requestFastLoading(TLLocalPhoto photo, ImageReceiver receiver) {
-        requestTask(new MediaPhotoFastTask(photo), receiver);
+    public void requestFastLoading(TLLocalPhoto photo, boolean isOut, ImageReceiver receiver) {
+        requestTask(new MediaPhotoFastTask(photo, isOut), receiver);
     }
 
     public void requestFastSmallLoading(TLLocalPhoto photo, ImageReceiver receiver) {
@@ -100,20 +99,20 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         requestTask(new SmallVideoTask(video), receiver);
     }
 
-    public void requestFastLoading(TLLocalDocument doc, ImageReceiver receiver) {
-        requestTask(new MediaDocFastTask(doc), receiver);
+    public void requestFastLoading(TLLocalDocument doc, boolean isOut, ImageReceiver receiver) {
+        requestTask(new MediaDocFastTask(doc, isOut), receiver);
     }
 
-    public void requestFastLoading(TLLocalVideo video, ImageReceiver receiver) {
-        requestTask(new MediaVideoFastTask(video), receiver);
+    public void requestFastLoading(TLLocalVideo video, boolean isOut, ImageReceiver receiver) {
+        requestTask(new MediaVideoFastTask(video, isOut), receiver);
     }
 
-    public void requestFullLoading(TLLocalPhoto photo, String fileName, ImageReceiver receiver) {
-        requestTask(new MediaFileTask(photo, fileName), receiver);
+    public void requestFullLoading(TLLocalPhoto photo, String fileName, boolean isOut, ImageReceiver receiver) {
+        requestTask(new MediaFileTask(photo, fileName, isOut), receiver);
     }
 
-    public void requestVideoLoading(String fileName, ImageReceiver receiver) {
-        requestTask(new MediaVideoTask(fileName), receiver);
+    public void requestVideoLoading(String fileName, boolean isOut, ImageReceiver receiver) {
+        requestTask(new MediaVideoTask(fileName, isOut), receiver);
     }
 
     public void cancelRequest(ImageReceiver receiver) {
@@ -125,7 +124,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         if (res == null) {
             res = Bitmap.createBitmap(PreviewConfig.MAX_PREVIEW_BITMAP_W, PreviewConfig.MAX_PREVIEW_BITMAP_H, Bitmap.Config.ARGB_8888);
         } else {
-            res.eraseColor(Color.TRANSPARENT);
+            Optimizer.clearBitmap(res);
         }
         return res;
     }
@@ -135,7 +134,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         if (res == null) {
             res = Bitmap.createBitmap(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW, Bitmap.Config.ARGB_8888);
         } else {
-            res.eraseColor(Color.TRANSPARENT);
+            Optimizer.clearBitmap(res);
         }
         return res;
     }
@@ -145,19 +144,15 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         if (res == null) {
             res = Bitmap.createBitmap(PreviewConfig.MAP_W, PreviewConfig.MAP_H, Bitmap.Config.ARGB_8888);
         } else {
-            res.eraseColor(Color.TRANSPARENT);
+            Optimizer.clearBitmap(res);
         }
         return res;
     }
 
-    private int[] drawPreview(Bitmap src, int w, int h, Bitmap dest) {
-//        return Optimizer.scaleToRatioRounded(src, w, h,
-//                dest, PreviewConfig.MIN_PREVIEW_W, PreviewConfig.MIN_PREVIEW_H,
-//                PreviewConfig.ROUND_RADIUS);
-
+    private int[] drawPreview(Bitmap src, int w, int h, Bitmap dest, boolean isOut) {
         return Optimizer.drawMasked(src, w, h,
                 dest, PreviewConfig.MIN_PREVIEW_W, PreviewConfig.MIN_PREVIEW_H,
-                outMediaMask);
+                isOut ? outMediaMask : inMediaMask);
     }
 
     private class FastWorker extends QueueWorker<BaseTask> {
@@ -255,7 +250,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
             }
             Optimizer.blur(img);
             Bitmap destPreview = fetchChatPreview();
-            int[] sizes = drawPreview(img, w, h, destPreview);
+            int[] sizes = drawPreview(img, w, h, destPreview, task.isOut());
             onImageLoaded(destPreview, sizes[0], sizes[1], task, SIZE_CHAT_PREVIEW);
             return true;
         }
@@ -302,13 +297,17 @@ public class MediaLoader extends BaseLoader<BaseTask> {
             Bitmap res = fetchChatPreview();
             Optimizer.BitmapInfo info = tryToLoadFromCache(rawTask.getKey(), res);
             if (info != null) {
-                onImageLoaded(res, info.getWidth(), info.getHeight(), rawTask, SIZE_CHAT_PREVIEW);
+                Bitmap pRes = fetchChatPreview();
+                int[] size = drawPreview(res, info.getWidth(), info.getHeight(), pRes, rawTask.isOut());
+                imageCache.putFree(res, SIZE_CHAT_PREVIEW);
+                onImageLoaded(pRes, size[0], size[1], rawTask, SIZE_CHAT_PREVIEW);
                 return;
             }
             Bitmap tmp = Optimizer.optimize(rawTask.getUri(), application);
-            int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res);
-            putToDiskCache(rawTask.getKey(), res, sizes[0], sizes[1]);
+            int[] tmpSizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
+            putToDiskCache(rawTask.getKey(), res, tmpSizes[0], tmpSizes[1]);
 
+            int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res, rawTask.isOut());
             onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
         }
 
@@ -323,7 +322,10 @@ public class MediaLoader extends BaseLoader<BaseTask> {
 
             Optimizer.BitmapInfo info = tryToLoadFromCache(rawTask.getKey(), res);
             if (info != null) {
-                onImageLoaded(res, info.getWidth(), info.getHeight(), rawTask, SIZE_CHAT_PREVIEW);
+                Bitmap pRes = fetchChatPreview();
+                int[] size = drawPreview(res, info.getWidth(), info.getHeight(), pRes, rawTask.isOut());
+                imageCache.putFree(res, SIZE_CHAT_PREVIEW);
+                onImageLoaded(pRes, size[0], size[1], rawTask, SIZE_CHAT_PREVIEW);
                 return;
             }
 
@@ -333,14 +335,14 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 if (info.getHeight() <= fullImageCached.getHeight() && info.getWidth() <= fullImageCached.getWidth()) {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.getFileName(), fullImageCached);
-                        int[] sizes = drawPreview(fullImageCached, info.getWidth(), info.getHeight(), res);
+                        int[] sizes = drawPreview(fullImageCached, info.getWidth(), info.getHeight(), res, rawTask.isOut());
                         onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
                         return;
                     }
                 } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
                     synchronized (fullImageCachedLock) {
                         BitmapDecoderEx.decodeReuseBitmap(rawTask.getFileName(), fullImageCached);
-                        int[] sizes = drawPreview(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res);
+                        int[] sizes = drawPreview(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res, rawTask.isOut());
                         onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
                         return;
                     }
@@ -348,8 +350,10 @@ public class MediaLoader extends BaseLoader<BaseTask> {
             }
 
             Bitmap tmp = Optimizer.optimize(rawTask.getFileName());
-            int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res);
-            putToDiskCache(rawTask.getKey(), res, sizes[0], sizes[1]);
+            int[] tmpSizes = Optimizer.scaleToRatio(tmp, tmp.getWidth(), tmp.getHeight(), res);
+            putToDiskCache(rawTask.getKey(), res, tmpSizes[0], tmpSizes[1]);
+
+            int[] sizes = drawPreview(tmp, tmp.getWidth(), tmp.getHeight(), res, rawTask.isOut());
             onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
         }
 
@@ -382,7 +386,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 if (fullImageCached == null) {
                     fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
                 }
-                fullImageCached.eraseColor(Color.TRANSPARENT);
+                Optimizer.clearBitmap(fullImageCached);
 
                 boolean useScaled = false;
 
@@ -413,16 +417,20 @@ public class MediaLoader extends BaseLoader<BaseTask> {
 
         private void processVideoTask(MediaVideoTask task) throws Exception {
             Bitmap res = fetchChatPreview();
-            Optimizer.BitmapInfo info = tryToLoadFromCache(task.getKey(), res);
+            Optimizer.BitmapInfo info = tryToLoadFromCache(task.getStorageKey(), res);
             if (info != null) {
-                onImageLoaded(res, info.getWidth(), info.getHeight(), task, SIZE_CHAT_PREVIEW);
+                Bitmap pRes = fetchChatPreview();
+                int[] sizes = drawPreview(res, info.getWidth(), info.getHeight(), pRes, task.isOut());
+                imageCache.putFree(res, SIZE_CHAT_PREVIEW);
+                onImageLoaded(pRes, sizes[0], sizes[1], task, SIZE_CHAT_PREVIEW);
                 return;
             }
 
             VideoOptimizer.VideoMetadata metadata = VideoOptimizer.getVideoSize(task.getFileName());
-            int[] sizes = drawPreview(metadata.getImg(), metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
-            putToDiskCache(task.getKey(), res, sizes[0], sizes[1]);
+            int[] tempSize = Optimizer.scaleToRatio(metadata.getImg(), metadata.getImg().getWidth(), metadata.getImg().getHeight(), res);
+            putToDiskCache(task.getStorageKey(), res, tempSize[0], tempSize[1]);
 
+            int[] sizes = drawPreview(metadata.getImg(), metadata.getImg().getWidth(), metadata.getImg().getHeight(), res, task.isOut());
             onImageLoaded(res, sizes[0], sizes[1], task, SIZE_CHAT_PREVIEW);
         }
 
@@ -431,7 +439,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 if (fullImageCached == null) {
                     fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
                 }
-                fullImageCached.eraseColor(Color.TRANSPARENT);
+                Optimizer.clearBitmap(fullImageCached);
 
                 boolean useScaled = false;
 
@@ -452,7 +460,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 }
 
                 Bitmap res = fetchChatPreview();
-                int[] sizes = drawPreview(fullImageCached, scaledW, scaledH, res);
+                int[] sizes = drawPreview(fullImageCached, scaledW, scaledH, res, fileTask.isOut());
 
                 onImageLoaded(res, sizes[0], sizes[1], fileTask, SIZE_CHAT_PREVIEW);
             }
@@ -483,19 +491,11 @@ public class MediaLoader extends BaseLoader<BaseTask> {
             return true;
         }
 
-        @Override
-        protected boolean processTask(BaseTask task) throws Exception {
-            if (!(task instanceof MediaGeoTask)) {
-                return true;
-            }
-
-            MediaGeoTask geoTask = (MediaGeoTask) task;
-
+        private PrepareResult createBitmap(MediaGeoTask geoTask) throws IOException {
             Bitmap res = fetchMapPreview();
-            Optimizer.BitmapInfo info = tryToLoadFromCache(geoTask.getKey(), res);
+            Optimizer.BitmapInfo info = tryToLoadFromCache(geoTask.getStorageKey(), res);
             if (info != null) {
-                onImageLoaded(res, info.getWidth(), info.getHeight(), task, SIZE_MAP_PREVIEW);
-                return true;
+                return new PrepareResult(info.getWidth(), info.getHeight(), res);
             }
 
             int scale = 1;
@@ -526,17 +526,55 @@ public class MediaLoader extends BaseLoader<BaseTask> {
             response.getEntity().writeTo(outputStream);
             byte[] data = outputStream.toByteArray();
 
-            Optimizer.loadTo(data, res);
+            Optimizer.BitmapInfo info1 = Optimizer.loadTo(data, res);
 
-            putToDiskCache(task.getKey(), res, MAP_W, MAP_H);
+            putToDiskCache(geoTask.getStorageKey(), res, MAP_W, MAP_H);
 
-            onImageLoaded(res, MAP_W, MAP_H, task, SIZE_MAP_PREVIEW);
+            return new PrepareResult(info1.getWidth(), info1.getHeight(), res);
+        }
+
+        @Override
+        protected boolean processTask(BaseTask task) throws Exception {
+            if (!(task instanceof MediaGeoTask)) {
+                return true;
+            }
+
+            MediaGeoTask geoTask = (MediaGeoTask) task;
+            PrepareResult result = createBitmap(geoTask);
+            Bitmap mapPreview = fetchMapPreview();
+            int[] sizes = drawPreview(result.getBitmap(), result.getW(), result.getH(), mapPreview, geoTask.isOut());
+            imageCache.putFree(result.getBitmap(), SIZE_MAP_PREVIEW);
+            onImageLoaded(mapPreview, sizes[0], sizes[1], task, SIZE_MAP_PREVIEW);
             return true;
         }
 
         @Override
         public boolean isAccepted(BaseTask task) {
             return task instanceof MediaGeoTask;
+        }
+    }
+
+    private class PrepareResult {
+        private int w;
+        private int h;
+        private Bitmap bitmap;
+
+        private PrepareResult(int w, int h, Bitmap bitmap) {
+            this.w = w;
+            this.h = h;
+            this.bitmap = bitmap;
+        }
+
+        public int getW() {
+            return w;
+        }
+
+        public int getH() {
+            return h;
+        }
+
+        public Bitmap getBitmap() {
+            return bitmap;
         }
     }
 }

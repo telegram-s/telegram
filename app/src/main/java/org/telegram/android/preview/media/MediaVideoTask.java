@@ -1,12 +1,13 @@
 package org.telegram.android.preview.media;
 
 /**
-* Created by ex3ndr on 22.02.14.
-*/
+ * Created by ex3ndr on 22.02.14.
+ */
 public class MediaVideoTask extends BaseTask {
     private String fileName;
 
-    public MediaVideoTask(String fileName) {
+    public MediaVideoTask(String fileName, boolean isOut) {
+        super(isOut);
         this.fileName = fileName;
     }
 
@@ -15,7 +16,7 @@ public class MediaVideoTask extends BaseTask {
     }
 
     @Override
-    public String getKey() {
+    public String getStorageKey() {
         return fileName;
     }
 }

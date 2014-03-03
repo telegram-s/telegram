@@ -10,6 +10,7 @@ public class SmallVideoTask extends BaseTask {
     private TLLocalVideo video;
 
     public SmallVideoTask(TLLocalVideo video) {
+        super(true);
         this.video = video;
     }
 
@@ -18,7 +19,7 @@ public class SmallVideoTask extends BaseTask {
     }
 
     @Override
-    public String getKey() {
+    public String getStorageKey() {
         return "s:" + video.getPreviewKey();
     }
 }

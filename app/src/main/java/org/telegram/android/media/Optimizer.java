@@ -37,6 +37,11 @@ public class Optimizer {
 
     // Public methods
 
+    public static void clearBitmap(Bitmap bitmap) {
+        bitmap.eraseColor(Color.TRANSPARENT);
+        // new Canvas(bitmap).drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+    }
+
     public static void optimize(String srcFile, String destFile) throws IOException {
         optimize(new FileSource(srcFile), destFile);
     }
@@ -171,7 +176,7 @@ public class Optimizer {
 
         Matrix scaleMatrix = new Matrix();
         scaleMatrix.setScale(ratioX, ratioY, middleX, middleY);
-        dest.eraseColor(Color.TRANSPARENT);
+        clearBitmap(dest);
         Canvas canvas = new Canvas(dest);
         canvas.setMatrix(scaleMatrix);
         canvas.drawBitmap(src, middleX - src.getWidth() / 2, middleY - src.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG));
@@ -180,7 +185,7 @@ public class Optimizer {
     public static int[] scaleToRatio(Bitmap src, int sourceW, int sourceH, Bitmap dest) {
         float ratio = Math.min(dest.getWidth() / (float) sourceW, dest.getHeight() / (float) sourceH);
 
-        dest.eraseColor(Color.TRANSPARENT);
+        clearBitmap(dest);
         Canvas canvas = new Canvas(dest);
         canvas.drawBitmap(src,
                 new Rect(0, 0, sourceW, sourceH),
@@ -192,7 +197,7 @@ public class Optimizer {
     public static void scaleToFill(Bitmap src, int sourceW, int sourceH, Bitmap dest) {
         float ratio = Math.max(dest.getWidth() / (float) sourceW, dest.getHeight() / (float) sourceH);
 
-        dest.eraseColor(Color.TRANSPARENT);
+        clearBitmap(dest);
         Canvas canvas = new Canvas(dest);
         int paddingTop = -(dest.getHeight() - (int) (sourceH * ratio)) / 2;
         int paddingLeft = -(dest.getWidth() - (int) (sourceW * ratio)) / 2;
@@ -206,21 +211,18 @@ public class Optimizer {
     }
 
     public static int[] drawMasked(Bitmap src, int sourceW, int sourceH, Bitmap dest, int minDestW, int minDestH, NinePatchDrawable mask) {
+        clearBitmap(dest);
+
         float ratio = Math.min(dest.getWidth() / (float) sourceW, dest.getHeight() / (float) sourceH);
 
         int destW = (int) (sourceW * ratio);
         int destH = (int) (sourceH * ratio);
 
-        dest.eraseColor(Color.TRANSPARENT);
         Canvas canvas = new Canvas(dest);
-
-        // Path clipPath = new Path();
         int paddingH = Math.max(minDestW - destW, 0);
         int paddingV = Math.max(minDestH - destH, 0);
-//        RectF rect = new RectF(-paddingH, -paddingV, destW + paddingH, destH + paddingV);
-//        clipPath.addRoundRect(rect, destRadius, destRadius, Path.Direction.CW);
-//        canvas.clipPath(clipPath);
 
+        // canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         canvas.drawBitmap(src,
                 new Rect(0, 0, sourceW, sourceH),
                 new Rect(0, 0, destW, destH),
@@ -239,7 +241,7 @@ public class Optimizer {
         int destW = (int) (sourceW * ratio);
         int destH = (int) (sourceH * ratio);
 
-        dest.eraseColor(Color.TRANSPARENT);
+        clearBitmap(dest);
         Canvas canvas = new Canvas(dest);
 
         Path clipPath = new Path();
@@ -496,87 +498,116 @@ public class Optimizer {
 
     private static BitmapInfo loadTo(Source source, Bitmap dest) throws IOException {
         BitmapInfo res = getInfo(source, true);
+        clearBitmap(dest);
         decodeReuse(source, res, dest);
         return res;
     }
 
     private static void decodeReuse(Source source, BitmapInfo info, Bitmap dest) throws IOException {
-        if (Build.VERSION.SDK_INT >= 11 && info.getWidth() == dest.getWidth()
-                && info.getHeight() == dest.getHeight()) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inMutable = true;
-            options.inPreferQualityOverSpeed = true;
-            options.inSampleSize = 1;
-            options.inScaled = false;
-            options.inBitmap = dest;
-            options.inTempStorage = bitmapTmp.get();
+        if (source instanceof ByteSource) {
+            BitmapDecoderEx.decodeReuseBitmap(((ByteSource) source).getData(), dest);
+        } else if (source instanceof FileSource) {
+            BitmapDecoderEx.decodeReuseBitmap(((FileSource) source).getFileName(), dest);
+        } else if (source instanceof UriSource) {
+            UriSource uriSource = (UriSource) source;
+            InputStream stream = uriSource.getContext().getContentResolver().openInputStream(uriSource.getUri());
 
-            if (source instanceof ByteSource) {
-                byte[] data = ((ByteSource) source).getData();
-                BitmapFactory.decodeByteArray(data, 0, data.length, options);
-            } else if (source instanceof FileSource) {
-                InputStream stream = new CustomBufferedInputStream(new FileInputStream(((FileSource) source).getFileName()));
-                try {
-                    BitmapFactory.decodeStream(stream, null, options);
-                } finally {
-                    if (stream != null) {
-                        try {
+            File tempFile = new File(uriSource.context.getFilesDir().getAbsoluteFile() + "/tmp/convert_tmp" + Entropy.generateRandomId());
+            tempFile.mkdirs();
+            IOUtils.copy(stream, tempFile);
+            try {
+                BitmapDecoderEx.decodeReuseBitmap(tempFile.getName(), dest);
+            } finally {
+                if (stream != null) {
+                    try {
 
-                            stream.close();
-                        } catch (IOException e) {
-                            // Ignore
-                        }
+                        stream.close();
+                    } catch (IOException e) {
+                        // Ignore
                     }
                 }
-            } else if (source instanceof UriSource) {
-                UriSource uriSource = (UriSource) source;
-                InputStream stream = new CustomBufferedInputStream(
-                        uriSource.getContext().getContentResolver().openInputStream(uriSource.getUri()));
-                try {
-                    BitmapFactory.decodeStream(stream, null, options);
-                } finally {
-                    if (stream != null) {
-                        try {
-
-                            stream.close();
-                        } catch (IOException e) {
-                            // Ignore
-                        }
-                    }
-                }
-            } else {
-                throw new UnsupportedOperationException();
+                IOUtils.delete(tempFile);
             }
+
         } else {
-            if (source instanceof ByteSource) {
-                BitmapDecoderEx.decodeReuseBitmap(((ByteSource) source).getData(), dest);
-            } else if (source instanceof FileSource) {
-                BitmapDecoderEx.decodeReuseBitmap(((FileSource) source).getFileName(), dest);
-            } else if (source instanceof UriSource) {
-                UriSource uriSource = (UriSource) source;
-                InputStream stream = uriSource.getContext().getContentResolver().openInputStream(uriSource.getUri());
-
-                File tempFile = new File(uriSource.context.getFilesDir().getAbsoluteFile() + "/tmp/convert_tmp" + Entropy.generateRandomId());
-                tempFile.mkdirs();
-                IOUtils.copy(stream, tempFile);
-                try {
-                    BitmapDecoderEx.decodeReuseBitmap(tempFile.getName(), dest);
-                } finally {
-                    if (stream != null) {
-                        try {
-
-                            stream.close();
-                        } catch (IOException e) {
-                            // Ignore
-                        }
-                    }
-                    IOUtils.delete(tempFile);
-                }
-
-            } else {
-                throw new UnsupportedOperationException();
-            }
+            throw new UnsupportedOperationException();
         }
+//        if (Build.VERSION.SDK_INT >= 11 && info.getWidth() == dest.getWidth()
+//                && info.getHeight() == dest.getHeight()) {
+//            BitmapFactory.Options options = new BitmapFactory.Options();
+//            options.inMutable = true;
+//            options.inPreferQualityOverSpeed = true;
+//            options.inSampleSize = 1;
+//            options.inScaled = false;
+//            options.inBitmap = dest;
+//            options.inTempStorage = bitmapTmp.get();
+//
+//            if (source instanceof ByteSource) {
+//                byte[] data = ((ByteSource) source).getData();
+//                BitmapFactory.decodeByteArray(data, 0, data.length, options);
+//            } else if (source instanceof FileSource) {
+//                InputStream stream = new CustomBufferedInputStream(new FileInputStream(((FileSource) source).getFileName()));
+//                try {
+//                    BitmapFactory.decodeStream(stream, null, options);
+//                } finally {
+//                    if (stream != null) {
+//                        try {
+//
+//                            stream.close();
+//                        } catch (IOException e) {
+//                            // Ignore
+//                        }
+//                    }
+//                }
+//            } else if (source instanceof UriSource) {
+//                UriSource uriSource = (UriSource) source;
+//                InputStream stream = new CustomBufferedInputStream(
+//                        uriSource.getContext().getContentResolver().openInputStream(uriSource.getUri()));
+//                try {
+//                    BitmapFactory.decodeStream(stream, null, options);
+//                } finally {
+//                    if (stream != null) {
+//                        try {
+//
+//                            stream.close();
+//                        } catch (IOException e) {
+//                            // Ignore
+//                        }
+//                    }
+//                }
+//            } else {
+//                throw new UnsupportedOperationException();
+//            }
+//        } else {
+//            if (source instanceof ByteSource) {
+//                BitmapDecoderEx.decodeReuseBitmap(((ByteSource) source).getData(), dest);
+//            } else if (source instanceof FileSource) {
+//                BitmapDecoderEx.decodeReuseBitmap(((FileSource) source).getFileName(), dest);
+//            } else if (source instanceof UriSource) {
+//                UriSource uriSource = (UriSource) source;
+//                InputStream stream = uriSource.getContext().getContentResolver().openInputStream(uriSource.getUri());
+//
+//                File tempFile = new File(uriSource.context.getFilesDir().getAbsoluteFile() + "/tmp/convert_tmp" + Entropy.generateRandomId());
+//                tempFile.mkdirs();
+//                IOUtils.copy(stream, tempFile);
+//                try {
+//                    BitmapDecoderEx.decodeReuseBitmap(tempFile.getName(), dest);
+//                } finally {
+//                    if (stream != null) {
+//                        try {
+//
+//                            stream.close();
+//                        } catch (IOException e) {
+//                            // Ignore
+//                        }
+//                    }
+//                    IOUtils.delete(tempFile);
+//                }
+//
+//            } else {
+//                throw new UnsupportedOperationException();
+//            }
+//        }
     }
 
     private static InputStream createStream(Source source) throws IOException {
