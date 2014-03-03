@@ -65,7 +65,7 @@ public class ViewLocationFragment extends TelegramMapFragment {
         User user = getEngine().getUser(uid);
         userNameView.setText(user.getDisplayName());
         locationView.setText(R.string.st_location_unavailable);
-        avatarImage.setEmptyDrawable(Placeholders.getUserPlaceholder(uid));
+        avatarImage.setEmptyUser(user.getDisplayName(), uid);
         if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
             TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) user.getPhoto();
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {

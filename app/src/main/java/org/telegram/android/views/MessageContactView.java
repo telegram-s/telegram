@@ -3,6 +3,7 @@ package org.telegram.android.views;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.text.TextPaint;
@@ -30,6 +31,8 @@ public class MessageContactView extends BaseMsgView {
 
     private Paint clockIconPaint;
 
+    private Paint placeHolderBgPaint;
+
     private OnClickListener onAddContactClick;
 
     private Drawable addContactResource;
@@ -38,11 +41,13 @@ public class MessageContactView extends BaseMsgView {
     private Drawable stateHalfCheck;
     private Drawable stateFailure;
 
+    private Rect rect = new Rect();
+
     private static final int COLOR_NORMAL = 0xff70B15C;
     private static final int COLOR_ERROR = 0xffDB4942;
     private static final int COLOR_IN = 0xffA1AAB3;
 
-    private Drawable placeholder;
+    private Drawable basePlaceholder;
 
     private String title;
     private String phone;
@@ -116,6 +121,8 @@ public class MessageContactView extends BaseMsgView {
         stateHalfCheck = getResources().getDrawable(R.drawable.st_bubble_ic_halfcheck);
         stateFailure = getResources().getDrawable(R.drawable.st_bubble_ic_warning);
         addContactResource = getResources().getDrawable(R.drawable.st_bubble_ic_contact);
+
+        placeHolderBgPaint = new Paint();
     }
 
     public OnClickListener getOnAddContactClick() {
@@ -154,7 +161,12 @@ public class MessageContactView extends BaseMsgView {
         this.date = org.telegram.android.ui.TextUtil.formatTime(message.message.getDate(), getContext());
         this.showState = message.message.isOut();
 
-        this.placeholder = getResources().getDrawable(Placeholders.getUserPlaceholder(contact.getUserId()));
+        this.basePlaceholder = getResources().getDrawable(R.drawable.st_user_placeholder_dialog);
+        if (contact.getUserId() > 0) {
+            placeHolderBgPaint.setColor(Placeholders.getBgColor(contact.getUserId()));
+        } else {
+            placeHolderBgPaint.setColor(Placeholders.GREY);
+        }
         boolean isNotContact = (message.relatedUser != null) && (message.relatedUser.getLinkType() != LinkType.CONTACT);
         this.showAddButton = isNotContact && (contact.getUserId() != application.getCurrentUid());
         requestLayout();
@@ -215,8 +227,12 @@ public class MessageContactView extends BaseMsgView {
 
         boolean isAnimated = false;
 
-        placeholder.setBounds(-getPx(4), -getPx(1), getPx(42 - 4), getPx(42 - 1));
-        placeholder.draw(canvas);
+        rect.set(-getPx(4), -getPx(1), getPx(42 - 4), getPx(42 - 1));
+
+        canvas.drawRect(rect, placeHolderBgPaint);
+
+        basePlaceholder.setBounds(-getPx(4), -getPx(1), getPx(42 - 4), getPx(42 - 1));
+        basePlaceholder.draw(canvas);
 
         canvas.drawText(title, getPx(44), getPx(16), senderPaint);
         canvas.drawText(phone, getPx(44), getPx(35), bodyPaint);

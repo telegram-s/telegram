@@ -388,7 +388,7 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
 
             if (contact.getRelatedUsers().length > 0) {
                 User user = contact.getRelatedUsers()[0];
-                ((AvatarView) view.findViewById(R.id.avatar)).setEmptyDrawable(Placeholders.getUserPlaceholder(user.getUid()));
+                ((AvatarView) view.findViewById(R.id.avatar)).setEmptyUser(user.getDisplayName(), user.getUid());
                 if (user.getPhoto() != null && (user.getPhoto() instanceof TLLocalAvatarPhoto)) {
                     TLLocalAvatarPhoto p = (TLLocalAvatarPhoto) user.getPhoto();
                     ((AvatarView) view.findViewById(R.id.avatar)).requestAvatar(p.getPreviewLocation());
@@ -413,7 +413,7 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
                     view.findViewById(R.id.shareIcon).setVisibility(View.GONE);
                 }
             } else {
-                ((AvatarView) view.findViewById(R.id.avatar)).setEmptyDrawable(R.drawable.st_user_placeholder_grey);
+                ((AvatarView) view.findViewById(R.id.avatar)).setEmptyGreyUser();
                 ((AvatarView) view.findViewById(R.id.avatar)).requestAvatar(null);
                 onlineView.setVisibility(View.GONE);
                 if (!isMultiple) {

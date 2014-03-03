@@ -113,7 +113,7 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
         mainContainer = res.findViewById(R.id.mainContainer);
 
         avatarImage = (AvatarView) res.findViewById(R.id.avatar);
-        avatarImage.setEmptyDrawable(R.drawable.st_group_placeholder_cyan);
+        avatarImage.setEmptyGreyGroup();
         avatarImage.removeAvatar();
 
         chatTitleView = (EditText) res.findViewById(R.id.title);

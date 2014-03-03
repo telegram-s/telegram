@@ -55,8 +55,6 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private static int UNREAD_OFFSET;
     private static boolean isLoaded;
 
-    private static Bitmap[] cachedUserPlaceholders = new Bitmap[Placeholders.USER_PLACEHOLDERS.length];
-
     private TextPaint timeDivPaint;
     private TextPaint newDivPaint;
     private Paint avatarPaint;
@@ -240,13 +238,6 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         newMessagesPaint = new Paint();
         newMessagesPaint.setColor(0x66435266);
 
-        for (int i = 0; i < Placeholders.USER_PLACEHOLDERS.length; i++) {
-            if (cachedUserPlaceholders[i] == null) {
-                cachedUserPlaceholders[i] =
-                        ((BitmapDrawable) getResources().getDrawable(Placeholders.USER_PLACEHOLDERS[i])).getBitmap();
-            }
-        }
-
         receiver = new ImageReceiver() {
             @Override
             public void onImageReceived(ImageHolder mediaHolder, boolean intermediate) {
@@ -330,12 +321,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         }
 
         if (showAvatar) {
-            int index = Placeholders.getUserPlaceHolderIndex(message.message.getSenderId());
-            if (cachedUserPlaceholders[index] == null) {
-                cachedUserPlaceholders[index] =
-                        ((BitmapDrawable) getResources().getDrawable(Placeholders.USER_PLACEHOLDERS[index])).getBitmap();
-            }
-            placeholder = cachedUserPlaceholders[index];
+            placeholder = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_user_placeholder_chat)).getBitmap();
 
             User user = message.senderUser;
             if (user != null) {

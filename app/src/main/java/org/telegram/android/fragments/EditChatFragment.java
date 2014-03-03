@@ -258,7 +258,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
         forbidden.setVisibility(View.GONE);
 
-        avatarView.setEmptyDrawable(Placeholders.getGroupPlaceholder(chatId));
+        avatarView.setEmptyGroup(group.getTitle(), group.getChatId());
         boolean isLoaded = false;
 
         int state = application.getSyncKernel().getAvatarUploader().getGroupUploadState(chatId);
@@ -436,7 +436,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                 final User user = getItem(i);
 
                 AvatarView imageView = (AvatarView) row.findViewById(R.id.avatar);
-                imageView.setEmptyDrawable(Placeholders.USER_PLACEHOLDERS[user.getUid() % Placeholders.USER_PLACEHOLDERS.length]);
+                imageView.setEmptyUser(user.getDisplayName(), user.getUid());
 
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
                     TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) user.getPhoto();

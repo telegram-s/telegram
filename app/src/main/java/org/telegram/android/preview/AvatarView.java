@@ -18,7 +18,6 @@ import org.telegram.android.log.Logger;
  * Created by ex3ndr on 06.02.14.
  */
 public class AvatarView extends View implements ImageReceiver {
-
     private Drawable emptyDrawable;
     private ImageHolder holder;
 
@@ -50,6 +49,30 @@ public class AvatarView extends View implements ImageReceiver {
         super(context, attrs, defStyle);
         application = (TelegramApplication) context.getApplicationContext();
         loader = application.getUiKernel().getAvatarLoader();
+    }
+
+    public void setEmptyGreyUser() {
+
+    }
+
+    public void setEmptyGreyGroup() {
+
+    }
+
+    public void setEmptyUser(String title, int index) {
+
+    }
+
+    public void setEmptyUser(int index) {
+
+    }
+
+    public void setEmptyGroup(int index) {
+
+    }
+
+    public void setEmptyGroup(String title, int index) {
+
     }
 
     public Drawable getEmptyDrawable() {

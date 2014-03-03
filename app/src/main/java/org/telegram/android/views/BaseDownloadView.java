@@ -120,7 +120,11 @@ public abstract class BaseDownloadView extends BaseMsgView {
                 currentState = STATE_ERROR;
                 break;
             case COMPLETED:
-                currentState = STATE_DOWNLOADED;
+                if (currentState == STATE_IN_PROGRESS) {
+                    rebind();
+                } else {
+                    currentState = STATE_DOWNLOADED;
+                }
                 break;
             default:
             case CANCELLED:

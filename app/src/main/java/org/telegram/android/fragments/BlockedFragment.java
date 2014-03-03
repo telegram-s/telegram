@@ -209,7 +209,7 @@ public class BlockedFragment extends TelegramFragment {
                     ((TextView) view.findViewById(R.id.name)).setText(object.getDisplayName());
 
                     AvatarView imageView = (AvatarView) view.findViewById(R.id.avatar);
-                    imageView.setEmptyDrawable(Placeholders.USER_PLACEHOLDERS[object.getUid() % Placeholders.USER_PLACEHOLDERS.length]);
+                    imageView.setEmptyUser(object.getDisplayName(), object.getUid());
                     if (object.getPhoto() instanceof TLLocalAvatarPhoto) {
                         TLLocalAvatarPhoto userPhoto = (TLLocalAvatarPhoto) object.getPhoto();
                         if (userPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {

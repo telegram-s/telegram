@@ -253,7 +253,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         }
 
         avatar = (AvatarView) res.findViewById(R.id.avatar);
-        avatar.setEmptyDrawable(Placeholders.getUserPlaceholder(application.getCurrentUid()));
+        // avatar.setEmptyGreyUser(application.getCurrentUid());
 
         nameView = (TextView) res.findViewById(R.id.userName);
         phoneView = (TextView) res.findViewById(R.id.phone);
@@ -282,6 +282,8 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         if (user != null) {
 
             boolean isLoaded = false;
+
+            avatar.setEmptyGreyUser();
 
             int state = application.getSyncKernel().getAvatarUploader().getAvatarUploadState();
             if (state != AvatarUploader.STATE_NONE) {

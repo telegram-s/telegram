@@ -335,24 +335,24 @@ public class Notifications {
                 // TODO: Implement
             }
 
-            if (bigPhoto == null) {
-                if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
-                    BitmapDrawable drawable = (BitmapDrawable)
-                            application.getResources().getDrawable(Placeholders.getUserPlaceholder(Math.abs(senderId)));
-                    bigPhoto = drawable.getBitmap();
-                } else {
-                    BitmapDrawable drawable = (BitmapDrawable)
-                            application.getResources().getDrawable(Placeholders.getGroupPlaceholder(Math.abs(peerId)));
-                    bigPhoto = drawable.getBitmap();
-                }
-            }
-            builder.setLargeIcon(bigPhoto);
+//            if (bigPhoto == null) {
+//                if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
+//                    BitmapDrawable drawable = (BitmapDrawable)
+//                            application.getResources().getDrawable(Placeholders.getUserPlaceholder(Math.abs(senderId)));
+//                    bigPhoto = drawable.getBitmap();
+//                } else {
+//                    BitmapDrawable drawable = (BitmapDrawable)
+//                            application.getResources().getDrawable(Placeholders.getGroupPlaceholder(Math.abs(peerId)));
+//                    bigPhoto = drawable.getBitmap();
+//                }
+//            }
+//            builder.setLargeIcon(bigPhoto);
 
-            if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
-                builder.setLights(Placeholders.USER_PLACEHOLDERS_COLOR[Math.abs(senderId) % Placeholders.USER_PLACEHOLDERS_COLOR.length], 1500, 1500);
-            } else {
-                builder.setLights(Placeholders.GROUP_PLACEHOLDERS_COLOR[Math.abs(peerId) % Placeholders.GROUP_PLACEHOLDERS_COLOR.length], 1500, 1500);
-            }
+//            if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
+//                builder.setLights(Placeholders.USER_PLACEHOLDERS_COLOR[Math.abs(senderId) % Placeholders.USER_PLACEHOLDERS_COLOR.length], 1500, 1500);
+//            } else {
+//                builder.setLights(Placeholders.GROUP_PLACEHOLDERS_COLOR[Math.abs(peerId) % Placeholders.GROUP_PLACEHOLDERS_COLOR.length], 1500, 1500);
+//            }
 
             int defaults = 0;
 
@@ -426,17 +426,19 @@ public class Notifications {
 
                         AvatarView avatarImage = (AvatarView) notificationView.findViewById(R.id.avatar);
                         if (peerType == PeerType.PEER_USER) {
-                            avatarImage.setEmptyDrawable(Placeholders.getUserPlaceholder(peerId));
-                            ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getUserTitleColor(peerId));
+                            avatarImage.setEmptyUser(finalSenderTitle, senderId);
+                            ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getTitleColor(peerId));
                             ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawables(null, null, null, null);
                         } else if (peerType == PeerType.PEER_CHAT) {
-                            avatarImage.setEmptyDrawable(Placeholders.getGroupPlaceholder(peerId));
-                            ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getGroupTitleColor(peerId));
+                            avatarImage.setEmptyGroup(finalSenderTitle, senderId);
+                            ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getTitleColor(peerId));
                             ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawables(null, null, null, null);
-                        } else {
-                            avatarImage.setEmptyDrawable(Placeholders.getUserPlaceholder(senderId));
+                        } else if (peerType == PeerType.PEER_USER_ENCRYPTED) {
+                            avatarImage.setEmptyUser(finalSenderTitle, senderId);
                             ((TextView) notificationView.findViewById(R.id.name)).setTextColor(0xff67b540);
                             ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_dialogs_lock, 0, 0, 0);
+                        } else {
+                            throw new UnsupportedOperationException("Unknown peer type: " + peerType);
                         }
 
                         notificationView.findViewById(R.id.container).setOnClickListener(new View.OnClickListener() {

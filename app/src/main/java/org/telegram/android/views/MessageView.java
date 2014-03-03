@@ -401,8 +401,8 @@ public class MessageView extends BaseMsgView {
                 User user = wireframe.senderUser;
                 this.senderName = user.getDisplayName();
                 if (!wireframe.message.isForwarded()) {
-                    senderPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[wireframe.message.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
-                    forwardingPaint.setColor(Placeholders.USER_PLACEHOLDERS_COLOR[wireframe.message.getSenderId() % Placeholders.USER_PLACEHOLDERS_COLOR.length]);
+                    senderPaint.setColor(Placeholders.getTitleColor(wireframe.message.getSenderId()));
+                    forwardingPaint.setColor(Placeholders.getTitleColor(wireframe.message.getSenderId()));
                 }
             }
 

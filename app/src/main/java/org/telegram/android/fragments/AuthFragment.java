@@ -291,7 +291,7 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
         }));
 
         AvatarView avatar = ((AvatarView) signupPage.findViewById(R.id.avatar));
-        avatar.setEmptyDrawable(getResources().getDrawable(R.drawable.st_user_placeholder_grey));
+        avatar.setEmptyGreyUser();
 
         signupPage.findViewById(R.id.changeAvatarButton).setOnClickListener(secure(new View.OnClickListener() {
             @Override

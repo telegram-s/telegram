@@ -68,8 +68,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
     private static TextPaint counterTitlePaint;
 
-    private static Bitmap[] cachedUserPlaceholders = new Bitmap[Placeholders.USER_PLACEHOLDERS.length];
-    private static Bitmap[] cachedGroupPlaceholders = new Bitmap[Placeholders.GROUP_PLACEHOLDERS.length];
+    private static Bitmap userPlaceHolder;
+    private static Bitmap groupPlaceHolder;
 
     private Drawable statePending;
     private Drawable stateSent;
@@ -98,6 +98,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
     // private Drawable emptyDrawable;
     // private Bitmap empty;
 
+    private Bitmap placeholder;
     private ImageHolder avatarHolder;
 
     private long avatarAppearTime;
@@ -114,8 +115,6 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
     private Rect rect = new Rect();
     private Rect rect2 = new Rect();
-
-    private Bitmap placeholder;
 
     // Layouting
     private DialogLayout layout;
@@ -287,19 +286,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         stateFailure = getResources().getDrawable(R.drawable.st_dialogs_warning);
         secureIcon = getResources().getDrawable(R.drawable.st_dialogs_lock);
 
-        for (int index = 0; index < Placeholders.GROUP_PLACEHOLDERS.length; index++) {
-            if (cachedGroupPlaceholders[index] == null) {
-                cachedGroupPlaceholders[index] =
-                        ((BitmapDrawable) getResources().getDrawable(Placeholders.GROUP_PLACEHOLDERS[index])).getBitmap();
-            }
-        }
-
-        for (int index = 0; index < Placeholders.USER_PLACEHOLDERS.length; index++) {
-            if (cachedUserPlaceholders[index] == null) {
-                cachedUserPlaceholders[index] =
-                        ((BitmapDrawable) getResources().getDrawable(Placeholders.USER_PLACEHOLDERS[index])).getBitmap();
-            }
-        }
+        userPlaceHolder = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_user_placeholder_dialog)).getBitmap();
+        groupPlaceHolder = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_group_placeholder)).getBitmap();
     }
 
     public void setDescription(DialogWireframe description, Object preparedLayouts) {
@@ -313,34 +301,20 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             this.userTypes = application.getTypingStates().isUserTyping(description.getPeerId());
         }
 
-        if (description.getPeerType() == PeerType.PEER_CHAT) {
-            int index = Placeholders.getGroupPlaceHolderIndex(description.getPeerId());
-            if (cachedGroupPlaceholders[index] == null) {
-                cachedGroupPlaceholders[index] =
-                        ((BitmapDrawable) getResources().getDrawable(Placeholders.GROUP_PLACEHOLDERS[index])).getBitmap();
-            }
-            placeholder = cachedGroupPlaceholders[index];
-        } else {
-            int index = Placeholders.getUserPlaceHolderIndex(description.getPeerId());
-            if (cachedUserPlaceholders[index] == null) {
-                cachedUserPlaceholders[index] =
-                        ((BitmapDrawable) getResources().getDrawable(Placeholders.USER_PLACEHOLDERS[index])).getBitmap();
-            }
-            placeholder = cachedUserPlaceholders[index];
-        }
-
         photo = description.getDialogAvatar();
 
         if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
             EncryptedChat encryptedChat = application.getEngine().getEncryptedChat(description.getPeerId());
-            avatarBgPaint.setColor(Placeholders.getUserBgColor(encryptedChat.getUserId()));
-            // empty = userPlaceholder;
+            avatarBgPaint.setColor(Placeholders.getBgColor(encryptedChat.getUserId()));
+            placeholder = userPlaceHolder;
         } else if (description.getPeerType() == PeerType.PEER_USER) {
-            avatarBgPaint.setColor(Placeholders.getUserBgColor(description.getPeerId()));
-            // empty = userPlaceholder;
+            avatarBgPaint.setColor(Placeholders.getBgColor(description.getPeerId()));
+            placeholder = userPlaceHolder;
+        } else if (description.getPeerType() == PeerType.PEER_CHAT) {
+            avatarBgPaint.setColor(Placeholders.getBgColor(description.getPeerId()));
+            placeholder = groupPlaceHolder;
         } else {
-            avatarBgPaint.setColor(Placeholders.getGroupBgColor(description.getPeerId()));
-            // empty = groupPlaceholder;
+            throw new UnsupportedOperationException("Unknown peer type #" + description.getPeerType());
         }
 
         if (photo instanceof TLLocalAvatarPhoto) {
@@ -449,6 +423,26 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         }
     }
 
+    private void drawPlaceHolder(Canvas canvas) {
+        placeholderPaint.setColor(layout.placeHolderColor);
+
+        placeholderTextPaint.setAlpha(255);
+        placeholderPaint.setAlpha(255);
+        avatarPaint.setAlpha(255);
+
+        rect.set(layout.layoutAvatarLeft, layout.layoutAvatarTop,
+                layout.layoutAvatarLeft + layout.layoutAvatarWidth,
+                layout.layoutAvatarTop + layout.layoutAvatarWidth);
+
+        canvas.drawRect(rect, placeholderPaint);
+        if (layout.usePlaceholder) {
+            canvas.drawText(layout.placeHolderName, layout.placeholderLeft, layout.placeholderTop, placeholderTextPaint);
+        } else {
+            rect2.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
+            canvas.drawBitmap(placeholder, rect2, rect, avatarPaint);
+        }
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
 
@@ -526,32 +520,16 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 avatarPaint.setAlpha(255);
                 canvas.drawBitmap(avatarHolder.getBitmap(), layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
             } else {
+                drawPlaceHolder(canvas);
+
                 float alpha = time / (float) AVATAR_FADE_TIME;
-                avatarPaint.setAlpha(255);
-                rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
-                rect2.set(layout.layoutAvatarLeft, layout.layoutAvatarTop,
-                        layout.layoutAvatarLeft + layout.layoutAvatarWidth,
-                        layout.layoutAvatarTop + layout.layoutAvatarWidth);
-                canvas.drawBitmap(placeholder, rect, rect2, avatarPaint);
                 avatarPaint.setAlpha((int) (255 * alpha));
                 canvas.drawBitmap(avatarHolder.getBitmap(), layout.layoutAvatarLeft, layout.layoutAvatarTop, avatarPaint);
 
                 inavalidateForAnimation();
             }
         } else {
-
-            rect.set(layout.layoutAvatarLeft, layout.layoutAvatarTop,
-                    layout.layoutAvatarLeft + layout.layoutAvatarWidth,
-                    layout.layoutAvatarTop + layout.layoutAvatarWidth);
-            if (layout.usePlaceholder) {
-                placeholderPaint.setColor(layout.placeHolderColor);
-                canvas.drawRect(rect, placeholderPaint);
-                canvas.drawText(layout.placeHolderName, layout.placeholderLeft, layout.placeholderTop, placeholderTextPaint);
-            } else {
-                avatarPaint.setAlpha(255);
-                rect2.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
-                canvas.drawBitmap(placeholder, rect2, rect, avatarPaint);
-            }
+            drawPlaceHolder(canvas);
         }
 
         if (description.isErrorState() ||
@@ -968,10 +946,10 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
             // Placeholder
             placeHolderName = description.getDialogName();
+            placeHolderColor = Placeholders.getBgColor(description.getPeerId());
 
             if (placeHolderName.length() > 0) {
                 usePlaceholder = true;
-                placeHolderColor = Placeholders.BG_COLOR[Math.abs(description.getPeerId()) % Placeholders.BG_COLOR.length];
                 placeholderLeft = layoutAvatarLeft + layoutAvatarWidth / 2;
                 Rect rect = new Rect();
                 placeholderTextPaint.getTextBounds(placeHolderName, 0, placeHolderName.length(), rect);

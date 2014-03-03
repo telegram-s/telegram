@@ -211,7 +211,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
     }
 
     private void bindUi() {
-        avatarView.setEmptyDrawable(Placeholders.getUserPlaceholder(userId));
+        avatarView.setEmptyUser(user.getDisplayName(), userId);
         if (user.getPhoto() instanceof TLLocalAvatarPhoto && ((TLLocalAvatarPhoto) user.getPhoto()).getPreviewLocation() instanceof TLLocalFileLocation) {
             avatarView.requestAvatar(((TLLocalAvatarPhoto) user.getPhoto()).getPreviewLocation());
             if (((TLLocalAvatarPhoto) user.getPhoto()).getFullLocation() instanceof TLLocalFileLocation) {

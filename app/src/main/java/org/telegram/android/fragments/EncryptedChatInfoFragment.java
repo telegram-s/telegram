@@ -250,7 +250,7 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
             selfDestructTimerValue.setText("");
         }
 
-        avatarView.setEmptyDrawable(Placeholders.getUserPlaceholder(user.getUid()));
+        avatarView.setEmptyUser(user.getDisplayName(), user.getUid());
         if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
             final TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) user.getPhoto();
             if (avatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {

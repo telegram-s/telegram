@@ -429,9 +429,9 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
                 AvatarView avatarView = (AvatarView) view.findViewById(R.id.avatar);
 
                 if (wireframe.getPeerType() == PeerType.PEER_USER) {
-                    avatarView.setEmptyDrawable(Placeholders.getUserPlaceholder(wireframe.getPeerId()));
+                    avatarView.setEmptyUser(wireframe.getTitle().toString(), wireframe.getPeerId());
                 } else {
-                    avatarView.setEmptyDrawable(Placeholders.getGroupPlaceholder(wireframe.getPeerId()));
+                    avatarView.setEmptyGroup(wireframe.getTitle().toString(), wireframe.getPeerId());
                 }
 
                 if (wireframe.getPhoto() instanceof TLLocalAvatarPhoto) {

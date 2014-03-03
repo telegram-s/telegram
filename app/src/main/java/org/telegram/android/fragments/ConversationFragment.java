@@ -1083,9 +1083,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 imageView.setEmptyDrawable(R.drawable.st_support_avatar);
                 touchLayer.setOnClickListener(null);
             } else {
-                imageView.setEmptyDrawable(Placeholders.USER_PLACEHOLDERS[peerId % Placeholders.USER_PLACEHOLDERS.length]);
                 User usr = application.getEngine().getUser(peerId);
                 if (usr != null) {
+                    imageView.setEmptyUser(usr.getDisplayName(), usr.getUid());
                     if (usr.getPhoto() instanceof TLLocalAvatarPhoto) {
                         TLLocalAvatarPhoto localAvatarPhoto = (TLLocalAvatarPhoto) usr.getPhoto();
                         if (localAvatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
@@ -1107,8 +1107,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }));
             }
         } else if (peerType == PeerType.PEER_CHAT) {
-            imageView.setEmptyDrawable(Placeholders.GROUP_PLACEHOLDERS[peerId % Placeholders.GROUP_PLACEHOLDERS.length]);
             Group group = getEngine().getGroupsEngine().getGroup(peerId);
+            imageView.setEmptyGroup(group.getTitle(), group.getChatId());
             int state = application.getSyncKernel().getAvatarUploader().getGroupUploadState(peerId);
             boolean isLoaded = false;
             if (state != AvatarUploader.STATE_NONE) {
@@ -1165,9 +1165,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 imageView.setEmptyDrawable(R.drawable.st_support_avatar);
                 touchLayer.setOnClickListener(null);
             } else {
-                imageView.setEmptyDrawable(Placeholders.USER_PLACEHOLDERS[chat.getUserId() % Placeholders.USER_PLACEHOLDERS.length]);
                 User usr = application.getEngine().getUser(chat.getUserId());
                 if (usr != null) {
+                    imageView.setEmptyUser(usr.getDisplayName(), usr.getUid());
                     if (usr.getPhoto() instanceof TLLocalAvatarPhoto) {
                         TLLocalAvatarPhoto localAvatarPhoto = (TLLocalAvatarPhoto) usr.getPhoto();
                         if (localAvatarPhoto.getPreviewLocation() instanceof TLLocalFileLocation) {

@@ -1,7 +1,10 @@
 package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.NinePatchDrawable;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -9,6 +12,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.telegram.android.R;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.core.model.media.TLLocalDocument;
@@ -34,12 +38,13 @@ public class MediaLoader extends BaseLoader<BaseTask> {
 
     private static final int SIZE_CHAT_PREVIEW = 0;
     private static final int SIZE_MAP_PREVIEW = 1;
-    private static final int SIZE_FULL_PREVIEW = 2;
     private static final int SIZE_FAST_PREVIEW = 3;
     private static final int SIZE_SMALL_PREVIEW = 4;
 
     private Bitmap fullImageCached = null;
     private final Object fullImageCachedLock = new Object();
+
+    private NinePatchDrawable outMediaMask;
 
     private ThreadLocal<Bitmap> fastBitmaps = new ThreadLocal<Bitmap>() {
         @Override
@@ -50,6 +55,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
 
     public MediaLoader(TelegramApplication application) {
         super("previews", 5, application);
+        outMediaMask = (NinePatchDrawable) application.getResources().getDrawable(R.drawable.st_bubble_out_media_content);
     }
 
     @Override
@@ -134,16 +140,6 @@ public class MediaLoader extends BaseLoader<BaseTask> {
         return res;
     }
 
-    private Bitmap fetchFastPreview() {
-        Bitmap res = imageCache.findFree(SIZE_FAST_PREVIEW);
-        if (res == null) {
-            res = Bitmap.createBitmap(PreviewConfig.FAST_MAX_W, PreviewConfig.FAST_MAX_H, Bitmap.Config.ARGB_8888);
-        } else {
-            res.eraseColor(Color.TRANSPARENT);
-        }
-        return res;
-    }
-
     private Bitmap fetchMapPreview() {
         Bitmap res = imageCache.findFree(SIZE_MAP_PREVIEW);
         if (res == null) {
@@ -155,9 +151,13 @@ public class MediaLoader extends BaseLoader<BaseTask> {
     }
 
     private int[] drawPreview(Bitmap src, int w, int h, Bitmap dest) {
-        return Optimizer.scaleToRatioRounded(src, w, h,
+//        return Optimizer.scaleToRatioRounded(src, w, h,
+//                dest, PreviewConfig.MIN_PREVIEW_W, PreviewConfig.MIN_PREVIEW_H,
+//                PreviewConfig.ROUND_RADIUS);
+
+        return Optimizer.drawMasked(src, w, h,
                 dest, PreviewConfig.MIN_PREVIEW_W, PreviewConfig.MIN_PREVIEW_H,
-                PreviewConfig.ROUND_RADIUS);
+                outMediaMask);
     }
 
     private class FastWorker extends QueueWorker<BaseTask> {
