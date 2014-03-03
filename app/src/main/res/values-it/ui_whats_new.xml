@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whats_contacts_title">Miglioramenti nei contatti e nell\'avvio</string>
+    <string name="whats_contacts_0">Eliminazione contatti</string>
+    <string name="whats_contacts_1">L\'ordinazione dei contatti (nome \ cognome) ora utilizza le impostazioni del telefono</string>
+    <string name="whats_contacts_2">Miglioramenti nella velocità dei caricamenti</string>
+
+    <string name="whats_new_design_title">Design, velocità e stabilità</string>
+    <string name="whats_new_design_0">Nuovo design azzurro</string>
+    <string name="whats_new_design_1">Invio delle foto, dei video e dei messaggi velocizzato</string>
+    <string name="whats_new_design_2">Ottimizzazioni per i paesi "firewallati"</string>
+    <string name="whats_new_design_3">Più stabilità</string>
+
+    <string name="whats_new_secret_title">Aggiunte chat segrete</string>
+    <string name="whats_new_secret_hint">Inizia una chat segreta dal menu "Scrivi a" o dal profilo di un contatto.
+        
+    </string>
+    <string name="whats_new_secret_0">Usa crittografia punto-punto</string>
+    <string name="whats_new_secret_1">Non lascia traccia sui nostri server</string>
+    <string name="whats_new_secret_2">Si autodistrugge</string>
+    <string name="whats_new_secret_3">Non permette il reinvio dei messaggi</string>
+
+    <string name="whats_new_arabic_title">Aggiunta traduzione araba</string>
+    <string name="whats_new_arabic_hint">Se hai qualche problema con la traduzione, per favore dillo al nostro supporto tecnico in Impostazioni - Fai una domanda.
+    </string>
+    <string name="whats_new_arabic_0">Supporto completo ad RTL su Android 4.0+</string>
+    <string name="whats_new_arabic_1">Interfaccia invertita su Android 4.2+</string>
+    <string name="whats_new_arabic_2">Supporto completo ai numeri arabi</string>
+
+    <string name="whats_new_gif_title">GIF, lingua Russa e velocità</string>
+    <string name="whats_new_gif_hint">
+        Le GIF funzionano con immagini inviate da altri dispositivi con Telegram S-Edition.
+		Se hai qualche problema con la traduzione Russa, per favore dillo al nostro supporto tecnico in Impostazioni - Fai una domanda.
+    </string>
+    <string name="whats_new_gif_0">Invio e ricezione di GIF</string>
+    <string name="whats_new_gif_1">Anteprima dei documenti (ora visibile solo nella S-Edition)</string>
+    <string name="whats_new_gif_2">Invio e ricezione di file audio (dal menu File)</string>
+    <string name="whats_new_gif_3">Migliorato il download delle animazioni</string>
+    <string name="whats_new_gif_4">Traduzione russa</string>
+    <string name="whats_new_gif_5">Temi sperimentali</string>
+
+    <string name="whats_new_spain_title">Traduzione spagnola e migliore stabilità</string>
+    <string name="whats_new_spain_hint">Se hai qualche problema con la traduzione spagnola, per favore dillo al nostro supporto tecnico in Impostazioni - Fai una domanda.
+    </string>
+    <string name="whats_new_spain_0">Completamente tradotto in Spagnolo</string>
+    <string name="whats_new_spain_1">Aggiustati 50 bug circa</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="lang_seconds">
+        <item quantity="zero">secondi</item>
+        <item quantity="one">un secondo</item>
+        <item quantity="other">{d} secondi</item>
+    </plurals>
+
+    <plurals name="lang_minutes">
+        <item quantity="zero">minuti</item>
+        <item quantity="one">un minuto</item>
+        <item quantity="other">{d} minuti</item>
+    </plurals>
+
+    <plurals name="lang_hours">
+        <item quantity="zero">ore</item>
+        <item quantity="one">una ora</item>
+        <item quantity="other">{d} ore</item>
+    </plurals>
+
+    <plurals name="lang_days">
+        <item quantity="zero">giorni</item>
+        <item quantity="one">un giorno</item>
+        <item quantity="other">{d} giorni</item>
+    </plurals>
+
+    <plurals name="lang_week">
+        <item quantity="zero">settimane</item>
+        <item quantity="one">una settimana</item>
+        <item quantity="other">{d} settimane</item>
+    </plurals>
+
+    <plurals name="lang_month">
+        <item quantity="zero">mesi</item>
+        <item quantity="one">un mese</item>
+        <item quantity="other">{d} mesi</item>
+    </plurals>
+
+    <plurals name="lang_year">
+        <item quantity="zero">anni</item>
+        <item quantity="one">un anno</item>
+        <item quantity="other">{d} anni</item>
+    </plurals>
+
+    <plurals name="lang_more">
+        <item quantity="one">uno in più</item>
+        <item quantity="other">{d} in più</item>
+    </plurals>
+</resources>
