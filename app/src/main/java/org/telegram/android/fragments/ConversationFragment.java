@@ -1923,7 +1923,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         imageView.setOnClickListener(secure(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                getRootController().openImage((TLLocalFileLocation) chatEditPhoto.getPhoto().getFullLocation());
+                                getRootController().openAvatarPreview((TLLocalFileLocation) chatEditPhoto.getPhoto().getFullLocation());
                             }
                         }));
                     } else {
@@ -1944,14 +1944,14 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             imageView.setOnClickListener(secure(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    getRootController().openImage((TLLocalFileLocation) avatarPhoto.getFullLocation());
+                                    getRootController().openAvatarPreview((TLLocalFileLocation) avatarPhoto.getFullLocation());
                                 }
                             }));
                         } else {
                             imageView.setOnClickListener(secure(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    getRootController().openImage((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
+                                    getRootController().openAvatarPreview((TLLocalFileLocation) avatarPhoto.getPreviewLocation());
                                 }
                             }));
                         }

@@ -507,4 +507,30 @@ public class AvatarLoader {
             return fileLocation.getUniqKey() + "_" + kind;
         }
     }
+
+    private class FullAvatarTask extends BaseAvatarTask {
+        private TLAbsLocalFileLocation fileLocation;
+        private boolean isDownloaded = true;
+
+        private FullAvatarTask(TLAbsLocalFileLocation fileLocation, int kind) {
+            this.fileLocation = fileLocation;
+        }
+
+        public boolean isDownloaded() {
+            return isDownloaded;
+        }
+
+        public void setDownloaded(boolean isDownloaded) {
+            this.isDownloaded = isDownloaded;
+        }
+
+        public TLAbsLocalFileLocation getFileLocation() {
+            return fileLocation;
+        }
+
+        @Override
+        public String getKey() {
+            return fileLocation.getUniqKey();
+        }
+    }
 }

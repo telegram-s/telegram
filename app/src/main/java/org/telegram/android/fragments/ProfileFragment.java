@@ -30,7 +30,6 @@ import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.tasks.ProgressInterface;
-import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
 import org.telegram.api.engine.RpcException;
@@ -218,7 +217,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
                 avatarView.setOnClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        getRootController().openImage((TLLocalFileLocation) ((TLLocalAvatarPhoto) user.getPhoto()).getFullLocation());
+                        getRootController().openAvatarPreview((TLLocalFileLocation) ((TLLocalAvatarPhoto) user.getPhoto()).getFullLocation());
                     }
                 }));
             } else {

@@ -46,7 +46,7 @@ public interface RootController {
 
     public void openImage(int mid, int peerType, int peerId);
 
-    public void openImage(TLLocalFileLocation fileLocation);
+    public void openAvatarPreview(TLLocalFileLocation fileLocation);
 
     public void openUser(int uid);
 

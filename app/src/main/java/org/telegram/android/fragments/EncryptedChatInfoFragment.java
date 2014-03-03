@@ -27,7 +27,6 @@ import org.telegram.android.core.model.service.TLLocalActionEncryptedTtl;
 import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
-import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.TLDecryptedMessageActionSetMessageTTL;
 import org.telegram.api.TLDecryptedMessageService;
@@ -259,7 +258,7 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
                     avatarView.setOnClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            getRootController().openImage((TLLocalFileLocation) avatarPhoto.getFullLocation());
+                            getRootController().openAvatarPreview((TLLocalFileLocation) avatarPhoto.getFullLocation());
                         }
                     }));
                 } else {

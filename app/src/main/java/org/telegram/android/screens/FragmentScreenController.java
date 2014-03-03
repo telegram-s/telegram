@@ -350,8 +350,8 @@ public class FragmentScreenController implements RootController {
     }
 
     @Override
-    public void openImage(TLLocalFileLocation fileLocation) {
-        activity.openImage(fileLocation);
+    public void openAvatarPreview(TLLocalFileLocation fileLocation) {
+        activity.openAvatarPreview(fileLocation);
     }
 
     @Override

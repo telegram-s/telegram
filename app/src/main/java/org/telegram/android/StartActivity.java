@@ -360,7 +360,7 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         startActivityForResult(ViewImagesActivity.createIntent(mid, peerType, peerId, this), REQUEST_OPEN_IMAGE);
     }
 
-    public void openImage(TLLocalFileLocation location) {
+    public void openAvatarPreview(TLLocalFileLocation location) {
         startActivity(ViewImageActivity.createIntent(location, this));
     }
 
