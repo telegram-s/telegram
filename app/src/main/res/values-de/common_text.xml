@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lang_common_typing">schreibt...</string>
+    <string name="lang_common_typing_single">{content} schreibt...</string>
+    <string name="lang_common_typing_multiple">{content} schreiben...</string>
+    <string name="lang_common_and">{content1} und {content2}</string>
+    <string name="lang_common_and_short">{content1}, {content2}</string>
+
+    <string name="lang_common_online_templates">zuletzt online {time}</string>
+    <string name="lang_common_online_now">gerade eben</string>
+    <string name="lang_common_online_ago">vor {time}</string>
+</resources>
