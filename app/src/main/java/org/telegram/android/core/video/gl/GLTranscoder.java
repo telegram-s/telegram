@@ -15,11 +15,23 @@ import java.nio.ByteBuffer;
  */
 public class GLTranscoder {
 
+    private static final float MAX_SIZE = 640;
+
     private static final String TAG = "GLTranscoder";
 
     public static boolean transcode(String sourceFile, String destFile) throws IOException {
         long tStart = System.currentTimeMillis();
         long start = System.currentTimeMillis();
+
+        MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
+        metaRetriever.setDataSource(sourceFile);
+        int height = Integer.parseInt(metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+        int width = Integer.parseInt(metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+
+        float scale = Math.min(MAX_SIZE / height, MAX_SIZE / width);
+        int destW = (int) (width * scale);
+        int destH = (int) (height * scale);
+
         MediaExtractor extractor = new MediaExtractor();
         extractor.setDataSource(sourceFile);
         int trackIndex = selectTrack(extractor);
@@ -32,7 +44,7 @@ public class GLTranscoder {
         Logger.d(TAG, "Extracted in " + (System.currentTimeMillis() - start) + " ms");
 
         start = System.currentTimeMillis();
-        VideoChunks res = editVideo(chunks);
+        VideoChunks res = editVideo(chunks, destW, destH);
         Logger.d(TAG, "Edited in " + (System.currentTimeMillis() - start) + " ms");
 
         start = System.currentTimeMillis();
@@ -46,7 +58,7 @@ public class GLTranscoder {
     }
 
 
-    private static VideoChunks editVideo(VideoChunks inputData) {
+    private static VideoChunks editVideo(VideoChunks inputData, int destW, int destH) {
         VideoChunks outputData = new VideoChunks();
         MediaCodec decoder = null;
         MediaCodec encoder = null;
@@ -58,7 +70,7 @@ public class GLTranscoder {
 
             // Create an encoder format that matches the input format.  (Might be able to just
             // re-use the format used to generate the video, since we want it to be the same.)
-            MediaFormat outputFormat = MediaFormat.createVideoFormat("video/avc", 640, 320);
+            MediaFormat outputFormat = MediaFormat.createVideoFormat("video/avc", destW, destH);
             outputFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT,
                     MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
             outputFormat.setInteger(MediaFormat.KEY_BIT_RATE, 1000000);
