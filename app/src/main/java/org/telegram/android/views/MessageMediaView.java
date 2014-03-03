@@ -3,6 +3,7 @@ package org.telegram.android.views;
 import android.content.Context;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.NinePatchDrawable;
 import android.os.SystemClock;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -52,6 +53,8 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private Drawable unsupportedMark;
     private Drawable downloadIcon;
     private Drawable tryAgainIcon;
+    private NinePatchDrawable outMask;
+    private NinePatchDrawable inMask;
     private TextPaint videoDurationPaint;
     private TextPaint downloadPaint;
     private TextPaint timePaint;
@@ -205,6 +208,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
         downloadIcon = getResources().getDrawable(R.drawable.st_bubble_ic_download);
         tryAgainIcon = getResources().getDrawable(R.drawable.st_bubble_media_retry);
+
+        inMask = (NinePatchDrawable) getResources().getDrawable(R.drawable.st_bubble_in_media_content);
+        outMask = (NinePatchDrawable) getResources().getDrawable(R.drawable.st_bubble_out_media_content);
 
         placeholderPaint = new Paint();
         placeholderPaint.setColor(Color.WHITE);
@@ -591,20 +597,19 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
             if (movie.width() != 0 && movie.height() != 0) {
                 Optimizer.clearBitmap(movieDestBitmap);
+
                 movieDestCanvas.save();
                 float scaleX = (float) desiredWidth / movie.width();
                 float scaleY = (float) desiredHeight / movie.height();
-
-                Path clipPath = new Path();
-                RectF rect = new RectF(0, 0, desiredWidth, desiredHeight);
-                clipPath.addRoundRect(rect, PreviewConfig.ROUND_RADIUS, PreviewConfig.ROUND_RADIUS, Path.Direction.CW);
-                movieDestCanvas.clipPath(clipPath);
-
-                // float scale = Math.min((float) desiredWidth / movie.width(), (float) desiredHeight / movie.height());
                 movieDestCanvas.translate((desiredWidth - scaleX * movie.width()) / 2, (desiredHeight - scaleY * movie.height()) / 2);
                 movieDestCanvas.scale(scaleX, scaleY);
                 movie.draw(movieDestCanvas, 0, 0);
                 movieDestCanvas.restore();
+
+                NinePatchDrawable mask = isOut ? outMask : inMask;
+                mask.getPaint().setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+                mask.setBounds(0, 0, desiredWidth, desiredHeight);
+                mask.draw(movieDestCanvas);
             } else {
                 movie.draw(movieDestCanvas, 0, 0);
             }
@@ -625,7 +630,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
                 if (oldPreview != null) {
                     bitmapFilteredPaint.setAlpha(255);
-                    rect1.set(0, 0, preview.getW(), preview.getH());
+                    rect1.set(0, 0, oldPreview.getW(), oldPreview.getH());
                     rect2.set(0, 0, desiredWidth, desiredHeight);
                     canvas.drawBitmap(oldPreview.getBitmap(), rect1, rect2, bitmapFilteredPaint);
                 } else {
