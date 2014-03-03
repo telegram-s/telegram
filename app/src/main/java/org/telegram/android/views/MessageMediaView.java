@@ -190,7 +190,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 //        bitmapFilteredPaint.setColorFilter(new ColorMatrixColorFilter(result));
 
         timeBgRect = new Paint();
-        timeBgRect.setColor(0xb6000000);
+        timeBgRect.setColor(0x59000000);
 
         downloadBgRect = new Paint();
         downloadBgRect.setColor(0xB6000000);
