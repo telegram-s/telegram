@@ -10,9 +10,11 @@ import android.net.Uri;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.View;
+import org.telegram.android.R;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.model.media.TLAbsLocalFileLocation;
 import org.telegram.android.log.Logger;
+import org.telegram.android.ui.placeholders.PlaceholderDrawable;
 
 /**
  * Created by ex3ndr on 06.02.14.
@@ -52,35 +54,19 @@ public class AvatarView extends View implements ImageReceiver {
     }
 
     public void setEmptyGreyUser() {
-
+        emptyDrawable = new PlaceholderDrawable(R.drawable.st_user_placeholder_dialog, getContext());
     }
 
     public void setEmptyGreyGroup() {
-
+        emptyDrawable = new PlaceholderDrawable(R.drawable.st_group_placeholder, getContext());
     }
 
     public void setEmptyUser(String title, int index) {
-
-    }
-
-    public void setEmptyUser(int index) {
-
-    }
-
-    public void setEmptyGroup(int index) {
-
+        emptyDrawable = new PlaceholderDrawable(index, R.drawable.st_user_placeholder_dialog, getContext());
     }
 
     public void setEmptyGroup(String title, int index) {
-
-    }
-
-    public Drawable getEmptyDrawable() {
-        return emptyDrawable;
-    }
-
-    public void setEmptyDrawable(Drawable emptyDrawable) {
-        this.emptyDrawable = emptyDrawable;
+        emptyDrawable = new PlaceholderDrawable(index, R.drawable.st_group_placeholder, getContext());
     }
 
     public void setEmptyDrawable(int res) {
@@ -187,6 +173,7 @@ public class AvatarView extends View implements ImageReceiver {
             emptyDrawable.setBounds(0, 0, getWidth(), getHeight());
             emptyDrawable.draw(canvas);
         }
+
         if (holder != null) {
             rect.set(0, 0, holder.getBitmap().getWidth(), holder.getBitmap().getHeight());
             rect1.set(0, 0, getWidth(), getHeight());

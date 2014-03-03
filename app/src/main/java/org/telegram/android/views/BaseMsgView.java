@@ -58,6 +58,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private TextPaint timeDivPaint;
     private TextPaint newDivPaint;
     private Paint avatarPaint;
+    private Paint placeHolderBgPaint;
     private Bitmap placeholder;
     private ImageReceiver receiver;
     private ImageHolder avatarHolder;
@@ -179,30 +180,8 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         newDivPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
 
         avatarPaint = new Paint();
-       /* avatarPaint.setAntiAlias(true);
-        avatarPaint.setFilterBitmap(true);
-        avatarPaint.setDither(true);*/
-//        receiver = new ImageReceiver() {
-//            @Override
-//            public void onImageLoaded(Bitmap result) {
-//                avatar = result;
-//                avatarImageTime = SystemClock.uptimeMillis();
-//                postInvalidate();
-//            }
-//
-//            @Override
-//            public void onImageLoadFailure() {
-//                avatar = null;
-//                postInvalidate();
-//            }
-//
-//            @Override
-//            public void onNoImage() {
-//                avatar = null;
-//                postInvalidate();
-//            }
-//        };
-//        receiver.register(application.getImageController());
+
+        placeHolderBgPaint = new Paint();
 
         bubbleInPadding = new Rect();
         bubbleOutPadding = new Rect();
@@ -325,6 +304,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
             User user = message.senderUser;
             if (user != null) {
+                placeHolderBgPaint.setColor(Placeholders.getBgColor(user.getUid()));
                 if (user.getPhoto() instanceof TLLocalAvatarPhoto) {
                     TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) user.getPhoto();
                     if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
@@ -580,6 +560,14 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         }
     }
 
+    private void drawPlaceholder(Canvas canvas) {
+        avatarPaint.setAlpha(255);
+        rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
+
+        canvas.drawRect(avatarRect, placeHolderBgPaint);
+        canvas.drawBitmap(placeholder, rect, avatarRect, avatarPaint);
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         // long start = SystemClock.uptimeMillis();
@@ -654,9 +642,8 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                         float animationPercent = fadeEasing((float) animationTime / AVATAR_FADE_TIME);
                         int placeholderAlpha = (int) ((1 - animationPercent) * 255);
                         int avatarAlpha = (int) (animationPercent * 255);
-                        avatarPaint.setAlpha(placeholderAlpha);
-                        rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
-                        canvas.drawBitmap(placeholder, rect, avatarRect, avatarPaint);
+
+                        drawPlaceholder(canvas);
 
                         avatarPaint.setAlpha(avatarAlpha);
                         canvas.drawBitmap(avatarHolder.getBitmap(), avatarRect.left, avatarRect.top, avatarPaint);
@@ -665,9 +652,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                         isAnimating = true;
                     }
                 } else {
-                    avatarPaint.setAlpha(255);
-                    rect.set(0, 0, placeholder.getWidth(), placeholder.getHeight());
-                    canvas.drawBitmap(placeholder, rect, avatarRect, avatarPaint);
+                    drawPlaceholder(canvas);
                 }
                 canvas.translate(AVATAR_OFFSET, 0);
             }
