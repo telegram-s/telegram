@@ -15,7 +15,7 @@ public class PreviewConfig {
     private static final int MIN_PREVIEW_W_DP = 100;
     private static final int MIN_PREVIEW_H_DP = 40;
 
-    private static final int MAX_PREVIEW_W_DP = 220;
+    private static final int MAX_PREVIEW_W_DP = 280;
     private static final int MAX_PREVIEW_H_DP = 300;
 
     private static final int MAX_MEDIA_PREVIEW_DP = 120;

@@ -8,7 +8,7 @@ import org.telegram.android.R;
  */
 public class Placeholders {
 
-    public static final int GREY = 0xff767676;
+    public static final int GREY = 0xffb1bbc2;
 
     public static final int BLUE_BG = 0xff8abae7;
     public static final int BLUE = 0xff0f94ed;

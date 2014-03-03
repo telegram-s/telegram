@@ -562,6 +562,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     @Override
     protected boolean drawBubble(Canvas canvas) {
         boolean isAnimated = false;
+        boolean isAnimationShown = false;
 
 
         // Start Main content
@@ -611,6 +612,8 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             rect1.set(0, 0, desiredWidth, desiredHeight);
 
             canvas.drawBitmap(movieDestBitmap, rect1, rect1, bitmapPaint);
+
+            isAnimationShown = true;
         } else if (preview != null) {
             if (animationTime > FADE_ANIMATION_TIME || !isAnimatedProgress) {
                 bitmapFilteredPaint.setAlpha(255);
@@ -750,57 +753,59 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
         canvas.restore();
 
-        int bottom = desiredHeight + desiredPaddingV * 2;
-        int right = desiredWidth + desiredPaddingH * 2;
-        canvas.drawRect(right - timeWidth - getPx(17), bottom - getPx(25), right - getPx(3), bottom - getPx(3), timeBgRect);
-        canvas.drawText(date, right - timeWidth - getPx(10), bottom - getPx(9), timePaint);
-        if (isOut) {
-            if (state == MessageState.PENDING) {
-                canvas.save();
-                canvas.translate(right - getPx(12 + 8), bottom - getPx(19));
-                canvas.drawCircle(getPx(6), getPx(6), getPx(6), clockIconPaint);
-                double time = (System.currentTimeMillis() / 15.0) % (12 * 60);
-                double angle = (time / (6 * 60)) * Math.PI;
+        if (!isAnimationShown) {
+            int bottom = desiredHeight + desiredPaddingV * 2;
+            int right = desiredWidth + desiredPaddingH * 2;
+            canvas.drawRect(right - timeWidth - getPx(17), bottom - getPx(25), right - getPx(3), bottom - getPx(3), timeBgRect);
+            canvas.drawText(date, right - timeWidth - getPx(10), bottom - getPx(9), timePaint);
+            if (isOut) {
+                if (state == MessageState.PENDING) {
+                    canvas.save();
+                    canvas.translate(right - getPx(12 + 8), bottom - getPx(19));
+                    canvas.drawCircle(getPx(6), getPx(6), getPx(6), clockIconPaint);
+                    double time = (System.currentTimeMillis() / 15.0) % (12 * 60);
+                    double angle = (time / (6 * 60)) * Math.PI;
 
-                int x = (int) (Math.sin(-angle) * getPx(4));
-                int y = (int) (Math.cos(-angle) * getPx(4));
-                canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
+                    int x = (int) (Math.sin(-angle) * getPx(4));
+                    int y = (int) (Math.cos(-angle) * getPx(4));
+                    canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
 
-                x = (int) (Math.sin(-angle * 12) * getPx(5));
-                y = (int) (Math.cos(-angle * 12) * getPx(5));
-                canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
-                canvas.restore();
-                isAnimated = true;
-            } else if (state == MessageState.READED && prevState == MessageState.SENT && (SystemClock.uptimeMillis() - stateChangeTime < FADE_ANIMATION_TIME)) {
-                long stateAnimationTime = SystemClock.uptimeMillis() - stateChangeTime;
-                float progress = easeStateFade(stateAnimationTime / (float) STATE_ANIMATION_TIME);
-                int offset = (int) (getPx(5) * progress);
-                int alphaNew = (int) (progress * 255);
+                    x = (int) (Math.sin(-angle * 12) * getPx(5));
+                    y = (int) (Math.cos(-angle * 12) * getPx(5));
+                    canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
+                    canvas.restore();
+                    isAnimated = true;
+                } else if (state == MessageState.READED && prevState == MessageState.SENT && (SystemClock.uptimeMillis() - stateChangeTime < FADE_ANIMATION_TIME)) {
+                    long stateAnimationTime = SystemClock.uptimeMillis() - stateChangeTime;
+                    float progress = easeStateFade(stateAnimationTime / (float) STATE_ANIMATION_TIME);
+                    int offset = (int) (getPx(5) * progress);
+                    int alphaNew = (int) (progress * 255);
 
-                bounds(stateSent, right - getPx(8) - stateSent.getIntrinsicWidth() - offset,
-                        bottom - getPx(8) - stateSent.getIntrinsicHeight());
-                stateSent.setAlpha(255);
-                stateSent.draw(canvas);
-
-                bounds(stateHalfCheck, right - getPx(8) - stateHalfCheck.getIntrinsicWidth(),
-                        bottom - getPx(8) - stateHalfCheck.getIntrinsicHeight());
-                stateHalfCheck.setAlpha(alphaNew);
-                stateHalfCheck.draw(canvas);
-
-                isAnimated = true;
-            } else {
-                Drawable drawable = getStateDrawable(state);
-
-                if (state == MessageState.READED) {
-                    bounds(stateSent, right - getPx(8) - stateSent.getIntrinsicWidth() - getPx(5),
+                    bounds(stateSent, right - getPx(8) - stateSent.getIntrinsicWidth() - offset,
                             bottom - getPx(8) - stateSent.getIntrinsicHeight());
                     stateSent.setAlpha(255);
                     stateSent.draw(canvas);
-                }
 
-                bounds(drawable, right - getPx(8) - drawable.getIntrinsicWidth(), bottom - getPx(8) - drawable.getIntrinsicHeight());
-                drawable.setAlpha(255);
-                drawable.draw(canvas);
+                    bounds(stateHalfCheck, right - getPx(8) - stateHalfCheck.getIntrinsicWidth(),
+                            bottom - getPx(8) - stateHalfCheck.getIntrinsicHeight());
+                    stateHalfCheck.setAlpha(alphaNew);
+                    stateHalfCheck.draw(canvas);
+
+                    isAnimated = true;
+                } else {
+                    Drawable drawable = getStateDrawable(state);
+
+                    if (state == MessageState.READED) {
+                        bounds(stateSent, right - getPx(8) - stateSent.getIntrinsicWidth() - getPx(5),
+                                bottom - getPx(8) - stateSent.getIntrinsicHeight());
+                        stateSent.setAlpha(255);
+                        stateSent.draw(canvas);
+                    }
+
+                    bounds(drawable, right - getPx(8) - drawable.getIntrinsicWidth(), bottom - getPx(8) - drawable.getIntrinsicHeight());
+                    drawable.setAlpha(255);
+                    drawable.draw(canvas);
+                }
             }
         }
 
