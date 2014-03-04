@@ -83,8 +83,10 @@ public class SingleImagePreviewFragment extends TelegramFragment implements Imag
     public void onDestroyView() {
         super.onDestroyView();
         application.getUiKernel().getAvatarLoader().cancelRequest(this);
-        mediaHolder.release();
-        mediaHolder = null;
+        if (mediaHolder != null) {
+            mediaHolder.release();
+            mediaHolder = null;
+        }
         imageView = null;
     }
 }

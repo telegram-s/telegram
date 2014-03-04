@@ -161,7 +161,7 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
                 } else {
                     if (view == null) {
                         view = inflater.inflate(R.layout.media_loading, viewGroup, false);
-                        ViewGroup.LayoutParams imageParams = new ViewGroup.LayoutParams(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW);
+                        GridView.LayoutParams imageParams = new GridView.LayoutParams(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW);
                         view.setLayoutParams(imageParams);
                     }
 

@@ -9,6 +9,7 @@ import android.os.Build;
 import org.telegram.android.R;
 import org.telegram.android.core.background.UpdateProcessor;
 import org.telegram.android.log.Logger;
+import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.util.NativeAES;
 import org.telegram.android.util.NativePQ;
 import org.telegram.api.TLAbsUpdates;
@@ -37,7 +38,11 @@ public class ApiKernel {
 
     public void runKernel() {
         // CryptoUtils.setAESImplementation(new NativeAES());
-        PQSolver.setCurrentImplementation(new NativePQ());
+        try {
+            PQSolver.setCurrentImplementation(new NativePQ());
+        } catch (Exception e) {
+            CrashHandler.logHandledException(e);
+        }
 
         api = new TelegramApi(kernel.getAuthKernel().getApiStorage(), new AppInfo(5, Build.MODEL, Build.VERSION.RELEASE, kernel.getTechKernel().getTechReflection().getAppVersion(),
                 kernel.getApplication().getString(R.string.st_lang)), new ApiCallback() {

@@ -151,6 +151,10 @@ public class AvatarLoader {
                                  int kind,
                                  ImageReceiver receiver) {
         checkUiThread();
+        if (fileLocation == null) {
+            cancelRequest(receiver);
+            return false;
+        }
 
         String key = fileLocation.getUniqKey();
         String cacheKey = key + "_" + kind;

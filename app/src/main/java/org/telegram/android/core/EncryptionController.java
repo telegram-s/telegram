@@ -262,17 +262,17 @@ public class EncryptionController {
                         User u = application.getEngine().getUser(chat.getUserId());
                         application.getNotifications().onNewSecretMessageDoc(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaAudio) {
-                        TLDecryptedMessageMediaDocument mediaDocument = (TLDecryptedMessageMediaDocument) decryptedMessage.getMedia();
+                        TLDecryptedMessageMediaAudio mediaAudio = (TLDecryptedMessageMediaAudio) decryptedMessage.getMedia();
                         TLLocalAudio localAudio = new TLLocalAudio();
                         if (encMsg.getFile() instanceof TLEncryptedFile) {
                             TLEncryptedFile file = (TLEncryptedFile) encMsg.getFile();
-                            byte[] digest = MD5Raw(concat(mediaDocument.getKey().cleanData(), mediaDocument.getIv().cleanData()));
+                            byte[] digest = MD5Raw(concat(mediaAudio.getKey().cleanData(), mediaAudio.getIv().cleanData()));
                             int fingerprint = StreamingUtils.readInt(xor(substring(digest, 0, 4), substring(digest, 4, 4)));
                             if (file.getKeyFingerprint() != fingerprint) {
                                 Logger.w(TAG, "Ignoring message: attach fingerprint mismatched");
                                 return;
                             }
-                            localAudio.setFileLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), file.getSize(), file.getDcId(), mediaDocument.getKey().cleanData(), mediaDocument.getIv().cleanData()));
+                            localAudio.setFileLocation(new TLLocalEncryptedFileLocation(file.getId(), file.getAccessHash(), file.getSize(), file.getDcId(), mediaAudio.getKey().cleanData(), mediaAudio.getIv().cleanData()));
                         } else {
                             localAudio.setDuration(0);
                             localAudio.setFileLocation(new TLLocalFileEmpty());
