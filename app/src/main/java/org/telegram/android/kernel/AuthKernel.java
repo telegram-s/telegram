@@ -225,7 +225,6 @@ public class AuthKernel {
 
     public void logIn(TLAuthorization authorization) {
         storage.doAuth(authorization);
-        CrashHandler.setUid(storage.getObj().getUid());
         ArrayList<TLAbsUser> users = new ArrayList<TLAbsUser>();
         users.add(authorization.getUser());
         kernel.getStorageKernel().getModel().onUsers(users);

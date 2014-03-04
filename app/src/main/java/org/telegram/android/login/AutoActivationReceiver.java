@@ -86,7 +86,7 @@ public class AutoActivationReceiver {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                Logger.d(TAG,"notify");
+                Logger.d(TAG, "notify");
                 if (listener != null) {
                     listener.onCodeReceived(code);
                     listener = null;
@@ -134,11 +134,13 @@ public class AutoActivationReceiver {
         try {
             cursor = context.getContentResolver().query(Uri.parse("content://sms/inbox"), new String[]{"body", "address"},
                     "date>?", new String[]{"" + (sentTime - 6) * 1000L}, "date desc limit 3");
-            if (cursor.moveToFirst()) {
-                do {
-                    String body = cursor.getString(0);
-                    onSms(body);
-                } while (cursor.moveToNext());
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        String body = cursor.getString(0);
+                        onSms(body);
+                    } while (cursor.moveToNext());
+                }
             }
         } catch (Exception e) {
             Logger.t(TAG, e);

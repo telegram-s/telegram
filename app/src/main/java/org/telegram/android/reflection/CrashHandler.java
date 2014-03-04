@@ -31,11 +31,19 @@ public class CrashHandler {
         });
     }
 
-    public static void logHandledException(Exception e) {
+    public static void logHandledException(Throwable e) {
         Crashlytics.logException(e);
     }
 
-    public static void setUid(int uid) {
+    public static void setUid(int uid, int dcId, String key) {
+        Crashlytics.setInt("dc_id", dcId);
+        Crashlytics.setString("auth_key_id", key);
         Crashlytics.setUserIdentifier("" + uid);
+    }
+
+    public static void removeUid() {
+        Crashlytics.setInt("dc_id", 0);
+        Crashlytics.setString("auth_key_id", "");
+        Crashlytics.setUserIdentifier("" + 0);
     }
 }

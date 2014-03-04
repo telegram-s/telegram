@@ -12,7 +12,7 @@ public class NativePQ implements PQImplementation {
     private static final String TAG = "NativePQ";
 
     static {
-        System.loadLibrary("timg");
+        NativeLibLoader.loadLib();
     }
 
     @Override

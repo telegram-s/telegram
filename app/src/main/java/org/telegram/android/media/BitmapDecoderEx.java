@@ -1,6 +1,7 @@
 package org.telegram.android.media;
 
 import android.graphics.Bitmap;
+import org.telegram.android.util.NativeLibLoader;
 
 import java.io.IOException;
 
@@ -12,7 +13,7 @@ public class BitmapDecoderEx {
     private static final String TAG = "BitmapDecoderEx";
 
     static {
-        System.loadLibrary("timg");
+        NativeLibLoader.loadLib();
     }
 
     private BitmapDecoderEx() {

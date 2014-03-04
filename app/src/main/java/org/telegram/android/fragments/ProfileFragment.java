@@ -356,7 +356,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
         menu.findItem(R.id.removeContact).setTitle(highlightMenuText(R.string.st_profile_menu_remove));
         menu.findItem(R.id.addContact).setTitle(highlightMenuText(R.string.st_profile_menu_add));
 
-        if (user.getLinkType() == LinkType.CONTACT) {
+        if (user != null && user.getLinkType() == LinkType.CONTACT) {
             menu.findItem(R.id.addContact).setVisible(false);
             menu.findItem(R.id.removeContact).setVisible(true);
             if (application.getEngine().getUsersEngine().getContactsForUid(userId).length > 0) {

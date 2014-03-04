@@ -595,7 +595,10 @@ public class ImagePreviewFragment extends TelegramFragment {
         } else {
             record = mainRecord;
         }
-        application.getEngine().deleteSentMessage(application.getEngine().getMessagesEngine().getMessageByMid(record.getMid()).getDatabaseId());
+        ChatMessage message = application.getEngine().getMessagesEngine().getMessageByMid(record.getMid());
+        if (message != null) {
+            application.getEngine().deleteSentMessage(message.getDatabaseId());
+        }
         application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
         application.notifyUIUpdate();
 

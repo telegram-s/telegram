@@ -12,6 +12,10 @@ import org.telegram.mtproto.log.LogInterface;
 
 import java.io.IOException;
 
+import static org.telegram.mtproto.secure.CryptoUtils.SHA1;
+import static org.telegram.mtproto.secure.CryptoUtils.ToHex;
+import static org.telegram.mtproto.secure.CryptoUtils.substring;
+
 /**
  * Created by ex3ndr on 16.11.13.
  */
@@ -168,10 +172,7 @@ public class ApplicationKernel {
         long start = SystemClock.uptimeMillis();
         authKernel = new AuthKernel(this);
         Logger.d(TAG, "AuthKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
-
-        if (authKernel.isLoggedIn()) {
-            CrashHandler.setUid(authKernel.getApiStorage().getObj().getUid());
-        }
+        updateCrashHandler();
     }
 
     public void initSettingsKernel() {
@@ -282,6 +283,18 @@ public class ApplicationKernel {
         syncKernel.logIn();
         dataSourceKernel.logIn();
         uiKernel.logIn();
+        updateCrashHandler();
+    }
+
+    private void updateCrashHandler() {
+        if (authKernel.isLoggedIn()) {
+            int uid = authKernel.getApiStorage().getObj().getUid();
+            int dc = authKernel.getApiStorage().getPrimaryDc();
+            byte[] key = substring(SHA1(authKernel.getApiStorage().getAuthKey(dc)), 12, 8);
+            CrashHandler.setUid(uid, dc, ToHex(key));
+        } else {
+            CrashHandler.removeUid();
+        }
     }
 
     // Executing may take time
@@ -304,6 +317,7 @@ public class ApplicationKernel {
         start = SystemClock.uptimeMillis();
         uiKernel.logOut();
         Logger.d(TAG, "LogOut: uiKernel in " + (SystemClock.uptimeMillis() - start) + " ms");
+        updateCrashHandler();
     }
 
     public void sendEvent(String type) {

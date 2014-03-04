@@ -16,7 +16,7 @@ public class NativeAES implements AESImplementation {
     private static final String TAG = "NativeAES";
 
     static {
-        System.loadLibrary("timg");
+        NativeLibLoader.loadLib();
     }
 
     @Override

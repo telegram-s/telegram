@@ -9,7 +9,7 @@ import org.telegram.android.ui.BitmapUtils;
 public class ImageNativeUtils {
 
     static {
-        System.loadLibrary("timg");
+        NativeLibLoader.loadLib();
     }
 
     public static Bitmap[] loadEmoji(String color, String alpha) {
