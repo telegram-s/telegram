@@ -6,7 +6,10 @@
     <string name="lang_common_and">{content1} und {content2}</string>
     <string name="lang_common_and_short">{content1}, {content2}</string>
 
-    <string name="lang_common_online_templates">zuletzt online {time}</string>
+    <string name="lang_common_online_templates_now">zuletzt online {time}</string>
+    <string name="lang_common_online_templates_date">@string/lang_common_online_templates_now</string>
+    <string name="lang_common_online_templates_time">@string/lang_common_online_templates_now</string>
+
     <string name="lang_common_online_now">gerade eben</string>
     <string name="lang_common_online_ago">vor {time}</string>
 </resources>
