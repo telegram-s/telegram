@@ -6,8 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Telephony;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -218,11 +220,25 @@ public class ContactsFragment extends BaseContactsFragment {
 
                                     if (pCur.moveToFirst()) {
                                         String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                                        Intent sendSms = new Intent(Intent.ACTION_VIEW, Uri.parse("tel:" + phoneNo));
-                                        sendSms.putExtra("address", phoneNo);
-                                        sendSms.putExtra("sms_body", getStringSafe(R.string.st_invite_short));
-                                        sendSms.setType("vnd.android-dir/mms-sms");
-                                        startPickerActivity(sendSms);
+
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                                            String defaultSmsPackageName = Telephony.Sms.getDefaultSmsPackage(getActivity());
+
+                                            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + Uri.encode(phoneNo)));
+                                            intent.putExtra("sms_body", getStringSafe(R.string.st_invite_short));
+
+                                            if (defaultSmsPackageName != null) // Can be null in case that there is no default, then the user would be able to choose any app that supports this intent.
+                                            {
+                                                intent.setPackage(defaultSmsPackageName);
+                                            }
+                                            startActivity(intent);
+                                        } else {
+                                            Intent sendSms = new Intent(Intent.ACTION_VIEW, Uri.parse("tel:" + phoneNo));
+                                            sendSms.putExtra("address", phoneNo);
+                                            sendSms.putExtra("sms_body", getStringSafe(R.string.st_invite_short));
+                                            sendSms.setType("vnd.android-dir/mms-sms");
+                                            startPickerActivity(sendSms);
+                                        }
                                     } else {
                                         Context context1 = getActivity();
                                         if (context1 != null) {
