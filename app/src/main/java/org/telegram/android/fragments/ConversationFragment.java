@@ -204,12 +204,14 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         if (application.getUserSettings().isWallpaperSet()) {
             if (application.getUserSettings().isWallpaperSolid()) {
-                ColorDrawable drawable = new ColorDrawable(application.getUserSettings().getCurrentWallpaperSolidColor());
+                int color = application.getUserSettings().getCurrentWallpaperSolidColor();
+                ColorDrawable drawable = new ColorDrawable(color);
                 if (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                     res.setBackgroundDrawable(drawable);
                 } else {
                     res.setBackground(drawable);
                 }
+                listView.setCacheColorHint(color);
             } else {
                 Bitmap bitmap = application.getWallpaperHolder().getBitmap();
                 if (bitmap != null) {
@@ -220,13 +222,14 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         res.setBackground(drawable);
                     }
                 }
+                listView.setCacheColorHint(0);
             }
         } else {
             Bitmap bitmap = application.getWallpaperHolder().getBitmap();
             FastBackgroundDrawable drawable = new FastBackgroundDrawable(bitmap);
             mainContainer.setBackgroundDrawable(drawable);
+            listView.setCacheColorHint(0);
         }
-        listView.setCacheColorHint(0);
         listView.setRecyclerListener(new AbsListView.RecyclerListener() {
             @Override
             public void onMovedToScrapHeap(View view) {

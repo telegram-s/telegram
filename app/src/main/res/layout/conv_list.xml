@@ -180,9 +180,10 @@
                                                    android:layout_marginLeft="2dp"
                                                    android:layout_marginRight="2dp"
                                                    android:textSize="16sp"
-                                                   android:maxLines="3"
+                                                   android:maxLines="5"
                                                    android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
                                                    android:imeOptions="actionSend"
+                                                   android:textColorHint="#bfbfbf"
                                                    android:hint="@string/st_conv_hint"
                                                    android:id="@+id/text"
                                                    android:background="@drawable/transparent"/>

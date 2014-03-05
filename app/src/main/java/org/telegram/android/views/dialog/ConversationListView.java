@@ -183,17 +183,14 @@ public class ConversationListView extends ListView {
         @Override
         public void onScrollStateChanged(AbsListView absListView, int i) {
 
-//            if (i == SCROLL_STATE_FLING || i == SCROLL_STATE_TOUCH_SCROLL) {
-//                handler.removeMessages(0);
-//            }
-//
-//            if (i == SCROLL_STATE_IDLE) {
-//                application.getImageController().doResume();
-//                handler.removeMessages(0);
-//                handler.sendEmptyMessageDelayed(0, UI_TIMEOUT);
-//            } else {
-//                application.getImageController().doPause();
-//            }
+            if (i == SCROLL_STATE_FLING || i == SCROLL_STATE_TOUCH_SCROLL) {
+                handler.removeMessages(0);
+            }
+
+            if (i == SCROLL_STATE_IDLE) {
+                handler.removeMessages(0);
+                handler.sendEmptyMessageDelayed(0, UI_TIMEOUT);
+            }
 
             state = i;
         }
@@ -239,6 +236,8 @@ public class ConversationListView extends ListView {
                 if (firstVisibleItem == 0) {
                     visibleDate = null;
                     visibleDateNext = null;
+                    formattedVisibleDate = -1;
+                    formattedVisibleDateNext = -1;
 
                     View view = getChildAt(1);
                     if (view != null) {

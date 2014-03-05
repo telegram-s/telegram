@@ -108,7 +108,22 @@ public class TextUtil {
     }
 
     public static boolean areSameDays(long time1, long time2) {
-        return (time1 / (60 * 60 * 24)) == (time2 / (60 * 60 * 24));
+        Calendar calendar = calendarThreadLocal.get();
+        if (calendar == null) {
+            calendar = Calendar.getInstance();
+            calendarThreadLocal.set(calendar);
+        }
+        calendar.setTimeInMillis(time1 * 1000L);
+        int y1 = calendar.get(Calendar.YEAR);
+        int m1 = calendar.get(Calendar.MONTH);
+        int d1 = calendar.get(Calendar.DATE);
+        calendar.setTimeInMillis(time2 * 1000L);
+        int y2 = calendar.get(Calendar.YEAR);
+        int m2 = calendar.get(Calendar.MONTH);
+        int d2 = calendar.get(Calendar.DATE);
+
+        return y1 == y2 && m1 == m2 && d1 == d2;
+        // return (time1 / (60 * 60 * 24)) == (time2 / (60 * 60 * 24));
     }
 
     public static String formatDateLong(long time) {

@@ -39,6 +39,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
     private static final long AVATAR_FADE_TIME = 150;
     private static final boolean AVATAR_FADE = false;
+    private static final boolean HIGHLIGHT_UNDEAD = false;
 
     // Resources
     private static int HIGHLIGHT_COLOR = 0xff3076a4;
@@ -494,7 +495,8 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             }
         }
 
-        canvas.drawText(layout.time, layout.layoutTimeLeft, layout.layoutTimeTop, layout.isUnreadIn ? unreadClockPaint : readClockPaint);
+        TextPaint timePaint = HIGHLIGHT_UNDEAD ? (layout.isUnreadIn ? unreadClockPaint : readClockPaint) : readClockPaint;
+        canvas.drawText(layout.time, layout.layoutTimeLeft, layout.layoutTimeTop, timePaint);
 
         if (typingLayout != null) {
             canvas.save();
@@ -834,7 +836,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 }
             }
 
-            layoutMainWidth = w - px(6) - layoutBodyPadding;
+            layoutMainWidth = w - layoutBodyPadding - layoutPadding;
             if (isRtl) {
                 layoutMainLeft = w - layoutMainWidth - layoutBodyPadding;
                 if (layoutMarkWidth != 0) {
@@ -862,8 +864,12 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 if (isBodyHighlighted) {
                     bodyTextPaint = bodyHighlightPaint;
                 } else {
-                    if (isUnreadIn) {
-                        bodyTextPaint = bodyUnreadPaint;
+                    if (HIGHLIGHT_UNDEAD) {
+                        if (isUnreadIn) {
+                            bodyTextPaint = bodyUnreadPaint;
+                        } else {
+                            bodyTextPaint = bodyPaint;
+                        }
                     } else {
                         bodyTextPaint = bodyPaint;
                     }

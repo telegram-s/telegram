@@ -114,7 +114,7 @@ public class MediaReceiverFragment extends TelegramFragment {
                             application.getUserSettings().setWallpaperSet(true);
                             application.getUserSettings().setWallpaperSolid(true);
                             application.getUserSettings().setCurrentWallpaperId(0);
-                            application.getUserSettings().setCurrentWallpaperSolidColor(0xffD2E2EE);
+                            application.getUserSettings().setCurrentWallpaperSolidColor(0xffdae8f3);
                             application.getWallpaperHolder().dropCache();
                         } else if ("default".equals(item.getTag())) {
                             application.getUserSettings().setWallpaperSet(false);
