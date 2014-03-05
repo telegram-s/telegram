@@ -121,21 +121,19 @@ public class TelegramFragment extends TelegramBaseFragment {
     }
 
     protected CharSequence highlightSubtitleText(int resId) {
-        //return html("<font color='#006FC8'>" + getStringSafe(resId) + "</font>");
-        return html("<font color='#d0dbe7'>" + getStringSafe(resId) + "</font>");
+        return html("<font_a>" + getStringSafe(resId) + "</font_a>");
     }
 
     protected CharSequence highlightSubtitleText(String src) {
-        // return html("<font color='#006FC8'>" + src + "</font>");
-        return html("<font color='#d0dbe7'>" + src + "</font>");
+        return html("<font_a>" + src + "</font_a>");
     }
 
-    protected CharSequence highlightText(int resId) {
-        return html("<font color='#006FC8'>" + getStringSafe(resId) + "</font>");
+    protected CharSequence highlightSubtitle2Text(int resId) {
+        return html("<font_b>" + getStringSafe(resId) + "</font_b>");
     }
 
-    protected CharSequence highlightText(String src) {
-        return html("<font color='#006FC8'>" + src + "</font>");
+    protected CharSequence highlightSubtitle2Text(String src) {
+        return html("<font_b>" + src + "</font_b>");
     }
 
     protected String unicodeWrap(String src) {
@@ -156,15 +154,36 @@ public class TelegramFragment extends TelegramBaseFragment {
 
     protected Spanned html(String src) {
         return Html.fromHtml(src, null, new Html.TagHandler() {
-            int lightTagStart;
+            int fontATagStart = -1;
+            int fontBTagStart = -1;
 
             @Override
             public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader) {
-                if (tag.equals("light")) {
+                if (tag.equals("font_a")) {
                     if (opening) {
-                        lightTagStart = output.length();
+                        fontATagStart = output.length();
+                        if (fontBTagStart >= 0) {
+                            output.setSpan(new ForegroundColorSpan(0xd8ffffff), fontBTagStart, output.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            fontBTagStart = -1;
+                        }
                     } else {
-                        output.setSpan(new StelsTypefaceSpan("light", getActivity(), false), lightTagStart, output.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        if (fontATagStart >= 0) {
+                            output.setSpan(new ForegroundColorSpan(0xB2ffffff), fontATagStart, output.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            fontATagStart = -1;
+                        }
+                    }
+                } else if (tag.equals("font_b")) {
+                    if (opening) {
+                        fontBTagStart = output.length();
+                        if (fontATagStart >= 0) {
+                            output.setSpan(new ForegroundColorSpan(0xB2ffffff), fontATagStart, output.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            fontATagStart = -1;
+                        }
+                    } else {
+                        if (fontBTagStart >= 0) {
+                            output.setSpan(new ForegroundColorSpan(0xd8ffffff), fontBTagStart, output.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            fontBTagStart = -1;
+                        }
                     }
                 }
             }

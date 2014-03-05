@@ -1325,7 +1325,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             if (peerId == 333000) {
                 getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText("Telegram"));
                 if (application.getTypingStates().isUserTyping(peerId)) {
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitle2Text(R.string.lang_common_typing));
                 } else {
                     getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_support_hint));
                 }
@@ -1335,13 +1335,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         application.getEmojiProcessor().processEmojiCutMutable(user.getDisplayName(), 0)));
 
                 if (application.getTypingStates().isUserTyping(peerId)) {
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitle2Text(R.string.lang_common_typing));
                 } else {
                     int status = getUserState(user.getStatus());
                     if (status < 0) {
                         getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_offline));
                     } else if (status == 0) {
-                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_online));
+                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitle2Text(R.string.st_online));
                     } else {
                         getSherlockActivity().getSupportActionBar().setSubtitle(
                                 highlightSubtitleText(formatLastSeen(status)));
@@ -1353,7 +1353,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             if (chat.getUserId() == 333000) {
                 getSherlockActivity().getSupportActionBar().setTitle(highlightSecureTitleText("Telegram"));
                 if (application.getTypingStates().isEncryptedTyping(chat.getId())) {
-                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));
+                    getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitle2Text(R.string.lang_common_typing));
                 } else {
                     getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_support_hint));
                 }
@@ -1364,13 +1364,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_conv_enc_cancelled));
                 } else {
                     if (application.getTypingStates().isEncryptedTyping(chat.getId())) {
-                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.lang_common_typing));
+                        getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitle2Text(R.string.lang_common_typing));
                     } else {
                         int status = getUserState(user.getStatus());
                         if (status < 0) {
                             getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_offline));
                         } else if (status == 0) {
-                            getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(R.string.st_online));
+                            getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitle2Text(R.string.st_online));
                         } else {
                             getSherlockActivity().getSupportActionBar().setSubtitle(
                                     highlightSubtitleText(formatLastSeen(status)));
@@ -1397,26 +1397,24 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             }
                         }
                         if (onlineCount != 0) {
-                            String title = "<light>" + getQuantityString(R.plurals.st_members,
-                                    group.getUsersCount()).replace("{d}", "" +
+                            String title = "<font_a>" + getQuantityString(R.plurals.st_members,
+                                    group.getUsersCount()).replace("{d}",
                                     I18nUtil.getInstance().correctFormatNumber(group.getUsersCount()));
-                            title += ",</light> " + I18nUtil.getInstance().correctFormatNumber(onlineCount) + " " + getStringSafe(R.string.st_online);
-                            getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitleText(title));
+                            title += ",</font_a> <font_b>" + I18nUtil.getInstance().correctFormatNumber(onlineCount) + " " + getStringSafe(R.string.st_online) + "</font_b>";
+                            getSherlockActivity().getSupportActionBar().setSubtitle(html(title));
                         } else {
                             getSherlockActivity().getSupportActionBar().setSubtitle(
                                     highlightSubtitleText(
-                                            "<light>" +
-                                                    getQuantityString(R.plurals.st_members,
-                                                            group.getUsersCount())
-                                                            .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount())) + "</light>"));
+                                            getQuantityString(R.plurals.st_members,
+                                                    group.getUsersCount())
+                                                    .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount()))));
                         }
                     } else {
                         getSherlockActivity().getSupportActionBar().setSubtitle(
                                 highlightSubtitleText(
-                                        "<light>" +
-                                                getQuantityString(R.plurals.st_members,
-                                                        group.getUsersCount())
-                                                        .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount())) + "</light>"));
+                                        getQuantityString(R.plurals.st_members,
+                                                group.getUsersCount())
+                                                .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount()))));
                     }
                 } else {
                     String[] names = new String[typing.length];
