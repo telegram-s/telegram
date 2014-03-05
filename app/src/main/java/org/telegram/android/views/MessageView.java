@@ -15,6 +15,8 @@ import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.log.Logger;
 import org.telegram.android.ui.*;
 
+import java.util.HashMap;
+
 /**
  * Author: Korshakov Stepan
  * Created: 14.08.13 20:26
@@ -26,6 +28,8 @@ public class MessageView extends BaseMsgView {
         isLoaded = false;
     }
 
+    private static HashMap<Long, Long> pendingTimes = new HashMap<Long, Long>();
+
     private static TextPaint bodyPaint;
     private static TextPaint clockOutPaint;
     private static TextPaint senderPaintBase;
@@ -36,13 +40,13 @@ public class MessageView extends BaseMsgView {
 
     private Paint clockIconPaint;
 
-    private Drawable statePending;
     private Drawable stateSent;
     private Drawable stateHalfCheck;
     private Drawable stateFailure;
-    private static final int COLOR_NORMAL = 0xff70B15C;
+    private static final int COLOR_NORMAL = 0xff94cb7d;
     private static final int COLOR_ERROR = 0xffDB4942;
-    private static final int COLOR_IN = 0xffA1AAB3;
+    private static final int COLOR_IN = 0xffa1aab3;
+    private static final long PENDING_QUITE_TIME = 1000;
 
     private int state;
     private int prevState;
@@ -99,7 +103,7 @@ public class MessageView extends BaseMsgView {
         clockOutPaint = initTextPaint();
         clockOutPaint.setTypeface(FontController.loadTypeface(context, "regular"));
         clockOutPaint.setTextSize(sp(fontSizeClock));
-        clockOutPaint.setColor(0xff70B15C);
+        clockOutPaint.setColor(0xff94cb7d);
 
         senderPaintBase = initTextPaint();
         senderPaintBase.setTypeface(FontController.loadTypeface(context, "regular"));
@@ -129,12 +133,11 @@ public class MessageView extends BaseMsgView {
 
         clockIconPaint = new Paint();
         clockIconPaint.setStyle(Paint.Style.STROKE);
-        clockIconPaint.setColor(0xff12C000);
+        clockIconPaint.setColor(0xff69b449);
         clockIconPaint.setStrokeWidth(getPx(1));
         clockIconPaint.setAntiAlias(true);
         clockIconPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
-        statePending = getResources().getDrawable(R.drawable.st_bubble_ic_clock);
         stateSent = getResources().getDrawable(R.drawable.st_bubble_ic_check);
         stateHalfCheck = getResources().getDrawable(R.drawable.st_bubble_ic_halfcheck);
         stateFailure = getResources().getDrawable(R.drawable.st_bubble_ic_warning);
@@ -159,8 +162,6 @@ public class MessageView extends BaseMsgView {
                 return stateHalfCheck;
             case MessageState.FAILURE:
                 return stateFailure;
-            case MessageState.PENDING:
-                return statePending;
         }
     }
 
@@ -173,6 +174,16 @@ public class MessageView extends BaseMsgView {
             cachedLayout = null;
         }
         this.state = msg.message.getState();
+        if (state == MessageState.PENDING) {
+            if (pendingTimes.containsKey(msg.randomId)) {
+                this.stateChangeTime = pendingTimes.get(msg.randomId);
+            } else {
+                this.stateChangeTime = SystemClock.uptimeMillis();
+                pendingTimes.put(msg.randomId, this.stateChangeTime);
+            }
+            // msg.message.getRandomId();
+
+        }
         this.prevState = -1;
 
         messageLayout = null;
@@ -253,27 +264,29 @@ public class MessageView extends BaseMsgView {
                 messageLayout.layout.draw(canvas);
             }
         }
-        // Logger.d(TAG, "Text draw in " + (SystemClock.uptimeMillis() - start) + " ms");
-        // start = SystemClock.uptimeMillis();
-
 
         if (messageLayout.showState) {
             if (state == MessageState.PENDING) {
-                canvas.save();
-                canvas.translate(messageLayout.layoutRealWidth - getPx(12), messageLayout.layoutHeight - getPx(12) - getPx(3));
-                canvas.drawCircle(getPx(6), getPx(6), getPx(6), clockIconPaint);
-                double time = (System.currentTimeMillis() / 15.0) % (12 * 60);
-                double angle = (time / (6 * 60)) * Math.PI;
+                long animationTime = SystemClock.uptimeMillis() - stateChangeTime;
+                if (animationTime > PENDING_QUITE_TIME) {
+                    // int alpha = (animationTime < PENDING_FADE_TIME) ? (int) ((255 * animationTime) / PENDING_FADE_TIME) : 255;
+                    canvas.save();
+                    // clockIconPaint.setAlpha(alpha);
+                    canvas.translate(messageLayout.stateIconLeft - getPx(4), messageLayout.stateIconTop);
+                    canvas.drawCircle(messageLayout.waitRadius, messageLayout.waitRadius, messageLayout.waitRadius, clockIconPaint);
+                    double time = (System.currentTimeMillis() / 15.0) % (12 * 60);
+                    double angle = (time / (6 * 60)) * Math.PI;
 
-                int x = (int) (Math.sin(-angle) * getPx(4));
-                int y = (int) (Math.cos(-angle) * getPx(4));
-                canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
+                    int x = (int) (Math.sin(-angle) * messageLayout.waitRadiusSmall);
+                    int y = (int) (Math.cos(-angle) * messageLayout.waitRadiusSmall);
+                    canvas.drawLine(messageLayout.waitRadius, messageLayout.waitRadius, messageLayout.waitRadius + x, messageLayout.waitRadius + y, clockIconPaint);
 
-                x = (int) (Math.sin(-angle * 12) * getPx(5));
-                y = (int) (Math.cos(-angle * 12) * getPx(5));
-                canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
+                    x = (int) (Math.sin(-angle * 12) * messageLayout.waitRadiusBig);
+                    y = (int) (Math.cos(-angle * 12) * messageLayout.waitRadiusBig);
+                    canvas.drawLine(messageLayout.waitRadius, messageLayout.waitRadius, messageLayout.waitRadius + x, messageLayout.waitRadius + y, clockIconPaint);
 
-                canvas.restore();
+                    canvas.restore();
+                }
 
                 clockOutPaint.setColor(COLOR_NORMAL);
 
@@ -281,16 +294,14 @@ public class MessageView extends BaseMsgView {
             } else if (state == MessageState.READED && prevState == MessageState.SENT && (SystemClock.uptimeMillis() - stateChangeTime < STATE_ANIMATION_TIME)) {
                 long animationTime = SystemClock.uptimeMillis() - stateChangeTime;
                 float progress = easeStateFade(animationTime / (float) STATE_ANIMATION_TIME);
-                int offset = (int) (getPx(5) * progress);
                 int alphaNew = (int) (progress * 255);
+                float scale = 1 + progress * 0.2f;
 
-                bounds(stateSent, messageLayout.layoutRealWidth - stateSent.getIntrinsicWidth() - offset,
-                        messageLayout.layoutHeight - stateSent.getIntrinsicHeight() - getPx(3));
+                bounds(stateSent, messageLayout.stateIconLeft - getPx(4), messageLayout.stateIconTop);
                 stateSent.setAlpha(255);
                 stateSent.draw(canvas);
 
-                bounds(stateHalfCheck, messageLayout.layoutRealWidth - stateHalfCheck.getIntrinsicWidth() + getPx(5) - offset,
-                        messageLayout.layoutHeight - stateHalfCheck.getIntrinsicHeight() - getPx(3));
+                bounds(stateHalfCheck, messageLayout.stateIconLeft, messageLayout.stateIconTop, scale);
                 stateHalfCheck.setAlpha(alphaNew);
                 stateHalfCheck.draw(canvas);
 
@@ -298,17 +309,19 @@ public class MessageView extends BaseMsgView {
 
                 isAnimated = true;
             } else {
-                Drawable stateDrawable = getStateDrawable(state);
-
-                bounds(stateDrawable, messageLayout.layoutRealWidth - stateDrawable.getIntrinsicWidth(), messageLayout.layoutHeight - stateDrawable.getIntrinsicHeight() - getPx(3));
-                stateDrawable.setAlpha(255);
-                stateDrawable.draw(canvas);
-
                 if (state == MessageState.READED) {
-                    bounds(stateSent, messageLayout.layoutRealWidth - stateSent.getIntrinsicWidth() - getPx(5),
-                            messageLayout.layoutHeight - stateDrawable.getIntrinsicHeight() - getPx(3));
+                    bounds(stateSent, messageLayout.stateIconLeft - getPx(4), messageLayout.stateIconTop);
                     stateSent.setAlpha(255);
                     stateSent.draw(canvas);
+
+                    bounds(stateHalfCheck, messageLayout.stateIconLeft, messageLayout.stateIconTop);
+                    stateHalfCheck.setAlpha(255);
+                    stateHalfCheck.draw(canvas);
+                } else {
+                    Drawable stateDrawable = getStateDrawable(state);
+                    bounds(stateDrawable, messageLayout.stateIconLeft - getPx(4), messageLayout.stateIconTop);
+                    stateDrawable.setAlpha(255);
+                    stateDrawable.draw(canvas);
                 }
 
                 if (state == MessageState.FAILURE) {
@@ -317,15 +330,11 @@ public class MessageView extends BaseMsgView {
                     clockOutPaint.setColor(COLOR_NORMAL);
                 }
             }
-            // Logger.d(TAG, "State draw in " + (SystemClock.uptimeMillis() - start) + " ms");
-            // start = SystemClock.uptimeMillis();
         } else {
             clockOutPaint.setColor(COLOR_IN);
         }
 
-        canvas.drawText(wireframe.date, messageLayout.layoutRealWidth - messageLayout.timeWidth + getPx(6), messageLayout.layoutHeight - getPx(4), clockOutPaint);
-
-        // Logger.d(TAG, "Date draw in " + (SystemClock.uptimeMillis() - start) + " ms");
+        canvas.drawText(wireframe.date, messageLayout.stateLeft, messageLayout.stateBaseline, clockOutPaint);
 
         return isAnimated;
     }
@@ -361,7 +370,6 @@ public class MessageView extends BaseMsgView {
         private int layoutDesiredWidth;
         private int layoutRealWidth;
         private int layoutHeight;
-        private int timeWidth;
 
         private String forwarderName;
         private String forwarderNameMeasured;
@@ -374,6 +382,15 @@ public class MessageView extends BaseMsgView {
         private boolean showState;
 
         private int forwardOffset;
+
+        private int stateLeft;
+        private int stateBaseline;
+        private int stateIconLeft;
+        private int stateIconTop;
+
+        private int waitRadius;
+        private int waitRadiusSmall;
+        private int waitRadiusBig;
 
         public void build(MessageWireframe wireframe, int desiredWidth, TelegramApplication application) {
 
@@ -466,33 +483,34 @@ public class MessageView extends BaseMsgView {
 
             layoutRealWidth = layout.getWidth();
 
-            timeWidth = (int) clockOutPaint.measureText(wireframe.date) + px((showState ? 23 : 0) + 6);
+            int cleanTimeWidth = (int) clockOutPaint.measureText(wireframe.date);
+            int timeWidth = cleanTimeWidth + px((showState ? 16 : 0)) + px(6);
 
             if (layout.getLineCount() == 1) {
                 boolean isLastRtl = layout.getParagraphDirection(0) == Layout.DIR_RIGHT_TO_LEFT;
                 if (!isLastRtl && desiredWidth - layoutRealWidth > timeWidth) {
                     layoutRealWidth += timeWidth;
-                    layoutHeight = layout.getHeight() + px(3);
+                    layoutHeight = layout.getHeight() + px(2);
                 } else if (isLastRtl && desiredWidth - layout.getWidth() > timeWidth) {
                     layoutRealWidth = layout.getWidth() + timeWidth;
-                    layoutHeight = layout.getHeight() + px(3);
+                    layoutHeight = layout.getHeight() + px(2);
                 } else {
                     if (isLastRtl) {
                         layoutRealWidth = layout.getWidth();
                     }
 
-                    layoutHeight = layout.getHeight() + px(17);
+                    layoutHeight = layout.getHeight() + px(14);
                 }
             } else {
                 boolean isLastRtl = layout.getParagraphDirection(layout.getLineCount() - 1) == Layout.DIR_RIGHT_TO_LEFT;
                 if (!isLastRtl && (desiredWidth - lastWidth > timeWidth)) {
                     layoutRealWidth = Math.max(layoutRealWidth, lastWidth + timeWidth);
-                    layoutHeight = layout.getHeight() + px(3);
+                    layoutHeight = layout.getHeight() + px(2);
                 } else if (isLastRtl && (desiredWidth - layout.getWidth() > timeWidth)) {
                     layoutRealWidth = Math.max(layoutRealWidth, layout.getWidth() + timeWidth);
-                    layoutHeight = layout.getHeight() + px(3);
+                    layoutHeight = layout.getHeight() + px(2);
                 } else {
-                    layoutHeight = layout.getHeight() + px(17);
+                    layoutHeight = layout.getHeight() + px(14);
                 }
             }
 
@@ -514,6 +532,15 @@ public class MessageView extends BaseMsgView {
                 int width = (int) senderPaintBase.measureText(senderNameMeasured);
                 layoutRealWidth = Math.max(layoutRealWidth, width);
             }
+
+            waitRadius = px(5);
+            waitRadiusBig = px(4);
+            waitRadiusSmall = px(3);
+
+            stateLeft = layoutRealWidth - timeWidth + px(6);
+            stateIconLeft = layoutRealWidth - px(8);
+            stateIconTop = layoutHeight - px(14);
+            stateBaseline = layoutHeight - px(4);
 
             // Logger.d(TAG, "Complated layout in " + (SystemClock.uptimeMillis() - start) + " ms");
 

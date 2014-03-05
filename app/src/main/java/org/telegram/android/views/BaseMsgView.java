@@ -38,7 +38,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
     private static final long AVATAR_FADE_TIME = 150;
     protected static final long FADE_ANIMATION_TIME = 150;
-    protected static final long STATE_ANIMATION_TIME = 160;
+    protected static final long STATE_ANIMATION_TIME = 120;
 
     private static final int TOUCHED_NONE = 0;
     private static final int TOUCHED_OUTSIDE = 4;
@@ -243,6 +243,10 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
     protected float easeStateFade(float src) {
         return 1 - (1 - src) * (1 - src);
+    }
+
+    protected float easeCheck(float src) {
+        return (float) (-Math.pow(2, -10 * src) + 1);
     }
 
     public final void rebind() {
@@ -637,17 +641,14 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
                     if (animationTime > AVATAR_FADE_TIME) {
                         avatarPaint.setAlpha(255);
                         canvas.drawBitmap(avatarHolder.getBitmap(), avatarRect.left, avatarRect.top, avatarPaint);
-                        // canvas.drawBitmap(avatar, new Rect(0, 0, avatar.getWidth(), avatar.getHeight()), avatarRect, avatarPaint);
                     } else {
                         float animationPercent = fadeEasing((float) animationTime / AVATAR_FADE_TIME);
-                        int placeholderAlpha = (int) ((1 - animationPercent) * 255);
                         int avatarAlpha = (int) (animationPercent * 255);
 
                         drawPlaceholder(canvas);
 
                         avatarPaint.setAlpha(avatarAlpha);
                         canvas.drawBitmap(avatarHolder.getBitmap(), avatarRect.left, avatarRect.top, avatarPaint);
-                        // canvas.drawBitmap(avatar, new Rect(0, 0, avatar.getWidth(), avatar.getHeight()), avatarRect, avatarPaint);
 
                         isAnimating = true;
                     }
@@ -662,12 +663,8 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
             currentBubbleDrawable.draw(canvas);
             canvas.save();
             canvas.translate(currentBubblePadding.left, currentBubblePadding.top);
-            // Logger.d(TAG, "onDraw:bubble in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
             isAnimating = isAnimating | drawBubble(canvas);
-            // Logger.d(TAG, "onDraw0 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
             canvas.restore();
-            //canvas.translate(-currentBubblePadding.left, -currentBubblePadding.top);
-            // Logger.d(TAG, "onDraw00 in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
 
             if (isBubblePressed) {
                 if (bubbleInDrawableOverlay != null) {

@@ -53,6 +53,15 @@ public class BaseView extends View {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, metrics);
     }
 
+    protected void bounds(Drawable d, int x, int y, float scale) {
+        int w = d.getIntrinsicWidth() >> 1;
+        int h = d.getIntrinsicHeight() >> 1;
+        int centerX = w + x;
+        int centerY = h + y;
+        bounds(d, (int) (centerX - w * scale), (int) (centerY - h * scale),
+                (int) (2 * w * scale), (int) (2 * h * scale));
+    }
+
     protected void bounds(Drawable d, int x, int y) {
         bounds(d, x, y, d.getIntrinsicWidth(), d.getIntrinsicHeight());
     }

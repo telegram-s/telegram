@@ -53,6 +53,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private Drawable unsupportedMark;
     private Drawable downloadIcon;
     private Drawable tryAgainIcon;
+    private Drawable infoBg;
     private NinePatchDrawable outMask;
     private NinePatchDrawable inMask;
     private TextPaint videoDurationPaint;
@@ -60,7 +61,6 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private TextPaint timePaint;
     private Paint bitmapPaint;
     private Paint bitmapFilteredPaint;
-    private Paint timeBgRect;
 
     private Paint downloadBgRect;
     private Paint downloadBgLightRect;
@@ -104,7 +104,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private int desiredWidth;
     private int desiredPaddingH;
     private int desiredPaddingV;
+
     private int timeWidth;
+    private int timeHeight;
 
     private boolean isAnimatedProgress = true;
 
@@ -130,6 +132,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         videoIcon = getResources().getDrawable(R.drawable.st_bubble_media_play);
         mapPoint = getResources().getDrawable(R.drawable.st_map_pin);
         unsupportedMark = getResources().getDrawable(R.drawable.st_bubble_unknown);
+        infoBg = getResources().getDrawable(R.drawable.st_bubble_media_info);
 
         if (FontController.USE_SUBPIXEL) {
             videoDurationPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
@@ -154,9 +157,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         } else {
             timePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         }
-        timePaint.setTextSize(getSp(13));
+        timePaint.setTextSize(getSp(12));
         timePaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
-        timePaint.setColor(0xB6FFFFFF);
+        timePaint.setColor(0xffffffff);
 
         bitmapPaint = new Paint(/*Paint.ANTI_ALIAS_FLAG*/);
         //bitmapPaint.setAntiAlias(true);
@@ -167,30 +170,6 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         bitmapFilteredPaint.setAntiAlias(true);
         bitmapFilteredPaint.setFilterBitmap(true);
         bitmapFilteredPaint.setDither(true);
-
-//        ColorMatrix saturation = new ColorMatrix();
-//        saturation.setSaturation(2.2f);
-//
-//        ColorMatrix scale = new ColorMatrix();
-//        scale.setScale(1.7f, 1.7f, 1.7f, 1.0f);
-//
-//        ColorMatrix white = new ColorMatrix();
-//        white.set(new float[]{
-//                0.7f, 0, 0, 0, 255 * 0.3f,
-//                0, 0.7f, 0, 0, 255 * 0.3f,
-//                0, 0, 0.7f, 0, 255 * 0.3f,
-//                0, 0, 0, 1, 0,
-//        });
-//
-//        ColorMatrix result = new ColorMatrix();
-//        result.set(saturation);
-//        result.postConcat(scale);
-//        result.postConcat(white);
-//
-//        bitmapFilteredPaint.setColorFilter(new ColorMatrixColorFilter(result));
-
-        timeBgRect = new Paint();
-        timeBgRect.setColor(0x59000000);
 
         downloadBgRect = new Paint();
         downloadBgRect.setColor(0xB6000000);
@@ -236,18 +215,6 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         super.unbind();
         unbindOldPreview();
         unbindPreview();
-    }
-
-    private int[] buildSize(int w, int h) {
-        float maxWidth = getPx(160);
-        float maxHeight = getPx(300);
-
-        float scale = Math.min(maxWidth / w, maxHeight / h);
-
-        int scaledW = (int) (w * scale);
-        int scaledH = (int) (h * scale);
-
-        return new int[]{scaledW, scaledH};
     }
 
     private void bindSize(int w, int h) {
@@ -524,7 +491,10 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         path.close();
         path.setFillType(Path.FillType.EVEN_ODD);
 
+        timePaint.getTextBounds(date, 0, date.length(), rect1);
+
         timeWidth = (int) timePaint.measureText(date);
+        timeHeight = -rect1.top;
         if (isOut) {
             timeWidth += getPx(18);
         }
@@ -761,38 +731,50 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         if (!isAnimationShown) {
             int bottom = desiredHeight + desiredPaddingV * 2;
             int right = desiredWidth + desiredPaddingH * 2;
-            canvas.drawRect(right - timeWidth - getPx(17), bottom - getPx(25), right - getPx(3), bottom - getPx(3), timeBgRect);
-            canvas.drawText(date, right - timeWidth - getPx(10), bottom - getPx(9), timePaint);
+
+            infoBg.getPadding(rect1);
+
+            int timeBottom = bottom;
+            int timeRight = right;
+            int timeStart = timeRight - rect1.right - timeWidth;
+            int timeIcon = timeRight - rect1.right - getPx(10);
+            int timeIconTop = timeBottom - rect1.bottom - getPx(10);
+            int timeBaseline = timeBottom - rect1.bottom - (getPx(10) - timeHeight) / 2;
+            int timeLeft = timeStart - rect1.left;
+            int timeTop = timeBaseline - rect1.top - getPx(10);
+
+            infoBg.setBounds(timeLeft, timeTop, timeRight, timeBottom);
+            infoBg.draw(canvas);
+            canvas.drawText(date, timeStart, timeBaseline, timePaint);
+
             if (isOut) {
                 if (state == MessageState.PENDING) {
                     canvas.save();
-                    canvas.translate(right - getPx(12 + 8), bottom - getPx(19));
-                    canvas.drawCircle(getPx(6), getPx(6), getPx(6), clockIconPaint);
+                    canvas.translate(timeIcon, timeIconTop);
+                    canvas.drawCircle(getPx(5), getPx(5), getPx(5), clockIconPaint);
                     double time = (System.currentTimeMillis() / 15.0) % (12 * 60);
                     double angle = (time / (6 * 60)) * Math.PI;
 
-                    int x = (int) (Math.sin(-angle) * getPx(4));
-                    int y = (int) (Math.cos(-angle) * getPx(4));
-                    canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
+                    int x = (int) (Math.sin(-angle) * getPx(3));
+                    int y = (int) (Math.cos(-angle) * getPx(3));
+                    canvas.drawLine(getPx(5), getPx(5), getPx(5) + x, getPx(5) + y, clockIconPaint);
 
-                    x = (int) (Math.sin(-angle * 12) * getPx(5));
-                    y = (int) (Math.cos(-angle * 12) * getPx(5));
-                    canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
+                    x = (int) (Math.sin(-angle * 12) * getPx(4));
+                    y = (int) (Math.cos(-angle * 12) * getPx(4));
+                    canvas.drawLine(getPx(5), getPx(5), getPx(5) + x, getPx(5) + y, clockIconPaint);
                     canvas.restore();
                     isAnimated = true;
                 } else if (state == MessageState.READED && prevState == MessageState.SENT && (SystemClock.uptimeMillis() - stateChangeTime < FADE_ANIMATION_TIME)) {
                     long stateAnimationTime = SystemClock.uptimeMillis() - stateChangeTime;
                     float progress = easeStateFade(stateAnimationTime / (float) STATE_ANIMATION_TIME);
-                    int offset = (int) (getPx(5) * progress);
+                    float scale = 1 + progress * 0.2f;
                     int alphaNew = (int) (progress * 255);
 
-                    bounds(stateSent, right - getPx(8) - stateSent.getIntrinsicWidth() - offset,
-                            bottom - getPx(8) - stateSent.getIntrinsicHeight());
+                    bounds(stateSent, timeIcon - getPx(4), timeIconTop);
                     stateSent.setAlpha(255);
                     stateSent.draw(canvas);
 
-                    bounds(stateHalfCheck, right - getPx(8) - stateHalfCheck.getIntrinsicWidth(),
-                            bottom - getPx(8) - stateHalfCheck.getIntrinsicHeight());
+                    bounds(stateHalfCheck, timeIcon, timeIconTop, scale);
                     stateHalfCheck.setAlpha(alphaNew);
                     stateHalfCheck.draw(canvas);
 
@@ -801,15 +783,18 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
                     Drawable drawable = getStateDrawable(state);
 
                     if (state == MessageState.READED) {
-                        bounds(stateSent, right - getPx(8) - stateSent.getIntrinsicWidth() - getPx(5),
-                                bottom - getPx(8) - stateSent.getIntrinsicHeight());
+                        bounds(stateSent, timeIcon - getPx(4), timeIconTop);
                         stateSent.setAlpha(255);
                         stateSent.draw(canvas);
-                    }
 
-                    bounds(drawable, right - getPx(8) - drawable.getIntrinsicWidth(), bottom - getPx(8) - drawable.getIntrinsicHeight());
-                    drawable.setAlpha(255);
-                    drawable.draw(canvas);
+                        bounds(stateHalfCheck, timeIcon, timeIconTop);
+                        stateHalfCheck.setAlpha(255);
+                        stateHalfCheck.draw(canvas);
+                    } else {
+                        bounds(drawable, timeIcon - getPx(4), timeIconTop);
+                        drawable.setAlpha(255);
+                        drawable.draw(canvas);
+                    }
                 }
             }
         }

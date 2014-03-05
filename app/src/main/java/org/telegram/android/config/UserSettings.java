@@ -29,7 +29,7 @@ public class UserSettings {
 
     public static final int BUBBLE_FONT_NORMAL = 0;
     public static final int BUBBLE_FONT_NORMAL_VALUE = 18;
-    public static final int BUBBLE_FONT_NORMAL_VALUE_CLOCK = 14;
+    public static final int BUBBLE_FONT_NORMAL_VALUE_CLOCK = 12;
     public static final int BUBBLE_FONT_TINY = 1;
     public static final int BUBBLE_FONT_TINY_VALUE = 14;
     public static final int BUBBLE_FONT_TINY_VALUE_CLOCK = 12;
