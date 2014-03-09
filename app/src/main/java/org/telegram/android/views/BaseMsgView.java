@@ -152,7 +152,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         AVATAR_LEFT = px(6);
         AVATAR_BOTTOM = px(4);
         BUBBLE_PADDING = px(40);
-        UNREAD_HEIGHT = px(34);
+        UNREAD_HEIGHT = px(38);
         // unreadOffset = px(24);
 
         isLoaded = true;
