@@ -1853,7 +1853,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         public View newView(Context context, MessageWireframe object, ViewGroup parent) {
             if (object.message.getRawContentType() == ContentType.MESSAGE_SYSTEM) {
-                return View.inflate(context, R.layout.conv_item_system, null);
+                View res = View.inflate(context, R.layout.conv_item_system, null);
+                ((TextView) res.findViewById(R.id.unreadDivider)).setTypeface(FontController.loadTypeface(context, "medium"));
+                return res;
             }
 
             if (object.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT) {
@@ -1894,12 +1896,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 }
 
                 TextView unreadView = (TextView) view.findViewById(R.id.unreadDivider);
+                View unreadContainer = view.findViewById(R.id.unreadContainer);
 
                 if (showDiv) {
                     unreadView.setText(I18nUtil.getInstance().getPluralFormatted(R.plurals.st_new_messages, unreadCount));
-                    unreadView.setVisibility(View.VISIBLE);
+                    unreadContainer.setVisibility(View.VISIBLE);
                 } else {
-                    unreadView.setVisibility(View.GONE);
+                    unreadContainer.setVisibility(View.GONE);
                 }
 
                 TextView messageView = (TextView) view.findViewById(R.id.message);

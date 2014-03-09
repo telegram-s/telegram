@@ -52,7 +52,6 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private static int AVATAR_LEFT;
     private static int AVATAR_BOTTOM;
     private static int UNREAD_HEIGHT;
-    private static int UNREAD_OFFSET;
     private static boolean isLoaded;
 
     private TextPaint timeDivPaint;
@@ -78,6 +77,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
     private int bubbleContentWidth;
     private int bubbleContentHeight;
+    private int unreadOffset;
 
     private Drawable bubbleInDrawable;
     private Drawable bubbleInDrawableOverlay;
@@ -85,6 +85,8 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private Drawable bubbleOutDrawable;
     private Drawable bubbleOutDrawableOverlay;
     private Rect bubbleOutPadding;
+    private Drawable unreadBg;
+    private Drawable unreadArrow;
 
     private Drawable currentBubbleDrawable;
     private Rect currentBubblePadding;
@@ -150,8 +152,8 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         AVATAR_LEFT = px(6);
         AVATAR_BOTTOM = px(4);
         BUBBLE_PADDING = px(40);
-        UNREAD_HEIGHT = px(24);
-        UNREAD_OFFSET = px(18);
+        UNREAD_HEIGHT = px(34);
+        // unreadOffset = px(24);
 
         isLoaded = true;
     }
@@ -175,9 +177,9 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         } else {
             newDivPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         }
-        newDivPaint.setTextSize(getSp(16));
+        newDivPaint.setTextSize(getSp(14));
         newDivPaint.setColor(0xffFFFFFF);
-        newDivPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
+        newDivPaint.setTypeface(FontController.loadTypeface(getContext(), "medium"));
 
         avatarPaint = new Paint();
 
@@ -208,6 +210,9 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         serviceDrawable = getResources().getDrawable(org.telegram.android.R.drawable.st_bubble_service);
         servicePadding = new Rect();
         serviceDrawable.getPadding(servicePadding);
+
+        unreadBg = getResources().getDrawable(R.drawable.st_bubble_unread);
+        unreadArrow = getResources().getDrawable(R.drawable.st_bubble_unread_arrow);
 
         avatarRect = new Rect();
 
@@ -418,6 +423,8 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
         if (showUnreadMessagesNotify) {
             newDivMeasure = (int) newDivPaint.measureText(newDivText);
+            newDivPaint.getTextBounds(newDivText, 0, newDivText.length(), rect);
+            unreadOffset = (UNREAD_HEIGHT + Math.abs(rect.top)) / 2;
             realHeight += UNREAD_HEIGHT;
         }
 
@@ -594,9 +601,14 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         }
 
         if (showUnreadMessagesNotify) {
-            rect.set(0, 0, getWidth(), UNREAD_HEIGHT);
-            canvas.drawRect(rect, newMessagesPaint);
-            canvas.drawText(newDivText, (getWidth() - newDivMeasure) / 2, UNREAD_OFFSET, newDivPaint);
+            unreadBg.setBounds(0, 0, getWidth(), UNREAD_HEIGHT);
+            unreadBg.draw(canvas);
+            int arrowTop = (UNREAD_HEIGHT - unreadArrow.getIntrinsicHeight()) / 2;
+            unreadArrow.setBounds(getPx(20), arrowTop, getPx(20) + unreadArrow.getIntrinsicWidth(), arrowTop +
+                    unreadArrow.getIntrinsicHeight());
+            unreadArrow.draw(canvas);
+
+            canvas.drawText(newDivText, (getWidth() - newDivMeasure) / 2, unreadOffset, newDivPaint);
             canvas.translate(0, UNREAD_HEIGHT);
         }
 

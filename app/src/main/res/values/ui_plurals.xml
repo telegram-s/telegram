@@ -7,9 +7,9 @@
     </plurals>
 
     <plurals name="st_new_messages">
-        <item quantity="zero">no new message</item>
-        <item quantity="one">one new message</item>
-        <item quantity="other">{d} new messages</item>
+        <item quantity="zero">NO NEW MESSAGES</item>
+        <item quantity="one">ONE NEW MESSAGE</item>
+        <item quantity="other">{d} NEW MESSAGES</item>
     </plurals>
 
     <plurals name="st_members_caps">

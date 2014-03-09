@@ -8,10 +8,10 @@
     </plurals>
 
     <plurals name="st_new_messages">
-        <item quantity="one">{d} новое сообщение</item>
-        <item quantity="few">{d} новых сообщения</item>
-        <item quantity="many">{d} новых сообщений</item>
-        <item quantity="other">{d} новых сообщения</item>
+        <item quantity="one">{d} НОВОЕ СООБЩЕНИЕ</item>
+        <item quantity="few">{d} НОВЫХ СООБЩЕНИЯ</item>
+        <item quantity="many">{d} НОВЫХ СООБЩЕНИЙ</item>
+        <item quantity="other">{d} НОВЫХ СООБЩЕНИЯ</item>
     </plurals>
 
     <plurals name="st_members_caps">
