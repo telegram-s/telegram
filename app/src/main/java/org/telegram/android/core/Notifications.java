@@ -6,9 +6,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.PixelFormat;
+import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -34,6 +34,7 @@ import org.telegram.android.log.Logger;
 import org.telegram.android.preview.AvatarView;
 import org.telegram.android.screens.RootControllerHolder;
 import org.telegram.android.ui.Placeholders;
+import org.telegram.android.ui.UiMeasure;
 import org.telegram.tl.TLObject;
 
 import java.util.Random;
@@ -324,35 +325,38 @@ public class Notifications {
             intent.putExtra("peerType", peerType);
             intent.putExtra("peerId", peerId);
             builder.setContentIntent(PendingIntent.getActivity(application, rnd.nextInt(), intent, 0));
-            Bitmap bigPhoto = null;
-            if (photo != null) {
-//                if (photo instanceof TLLocalAvatarPhoto) {
-//                    TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) photo;
-//                    if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-//                        bigPhoto = application.getImageController().addTask(new StelsImageTask((TLLocalFileLocation) profilePhoto.getPreviewLocation()));
-//                    }
-//                }
-                // TODO: Implement
+
+            if (Build.VERSION.SDK_INT >= 11) {
+                int size = (int) (UiMeasure.DENSITY * 64);
+                Bitmap notificationBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+                boolean loaded = false;
+                if (photo != null) {
+                    if (photo instanceof TLLocalAvatarPhoto) {
+                        TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) photo;
+                        if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
+                            Bitmap avatar = application.getUiKernel().getAvatarLoader().loadFromStorage(profilePhoto.getPreviewLocation());
+                            if (avatar != null) {
+                                Canvas canvas = new Canvas(notificationBitmap);
+                                canvas.drawBitmap(avatar, new Rect(0, 0, avatar.getWidth(), avatar.getHeight()), new Rect(0, 0, size, size),
+                                        new Paint(Paint.FILTER_BITMAP_FLAG));
+                                loaded = true;
+                            }
+                        }
+                    }
+                }
+
+                if (!loaded) {
+                    int color = Placeholders.getBgColor(peerId);
+                    notificationBitmap.eraseColor(color);
+                    Canvas canvas = new Canvas(notificationBitmap);
+                    Drawable mask = application.getResources().getDrawable(R.drawable.st_group_placeholder_big);
+                    mask.setBounds(0, 0, size, size);
+                    mask.draw(canvas);
+                }
+                builder.setLargeIcon(notificationBitmap);
             }
 
-//            if (bigPhoto == null) {
-//                if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
-//                    BitmapDrawable drawable = (BitmapDrawable)
-//                            application.getResources().getDrawable(Placeholders.getUserPlaceholder(Math.abs(senderId)));
-//                    bigPhoto = drawable.getBitmap();
-//                } else {
-//                    BitmapDrawable drawable = (BitmapDrawable)
-//                            application.getResources().getDrawable(Placeholders.getGroupPlaceholder(Math.abs(peerId)));
-//                    bigPhoto = drawable.getBitmap();
-//                }
-//            }
-//            builder.setLargeIcon(bigPhoto);
-
-//            if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
-//                builder.setLights(Placeholders.USER_PLACEHOLDERS_COLOR[Math.abs(senderId) % Placeholders.USER_PLACEHOLDERS_COLOR.length], 1500, 1500);
-//            } else {
-//                builder.setLights(Placeholders.GROUP_PLACEHOLDERS_COLOR[Math.abs(peerId) % Placeholders.GROUP_PLACEHOLDERS_COLOR.length], 1500, 1500);
-//            }
+            builder.setLights(Placeholders.getLedColor(senderId), 1500, 1500);
 
             int defaults = 0;
 
@@ -556,7 +560,7 @@ public class Notifications {
             config.useSound = settings.isMessageSoundEnabled();
             if (settings.getUserNotificationSound(senderId) != null) {
                 config.customSoundUri = settings.getUserNotificationSound(senderId);
-                config.useCustomSound = false;
+                config.useCustomSound = true;
             } else {
                 config.customSoundUri = settings.getNotificationSound();
                 config.useCustomSound = config.customSoundUri != null;

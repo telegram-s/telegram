@@ -763,7 +763,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             layoutMarkRadius = px(2);
             if (description.isErrorState() ||
                     (description.getMessageState() == MessageState.FAILURE && description.isMine())) {
-                layoutMarkWidth = px(30);
+                layoutMarkWidth = px(22);
                 if (isRtl) {
                     layoutMarkLeft = layoutPadding; // getMeasuredWidth() - layoutMarkWidth - getPx(80);
                 } else {

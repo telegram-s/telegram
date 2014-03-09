@@ -713,6 +713,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     @Override
     public void setChecked(boolean checked) {
         isBubbleChecked = checked;
+        refreshDrawableState();
         invalidate();
     }
 

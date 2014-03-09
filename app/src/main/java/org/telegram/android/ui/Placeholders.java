@@ -30,6 +30,7 @@ public class Placeholders {
     private static final int COUNT = 8;
     private static final int[] BG_COLORS = new int[]{BLUE_BG, CYAN_BG, GREEN_BG, ORANGE_BG, PINK_BG, PURPLE_BG, RED_BG, YELLOW_BG};
     private static final int[] COLORS = new int[]{BLUE, CYAN, GREEN, ORANGE, PINK, PURPLE, RED, YELLOW};
+    private static final int[] LED_COLORS = new int[]{BLUE, CYAN, GREEN, ORANGE, PINK, PURPLE, RED, YELLOW};
 
     public static int getTitleColor(int peerId) {
         return COLORS[Math.abs(peerId) % COUNT];
@@ -37,5 +38,9 @@ public class Placeholders {
 
     public static int getBgColor(int peerId) {
         return BG_COLORS[Math.abs(peerId) % COUNT];
+    }
+
+    public static int getLedColor(int peerId) {
+        return LED_COLORS[Math.abs(peerId) % COUNT];
     }
 }

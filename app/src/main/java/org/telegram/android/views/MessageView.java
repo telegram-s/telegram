@@ -43,7 +43,7 @@ public class MessageView extends BaseMsgView {
     private Drawable stateSent;
     private Drawable stateHalfCheck;
     private Drawable stateFailure;
-    private static final int COLOR_NORMAL = 0xff94cb7d;
+    private static final int COLOR_NORMAL = 0xff7ebe6b;
     private static final int COLOR_ERROR = 0xffDB4942;
     private static final int COLOR_IN = 0xffa1aab3;
     private static final long PENDING_QUITE_TIME = 1000;

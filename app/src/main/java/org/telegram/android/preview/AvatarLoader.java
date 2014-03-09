@@ -112,6 +112,12 @@ public class AvatarLoader {
         }
     }
 
+    public Bitmap loadFromStorage(TLAbsLocalFileLocation fileLocation) {
+        String key = fileLocation.getUniqKey();
+        String cacheKey = key + "_" + TYPE_FULL;
+        return fileStorage.tryLoadFile(cacheKey);
+    }
+
     public boolean requestRawAvatar(String fileName,
                                     ImageReceiver receiver) {
         Uri sourceUri = Uri.fromFile(new File(fileName));
