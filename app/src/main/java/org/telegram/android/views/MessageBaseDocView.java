@@ -240,10 +240,14 @@ public class MessageBaseDocView extends BaseMsgView {
         this.showState = message.message.isOut();
     }
 
+    protected int measureHeight() {
+        return getPx(52);
+    }
+
     @Override
     protected void measureBubbleContent(int width) {
         contentW = getPx(220);
-        contentH = getPx(56);
+        contentH = measureHeight();
         timeWidth = (int) clockOutPaint.measureText(date) + getPx((showState ? 23 : 0) + 6);
         setBubbleMeasuredContent(contentW, contentH);
     }
@@ -290,7 +294,7 @@ public class MessageBaseDocView extends BaseMsgView {
 
         boolean isAnimated = false;
 
-        canvas.drawRect(new RectF(0, 0, contentW, contentH), bubbleBgPaint);
+        // canvas.drawRect(new RectF(0, 0, contentW, contentH), bubbleBgPaint);
 
         drawContent(canvas);
 

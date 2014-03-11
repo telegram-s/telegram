@@ -534,6 +534,42 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         }
     }
 
+    private boolean drawState(Canvas canvas, int stateId, float stateAlpha, boolean isNewState) {
+        int centerX = desiredWidth / 2;
+        int centerY = desiredHeight / 2;
+        int internalR = getPx(18);
+        int outerR = getPx(22);
+        boolean isAnimated = false;
+        if (isNewState && (stateId == STATE_IN_PROGRESS ||
+                stateId == STATE_ERROR ||
+                stateId == STATE_PENDING)) {
+            // downloadBgRect.setAlpha((int) (0xA5 * stateAlpha));
+            downloadBgRect.setAlpha(0xA5);
+            canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
+        }
+
+        if (stateId == STATE_IN_PROGRESS) {
+            downloadBgLightRect.setAlpha((int) (0xA5 * stateAlpha));
+            rectF.set(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
+            int progressAngleStart = -90;
+            int progressAngle = (int) ((downloadAnimatedProgress * 360 / 100));
+            canvas.drawArc(rectF, progressAngleStart, progressAngle, true, downloadBgLightRect);
+        } else if (stateId == STATE_ERROR) {
+            tryAgainIcon.setBounds(
+                    centerX - tryAgainIcon.getIntrinsicWidth() / 2, centerY - tryAgainIcon.getIntrinsicHeight() / 2,
+                    centerX + tryAgainIcon.getIntrinsicWidth() / 2, centerY + tryAgainIcon.getIntrinsicHeight() / 2);
+            tryAgainIcon.setAlpha((int) (255 * stateAlpha));
+            tryAgainIcon.draw(canvas);
+        } else if (stateId == STATE_PENDING) {
+            downloadIcon.setBounds(
+                    centerX - downloadIcon.getIntrinsicWidth() / 2, centerY - downloadIcon.getIntrinsicHeight() / 2,
+                    centerX + downloadIcon.getIntrinsicWidth() / 2, centerY + downloadIcon.getIntrinsicHeight() / 2);
+            downloadIcon.setAlpha((int) (255 * stateAlpha));
+            downloadIcon.draw(canvas);
+        }
+
+        return isAnimated;
+    }
 
     @Override
     protected boolean drawBubble(Canvas canvas) {
@@ -595,6 +631,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
                 rect1.set(0, 0, preview.getW(), preview.getH());
                 rect2.set(0, 0, desiredWidth, desiredHeight);
                 canvas.drawBitmap(preview.getBitmap(), rect1, rect2, bitmapFilteredPaint);
+                if (oldPreview != null) {
+                    unbindOldPreview();
+                }
             } else {
                 float alpha = fadeEasing((float) animationTime / FADE_ANIMATION_TIME);
 
@@ -603,29 +642,12 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
                     rect1.set(0, 0, oldPreview.getW(), oldPreview.getH());
                     rect2.set(0, 0, desiredWidth, desiredHeight);
                     canvas.drawBitmap(oldPreview.getBitmap(), rect1, rect2, bitmapFilteredPaint);
-                } else {
-                    // canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
                 }
-//                } else if (previewCached != null) {
-//                    bitmapFilteredPaint.setAlpha(255);
-//                    rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
-//                    rect2.set(0, 0, desiredWidth, desiredHeight);
-//                    canvas.drawBitmap(previewCached, rect1, rect2, bitmapFilteredPaint);
-//                } else {
-//                    canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
-//                }
 
                 bitmapFilteredPaint.setAlpha((int) (255 * alpha));
                 rect1.set(0, 0, preview.getW(), preview.getH());
                 rect2.set(0, 0, desiredWidth, desiredHeight);
                 canvas.drawBitmap(preview.getBitmap(), rect1, rect2, bitmapFilteredPaint);
-//                if (scaleUpMedia) {
-//                    rect1.set(0, 0, preview.getWidth(), preview.getHeight());
-//                    rect2.set(0, 0, desiredWidth, desiredHeight);
-//                    canvas.drawBitmap(preview, rect1, rect2, bitmapPaint);
-//                } else {
-//                    canvas.drawBitmap(preview, 0, 0, bitmapPaint);
-//                }
 
                 isAnimated = true;
             }
@@ -635,17 +657,6 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             rect2.set(0, 0, desiredWidth, desiredHeight);
             canvas.drawBitmap(oldPreview.getBitmap(), rect1, rect2, bitmapPaint);
         }
-//        else {
-//            canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
-//        }
-//        } else if (previewCached != null) {
-//            bitmapFilteredPaint.setAlpha(255);
-//            rect1.set(0, 0, fastPreviewWidth, fastPreviewHeight);
-//            rect2.set(0, 0, desiredWidth, desiredHeight);
-//            canvas.drawBitmap(previewCached, rect1, rect2, bitmapFilteredPaint);
-//        } else {
-//            canvas.drawRect(0, 0, desiredWidth, desiredHeight, placeholderPaint);
-//        }
 
         if (showMapPoint) {
             mapPoint.setBounds((desiredWidth - mapPoint.getIntrinsicWidth()) / 2,
@@ -663,57 +674,6 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             unsupportedMark.draw(canvas);
         }
 
-        if (mode != MODE_NONE) {
-            int centerX = desiredWidth / 2;
-            int centerY = desiredHeight / 2;
-            int internalR = getPx(18);
-            int outerR = getPx(22);
-
-            if (getState() == STATE_IN_PROGRESS) {
-                long downloadProgressAnimationTime = SystemClock.uptimeMillis() - downloadStateTime;
-                isAnimated = true;
-
-                if (downloadProgress == 100 && isAnimatedProgress) {
-                    float alpha = fadeEasing((float) downloadProgressAnimationTime / FADE_ANIMATION_TIME);
-                    downloadBgRect.setAlpha((int) (0xA5 * (1 - alpha)));
-                    downloadBgLightRect.setAlpha((int) (0xA5 * (1 - alpha)));
-                } else {
-                    downloadBgRect.setAlpha(0xA5);
-                    downloadBgLightRect.setAlpha(0xA5);
-                }
-
-                canvas.save();
-                canvas.clipRect(0, 0, desiredWidth, desiredHeight);
-
-                float currentDownloadProgress = downloadProgress;
-                if (downloadProgressAnimationTime < STATE_ANIMATION_TIME && isAnimatedProgress) {
-                    float alpha = fadeEasing((float) downloadProgressAnimationTime / STATE_ANIMATION_TIME);
-                    isAnimated = true;
-                    currentDownloadProgress = oldDownloadProgress + (downloadProgress - oldDownloadProgress) * alpha;
-                }
-
-                canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
-
-                rectF.set(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
-                int progressAngleStart = -90;
-                int progressAngle = (int) ((currentDownloadProgress * 360 / 100));
-                canvas.drawArc(rectF, progressAngleStart, progressAngle, true, downloadBgLightRect);
-                canvas.restore();
-            } else if (getState() == STATE_ERROR) {
-                canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
-                tryAgainIcon.setBounds(
-                        centerX - tryAgainIcon.getIntrinsicWidth() / 2, centerY - tryAgainIcon.getIntrinsicHeight() / 2,
-                        centerX + tryAgainIcon.getIntrinsicWidth() / 2, centerY + tryAgainIcon.getIntrinsicHeight() / 2);
-                tryAgainIcon.draw(canvas);
-            } else if (getState() == STATE_PENDING) {
-                canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
-                downloadIcon.setBounds(
-                        centerX - downloadIcon.getIntrinsicWidth() / 2, centerY - downloadIcon.getIntrinsicHeight() / 2,
-                        centerX + downloadIcon.getIntrinsicWidth() / 2, centerY + downloadIcon.getIntrinsicHeight() / 2);
-                downloadIcon.draw(canvas);
-            }
-        }
-
         if (isVideo) {
             if ((getState() == STATE_NONE || getState() == STATE_DOWNLOADED)) {
                 int centerX = desiredWidth / 2;
@@ -724,6 +684,25 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
                 videoIcon.draw(canvas);
             }
             canvas.drawText(duration, getPx(8), getPx(18), videoDurationPaint);
+        }
+
+        if (mode != MODE_NONE) {
+            calculateAnimations();
+            if (isInStateSwitch) {
+                drawState(canvas, getState(), newStateAlpha, true);
+                drawState(canvas, getPrevState(), oldStateAlpha, false);
+            } else {
+                drawState(canvas, getState(), 1, true);
+            }
+//            Paint src = new Paint();
+//            src.setColor(Color.GREEN);
+//            src.setAlpha((int) (255 * newStateAlpha));
+//            canvas.drawRect(new Rect(10, 10, 100, 100), src);
+//
+//            src.setColor(Color.RED);
+//            src.setAlpha((int) (255 * oldStateAlpha));
+//            canvas.drawRect(new Rect(100, 100, 210, 210), src);
+            isAnimated = true;
         }
 
         canvas.restore();

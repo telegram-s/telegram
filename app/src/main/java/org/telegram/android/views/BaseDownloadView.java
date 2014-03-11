@@ -22,11 +22,20 @@ public abstract class BaseDownloadView extends BaseMsgView {
     protected static final int MODE_DOWNLOAD = 1;
     protected static final int MODE_UPLOAD = 2;
 
+    private int prevState = STATE_NONE;
     private int currentState = STATE_NONE;
 
     protected int downloadProgress;
     protected int oldDownloadProgress;
     protected long downloadStateTime;
+    protected long stateTime;
+
+    protected boolean isInStateSwitch;
+    protected float oldStateAlpha;
+    protected float newStateAlpha;
+    protected float progressWaitAlpha;
+    protected float progressAlpha;
+    protected long downloadAnimatedProgress;
 
     protected int mode = MODE_NONE;
     private String downloadKey;
@@ -51,8 +60,6 @@ public abstract class BaseDownloadView extends BaseMsgView {
         super.init();
 
         downloadListener = new DownloadListener() {
-            long lastNotify = 0;
-
             @Override
             public void onStateChanged(String _key, DownloadState state, int percent) {
                 if (mode != MODE_DOWNLOAD || !_key.equals(downloadKey)) {
@@ -83,15 +90,21 @@ public abstract class BaseDownloadView extends BaseMsgView {
         return currentState;
     }
 
+    protected int getPrevState() {
+        return prevState;
+    }
+
     protected String getDownloadKey() {
         return downloadKey;
     }
 
     protected void clearBinding() {
+        this.prevState = STATE_NONE;
         this.currentState = STATE_NONE;
         this.mode = MODE_NONE;
         this.downloadProgress = 0;
         this.downloadStateTime = 0;
+        this.stateTime = 0;
     }
 
     protected void bindDownload(String key) {
@@ -114,31 +127,54 @@ public abstract class BaseDownloadView extends BaseMsgView {
         switch (state) {
             case PENDING:
             case IN_PROGRESS:
-                currentState = STATE_IN_PROGRESS;
+                if (currentState != STATE_IN_PROGRESS) {
+                    if (prevState != currentState) {
+                        prevState = currentState;
+                        stateTime = SystemClock.uptimeMillis();
+                    }
+                    currentState = STATE_IN_PROGRESS;
+                }
                 break;
             case FAILURE:
-                currentState = STATE_ERROR;
+                if (currentState != STATE_ERROR) {
+                    if (prevState != currentState) {
+                        prevState = currentState;
+                        stateTime = SystemClock.uptimeMillis();
+                    }
+                    currentState = STATE_ERROR;
+                }
                 break;
             case COMPLETED:
                 if (currentState == STATE_IN_PROGRESS) {
                     rebind();
                 } else {
-                    currentState = STATE_DOWNLOADED;
+                    if (currentState != STATE_DOWNLOADED) {
+                        if (prevState != currentState) {
+                            prevState = currentState;
+                            stateTime = SystemClock.uptimeMillis();
+                        }
+                        currentState = STATE_DOWNLOADED;
+                    }
                 }
                 break;
             default:
             case CANCELLED:
             case NONE:
-                currentState = STATE_PENDING;
+                if (currentState != STATE_PENDING) {
+                    if (prevState != currentState) {
+                        prevState = currentState;
+                        stateTime = SystemClock.uptimeMillis();
+                    }
+                    currentState = STATE_PENDING;
+                }
                 break;
         }
-        if (state == DownloadState.IN_PROGRESS || state == DownloadState.PENDING) {
-            currentState = STATE_IN_PROGRESS;
-        }
-        if (downloadProgress != progress) {
-            oldDownloadProgress = downloadProgress;
-            downloadProgress = progress;
-            downloadStateTime = SystemClock.uptimeMillis();
+        if (currentState == STATE_IN_PROGRESS) {
+            if (downloadProgress != progress) {
+                oldDownloadProgress = downloadProgress;
+                downloadProgress = progress;
+                downloadStateTime = SystemClock.uptimeMillis();
+            }
         }
     }
 
@@ -162,6 +198,38 @@ public abstract class BaseDownloadView extends BaseMsgView {
             oldDownloadProgress = 0;
             downloadProgress = 0;
             downloadStateTime = 0;
+        }
+    }
+
+    protected void calculateAnimations() {
+        if (mode != MODE_NONE) {
+            // State animations
+            if (currentState != prevState) {
+                long stateAnimationTime = SystemClock.uptimeMillis() - stateTime;
+                if (stateAnimationTime < GLOBAL_STATE_ANIMATION_TIME) {
+                    float progress = stateAnimationTime / (float) GLOBAL_STATE_ANIMATION_TIME;
+                    isInStateSwitch = true;
+                    newStateAlpha = progress;
+                    oldStateAlpha = 1 - progress;
+                } else {
+                    isInStateSwitch = false;
+                    oldStateAlpha = 0;
+                    newStateAlpha = 1;
+                }
+            }
+
+            if (getState() == STATE_IN_PROGRESS) {
+                long downloadProgressAnimationTime = SystemClock.uptimeMillis() - downloadStateTime;
+                downloadAnimatedProgress = downloadProgress;
+                if (downloadProgressAnimationTime < STATE_ANIMATION_TIME) {
+                    float alpha = fadeEasing((float) downloadProgressAnimationTime / STATE_ANIMATION_TIME);
+                    downloadAnimatedProgress = (long) (oldDownloadProgress + (downloadProgress - oldDownloadProgress) * alpha);
+                }
+            }
+        } else {
+            isInStateSwitch = false;
+            oldStateAlpha = 0;
+            newStateAlpha = 1;
         }
     }
 }

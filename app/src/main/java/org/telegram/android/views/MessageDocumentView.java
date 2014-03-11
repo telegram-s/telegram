@@ -27,11 +27,12 @@ import org.telegram.android.ui.TextUtil;
  * Created by ex3ndr on 15.12.13.
  */
 public class MessageDocumentView extends MessageBaseDocView {
-    private Paint iconBgPaint;
     private TextPaint fileNamePaint;
     private TextPaint fileDeskPaint;
     private Drawable documentIconOut;
+    private Drawable documentIconOutDownloaded;
     private Drawable documentIconIn;
+    private Drawable documentIconInDownloaded;
     private Drawable documentIcon;
 
     private String fileName;
@@ -53,12 +54,10 @@ public class MessageDocumentView extends MessageBaseDocView {
     protected void init() {
         super.init();
 
-        documentIconOut = getResources().getDrawable(R.drawable.st_bubble_ic_doc_out);
-        documentIconIn = getResources().getDrawable(R.drawable.st_bubble_ic_doc_in);
-
-        iconBgPaint = new Paint();
-        iconBgPaint.setStyle(Paint.Style.FILL);
-        iconBgPaint.setColor(0xffdff4bd);
+        documentIconOut = getResources().getDrawable(R.drawable.st_bubble_in_doc);
+        documentIconInDownloaded = getResources().getDrawable(R.drawable.st_bubble_in_doc_downloaded);
+        documentIconIn = getResources().getDrawable(R.drawable.st_bubble_in_doc);
+        documentIconInDownloaded = getResources().getDrawable(R.drawable.st_bubble_in_doc_downloaded);
 
         if (FontController.USE_SUBPIXEL) {
             fileNamePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
@@ -66,7 +65,7 @@ public class MessageDocumentView extends MessageBaseDocView {
             fileNamePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         }
         fileNamePaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
-        fileNamePaint.setTextSize(getSp(18f));
+        fileNamePaint.setTextSize(getSp(16f));
         fileNamePaint.setColor(0xff000000);
 
         if (FontController.USE_SUBPIXEL) {
@@ -83,13 +82,11 @@ public class MessageDocumentView extends MessageBaseDocView {
     protected void bindNewView(MessageWireframe message) {
         super.bindNewView(message);
         if (message.message.isOut()) {
-            iconBgPaint.setColor(0xffdef3bd);
             documentIcon = documentIconOut;
             fileDeskPaint.setColor(0xff97bb7c);
         } else {
-            iconBgPaint.setColor(0xfff1f4f6);
             documentIcon = documentIconIn;
-            fileDeskPaint.setColor(0xffafb7c3);
+            fileDeskPaint.setColor(0xffa1aab3);
         }
     }
 
@@ -143,6 +140,11 @@ public class MessageDocumentView extends MessageBaseDocView {
     }
 
     @Override
+    protected int measureHeight() {
+        return px(54);
+    }
+
+    @Override
     protected void measureBubbleContent(int width) {
         super.measureBubbleContent(width);
         fileNameMeasured = TextUtils.ellipsize(fileName, fileNamePaint, getPx(160), TextUtils.TruncateAt.END).toString();
@@ -150,12 +152,12 @@ public class MessageDocumentView extends MessageBaseDocView {
 
     @Override
     protected void drawContent(Canvas canvas) {
-        canvas.drawText(fileNameMeasured, getPx(60), getPx(26), fileNamePaint);
-        canvas.drawText(fileSize, getPx(60), getPx(46), fileDeskPaint);
+        canvas.drawText(fileNameMeasured, getPx(54), getPx(24), fileNamePaint);
+        canvas.drawText(fileSize, getPx(54), getPx(42), fileDeskPaint);
 
-        canvas.drawRect(new Rect(getPx(4), getPx(4), getPx(4 + 48), getPx(4 + 48)), iconBgPaint);
+        // canvas.drawRect(new Rect(getPx(4), getPx(4), getPx(4 + 48), getPx(4 + 48)), iconBgPaint);
 
-        documentIcon.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 32), getPx(12 + 32)));
+        documentIcon.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 30), getPx(12 + 30)));
         documentIcon.draw(canvas);
     }
 }
