@@ -5,6 +5,7 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import org.telegram.android.core.background.MediaSender;
 import org.telegram.android.core.background.SenderListener;
+import org.telegram.android.log.Logger;
 import org.telegram.android.media.DownloadListener;
 import org.telegram.android.media.DownloadState;
 
@@ -22,6 +23,10 @@ public abstract class BaseDownloadView extends BaseMsgView {
     protected static final int MODE_DOWNLOAD = 1;
     protected static final int MODE_UPLOAD = 2;
 
+    protected static final int PROGRESS_INTERMEDIATE = 0;
+    protected static final int PROGRESS_TRANSITION = 1;
+    protected static final int PROGRESS_FULL = 2;
+
     private int prevState = STATE_NONE;
     private int currentState = STATE_NONE;
 
@@ -33,9 +38,12 @@ public abstract class BaseDownloadView extends BaseMsgView {
     protected boolean isInStateSwitch;
     protected float oldStateAlpha;
     protected float newStateAlpha;
+
+    protected int progressState = PROGRESS_INTERMEDIATE;
+    private long progressTransitionStart;
     protected float progressWaitAlpha;
     protected float progressAlpha;
-    protected long downloadAnimatedProgress;
+    protected float downloadAnimatedProgress;
 
     protected int mode = MODE_NONE;
     private String downloadKey;
@@ -218,13 +226,40 @@ public abstract class BaseDownloadView extends BaseMsgView {
                 }
             }
 
-            if (getState() == STATE_IN_PROGRESS) {
+            if (currentState == STATE_IN_PROGRESS) {
                 long downloadProgressAnimationTime = SystemClock.uptimeMillis() - downloadStateTime;
-                downloadAnimatedProgress = downloadProgress;
-                if (downloadProgressAnimationTime < STATE_ANIMATION_TIME) {
-                    float alpha = fadeEasing((float) downloadProgressAnimationTime / STATE_ANIMATION_TIME);
-                    downloadAnimatedProgress = (long) (oldDownloadProgress + (downloadProgress - oldDownloadProgress) * alpha);
+                float newDownloadProgress;
+                if (downloadProgressAnimationTime < FADE_ANIMATION_TIME) {
+                    // float alpha = fadeEasing(downloadProgressAnimationTime / (float) FADE_ANIMATION_TIME);
+                    float alpha = downloadProgressAnimationTime / (float) FADE_ANIMATION_TIME;
+                    newDownloadProgress = (downloadAnimatedProgress + (downloadProgress - downloadAnimatedProgress) * alpha);
+                } else {
+                    newDownloadProgress = downloadProgress;
+
                 }
+
+                if (downloadProgress == 0) {
+                    progressState = PROGRESS_INTERMEDIATE;
+                } else {
+                    if (progressState == PROGRESS_TRANSITION) {
+                        long transitionTime = SystemClock.uptimeMillis() - progressTransitionStart;
+                        if (transitionTime < FADE_ANIMATION_TIME) {
+                            float alpha = transitionTime / (float) FADE_ANIMATION_TIME;
+                            progressWaitAlpha = 1 - alpha;
+                            progressAlpha = alpha;
+                        } else {
+                            progressState = PROGRESS_FULL;
+                        }
+                    } else if (progressState == PROGRESS_INTERMEDIATE) {
+                        progressState = PROGRESS_TRANSITION;
+                        progressWaitAlpha = 1;
+                        progressAlpha = 0;
+                        progressTransitionStart = SystemClock.uptimeMillis();
+                    }
+                }
+
+                downloadAnimatedProgress = newDownloadProgress;
+                Logger.d("BaseDownloadView", "downloadAnimatedProgress: " + downloadProgress + ", " + oldDownloadProgress + ", " + downloadAnimatedProgress);
             }
         } else {
             isInStateSwitch = false;

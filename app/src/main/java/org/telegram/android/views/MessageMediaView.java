@@ -537,7 +537,6 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private boolean drawState(Canvas canvas, int stateId, float stateAlpha, boolean isNewState) {
         int centerX = desiredWidth / 2;
         int centerY = desiredHeight / 2;
-        int internalR = getPx(18);
         int outerR = getPx(22);
         boolean isAnimated = false;
         if (isNewState && (stateId == STATE_IN_PROGRESS ||
@@ -549,11 +548,43 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         }
 
         if (stateId == STATE_IN_PROGRESS) {
-            downloadBgLightRect.setAlpha((int) (0xA5 * stateAlpha));
+            int internalR = (int) (getPx(16) * stateAlpha);
+            downloadBgLightRect.setStyle(Paint.Style.STROKE);
+            downloadBgLightRect.setStrokeWidth(getPx(2));
             rectF.set(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
-            int progressAngleStart = -90;
-            int progressAngle = (int) ((downloadAnimatedProgress * 360 / 100));
-            canvas.drawArc(rectF, progressAngleStart, progressAngle, true, downloadBgLightRect);
+
+            downloadBgLightRect.setAlpha((int) (0x60 * stateAlpha));
+            canvas.drawCircle(centerX, centerY, internalR, downloadBgLightRect);
+
+            if (progressState == PROGRESS_INTERMEDIATE ||
+                    progressState == PROGRESS_TRANSITION) {
+                float switchProgress = progressState == PROGRESS_INTERMEDIATE ? stateAlpha : stateAlpha * progressWaitAlpha;
+                long angle = (SystemClock.uptimeMillis() / 6) % 360;
+                downloadBgLightRect.setAlpha((int) (0xA5 * switchProgress));
+
+                // int startAngle = (int) (isNewState ? (angle) : angle + (180 * (1 - switchProgress)));
+                // int angleValue = 180 * switchProgress;
+                int startAngle = (int) angle;
+                int angleValue = 180;
+                canvas.drawArc(rectF, startAngle, angleValue, false, downloadBgLightRect);
+            }
+
+            if (progressState == PROGRESS_TRANSITION ||
+                    progressState == PROGRESS_FULL) {
+//                downloadBgLightRect.setStyle(Paint.Style.FILL);
+//                rectF.set(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
+//                int progressAngleStart = -90;
+//                int progressAngle = (int) ((downloadAnimatedProgress * 360 / 100));
+//                canvas.drawArc(rectF, progressAngleStart, progressAngle, true, downloadBgLightRect);
+
+                // int internalR = (int) (getPx(16));
+                // long angle = (SystemClock.uptimeMillis() / 6) % 360;
+
+                downloadBgLightRect.setAlpha((int) (0xA5 * stateAlpha));
+                int progressAngleStart = -90;
+                int progressAngle = (int) ((downloadAnimatedProgress * 360 / 100));
+                canvas.drawArc(rectF, progressAngleStart, progressAngle, false, downloadBgLightRect);
+            }
         } else if (stateId == STATE_ERROR) {
             tryAgainIcon.setBounds(
                     centerX - tryAgainIcon.getIntrinsicWidth() / 2, centerY - tryAgainIcon.getIntrinsicHeight() / 2,
@@ -561,9 +592,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             tryAgainIcon.setAlpha((int) (255 * stateAlpha));
             tryAgainIcon.draw(canvas);
         } else if (stateId == STATE_PENDING) {
-            downloadIcon.setBounds(
-                    centerX - downloadIcon.getIntrinsicWidth() / 2, centerY - downloadIcon.getIntrinsicHeight() / 2,
-                    centerX + downloadIcon.getIntrinsicWidth() / 2, centerY + downloadIcon.getIntrinsicHeight() / 2);
+            int h2 = (int) (stateAlpha * downloadIcon.getIntrinsicHeight() / 2);
+            int w2 = (int) (stateAlpha * downloadIcon.getIntrinsicWidth() / 2);
+            downloadIcon.setBounds(centerX - w2, centerY - h2, centerX + w2, centerY + h2);
             downloadIcon.setAlpha((int) (255 * stateAlpha));
             downloadIcon.draw(canvas);
         }
@@ -694,19 +725,12 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             } else {
                 drawState(canvas, getState(), 1, true);
             }
-//            Paint src = new Paint();
-//            src.setColor(Color.GREEN);
-//            src.setAlpha((int) (255 * newStateAlpha));
-//            canvas.drawRect(new Rect(10, 10, 100, 100), src);
-//
-//            src.setColor(Color.RED);
-//            src.setAlpha((int) (255 * oldStateAlpha));
-//            canvas.drawRect(new Rect(100, 100, 210, 210), src);
             isAnimated = true;
         }
 
         canvas.restore();
 
+        // Drawing info panel
         if (!isAnimationShown) {
             int bottom = desiredHeight + desiredPaddingV * 2;
             int right = desiredWidth + desiredPaddingH * 2;
