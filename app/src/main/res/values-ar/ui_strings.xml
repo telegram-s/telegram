@@ -466,7 +466,7 @@
     <string name="st_message_name_change">{0} قام بتغيير اسم المجموعة إلى {1}</string>
     <string name="st_message_name_change_you">لقد قمت بتغيير اسم المجموعة إلى {1}</string>
 
-    <string name="st_message_added_user">{0} قام بإضافة {1} للمجموعة</string>
+    <string name="st_message_added_user">{1} قام بإضافة {0} للمجموعة</string>
     <string name="st_message_added_user_you">لقد قمت بإضافة {1} للمجموعة</string>
     <string name="st_message_added_user_of_you">{0} قام بإضافتك للمجموعة</string>
 
