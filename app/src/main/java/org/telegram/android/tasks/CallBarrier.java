@@ -1,5 +1,7 @@
 package org.telegram.android.tasks;
 
+import android.os.Handler;
+
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -14,9 +16,12 @@ public class CallBarrier {
     private CopyOnWriteArrayList<Runnable> callbacks =
             new CopyOnWriteArrayList<Runnable>();
     private boolean isPaused;
+    private boolean isResuming;
     private final Object pausedLocker = new Object();
+    private Handler uiHandler;
 
-    public CallBarrier(CallbackHandler handler) {
+    public CallBarrier(CallbackHandler handler, Handler uiHandler) {
+        this.uiHandler = uiHandler;
         this.callbackHandler = new WeakReference<CallbackHandler>(handler);
         this.isPaused = false;
     }
@@ -58,14 +63,47 @@ public class CallBarrier {
     public void pause() {
         synchronized (pausedLocker) {
             isPaused = true;
+            isResuming = false;
         }
     }
 
     public void resume() {
         synchronized (pausedLocker) {
+            if (isResuming) {
+                return;
+            }
             isPaused = false;
         }
 
+        for (Runnable runnable : callbacks) {
+            sendCallback(runnable);
+        }
+        callbacks.clear();
+    }
+
+    public void resume(int delay) {
+        synchronized (pausedLocker) {
+            if (isResuming) {
+                return;
+            }
+            isResuming = true;
+            uiHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    completeResume();
+                }
+            }, delay);
+        }
+    }
+
+    private void completeResume() {
+        synchronized (pausedLocker) {
+            if (!isResuming) {
+                return;
+            }
+            isPaused = false;
+            isResuming = false;
+        }
         for (Runnable runnable : callbacks) {
             sendCallback(runnable);
         }

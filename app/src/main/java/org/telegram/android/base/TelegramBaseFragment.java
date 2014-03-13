@@ -83,7 +83,9 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
                     });
         }
     };
-    private CallBarrier barrier = new CallBarrier(callbackHandler);
+
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private CallBarrier barrier = new CallBarrier(callbackHandler, handler);
     private ProgressInterface dialogProgressInterface = new ProgressInterface() {
         @Override
         public void showContent() {
@@ -115,7 +117,7 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
     };
     private ProgressInterface defaultProgressInterface = dialogProgressInterface;
     protected TelegramApplication application;
-    private Handler handler = new Handler(Looper.getMainLooper());
+
     private DisplayMetrics metrics;
 
     private RootController rootController;

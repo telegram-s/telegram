@@ -327,7 +327,7 @@ public class FragmentScreenController implements RootController {
             }
         }
 
-        openScreen(new ConversationFragment(peerType, peerId), true);
+        openScreen(new ConversationFragment(peerType, peerId), false);
 
         if (index >= 0) {
             backStack.remove(index);

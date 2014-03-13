@@ -36,7 +36,7 @@ public class DialogSource {
     private static final int STATE_LOADED = 1;
     private static final int STATE_COMPLETED = 2;
 
-    public static final int PAGE_SIZE = 40;
+    public static final int PAGE_SIZE = 20;
     public static final int PAGE_SIZE_REMOTE = 20;
 
     public static final int PAGE_OVERLAP = 3;

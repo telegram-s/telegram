@@ -41,7 +41,7 @@ public class MessageSource {
     private static final int STATE_LOADED = 1;
     private static final int STATE_COMPLETED = 2;
 
-    public static final int PAGE_SIZE = 40;
+    public static final int PAGE_SIZE = 20;
     public static final int PAGE_SIZE_REMOTE = 20;
 
     public static final int PAGE_OVERLAP = 3;
@@ -99,7 +99,7 @@ public class MessageSource {
             @Override
             protected ChatMessage[] loadItems(int offset) {
                 ChatMessage[] res = null;
-
+                long start = SystemClock.uptimeMillis();
                 if (offset == 0) {
                     if (peerType != PeerType.PEER_USER_ENCRYPTED) {
                         DialogDescription description = application.getEngine().getDescriptionForPeer(peerType, peerId);
@@ -111,6 +111,7 @@ public class MessageSource {
                         }
                     }
                 }
+                Logger.d(TAG, "Loaded1 in " + (SystemClock.uptimeMillis() - start) + " ms");
 
                 if (res == null) {
                     if (offset < PAGE_OVERLAP) {
@@ -122,6 +123,8 @@ public class MessageSource {
                     res = application.getEngine().getMessagesEngine().queryMessages(peerType, peerId, PAGE_SIZE, offset);
                 }
 
+                Logger.d(TAG, "Loaded2 in " + (SystemClock.uptimeMillis() - start) + " ms");
+
                 HashSet<Integer> uids = new HashSet<Integer>();
                 for (ChatMessage msg : res) {
                     if (msg.getSenderId() > 0) {
@@ -129,7 +132,7 @@ public class MessageSource {
                     }
                 }
                 application.getEngine().getUsersEngine().getUsersById(uids.toArray());
-
+                Logger.d(TAG, "Loaded3 in " + (SystemClock.uptimeMillis() - start) + " ms");
                 return res;
             }
 

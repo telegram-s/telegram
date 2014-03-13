@@ -186,6 +186,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             peerType = savedInstanceState.getInt("peerType");
         }
 
+
+
         checkState();
 
         viewCreateTime = SystemClock.uptimeMillis();
