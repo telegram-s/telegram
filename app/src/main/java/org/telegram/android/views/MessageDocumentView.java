@@ -33,11 +33,11 @@ public class MessageDocumentView extends MessageBaseDocView {
     private Drawable documentIconOutDownloaded;
     private Drawable documentIconIn;
     private Drawable documentIconInDownloaded;
-    private Drawable documentIcon;
 
     private String fileName;
     private String fileNameMeasured;
     private String fileSize;
+    private boolean isOut;
 
     public MessageDocumentView(Context context) {
         super(context);
@@ -54,8 +54,8 @@ public class MessageDocumentView extends MessageBaseDocView {
     protected void init() {
         super.init();
 
-        documentIconOut = getResources().getDrawable(R.drawable.st_bubble_in_doc);
-        documentIconInDownloaded = getResources().getDrawable(R.drawable.st_bubble_in_doc_downloaded);
+        documentIconOut = getResources().getDrawable(R.drawable.st_bubble_out_doc);
+        documentIconOutDownloaded = getResources().getDrawable(R.drawable.st_bubble_out_doc_downloaded);
         documentIconIn = getResources().getDrawable(R.drawable.st_bubble_in_doc);
         documentIconInDownloaded = getResources().getDrawable(R.drawable.st_bubble_in_doc_downloaded);
 
@@ -83,10 +83,10 @@ public class MessageDocumentView extends MessageBaseDocView {
         super.bindNewView(message);
         bindStateNew(message);
         if (message.message.isOut()) {
-            documentIcon = documentIconOut;
+            isOut = true;
             fileDeskPaint.setColor(0xff97bb7c);
         } else {
-            documentIcon = documentIconIn;
+            isOut = false;
             fileDeskPaint.setColor(0xffa1aab3);
         }
     }
@@ -162,14 +162,22 @@ public class MessageDocumentView extends MessageBaseDocView {
         canvas.drawText(fileNameMeasured, getPx(54), getPx(24), fileNamePaint);
         canvas.drawText(fileSize, getPx(54), getPx(42), fileDeskPaint);
 
-        // canvas.drawRect(new Rect(getPx(4), getPx(4), getPx(4 + 48), getPx(4 + 48)), iconBgPaint);
-
+        Drawable icon;
         if (getState() == STATE_DOWNLOADED) {
-            documentIconInDownloaded.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 30), getPx(12 + 30)));
-            documentIconInDownloaded.draw(canvas);
+            if (isOut) {
+                icon = documentIconOutDownloaded;
+            } else {
+                icon = documentIconInDownloaded;
+            }
         } else {
-            documentIcon.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 30), getPx(12 + 30)));
-            documentIcon.draw(canvas);
+            if (isOut) {
+                icon = documentIconOut;
+            } else {
+                icon = documentIconIn;
+            }
         }
+
+        icon.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 30), getPx(12 + 30)));
+        icon.draw(canvas);
     }
 }

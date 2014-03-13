@@ -751,13 +751,13 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             if (isRtl) {
                 layoutTimeLeft = layoutPadding;
                 layoutStateLeftDouble = layoutPadding + timeWidth + px(2);
-                layoutStateLeft = layoutStateLeftDouble + px(6);
+                layoutStateLeft = layoutStateLeftDouble + px(8);
                 layoutClockLeft = layoutPadding + timeWidth + px(2);
             } else {
                 layoutTimeLeft = w - layoutPadding - timeWidth;
                 layoutClockLeft = w - layoutPadding - timeWidth - px(14);
                 layoutStateLeft = w - layoutPadding - timeWidth - px(16);
-                layoutStateLeftDouble = w - layoutPadding - timeWidth - px(6 + 16);
+                layoutStateLeftDouble = w - layoutPadding - timeWidth - px(8 + 16);
             }
 
             layoutMarkRadius = px(2);

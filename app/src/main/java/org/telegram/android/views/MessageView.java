@@ -209,7 +209,7 @@ public class MessageView extends BaseMsgStateView {
             }
         }
 
-        isAnimated |= drawState(canvas, -getPx(2), 0);
+        isAnimated |= drawState(canvas, -getPx(2), getPx(2));
 
         return isAnimated;
     }

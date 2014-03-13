@@ -739,12 +739,15 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         if (mode != MODE_NONE) {
             calculateAnimations();
             if (isInStateSwitch) {
-                drawState(canvas, getState(), newStateAlpha, true);
-                drawState(canvas, getPrevState(), oldStateAlpha, false);
+                isAnimated |= drawState(canvas, getState(), newStateAlpha, true);
+                isAnimated |= drawState(canvas, getPrevState(), oldStateAlpha, false);
             } else {
-                drawState(canvas, getState(), 1, true);
+                if ((getState() == STATE_PENDING || getState() == STATE_NONE) && state == MessageState.FAILURE) {
+                    isAnimated |= drawState(canvas, STATE_ERROR, 1, true);
+                } else {
+                    isAnimated |= drawState(canvas, getState(), 1, true);
+                }
             }
-            isAnimated = true;
         }
 
         canvas.restore();
