@@ -123,7 +123,7 @@ public class MessageAudioView extends MessageBaseDocView {
                         MediaPlayer mplayer = new MediaPlayer();
                         mplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         mplayer.setDataSource(application,
-                                Uri.fromFile(new File(application.getDownloadManager().getFileName(key))));
+                                Uri.fromFile(new File(application.getDownloadManager().getFileName(getDownloadKey()))));
                         mplayer.prepare();
                         mplayer.setLooping(false);
                         mplayer.start();

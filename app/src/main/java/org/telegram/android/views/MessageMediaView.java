@@ -542,8 +542,8 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         if (isNewState && (stateId == STATE_IN_PROGRESS ||
                 stateId == STATE_ERROR ||
                 stateId == STATE_PENDING)) {
-            // downloadBgRect.setAlpha((int) (0xA5 * stateAlpha));
-            downloadBgRect.setAlpha(0xA5);
+            downloadBgRect.setAlpha((int) (0xA5 * stateAlpha));
+            // downloadBgRect.setAlpha(0xA5);
             canvas.drawCircle(centerX, centerY, outerR, downloadBgRect);
         }
 

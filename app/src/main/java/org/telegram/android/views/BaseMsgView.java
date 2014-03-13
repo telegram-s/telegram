@@ -243,6 +243,30 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         return 1 - (1 - src) * (1 - src);
     }
 
+    protected float progressEasing(float src) {
+        float border = 0.25f;
+        float factor = 0.5f;
+        if (src < border) {
+            return src * factor;
+        }
+
+
+        float separator = (src - border) / (1 - border);
+        float base = src * factor;
+        //float sec = src * src * src * src;
+        float sec = (float) Math.sin(src * Math.PI / 2);
+
+        return (1 - separator) * base + separator * sec;
+    }
+
+    protected float progressScaleEasing(float src) {
+        if (src < 0.1) {
+            return 1.0f;
+        }
+        // return src * src * src;
+        return (1 - src);
+    }
+
     protected float fadeEasing(float src) {
         return 1 - (1 - src) * (1 - src);
     }
