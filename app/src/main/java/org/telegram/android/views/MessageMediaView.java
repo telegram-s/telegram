@@ -59,6 +59,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private TextPaint videoDurationPaint;
     private TextPaint downloadPaint;
     private TextPaint timePaint;
+    private TextPaint progressPaint;
     private Paint bitmapPaint;
     private Paint bitmapFilteredPaint;
 
@@ -160,6 +161,15 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         timePaint.setTextSize(getSp(12));
         timePaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
         timePaint.setColor(0xffffffff);
+
+        if (FontController.USE_SUBPIXEL) {
+            progressPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            progressPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
+        progressPaint.setTextSize(getSp(14));
+        progressPaint.setTypeface(FontController.loadTypeface(getContext(), "bold"));
+        progressPaint.setColor(0xffeeeeee);
 
         bitmapPaint = new Paint(/*Paint.ANTI_ALIAS_FLAG*/);
         //bitmapPaint.setAntiAlias(true);
@@ -571,6 +581,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
             if (progressState == PROGRESS_TRANSITION ||
                     progressState == PROGRESS_FULL) {
+
+                float switchProgress = progressState == PROGRESS_INTERMEDIATE ? stateAlpha : stateAlpha * progressAlpha;
+
 //                downloadBgLightRect.setStyle(Paint.Style.FILL);
 //                rectF.set(centerX - internalR, centerY - internalR, centerX + internalR, centerY + internalR);
 //                int progressAngleStart = -90;
@@ -580,10 +593,16 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
                 // int internalR = (int) (getPx(16));
                 // long angle = (SystemClock.uptimeMillis() / 6) % 360;
 
-                downloadBgLightRect.setAlpha((int) (0xA5 * stateAlpha));
+                downloadBgLightRect.setAlpha((int) (0xA5 * switchProgress));
+                progressPaint.setAlpha((int) (0xff * switchProgress));
                 int progressAngleStart = -90;
                 int progressAngle = (int) ((downloadAnimatedProgress * 360 / 100));
                 canvas.drawArc(rectF, progressAngleStart, progressAngle, false, downloadBgLightRect);
+
+                String progress = downloadProgress + "";
+                progressPaint.getTextBounds(progress, 0, progress.length(), rect1);
+                progressPaint.setTextAlign(Paint.Align.CENTER);
+                canvas.drawText(progress, centerX, centerY - rect1.top / 2, progressPaint);
             }
         } else if (stateId == STATE_ERROR) {
             tryAgainIcon.setBounds(
