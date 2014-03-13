@@ -81,6 +81,7 @@ public class MessageDocumentView extends MessageBaseDocView {
     @Override
     protected void bindNewView(MessageWireframe message) {
         super.bindNewView(message);
+        bindStateNew(message);
         if (message.message.isOut()) {
             documentIcon = documentIconOut;
             fileDeskPaint.setColor(0xff97bb7c);
@@ -88,6 +89,12 @@ public class MessageDocumentView extends MessageBaseDocView {
             documentIcon = documentIconIn;
             fileDeskPaint.setColor(0xffa1aab3);
         }
+    }
+
+    @Override
+    protected void bindUpdate(MessageWireframe message) {
+        super.bindUpdate(message);
+        bindStateUpdate(message);
     }
 
     @Override
@@ -157,7 +164,12 @@ public class MessageDocumentView extends MessageBaseDocView {
 
         // canvas.drawRect(new Rect(getPx(4), getPx(4), getPx(4 + 48), getPx(4 + 48)), iconBgPaint);
 
-        documentIcon.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 30), getPx(12 + 30)));
-        documentIcon.draw(canvas);
+        if (getState() == STATE_DOWNLOADED) {
+            documentIconInDownloaded.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 30), getPx(12 + 30)));
+            documentIconInDownloaded.draw(canvas);
+        } else {
+            documentIcon.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 30), getPx(12 + 30)));
+            documentIcon.draw(canvas);
+        }
     }
 }

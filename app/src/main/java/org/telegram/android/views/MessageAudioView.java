@@ -80,6 +80,7 @@ public class MessageAudioView extends MessageBaseDocView {
     @Override
     protected void bindNewView(MessageWireframe message) {
         super.bindNewView(message);
+        bindStateNew(message);
         if (message.message.isOut()) {
             iconBgPaint.setColor(0xffdef3bd);
             documentIcon = documentIconOut;
@@ -91,6 +92,12 @@ public class MessageAudioView extends MessageBaseDocView {
         }
         isDocument = message.message.getExtras() instanceof TLUploadingDocument
                 || message.message.getExtras() instanceof TLLocalDocument;
+    }
+
+    @Override
+    protected void bindUpdate(MessageWireframe message) {
+        super.bindUpdate(message);
+        bindStateUpdate(message);
     }
 
     public void play() {

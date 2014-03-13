@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -139,5 +141,22 @@ public class FontController {
             }
             return null;
         }
+    }
+
+    public static final TextPaint createTextPaint(Context context, int sp) {
+        return createTextPaint(context, sp, "regular");
+    }
+
+    public static final TextPaint createTextPaint(Context context, int sp, String typeface) {
+        TextPaint res;
+        if (USE_SUBPIXEL) {
+            res = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            res = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
+        res.setTypeface(FontController.loadTypeface(context, typeface));
+        float fontSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, UiMeasure.METRICS);
+        res.setTextSize(fontSize);
+        return res;
     }
 }

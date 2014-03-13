@@ -12,7 +12,7 @@ import org.telegram.android.media.DownloadState;
 /**
  * Created by ex3ndr on 22.02.14.
  */
-public abstract class BaseDownloadView extends BaseMsgView {
+public abstract class BaseDownloadView extends BaseMsgStateView {
     protected static final int STATE_NONE = -1;
     protected static final int STATE_DOWNLOADED = 0;
     protected static final int STATE_IN_PROGRESS = 1;

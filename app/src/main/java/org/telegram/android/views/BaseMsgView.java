@@ -726,6 +726,14 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         // Logger.d(TAG, "onDraw in " + (SystemClock.uptimeMillis() - start) + " ms at " + getClass().getSimpleName() + "#" + hashCode());
     }
 
+    public int getBubbleContentWidth() {
+        return bubbleContentWidth;
+    }
+
+    public int getBubbleContentHeight() {
+        return bubbleContentHeight;
+    }
+
     protected abstract void measureBubbleContent(int width);
 
     protected abstract int getInBubbleResource();
