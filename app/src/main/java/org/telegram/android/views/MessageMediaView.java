@@ -54,11 +54,14 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private Drawable downloadIcon;
     private Drawable tryAgainIcon;
     private Drawable infoBg;
+    private Drawable infoDoc;
+    private Drawable infoAnimation;
     private NinePatchDrawable outMask;
     private NinePatchDrawable inMask;
     private TextPaint videoDurationPaint;
     private TextPaint downloadPaint;
     private TextPaint timePaint;
+    private TextPaint sizePaint;
     private TextPaint progressPaint;
     private Paint bitmapPaint;
     private Paint bitmapFilteredPaint;
@@ -75,7 +78,6 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private Rect rect2 = new Rect();
 
     private int databaseId = -1;
-    // private String key;
     private int state;
     private int prevState;
     private long stateChangeTime;
@@ -85,20 +87,16 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
     private ImageHolder oldPreview;
     private ImageHolder preview;
 
-    // private Bitmap previewCached;
-    // private int fastPreviewHeight;
-    // private int fastPreviewWidth;
-    // private int previewHeight;
-    // private int previewWidth;
     private boolean isOut;
     private boolean isVideo;
-    // private boolean isDownloadable;
-    // private boolean isUploadable;
+    private boolean isDocument;
+    private boolean isAnimatedDocument;
     private boolean showMapPoint;
     private boolean isUnsupported;
 
     private String duration;
     private String date;
+    private String size;
 
     private boolean isBindSizeCalled;
     private int desiredHeight;
@@ -108,6 +106,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
     private int timeWidth;
     private int timeHeight;
+
+    private int sizeWidth;
+    private int sizeHeight;
 
     private boolean isAnimatedProgress = true;
 
@@ -163,6 +164,15 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         timePaint.setColor(0xffffffff);
 
         if (FontController.USE_SUBPIXEL) {
+            sizePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
+        } else {
+            sizePaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        }
+        sizePaint.setTextSize(getSp(12));
+        sizePaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
+        sizePaint.setColor(0xffffffff);
+
+        if (FontController.USE_SUBPIXEL) {
             progressPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
         } else {
             progressPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
@@ -200,6 +210,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
         inMask = (NinePatchDrawable) getResources().getDrawable(R.drawable.st_bubble_in_media_content);
         outMask = (NinePatchDrawable) getResources().getDrawable(R.drawable.st_bubble_out_media_content);
+
+        infoDoc = getResources().getDrawable(R.drawable.st_bubble_media_document);
+        infoAnimation = getResources().getDrawable(R.drawable.st_bubble_media_animation);
 
         placeholderPaint = new Paint();
         placeholderPaint.setColor(Color.WHITE);
@@ -264,6 +277,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         this.isVideo = false;
         this.showMapPoint = false;
         this.isUnsupported = false;
+        this.isDocument = false;
+        this.isAnimatedDocument = false;
+        this.size = null;
 
         boolean isBinded = false;
         if (message.message.getExtras() instanceof TLLocalPhoto) {
@@ -292,7 +308,16 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             duration = TextUtil.formatDuration(mediaVideo.getDuration());
             placeholderPaint.setColor(Color.BLACK);
 
+            if (mediaVideo.getVideoLocation() instanceof TLLocalFileVideoLocation) {
+                size = TextUtil.formatFileSize(((TLLocalFileVideoLocation) mediaVideo.getVideoLocation()).getSize());
+            } else if (mediaVideo.getVideoLocation() instanceof TLLocalEncryptedFileLocation) {
+                size = TextUtil.formatFileSize(((TLLocalEncryptedFileLocation) mediaVideo.getVideoLocation()).getSize());
+            } else {
+                size = "???";
+            }
+
             if (!(mediaVideo.getVideoLocation() instanceof TLLocalFileEmpty)) {
+
                 bindDownload(DownloadManager.getVideoKey(mediaVideo));
 
                 String key = DownloadManager.getVideoKey(mediaVideo);
@@ -358,6 +383,16 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         } else if (message.message.getExtras() instanceof TLLocalDocument) {
             TLLocalDocument document = (TLLocalDocument) message.message.getExtras();
 
+            if (document.getFileLocation() instanceof TLLocalFileDocument) {
+                size = TextUtil.formatFileSize(((TLLocalFileDocument) document.getFileLocation()).getSize());
+            } else if (document.getFileLocation() instanceof TLLocalEncryptedFileLocation) {
+                size = TextUtil.formatFileSize(((TLLocalEncryptedFileLocation) document.getFileLocation()).getSize());
+            } else {
+                size = "???";
+            }
+
+            isDocument = true;
+
             bindSize(document.getPreviewW(), document.getPreviewH());
 
             String key = DownloadManager.getDocumentKey(document);
@@ -371,7 +406,9 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
                         loader.requestRaw(downloadManager.getFileName(key), isOut, this);
                         isBinded = true;
                     }
+                    isAnimatedDocument = document.getMimeType().equals("image/gif");
                 }
+
 
                 if (!isBinded && document.getFastPreview().length > 0) {
                     loader.requestFastLoading(document, isOut, this);
@@ -509,6 +546,17 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
             timeWidth += getPx(18);
         }
 
+        if (size != null) {
+            timePaint.getTextBounds(size, 0, size.length(), rect1);
+            sizeWidth = (int) sizePaint.measureText(size);
+
+            if (isDocument) {
+                sizeWidth += getPx(16);
+            }
+
+            sizeHeight = -rect1.top;
+        }
+
         setBubbleMeasuredContent(desiredWidth + desiredPaddingH * 2, desiredHeight + desiredPaddingV * 2);
     }
 
@@ -604,6 +652,7 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
                 progressPaint.setTextAlign(Paint.Align.CENTER);
                 canvas.drawText(progress, centerX, centerY - rect1.top / 2, progressPaint);
             }
+            isAnimated = true;
         } else if (stateId == STATE_ERROR) {
             tryAgainIcon.setBounds(
                     centerX - tryAgainIcon.getIntrinsicWidth() / 2, centerY - tryAgainIcon.getIntrinsicHeight() / 2,
@@ -739,20 +788,66 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         if (mode != MODE_NONE) {
             calculateAnimations();
             if (isInStateSwitch) {
-                isAnimated |= drawState(canvas, getState(), newStateAlpha, true);
-                isAnimated |= drawState(canvas, getPrevState(), oldStateAlpha, false);
+                drawState(canvas, getState(), newStateAlpha, true);
+                drawState(canvas, getPrevState(), oldStateAlpha, false);
+                isAnimated = true;
             } else {
                 if ((getState() == STATE_PENDING || getState() == STATE_NONE) && state == MessageState.FAILURE) {
                     isAnimated |= drawState(canvas, STATE_ERROR, 1, true);
                 } else {
                     isAnimated |= drawState(canvas, getState(), 1, true);
                 }
+
             }
         }
 
         canvas.restore();
 
         // Drawing info panel
+        if (!isAnimationShown) {
+            if (size != null) {
+                int bottom = desiredHeight + desiredPaddingV * 2;
+                infoBg.getPadding(rect1);
+
+                int contentW = rect1.left + rect1.right + sizeWidth;
+                int contentH = rect1.bottom + rect1.top + getPx(10);
+
+                int sizeBaseline = bottom - rect1.bottom - (getPx(10) - sizeHeight) / 2;
+
+                infoBg.setBounds(0, bottom - contentH, contentW, bottom);
+                infoBg.draw(canvas);
+
+                if (isDocument) {
+                    if (isAnimatedDocument) {
+                        int offset = (getPx(10) - infoAnimation.getIntrinsicHeight()) / 2;
+                        int top = bottom - contentH + rect1.top + offset;
+                        infoAnimation.setBounds(rect1.left, top, rect1.left + infoAnimation.getIntrinsicWidth(),
+                                top + infoAnimation.getIntrinsicHeight());
+                        infoAnimation.draw(canvas);
+                    } else {
+                        int offset = (getPx(10) - infoDoc.getIntrinsicHeight()) / 2;
+                        int top = bottom - contentH + rect1.top + offset;
+                        infoDoc.setBounds(rect1.left, top, rect1.left + infoDoc.getIntrinsicWidth(),
+                                top + infoDoc.getIntrinsicHeight());
+                        infoDoc.draw(canvas);
+                    }
+                    canvas.drawText(size, rect1.left + getPx(16), sizeBaseline, sizePaint);
+                } else {
+                    canvas.drawText(size, rect1.left, sizeBaseline, sizePaint);
+                }
+
+
+                // int contentStart = rect1.left;
+
+//                int timeIcon = timeRight - rect1.right - getPx(10);
+//                int timeIconTop = timeBottom - rect1.bottom - getPx(10);
+//                int timeBaseline = timeBottom - rect1.bottom - (getPx(10) - timeHeight) / 2;
+//                int timeLeft = timeStart - rect1.left;
+//                int timeTop = timeBaseline - rect1.top - getPx(10);
+            }
+        }
+
+        // Drawing date panel
         if (!isAnimationShown) {
             int bottom = desiredHeight + desiredPaddingV * 2;
             int right = desiredWidth + desiredPaddingH * 2;
