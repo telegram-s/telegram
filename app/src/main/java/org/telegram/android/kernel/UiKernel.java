@@ -181,7 +181,7 @@ public class UiKernel {
             @Override
             public void run() {
                 application.getEngine().getDialogsEngine().markDialogAsNonFailed(peerType, peerId);
-
+                application.notifyUIUpdate();
                 if (peerType != PeerType.PEER_USER_ENCRYPTED) {
                     int maxMid = application.getEngine().getMessagesEngine().getMaxMidInDialog(peerType, peerId);
                     application.getEngine().getDialogsEngine().onMaxLocalViewed(peerType, peerId, maxMid);
@@ -190,10 +190,10 @@ public class UiKernel {
                     application.getEngine().getDialogsEngine().onMaxLocalViewed(peerType, peerId, maxDate);
                 }
                 application.getSyncKernel().getBackgroundSync().resetHistorySync();
+                application.notifyUIUpdate();
             }
         });
 
-        // application.getDialogSource().getViewSource().invalidateData();
         getNotifications().hideChatNotifications(peerType, peerId);
     }
 
