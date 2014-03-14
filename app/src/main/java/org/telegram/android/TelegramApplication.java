@@ -13,6 +13,7 @@ import org.telegram.android.kernel.*;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.reflection.CrashHandler;
 import org.telegram.android.ui.*;
+import org.telegram.android.util.NativeLibLoader;
 import org.telegram.api.engine.TelegramApi;
 
 /**
@@ -30,6 +31,9 @@ public class TelegramApplication extends Application {
             super.onCreate();
             return;
         }
+
+        NativeLibLoader.initNativeLibs(this);
+
         CrashHandler.init(this);
         kernel = new ApplicationKernel(this);
         super.onCreate();
