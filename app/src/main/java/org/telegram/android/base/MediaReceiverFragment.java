@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.widget.Toast;
 import org.telegram.android.R;
 import org.telegram.android.activity.CropImageActivity;
+import org.telegram.android.activity.PickWebImage;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.ui.pick.PickIntentClickListener;
 import org.telegram.android.ui.pick.PickIntentDialog;
@@ -144,6 +145,8 @@ public class MediaReceiverFragment extends TelegramFragment {
         final Uri fileUri = Uri.fromFile(new File(imageFileName));
 
         ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
+        items.add(new PickIntentItem(R.drawable.app_icon, "WebSearch").setIntent(
+                new Intent().setClass(getActivity(), PickWebImage.class)));
         Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
         Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
                 .setType("image/*")));

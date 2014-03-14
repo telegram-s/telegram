@@ -13,6 +13,7 @@ import org.apache.http.params.HttpParams;
 import org.telegram.android.R;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ApiUtils;
+import org.telegram.android.core.model.WebSearchResult;
 import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLLocalGeo;
 import org.telegram.android.core.model.media.TLLocalPhoto;
@@ -65,6 +66,10 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 new MapWorker(),
                 new RawWorker()
         };
+    }
+
+    public void requestSearchThumb(WebSearchResult result, ImageReceiver receiver) {
+        requestTask(new SearchThumbTask(result), receiver);
     }
 
     public void requestRaw(String fileName, boolean isOut, ImageReceiver receiver) {
@@ -491,7 +496,24 @@ public class MediaLoader extends BaseLoader<BaseTask> {
             return true;
         }
 
-        private PrepareResult createBitmap(MediaGeoTask geoTask) throws IOException {
+        private byte[] downloadFile(String url) throws IOException {
+            HttpGet get = new HttpGet(url.replace(" ", "%20"));
+            HttpResponse response = client.execute(get);
+            if (response.getEntity().getContentLength() == 0) {
+                throw new IOException();
+            }
+
+            if (response.getStatusLine().getStatusCode() == 404) {
+                throw new IOException();
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            response.getEntity().writeTo(outputStream);
+            byte[] data = outputStream.toByteArray();
+            return data;
+        }
+
+        private PrepareResult downloadMap(MediaGeoTask geoTask) throws IOException {
             Bitmap res = fetchMapPreview();
             Optimizer.BitmapInfo info = tryToLoadFromCache(geoTask.getStorageKey(), res);
             if (info != null) {
@@ -512,19 +534,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                     "&sensor=false" +
                     "&format=jpg";
 
-            HttpGet get = new HttpGet(url.replace(" ", "%20"));
-            HttpResponse response = client.execute(get);
-            if (response.getEntity().getContentLength() == 0) {
-                throw new IOException();
-            }
-
-            if (response.getStatusLine().getStatusCode() == 404) {
-                throw new IOException();
-            }
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            response.getEntity().writeTo(outputStream);
-            byte[] data = outputStream.toByteArray();
+            byte[] data = downloadFile(url);
 
             Optimizer.BitmapInfo info1 = Optimizer.loadTo(data, res);
 
@@ -533,24 +543,58 @@ public class MediaLoader extends BaseLoader<BaseTask> {
             return new PrepareResult(info1.getWidth(), info1.getHeight(), res);
         }
 
-        @Override
-        protected boolean processTask(BaseTask task) throws Exception {
-            if (!(task instanceof MediaGeoTask)) {
-                return true;
-            }
-
-            MediaGeoTask geoTask = (MediaGeoTask) task;
-            PrepareResult result = createBitmap(geoTask);
+        protected void processGeo(MediaGeoTask geoTask) throws Exception {
+            PrepareResult result = downloadMap(geoTask);
             Bitmap mapPreview = fetchMapPreview();
             int[] sizes = drawPreview(result.getBitmap(), result.getW(), result.getH(), mapPreview, geoTask.isOut());
             imageCache.putFree(result.getBitmap(), SIZE_MAP_PREVIEW);
-            onImageLoaded(mapPreview, sizes[0], sizes[1], task, SIZE_MAP_PREVIEW);
+            onImageLoaded(mapPreview, sizes[0], sizes[1], geoTask, SIZE_MAP_PREVIEW);
+        }
+
+        protected void processWeb(SearchThumbTask thumbTask) throws Exception {
+            synchronized (fullImageCachedLock) {
+                if (fullImageCached == null) {
+                    fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
+                }
+                Optimizer.BitmapInfo info = tryToLoadFromCache(thumbTask.getStorageKey(), fullImageCached);
+                if (info != null) {
+                    Bitmap res = fetchMediaPreview();
+                    Optimizer.scaleToFill(fullImageCached, info.getWidth(), info.getHeight(), res);
+                    onImageLoaded(res, res.getWidth(), res.getHeight(), thumbTask, SIZE_SMALL_PREVIEW);
+                    return;
+                }
+            }
+
+
+            byte[] data = downloadFile(thumbTask.getResult().getThumbUrl());
+            synchronized (fullImageCachedLock) {
+                if (fullImageCached == null) {
+                    fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);
+                }
+                Optimizer.BitmapInfo bitmapInfo = Optimizer.loadTo(data, fullImageCached);
+                putToDiskCache(thumbTask.getStorageKey(), fullImageCached, bitmapInfo.getWidth(), bitmapInfo.getHeight());
+
+                Bitmap res = fetchMediaPreview();
+                Optimizer.scaleToFill(fullImageCached, bitmapInfo.getWidth(), bitmapInfo.getHeight(), res);
+                onImageLoaded(res, res.getWidth(), res.getHeight(), thumbTask, SIZE_SMALL_PREVIEW);
+            }
+        }
+
+
+        @Override
+        protected boolean processTask(BaseTask task) throws Exception {
+            if (task instanceof MediaGeoTask) {
+                processGeo((MediaGeoTask) task);
+            } else if (task instanceof SearchThumbTask) {
+                processWeb((SearchThumbTask) task);
+            }
+
             return true;
         }
 
         @Override
         public boolean isAccepted(BaseTask task) {
-            return task instanceof MediaGeoTask;
+            return task instanceof MediaGeoTask || task instanceof SearchThumbTask;
         }
     }
 

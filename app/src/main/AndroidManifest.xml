@@ -106,6 +106,7 @@
                   android:label="Telegram"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
                   android:windowSoftInputMode="stateHidden|adjustNothing"/>
+
         <activity android:name=".activity.ViewImageActivity"
                   android:theme="@style/AppTheme.Photo"
                   android:label="Telegram"
@@ -114,6 +115,12 @@
         <activity android:name=".video.VideoRecorderActivity"
                   android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
                   android:windowSoftInputMode="stateHidden|adjustNothing"/>
+
+        <activity android:name=".activity.PickWebImage"
+                  android:theme="@style/AppTheme.Theme"
+                  android:label="Telegram"
+                  android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                  android:windowSoftInputMode="stateVisible|adjustResize"/>
 
         <activity android:name=".activity.PickCountryActivity"
                   android:theme="@style/AppTheme.Theme"/>

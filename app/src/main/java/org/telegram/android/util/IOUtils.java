@@ -1,5 +1,13 @@
 package org.telegram.android.util;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+
 import java.io.*;
 
 /**
@@ -49,6 +57,12 @@ public class IOUtils {
         out.close();
     }
 
+    public static void writeAll(String fileName, byte[] data) throws IOException {
+        OutputStream stream = new FileOutputStream(fileName);
+        stream.write(data);
+        stream.close();
+    }
+
     public static byte[] readAll(String fileName) throws IOException {
         byte[] res;
         InputStream in = new FileInputStream(fileName);
@@ -70,4 +84,28 @@ public class IOUtils {
         }
         return os.toByteArray();
     }
+
+    public static byte[] downloadFile(String url) throws IOException {
+        HttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
+        HttpConnectionParams.setSoTimeout(httpParams, 5000);
+        DefaultHttpClient client = new DefaultHttpClient(httpParams);
+        client.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
+
+        HttpGet get = new HttpGet(url.replace(" ", "%20"));
+        HttpResponse response = client.execute(get);
+        if (response.getEntity().getContentLength() == 0) {
+            throw new IOException();
+        }
+
+        if (response.getStatusLine().getStatusCode() == 404) {
+            throw new IOException();
+        }
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        response.getEntity().writeTo(outputStream);
+        byte[] data = outputStream.toByteArray();
+        return data;
+    }
+
 }

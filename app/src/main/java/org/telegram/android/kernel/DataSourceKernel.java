@@ -29,6 +29,7 @@ public class DataSourceKernel {
     private volatile ContactsSource contactsSource;
     private volatile ChatSource chatSource;
     private volatile EncryptedChatSource encryptedChatSource;
+    private volatile WebSearchSource webSearchSource;
 
     public DataSourceKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
@@ -36,6 +37,7 @@ public class DataSourceKernel {
     }
 
     private void init() {
+        webSearchSource = new WebSearchSource();
         if (kernel.getAuthKernel().isLoggedIn()) {
             dialogSource = new DialogSource(kernel.getApplication());
             userSource = new UserSource();
@@ -71,6 +73,10 @@ public class DataSourceKernel {
 
     public EncryptedChatSource getEncryptedChatSource() {
         return encryptedChatSource;
+    }
+
+    public WebSearchSource getWebSearchSource() {
+        return webSearchSource;
     }
 
     public synchronized MediaSource getMediaSource(int peerType, int peerId) {

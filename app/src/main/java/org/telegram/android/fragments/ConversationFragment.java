@@ -187,7 +187,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
 
 
-
         checkState();
 
         viewCreateTime = SystemClock.uptimeMillis();

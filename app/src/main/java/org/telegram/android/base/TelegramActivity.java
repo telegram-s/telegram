@@ -8,6 +8,8 @@ import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.UserSettings;
 import org.telegram.android.ui.FontController;
 
+import java.lang.reflect.Field;
+
 /**
  * Author: Korshakov Stepan
  * Created: 24.07.13 17:11
@@ -57,6 +59,35 @@ public class TelegramActivity extends SherlockFragmentActivity {
         }
         if (!fromStart) {
             invalidateOptionsMenu();
+        }
+    }
+
+    public void fixBackButton() {
+        if (android.os.Build.VERSION.SDK_INT == 19) {
+            //workaround for back button dissapear
+//            try {
+//                Class firstClass = getSupportActionBar().getClass();
+//                Class aClass = firstClass.getSuperclass();
+//                if (aClass == android.support.v7.app.ActionBar.class) {
+//
+//                } else {
+//                    Field field = aClass.getDeclaredField("mActionBar");
+//                    field.setAccessible(true);
+//                    android.app.ActionBar bar = (android.app.ActionBar) field.get(getSupportActionBar());
+//
+//                    field = bar.getClass().getDeclaredField("mActionView");
+//                    field.setAccessible(true);
+//                    View v = (View) field.get(bar);
+//                    aClass = v.getClass();
+//
+//                    field = aClass.getDeclaredField("mHomeLayout");
+//                    field.setAccessible(true);
+//                    v = (View) field.get(v);
+//                    v.setVisibility(View.VISIBLE);
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
         }
     }
 

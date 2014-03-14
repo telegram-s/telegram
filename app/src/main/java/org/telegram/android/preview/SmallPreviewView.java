@@ -3,6 +3,7 @@ package org.telegram.android.preview;
 import android.content.Context;
 import android.util.AttributeSet;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.core.model.WebSearchResult;
 import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
@@ -16,6 +17,7 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
     private TLLocalVideo fastVideoTask;
     private TLLocalDocument fastDocTask;
     private String photoFileName;
+    private WebSearchResult searchResult;
 
     public SmallPreviewView(Context context) {
         super(context);
@@ -39,6 +41,7 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
         fastVideoTask = null;
         fastDocTask = null;
         photoFileName = null;
+        searchResult = null;
         requestBind();
     }
 
@@ -55,6 +58,7 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
         fastVideoTask = null;
         fastDocTask = document;
         photoFileName = null;
+        searchResult = null;
         requestBind();
     }
 
@@ -63,6 +67,16 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
         fastVideoTask = null;
         fastDocTask = null;
         photoFileName = fileName;
+        searchResult = null;
+        requestBind();
+    }
+
+    public void requestSearchThumb(WebSearchResult searchResult) {
+        fastPhotoTask = null;
+        fastVideoTask = null;
+        fastDocTask = null;
+        photoFileName = null;
+        this.searchResult = searchResult;
         requestBind();
     }
 
@@ -71,6 +85,7 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
         fastVideoTask = null;
         fastDocTask = null;
         photoFileName = null;
+        searchResult = null;
         requestBind();
     }
 
@@ -84,6 +99,8 @@ public class SmallPreviewView extends BaseView<MediaLoader> {
             getLoader().requestFastSmallLoading(fastDocTask, this);
         } else if (photoFileName != null) {
             getLoader().requestRawSmall(photoFileName, this);
+        } else if (searchResult != null) {
+            getLoader().requestSearchThumb(searchResult, this);
         } else {
             getLoader().cancelRequest(this);
         }
