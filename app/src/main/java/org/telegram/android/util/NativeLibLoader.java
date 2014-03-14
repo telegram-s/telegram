@@ -56,15 +56,12 @@ public class NativeLibLoader {
         }
         File destLocalFile = new File(dataPath + "/libtimg_" + packageVersion + ".so");
 
-        boolean isLoaded = false;
-
         if (Build.VERSION.SDK_INT >= 9) {
             String apkPath = context.getApplicationInfo().sourceDir;
             String nativeDir = context.getApplicationInfo().nativeLibraryDir;
             File destFile = new File(nativeDir + "/libtimg.so");
 
             if (destLocalFile.exists() || destFile.exists()) {
-                isLoaded = true;
                 if (destFile.exists()) {
                     Logger.d(TAG, "Library installed");
                     System.loadLibrary("timg");
@@ -105,8 +102,8 @@ public class NativeLibLoader {
                 }
                 stream = zipFile.getInputStream(entry);
                 IOUtils.copy(stream, destLocalFile);
-                isLoaded = true;
                 System.load(destLocalFile.getAbsolutePath());
+                return;
             } catch (Exception e) {
                 Logger.t(TAG, e);
             } finally {
@@ -127,8 +124,7 @@ public class NativeLibLoader {
             }
         }
 
-        if (!isLoaded) {
-            System.loadLibrary("timg");
-        }
+        // Try load anyway
+        System.loadLibrary("timg");
     }
 }
