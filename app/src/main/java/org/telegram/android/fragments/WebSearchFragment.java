@@ -1,11 +1,8 @@
 package org.telegram.android.fragments;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -89,7 +86,7 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
         adapter = new BaseAdapter() {
             @Override
             public int getCount() {
-                return searchResults.size();
+                return searchResults.size() + 1;
             }
 
             @Override
@@ -103,47 +100,98 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
             }
 
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if (isInSearchMode) {
-                    webSearchSource.getViewSource().onItemsShown(position);
+            public int getItemViewType(int position) {
+                if (position < searchResults.size()) {
+                    return 0;
+                } else {
+                    return 1;
                 }
+            }
 
-                if (convertView == null) {
-                    FrameLayout res = new FrameLayout(context);
+            @Override
+            public int getViewTypeCount() {
+                return 2;
+            }
+
+            @Override
+            public boolean areAllItemsEnabled() {
+                return false;
+            }
+
+            @Override
+            public boolean isEnabled(int position) {
+                return position < searchResults.size();
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (position < searchResults.size()) {
+                    if (isInSearchMode) {
+                        webSearchSource.getViewSource().onItemsShown(position);
+                    }
+
+                    if (convertView == null) {
+                        FrameLayout res = new FrameLayout(context);
+                        GridView.LayoutParams params = new GridView.LayoutParams(
+                                PreviewConfig.MEDIA_PREVIEW,
+                                PreviewConfig.MEDIA_PREVIEW);
+                        res.setLayoutParams(params);
+
+                        SmallPreviewView previewView = new SmallPreviewView(context);
+                        previewView.setEmptyDrawable(new ColorDrawable(0xffdfe4ea));
+                        previewView.setLayoutParams(new FrameLayout.LayoutParams(
+                                PreviewConfig.MEDIA_PREVIEW,
+                                PreviewConfig.MEDIA_PREVIEW));
+                        res.addView(previewView);
+
+                        TextView size = new TextView(context);
+                        size.setBackgroundResource(R.drawable.st_bubble_media_info);
+                        size.setTextColor(Color.WHITE);
+                        size.setTextSize(12);
+                        FrameLayout.LayoutParams sizeParams = new FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                Gravity.BOTTOM | Gravity.LEFT);
+                        size.setLayoutParams(sizeParams);
+                        size.setGravity(Gravity.CENTER_VERTICAL);
+                        size.setCompoundDrawablePadding(getPx(4));
+                        res.addView(size);
+
+                        convertView = res;
+                    }
+
+                    WebSearchResult searchResult = getItem(position);
+
+                    SmallPreviewView previewView = (SmallPreviewView) ((ViewGroup) convertView).getChildAt(0);
+                    previewView.requestSearchThumb(searchResult);
+
+                    TextView size = (TextView) ((ViewGroup) convertView).getChildAt(1);
+                    size.setText(TextUtil.formatFileSize(searchResult.getSize()));
+
+                    if (searchResult.getContentType().equals("image/gif")) {
+                        size.setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_bubble_media_animation, 0, 0, 0);
+                    } else {
+                        size.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                    }
+
+                    return convertView;
+                } else {
+                    ProgressBar res = new ProgressBar(context);
                     GridView.LayoutParams params = new GridView.LayoutParams(
                             PreviewConfig.MEDIA_PREVIEW,
                             PreviewConfig.MEDIA_PREVIEW);
                     res.setLayoutParams(params);
 
-                    SmallPreviewView previewView = new SmallPreviewView(context);
-                    previewView.setEmptyDrawable(new ColorDrawable(0xffdfe4ea));
-                    previewView.setLayoutParams(new FrameLayout.LayoutParams(
-                            PreviewConfig.MEDIA_PREVIEW,
-                            PreviewConfig.MEDIA_PREVIEW));
-                    res.addView(previewView);
-
-                    TextView size = new TextView(context);
-                    size.setBackgroundResource(R.drawable.st_bubble_media_info);
-                    size.setTextColor(Color.WHITE);
-                    size.setTextSize(12);
-                    FrameLayout.LayoutParams sizeParams = new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            Gravity.BOTTOM | Gravity.LEFT);
-                    size.setLayoutParams(sizeParams);
-                    res.addView(size);
-
-                    convertView = res;
+                    res.setVisibility(View.INVISIBLE);
+                    if (isInSearchMode) {
+                        if (webSearchSource.getViewSource() != null) {
+                            if (webSearchSource.getViewSource().getState() == ViewSourceState.IN_PROGRESS) {
+                                res.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                    return res;
                 }
-
-                WebSearchResult searchResult = getItem(position);
-
-                SmallPreviewView previewView = (SmallPreviewView) ((ViewGroup) convertView).getChildAt(0);
-                previewView.requestSearchThumb(searchResult);
-
-                TextView size = (TextView) ((ViewGroup) convertView).getChildAt(1);
-                size.setText(TextUtil.formatFileSize(searchResult.getSize()));
-                return convertView;
             }
         };
         gridView.setAdapter(adapter);
@@ -228,19 +276,22 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
     public void onSourceStateChanged() {
         if (isInSearchMode) {
             if (webSearchSource.getViewSource() != null) {
-                if (webSearchSource.getViewSource().getState() == ViewSourceState.IN_PROGRESS) {
-                    goneView(gridView);
-                    goneView(empty);
-                    goneView(emptyHint);
-                    showView(progress);
-                } else {
-                    if (webSearchSource.getViewSource().getItemsCount() == 0) {
+
+                if (webSearchSource.getViewSource().getItemsCount() == 0) {
+                    if (webSearchSource.getViewSource().getState() == ViewSourceState.IN_PROGRESS) {
+                        goneView(gridView);
+                        goneView(empty);
+                        goneView(emptyHint);
+                        showView(progress);
+                    } else {
                         showView(empty);
                         goneView(gridView);
-                    } else {
-                        goneView(empty);
-                        showView(gridView);
+                        goneView(emptyHint);
+                        goneView(progress);
                     }
+                } else {
+                    goneView(empty);
+                    showView(gridView);
                     goneView(emptyHint);
                     goneView(progress);
                 }

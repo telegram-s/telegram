@@ -39,6 +39,7 @@ public class WebSearchSource {
     private boolean isDestroyed;
     private HttpClient client;
     private String query;
+    private boolean canLoadMore = true;
     private ViewSourceListener listener;
 
     private TLPersistence<TLLastSearchResults> lastStorage;
@@ -100,6 +101,7 @@ public class WebSearchSource {
 
     public void newQuery(final String _query) {
         this.query = _query;
+        this.canLoadMore = true;
 
         if (viewSource != null) {
             viewSource.destroy();
@@ -109,7 +111,7 @@ public class WebSearchSource {
         viewSource = new ViewSource<WebSearchResult, WebSearchResult>() {
             @Override
             protected WebSearchResult[] loadItems(int offset) {
-                while (!isDestroyed && _query.equals(query)) {
+                while (!isDestroyed && canLoadMore && _query.equals(query)) {
                     try {
                         return doRequest(offset, _query);
                     } catch (Exception e) {
@@ -121,7 +123,7 @@ public class WebSearchSource {
 
             @Override
             protected long getSortingKey(WebSearchResult obj) {
-                return obj.getIndex();
+                return -obj.getIndex();
             }
 
             @Override
@@ -156,7 +158,7 @@ public class WebSearchSource {
 
     private WebSearchResult[] doRequest(int offset, String query) throws Exception {
         String encodedQuery = Uri.encode(query);
-        String url = "https://api.datamarket.azure.com/Bing/Search/v1/Image?Query='" + encodedQuery + "'&$format=json&Adult='Off'";
+        String url = "https://api.datamarket.azure.com/Bing/Search/v1/Image?Query='" + encodedQuery + "'&$format=json&$skip=" + offset + "&$top=30&Adult='Off'";
         HttpGet get = new HttpGet(url);
 
         UsernamePasswordCredentials credentials =
@@ -196,6 +198,11 @@ public class WebSearchSource {
             int thumbH = thumb.getInt("Height");
 
             results[i] = new WebSearchResult(id, offset + i, size, fullW, fullH, fullUrl, thumbW, thumbH, thumbUrl, contentType);
+        }
+
+        boolean canLoadMore = res.getJSONObject("d").has("__next");
+        if (query.equals(this.query)) {
+            this.canLoadMore = canLoadMore;
         }
         return results;
     }
