@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import org.telegram.android.R;
@@ -32,6 +34,8 @@ public class WebSearchPreviewFragment extends TelegramFragment {
     private boolean isClosed = false;
     private PhotoView imageView;
     private GifView gifView;
+    private ImageView preview;
+    private ProgressBar progressBar;
 
     public WebSearchPreviewFragment(WebSearchResult webSearchResult) {
         this.webSearchResult = webSearchResult;
@@ -47,6 +51,8 @@ public class WebSearchPreviewFragment extends TelegramFragment {
         View res = inflater.inflate(R.layout.web_search_preview, container, false);
         imageView = (PhotoView) res.findViewById(R.id.image);
         gifView = (GifView) res.findViewById(R.id.gif);
+        progressBar = (ProgressBar) res.findViewById(R.id.loading);
+        preview = (ImageView) res.findViewById(R.id.preview);
 
         if (webSearchResult.getContentType().equals("image/gif")) {
             imageView.setVisibility(View.GONE);
@@ -54,6 +60,14 @@ public class WebSearchPreviewFragment extends TelegramFragment {
         } else {
             imageView.setVisibility(View.VISIBLE);
             gifView.setVisibility(View.GONE);
+        }
+
+        Bitmap thumbPreview = application.getUiKernel().getMediaLoader().tryLoadSearchThumb(webSearchResult);
+        if (thumbPreview != null) {
+            preview.setVisibility(View.VISIBLE);
+            preview.setImageBitmap(thumbPreview);
+        } else {
+            preview.setVisibility(View.GONE);
         }
 
         res.findViewById(R.id.sendImage).setOnClickListener(new View.OnClickListener() {
@@ -96,7 +110,17 @@ public class WebSearchPreviewFragment extends TelegramFragment {
                         byte[] data = application.getUiKernel().getWebImageStorage().tryLoadData(webSearchResult.getFullUrl());
 
                         if (data == null) {
-                            data = IOUtils.downloadFile(webSearchResult.getFullUrl());
+                            data = IOUtils.downloadFile(webSearchResult.getFullUrl(), new IOUtils.ProgressListener() {
+                                @Override
+                                public void onProgress(final int bytes) {
+                                    secureCallback(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            progressBar.setProgress((100 * bytes) / webSearchResult.getSize());
+                                        }
+                                    });
+                                }
+                            });
                         }
                         String fileName = getUploadTempFile("upload.jpg");
                         IOUtils.writeAll(fileName, data);
@@ -106,6 +130,8 @@ public class WebSearchPreviewFragment extends TelegramFragment {
                             secureCallback(new Runnable() {
                                 @Override
                                 public void run() {
+                                    goneView(progressBar);
+                                    goneView(preview);
                                     gifView.loadGif(application.getUiKernel().getWebImageStorage().getImageFileName(webSearchResult.getFullUrl()));
                                 }
                             });
@@ -114,6 +140,8 @@ public class WebSearchPreviewFragment extends TelegramFragment {
                             secureCallback(new Runnable() {
                                 @Override
                                 public void run() {
+                                    goneView(progressBar);
+                                    goneView(preview);
                                     imageView.setImageBitmap(bitmap);
                                 }
                             });

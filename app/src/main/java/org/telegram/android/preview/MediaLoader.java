@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.NinePatchDrawable;
 import android.net.http.AndroidHttpClient;
+import android.os.SystemClock;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
@@ -18,6 +19,7 @@ import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLLocalGeo;
 import org.telegram.android.core.model.media.TLLocalPhoto;
 import org.telegram.android.core.model.media.TLLocalVideo;
+import org.telegram.android.log.Logger;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
@@ -72,6 +74,10 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 new MapWorker(),
                 new RawWorker()
         };
+    }
+
+    public Bitmap tryLoadSearchThumb(WebSearchResult result) {
+        return imageStorage.tryLoadFile(result.getThumbUrl());
     }
 
     public void requestSearchThumb(WebSearchResult result, ImageReceiver receiver) {
@@ -547,7 +553,9 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 }
             }
 
+            long start = System.currentTimeMillis();
             byte[] data = IOUtils.downloadFile(thumbTask.getResult().getThumbUrl());
+            Logger.d("MediaLoader", "Downloaded " + data.length + " in " + (System.currentTimeMillis() - start) + " ms");
             synchronized (fullImageCachedLock) {
                 if (fullImageCached == null) {
                     fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);

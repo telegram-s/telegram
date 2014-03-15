@@ -74,13 +74,23 @@ public class IOUtils {
     }
 
     public static byte[] readAll(InputStream in) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
+        return readAll(in, null);
+    }
+
+    public static byte[] readAll(InputStream in, ProgressListener listener) throws IOException {
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(in);
+        ByteArrayOutputStream os = new ByteArrayOutputStream(4096);
         byte[] buffer = buffers.get();
         int len;
+        int readed = 0;
         try {
-            while ((len = in.read(buffer)) >= 0) {
+            while ((len = bufferedInputStream.read(buffer)) >= 0) {
                 Thread.yield();
                 os.write(buffer, 0, len);
+                readed += len;
+                if (listener != null) {
+                    listener.onProgress(readed);
+                }
             }
         } catch (java.io.IOException e) {
         }
@@ -88,17 +98,25 @@ public class IOUtils {
     }
 
     public static byte[] downloadFile(String url) throws IOException {
+        return downloadFile(url, null);
+    }
+
+    public static byte[] downloadFile(String url, ProgressListener listener) throws IOException {
         URL urlSpec = new URL(url);
         HttpURLConnection urlConnection = null;
         try {
             urlConnection = (HttpURLConnection) urlSpec.openConnection();
             InputStream in = urlConnection.getInputStream();
-            return IOUtils.readAll(in);
+            return IOUtils.readAll(in, listener);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
         }
+    }
+
+    public static interface ProgressListener {
+        public void onProgress(int bytes);
     }
 
 }
