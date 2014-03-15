@@ -16,6 +16,7 @@ import org.telegram.android.log.Logger;
 import org.telegram.android.preview.AvatarLoader;
 import org.telegram.android.preview.MediaLoader;
 import org.telegram.android.preview.WallpaperLoader;
+import org.telegram.android.preview.cache.ImageStorage;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
@@ -45,6 +46,7 @@ public class UiKernel {
     private AvatarLoader avatarLoader;
 
     private MediaLoader mediaLoader;
+    private ImageStorage webImageStorage;
 
     private WallpaperLoader wallpaperLoader;
 
@@ -99,6 +101,7 @@ public class UiKernel {
 
         start = SystemClock.uptimeMillis();
         mediaLoader = new MediaLoader(application);
+        webImageStorage = new ImageStorage(application, "web");
         Logger.d(TAG, "MediaLoader loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         start = SystemClock.uptimeMillis();
@@ -159,6 +162,10 @@ public class UiKernel {
 
     public WallpaperHolder getWallpaperHolder() {
         return wallpaperHolder;
+    }
+
+    public ImageStorage getWebImageStorage() {
+        return webImageStorage;
     }
 
     public boolean isAppVisible() {

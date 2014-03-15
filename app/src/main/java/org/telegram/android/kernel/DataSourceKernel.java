@@ -37,7 +37,7 @@ public class DataSourceKernel {
     }
 
     private void init() {
-        webSearchSource = new WebSearchSource();
+        webSearchSource = new WebSearchSource(kernel.getApplication());
         if (kernel.getAuthKernel().isLoggedIn()) {
             dialogSource = new DialogSource(kernel.getApplication());
             userSource = new UserSource();

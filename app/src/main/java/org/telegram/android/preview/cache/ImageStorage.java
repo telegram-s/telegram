@@ -90,4 +90,12 @@ public class ImageStorage {
             return null;
         }
     }
+
+    public String getImageFileName(String key) {
+        String fileName = getFileName(key);
+        if (!new File(fileName).exists()) {
+            return null;
+        }
+        return fileName;
+    }
 }

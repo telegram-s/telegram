@@ -18,6 +18,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import org.telegram.android.R;
+import org.telegram.android.base.TelegramActivity;
 import org.telegram.android.core.ContactsSource;
 import org.telegram.android.core.model.Contact;
 import org.telegram.android.core.model.LinkType;
@@ -124,6 +125,7 @@ public class ContactsFragment extends BaseContactsFragment {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 doFilter(null);
+                ((TelegramActivity) getActivity()).fixBackButton();
                 return true;
             }
         });

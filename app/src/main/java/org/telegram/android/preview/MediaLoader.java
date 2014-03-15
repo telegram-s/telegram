@@ -21,6 +21,7 @@ import org.telegram.android.core.model.media.TLLocalVideo;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
+import org.telegram.android.preview.cache.ImageStorage;
 import org.telegram.android.preview.media.*;
 import org.telegram.android.preview.queue.QueueWorker;
 

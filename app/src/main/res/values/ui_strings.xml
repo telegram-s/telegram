@@ -395,6 +395,10 @@
     <string name="st_media_title_all">All shared media</string>
     <string name="st_media_empty">No media.</string>
 
+    <string name="st_web_search_title">Web Search</string>
+    <string name="st_web_search_hint">Type search query and press search button.</string>
+    <string name="st_web_search_empty">Nothing found.</string>
+
     <string name="st_map_unavailable">Maps unavailable</string>
     <string name="st_map_hybrid">Hybrid</string>
     <string name="st_map_normal">Normal</string>

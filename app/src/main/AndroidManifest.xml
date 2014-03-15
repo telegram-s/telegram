@@ -120,7 +120,7 @@
                   android:theme="@style/AppTheme.Theme"
                   android:label="Telegram"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-                  android:windowSoftInputMode="stateVisible|adjustResize"/>
+                  android:windowSoftInputMode="adjustResize"/>
 
         <activity android:name=".activity.PickCountryActivity"
                   android:theme="@style/AppTheme.Theme"/>

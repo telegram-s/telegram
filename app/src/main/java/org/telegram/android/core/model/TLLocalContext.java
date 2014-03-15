@@ -8,6 +8,8 @@ import org.telegram.android.core.model.phone.TLSyncPhone;
 import org.telegram.android.core.model.phone.TLSyncState;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.core.model.storage.*;
+import org.telegram.android.core.model.web.TLLastSearchResults;
+import org.telegram.android.core.model.web.TLSearchResult;
 import org.telegram.android.kernel.compat.v5.TLDcInfoCompat;
 import org.telegram.android.kernel.compat.v8.TLLocalPhotoCompat8;
 import org.telegram.android.kernel.compat.v9.TLLocalPhotoCompat9;
@@ -57,6 +59,8 @@ public class TLLocalContext extends TLContext {
         registerClass(TLUploadingVideo.CLASS_ID, TLUploadingVideo.class);
         registerClass(TLUploadingDocument.CLASS_ID, TLUploadingDocument.class);
         registerClass(TLUploadingAudio.CLASS_ID, TLUploadingAudio.class);
+        registerClass(TLSearchResult.CLASS_ID, TLSearchResult.class);
+        registerClass(TLLastSearchResults.CLASS_ID, TLLastSearchResults.class);
 
         // Service
         registerClass(TLLocalActionChatAddUser.CLASS_ID, TLLocalActionChatAddUser.class);

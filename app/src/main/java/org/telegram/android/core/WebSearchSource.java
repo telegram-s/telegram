@@ -1,7 +1,6 @@
 package org.telegram.android.core;
 
 import android.net.Uri;
-import android.util.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -15,10 +14,16 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.telegram.android.TelegramApplication;
+import org.telegram.android.core.model.TLLocalContext;
 import org.telegram.android.core.model.WebSearchResult;
+import org.telegram.android.core.model.web.TLLastSearchResults;
+import org.telegram.android.core.model.web.TLSearchResult;
+import org.telegram.android.critical.TLPersistence;
 import org.telegram.android.ui.source.ViewSource;
 import org.telegram.android.ui.source.ViewSourceListener;
 import org.telegram.android.ui.source.ViewSourceState;
+import org.telegram.tl.TLVector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,6 +33,7 @@ import java.io.IOException;
  */
 public class WebSearchSource {
     private static final String BING_KEY = "qcN+C8Z41IFbeIsQsDjq90rinInEKaNJew+y9CBAxdM";
+    private static final int LAST_IMAGES_LIMIT = 80;
 
     private ViewSource<WebSearchResult, WebSearchResult> viewSource;
     private boolean isDestroyed;
@@ -35,13 +41,35 @@ public class WebSearchSource {
     private String query;
     private ViewSourceListener listener;
 
-    public WebSearchSource() {
+    private TLPersistence<TLLastSearchResults> lastStorage;
+
+    public WebSearchSource(TelegramApplication application) {
         isDestroyed = false;
+        lastStorage = new TLPersistence<TLLastSearchResults>(application, "last_search", TLLastSearchResults.class, TLLocalContext.getInstance());
         HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
         HttpConnectionParams.setSoTimeout(httpParams, 5000);
         client = new DefaultHttpClient(httpParams);
         client.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
+    }
+
+    public TLSearchResult[] getLastResults() {
+        return lastStorage.getObj().getLastResults().toArray(new TLSearchResult[0]);
+    }
+
+    public void onSearchResultSent(TLSearchResult result) {
+        TLVector<TLSearchResult> results = lastStorage.getObj().getLastResults();
+        for (TLSearchResult res : results) {
+            if (res.getKey().equals(result.getKey())) {
+                results.remove(res);
+                break;
+            }
+        }
+        results.add(0, result);
+        while (results.size() > LAST_IMAGES_LIMIT) {
+            results.remove(results.size() - 1);
+        }
+        lastStorage.write();
     }
 
     public String getQuery() {
@@ -59,6 +87,14 @@ public class WebSearchSource {
         this.listener = listener;
         if (viewSource != null && listener != null) {
             viewSource.addListener(listener);
+        }
+    }
+
+    public void cancelQuery() {
+        this.query = null;
+        if (viewSource != null) {
+            viewSource.destroy();
+            viewSource = null;
         }
     }
 
@@ -148,6 +184,7 @@ public class WebSearchSource {
         for (int i = 0; i < results.length; i++) {
             JSONObject record = array.getJSONObject(i);
             JSONObject thumb = record.getJSONObject("Thumbnail");
+            String id = record.getString("ID");
             int size = record.getInt("FileSize");
             String fullUrl = record.getString("MediaUrl");
             String contentType = record.getString("ContentType");
@@ -158,7 +195,7 @@ public class WebSearchSource {
             int thumbW = thumb.getInt("Width");
             int thumbH = thumb.getInt("Height");
 
-            results[i] = new WebSearchResult(offset + i, size, fullW, fullH, fullUrl, thumbW, thumbH, thumbUrl, contentType);
+            results[i] = new WebSearchResult(id, offset + i, size, fullW, fullH, fullUrl, thumbW, thumbH, thumbUrl, contentType);
         }
         return results;
     }

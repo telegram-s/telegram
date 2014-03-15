@@ -3,6 +3,8 @@ package org.telegram.android.base;
 import android.os.Bundle;
 import android.view.View;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.internal.ActionBarSherlockCompat;
+import com.actionbarsherlock.internal.ActionBarSherlockNative;
 import org.telegram.android.R;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.UserSettings;
@@ -65,29 +67,25 @@ public class TelegramActivity extends SherlockFragmentActivity {
     public void fixBackButton() {
         if (android.os.Build.VERSION.SDK_INT == 19) {
             //workaround for back button dissapear
-//            try {
-//                Class firstClass = getSupportActionBar().getClass();
-//                Class aClass = firstClass.getSuperclass();
-//                if (aClass == android.support.v7.app.ActionBar.class) {
-//
-//                } else {
-//                    Field field = aClass.getDeclaredField("mActionBar");
-//                    field.setAccessible(true);
-//                    android.app.ActionBar bar = (android.app.ActionBar) field.get(getSupportActionBar());
-//
-//                    field = bar.getClass().getDeclaredField("mActionView");
-//                    field.setAccessible(true);
-//                    View v = (View) field.get(bar);
-//                    aClass = v.getClass();
-//
-//                    field = aClass.getDeclaredField("mHomeLayout");
-//                    field.setAccessible(true);
-//                    v = (View) field.get(v);
-//                    v.setVisibility(View.VISIBLE);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+            try {
+                Class firstClass = getSupportActionBar().getClass();
+                Class aClass = firstClass;
+                Field field = aClass.getDeclaredField("mActionBar");
+                field.setAccessible(true);
+                android.app.ActionBar bar = (android.app.ActionBar) field.get(getSupportActionBar());
+
+                field = bar.getClass().getDeclaredField("mActionView");
+                field.setAccessible(true);
+                View v = (View) field.get(bar);
+                aClass = v.getClass();
+
+                field = aClass.getDeclaredField("mHomeLayout");
+                field.setAccessible(true);
+                v = (View) field.get(v);
+                v.setVisibility(View.VISIBLE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
