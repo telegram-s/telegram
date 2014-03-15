@@ -50,8 +50,6 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View res = inflater.inflate(R.layout.web_search, container, false);
 
-        isInSearchMode = false;
-
         webSearchSource = application.getDataSourceKernel().getWebSearchSource();
         if (lastSearchResults == null) {
             lastSearchResults = webSearchSource.getLastResults();
@@ -226,6 +224,12 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
 
         final MenuItem searchItem = menu.findItem(R.id.searchMenu);
         final SearchView searchView = (SearchView) searchItem.getActionView();
+        if (isInSearchMode) {
+            searchItem.expandActionView();
+            searchView.setQuery(webSearchSource.getQuery(), false);
+            searchView.clearFocus();
+        }
+
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem menuItem) {
