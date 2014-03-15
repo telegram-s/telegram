@@ -9,6 +9,10 @@
                   android:icon="@drawable/st_bar_ic_attach_photo"
                   android:title="Take photo"/>
 
+            <item android:id="@+id/attachWebImage"
+                  android:icon="@drawable/st_bar_ic_attach_photo"
+                  android:title="Web Image"/>
+
             <item android:id="@+id/attachVideo"
                   android:icon="@drawable/st_bar_ic_attach_video"
                   android:title="Video"/>

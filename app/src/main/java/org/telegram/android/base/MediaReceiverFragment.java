@@ -11,7 +11,7 @@ import android.provider.MediaStore;
 import android.widget.Toast;
 import org.telegram.android.R;
 import org.telegram.android.activity.CropImageActivity;
-import org.telegram.android.activity.PickWebImage;
+import org.telegram.android.activity.PickWebImageActivity;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.ui.pick.PickIntentClickListener;
 import org.telegram.android.ui.pick.PickIntentDialog;
@@ -146,7 +146,7 @@ public class MediaReceiverFragment extends TelegramFragment {
 
         ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
         items.add(new PickIntentItem(R.drawable.app_icon, "WebSearch").setIntent(
-                new Intent().setClass(getActivity(), PickWebImage.class)));
+                new Intent().setClass(getActivity(), PickWebImageActivity.class)));
         Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
         Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
                 .setType("image/*")));
@@ -166,6 +166,11 @@ public class MediaReceiverFragment extends TelegramFragment {
                 }));
         pickIntentDialog.setTitle(getStringSafe(R.string.st_receiver_pick_photo));
         pickIntentDialog.show();
+    }
+
+    public void requestWebImage(final int requestId) {
+        startActivityForResult(new Intent().setClass(getActivity(), PickWebImageActivity.class), requestId * REQ_M + REQUEST_BASE + 1);
+        // getActivity().overridePendingTransition(R.anim.slide_in_bottom, R.anim.fade_out);
     }
 
     public void requestVideo(final int requestId) {

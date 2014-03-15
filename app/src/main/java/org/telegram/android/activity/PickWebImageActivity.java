@@ -8,7 +8,7 @@ import org.telegram.android.fragments.WebSearchFragment;
 /**
  * Created by ex3ndr on 14.03.14.
  */
-public class PickWebImage extends TelegramActivity {
+public class PickWebImageActivity extends TelegramActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

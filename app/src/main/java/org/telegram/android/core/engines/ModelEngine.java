@@ -574,19 +574,7 @@ public class ModelEngine {
 
         msg.setForwardMid(src.getMid());
         msg.setMessage(src.getMessage());
-        if (src.getRawContentType() == ContentType.MESSAGE_PHOTO) {
-            msg.setContentType(ContentType.MESSAGE_PHOTO | ContentType.MESSAGE_FORWARDED);
-        } else if (src.getRawContentType() == ContentType.MESSAGE_VIDEO) {
-            msg.setContentType(ContentType.MESSAGE_VIDEO | ContentType.MESSAGE_FORWARDED);
-        } else if (src.getRawContentType() == ContentType.MESSAGE_CONTACT) {
-            msg.setContentType(ContentType.MESSAGE_CONTACT | ContentType.MESSAGE_FORWARDED);
-        } else if (src.getRawContentType() == ContentType.MESSAGE_GEO) {
-            msg.setContentType(ContentType.MESSAGE_GEO | ContentType.MESSAGE_FORWARDED);
-        } else if (src.getRawContentType() == ContentType.MESSAGE_DOCUMENT) {
-            msg.setContentType(ContentType.MESSAGE_DOCUMENT | ContentType.MESSAGE_FORWARDED);
-        } else {
-            msg.setContentType(ContentType.MESSAGE_TEXT | ContentType.MESSAGE_FORWARDED);
-        }
+        msg.setContentType(src.getRawContentType() | ContentType.MESSAGE_FORWARDED);
 
         if (src.isForwarded()) {
             msg.setForwardDate(src.getForwardDate());

@@ -116,7 +116,7 @@
                   android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
                   android:windowSoftInputMode="stateHidden|adjustNothing"/>
 
-        <activity android:name=".activity.PickWebImage"
+        <activity android:name=".activity.PickWebImageActivity"
                   android:theme="@style/AppTheme.Theme"
                   android:label="Telegram"
                   android:configChanges="keyboard|keyboardHidden|orientation|screenSize"

@@ -1061,6 +1061,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         menu.findItem(R.id.attachLocation).setTitle(highlightMenuText(R.string.st_conv_menu_location));
         menu.findItem(R.id.attachDocument).setTitle(highlightMenuText(R.string.st_conv_menu_doc));
         menu.findItem(R.id.attachAudio).setTitle(highlightMenuText(R.string.st_conv_menu_audio));
+        menu.findItem(R.id.attachWebImage).setTitle(highlightMenuText(R.string.st_conv_menu_web));
 
         MenuItem avatarItem = menu.findItem(R.id.userAvatar);
         View avatarUploadView = avatarItem.getActionView().findViewById(R.id.avatarUploadProgress);
@@ -1243,6 +1244,16 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
 
             startAudio();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.attachWebImage) {
+            if (!isEnabledInput) {
+                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            requestWebImage(0);
             return true;
         }
 

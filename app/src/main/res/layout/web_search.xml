@@ -22,6 +22,7 @@
               android:textColor="@color/st_empty_text"
               android:textSize="19sp"
               android:id="@+id/hint"
+              android:gravity="center"
               android:text="@string/st_web_search_hint"/>
 
     <TextView android:layout_width="wrap_content"
@@ -31,6 +32,7 @@
               android:textColor="@color/st_empty_text"
               android:textSize="19sp"
               android:id="@+id/empty"
+              android:gravity="center"
               android:text="@string/st_web_search_empty"/>
 
     <ProgressBar android:layout_width="wrap_content"

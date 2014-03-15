@@ -3,6 +3,7 @@ package org.telegram.android.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -46,6 +47,7 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
     private GridView gridView;
     private TLSearchResult[] lastSearchResults;
     private ArrayList<WebSearchResult> searchResults = new ArrayList<WebSearchResult>();
+    private ArrayList<WebSearchResult> lastResults = new ArrayList<WebSearchResult>();
     private BaseAdapter adapter;
     private WebSearchSource webSearchSource;
     private boolean isInSearchMode;
@@ -59,7 +61,7 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
         webSearchSource = application.getDataSourceKernel().getWebSearchSource();
         lastSearchResults = webSearchSource.getLastResults();
         for (int i = 0; i < lastSearchResults.length; i++) {
-            searchResults.add(new WebSearchResult(i, lastSearchResults[i]));
+            lastResults.add(new WebSearchResult(i, lastSearchResults[i]));
         }
 
         gridView = (GridView) res.findViewById(R.id.mediaGrid);
@@ -88,10 +90,16 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
                     @Override
                     public void execute() throws AsyncException {
                         try {
-                            byte[] data = IOUtils.downloadFile(result.getFullUrl());
+                            byte[] data = application.getUiKernel().getWebImageStorage().tryLoadData(result.getFullUrl());
+
+                            if (data == null) {
+                                data = IOUtils.downloadFile(result.getFullUrl());
+                            }
                             fileName = getUploadTempFile("upload.jpg");
                             IOUtils.writeAll(fileName, data);
+                            application.getUiKernel().getWebImageStorage().saveFile(result.getFullUrl(), data);
                             webSearchSource.onSearchResultSent(result.toTlResult());
+
                         } catch (IOException e) {
                             throw new AsyncException(AsyncException.ExceptionType.CONNECTION_ERROR);
                         }
@@ -126,8 +134,13 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
+                if (isInSearchMode) {
+                    webSearchSource.getViewSource().onItemsShown(position);
+                }
+
                 if (convertView == null) {
                     SmallPreviewView previewView = new SmallPreviewView(context);
+                    previewView.setEmptyDrawable(new ColorDrawable(0xffdfe4ea));
                     GridView.LayoutParams imageParams = new GridView.LayoutParams(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW);
                     previewView.setLayoutParams(imageParams);
                     convertView = previewView;
@@ -154,9 +167,7 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
         super.onResume();
         webSearchSource.setListener(this);
         onSourceStateChanged();
-        if (webSearchSource.getViewSource() != null) {
-            onSourceDataChanged();
-        }
+        onSourceDataChanged();
     }
 
     @Override
@@ -172,17 +183,23 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
 
         final MenuItem searchItem = menu.findItem(R.id.searchMenu);
         final SearchView searchView = (SearchView) searchItem.getActionView();
-        // searchItem.expandActionView();
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem menuItem) {
                 isInSearchMode = true;
+                onSourceDataChanged();
+                onSourceStateChanged();
+                adapter.notifyDataSetInvalidated();
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem menuItem) {
                 isInSearchMode = false;
+                webSearchSource.cancelQuery();
+                onSourceDataChanged();
+                onSourceStateChanged();
+
                 ((TelegramActivity) getActivity()).fixBackButton();
                 return true;
             }
@@ -213,23 +230,32 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
 
     @Override
     public void onSourceStateChanged() {
-        if (webSearchSource.getViewSource() != null) {
-            if (webSearchSource.getViewSource().getState() == ViewSourceState.IN_PROGRESS) {
-                goneView(gridView);
-                goneView(empty);
-                showView(progress);
-            } else {
-                if (webSearchSource.getViewSource().getItemsCount() == 0) {
-                    showView(empty);
+        if (isInSearchMode) {
+            if (webSearchSource.getViewSource() != null) {
+                if (webSearchSource.getViewSource().getState() == ViewSourceState.IN_PROGRESS) {
                     goneView(gridView);
-                } else {
                     goneView(empty);
-                    showView(gridView);
+                    goneView(emptyHint);
+                    showView(progress);
+                } else {
+                    if (webSearchSource.getViewSource().getItemsCount() == 0) {
+                        showView(empty);
+                        goneView(gridView);
+                    } else {
+                        goneView(empty);
+                        showView(gridView);
+                    }
+                    goneView(emptyHint);
+                    goneView(progress);
                 }
+            } else {
+                goneView(gridView);
+                showView(emptyHint);
                 goneView(progress);
+                goneView(empty);
             }
         } else {
-            if (lastSearchResults.length > 0) {
+            if (lastResults.size() > 0) {
                 showView(gridView);
                 goneView(emptyHint);
             } else {
@@ -239,11 +265,21 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
             goneView(progress);
             goneView(empty);
         }
+
     }
 
     @Override
     public void onSourceDataChanged() {
-        searchResults = webSearchSource.getViewSource().getCurrentWorkingSet();
-        adapter.notifyDataSetChanged();
+        if (isInSearchMode) {
+            if (webSearchSource.getViewSource() != null) {
+                searchResults = webSearchSource.getViewSource().getCurrentWorkingSet();
+            } else {
+                searchResults.clear();
+            }
+            adapter.notifyDataSetChanged();
+        } else {
+            searchResults = new ArrayList<WebSearchResult>(lastResults);
+            adapter.notifyDataSetChanged();
+        }
     }
 }
