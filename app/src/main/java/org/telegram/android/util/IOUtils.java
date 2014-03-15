@@ -9,6 +9,8 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Created by ex3ndr on 18.11.13.
@@ -86,26 +88,17 @@ public class IOUtils {
     }
 
     public static byte[] downloadFile(String url) throws IOException {
-        HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
-        HttpConnectionParams.setSoTimeout(httpParams, 5000);
-        DefaultHttpClient client = new DefaultHttpClient(httpParams);
-        client.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
-
-        HttpGet get = new HttpGet(url.replace(" ", "%20"));
-        HttpResponse response = client.execute(get);
-        if (response.getEntity().getContentLength() == 0) {
-            throw new IOException();
+        URL urlSpec = new URL(url);
+        HttpURLConnection urlConnection = null;
+        try {
+            urlConnection = (HttpURLConnection) urlSpec.openConnection();
+            InputStream in = urlConnection.getInputStream();
+            return IOUtils.readAll(in);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
-
-        if (response.getStatusLine().getStatusCode() == 404) {
-            throw new IOException();
-        }
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        response.getEntity().writeTo(outputStream);
-        byte[] data = outputStream.toByteArray();
-        return data;
     }
 
 }

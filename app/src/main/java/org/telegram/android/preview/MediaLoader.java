@@ -3,13 +3,13 @@ package org.telegram.android.preview;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.NinePatchDrawable;
+import android.net.http.AndroidHttpClient;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.params.*;
 import org.telegram.android.R;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ApiUtils;
@@ -24,9 +24,14 @@ import org.telegram.android.media.VideoOptimizer;
 import org.telegram.android.preview.cache.ImageStorage;
 import org.telegram.android.preview.media.*;
 import org.telegram.android.preview.queue.QueueWorker;
+import org.telegram.android.util.IOUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 
 import static org.telegram.android.preview.PreviewConfig.*;
 
@@ -481,37 +486,13 @@ public class MediaLoader extends BaseLoader<BaseTask> {
 
     private class MapWorker extends QueueWorker<BaseTask> {
 
-        private DefaultHttpClient client;
-
         private MapWorker() {
             super(processor);
-            HttpParams httpParams = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
-            HttpConnectionParams.setSoTimeout(httpParams, 5000);
-            client = new DefaultHttpClient(httpParams);
-            client.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
         }
 
         @Override
         protected boolean needRepeatOnError() {
             return true;
-        }
-
-        private byte[] downloadFile(String url) throws IOException {
-            HttpGet get = new HttpGet(url.replace(" ", "%20"));
-            HttpResponse response = client.execute(get);
-            if (response.getEntity().getContentLength() == 0) {
-                throw new IOException();
-            }
-
-            if (response.getStatusLine().getStatusCode() == 404) {
-                throw new IOException();
-            }
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            response.getEntity().writeTo(outputStream);
-            byte[] data = outputStream.toByteArray();
-            return data;
         }
 
         private PrepareResult downloadMap(MediaGeoTask geoTask) throws IOException {
@@ -535,7 +516,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                     "&sensor=false" +
                     "&format=jpg";
 
-            byte[] data = downloadFile(url);
+            byte[] data = IOUtils.downloadFile(url);
 
             Optimizer.BitmapInfo info1 = Optimizer.loadTo(data, res);
 
@@ -566,8 +547,7 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 }
             }
 
-
-            byte[] data = downloadFile(thumbTask.getResult().getThumbUrl());
+            byte[] data = IOUtils.downloadFile(thumbTask.getResult().getThumbUrl());
             synchronized (fullImageCachedLock) {
                 if (fullImageCached == null) {
                     fullImageCached = Bitmap.createBitmap(ApiUtils.MAX_SIZE / 2, ApiUtils.MAX_SIZE / 2, Bitmap.Config.ARGB_8888);

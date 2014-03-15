@@ -54,6 +54,10 @@ public class Optimizer {
         return optimize(new FileSource(srcFile));
     }
 
+    public static Bitmap optimize(byte[] data) throws IOException {
+        return optimize(new ByteSource(data));
+    }
+
     public static Bitmap optimize(String uri, Context context) throws IOException {
         return optimize(new UriSource(Uri.parse(uri), context));
     }
@@ -484,7 +488,9 @@ public class Optimizer {
 
         int scale = getScale(source);
         Bitmap res = buildOptimized(source, scale);
-        res = fixRotation(res, source);
+        if (!(source instanceof ByteSource)) {
+            res = fixRotation(res, source);
+        }
         return res;
     }
 

@@ -397,6 +397,7 @@
     <string name="st_media_empty">No media.</string>
 
     <string name="st_web_search_title">Web Search</string>
+    <string name="st_web_search_preview">Web Preview</string>
     <string name="st_web_search_hint">Type search query and press search button.</string>
     <string name="st_web_search_empty">Nothing found.</string>
 
