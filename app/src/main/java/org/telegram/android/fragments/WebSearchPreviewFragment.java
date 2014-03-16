@@ -208,8 +208,8 @@ public class WebSearchPreviewFragment extends TelegramFragment {
                                 goneView(progressBar);
                             }
                         });
-                        return;
                     }
+                    return;
                 }
             }
         }.start();
