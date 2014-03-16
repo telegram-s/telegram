@@ -9,6 +9,7 @@ import org.telegram.android.core.model.User;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.log.Logger;
+import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
 import org.telegram.api.messages.TLAbsSentMessage;
 import org.telegram.api.messages.TLAbsStatedMessage;
@@ -601,7 +602,7 @@ public class ModelEngine {
         ChatMessage msg = prepareSendMessage(peerType, peerId);
         msg.setContentType(ContentType.MESSAGE_CONTACT);
         msg.setMessage("");
-        msg.setExtras(new TLLocalContact(src.getPhone(), src.getFirstName(), src.getLastName(), src.getUid()));
+        msg.setExtras(new TLLocalContact(TextUtil.formatPhone(src.getPhone()), src.getFirstName(), src.getLastName(), src.getUid()));
 
         messagesEngine.create(msg);
         application.getMessageSender().sendMessage(msg);

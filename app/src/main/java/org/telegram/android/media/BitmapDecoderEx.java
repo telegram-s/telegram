@@ -27,8 +27,19 @@ public class BitmapDecoderEx {
         nativeDecodeBitmap(fileName, dest);
     }
 
-    public static void decodeReuseBitmapScaled(String fileName, Bitmap dest) throws IOException {
-        nativeDecodeBitmapScaled(fileName, dest);
+    public static int decodeReuseBitmapScaled(String fileName, Bitmap dest) throws IOException {
+        Optimizer.BitmapInfo bitmapInfo = Optimizer.getInfo(fileName);
+        int scale = 1;
+        while ((bitmapInfo.getWidth() / scale > dest.getWidth() ||
+                bitmapInfo.getHeight() / scale > dest.getHeight()) && scale <= 8) {
+            scale++;
+        }
+        if (scale == 1) {
+            nativeDecodeBitmap(fileName, dest);
+        } else {
+            nativeDecodeBitmapScaled(fileName, dest, scale);
+        }
+        return scale;
     }
 
     public static void decodeReuseBitmap(byte[] src, Bitmap dest) throws IOException {
@@ -39,7 +50,7 @@ public class BitmapDecoderEx {
         nativeSaveBitmap(dest, w, h, fileName);
     }
 
-    private static native void nativeDecodeBitmapScaled(String fileName, Bitmap bitmap) throws IOException;
+    private static native int nativeDecodeBitmapScaled(String fileName, Bitmap bitmap, int scale) throws IOException;
 
     private static native void nativeDecodeBitmap(String fileName, Bitmap bitmap) throws IOException;
 

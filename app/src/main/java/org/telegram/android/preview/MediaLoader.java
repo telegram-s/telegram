@@ -349,20 +349,11 @@ public class MediaLoader extends BaseLoader<BaseTask> {
             info = Optimizer.getInfo(rawTask.getFileName());
 
             if (info.getMimeType() != null && info.getMimeType().equals("image/jpeg")) {
-                if (info.getHeight() <= fullImageCached.getHeight() && info.getWidth() <= fullImageCached.getWidth()) {
-                    synchronized (fullImageCachedLock) {
-                        BitmapDecoderEx.decodeReuseBitmap(rawTask.getFileName(), fullImageCached);
-                        int[] sizes = drawPreview(fullImageCached, info.getWidth(), info.getHeight(), res, rawTask.isOut());
-                        onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
-                        return;
-                    }
-                } else if (info.getWidth() / 2 <= fullImageCached.getWidth() && info.getHeight() / 2 <= fullImageCached.getHeight()) {
-                    synchronized (fullImageCachedLock) {
-                        BitmapDecoderEx.decodeReuseBitmap(rawTask.getFileName(), fullImageCached);
-                        int[] sizes = drawPreview(fullImageCached, info.getWidth() / 2, info.getHeight() / 2, res, rawTask.isOut());
-                        onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
-                        return;
-                    }
+                synchronized (fullImageCachedLock) {
+                    int scale = BitmapDecoderEx.decodeReuseBitmapScaled(rawTask.getFileName(), fullImageCached);
+                    int[] sizes = drawPreview(fullImageCached, info.getWidth() / scale, info.getHeight() / scale, res, rawTask.isOut());
+                    onImageLoaded(res, sizes[0], sizes[1], rawTask, SIZE_CHAT_PREVIEW);
+                    return;
                 }
             }
 
@@ -405,8 +396,6 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 }
                 Optimizer.clearBitmap(fullImageCached);
 
-                boolean useScaled = false;
-
                 Optimizer.BitmapInfo info;
                 try {
                     info = Optimizer.getInfo(task.getFileName());
@@ -415,19 +404,10 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                     return;
                 }
 
-                useScaled = info.getWidth() > fullImageCached.getWidth() || info.getHeight() > fullImageCached.getHeight();
-
-                int scaledW = useScaled ? info.getWidth() / 2 : info.getWidth();
-                int scaledH = useScaled ? info.getHeight() / 2 : info.getHeight();
-
-                if (useScaled) {
-                    BitmapDecoderEx.decodeReuseBitmapScaled(task.getFileName(), fullImageCached);
-                } else {
-                    BitmapDecoderEx.decodeReuseBitmap(task.getFileName(), fullImageCached);
-                }
+                int scale = BitmapDecoderEx.decodeReuseBitmapScaled(task.getFileName(), fullImageCached);
 
                 Bitmap res = fetchMediaPreview();
-                Optimizer.scaleToFill(fullImageCached, scaledW, scaledH, res);
+                Optimizer.scaleToFill(fullImageCached, info.getWidth() / scale, info.getHeight() / scale, res);
                 onImageLoaded(res, res.getWidth(), res.getHeight(), task, SIZE_SMALL_PREVIEW);
             }
         }
@@ -458,23 +438,28 @@ public class MediaLoader extends BaseLoader<BaseTask> {
                 }
                 Optimizer.clearBitmap(fullImageCached);
 
-                boolean useScaled = false;
+//                boolean useScaled = false;
+//
+//                try {
+//                    Optimizer.BitmapInfo info = Optimizer.getInfo(fileTask.getFileName());
+//                    useScaled = info.getWidth() > fullImageCached.getWidth() || info.getHeight() > fullImageCached.getHeight();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                int scaledW = useScaled ? fileTask.getLocalPhoto().getFullW() / 2 : fileTask.getLocalPhoto().getFullW();
+//                int scaledH = useScaled ? fileTask.getLocalPhoto().getFullH() / 2 : fileTask.getLocalPhoto().getFullH();
+//
+//                if (useScaled) {
+//                    BitmapDecoderEx.decodeReuseBitmapScaled(fileTask.getFileName(), fullImageCached);
+//                } else {
+//                    BitmapDecoderEx.decodeReuseBitmap(fileTask.getFileName(), fullImageCached);
+//                }
 
-                try {
-                    Optimizer.BitmapInfo info = Optimizer.getInfo(fileTask.getFileName());
-                    useScaled = info.getWidth() > fullImageCached.getWidth() || info.getHeight() > fullImageCached.getHeight();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                int scale = BitmapDecoderEx.decodeReuseBitmapScaled(fileTask.getFileName(), fullImageCached);
 
-                int scaledW = useScaled ? fileTask.getLocalPhoto().getFullW() / 2 : fileTask.getLocalPhoto().getFullW();
-                int scaledH = useScaled ? fileTask.getLocalPhoto().getFullH() / 2 : fileTask.getLocalPhoto().getFullH();
-
-                if (useScaled) {
-                    BitmapDecoderEx.decodeReuseBitmapScaled(fileTask.getFileName(), fullImageCached);
-                } else {
-                    BitmapDecoderEx.decodeReuseBitmap(fileTask.getFileName(), fullImageCached);
-                }
+                int scaledW = fileTask.getLocalPhoto().getFullW() / scale;
+                int scaledH = fileTask.getLocalPhoto().getFullH() / scale;
 
                 Bitmap res = fetchChatPreview();
                 int[] sizes = drawPreview(fullImageCached, scaledW, scaledH, res, fileTask.isOut());

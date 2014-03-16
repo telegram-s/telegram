@@ -346,7 +346,8 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
                                                              JNIEnv* env,
                                                              jclass clazz,
                                                              jstring fileName,
-                                                             jobject bitmap)
+                                                             jobject bitmap,
+                                                             jint scale)
 {
     char * path =  (*env)->GetStringUTFChars( env, fileName , NULL );
     AndroidBitmapInfo  info;
@@ -402,7 +403,12 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
     jpeg_stdio_src(&cinfo, infile);
     (void) jpeg_read_header(&cinfo, TRUE);
 
+    cinfo.scale_denom = scale;
+    cinfo.scale_num = 1;
+
     (void) jpeg_start_decompress(&cinfo);
+
+    LOGD("Scaled size %dx%d",cinfo.output_width, cinfo.output_height);
 
     row_stride = cinfo.output_width * cinfo.output_components;
 
@@ -415,15 +421,11 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
     while (cinfo.output_scanline < cinfo.output_height) {
         (void) jpeg_read_scanlines(&cinfo, buffer, 1);
 
-        if (sRowIndex++ % 2 == 0)
-        {
-            if (rowIndex++ < info.height) {
-                for( i = 0; i < MIN(info.width, cinfo.output_width/2); i++) {
-                    ind = i * 2;
-                    line[i] = ARGB(255, buffer[0][ind*3], buffer[0][ind*3+1], buffer[0][ind*3 + 2]);
-                }
-                line = (char*)line + (info.stride);
+        if (rowIndex++ < info.height) {
+            for( i = 0; i < MIN(info.width, cinfo.output_width); i++) {
+                line[i] = ARGB(255, buffer[0][i*3], buffer[0][i*3+1], buffer[0][i*3 + 2]);
             }
+            line = (char*)line + (info.stride);
         }
     }
 

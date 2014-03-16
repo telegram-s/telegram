@@ -12,8 +12,12 @@ import android.util.AttributeSet;
 import org.telegram.android.R;
 import org.telegram.android.core.model.LinkType;
 import org.telegram.android.core.model.MessageState;
+import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalContact;
 import org.telegram.android.core.wireframes.MessageWireframe;
+import org.telegram.android.preview.AvatarLoader;
+import org.telegram.android.preview.ImageHolder;
+import org.telegram.android.preview.ImageReceiver;
 import org.telegram.android.ui.FontController;
 import org.telegram.android.ui.Placeholders;
 
@@ -23,7 +27,7 @@ import org.telegram.android.ui.Placeholders;
  * Date: 24.09.13
  * Time: 20:53
  */
-public class MessageContactView extends BaseMsgView {
+public class MessageContactView extends BaseMsgStateView {
 
     private TextPaint clockOutPaint;
     private TextPaint bodyPaint;
@@ -33,36 +37,44 @@ public class MessageContactView extends BaseMsgView {
 
     private Paint placeHolderBgPaint;
 
+    private Paint avatarPaint;
+
     private OnClickListener onAddContactClick;
 
     private Drawable addContactResource;
-    private Drawable statePending;
-    private Drawable stateSent;
-    private Drawable stateHalfCheck;
-    private Drawable stateFailure;
 
     private Rect rect = new Rect();
-
-    private static final int COLOR_NORMAL = 0xff70B15C;
-    private static final int COLOR_ERROR = 0xffDB4942;
-    private static final int COLOR_IN = 0xffA1AAB3;
 
     private Drawable basePlaceholder;
 
     private String title;
     private String phone;
     private String date;
-    private int state;
-    private int prevState;
-    private long stateChangeTime;
 
     private int uid;
+
+    private long avatarAppearTime;
+    private ImageHolder contactAvatar;
+    private ImageReceiver receiver = new ImageReceiver() {
+        @Override
+        public void onImageReceived(ImageHolder mediaHolder, boolean intermediate) {
+            unbindAvatar();
+            contactAvatar = mediaHolder;
+            if (intermediate) {
+                avatarAppearTime = 0;
+            } else {
+                avatarAppearTime = SystemClock.uptimeMillis();
+            }
+            invalidate();
+        }
+    };
 
     private int layoutWidth;
     private int timeWidth;
     private boolean showState;
 
     private boolean showAddButton;
+    private AvatarLoader loader;
 
     public MessageContactView(Context context) {
         super(context);
@@ -116,13 +128,13 @@ public class MessageContactView extends BaseMsgView {
         clockIconPaint.setAntiAlias(true);
         clockIconPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
-        statePending = getResources().getDrawable(R.drawable.st_bubble_ic_clock);
-        stateSent = getResources().getDrawable(R.drawable.st_bubble_ic_check);
-        stateHalfCheck = getResources().getDrawable(R.drawable.st_bubble_ic_halfcheck);
-        stateFailure = getResources().getDrawable(R.drawable.st_bubble_ic_warning);
         addContactResource = getResources().getDrawable(R.drawable.st_bubble_ic_contact);
 
         placeHolderBgPaint = new Paint();
+
+        avatarPaint = new Paint();
+
+        loader = application.getUiKernel().getAvatarLoader();
     }
 
     public OnClickListener getOnAddContactClick() {
@@ -133,26 +145,44 @@ public class MessageContactView extends BaseMsgView {
         this.onAddContactClick = onAddContactClick;
     }
 
+    private void unbindAvatar() {
+        if (contactAvatar != null) {
+            contactAvatar.release();
+            contactAvatar = null;
+        }
+    }
+
     @Override
     protected void bindNewView(MessageWireframe message) {
-        this.state = message.message.getState();
-        this.prevState = -1;
+        bindStateNew(message);
+
+        unbindAvatar();
+        if (message.relatedUser != null) {
+            if (message.relatedUser.getPhoto() instanceof TLLocalAvatarPhoto) {
+                TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) message.relatedUser.getPhoto();
+                loader.requestAvatar(avatarPhoto.getPreviewLocation(), AvatarLoader.TYPE_SMALL, receiver);
+            } else {
+                loader.cancelRequest(receiver);
+            }
+        } else {
+            loader.cancelRequest(receiver);
+        }
     }
 
     @Override
     protected void bindUpdate(MessageWireframe message) {
-        if (this.state != message.message.getState()) {
-            this.prevState = this.state;
-            this.state = message.message.getState();
-            this.stateChangeTime = SystemClock.uptimeMillis();
-        }
+        bindStateUpdate(message);
     }
 
     @Override
     protected void bindCommon(MessageWireframe message) {
         TLLocalContact contact = (TLLocalContact) message.message.getExtras();
-        title = (contact.getFirstName() + " " + contact.getLastName()).trim();
-        phone = org.telegram.android.ui.TextUtil.formatPhone(contact.getPhoneNumber());
+        if (contact.getLastName().trim().length() == 0) {
+            title = contact.getFirstName().trim();
+        } else {
+            title = contact.getFirstName().trim() + " " + contact.getLastName().trim();
+        }
+        phone = contact.getPhoneNumber();
         if (message.message.isOut()) {
             senderPaint.setColor(0xff739f53);
         } else {
@@ -189,120 +219,66 @@ public class MessageContactView extends BaseMsgView {
 
         title = TextUtils.ellipsize(title, senderPaint, realWidth, TextUtils.TruncateAt.END).toString();
         layoutWidth = Math.max((int) senderPaint.measureText(title, 0, title.length()), (int) bodyPaint.measureText(phone, 0, phone.length()));
-        layoutWidth += getPx(44);
+        layoutWidth += getPx(42);
         layoutWidth += getPx(4);
         if (showAddButton) {
-            setBubbleMeasuredContent(layoutWidth + getPx(54 + 4), getPx(56));
+            setBubbleMeasuredContent(layoutWidth + getPx(56 + 16), getPx(60));
         } else {
-            setBubbleMeasuredContent(layoutWidth + getPx(4), getPx(56));
+            setBubbleMeasuredContent(layoutWidth + getPx(16), getPx(60));
         }
     }
 
     @Override
     protected int getInBubbleResource() {
-        return R.drawable.st_bubble_in;
+        return R.drawable.st_bubble_in_media_normal;
     }
 
     @Override
     protected int getOutBubbleResource() {
-        return R.drawable.st_bubble_out;
+        return R.drawable.st_bubble_out_media_normal;
     }
 
-    private Drawable getStateDrawable(int state) {
-        switch (state) {
-            default:
-            case MessageState.SENT:
-                return stateSent;
-            case MessageState.READED:
-                return stateHalfCheck;
-            case MessageState.FAILURE:
-                return stateFailure;
-            case MessageState.PENDING:
-                return statePending;
-        }
+    @Override
+    protected int getOutPressedBubbleResource() {
+        return R.drawable.st_bubble_out_media_overlay;
+    }
+
+    @Override
+    protected int getInPressedBubbleResource() {
+        return R.drawable.st_bubble_in_media_overlay;
     }
 
     @Override
     protected boolean drawBubble(Canvas canvas) {
-
         boolean isAnimated = false;
 
-        rect.set(-getPx(4), -getPx(1), getPx(42 - 4), getPx(42 - 1));
+        rect.set(getPx(6), getPx(6), getPx(42 + 6), getPx(42 + 6));
+        if (contactAvatar != null) {
+            long animationTime = SystemClock.uptimeMillis() - avatarAppearTime;
+            if (animationTime < FADE_ANIMATION_TIME) {
+                float alpha = fadeEasing(animationTime / (float) FADE_ANIMATION_TIME);
 
-        canvas.drawRect(rect, placeHolderBgPaint);
+                canvas.drawRect(rect, placeHolderBgPaint);
+                basePlaceholder.setBounds(rect);
+                basePlaceholder.draw(canvas);
 
-        basePlaceholder.setBounds(-getPx(4), -getPx(1), getPx(42 - 4), getPx(42 - 1));
-        basePlaceholder.draw(canvas);
-
-        canvas.drawText(title, getPx(44), getPx(16), senderPaint);
-        canvas.drawText(phone, getPx(44), getPx(35), bodyPaint);
-
-        if (showState) {
-            int layoutHeight = getPx(56);
-            if (state == MessageState.PENDING) {
-                canvas.save();
-                canvas.translate(layoutWidth - getPx(12), layoutHeight - getPx(12) - getPx(3));
-                canvas.drawCircle(getPx(6), getPx(6), getPx(6), clockIconPaint);
-                double time = (System.currentTimeMillis() / 10.0) % (12 * 60);
-                double angle = (time / (6 * 60)) * Math.PI;
-
-                int x = (int) (Math.sin(-angle) * getPx(4));
-                int y = (int) (Math.cos(-angle) * getPx(4));
-                canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
-
-                x = (int) (Math.sin(-angle * 12) * getPx(5));
-                y = (int) (Math.cos(-angle * 12) * getPx(5));
-                canvas.drawLine(getPx(6), getPx(6), getPx(6) + x, getPx(6) + y, clockIconPaint);
-
-                canvas.restore();
-
-                clockOutPaint.setColor(COLOR_NORMAL);
-
-                isAnimated = true;
-            } else if (state == MessageState.READED && prevState == MessageState.SENT && (SystemClock.uptimeMillis() - stateChangeTime < STATE_ANIMATION_TIME)) {
-                long animationTime = SystemClock.uptimeMillis() - stateChangeTime;
-                float progress = easeStateFade(animationTime / (float) STATE_ANIMATION_TIME);
-                int offset = (int) (getPx(5) * progress);
-                int alphaNew = (int) (progress * 255);
-
-                bounds(stateSent, layoutWidth - stateSent.getIntrinsicWidth() - offset,
-                        layoutHeight - stateSent.getIntrinsicHeight() - getPx(3));
-                stateSent.setAlpha(255);
-                stateSent.draw(canvas);
-
-                bounds(stateHalfCheck, layoutWidth - stateHalfCheck.getIntrinsicWidth() + getPx(5) - offset,
-                        layoutHeight - stateHalfCheck.getIntrinsicHeight() - getPx(3));
-                stateHalfCheck.setAlpha(alphaNew);
-                stateHalfCheck.draw(canvas);
-
-                clockOutPaint.setColor(COLOR_NORMAL);
-
+                avatarPaint.setAlpha((int) (alpha * 255));
+                canvas.drawBitmap(contactAvatar.getBitmap(), new Rect(0, 0, getPx(42), getPx(42)), rect, avatarPaint);
                 isAnimated = true;
             } else {
-                Drawable stateDrawable = getStateDrawable(state);
-
-                bounds(stateDrawable, layoutWidth - stateDrawable.getIntrinsicWidth(), layoutHeight - stateDrawable.getIntrinsicHeight() - getPx(3));
-                stateDrawable.setAlpha(255);
-                stateDrawable.draw(canvas);
-
-                if (state == MessageState.READED) {
-                    bounds(stateSent, layoutWidth - stateSent.getIntrinsicWidth() - getPx(5),
-                            layoutHeight - stateDrawable.getIntrinsicHeight() - getPx(3));
-                    stateSent.setAlpha(255);
-                    stateSent.draw(canvas);
-                }
-
-                if (state == MessageState.FAILURE) {
-                    clockOutPaint.setColor(COLOR_ERROR);
-                } else {
-                    clockOutPaint.setColor(COLOR_NORMAL);
-                }
+                avatarPaint.setAlpha(255);
+                canvas.drawBitmap(contactAvatar.getBitmap(), new Rect(0, 0, getPx(42), getPx(42)), rect, avatarPaint);
             }
         } else {
-            clockOutPaint.setColor(COLOR_IN);
+            canvas.drawRect(rect, placeHolderBgPaint);
+            basePlaceholder.setBounds(rect);
+            basePlaceholder.draw(canvas);
         }
 
-        canvas.drawText(date, layoutWidth - timeWidth + getPx(6), getPx(52), clockOutPaint);
+        canvas.drawText(title, getPx(56), getPx(20), senderPaint);
+        canvas.drawText(phone, getPx(56), getPx(38), bodyPaint);
+
+        isAnimated |= drawState(canvas, px(8), px(4));
 
         if (showAddButton) {
             Paint p = new Paint();
