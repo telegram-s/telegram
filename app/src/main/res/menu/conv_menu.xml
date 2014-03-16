@@ -10,7 +10,7 @@
                   android:title="Take photo"/>
 
             <item android:id="@+id/attachWebImage"
-                  android:icon="@drawable/st_bar_ic_attach_photo"
+                  android:icon="@drawable/st_bar_ic_attach_websearch"
                   android:title="Web Image"/>
 
             <item android:id="@+id/attachVideo"

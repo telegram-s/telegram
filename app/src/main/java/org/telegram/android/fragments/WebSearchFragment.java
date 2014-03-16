@@ -155,6 +155,15 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
                         size.setCompoundDrawablePadding(getPx(4));
                         res.addView(size);
 
+                        ImageView animationIcon = new ImageView(context);
+                        animationIcon.setImageResource(R.drawable.st_ic_websearch_animation);
+                        FrameLayout.LayoutParams iconParams = new FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                Gravity.CENTER);
+                        animationIcon.setLayoutParams(iconParams);
+                        res.addView(animationIcon);
+
                         convertView = res;
                     }
 
@@ -166,10 +175,12 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
                     TextView size = (TextView) ((ViewGroup) convertView).getChildAt(1);
                     size.setText(TextUtil.formatFileSize(searchResult.getSize()));
 
+                    View animationIcon = ((ViewGroup) convertView).getChildAt(2);
+
                     if (searchResult.getContentType().equals("image/gif")) {
-                        size.setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_bubble_media_animation, 0, 0, 0);
+                        animationIcon.setVisibility(View.VISIBLE);
                     } else {
-                        size.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                        animationIcon.setVisibility(View.GONE);
                     }
 
                     return convertView;

@@ -106,6 +106,8 @@ public class IOUtils {
         HttpURLConnection urlConnection = null;
         try {
             urlConnection = (HttpURLConnection) urlSpec.openConnection();
+            urlConnection.setConnectTimeout(15000);
+            urlConnection.setReadTimeout(15000);
             InputStream in = urlConnection.getInputStream();
             return IOUtils.readAll(in, listener);
         } finally {

@@ -1063,6 +1063,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         menu.findItem(R.id.attachAudio).setTitle(highlightMenuText(R.string.st_conv_menu_audio));
         menu.findItem(R.id.attachWebImage).setTitle(highlightMenuText(R.string.st_conv_menu_web));
 
+        menu.findItem(R.id.attachAudio).setVisible(false);
+
         MenuItem avatarItem = menu.findItem(R.id.userAvatar);
         View avatarUploadView = avatarItem.getActionView().findViewById(R.id.avatarUploadProgress);
         View avatarUploadProgress = avatarItem.getActionView().findViewById(R.id.uploadProgressBar);

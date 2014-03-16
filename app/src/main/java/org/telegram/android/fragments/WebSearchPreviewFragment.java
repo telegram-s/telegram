@@ -3,6 +3,7 @@ package org.telegram.android.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Movie;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import org.telegram.android.R;
@@ -79,17 +81,46 @@ public class WebSearchPreviewFragment extends TelegramFragment {
 
                     @Override
                     public void execute() throws AsyncException {
+                        byte[] data;
                         try {
-                            byte[] data = application.getUiKernel().getWebImageStorage().tryLoadData(webSearchResult.getFullUrl());
+                            data = application.getUiKernel().getWebImageStorage().tryLoadData(webSearchResult.getFullUrl());
+
                             if (data == null) {
-                                data = IOUtils.downloadFile(webSearchResult.getFullUrl());
+                                data = IOUtils.downloadFile(webSearchResult.getFullUrl(), new IOUtils.ProgressListener() {
+                                    @Override
+                                    public void onProgress(final int bytes) {
+                                        secureCallback(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                progressBar.setProgress((100 * bytes) / webSearchResult.getSize());
+                                            }
+                                        });
+                                    }
+                                });
                             }
-                            fileName = getUploadTempFile("upload.jpg");
+                        } catch (IOException e) {
+                            throw new AsyncException(getStringSafe(R.string.st_error_download_image));
+                        }
+
+                        try {
+                            if (webSearchResult.getContentType().equals("image/gif")) {
+                                final Movie movie = Movie.decodeByteArray(data, 0, data.length);
+                                if (movie == null) {
+                                    throw new Exception("unable to load gif");
+                                }
+                                fileName = getUploadTempFile("upload.gif");
+                            } else {
+                                final Bitmap res = Optimizer.optimize(data);
+                                if (res == null) {
+                                    throw new Exception("unable to load image");
+                                }
+                                fileName = getUploadTempFile("upload.jpg");
+                            }
                             IOUtils.writeAll(fileName, data);
                             application.getUiKernel().getWebImageStorage().saveFile(webSearchResult.getFullUrl(), data);
                             application.getDataSourceKernel().getWebSearchSource().onSearchResultSent(webSearchResult.toTlResult());
-                        } catch (IOException e) {
-                            throw new AsyncException(AsyncException.ExceptionType.CONNECTION_ERROR);
+                        } catch (Throwable e) {
+                            throw new AsyncException(getStringSafe(R.string.st_error_download_image));
                         }
                     }
 
@@ -106,8 +137,9 @@ public class WebSearchPreviewFragment extends TelegramFragment {
             @Override
             public void run() {
                 while (!isClosed) {
+                    byte[] data;
                     try {
-                        byte[] data = application.getUiKernel().getWebImageStorage().tryLoadData(webSearchResult.getFullUrl());
+                        data = application.getUiKernel().getWebImageStorage().tryLoadData(webSearchResult.getFullUrl());
 
                         if (data == null) {
                             data = IOUtils.downloadFile(webSearchResult.getFullUrl(), new IOUtils.ProgressListener() {
@@ -122,33 +154,61 @@ public class WebSearchPreviewFragment extends TelegramFragment {
                                 }
                             });
                         }
-                        String fileName = getUploadTempFile("upload.jpg");
-                        IOUtils.writeAll(fileName, data);
-                        application.getUiKernel().getWebImageStorage().saveFile(webSearchResult.getFullUrl(), data);
 
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                            return;
+                        }
+                        continue;
+                    }
+
+                    try {
                         if (webSearchResult.getContentType().equals("image/gif")) {
+                            final Movie movie = Movie.decodeByteArray(data, 0, data.length);
+                            if (movie == null) {
+                                throw new Exception("unable to load gif");
+                            }
+                            String fileName = getUploadTempFile("upload.gif");
+                            IOUtils.writeAll(fileName, data);
+                            application.getUiKernel().getWebImageStorage().saveFile(webSearchResult.getFullUrl(), data);
                             secureCallback(new Runnable() {
                                 @Override
                                 public void run() {
                                     goneView(progressBar);
                                     goneView(preview);
-                                    gifView.loadGif(application.getUiKernel().getWebImageStorage().getImageFileName(webSearchResult.getFullUrl()));
+                                    gifView.loadGif(movie);
                                 }
                             });
                         } else {
-                            final Bitmap bitmap = Optimizer.optimize(data);
+                            final Bitmap res = Optimizer.optimize(data);
+                            if (res == null) {
+                                throw new Exception("unable to load image");
+                            }
+                            String fileName = getUploadTempFile("upload.jpg");
+                            IOUtils.writeAll(fileName, data);
+                            application.getUiKernel().getWebImageStorage().saveFile(webSearchResult.getFullUrl(), data);
                             secureCallback(new Runnable() {
                                 @Override
                                 public void run() {
                                     goneView(progressBar);
                                     goneView(preview);
-                                    imageView.setImageBitmap(bitmap);
+                                    imageView.setImageBitmap(res);
                                 }
                             });
                         }
+                    } catch (Throwable e) {
+                        secureCallback(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), R.string.st_error_download_image, Toast.LENGTH_LONG).show();
+                                goneView(progressBar);
+                            }
+                        });
                         return;
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
                 }
             }

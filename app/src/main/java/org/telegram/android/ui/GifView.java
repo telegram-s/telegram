@@ -31,6 +31,14 @@ public class GifView extends View {
         super(context, attrs, defStyleAttr);
     }
 
+    public void loadGif(final Movie movie) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        }
+        this.movie = movie;
+        postInvalidate();
+    }
+
     public void loadGif(final String fileName) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             setLayerType(LAYER_TYPE_SOFTWARE, null);

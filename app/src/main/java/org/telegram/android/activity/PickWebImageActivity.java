@@ -18,11 +18,12 @@ import java.util.concurrent.Executors;
  */
 public class PickWebImageActivity extends TelegramActivity {
 
-    private Executor executor = Executors.newSingleThreadExecutor();
+    private boolean isStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setBarBg(true);
         getSupportActionBar().show();
 
         setContentView(R.layout.activity_web_search);
@@ -71,6 +72,7 @@ public class PickWebImageActivity extends TelegramActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setBarBg();
+        setBarBg(!isStarted);
+        isStarted = true;
     }
 }

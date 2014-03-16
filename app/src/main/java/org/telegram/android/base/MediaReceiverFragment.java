@@ -145,8 +145,8 @@ public class MediaReceiverFragment extends TelegramFragment {
         final Uri fileUri = Uri.fromFile(new File(imageFileName));
 
         ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
-        items.add(new PickIntentItem(R.drawable.app_icon, "WebSearch").setIntent(
-                new Intent().setClass(getActivity(), PickWebImageActivity.class)));
+//        items.add(new PickIntentItem(R.drawable.app_icon, "WebSearch").setIntent(
+//                new Intent().setClass(getActivity(), PickWebImageActivity.class)));
         Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
         Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
                 .setType("image/*")));

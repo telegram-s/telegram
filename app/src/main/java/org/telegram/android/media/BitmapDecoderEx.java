@@ -31,8 +31,8 @@ public class BitmapDecoderEx {
         Optimizer.BitmapInfo bitmapInfo = Optimizer.getInfo(fileName);
         int scale = 1;
         while ((bitmapInfo.getWidth() / scale > dest.getWidth() ||
-                bitmapInfo.getHeight() / scale > dest.getHeight()) && scale <= 8) {
-            scale++;
+                bitmapInfo.getHeight() / scale > dest.getHeight()) && scale <= 16) {
+            scale *= 2;
         }
         if (scale == 1) {
             nativeDecodeBitmap(fileName, dest);
