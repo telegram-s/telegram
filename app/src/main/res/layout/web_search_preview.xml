@@ -27,8 +27,16 @@
                  android:id="@+id/loading"
                  style="@style/Widget.Sherlock.Light.ProgressBar.Horizontal"/>
 
-    <Button android:layout_width="fill_parent" android:layout_height="wrap_content"
+    <Button android:layout_width="fill_parent"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginBottom="10dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:text="Send"
-            android:id="@+id/sendImage"/>
+            android:textColor="@color/st_location_text"
+            android:text="@string/st_web_search_send"
+            android:textSize="18sp"
+            android:id="@+id/sendImage"
+            android:background="@drawable/st_location_send"/>
+
 </FrameLayout>
