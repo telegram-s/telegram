@@ -1,43 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="lang_seconds">
-        <item quantity="zero">second</item>
         <item quantity="one">one second</item>
         <item quantity="other">{d} seconds</item>
     </plurals>
 
     <plurals name="lang_minutes">
-        <item quantity="zero">minute</item>
         <item quantity="one">one minute</item>
         <item quantity="other">{d} minutes</item>
     </plurals>
 
     <plurals name="lang_hours">
-        <item quantity="zero">hour</item>
         <item quantity="one">one hour</item>
         <item quantity="other">{d} hours</item>
     </plurals>
 
     <plurals name="lang_days">
-        <item quantity="zero">day</item>
         <item quantity="one">one day</item>
         <item quantity="other">{d} days</item>
     </plurals>
 
     <plurals name="lang_week">
-        <item quantity="zero">week</item>
         <item quantity="one">one week</item>
         <item quantity="other">{d} weeks</item>
     </plurals>
 
     <plurals name="lang_month">
-        <item quantity="zero">month</item>
         <item quantity="one">one month</item>
         <item quantity="other">{d} months</item>
     </plurals>
 
     <plurals name="lang_year">
-        <item quantity="zero">year</item>
         <item quantity="one">one year</item>
         <item quantity="other">{d} years</item>
     </plurals>
