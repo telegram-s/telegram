@@ -321,7 +321,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         if (photo instanceof TLLocalAvatarPhoto) {
             if (!loader.requestAvatar(
                     ((TLLocalAvatarPhoto) photo).getPreviewLocation(),
-                    AvatarLoader.TYPE_MEDIUM,
+                    IS_LARGE ? AvatarLoader.TYPE_MEDIUM2 : AvatarLoader.TYPE_MEDIUM,
                     this)) {
                 releaseAvatar();
             }
@@ -710,12 +710,11 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
 
             if (IS_LARGE) {
                 layoutAvatarWidth = px(64);
-                layoutPadding = px(8);
-                layoutBodyPadding = layoutAvatarWidth + layoutPadding + px(10);
+                layoutPadding = application.getResources().getDimensionPixelSize(R.dimen.dialogs_padding);
+                layoutBodyPadding = layoutAvatarWidth + layoutPadding + px(12);
                 layoutAvatarTop = px(8);
-                layoutTitleTop = px(16);
-                layoutTitleTop = px(24);
-                layoutMainTop = px(46);
+                layoutTitleTop = px(34);
+                layoutMainTop = px(60);
                 layoutTimeTop = px(34);
 
                 layoutMarkTop = px(44);

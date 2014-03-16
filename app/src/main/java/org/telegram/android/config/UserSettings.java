@@ -65,7 +65,7 @@ public class UserSettings {
         showOnlyTelegramContacts = preferences.getBoolean("only_telegram", showOnlyTelegramContacts);
         bubbleFontSize = preferences.getInt("bubbleFontSize", bubbleFontSize);
         sendByEnter = preferences.getBoolean("sendByEnter", sendByEnter);
-        dialogItemSize = preferences.getInt("bubbleFontSize", dialogItemSize);
+        dialogItemSize = preferences.getInt("dialogItemSize", dialogItemSize);
         barColor = preferences.getInt("barColor", BAR_COLOR_DEFAULT);
     }
 
