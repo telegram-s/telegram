@@ -1,25 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <plurals name="st_members">
-        <item quantity="zero">unbekannt</item>
         <item quantity="one">ein Mitglied</item>
         <item quantity="other">{d} Mitglieder</item>
     </plurals>
 
     <plurals name="st_new_messages">
-        <item quantity="zero">KEINE NEUE NACHRICHT</item>
         <item quantity="one">EINE NEUE NACHRICHT</item>
         <item quantity="other">{d} NEUE NACHRICHTEN</item>
     </plurals>
 
     <plurals name="st_members_caps">
-        <item quantity="zero">UNBEKANNT</item>
         <item quantity="one">EIN MITGLIED</item>
         <item quantity="other">{d} MITGLIEDER</item>
     </plurals>
 
     <plurals name="st_dialogs">
-        <item quantity="zero"></item>
         <item quantity="one">{d} Chat</item>
         <item quantity="other">{d} Chats</item>
     </plurals>

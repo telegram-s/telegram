@@ -7,8 +7,8 @@
     <string name="lang_common_and_short">{content1}و{content2}</string>
 
     <string name="lang_common_online_templates_now">آخر ظهور {time}</string>
-    <string name="lang_common_online_templates_date">@string/lang_common_online_templates_now</string>
-    <string name="lang_common_online_templates_time">@string/lang_common_online_templates_now</string>
+    <string name="lang_common_online_templates_date">آخر ظهور {time}</string>
+    <string name="lang_common_online_templates_time">آخر ظهور {time}</string>
 
     <string name="lang_common_online_now">قبل قليل</string>
     <string name="lang_common_online_ago">{time} مسبقًا</string>

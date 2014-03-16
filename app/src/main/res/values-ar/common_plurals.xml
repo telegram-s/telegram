@@ -57,6 +57,7 @@
         <item quantity="other">{d} سنة</item>
     </plurals>
     <plurals name="lang_more">
+        <item quantity="zero">شخص آخر</item>
         <item quantity="one">شخص آخر</item>
         <item quantity="two">شخصين</item>
         <item quantity="few">{d} أشخاص</item>
