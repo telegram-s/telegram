@@ -119,6 +119,7 @@ public class WebSearchPreviewFragment extends TelegramFragment {
                             IOUtils.writeAll(fileName, data);
                             application.getUiKernel().getWebImageStorage().saveFile(webSearchResult.getFullUrl(), data);
                             application.getDataSourceKernel().getWebSearchSource().onSearchResultSent(webSearchResult.toTlResult());
+                            application.getDataSourceKernel().getWebSearchSource().cancelQuery();
                         } catch (Throwable e) {
                             throw new AsyncException(getStringSafe(R.string.st_error_download_image));
                         }
