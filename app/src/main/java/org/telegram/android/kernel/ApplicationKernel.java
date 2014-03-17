@@ -50,10 +50,16 @@ public class ApplicationKernel {
 
     private volatile ActivationController activationController;
 
+    private volatile ActorKernel actorKernel;
+
     public ApplicationKernel(TelegramApplication application) {
         this.application = application;
         initLogging();
         Logger.d(TAG, "--------------- Kernel Created ------------------");
+    }
+
+    public ActorKernel getActorKernel() {
+        return actorKernel;
     }
 
     public TelegramApplication getApplication() {
@@ -144,6 +150,13 @@ public class ApplicationKernel {
         });
     }
 
+    public void initActorKernel() {
+        long start = SystemClock.uptimeMillis();
+        actorKernel = new ActorKernel(this);
+        actorKernel.create();
+        Logger.d(TAG, "TechKernel init in " + (SystemClock.uptimeMillis() - start) + " ms");
+    }
+
     public void initTechKernel() {
         long start = SystemClock.uptimeMillis();
         techKernel = new TechKernel(application);
@@ -224,6 +237,7 @@ public class ApplicationKernel {
     public void runKernels() {
         long kernelsStart = SystemClock.uptimeMillis();
         long start = SystemClock.uptimeMillis();
+        actorKernel.runKernel();
         storageKernel.runKernel();
         Logger.d(TAG, "Storate run in " + (SystemClock.uptimeMillis() - start) + " ms");
         start = SystemClock.uptimeMillis();

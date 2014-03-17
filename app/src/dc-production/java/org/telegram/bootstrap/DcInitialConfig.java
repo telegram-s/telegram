@@ -5,5 +5,5 @@ package org.telegram.bootstrap;
  */
 public class DcInitialConfig {
     public static final int PORT = 443;
-    public static final String ADDRESS = "173.240.5.1";
+    public static final String ADDRESS = "109.239.131.193";
 }

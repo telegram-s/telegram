@@ -70,6 +70,7 @@ public class KernelsLoader {
         // None of this objects starts doing something in background until someone ack them about this
         // At this stage nothing might request for data from storage kernel
         kernel.initTechKernel(); // Technical information about environment. Might be loaded first.
+        kernel.initActorKernel();// Actor system init
         kernel.initLifeKernel(); // Keeping application alive
         kernel.initBasicUiKernel(); // UI state objects, eg opened page, app state
 
@@ -139,6 +140,7 @@ public class KernelsLoader {
 
         // None of this objects starts doing something in background until someone ack them about this
         kernel.initTechKernel(); // Technical information about environment. Might be loaded first.
+        kernel.initActorKernel();// Actor system init
         kernel.initLifeKernel(); // Keeping application alive
         kernel.initBasicUiKernel(); // UI state objects, eg opened page, app state
 

@@ -9,7 +9,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.*;
 import android.text.*;
@@ -30,6 +29,7 @@ import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.config.DebugSettings;
 import org.telegram.android.core.*;
+import org.telegram.android.core.audio.VoiceCaptureActor;
 import org.telegram.android.core.background.AvatarUploader;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.file.AbsFileSource;
@@ -121,9 +121,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private View audioRecordContainer;
     private TextView audioRecordTimer;
-    private MediaRecorder audioRecorder;
     private String audioFile;
-    private long audioStart;
     private Handler handler = new Handler(Looper.getMainLooper());
 
     private Runnable updateTimer = new Runnable() {
@@ -131,9 +129,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         public void run() {
             updateAudioUi();
             handler.removeCallbacks(this);
-            if (audioRecorder != null) {
-                handler.postDelayed(this, 1000);
-            }
+//            if (application.getUiKernel().getVoiceRecorder().isStarted()) {
+//                handler.postDelayed(this, 1000);
+//            }
         }
     };
 
@@ -924,63 +922,48 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     }
 
     private void startAudio() {
-        if (audioRecorder != null) {
-            updateAudioUi();
-            return;
-        }
-
         try {
             audioFile = getUploadTempAudioFile();
-            audioRecorder = new MediaRecorder();
-            audioRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            audioRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            audioRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            audioRecorder.setOutputFile(audioFile);
-            audioRecorder.prepare();
-            audioRecorder.start();
-            audioStart = SystemClock.uptimeMillis();
+            //application.getUiKernel().getVoiceRecorder().startRecord(audioFile);
+            // application.getUiKernel().getVoiceRecorder().startRecord("/sdcard/mic_record.pcm");
+            application.getKernel().getActorKernel().getVoiceCaptureActor().sendMessage(new
+                    VoiceCaptureActor.StartMessage("/sdcard/mic_record.pcm"));
         } catch (Exception e) {
-            audioRecorder = null;
             audioFile = null;
         }
         updateTimer.run();
     }
 
     private void sendAudio() {
-        if (audioRecorder == null) {
-            updateAudioUi();
-            return;
-        }
-
-        audioRecorder.stop();
-        audioRecorder = null;
+        // long duration = application.getUiKernel().getVoiceRecorder().currentDuration();
+        long duration = 3000;
+        application.getKernel().getActorKernel().getVoiceCaptureActor().sendMessage(
+                new VoiceCaptureActor.StopMessage()
+        );
+        // application.getUiKernel().getVoiceRecorder().stopRecord();
 
         application.getEngine().sendAudio(peerType, peerId,
-                new TLUploadingAudio(audioFile, (int) ((SystemClock.uptimeMillis() - audioStart) / 1000)));
+                new TLUploadingAudio(audioFile, (int) ((duration) / 1000)));
 
         updateAudioUi();
     }
 
     private void cancelAudio() {
-        if (audioRecorder == null) {
-            updateAudioUi();
-            return;
-        }
-
-        audioRecorder.stop();
-        audioRecorder = null;
-
+        // application.getUiKernel().getVoiceRecorder().stopRecord();
+        application.getKernel().getActorKernel().getVoiceCaptureActor().sendMessage(
+                new VoiceCaptureActor.StopMessage()
+        );
         updateAudioUi();
     }
 
     private void updateAudioUi() {
-        if (audioRecorder == null) {
+        if (!application.getKernel().getActorKernel().getVoiceCaptureActor().isStarted()) {
             // Hide
             audioRecordContainer.setVisibility(View.GONE);
         } else {
             // Show
             audioRecordContainer.setVisibility(View.VISIBLE);
-            audioRecordTimer.setText(TextUtil.formatDuration((int) ((SystemClock.uptimeMillis() - audioStart) / 1000)));
+            // audioRecordTimer.setText(TextUtil.formatDuration((int) ((application.getUiKernel().getVoiceRecorder().currentDuration()) / 1000)));
         }
     }
 
@@ -1063,7 +1046,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         menu.findItem(R.id.attachAudio).setTitle(highlightMenuText(R.string.st_conv_menu_audio));
         menu.findItem(R.id.attachWebImage).setTitle(highlightMenuText(R.string.st_conv_menu_web));
 
-        menu.findItem(R.id.attachAudio).setVisible(false);
+        // menu.findItem(R.id.attachAudio).setVisible(false);
 
         MenuItem avatarItem = menu.findItem(R.id.userAvatar);
         View avatarUploadView = avatarItem.getActionView().findViewById(R.id.avatarUploadProgress);

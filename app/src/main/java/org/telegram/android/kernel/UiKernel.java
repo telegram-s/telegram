@@ -13,6 +13,7 @@ import org.telegram.android.core.Notifications;
 import org.telegram.android.core.TextSaver;
 import org.telegram.android.core.model.PeerType;
 import org.telegram.android.log.Logger;
+import org.telegram.android.core.audio.VoiceRecorder;
 import org.telegram.android.preview.AvatarLoader;
 import org.telegram.android.preview.MediaLoader;
 import org.telegram.android.preview.WallpaperLoader;
@@ -73,6 +74,8 @@ public class UiKernel {
     public boolean isAppActive = true;
     public long lastStartTime;
 
+    private VoiceRecorder voiceRecorder;
+
     public UiKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
         this.application = kernel.getApplication();
@@ -124,8 +127,13 @@ public class UiKernel {
 
         start = SystemClock.uptimeMillis();
         ApiUtils.init(application, kernel.getTechKernel().getTechReflection().getScreenSize());
+        voiceRecorder = new VoiceRecorder();
         Logger.d(TAG, "Misc UI4 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
+    }
+
+    public VoiceRecorder getVoiceRecorder() {
+        return voiceRecorder;
     }
 
     public MediaLoader getMediaLoader() {
