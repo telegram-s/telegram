@@ -32,7 +32,7 @@
 
     <color name="st_section_title">#333333</color>
     <color name="st_section_title_disabled">#cccccc</color>
-    <color name="st_section_subtitle">#4b4b4b</color>
+    <color name="st_section_subtitle">#9c9c9c</color>
     <color name="st_section_value">#999999</color>
     <color name="st_section_value_disabled">#e1e1e1</color>
 
