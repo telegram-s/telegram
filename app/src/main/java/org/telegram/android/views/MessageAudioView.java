@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.AttributeSet;
 import org.telegram.android.R;
+import org.telegram.android.core.audio.AudioPlayerActor;
 import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLUploadingDocument;
 import org.telegram.android.core.wireframes.MessageWireframe;
@@ -101,83 +102,86 @@ public class MessageAudioView extends MessageBaseDocView {
     }
 
     public void play() {
-        if (lastDatabaseId != databaseId) {
-            lastDatabaseId = databaseId;
-
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
-                mediaPlayer.reset();
-                mediaPlayer.release();
-                mediaPlayer = null;
-
-                if (lastView != null) {
-                    MessageAudioView view = lastView.get();
-                    if (view != null) {
-                        view.postInvalidate();
-                    }
-                }
-            }
-
-            lastView = new WeakReference<MessageAudioView>(this);
-
-            audioLoader.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (lastDatabaseId != databaseId) {
-                        return;
-                    }
-                    try {
-                        MediaPlayer mplayer = new MediaPlayer();
-                        mplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mplayer.setDataSource(application,
-                                Uri.fromFile(new File(application.getDownloadManager().getFileName(getDownloadKey()))));
-                        mplayer.prepare();
-                        mplayer.setLooping(false);
-                        mplayer.start();
-                        mplayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                if (lastDatabaseId != databaseId) {
-                                    return;
-                                }
-                                mediaPlayer.stop();
-                                mediaPlayer.reset();
-                                mediaPlayer.release();
-                                mediaPlayer = null;
-                                lastDatabaseId = 0;
-                                if (lastView != null) {
-                                    MessageAudioView view = lastView.get();
-                                    if (view != null) {
-                                        view.postInvalidate();
-                                    }
-                                    lastView = null;
-                                }
-                                postInvalidate();
-                            }
-                        });
-
-                        if (lastDatabaseId != databaseId) {
-                            return;
-                        }
-
-                        mediaPlayer = mplayer;
-                        postInvalidate();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        } else {
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
-                mediaPlayer.reset();
-                mediaPlayer.release();
-                lastView = null;
-                mediaPlayer = null;
-            }
-            lastDatabaseId = 0;
-            invalidate();
-        }
+        application.getKernel().getActorKernel().getAudioPlayerActor().sendMessage(
+                new AudioPlayerActor.PlayAudio(application.getDownloadManager().getFileName(getDownloadKey()))
+        );
+//        if (lastDatabaseId != databaseId) {
+//            lastDatabaseId = databaseId;
+//
+//            if (mediaPlayer != null) {
+//                mediaPlayer.stop();
+//                mediaPlayer.reset();
+//                mediaPlayer.release();
+//                mediaPlayer = null;
+//
+//                if (lastView != null) {
+//                    MessageAudioView view = lastView.get();
+//                    if (view != null) {
+//                        view.postInvalidate();
+//                    }
+//                }
+//            }
+//
+//            lastView = new WeakReference<MessageAudioView>(this);
+//
+//            audioLoader.execute(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (lastDatabaseId != databaseId) {
+//                        return;
+//                    }
+//                    try {
+//                        MediaPlayer mplayer = new MediaPlayer();
+//                        mplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//                        mplayer.setDataSource(application,
+//                                Uri.fromFile(new File(application.getDownloadManager().getFileName(getDownloadKey()))));
+//                        mplayer.prepare();
+//                        mplayer.setLooping(false);
+//                        mplayer.start();
+//                        mplayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                            @Override
+//                            public void onCompletion(MediaPlayer mp) {
+//                                if (lastDatabaseId != databaseId) {
+//                                    return;
+//                                }
+//                                mediaPlayer.stop();
+//                                mediaPlayer.reset();
+//                                mediaPlayer.release();
+//                                mediaPlayer = null;
+//                                lastDatabaseId = 0;
+//                                if (lastView != null) {
+//                                    MessageAudioView view = lastView.get();
+//                                    if (view != null) {
+//                                        view.postInvalidate();
+//                                    }
+//                                    lastView = null;
+//                                }
+//                                postInvalidate();
+//                            }
+//                        });
+//
+//                        if (lastDatabaseId != databaseId) {
+//                            return;
+//                        }
+//
+//                        mediaPlayer = mplayer;
+//                        postInvalidate();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            });
+//        } else {
+//            if (mediaPlayer != null) {
+//                mediaPlayer.stop();
+//                mediaPlayer.reset();
+//                mediaPlayer.release();
+//                lastView = null;
+//                mediaPlayer = null;
+//            }
+//            lastDatabaseId = 0;
+//            invalidate();
+//        }
     }
 
     @Override

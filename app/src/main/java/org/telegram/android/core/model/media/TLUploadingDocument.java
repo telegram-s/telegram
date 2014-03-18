@@ -67,9 +67,13 @@ public class TLUploadingDocument extends TLObject {
             }
 
             if (ext != null && ext.length() > 0) {
-                String nMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
-                if (nMimeType != null) {
-                    mimeType = nMimeType;
+                if (ext.equals("opus")) {
+                    mimeType = "audio/ogg";
+                } else {
+                    String nMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+                    if (nMimeType != null) {
+                        mimeType = nMimeType;
+                    }
                 }
             }
         }

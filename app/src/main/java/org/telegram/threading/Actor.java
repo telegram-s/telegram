@@ -9,12 +9,12 @@ public abstract class Actor<T> {
     private boolean isAlive = true;
 
     public Actor(ActorSystem system, String name) {
-        this(system.findThread(name));
-        actorSystem = system;
-    }
-
-    private Actor(ActorThread thread) {
+        ActorThread thread = system.findThread(name);
+        if (thread == null) {
+            throw new RuntimeException("Unable to find thread '" + name + "'");
+        }
         reference = new ActorReference(this, thread);
+        actorSystem = system;
     }
 
     public abstract void receive(T message, Actor sender) throws Exception;

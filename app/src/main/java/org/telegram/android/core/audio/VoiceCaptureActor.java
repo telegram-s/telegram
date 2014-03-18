@@ -27,11 +27,10 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
 
     private AudioRecord audioRecord;
     private String fileName;
-    private FileWriterActor writerActor;
+    // private FileWriterActor writerActor;
+    private OpusEncoder opusActor;
     private int bufferSize;
     private TelegramApplication application;
-    private OpusLib opusLib = new OpusLib();
-    private ByteBuffer fileBuffer = ByteBuffer.allocateDirect(1920);
 
     public VoiceCaptureActor(TelegramApplication application, ActorSystem system) {
         super(system, "audio");
@@ -54,11 +53,10 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
             audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 16000, AudioFormat.CHANNEL_IN_MONO,
                     AudioFormat.ENCODING_PCM_16BIT, bufferSize);
             audioRecord.startRecording();
-            writerActor = new FileWriterActor(actorSystem);
-            writerActor.sendMessage(new FileWriterActor.StartMessage(fileName));
-            int res = opusLib.startRecord(fileName + ".opus");
-            Logger.d("VoiceCapture", "Start record: " + res);
-            fileBuffer.rewind();
+            opusActor = new OpusEncoder(actorSystem);
+            opusActor.sendMessage(new OpusEncoder.StartMessage(fileName + ".opus"));
+            // writerActor = new FileWriterActor(actorSystem);
+            // writerActor.sendMessage(new FileWriterActor.StartMessage(fileName));
             state = STATE_STARTED;
             vibrate();
             sendMessage(new ReadMessage());
@@ -70,33 +68,8 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
             byte[] buffer = VoiceBuffers.getInstance().obtainBuffer(BUFFER_SIZE);
             int len = audioRecord.read(buffer, 0, buffer.length);
             if (len > 0) {
-                // Forward data to child actor
-                ByteBuffer finalBuffer = ByteBuffer.allocateDirect(len);
-                finalBuffer.put(buffer, 0, len);
-                finalBuffer.rewind();
-                boolean flush = false;
-
-                while (finalBuffer.hasRemaining()) {
-                    int oldLimit = -1;
-                    if (finalBuffer.remaining() > fileBuffer.remaining()) {
-                        oldLimit = finalBuffer.limit();
-                        finalBuffer.limit(fileBuffer.remaining() + finalBuffer.position());
-                    }
-                    fileBuffer.put(finalBuffer);
-                    if (fileBuffer.position() == fileBuffer.limit() || flush) {
-                        if (opusLib.writeFrame(fileBuffer, !flush ? fileBuffer.limit() : finalBuffer.position()) != 0) {
-                            fileBuffer.rewind();
-                            // recordTimeCount += fileBuffer.limit() / 2 / 16;
-                        }
-                    }
-                    if (oldLimit != -1) {
-                        finalBuffer.limit(oldLimit);
-                    }
-                }
-
-                // int res = opusLib.writeFrame(byteBuffer, len);
-                // Logger.d("VoiceCapture", "Write frame: " + res);
-                writerActor.sendMessage(new FileWriterActor.WriteMessage(buffer, len));
+                // writerActor.sendMessage(new FileWriterActor.WriteMessage(buffer, len));
+                opusActor.sendMessage(new OpusEncoder.WriteMessage(buffer, len));
             } else {
                 VoiceBuffers.getInstance().releaseBuffer(buffer);
             }
@@ -106,9 +79,10 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
                 return;
             }
             audioRecord.stop();
+            audioRecord.release();
             audioRecord = null;
-            opusLib.stopRecord();
-            writerActor.sendMessage(new FileWriterActor.StopMessage());
+            opusActor.sendMessage(new OpusEncoder.StopMessage());
+            // writerActor.sendMessage(new FileWriterActor.StopMessage());
             state = STATE_STOPPED;
         }
     }
