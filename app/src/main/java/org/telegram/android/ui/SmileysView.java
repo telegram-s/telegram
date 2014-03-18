@@ -113,8 +113,8 @@ public class SmileysView extends View {
                 if (!canvas.quickReject(rect.left, rect.top, rect.right, rect.bottom, Canvas.EdgeType.AA)) {
                     Bitmap img = processor.getSection(smileysSections[i]);
                     if (img != null) {
-                        sectionRect.set(smileysX[i] * smileySrcSize, smileysY[i] * smileySrcSize,
-                                (smileysX[i] + 1) * smileySrcSize, (smileysY[i] + 1) * smileySrcSize);
+                        sectionRect.set(smileysX[i] * smileySrcSize + 1, smileysY[i] * smileySrcSize + 1,
+                                (smileysX[i] + 1) * smileySrcSize - 1, (smileysY[i] + 1) * smileySrcSize - 1);
                         canvas.drawBitmap(img, sectionRect, rect, paint);
                     }
                 }

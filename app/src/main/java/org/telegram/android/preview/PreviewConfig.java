@@ -12,8 +12,8 @@ public class PreviewConfig {
     private static final int WALLPAPER_S_W_DP = 100;
     private static final int WALLPAPER_S_H_DP = 100;
 
-    private static final int MIN_PREVIEW_W_DP = 100;
-    private static final int MIN_PREVIEW_H_DP = 40;
+    private static final int MIN_PREVIEW_W_DP = 200;
+    private static final int MIN_PREVIEW_H_DP = 100;
 
     private static final int MAX_PREVIEW_W_DP = 240;
     private static final int MAX_PREVIEW_H_DP = 300;

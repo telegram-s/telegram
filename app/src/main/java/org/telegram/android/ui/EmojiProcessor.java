@@ -287,24 +287,29 @@ public class EmojiProcessor {
                             break;
                     }
 
-                    File sourceFile = application.getFileStreamPath("emoji_c.jpg");
+                    File sourceFile = application.getFileStreamPath(fileName);
                     if (!sourceFile.exists()) {
                         InputStream colorsIs = EmojiProcessor.this.application.getAssets().open(fileName);
                         IOUtils.copy(colorsIs, sourceFile);
                         colorsIs.close();
                     }
 
-                    File sourceAlphaFile = application.getFileStreamPath("emoji_a.jpg");
+                    File sourceAlphaFile = application.getFileStreamPath(fileNameAlpha);
                     if (!sourceAlphaFile.exists()) {
                         InputStream colorsIs = EmojiProcessor.this.application.getAssets().open(fileNameAlpha);
                         IOUtils.copy(colorsIs, sourceAlphaFile);
                         colorsIs.close();
                     }
 
-                    Bitmap colorsBitmap = !useScale
-                            ? Optimizer.load(sourceFile.getAbsolutePath())
-                            : Optimizer.loadX2(sourceFile.getAbsolutePath());
-                    colorsBitmap.setHasAlpha(true);
+                    Optimizer.BitmapInfo info = Optimizer.getInfo(sourceFile.getAbsolutePath());
+                    int w = useScale ? info.getWidth() / 2 : info.getWidth();
+                    int h = useScale ? info.getHeight() / 2 : info.getHeight();
+
+                    Bitmap colorsBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    BitmapDecoderEx.decodeReuseBitmapScaled(sourceFile.getAbsolutePath(), colorsBitmap);
+                    if (Build.VERSION.SDK_INT >= 12) {
+                        colorsBitmap.setHasAlpha(true);
+                    }
 
                     BitmapDecoderEx.decodeReuseBitmapBlend(sourceAlphaFile.getAbsolutePath(), colorsBitmap, useScale);
 

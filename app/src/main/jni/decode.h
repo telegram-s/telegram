@@ -120,6 +120,11 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
     jpeg_stdio_src(&cinfo, infile);
     (void) jpeg_read_header(&cinfo, TRUE);
 
+    if (scale == JNI_TRUE) {
+        cinfo.scale_denom = 2;
+        cinfo.scale_num = 1;
+    }
+
     (void) jpeg_start_decompress(&cinfo);
 
     row_stride = cinfo.output_width * cinfo.output_components;
@@ -130,37 +135,16 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
     rowIndex = 0;
     uint32_t* line = (uint32_t*)pixels;
     rw = cinfo.output_width;
-    if (scale == JNI_TRUE)
-    {
-        rw = rw >> 1;
-    }
     while (cinfo.output_scanline < cinfo.output_height) {
-        if (scale) {
-            (void) jpeg_read_scanlines(&cinfo, buffer, 1);
-        }
         (void) jpeg_read_scanlines(&cinfo, buffer, 1);
-
-        if (rowIndex++ < info.height) {
-            if (scale == JNI_TRUE) {
-                for(i = 0; i < MIN(info.width, rw); i++) {
-                    a = buffer[0][i * 2];
-                    r = (R(line[i]) * a) >> 8;
-                    g = (G(line[i]) * a) >> 8;
-                    b = (B(line[i]) * a) >> 8;
-                    line[i] = ARGB(a, r, g, b);
-                }
-            }
-            else{
-                for(i = 0; i < MIN(info.width, rw); i++) {
-                    a = buffer[0][i];
-                    r = (R(line[i]) * a) >> 8;
-                    g = (G(line[i]) * a) >> 8;
-                    b = (B(line[i]) * a) >> 8;
-                    line[i] = ARGB(a, r, g, b);
-                }
-            }
-            line = (char*)line + (info.stride);
+        for(i = 0; i < info.width; i++) {
+            a = buffer[0][i*3+1]; // Green component
+            r = (R(line[i]) * a) >> 8;
+            g = (G(line[i]) * a) >> 8;
+            b = (B(line[i]) * a) >> 8;
+            line[i] = ARGB(a, r, g, b);
         }
+        line = (char*)line + (info.stride);
     }
 
     (void) jpeg_finish_decompress(&cinfo);
@@ -407,8 +391,6 @@ JNIEXPORT void Java_org_telegram_android_media_BitmapDecoderEx_nativeDecodeBitma
     cinfo.scale_num = 1;
 
     (void) jpeg_start_decompress(&cinfo);
-
-    LOGD("Scaled size %dx%d",cinfo.output_width, cinfo.output_height);
 
     row_stride = cinfo.output_width * cinfo.output_components;
 
