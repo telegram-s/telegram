@@ -203,6 +203,15 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         }
 
         // Current version
+        if (prevVersionCode < 1169) {
+            definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_web_search),
+                    new String[]{
+                            getString(R.string.whats_web_search_0),
+                            getString(R.string.whats_web_search_1),
+                            getString(R.string.whats_web_search_2),
+                    }, null));
+        }
+
         if (prevVersionCode < 1040) {
             definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_new_spain_title),
                     new String[]{
