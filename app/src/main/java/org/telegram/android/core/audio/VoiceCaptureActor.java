@@ -6,8 +6,12 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Vibrator;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.log.Logger;
+import org.telegram.opus.OpusLib;
 import org.telegram.threading.Actor;
 import org.telegram.threading.ActorSystem;
+
+import java.nio.ByteBuffer;
 
 /**
  * Created by ex3ndr on 17.03.14.
@@ -26,6 +30,8 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
     private FileWriterActor writerActor;
     private int bufferSize;
     private TelegramApplication application;
+    private OpusLib opusLib = new OpusLib();
+    private ByteBuffer fileBuffer = ByteBuffer.allocateDirect(1920);
 
     public VoiceCaptureActor(TelegramApplication application, ActorSystem system) {
         super(system, "audio");
@@ -42,13 +48,17 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
             if (state == STATE_STARTED) {
                 return;
             }
-            int minBufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+            fileName = ((StartMessage) message).fileName;
+            int minBufferSize = AudioRecord.getMinBufferSize(16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
             bufferSize = 16 * minBufferSize;
-            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100, AudioFormat.CHANNEL_IN_MONO,
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 16000, AudioFormat.CHANNEL_IN_MONO,
                     AudioFormat.ENCODING_PCM_16BIT, bufferSize);
             audioRecord.startRecording();
             writerActor = new FileWriterActor(actorSystem);
-            writerActor.sendMessage(new FileWriterActor.StartMessage(((StartMessage) message).fileName));
+            writerActor.sendMessage(new FileWriterActor.StartMessage(fileName));
+            int res = opusLib.startRecord(fileName + ".opus");
+            Logger.d("VoiceCapture", "Start record: " + res);
+            fileBuffer.rewind();
             state = STATE_STARTED;
             vibrate();
             sendMessage(new ReadMessage());
@@ -61,6 +71,31 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
             int len = audioRecord.read(buffer, 0, buffer.length);
             if (len > 0) {
                 // Forward data to child actor
+                ByteBuffer finalBuffer = ByteBuffer.allocateDirect(len);
+                finalBuffer.put(buffer, 0, len);
+                finalBuffer.rewind();
+                boolean flush = false;
+
+                while (finalBuffer.hasRemaining()) {
+                    int oldLimit = -1;
+                    if (finalBuffer.remaining() > fileBuffer.remaining()) {
+                        oldLimit = finalBuffer.limit();
+                        finalBuffer.limit(fileBuffer.remaining() + finalBuffer.position());
+                    }
+                    fileBuffer.put(finalBuffer);
+                    if (fileBuffer.position() == fileBuffer.limit() || flush) {
+                        if (opusLib.writeFrame(fileBuffer, !flush ? fileBuffer.limit() : finalBuffer.position()) != 0) {
+                            fileBuffer.rewind();
+                            // recordTimeCount += fileBuffer.limit() / 2 / 16;
+                        }
+                    }
+                    if (oldLimit != -1) {
+                        finalBuffer.limit(oldLimit);
+                    }
+                }
+
+                // int res = opusLib.writeFrame(byteBuffer, len);
+                // Logger.d("VoiceCapture", "Write frame: " + res);
                 writerActor.sendMessage(new FileWriterActor.WriteMessage(buffer, len));
             } else {
                 VoiceBuffers.getInstance().releaseBuffer(buffer);
@@ -72,6 +107,7 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
             }
             audioRecord.stop();
             audioRecord = null;
+            opusLib.stopRecord();
             writerActor.sendMessage(new FileWriterActor.StopMessage());
             state = STATE_STOPPED;
         }
