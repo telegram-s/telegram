@@ -247,7 +247,7 @@
     <string name="st_settings_name_empty_last">Please add a last name</string>
 
     <string name="st_new_group_title">New group</string>
-    <string name="st_new_group_hint">Add memebers...</string>
+    <string name="st_new_group_hint">Add members...</string>
     <string name="st_new_group_maximum">This group is full</string>
     <string name="st_new_group_next">NEXT</string>
 

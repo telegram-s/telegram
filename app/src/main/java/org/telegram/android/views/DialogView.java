@@ -144,7 +144,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             titlePaint.setColor(0xff222222);
             if (IS_LARGE) {
                 titlePaint.setTextSize(sp(20f));
-                titlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
+                titlePaint.setTypeface(FontController.loadTypeface(context, "medium"));
             } else {
                 titlePaint.setTextSize(sp(18f));
                 titlePaint.setTypeface(FontController.loadTypeface(context, "medium"));
@@ -158,7 +158,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             titleHighlightPaint.setColor(0xff006FC8);
             if (IS_LARGE) {
                 titleHighlightPaint.setTextSize(sp(20f));
-                titleHighlightPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+                titleHighlightPaint.setTypeface(FontController.loadTypeface(context, "medium"));
             } else {
                 titleHighlightPaint.setTextSize(sp(18f));
                 titleHighlightPaint.setTypeface(FontController.loadTypeface(context, "medium"));
@@ -172,7 +172,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             titleEncryptedPaint.setColor(0xff368c3e);
             if (IS_LARGE) {
                 titleEncryptedPaint.setTextSize(sp(20f));
-                titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "regular"));
+                titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "medium"));
             } else {
                 titleEncryptedPaint.setTextSize(sp(18f));
                 titleEncryptedPaint.setTypeface(FontController.loadTypeface(context, "medium"));

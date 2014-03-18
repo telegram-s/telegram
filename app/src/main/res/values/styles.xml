@@ -19,6 +19,7 @@
         <item name="android:divider">@color/st_divider</item>
         <item name="android:dividerHeight">1dp</item>
         <item name="android:verticalScrollbarPosition">defaultPosition</item>
+        <item name="android:drawSelectorOnTop">false</item>
         <!--<item name="android:fastScrollThumbDrawable"/>-->
     </style>
 

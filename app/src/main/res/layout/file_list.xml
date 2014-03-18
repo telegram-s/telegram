@@ -6,7 +6,6 @@
               android:layout_height="match_parent"
               android:background="@android:color/white">
     <ListView android:layout_width="fill_parent" android:layout_height="fill_parent"
-              android:drawSelectorOnTop="true"
               android:divider="@drawable/st_divider_short"
               android:id="@+id/itemsList"/>
 </LinearLayout>

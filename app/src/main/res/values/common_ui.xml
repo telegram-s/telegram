@@ -14,7 +14,9 @@
     <color name="st_file_dir_bg">#f3f3f3</color>
 
     <!-- Selectors -->
-    <color name="st_selector">#1c000000</color>
+    <!--<color name="st_selector">#1c000000</color>-->
+    <!--<color name="st_selector_end">#1c000000</color>-->
+    <color name="st_selector">#08000000</color>
     <color name="st_selector_end">#1c000000</color>
     <color name="st_selector_avatar">#30000000</color>
 
