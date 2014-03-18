@@ -142,7 +142,7 @@
     <string name="st_auth_confirm_sms">Мы отправим бесплатную SMS с кодом активации.</string>
 
     <string name="st_auth_phone_title">Выберите страну, введите номер телефона и нажмите продолжить:</string>
-    <string name="st_auth_phone_hint">Телефонный номер</string>
+    <string name="st_auth_phone_hint">Телефон</string>
 
     <string name="st_auth_activating_manual">Введите код</string>
     <string name="st_auth_activating_title">Активация телефона…</string>
