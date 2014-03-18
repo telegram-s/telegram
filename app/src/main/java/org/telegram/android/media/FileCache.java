@@ -209,7 +209,7 @@ public class FileCache {
         }
         if (internalCachePath != null) {
             if (new File(internalCachePath + "/" + fileName).exists()) {
-                storage = STORAGE_CACHE_EXTERNAL;
+                storage = STORAGE_CACHE_INTERNAL;
             }
         }
         persistence.markDownloaded(fileName);
