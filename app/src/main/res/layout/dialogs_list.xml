@@ -11,7 +11,6 @@
               android:layout_width="fill_parent"
               android:cacheColorHint="@android:color/white"
               android:divider="@drawable/st_divider_short"
-              android:drawSelectorOnTop="true"
               android:id="@+id/dialogsList"/>
 
     <LinearLayout android:layout_width="wrap_content"

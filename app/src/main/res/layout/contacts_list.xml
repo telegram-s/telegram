@@ -12,7 +12,6 @@
                                        android:paddingLeft="@dimen/fast_scroll_padding_left"
                                        android:paddingRight="@dimen/fast_scroll_padding_right"
                                        android:scrollbarStyle="outsideOverlay"
-                                       android:drawSelectorOnTop="true"
                                        android:scrollbars="none"
                                        android:clipToPadding="false"
                                        android:fastScrollEnabled="true"

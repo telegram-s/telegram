@@ -259,7 +259,7 @@ public abstract class BaseDownloadView extends BaseMsgStateView {
                 }
 
                 downloadAnimatedProgress = newDownloadProgress;
-                Logger.d("BaseDownloadView", "downloadAnimatedProgress: " + downloadProgress + ", " + oldDownloadProgress + ", " + downloadAnimatedProgress);
+                // Logger.d("BaseDownloadView", "downloadAnimatedProgress: " + downloadProgress + ", " + oldDownloadProgress + ", " + downloadAnimatedProgress);
             }
         } else {
             isInStateSwitch = false;

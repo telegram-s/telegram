@@ -1,46 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <resources>
-    <!-- NEW LINES -->
-    <string name="whats_contacts_title">تحسينات في جهات الاتصال وسرعة تشغيل التطبيق</string>
-    <string name="whats_contacts_0">إمكانية حذف جهات اتصال</string>
-    <string name="whats_contacts_1">ترتيب جهات الاتصال كما في الجهاز</string>
-    <string name="whats_contacts_2">تحسينات في سرعة تشغيل وتحميل التطبيق</string>
-    
-    <string name="whats_new_design_title">تحسينات في التصميم والسرعة والاستقرار</string>
-    <string name="whats_new_design_0">تصميم أزرق جديد</string>
-    <string name="whats_new_design_1">تحسينات في سرعة توصيل الرسائل</string>
-    <string name="whats_new_design_2">تحسينات للدول التي تستخدم جدار ناري</string>
-    <string name="whats_new_design_3">تحسينات في استقرار وقوة التطبيق</string>
-    <!-- END NEW LINES -->
-
-    <string name="whats_new_secret_title">تم إضافة المحادثات السرية</string>
-    <string name="whats_new_secret_hint">يمكنك إنشاء محادثة سرية من خلال القائمة الرئيسية أو عن طريق صفحة معلومات جهة الاتصال.</string>
-    <string name="whats_new_secret_0">يستخدم التشفير من البداية للنهاية</string>
-    <string name="whats_new_secret_1">لا تترك أثرًا في خوادمنا</string>
-    <string name="whats_new_secret_2">تمتلك عداد للتدمير الذاتي</string>
-    <string name="whats_new_secret_3">تمتلك عداد للتدمير الذاتي</string>
-    <string name="whats_new_secret_4">لا تسمح بتحويل الرسائل</string>
-
-    <string name="whats_new_arabic_title">دعم الواجهة العربية بشكل كامل</string>
-    <string name="whats_new_arabic_hint">إذا كان لديك مشاكل مع الواجهة العربية، يمكنك كتابة آرائك ومقترحاتك لفريق الدعم الفني عن طريق صفحة الإعدادات في البرنامج.</string>
-    <string name="whats_new_arabic_0">دعم الواجهة من اليمين لليسار لأنظمة الأندرويد ٤.٠ وما بعد.</string>
-    <string name="whats_new_arabic_1">دعم الواجهة الانعكاسية لأنظمة الأندرويد ٤.٢ وما بعد.</string>
-    <string name="whats_new_arabic_2">دعم الأرقام الهندية بشكل كامل.</string>
-
-    <string name="whats_new_gif_title">الصور المتحركة واللغة الروسية وتحسين السرعة</string>
-    <string name="whats_new_gif_hint">
-        الصور المتحركة تعمل إذا كانت مرسلة من مستخدم يستخدم نسخة الإس. إذا واجهتم مشاكل في اللغة، لا تترددوا في التواصل مع الدعم الفني عن طريق إعدادات البرنامج.
-    </string>
-    <string name="whats_new_gif_0">إرسال وإستعراض الصور المتحركة</string>
-    <string name="whats_new_gif_1">معاينة المستندات</string>
-    <string name="whats_new_gif_2">إرسال واستقبال ملفات الصوت عن طريق المستندات</string>
-    <string name="whats_new_gif_3">تطوير شكل التنزيل</string>
-    <string name="whats_new_gif_4">دعم اللغة الروسية</string>
-    <string name="whats_new_gif_5">ثيمات تجريبية</string>
-
-    <string name="whats_new_spain_title">تم إضافة اللغة الإسبانية وجعل البرنامج أكثر قوة</string>
-    <string name="whats_new_spain_hint">إذا واجهتكم مشاكل مع اللغة الإسبانية، نجو التواصل مع الدعم الفني داخل التطبيق
-    </string>
-    <string name="whats_new_spain_0">دعم كامل للواجهة الإسبانية</string>
-    <string name="whats_new_spain_1">حل تقريبًا ٥٠ مشكلة سابقة</string>
+  <string name="whats_contacts_title">تحسينات في جهات الاتصال وسرعة تشغيل التطبيق</string>
+  <string name="whats_contacts_0">إمكانية حذف جهات اتصال</string>
+  <string name="whats_contacts_1">ترتيب جهات الاتصال كما في الجهاز</string>
+  <string name="whats_contacts_2">تحسينات في سرعة تشغيل وتحميل التطبيق</string>
+  <string name="whats_new_design_title">تحسينات في التصميم والسرعة والاستقرار</string>
+  <string name="whats_new_design_0">تصميم أزرق جديد</string>
+  <string name="whats_new_design_1">تحسينات في سرعة توصيل الرسائل</string>
+  <string name="whats_new_design_2">تحسينات للدول التي تستخدم جدار ناري</string>
+  <string name="whats_new_design_3">تحسينات في استقرار وقوة التطبيق</string>
+  <string name="whats_new_secret_title">تم إضافة المحادثات السرية</string>
+  <string name="whats_new_secret_hint">يمكنك إنشاء محادثة سرية من خلال القائمة الرئيسية أو عن طريق صفحة معلومات جهة الاتصال.</string>
+  <string name="whats_new_secret_0">يستخدم التشفير من البداية للنهاية</string>
+  <string name="whats_new_secret_1">لا تترك أثرًا في خوادمنا</string>
+  <string name="whats_new_secret_2">تمتلك عداد للتدمير الذاتي</string>
+  <string name="whats_new_secret_3">تمتلك عداد للتدمير الذاتي</string>
+  <string name="whats_new_arabic_title">دعم الواجهة العربية بشكل كامل</string>
+  <string name="whats_new_arabic_hint">إذا كان لديك مشاكل مع الواجهة العربية، يمكنك كتابة آرائك ومقترحاتك لفريق الدعم الفني عن طريق صفحة الإعدادات في البرنامج.</string>
+  <string name="whats_new_arabic_0">دعم الواجهة من اليمين لليسار لأنظمة الأندرويد ٤.٠ وما بعد.</string>
+  <string name="whats_new_arabic_1">دعم الواجهة الانعكاسية لأنظمة الأندرويد ٤.٢ وما بعد.</string>
+  <string name="whats_new_arabic_2">دعم الأرقام الهندية بشكل كامل.</string>
+  <string name="whats_new_gif_title">الصور المتحركة واللغة الروسية وتحسين السرعة</string>
+  <string name="whats_new_gif_hint">        الصور المتحركة تعمل إذا كانت مرسلة من مستخدم يستخدم نسخة الإس. إذا واجهتم مشاكل في اللغة، لا تترددوا في التواصل مع الدعم الفني عن طريق إعدادات البرنامج.\n    </string>
+  <string name="whats_new_gif_0">إرسال وإستعراض الصور المتحركة</string>
+  <string name="whats_new_gif_1">معاينة المستندات</string>
+  <string name="whats_new_gif_2">إرسال واستقبال ملفات الصوت عن طريق المستندات</string>
+  <string name="whats_new_gif_3">تطوير شكل التنزيل</string>
+  <string name="whats_new_gif_4">دعم اللغة الروسية</string>
+  <string name="whats_new_gif_5">ثيمات تجريبية</string>
+  <string name="whats_new_spain_title">تم إضافة اللغة الإسبانية وجعل البرنامج أكثر قوة</string>
+  <string name="whats_new_spain_hint">إذا واجهتكم مشاكل مع اللغة الإسبانية، نجو التواصل مع الدعم الفني داخل التطبيق\n    </string>
+  <string name="whats_new_spain_0">دعم كامل للواجهة الإسبانية</string>
+  <string name="whats_new_spain_1">حل تقريبًا ٥٠ مشكلة سابقة</string>
+  <string name="whats_web_search">بحث في صور الإنترنت، تصميم جديد، تطوير في السرعة والكفاءة</string>
+  <string name="whats_web_search_0">تم إضافة بحث الصور في الإنترنت</string>
+  <string name="whats_web_search_1">تصميم أكثر خفة</string>
+  <string name="whats_web_search_2">تطوير في السرعة والكفاءة</string>
 </resources>

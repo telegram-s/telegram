@@ -12,8 +12,8 @@ public class PreviewConfig {
     private static final int WALLPAPER_S_W_DP = 100;
     private static final int WALLPAPER_S_H_DP = 100;
 
-    private static final int MIN_PREVIEW_W_DP = 100;
-    private static final int MIN_PREVIEW_H_DP = 40;
+    private static final int MIN_PREVIEW_W_DP = 160;
+    private static final int MIN_PREVIEW_H_DP = 60;
 
     private static final int MAX_PREVIEW_W_DP = 240;
     private static final int MAX_PREVIEW_H_DP = 300;
@@ -27,6 +27,7 @@ public class PreviewConfig {
     private static int WALL_S_MAX_W_DP = 100;
     private static int WALL_S_MAX_H_DP = 100;
 
+    private static final int MAP_PADDING_DP = 20;
     private static final int MAP_W_DP = 160;
     private static final int MAP_H_DP = 160;
 
@@ -46,6 +47,8 @@ public class PreviewConfig {
 
     public static int MAP_W = MAP_W_DP;
     public static int MAP_H = MAP_H_DP;
+
+    public static int MAP_PADDING = MAP_PADDING_DP;
 
     public static final int FAST_MAX_W = 90;
     public static final int FAST_MAX_H = 90;
@@ -103,6 +106,8 @@ public class PreviewConfig {
             MEDIA_PREVIEW = cellWidth;
             MEDIA_SPACING = margin;
         }
+
+        MAP_PADDING = (int) (MAP_PADDING_DP * metrics.density);
     }
 
     public static int[] getSizes(int w, int h) {

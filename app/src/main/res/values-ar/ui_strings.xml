@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <resources>
-
     <string name="st_lang">ar</string>
     <string name="st_app_name">تيليجرام</string>
-
     <string name="st_no">لا</string>
     <string name="st_yes">نعم</string>
     <string name="st_repeat">إعادة</string>
@@ -16,52 +14,42 @@
     <string name="st_no_contacts">لا يوجد جهات اتصال.</string>
     <string name="st_title">العنوان</string>
     <string name="st_loading_more">جاري تحميل مواد أكثر...</string>
+    <string name="st_loading">جاري التحميل ...</string>
     <string name="st_try_again">حاول مرة أخرى</string>
     <string name="st_default">الوضع الإفتراضي</string>
     <string name="st_select_tone">اختر نغمة</string>
     <string name="st_none">بدون</string>
     <string name="st_reset">إعادة تعيين</string>
-
     <string name="st_continue">استمرار</string>
     <string name="st_back">رجوع</string>
     <string name="st_start_again">إبدأ من جديد</string>
-
     <string name="st_receiver_pick_wallpaper">تغيير الخلفية</string>
     <string name="st_receiver_pick_photo">اختر صورة</string>
     <string name="st_receiver_pick_video">اختر مقطع مرئي</string>
-
     <string name="st_receiver_gallery">الأستوديو</string>
     <string name="st_receiver_photo">التقط صورة</string>
     <string name="st_receiver_delete">احذف صورة</string>
-
     <string name="st_avatar_changed">تم تغيير صورتك الشخصية</string>
     <string name="st_avatar_removed">تم إزالة صورتك الشخصية</string>
     <string name="st_avatar_change_error">خطأ في رفع الصورة الشخصية</string>
     <string name="st_avatar_change_error_title">خطأ في الرفع</string>
     <string name="st_avatar_change_error_message">غير قادر على رفع الصورة الشخصية. هل ترغب في المحاولة مرة أخرى؟</string>
-
     <string name="st_avatar_group_changed">تم تغيير صورة المجموعة</string>
     <string name="st_avatar_group_removed">تم حذف صورة المجموعة</string>
     <string name="st_avatar_group_error">خطأ في رفع صورة المجموعة</string>
-
     <string name="st_first_name">الاسم الأول</string>
     <string name="st_last_name">اسم العائلة</string>
-
     <string name="st_unknown">غير معروف</string>
     <string name="st_online">متصل</string>
     <string name="st_offline">غير متصل</string>
     <string name="st_support_hint">سعدت بمقابلتك</string>
-
     <string name="st_error_file_open">تعذر فتح الملف</string>
     <string name="st_error_unable_sms">غير قادر على إرسال رسالة</string>
-
     <string name="st_error_title">خطأ</string>
-
     <string name="st_error_unsupported">غير مدعوم على هذا الجهاز</string>
     <string name="st_error_unknown">طأ غير معروف في البرنامج :-(</string>
     <string name="st_error_connection">لا يوجد شبكة اتصال. يرجى المحاولة مرة أخرى.</string>
     <string name="st_error_server">خطأ داخلي في الخادم. يرجى المحاولة مرة أخرى.</string>
-
     <string name="st_error_code_empty">رمز التفعيل خالي.</string>
     <string name="st_error_code_incorrect">رمز التفعيل غير صحيح.</string>
     <string name="st_error_expired">انتهت صلاحية رمز التفعيل</string>
@@ -79,115 +67,84 @@
     <string name="st_error_incorrect">لا يمكن إنجاز المهمة.</string>
     <string name="st_error_many_attempts">محاولات كثيرة خاطئة، يرجى المحاولة لاحقًا.</string>
     <string name="st_error_no_app_for_file">لا يوجد برنامج يمكنه استعراض الملف</string>
-
+    <string name="st_error_download_image">غير قادر على تنزيل الصورة</string>
     <string name="st_tour_start_messaging">إبدأ المراسلة</string>
     <string name="st_tour_page1_title">تيليجرام</string>
     <string name="st_tour_page1">مرحبًا بك في عصر جديد من المراسلة.</string>
-
     <string name="st_tour_page2_title">سريع</string>
     <string name="st_tour_page2"><![CDATA[<b>تيليجرام</b> يقوم بإيصال الرسائل أسرع من أي تطبيق آخر.]]></string>
-
     <string name="st_tour_page3_title">مجاني</string>
     <string name="st_tour_page3"><![CDATA[<b>تيليجرام</b> مجاني للأبد. بدون أية إعلانات. وبدون رسوم إشتراك.]]></string>
-
     <string name="st_tour_page4_title">قوي</string>
     <string name="st_tour_page4"><![CDATA[<b>تيليجرام</b> لا يفرض عليك حدود لحجم الوسائط والمحادثات.]]></string>
-
     <string name="st_tour_page5_title">آمن</string>
     <string name="st_tour_page5"><![CDATA[<b>تيليجرام</b> يحمي الرسائل الخاصة بك من هجمات المخترقين.]]></string>
-
     <string name="st_tour_page6_title">مرتبط بالسحاب</string>
-    <string name="st_tour_page6">
-        <![CDATA[<b>تيليجرام</b> يمكنك من الوصول إلى الرسائل الخاصة بك من أجهزة متعددة.]]></string>
-
+    <string name="st_tour_page6">\n        <![CDATA[<b>تيليجرام</b> يمكنك من الوصول إلى الرسائل الخاصة بك من أجهزة متعددة.]]></string>
     <string name="st_auth_state_activation">جاري عملية التفعيل ...</string>
     <string name="st_auth_state_creating">إنشاء حساب</string>
     <string name="st_auth_state_error">خطأ في التفعيل</string>
     <string name="st_auth_state_error_connection">خطأ في الاتصال ...</string>
     <string name="st_auth_state_phone">هاتفك</string>
     <string name="st_auth_state_common">تفعيل الهاتف</string>
-
     <string name="st_auth_timer">سنقوم بالاتصال بك خلال {time}</string>
-
     <string name="st_auth_not_activating_ticker">جاري تفعيل تيليجرام...</string>
     <string name="st_auth_not_activating_content">جاري عملية التفعيل</string>
-
     <string name="st_auth_not_connection_error_ticker">خطأ في الاتصال</string>
     <string name="st_auth_not_connection_error_content">غير قادر على تفعيل تيليجرام: خطأ في الاتصال</string>
-
     <string name="st_auth_not_error_ticker">خطأ أثناء التفعيل</string>
     <string name="st_auth_not_error_content">غير قادر على تفعيل نيليجرام</string>
-
     <string name="st_auth_not_activating_code_ticker">التفعيل اليدوي مطلوب</string>
     <string name="st_auth_not_activating_code_content">يرجى إدخال رمز التفعيل</string>
-
     <string name="st_auth_not_activating_signup_ticker">التسجيل مطلوب</string>
     <string name="st_auth_not_activating_signup_content">تم تفعيل الجهاز! يرجى التسجيل.</string>
-
     <string name="st_auth_not_activating_complete_ticker">تم تفعيل تيليجرام</string>
     <string name="st_auth_not_activating_complete_content">تم تفعيل تيليجرام!</string>
-
     <string name="st_auth_confirm_number">هل هذا رقمك؟</string>
     <string name="st_auth_confirm_yes">نعم، فعل الحساب</string>
     <string name="st_auth_confirm_no">لا، غير الرقم</string>
     <string name="st_auth_confirm_sms">سنقوم بإرسال رسالة قصيرة تحتوي على رمز التفعيل الخاص بك.</string>
-
     <string name="st_auth_phone_title">اختر دولتك، أدخل رقم هاتفك ثم اضغط استمرار:</string>
     <string name="st_auth_phone_hint">رقم الهاتف</string>
-
     <string name="st_auth_activating_manual">أدخل رمز التفعيل</string>
     <string name="st_auth_activating_title">جاري تفعيل الهاتف...</string>
     <string name="st_auth_activating_subtitle">ربما تأخذ العملية دقيقة، يرجى الانتظار</string>
-
     <string name="st_auth_request_call">اطلب مكالمة</string>
     <string name="st_auth_phone_call">جاري طلب المكالمة...</string>
     <string name="st_auth_creating">جاري انشاء ملفك الشخصي...</string>
-
     <string name="st_auth_code_title">أدخل رمز التفعيل الخاص بك واضغط استمرار:</string>
     <string name="st_auth_code_call">اطلب مكالمة</string>
     <string name="st_auth_code">رمز التفعيل</string>
-
-    <string name="st_auth_signup_title">تم التحقق من رقم هاتفك! يرجى ادخال اسمك وإضافة صورتك الشخصية والضغط على استمرار:
-    </string>
-
+    <string name="st_auth_signup_title">تم التحقق من رقم هاتفك! يرجى ادخال اسمك وإضافة صورتك الشخصية والضغط على استمرار:\n    </string>
     <string name="st_auth_incorrect_phone">رقم الهاتف غير صحيح!</string>
-    <string name="st_auth_confirm_phone">هل هذا رقمك الصحيح؟ \n\n{0}\n\nسيتم إرسال رسالة قصيرة برمز التفعيل لهذا الرقم
-    </string>
-
+    <string name="st_auth_confirm_phone">هل هذا رقمك الصحيح؟ \n\n{0}\n\nسيتم إرسال رسالة قصيرة برمز التفعيل لهذا الرقم\n    </string>
     <string name="st_dialogs_pick_title">اختر محادثة</string>
-
     <string name="st_dialogs_delete_header">هل ترغب في حذف المحادثة؟</string>
     <string name="st_dialogs_delete_history">هل أنت متأكد من رغبتك في حذف جميع الرسائل؟</string>
     <string name="st_dialogs_delete_group">هل أنت متأكد من رغبتك في مغادرة المجموعة وحذف جميع الرسائل؟</string>
-
     <string name="st_dialogs_confirm_header">هل أنت متأكد؟</string>
-    <string name="st_dialogs_confirm_send">هل ترغب في إرسال رسالة إلى "{0}"؟</string>
-    <string name="st_dialogs_confirm_forward">هل ترغب في تحويل الرسالة إلى "{0}"؟</string>
-    <string name="st_dialogs_confirm_forward_multiple">هل ترغب في تحويل الرسائل إلى "{0}"؟</string>
-    <string name="st_dialogs_confirm_image">هل ترغب في إرسال الصورة إلى "{0}"؟</string>
-    <string name="st_dialogs_confirm_video">هل ترغب في إرسال المقطع المرئي إلى "{0}"؟</string>
-    <string name="st_dialogs_confirm_images">هل ترغب في إرسال الصور إلى "{0}"؟</string>
-    <string name="st_dialogs_confirm_contact">هل ترغب في إرسال جهة الاتصال إلى "{0}"؟</string>
-    <string name="st_dialogs_confirm_doc">قم بإرسال مستند إلى "{0}"؟</string>
-    <string name="st_dialogs_confirm_docs">قم بإرسال مستندات إلى "{0}"؟</string>
-
+    <string name="st_dialogs_confirm_send">هل ترغب في إرسال رسالة إلى \"{0}\"؟</string>
+    <string name="st_dialogs_confirm_forward">هل ترغب في تحويل الرسالة إلى \"{0}\"؟</string>
+    <string name="st_dialogs_confirm_forward_multiple">هل ترغب في تحويل الرسائل إلى \"{0}\"؟</string>
+    <string name="st_dialogs_confirm_image">هل ترغب في إرسال الصورة إلى \"{0}\"؟</string>
+    <string name="st_dialogs_confirm_video">هل ترغب في إرسال المقطع المرئي إلى \"{0}\"؟</string>
+    <string name="st_dialogs_confirm_doc">قم بإرسال مستند إلى \"{0}\"؟</string>
+    <string name="st_dialogs_confirm_images">هل ترغب في إرسال الصور إلى \"{0}\"؟</string>
+    <string name="st_dialogs_confirm_docs">قم بإرسال مستندات إلى \"{0}\"؟</string>
+    <string name="st_dialogs_confirm_contact">هل ترغب في إرسال جهة الاتصال إلى \"{0}\"؟</string>
     <string name="st_dialogs_search_hint">بحث سريع</string>
     <string name="st_dialogs_search_hint_full">أدخل اسم المجموعة أو جهة الاتصال.</string>
     <string name="st_dialogs_search_empty">لا توجد نتائج.</string>
-
     <string name="st_dialogs_write_to_friend">اكتب لصديقك</string>
     <string name="st_dialogs_empty">لا توجد رسائل بعد...</string>
-
     <string name="st_dialogs_share_to_secret">غير قادر على مشاركة جهة الاتصال للمحادثة السرية</string>
     <string name="st_dialogs_forward_to_secret">غير قادر على تحويل الرسالة للمحادثة السرية</string>
-
     <string name="st_dialogs_menu_contacts">جهات الاتصال</string>
     <string name="st_dialogs_menu_settings">الإعدادات</string>
     <string name="st_dialogs_menu_group">مجموعة جديدة</string>
     <string name="st_dialogs_menu_secret">محادثة سرية جديدة</string>
     <string name="st_dialogs_menu_write_contact">محادثة جديدة</string>
     <string name="st_dialogs_menu_appearance">المظهر</string>
-
     <string name="st_settings_title">الإعدادات</string>
     <string name="st_settings_header_phone">رقم هاتفك</string>
     <string name="st_settings_header_settings">الإعدادات</string>
@@ -203,6 +160,8 @@
     <string name="st_settings_blocked_subtitle">قائمة بجهات الاتصال المحظورة</string>
     <string name="st_settings_reset">سجل الخروج من كل الأجهزة</string>
     <string name="st_settings_reset_subtitle">سجل الخروج من كافة الأجهزة الأخرى</string>
+    <string name="st_settings_reset_title">هل أنت متأكد؟</string>
+    <string name="st_settings_reset_message">هل أنت متأكد من رغبتك في تسجيل الخروج من كافة الأجهزة؟ ستخسر جميع بيانات المحادثات السرية.</string>
     <string name="st_settings_reset_toast">تم الخروج من الأجهزة الأخرى</string>
     <string name="st_settings_chat">إعدادات المحادثة</string>
     <string name="st_settings_chat_subtitle">الخلفية، الإرسال بزر الإدخال، حجم النص …</string>
@@ -217,44 +176,36 @@
     <string name="st_settings_save_photo_subtitle">احفظها تلقائيًا في الألبوم</string>
     <string name="st_settings_notifications">الإشعارات والأصوات</string>
     <string name="st_settings_log_out">تسجيل الخروج</string>
-
+    <string name="st_settings_advanced_title">متقدم</string>
+    <string name="st_settings_advanced_background">الخلفية</string>
+    <string name="st_settings_advanced_send_time">الرسالة والوقت</string>
+    <string name="st_settings_advanced_life_time">اجعل التطبيق نشط</string>
     <string name="st_settings_name_title">اسمك الأول واسم العائلة</string>
     <string name="st_settings_name_changed">تم تغيير الاسم</string>
     <string name="st_settings_name_not_changed">لم يتم تغيير الاسم</string>
     <string name="st_settings_name_empty_first">لا يمكن ترك الاسم الأول فارغ</string>
     <string name="st_settings_name_empty_last">لا يمكن ترك اسم العائلة فارغ</string>
-
     <string name="st_new_group_title">مجموعة جديدة</string>
     <string name="st_new_group_hint">أرسل رسالة إلى...</string>
     <string name="st_new_group_maximum">المجموعة ممتلئة</string>
     <string name="st_new_group_next">التالي</string>
-
     <string name="st_new_group_complete_title">اسم المجموعة وصورتها</string>
-    <string name="st_new_group_complete_avatar">لقد قمت بإنشاء المجموعة بنجاح، لكن لم نستطع تحميل صورة المجموعة. هل ترغب
-        في المحاولة مرة أخرى؟
-    </string>
+    <string name="st_new_group_complete_avatar">لقد قمت بإنشاء المجموعة بنجاح، لكن لم نستطع تحميل صورة المجموعة. هل ترغب\n        في المحاولة مرة أخرى؟\n    </string>
     <string name="st_new_group_complete_done">تم</string>
-
     <string name="st_conv_empty">لا توجد رسائل بعد...</string>
     <string name="st_conv_empty_support">هل لديك سؤال عن تيليجرام؟</string>
-
     <string name="st_conv_chat_closed_title">تم إغلاق المحادثة</string>
     <string name="st_conv_enc_exchanging_keys">جاري إرسال المفاتيح المشفرة...</string>
     <string name="st_conv_enc_waiting">في انتظار {name} ليصبح متصل...</string>
     <string name="st_conv_enc_cancelled">تم إلغاء المحادثة السرية</string>
-
     <string name="st_conv_enc_invite_out_title">لقد قمت بدعوة {name} لمحادثة سرية.</string>
-
     <string name="st_conv_enc_invite_in_title">{name} قام بدعوتك لمحادثة سرية.</string>
-
     <string name="st_conv_enc_info_title">المحادثات السرية:</string>
     <string name="st_conv_enc_info_info1">تستخدم التشفير من البداية للنهاية</string>
     <string name="st_conv_enc_info_info2">لا تترك أثرًا في خوادمنا</string>
     <string name="st_conv_enc_info_info3">تمتلك عداد للتدمير الذاتي</string>
     <string name="st_conv_enc_info_info4">لا تسمح بتحويل الرسائل</string>
-
     <string name="st_conv_support_name">تيليجرام</string>
-
     <string name="st_conv_share_info">شارك جهة الاتصال الخاصة بي</string>
     <string name="st_conv_add_contact">أضف لجهات الاتصال</string>
     <string name="st_conv_delete_chat">احذف هذه المحادثة</string>
@@ -273,76 +224,57 @@
     <string name="st_conv_menu_photo">التقط صورة</string>
     <string name="st_conv_menu_gallery">الأستوديو</string>
     <string name="st_conv_menu_video">مقطع مرئي</string>
-    <string name="st_conv_menu_audio">مقطع صوتي</string>
     <string name="st_conv_menu_location">موقع</string>
+    <string name="st_conv_menu_audio">مقطع صوتي</string>
     <string name="st_conv_menu_doc">مستند</string>
-
+    <string name="st_conv_menu_web">صور من الإنترنت</string>
     <string name="st_conv_unsupported_title">المحتوى غير مدعوم</string>
     <string name="st_conv_unsupported_message">هذا المحتوى غير مدعوم من التطبيق</string>
-
     <string name="st_contacts_add_name_title">تعديل الاسم الأول واسم العائلة</string>
     <string name="st_contacts_add_toast">تم إضافة جهة الاتصال</string>
     <string name="st_contacts_edit_name_title">تعديل الاسم الأول واسم العائلة</string>
     <string name="st_contacts_edit_toast">تم تعديل اسم جهة الاتصال</string>
-
     <string name="st_contacts_title">جهات الاتصال</string>
     <string name="st_contacts_filter">تصفية المستخدمين</string>
     <string name="st_contacts_invite">قم بدعوة صديق</string>
     <string name="st_contacts_not_registered_title">جهة الاتصال غير مسجلة في تيليجرام</string>
     <string name="st_contacts_not_registered_message">{0} غير مسجل في تيليجرام. هل ترغب في دعوته؟</string>
-
-    <string name="st_contacts_delete">هل أنت متأكد من رغبتك في حذف \’{0}\’؟
-    </string>
-    <string name="st_contacts_block">هل أنت متأكد من رغبتك في حظر \’{0}\’؟
-    </string>
-    <string name="st_contacts_block_delete">هل أنت متأمد من رغبتك في حظر \'{0}\' وحذف كافة المحادثات بينكما؟
-    </string>
-
+    <string name="st_contacts_delete">هل أنت متأكد من رغبتك في حذف \’{0}\’؟\n    </string>
+    <string name="st_contacts_block">هل أنت متأكد من رغبتك في حظر \’{0}\’؟\n    </string>
+    <string name="st_contacts_block_delete">هل أنت متأمد من رغبتك في حظر \'{0}\' وحذف كافة المحادثات بينكما؟\n    </string>
     <string name="st_contacts_header_unregistered">جهة اتصال غير مسجلة</string>
-
     <string name="st_contacts_action_view">عرض في تطبيق جهات الاتصال</string>
     <string name="st_contacts_action_share">قم بمشاركة جهة الاتصال</string>
     <string name="st_contacts_action_delete">حذف جهة الاتصال</string>
     <string name="st_contacts_action_block">حظر جهة الاتصال</string>
     <string name="st_contacts_action_block_and_delete">حظر وحذف جهة الاتصال</string>
-
     <string name="st_contacts_menu_only_t">جهات اتصال تيليجرام فقط</string>
     <string name="st_contacts_menu_all_contacts">كافة جهات الاتصال</string>
     <string name="st_contacts_menu_add_contact">أضف جهة اتصال</string>
     <string name="st_contacts_menu_book">جهات اتصال الهاتف</string>
-
     <string name="st_profile_title">المعلومات</string>
     <string name="st_profile_header_phone">رقم الهاتف</string>
     <string name="st_profile_header_settings">الإعدادات</string>
     <string name="st_profile_header_media">الوسائط المشتركة</string>
-
     <string name="st_profile_phone_mobile">الجوال</string>
-
     <string name="st_profile_notifications">الإشعارات</string>
     <string name="st_profile_notifications_sound">قم بتخصيص النغمة</string>
     <string name="st_profile_media">الوسائط المشتركة مع المستخدم</string>
-
     <string name="st_profile_phone_hidden">مخفي</string>
     <string name="st_profile_phone_copied">تم نسخ الرقم إلى الحافظة</string>
     <string name="st_profile_menu_block">تم نسخ الرقم إلى الحافظة</string>
-
-    <string name="st_profile_menu_share">أرسل جهة الاتصال</string>
-    <string name="st_profile_menu_edit_name">قم بتعديل الاسم</string>
-
     <string name="st_profile_menu_add_phone">أضف جهة الاتصال للبرنامج</string>
     <string name="st_profile_menu_view">اعرض في تطبيق جهات الاتصال</string>
-    <string name="st_profile_menu_remove">حذف من جهات الاتصال</string>
     <string name="st_profile_menu_add">إضافة لجهات الاتصال</string>
-
+    <string name="st_profile_menu_remove">حذف من جهات الاتصال</string>
+    <string name="st_profile_menu_share">أرسل جهة الاتصال</string>
+    <string name="st_profile_menu_edit_name">قم بتعديل الاسم</string>
     <string name="st_profile_blocked">جهة الاتصال محظورة</string>
     <string name="st_profile_added">تم إضافة جهة الاتصال</string>
     <string name="st_profile_secret">إبدأ محادثة سرية</string>
-
     <string name="st_pick_file_title">اختر ملف</string>
-
     <string name="st_pick_user_title">اختر جهة اتصال</string>
     <string name="st_pick_user_filter">تصفية المستخدمين</string>
-
     <string name="st_edit_dialog_title">معلومات المجموعة</string>
     <string name="st_edit_dialog_no_access">أنت لم تعد عضو في هذه المجموعة.</string>
     <string name="st_edit_dialog_added">تم إضافة المستخدم للمجموعة</string>
@@ -361,44 +293,40 @@
     <string name="st_edit_dialog_action_dialog">قم بفتح محادثة مع {0}ـ</string>
     <string name="st_edit_dialog_action_view">اعرض جهة اتصال {0}ـ</string>
     <string name="st_edit_dialog_action_remove">قم بحذف {0} من المجموعة</string>
-
     <string name="st_edit_title_title">معلومات المجموعة</string>
     <string name="st_edit_title_header">قم بإدخال اسم للمجموعة</string>
     <string name="st_edit_title_done">تم</string>
-
     <string name="st_media_title_group">الوسائط في المجموعة</string>
     <string name="st_media_title_user">الوسائط المشتركة</string>
     <string name="st_media_title_all">جميع الوسائط المشتركة</string>
     <string name="st_media_empty">لا توجد وسائط.</string>
-
+    <string name="st_web_search_title">بحث في الإنترنت</string>
+    <string name="st_web_search_preview">معاينة</string>
+    <string name="st_web_search_hint">اكتب كلمة البحث واضغط على زر البحث</string>
+    <string name="st_web_search_empty">لا توجد نتائج.</string>
+    <string name="st_web_search_send">أرسل صورة</string>
     <string name="st_map_unavailable">الخرائط غير متاحة</string>
     <string name="st_map_hybrid">هجين</string>
     <string name="st_map_normal">طبيعي</string>
     <string name="st_map_satellite">قمر صناعي</string>
     <string name="st_map_location_unavailable">موقعك غير متاح</string>
-
     <string name="st_location_title">موقع</string>
     <string name="st_location_unavailable">غير متاح</string>
     <string name="st_location_pick_title">اختر موقع</string>
     <string name="st_location_pick_action">أرسل موقعك</string>
-
     <string name="st_image_title">الصورة</string>
     <string name="st_image_deleted">تم حذف الوسائط</string>
     <string name="st_image_incorrect">خطأ في فتح الوسائط</string>
-
     <string name="st_blocked_title">جهات الاتصال المحظورة</string>
     <string name="st_blocked_hint">قم بالضغط والتعليق على جهة اتصال لإزالة الحظر</string>
     <string name="st_blocked_blocked">تم حظر جهة الاتصال</string>
     <string name="st_blocked_unblocked">تم حظر جهة الاتصال</string>
     <string name="st_blocked_empty">لا يوجد جهات اتصال محظورة.</string>
     <string name="st_blocked_phone_hidden">مخفي</string>
-
     <string name="st_appearance_title">إعدادات المحادثة</string>
     <string name="st_appearance_header_common">المظهر</string>
     <string name="st_appearance_header_chat">نافذة الرسالة</string>
-
     <string name="st_appearance_header_dialogs">قائمة المحادثات</string>
-
     <string name="st_appearance_font_size">حجم النص: {s}</string>
     <string name="st_appearance_font_size_subtitle">حجم نص المحادثات المعروض على الشاشة</string>
     <string name="st_appearance_font_size_tiny">صغير جدًا</string>
@@ -421,12 +349,10 @@
     <string name="st_appearance_bar_color_wa">لون الواتساب</string>
     <string name="st_appearance_bar_color_line">لون لاين</string>
     <string name="st_appearance_bar_color_magenta">قرمزي</string>
-
     <string name="st_appearance_item_size">الحجم {s}</string>
     <string name="st_appearance_item_size_subtitle">حجم المحادثة في قائمة المحادثات</string>
     <string name="st_appearance_item_size_normal">طبيعي</string>
     <string name="st_appearance_item_size_large">كبير</string>
-
     <string name="st_notifications_title">الإشعارات والأصوات</string>
     <string name="st_notifications_header_common">إشعارات الرسائل</string>
     <string name="st_notifications_header_group">إشعارات المجموعات</string>
@@ -442,160 +368,109 @@
     <string name="st_notifications_reset">إعادة تعيين كافة الإشعارات</string>
     <string name="st_notifications_reset_hint">إعادة تعيين كافة إعدادات الإشعارات لجميع جهات الاتصال والمجموعات</string>
     <string name="st_notifications_reset_success">تم إعادة تعيين الإعدادات بنجاح</string>
-
     <string name="st_message_by_you">أنت</string>
     <string name="st_message_you">أنت</string>
-
     <string name="st_message_enc_self_destruct">{0} قام بتعيين عداد التدمير الذاتي إلى {1}</string>
     <string name="st_message_enc_self_destruct_you">{0} قمت بتعيين عداد التدمير الذاتي إلى {1}</string>
     <string name="st_message_enc_self_destruct_off">{0} قام بتعطيل عداد التدمير الذاتي</string>
     <string name="st_message_enc_self_destruct_off_you">{0} قمت بتعطيل عداد التدمير الذاتي</string>
-
     <string name="st_message_user_photo_change">{0} قام بإضافة صورة شخصية</string>
     <string name="st_message_user_joined_app">{0} قام بالتسجيل في تيليجرام</string>
-
     <string name="st_message_create_group">{0} قام بإنشاء المجموعة</string>
     <string name="st_message_create_group_you">لقد قمت بإنشاء المجموعة</string>
-
-    <string name="st_message_photo_remove">{0} قام بإزالة صورة المجموعة</string>
-    <string name="st_message_photo_remove_you">لقد قمت بإزالة صورة المجموعة</string>
-
     <string name="st_message_photo_change">{0} قام بتغيير صورة المجموعة</string>
     <string name="st_message_photo_change_you">لقد قمت بتغيير صورة المجموعة</string>
-
+    <string name="st_message_photo_remove">{0} قام بإزالة صورة المجموعة</string>
+    <string name="st_message_photo_remove_you">لقد قمت بإزالة صورة المجموعة</string>
     <string name="st_message_name_change">{0} قام بتغيير اسم المجموعة إلى {1}</string>
     <string name="st_message_name_change_you">لقد قمت بتغيير اسم المجموعة إلى {1}</string>
-
-    <string name="st_message_added_user">{0} قام بإضافة {1} للمجموعة</string>
+    <string name="st_message_added_user">{1} قام بإضافة {0} للمجموعة</string>
     <string name="st_message_added_user_you">لقد قمت بإضافة {1} للمجموعة</string>
     <string name="st_message_added_user_of_you">{0} قام بإضافتك للمجموعة</string>
-
     <string name="st_message_kicked_user">{0} قام بإخراج {1} من المجموعة</string>
     <string name="st_message_kicked_user_you">لقد قمت بإخراج {1} من المجموعة</string>
     <string name="st_message_kicked_user_of_you">{0} قام بإخراجك من المجموعة</string>
-
     <string name="st_message_left_user">{0} قام بمغادرة المجموعة</string>
     <string name="st_message_left_user_you">لقد قمت بمغادرة المجموعة</string>
-
     <string name="st_message_service">رسالة خدمة غير معروفة</string>
-
     <string name="st_dialog_you">أنت</string>
     <string name="st_dialog_you_r">أنت</string>
-
     <string name="st_dialog_photo">صورة</string>
     <string name="st_dialog_video">مقطع مرئي</string>
-    <string name="st_dialog_document">مستند</string>
     <string name="st_dialog_geo">موقع</string>
     <string name="st_dialog_contact">مشاركة جهة اتصال</string>
-    <string name="st_dialog_unknown">المحتوى غير مدعوم</string>
-    <string name="st_dialog_audio">مقطع صوتي</string>
+    <string name="st_dialog_document">مستند</string>
     <string name="st_dialog_animation">صورة متحركة</string>
-
+    <string name="st_dialog_audio">مقطع صوتي</string>
+    <string name="st_dialog_unknown">المحتوى غير مدعوم</string>
     <string name="st_dialog_user_add_avatar">{sender} قام بإضافة صورة شخصية جديدة</string>
     <string name="st_dialog_user_joined_app">{sender} قام بالتسجيل في تيليجرام</string>
-
-    <string name="st_dialog_encrypted_switched_off_you">لقد قمت بإيقاف عداد التدمير الذاتي</string>
     <string name="st_dialog_encrypted_switched_off">تم إيقاف عداد التدمير الذاتي</string>
-    <string name="st_dialog_encrypted_switched_you">لقد قمت بتعيين عداد التدمير الذاتي إلى {time}</string>
+    <string name="st_dialog_encrypted_switched_off_you">لقد قمت بإيقاف عداد التدمير الذاتي</string>
     <string name="st_dialog_encrypted_switched">قم بتعيين عداد التدمير الذاتي إلى {time}</string>
-
+    <string name="st_dialog_encrypted_switched_you">لقد قمت بتعيين عداد التدمير الذاتي إلى {time}</string>
     <string name="st_dialog_encrypted_selfdestructed">الرسالة الأخير تعرضت للتدمير الذاتي</string>
     <string name="st_dialog_encrypted_requested">جاري إرسال المفاتيح المشفرة...</string>
     <string name="st_dialog_encrypted_waiting">في انتظار {name} ليصبح متصل...</string>
     <string name="st_dialog_encrypted_cancelled">تم إلغاء المحادثة السرية</string>
     <string name="st_dialog_encrypted_created">تم إنشاء محادثة سرية</string>
-
     <string name="st_dialog_created_group">{sender} قام بإنشاء المجموعة</string>
     <string name="st_dialog_created_group_you">لقد قمت بإنشاء المجموعة</string>
-
     <string name="st_dialog_changed_photo">{sender} قام بتغيير صورة المجموعة</string>
     <string name="st_dialog_changed_photo_you">لقد قمت بتغيير صورة المجموعة</string>
-
     <string name="st_dialog_removed_photo">{sender} قام بإزالة صورة المجموعة</string>
     <string name="st_dialog_removed_photo_you">لقد قمت بإزالة صورة المجموعة</string>
-
     <string name="st_dialog_changed_name">{sender} قام بتغيير اسم المجموعة</string>
     <string name="st_dialog_changed_name_you">لقد قمت بتغيير اسم المجموعة</string>
-
     <string name="st_dialog_added_user">{0} قام بإضافة {sender} للمجموعة</string>
     <string name="st_dialog_added_user_you">لقد قمت بإضافة {0} للمجموعة</string>
     <string name="st_dialog_added_user_of_you">{sender} قام بإضافتك للمجموعة</string>
-
     <string name="st_dialog_enter_user">{sender} قام بالدخول للمجموعة</string>
     <string name="st_dialog_enter_user_you">لقد قمت بالدخول للمجموعة</string>
-
     <string name="st_dialog_left_user">{sender} قام بمغادرة المجموعة</string>
     <string name="st_dialog_left_user_you">لقد قمت بمغادرة المجموعة</string>
-
     <string name="st_dialog_kicked_user">تم إخراج {0} من المجموعة</string>
     <string name="st_dialog_kicked_user_you">لقد قمت بإخراج {0} من المجموعة</string>
     <string name="st_dialog_kicked_user_of_you">{sender} قام بإخراجك من</string>
-
     <string name="st_dialog_system">رسالة النظام</string>
-
     <string name="st_secret_title">محادثة سرية</string>
     <string name="st_secret_key">مفتاح تشفير</string>
-    <string name="st_secret_header_chat">محادثة</string>
     <string name="st_secret_destruct">عداد التدمير الذاتي</string>
-
+    <string name="st_secret_header_chat">محادثة</string>
     <string name="st_secret_key_title">مفتاح تشفير</string>
-    <string name="st_secret_key_info1">هذه الصورة هي تصور لمفتاح التشفير لهذه المحادثة السرية مع {name}.
-    </string>
-    <string name="st_secret_key_info2">ذا كانت مطابقة للصورة التي في جهاز {name} فمحادثتكم آمنة ٢٠٠٪."
-    </string>
-
+    <string name="st_secret_key_info1">هذه الصورة هي تصور لمفتاح التشفير لهذه المحادثة السرية مع {name}.\n    </string>
+    <string name="st_secret_key_info2">ذا كانت مطابقة للصورة التي في جهاز {name} فمحادثتكم آمنة ٢٠٠٪.\"\n    </string>
     <string name="st_bubble_media_cancelled">ملغي</string>
     <string name="st_bubble_media_try_again">هل ترغب في المحاولة مرة أخرى؟</string>
     <string name="st_bubble_media_download">تنزيل</string>
     <string name="st_bubble_media_in_progress">جاري التنزيل...</string>
-
     <string name="st_notification_sent_map">{name} قام بإرسال خريطة</string>
     <string name="st_notification_sent_contact">{name} قام بمشاركة جهة اتصال معك</string>
     <string name="st_notification_sent_video">{name} قام بإرسال مقطع مرئي</string>
     <string name="st_notification_sent_photo">{name} قام بإرسال صورة</string>
     <string name="st_notification_sent_message">{name} قام بإرسال رسالة</string>
     <string name="st_notification_sent_document">{name} قام بإرسال مستند</string>
+    <string name="st_notification_sent_audio">{name} قام بإرسال مقطع صوتي</string>
     <string name="st_notification_joined">{name} قام بالتسجيل في تيليجرام!</string>
-
     <string name="st_notification_group_sent_map">{name} قام بإرسال خريطة للمحادثة {chat}</string>
     <string name="st_notification_group_sent_contact">{name} قام بمشاركة جهة اتصال للمحادثة {chat}</string>
     <string name="st_notification_group_sent_video">{name} قام بإرسال مقطع مرئي للمحادثة {chat}</string>
     <string name="st_notification_group_sent_photo">{name} قام بإرسال صورة للمحادثة {chat}</string>
     <string name="st_notification_group_sent_document">{name} قام بإرسال مستند للمحادثة {chat}</string>
-
+    <string name="st_notification_group_sent_audio">{name} قام بإرسال مقطع صوتي للمحادثة {chat}</string>
     <string name="st_notification_secret_requested">قام دعوتك لمحادثة سرية جديدة</string>
     <string name="st_notification_secret_created">تم إنشاء محادثة سرية</string>
     <string name="st_notification_secret_cancelled">تم إلغاء المحادثة السرية</string>
-
     <string name="st_notification_secret_sent_message">تم إرسال رسالة للمحادثة السرية</string>
     <string name="st_notification_secret_sent_photo">تم إرسال صورة للمحادثة السرية</string>
     <string name="st_notification_secret_sent_video">تم إرسال مقطع مرئي للمحادثة السرية</string>
     <string name="st_notification_secret_sent_map">تم إرسال خريطة للمحادثة السرية</string>
+    <string name="st_notification_secret_sent_doc">تم إرسال مستند للمحادثة السرية</string>
+    <string name="st_notification_secret_sent_audio">تم إرسال مقطع صوتي للمحادثة السرية</string>
     <string name="st_notification_new_login">تم تسجيل الدخول لحسابك من الجهاز {device}</string>
-
-    <string name="st_notification_new_login_location">تم تسجيل الدخول لحسابك من الجهاز {device} من{location}
-    </string>
-
+    <string name="st_notification_new_login_location">تم تسجيل الدخول لحسابك من الجهاز {device} من{location}\n    </string>
     <string name="st_whats_new_title">ما الجديد</string>
     <string name="st_whats_new_continue">تابع المراسلة</string>
-
-    <string name="st_invite_short">
-        مرحبا! هيا نستخدم تيليجرام http://telegram.org/dl1
-    </string>
-
-    <string name="st_invite_big">
-        مرحبا
-
-        لقد قمت بتنزيل برنامج تيليجرام على جهاز الآندرويد الخاص بي للتو.
-
-        إنه برنامج تراسل للأجهزة الذكية يمكنه استبدال الرسائل النصية. تيليجرام يتيح لك إرسال صور ومقاطع مرئية بالإضافة
-        إلى الوسائل الأخرى!
-
-        تيليجرام متاح لأجهزة الأندرويد والآيفون. لا يوجد رمز تعريف شخصي أو اسم مستخدم لتتذكره، يعمل تمامًا كالرسائل
-        النصية بإستخدام باقة البيانات الخاصة بك.
-
-        إحصل علي الآن وقل وداعًا للرسائل النصية المكلفة!
-
-        http://telegram.org/dl1
-    </string>
+    <string name="st_invite_short">\n        مرحبا! هيا نستخدم تيليجرام http://telegram.org/dl1\n    </string>
+    <string name="st_invite_big">\n        مرحبا\n\n        لقد قمت بتنزيل برنامج تيليجرام على جهاز الآندرويد الخاص بي للتو.\n\n        إنه برنامج تراسل للأجهزة الذكية يمكنه استبدال الرسائل النصية. تيليجرام يتيح لك إرسال صور ومقاطع مرئية بالإضافة\n        إلى الوسائل الأخرى!\n\n        تيليجرام متاح لأجهزة الأندرويد والآيفون. لا يوجد رمز تعريف شخصي أو اسم مستخدم لتتذكره، يعمل تمامًا كالرسائل\n        النصية بإستخدام باقة البيانات الخاصة بك.\n\n        إحصل علي الآن وقل وداعًا للرسائل النصية المكلفة!\n\n        http://telegram.org/dl1\n    </string>
 </resources>

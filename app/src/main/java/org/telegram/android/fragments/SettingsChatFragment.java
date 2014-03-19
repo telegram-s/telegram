@@ -87,7 +87,7 @@ public class SettingsChatFragment extends MediaReceiverFragment {
 
                     @Override
                     public View getView(int i, View view, ViewGroup viewGroup) {
-                        View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
+                        View res = inflater.inflate(android.R.layout.select_dialog_item, viewGroup, false);
                         TextView text = (TextView) res.findViewById(android.R.id.text1);
                         text.setText(titles[i]);
                         text.setTextSize(getItem(i));
@@ -141,7 +141,7 @@ public class SettingsChatFragment extends MediaReceiverFragment {
 
                     @Override
                     public View getView(int i, View view, ViewGroup viewGroup) {
-                        View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
+                        View res = inflater.inflate(android.R.layout.select_dialog_item, viewGroup, false);
                         TextView text = (TextView) res.findViewById(android.R.id.text1);
                         text.setText(titles[i]);
                         return res;
@@ -225,7 +225,8 @@ public class SettingsChatFragment extends MediaReceiverFragment {
 
                     @Override
                     public View getView(int i, View view, ViewGroup viewGroup) {
-                        View res = inflater.inflate(android.R.layout.simple_dropdown_item_1line, viewGroup, false);
+
+                        View res = inflater.inflate(android.R.layout.select_dialog_item, viewGroup, false);
                         TextView text = (TextView) res.findViewById(android.R.id.text1);
                         text.setText(titles[i]);
                         return res;

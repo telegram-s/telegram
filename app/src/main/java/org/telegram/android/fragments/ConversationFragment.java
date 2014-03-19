@@ -419,10 +419,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     private void updateImeConfig() {
         if (application.getUserSettings().isSendByEnter()) {
             editText.setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
-            editText.setImeOptions(EditorInfo.IME_ACTION_SEND);
+            editText.setImeOptions(EditorInfo.IME_ACTION_SEND | EditorInfo.IME_FLAG_NO_FULLSCREEN);
         } else {
             editText.setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
-            editText.setImeOptions(EditorInfo.IME_ACTION_NONE);
+            editText.setImeOptions(EditorInfo.IME_ACTION_NONE | EditorInfo.IME_FLAG_NO_FULLSCREEN);
         }
     }
 

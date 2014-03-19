@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="overlay_android">@null</drawable>
+    <drawable name="overlay_sherlock">@null</drawable>
+</resources>

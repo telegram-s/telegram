@@ -1,51 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <resources>
-    <string name="whats_contacts_title">Mejoras de contactos e inicio</string>
-    <string name="whats_contacts_0">Eliminar contactos</string>
-    <string name="whats_contacts_1">Ordenar contactos (nombre \ apellido) usa los ajustes del teléfono</string>
-    <string name="whats_contacts_2">Mejoras en la velocidad de carga</string>
-
-    <string name="whats_new_design_title">Diseño, velocidad y estabilidad</string>
-    <string name="whats_new_design_0">Nuevo diseño azul</string>
-    <string name="whats_new_design_1">Aumento de velocidad de envío de fotos, vídeos y mensajes</string>
-    <string name="whats_new_design_2">Optimizaciones para países con "firewall"</string>
-    <string name="whats_new_design_3">Mejor estabilidad</string>
-
-    <string name="whats_new_secret_title">Chats secretos añadidos</string>
-    <string name="whats_new_secret_hint">Inicia un chat secreto desde el menú para "Escribir a" o desde el perfil del
-        contacto.
-    </string>
-    <string name="whats_new_secret_0">Usa cifrado de fin-a-fin</string>
-    <string name="whats_new_secret_1">No deja rastro en nuestros servidores</string>
-    <string name="whats_new_secret_2">Tiene autodestrucción</string>
-    <string name="whats_new_secret_3">No permite el reenvío de mensajes</string>
-
-    <string name="whats_new_arabic_title">Traducción al Árabe añadida</string>
-    <string name="whats_new_arabic_hint">Si tienes cualquier problema con la traducción al Árabe, por favor, dile a
-        nuestro
-        equipo de soporte en Ajustes — Haz una pregunta.
-    </string>
-    <string name="whats_new_arabic_0">Soporte completo de RTL en android 4.0+</string>
-    <string name="whats_new_arabic_1">Intefaz invertida en android 4.2+</string>
-    <string name="whats_new_arabic_2">Soporte completo para los numerales árabes del este</string>
-
-    <string name="whats_new_gif_title">Animaciones Gif, traducción al Ruso y velocidad</string>
-    <string name="whats_new_gif_hint">
-        Las animaciones Gif funcionan con imágenes enviadas desde otras ediciones S de Telegram.
-        Si tienes cualquier problema con la traducción al Ruso, por favor, dile a nuestro equipo de soporte en
-        Ajustes — Haz una pregunta.
-    </string>
-    <string name="whats_new_gif_0">Envío y recepción de Animaciones Gif</string>
-    <string name="whats_new_gif_1">Vista previa de documentos (ahora visible sólo en edición S)</string>
-    <string name="whats_new_gif_2">Enviar y recibir audio (desde el menú Archivos)</string>
-    <string name="whats_new_gif_3">Mejoras en la descarga de animaciones</string>
-    <string name="whats_new_gif_4">Traducción al Ruso</string>
-    <string name="whats_new_gif_5">Temas experimentales</string>
-
-    <string name="whats_new_spain_title">Traducción al Español añadida y mejor estabilidad</string>
-    <string name="whats_new_spain_hint">Si tienes cualquier problema con la traducción al Español, por favor, dile a
-        nuestro equipo de soporte en Ajustes — Haz una pregunta.
-    </string>
-    <string name="whats_new_spain_0">Completamente traducido al Español</string>
-    <string name="whats_new_spain_1">Alrededor de 50 bugs arreglados</string>
+  <string name="whats_contacts_title">Mejoras de contactos e inicio</string>
+  <string name="whats_contacts_0">Eliminar contactos</string>
+  <string name="whats_contacts_1">Ordenar contactos (nombre \ apellido) usa los ajustes del teléfono</string>
+  <string name="whats_contacts_2">Mejoras en la velocidad de carga</string>
+  <string name="whats_new_design_title">Diseño, velocidad y estabilidad</string>
+  <string name="whats_new_design_0">Nuevo diseño azul</string>
+  <string name="whats_new_design_1">Aumento de velocidad de envío de fotos, vídeos y mensajes</string>
+  <string name="whats_new_design_2">Optimizaciones para países con \"firewall\"</string>
+  <string name="whats_new_design_3">Mejor estabilidad</string>
+  <string name="whats_new_secret_title">Chats secretos añadidos</string>
+  <string name="whats_new_secret_hint">Inicia un chat secreto desde el menú para \"Escribir a\" o desde el perfil del\n        contacto.\n    </string>
+  <string name="whats_new_secret_0">Usa cifrado de fin-a-fin</string>
+  <string name="whats_new_secret_1">No deja rastro en nuestros servidores</string>
+  <string name="whats_new_secret_2">Tiene autodestrucción</string>
+  <string name="whats_new_secret_3">No permite el reenvío de mensajes</string>
+  <string name="whats_new_arabic_title">Traducción al Árabe añadida</string>
+  <string name="whats_new_arabic_hint">Si tienes cualquier problema con la traducción al Árabe, por favor, dile a\n        nuestro\n        equipo de soporte en Ajustes — Haz una pregunta.\n    </string>
+  <string name="whats_new_arabic_0">Soporte completo de RTL en android 4.0+</string>
+  <string name="whats_new_arabic_1">Intefaz invertida en android 4.2+</string>
+  <string name="whats_new_arabic_2">Soporte completo para los numerales árabes del este</string>
+  <string name="whats_new_gif_title">Animaciones Gif, traducción al Ruso y velocidad</string>
+  <string name="whats_new_gif_hint">\n        Las animaciones Gif funcionan con imágenes enviadas desde otras ediciones S de Telegram.\n        Si tienes cualquier problema con la traducción al Ruso, por favor, dile a nuestro equipo de soporte en\n        Ajustes — Haz una pregunta.\n    </string>
+  <string name="whats_new_gif_0">Envío y recepción de Animaciones Gif</string>
+  <string name="whats_new_gif_1">Vista previa de documentos (ahora visible sólo en edición S)</string>
+  <string name="whats_new_gif_2">Enviar y recibir audio (desde el menú Archivos)</string>
+  <string name="whats_new_gif_3">Mejoras en la descarga de animaciones</string>
+  <string name="whats_new_gif_4">Traducción al Ruso</string>
+  <string name="whats_new_gif_5">Temas experimentales</string>
+  <string name="whats_new_spain_title">Traducción al Español añadida y mejor estabilidad</string>
+  <string name="whats_new_spain_hint">Si tienes cualquier problema con la traducción al Español, por favor, dile a\n        nuestro equipo de soporte en Ajustes — Haz una pregunta.\n    </string>
+  <string name="whats_new_spain_0">Completamente traducido al Español</string>
+  <string name="whats_new_spain_1">Alrededor de 50 bugs arreglados</string>
+  <string name="whats_web_search">Búsqueda de imágenes en la web, diseño más fresco, mayor velocidad y mejor estabilidad</string>
+  <string name="whats_web_search_0">Añadida la búsqueda de imágenes en la web</string>
+  <string name="whats_web_search_1">Diseño más liviano</string>
+  <string name="whats_web_search_2">Velocidad y estabilidad mejoradas</string>
 </resources>

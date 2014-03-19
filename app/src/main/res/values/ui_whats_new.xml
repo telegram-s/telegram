@@ -46,4 +46,9 @@
     </string>
     <string name="whats_new_spain_0">Fully translated to spain language</string>
     <string name="whats_new_spain_1">Fixed about 50 bugs</string>
+
+    <string name="whats_web_search">Web image search, fresh design, more speed and better stability</string>
+    <string name="whats_web_search_0">Added searching of images in Web</string>
+    <string name="whats_web_search_1">Lighter design</string>
+    <string name="whats_web_search_2">Improved speed and stability</string>
 </resources>

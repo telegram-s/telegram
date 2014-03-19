@@ -80,6 +80,9 @@ public class FileCache {
                 onStorageCreated(STORAGE_CACHE_EXTERNAL);
 
                 File[] files = new File(externalCachePath).listFiles();
+                if (files == null) {
+                    files = new File[0];
+                }
                 HashSet<String> cacheFiles = new HashSet<String>();
                 for (File f : files) {
                     if (!f.isFile()) {
@@ -145,6 +148,9 @@ public class FileCache {
             onStorageCreated(STORAGE_CACHE_INTERNAL);
 
             File[] files = new File(internalCachePath).listFiles();
+            if (files == null) {
+                files = new File[0];
+            }
             HashSet<String> cacheFiles = new HashSet<String>();
             for (File f : files) {
                 if (!f.isFile()) {
@@ -209,7 +215,7 @@ public class FileCache {
         }
         if (internalCachePath != null) {
             if (new File(internalCachePath + "/" + fileName).exists()) {
-                storage = STORAGE_CACHE_EXTERNAL;
+                storage = STORAGE_CACHE_INTERNAL;
             }
         }
         persistence.markDownloaded(fileName);

@@ -1,5 +1,6 @@
 package org.telegram.android.core.wireframes;
 
+import android.os.Build;
 import android.text.Spannable;
 import org.telegram.android.core.model.Group;
 import org.telegram.android.core.model.LinkType;
@@ -104,7 +105,12 @@ public class DialogWireframe {
             if (dialogUser.getLastName() != null && dialogUser.getLastName().length() > 0) {
                 char second = dialogUser.getLastName().charAt(0);
                 if (Character.isLetter(second)) {
-                    res += "\u200D" + Character.toUpperCase(second);
+                    if (res.length() > 0) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            res += "\u200D";
+                        }
+                    }
+                    res += Character.toUpperCase(second);
                 }
             }
 

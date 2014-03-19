@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <resources>
     <string name="st_lang">de</string>
     <string name="st_app_name">Telegram</string>
@@ -67,35 +67,20 @@
     <string name="st_error_incorrect">Aktion kann nicht abgeschlossen werden.</string>
     <string name="st_error_many_attempts">Zu viele Versuche. Bitte versuchen Sie es später noch einmal.</string>
     <string name="st_error_no_app_for_file">Keine geeignete Anwendung für diese Datei</string>
-
+    <string name="st_error_download_image">Bild kann nicht heruntergeladen werden</string>
     <string name="st_tour_start_messaging">Chatten starten</string>
     <string name="st_tour_page1_title">Telegram</string>
-    <string name="st_tour_page1">
-        Willkommen in die neue Ära des Chattens.
-    </string>
-
+    <string name="st_tour_page1">\n        Willkommen in die neue Ära des Chattens.\n    </string>
     <string name="st_tour_page2_title">Schnell</string>
-    <string name="st_tour_page2"><![CDATA[<b>Telegram</b> empfängt Nachricten schneller als jede andere Anwendung.]]>
-    </string>
-
+    <string name="st_tour_page2"><![CDATA[<b>Telegram</b> empfängt Nachricten schneller als jede andere Anwendung.]]>\n    </string>
     <string name="st_tour_page3_title">Kostenlos</string>
-    <string name="st_tour_page3"><![CDATA[<b>Telegram</b> ist für immer kostenlos. Keine Werbung. Kein Abo.]]>
-    </string>
-
+    <string name="st_tour_page3"><![CDATA[<b>Telegram</b> ist für immer kostenlos. Keine Werbung. Kein Abo.]]>\n    </string>
     <string name="st_tour_page4_title">Stark</string>
-    <string name="st_tour_page4"><![CDATA[<b>Telegram</b> hat keine Limits bezüglich der Größe deiner Medien und deiner Chats.]]>
-    </string>
-
+    <string name="st_tour_page4"><![CDATA[<b>Telegram</b> hat keine Limits bezüglich der Größe deiner Medien und deiner Chats.]]>\n    </string>
     <string name="st_tour_page5_title">Sicher</string>
-    <string name="st_tour_page5">
-        <![CDATA[<b>Telegram</b> bewahrt deine Nachrichten sicher vor Hackerangriffen auf.]]>
-    </string>
-
+    <string name="st_tour_page5">\n        <![CDATA[<b>Telegram</b> bewahrt deine Nachrichten sicher vor Hackerangriffen auf.]]>\n    </string>
     <string name="st_tour_page6_title">Cloud-basiert</string>
-    <string name="st_tour_page6">
-        <![CDATA[<b>Telegram</b> gewährleistet dir Zugang zu deinen Nachrichten auf vielen Geräten gleichzeitg.]]>
-    </string>
-
+    <string name="st_tour_page6">\n        <![CDATA[<b>Telegram</b> gewährleistet dir Zugang zu deinen Nachrichten auf vielen Geräten gleichzeitg.]]>\n    </string>
     <string name="st_auth_state_activation">Die Aktivierung läuft ...</string>
     <string name="st_auth_state_creating">Konto erstellen</string>
     <string name="st_auth_state_error">Aktivierungsfehler</string>
@@ -138,15 +123,15 @@
     <string name="st_dialogs_delete_history">Sind Sie sicher, dass Sie alle Nachrichten löschen wollen?</string>
     <string name="st_dialogs_delete_group">Sind Sie sicher, dass Sie die Gruppe zu verlassen und alle Nachrichten löschen wollen?</string>
     <string name="st_dialogs_confirm_header">Sind Sie sicher?</string>
-    <string name="st_dialogs_confirm_send">Sende Nachricht an "{0}"?</string>
-    <string name="st_dialogs_confirm_forward">Nachricht weiterleiten an "{0}"?</string>
-    <string name="st_dialogs_confirm_forward_multiple">Nachrichten weiterleiten an "{0}"?</string>
-    <string name="st_dialogs_confirm_image">Sende Foto an "{0}"?</string>
-    <string name="st_dialogs_confirm_video">Sende Video an "{0}"?</string>
-    <string name="st_dialogs_confirm_doc">Sende Dokument an "{0}"?</string>
-    <string name="st_dialogs_confirm_images">Sende Bilder an "{0}"?</string>
-    <string name="st_dialogs_confirm_docs">Sende Dokumente an "{0}"?</string>
-    <string name="st_dialogs_confirm_contact">Sende Kontakt an "{0}"?</string>
+    <string name="st_dialogs_confirm_send">Sende Nachricht an \"{0}\"?</string>
+    <string name="st_dialogs_confirm_forward">Nachricht weiterleiten an \"{0}\"?</string>
+    <string name="st_dialogs_confirm_forward_multiple">Nachrichten weiterleiten an \"{0}\"?</string>
+    <string name="st_dialogs_confirm_image">Sende Foto an \"{0}\"?</string>
+    <string name="st_dialogs_confirm_video">Sende Video an \"{0}\"?</string>
+    <string name="st_dialogs_confirm_doc">Sende Dokument an \"{0}\"?</string>
+    <string name="st_dialogs_confirm_images">Sende Bilder an \"{0}\"?</string>
+    <string name="st_dialogs_confirm_docs">Sende Dokumente an \"{0}\"?</string>
+    <string name="st_dialogs_confirm_contact">Sende Kontakt an \"{0}\"?</string>
     <string name="st_dialogs_search_hint">Schnellsuche</string>
     <string name="st_dialogs_search_hint_full">Geben Gruppentitel oder Kontaktnamen ein.</string>
     <string name="st_dialogs_search_empty">Nichts gefunden.</string>
@@ -242,6 +227,7 @@
     <string name="st_conv_menu_location">Standort</string>
     <string name="st_conv_menu_audio">Audio</string>
     <string name="st_conv_menu_doc">Dokument</string>
+    <string name="st_conv_menu_web">Webbild</string>
     <string name="st_conv_unsupported_title">Nicht unterstützter Inhalt</string>
     <string name="st_conv_unsupported_message">Diese Art von Inhalten wird von dieser Anwendung nicht unterstützt</string>
     <string name="st_contacts_add_name_title">BEARBEITE VOR- UND NACHNAMEN</string>
@@ -314,6 +300,11 @@
     <string name="st_media_title_user">Geteilte Medien</string>
     <string name="st_media_title_all">Alle geteilten Medien</string>
     <string name="st_media_empty">Keine Medien.</string>
+    <string name="st_web_search_title">Websuche</string>
+    <string name="st_web_search_preview">Webvorschau</string>
+    <string name="st_web_search_hint">Geben Sie einen Suchbegriff ein und tippen Sie auf den Suchknopf.</string>
+    <string name="st_web_search_empty">Nichts gefunden.</string>
+    <string name="st_web_search_send">Bild senden</string>
     <string name="st_map_unavailable">Maps nicht verfügbar</string>
     <string name="st_map_hybrid">Hybrid</string>
     <string name="st_map_normal">Normal</string>
@@ -425,7 +416,7 @@
     <string name="st_secret_header_chat">CHAT</string>
     <string name="st_secret_key_title">Verschlüsselungsdatei</string>
     <string name="st_secret_key_info1">Dieses Bild ist eine Visualisierung Ihrer Verschlüsselungsdatei für diesen sicheren Chat mit {name}.</string>
-    <string name="st_secret_key_info2">Wenn dieses Bild aussieht, wie das auf dem Handy von {name}, dann ist euer Chat 200% sicher. "</string>
+    <string name="st_secret_key_info2">Wenn dieses Bild aussieht, wie das auf dem Handy von {name}, dann ist euer Chat 200% sicher. \"</string>
     <string name="st_bubble_media_cancelled">abgebrochen</string>
     <string name="st_bubble_media_try_again">wiederholen?</string>
     <string name="st_bubble_media_download">download</string>
@@ -457,20 +448,6 @@
     <string name="st_notification_new_login_location">Neuer Login an einem unbekannten Gerät {device} von {location}</string>
     <string name="st_whats_new_title">Was gibt\'s neues</string>
     <string name="st_whats_new_continue">Weiter Chatten</string>
-    <string name="st_invite_short">
-        Lass uns in der App Telegram schreiben http://telegram.org/dl1
-    </string>
-    <string name="st_invite_big">
-        Hey, 
-
-        Ich habe gerade Telegram Messenger auf mein Android installiert. 
-
-        Es ist ein schneller, sicherer und kostenloser Messenger, der SMS ersetzt. Mit dieser App können Sie Gruppen 
-        für bis zu 200 Personen gründen und Nachrichten, Fotos und große Videos senden! 
-
-        Telegram-Messenger ist für Android und iPhone verfrügbar. Es ist nicht nochtwendig keine PIN oder Passwort 
-        zu merken - es funktioniert genau so einfach wie SMS und verwendet Ihr Internet-Datentarif. 
-
-        Jetzt von http://telegram.org/dl1 herunterladen und auf Wiedersehen sagen zu SMS!
-    </string>
+    <string name="st_invite_short">\n        Lass uns in der App Telegram schreiben http://telegram.org/dl1\n    </string>
+    <string name="st_invite_big">\n        Hey, \n\n        Ich habe gerade Telegram Messenger auf mein Android installiert. \n\n        Es ist ein schneller, sicherer und kostenloser Messenger, der SMS ersetzt. Mit dieser App können Sie Gruppen \n        für bis zu 200 Personen gründen und Nachrichten, Fotos und große Videos senden! \n\n        Telegram-Messenger ist für Android und iPhone verfrügbar. Es ist nicht nochtwendig keine PIN oder Passwort \n        zu merken - es funktioniert genau so einfach wie SMS und verwendet Ihr Internet-Datentarif. \n\n        Jetzt von http://telegram.org/dl1 herunterladen und auf Wiedersehen sagen zu SMS!\n    </string>
 </resources>
