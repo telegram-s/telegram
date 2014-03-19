@@ -1,16 +1,7 @@
 package org.telegram.android.preview;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.NinePatchDrawable;
-import android.net.http.AndroidHttpClient;
-import android.os.SystemClock;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.*;
 import org.telegram.android.R;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.ApiUtils;
@@ -23,17 +14,11 @@ import org.telegram.android.log.Logger;
 import org.telegram.android.media.BitmapDecoderEx;
 import org.telegram.android.media.Optimizer;
 import org.telegram.android.media.VideoOptimizer;
-import org.telegram.android.preview.cache.ImageStorage;
 import org.telegram.android.preview.media.*;
 import org.telegram.android.preview.queue.QueueWorker;
 import org.telegram.android.util.IOUtils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 
 import static org.telegram.android.preview.PreviewConfig.*;
 
