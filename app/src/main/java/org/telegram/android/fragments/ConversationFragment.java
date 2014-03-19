@@ -18,12 +18,14 @@ import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.view.*;
+import android.view.animation.AccelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.nineoldandroids.animation.Animator;
 import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
@@ -62,6 +64,8 @@ import org.telegram.api.requests.TLRequestMessagesDeleteHistory;
 import org.telegram.api.requests.TLRequestMessagesDiscardEncryption;
 import org.telegram.i18n.I18nUtil;
 
+import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -99,6 +103,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private EditText editText;
     private ImageButton smileButton;
+    private ImageView audioButton;
     private ImageButton sendButton;
 
     private long viewCreateTime = 0;
@@ -118,9 +123,22 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private long firstUnreadMessage = 0;
     private int unreadCount = 0;
+    private boolean isAudioButtonVisible = true;
+    private boolean isAudioVisible = false;
+    private View audioContainer;
+    private View messageContainer;
+    private View audioSlide;
+    private int slideStart;
 
-    private View audioRecordContainer;
-    private TextView audioRecordTimer;
+    private int SLIDE_LIMIT;
+
+    // private View audioRecordContainer;
+    // private View audioRecordButton;
+    // private boolean audioEnabled;
+
+    // private TextView audioRecordTimer;
+
+
     private String audioFile;
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -183,7 +201,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             peerId = savedInstanceState.getInt("peerId");
             peerType = savedInstanceState.getInt("peerType");
         }
-
+        SLIDE_LIMIT = (int) (UiMeasure.DENSITY * 180);
 
         checkState();
 
@@ -240,25 +258,38 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         contactsPanel = res.findViewById(R.id.contactsPanel);
 
-        audioRecordContainer = res.findViewById(R.id.audioPanel);
-        audioRecordContainer.setVisibility(View.GONE);
+        // audioRecordContainer = res.findViewById(R.id.audioPanel);
+        // audioRecordContainer.setVisibility(View.VISIBLE);
 
-        audioRecordContainer.findViewById(R.id.sendAudio).setOnClickListener(secure(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendAudio();
-            }
-        }));
+//        audioRecordContainer.findViewById(R.id.sendAudio).setOnClickListener(secure(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                sendAudio();
+//            }
+//        }));
+//
+//        audioRecordContainer.findViewById(R.id.cancelAudio).setOnClickListener(secure(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                cancelAudio();
+//            }
+//        }));
 
-        audioRecordContainer.findViewById(R.id.cancelAudio).setOnClickListener(secure(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cancelAudio();
-            }
-        }));
+//        audioRecordTimer = (TextView) audioRecordContainer.findViewById(R.id.timer);
+//        audioRecordButton = audioRecordContainer.findViewById(R.id.startAudio);
+//        audioRecordContainer.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent e) {
+//                Logger.d(TAG, "onTouch: " + e.getX() + ", " + e.getY());
+//                // return gestureDetector.onTouchEvent(e);
+//                return false;
+//            }
+//        });
 
-        audioRecordTimer = (TextView) audioRecordContainer.findViewById(R.id.timer);
 
+        audioContainer = res.findViewById(R.id.audioContainer);
+        audioSlide = res.findViewById(R.id.audioSlide);
+        messageContainer = res.findViewById(R.id.messageContainer);
         loading = res.findViewById(R.id.loading);
         empty = res.findViewById(R.id.empty);
         emptyEncrypted = res.findViewById(R.id.emptyEncrypted);
@@ -319,8 +350,22 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (sendButton != null) {
-                    sendButton.setEnabled(editable.toString().trim().length() > 0);
+                if (sendButton != null && audioButton != null) {
+                    boolean isVisible = editable.toString().trim().length() == 0;
+                    if (isVisible) {
+                        if (!isAudioButtonVisible) {
+                            goneScaled(sendButton);
+                            showScaled(audioButton);
+                            isAudioButtonVisible = true;
+                        }
+
+                    } else {
+                        if (isAudioButtonVisible) {
+                            goneScaled(audioButton);
+                            showScaled(sendButton);
+                            isAudioButtonVisible = false;
+                        }
+                    }
                 }
             }
         });
@@ -375,15 +420,48 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 getSmileysController().showSmileys(editText);
             }
         }));
-
+        audioButton = (ImageView) res.findViewById(R.id.startAudio);
+        audioButton.setVisibility(View.VISIBLE);
+        audioButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (!isAudioVisible) {
+                        showAudio();
+                        slideStart = (int) event.getX();
+                    }
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (isAudioVisible) {
+                        hideAudio();
+                    }
+                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (isAudioVisible) {
+                        int slide = slideStart - (int) event.getX();
+                        if (slide < 0) {
+                            slide = 0;
+                        }
+                        if (slide > SLIDE_LIMIT) {
+                            hideAudio();
+                        } else {
+                            slideAudio(slide);
+                        }
+                    }
+                }
+                return true;
+            }
+        });
         sendButton = (ImageButton) res.findViewById(R.id.sendMessage);
-        sendButton.setEnabled(false);
+        sendButton.setVisibility(View.GONE);
+        sendButton.setEnabled(true);
+        animate(sendButton).scaleX(0.0f).scaleY(0.0f).alpha(0.0f).setDuration(0).start();
+        animate(audioContainer).translationX(UiMeasure.METRICS.widthPixels).setDuration(0).start();
         sendButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 doSend();
             }
         }));
+        isAudioButtonVisible = true;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             listView.setLayerType(View.LAYER_TYPE_NONE, null);
@@ -959,10 +1037,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     private void updateAudioUi() {
         if (!application.getKernel().getActorKernel().getVoiceCaptureActor().isStarted()) {
             // Hide
-            audioRecordContainer.setVisibility(View.GONE);
+            // audioRecordContainer.setVisibility(View.GONE);
         } else {
             // Show
-            audioRecordContainer.setVisibility(View.VISIBLE);
+            // audioRecordContainer.setVisibility(View.VISIBLE);
             // audioRecordTimer.setText(TextUtil.formatDuration((int) ((application.getUiKernel().getVoiceRecorder().currentDuration()) / 1000)));
         }
     }
@@ -2512,5 +2590,124 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     @Override
     public boolean isParentFragment(TelegramFragment fragment) {
         return false;
+    }
+
+    private void slideAudio(int value) {
+        animate(audioSlide).translationX(-value).setDuration(0).start();
+    }
+
+    private void showAudio() {
+        if (isAudioVisible) {
+            return;
+        }
+        isAudioVisible = true;
+
+        slideAudio(0);
+
+        animate(audioContainer)
+                .translationX(UiMeasure.METRICS.widthPixels)
+                .setDuration(0).start();
+
+        animate(audioContainer)
+                .translationX(0)
+                .setInterpolator(new AccelerateInterpolator())
+                .setDuration(160)
+                .start();
+
+        animate(messageContainer)
+                .translationX(0)
+                .setDuration(0)
+                .start();
+        animate(messageContainer)
+                .translationX(-UiMeasure.METRICS.widthPixels)
+                .setInterpolator(new AccelerateInterpolator())
+                .setDuration(160)
+                .start();
+    }
+
+    private void hideAudio() {
+        if (!isAudioVisible) {
+            return;
+        }
+        isAudioVisible = false;
+
+        animate(audioContainer)
+                .translationX(0)
+                .setDuration(0)
+                .start();
+        animate(audioContainer)
+                .translationX(UiMeasure.METRICS.widthPixels)
+                .setInterpolator(new AccelerateInterpolator())
+                .setDuration(160)
+                .start();
+
+        animate(messageContainer)
+                .translationX(-UiMeasure.METRICS.widthPixels)
+                .setDuration(0)
+                .start();
+        animate(messageContainer)
+                .translationX(0)
+                .setInterpolator(new AccelerateInterpolator())
+                .setDuration(160)
+                .start();
+    }
+
+    private void goneScaled(final View view) {
+        if (view == null) {
+            return;
+        }
+
+        view.setEnabled(false);
+        animate(view).scaleX(0.0f).scaleY(0.0f)
+                .alpha(0.0f).setDuration(160).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                view.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        }).start();
+    }
+
+    private void showScaled(final View view) {
+        if (view == null) {
+            return;
+        }
+
+        view.setEnabled(true);
+        animate(view).scaleX(1.0f).scaleY(1.0f).alpha(1.0f).setDuration(160).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+                view.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        }).start();
     }
 }

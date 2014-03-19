@@ -165,35 +165,93 @@
                       android:layout_width="fill_parent"
                       android:layout_gravity="bottom"
                       android:layoutDirection="ltr">
-            <ImageButton android:layout_height="48dp"
-                         android:layout_width="48dp"
-                         android:src="@drawable/st_conv_panel_kb"
-                         android:layout_gravity="bottom"
-                         android:background="@android:color/transparent"
-                         android:id="@+id/smileysButton"/>
-            <org.telegram.android.ui.FixedEditText android:layout_height="wrap_content"
-                                                   android:layout_width="0dp"
-                                                   android:layout_weight="1"
-                                                   android:layout_gravity="center_vertical"
-                                                   android:paddingTop="7dp"
-                                                   android:paddingBottom="6dp"
-                                                   android:layout_marginLeft="2dp"
-                                                   android:layout_marginRight="2dp"
-                                                   android:textSize="16sp"
-                                                   android:maxLines="5"
-                                                   android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
-                                                   android:imeOptions="actionSend"
-                                                   android:textColorHint="#bfbfbf"
-                                                   android:hint="@string/st_conv_hint"
-                                                   android:id="@+id/text"
-                                                   android:background="@drawable/transparent"/>
-            <ImageButton android:layout_height="48dp"
-                         android:layout_width="56dp"
-                         android:paddingTop="1dp"
-                         android:layout_gravity="bottom"
-                         android:background="@android:color/transparent"
-                         android:src="@drawable/st_conv_send"
-                         android:id="@+id/sendMessage"/>
+
+            <FrameLayout android:layout_width="0dp"
+                         android:layout_weight="1"
+                         android:layout_height="fill_parent">
+                <LinearLayout android:layout_width="fill_parent"
+                              android:layout_height="fill_parent"
+                              android:orientation="horizontal"
+                              android:id="@+id/messageContainer">
+
+                    <ImageButton android:layout_height="48dp"
+                                 android:layout_width="48dp"
+                                 android:src="@drawable/st_conv_panel_kb"
+                                 android:layout_gravity="bottom"
+                                 android:background="@android:color/transparent"
+                                 android:id="@+id/smileysButton"/>
+
+                    <org.telegram.android.ui.FixedEditText android:layout_height="wrap_content"
+                                                           android:layout_width="0dp"
+                                                           android:layout_weight="1"
+                                                           android:layout_gravity="center_vertical"
+                                                           android:paddingTop="7dp"
+                                                           android:paddingBottom="6dp"
+                                                           android:layout_marginLeft="2dp"
+                                                           android:layout_marginRight="2dp"
+                                                           android:textSize="16sp"
+                                                           android:maxLines="5"
+                                                           android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+                                                           android:imeOptions="actionSend"
+                                                           android:textColorHint="#bfbfbf"
+                                                           android:hint="@string/st_conv_hint"
+                                                           android:id="@+id/text"
+                                                           android:background="@drawable/transparent"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="fill_parent"
+                              android:layout_height="fill_parent"
+                              android:orientation="horizontal"
+                              android:background="@android:color/white"
+                              android:clickable="true"
+                              android:id="@+id/audioContainer">
+
+                    <ImageView android:layout_width="40dp"
+                               android:layout_height="48dp"
+                               android:paddingLeft="8dp"
+                               android:scaleType="center"
+                               android:src="@drawable/st_conv_voice_rec"/>
+
+                    <TextView android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:textSize="19sp"
+                              android:text="00:01"
+                              android:textColor="@android:color/black"
+                              android:layout_gravity="center_vertical"/>
+
+                    <FrameLayout android:layout_width="0dp"
+                                 android:layout_weight="1"
+                                 android:layout_height="fill_parent"
+                                 android:paddingLeft="16dp"
+                                 android:paddingRight="16dp">
+                        <TextView android:layout_width="wrap_content"
+                                  android:layout_height="wrap_content"
+                                  android:drawableLeft="@drawable/st_conv_voice_slide_arrow"
+                                  android:drawablePadding="4dp"
+                                  android:textColor="#aaaaaa"
+                                  android:textSize="16dp"
+                                  android:layout_gravity="center_vertical|right"
+                                  android:gravity="center_vertical"
+                                  android:text="SLIDE TO CANCEL"
+                                  android:id="@+id/audioSlide"/>
+                    </FrameLayout>
+                </LinearLayout>
+            </FrameLayout>
+            <FrameLayout android:layout_height="48dp"
+                         android:layout_width="56dp">
+                <ImageView android:layout_height="48dp"
+                           android:layout_width="56dp"
+                           android:layout_gravity="bottom"
+                           android:scaleType="center"
+                           android:src="@drawable/st_conv_voice_pressed"
+                           android:id="@+id/startAudio"/>
+                <ImageButton android:layout_height="48dp"
+                             android:layout_width="56dp"
+                             android:paddingTop="1dp"
+                             android:layout_gravity="bottom"
+                             android:background="@android:color/transparent"
+                             android:src="@drawable/st_conv_send_normal"
+                             android:id="@+id/sendMessage"/>
+            </FrameLayout>
         </LinearLayout>
 
         <FrameLayout android:layout_height="fill_parent"
@@ -218,24 +276,5 @@
                     android:text="@string/st_conv_delete_chat"
                     android:id="@+id/delete"/>
         </FrameLayout>
-
-        <LinearLayout android:layout_height="fill_parent"
-                      android:layout_width="fill_parent"
-                      android:orientation="horizontal"
-                      android:id="@+id/audioPanel"
-                      android:background="@android:color/white"
-                      android:gravity="center_vertical|left">
-            <Button android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/cancelAudio"
-                    android:text="Cancel"/>
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:id="@+id/timer"/>
-            <Button android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/sendAudio"
-                    android:text="Send"/>
-        </LinearLayout>
     </FrameLayout>
 </LinearLayout>
