@@ -128,17 +128,6 @@ public class MessageAudioView extends MessageBaseDocView implements StateSubscri
         canvas.drawRect(getPx(64), getPx(28), getPx(204), getPx(30), progressBgPaint);
 
         canvas.drawRect(getPx(64), getPx(28), getPx(64 + (204 - 64) * progress), getPx(30), progressPaint);
-
-//        if (mediaPlayer != null && lastDatabaseId == databaseId) {
-//            int duration = mediaPlayer.getDuration();
-//            int progress = mediaPlayer.getCurrentPosition();
-//
-//            if (duration != 0) {
-//                canvas.drawRect(getPx(64), getPx(28), getPx(64 + (204 - 64) * progress / duration), getPx(30), progressPaint);
-//            }
-//
-//            postInvalidateDelayed(100);
-//        }
     }
 
     @Override
