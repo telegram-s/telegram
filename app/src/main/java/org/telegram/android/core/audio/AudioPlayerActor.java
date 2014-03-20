@@ -3,7 +3,6 @@ package org.telegram.android.core.audio;
 import android.widget.Toast;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.Events;
-import org.telegram.notifications.Notifications;
 import org.telegram.opus.OpusLib;
 import org.telegram.threading.Actor;
 import org.telegram.threading.ActorSystem;
@@ -27,7 +26,7 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
         super(system, "common");
         this.application = application;
         androidPlayerActor = new AndroidPlayerActor(this, application, system);
-        opusPlayerActor = new OpusPlayerActor(system);
+        opusPlayerActor = new OpusPlayerActor(this, system);
         opusLib = new OpusLib();
     }
 
@@ -58,28 +57,28 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
                 play(((ToggleAudio) message).getId(), ((ToggleAudio) message).getFileName());
             }
             flushNotifications();
-        } else if (message instanceof AndroidPlayerStart) {
-            if (((AndroidPlayerStart) message).id != currentId || !isInited) {
+        } else if (message instanceof SubPlayerStart) {
+            if (((SubPlayerStart) message).id != currentId || !isInited) {
                 return;
             }
             notify(Events.STATE_IN_PROGRESS, 0.0f);
-        } else if (message instanceof AndroidPlayerStop) {
-            if (((AndroidPlayerStop) message).id != currentId || !isInited) {
+        } else if (message instanceof SubPlayerStop) {
+            if (((SubPlayerStop) message).id != currentId || !isInited) {
                 return;
             }
             notify(Events.STATE_STOP);
-        } else if (message instanceof AndroidPlayerPaused) {
-            if (((AndroidPlayerPaused) message).id != currentId || !isInited) {
+        } else if (message instanceof SubPlayerPaused) {
+            if (((SubPlayerPaused) message).id != currentId || !isInited) {
                 return;
             }
-            notify(Events.STATE_PAUSED, ((AndroidPlayerPaused) message).progress);
-        } else if (message instanceof AndroidPlayerInProgress) {
-            if (((AndroidPlayerInProgress) message).id != currentId || !isInited) {
+            notify(Events.STATE_PAUSED, ((SubPlayerPaused) message).progress);
+        } else if (message instanceof SubPlayerInProgress) {
+            if (((SubPlayerInProgress) message).id != currentId || !isInited) {
                 return;
             }
-            notify(Events.STATE_IN_PROGRESS, ((AndroidPlayerInProgress) message).progress);
-        } else if (message instanceof AndroidPlayerCrash) {
-            if (((AndroidPlayerCrash) message).id != currentId || !isInited) {
+            notify(Events.STATE_IN_PROGRESS, ((SubPlayerInProgress) message).progress);
+        } else if (message instanceof SubPlayerCrash) {
+            if (((SubPlayerCrash) message).id != currentId || !isInited) {
                 return;
             }
 
@@ -108,7 +107,6 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
     private void play(long id, String fileName) {
         this.fileName = fileName;
         this.usedAndroid = opusLib.isOpusFile(fileName) <= 0;
-        this.usedAndroid = true;
         this.currentId = id;
         this.isInited = true;
 
@@ -116,7 +114,7 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
             androidPlayerActor.sendMessage(new AndroidPlayerActor.PlayAudio(currentId, fileName));
             opusPlayerActor.sendMessage(new OpusPlayerActor.StopAudio());
         } else {
-            opusPlayerActor.sendMessage(new OpusPlayerActor.PlayAudio(fileName));
+            opusPlayerActor.sendMessage(new OpusPlayerActor.PlayAudio(currentId, fileName));
             androidPlayerActor.sendMessage(new AndroidPlayerActor.StopAudio());
         }
     }
@@ -181,10 +179,10 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
 
     // Internal
 
-    public static class AndroidPlayerStart extends Message {
+    public static class SubPlayerStart extends Message {
         private long id;
 
-        public AndroidPlayerStart(long id) {
+        public SubPlayerStart(long id) {
             this.id = id;
         }
 
@@ -193,11 +191,11 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
         }
     }
 
-    public static class AndroidPlayerInProgress extends Message {
+    public static class SubPlayerInProgress extends Message {
         private long id;
         private float progress;
 
-        public AndroidPlayerInProgress(long id, float progress) {
+        public SubPlayerInProgress(long id, float progress) {
             this.id = id;
             this.progress = progress;
         }
@@ -211,10 +209,10 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
         }
     }
 
-    public static class AndroidPlayerStop extends Message {
+    public static class SubPlayerStop extends Message {
         private long id;
 
-        public AndroidPlayerStop(long id) {
+        public SubPlayerStop(long id) {
             this.id = id;
         }
 
@@ -223,11 +221,11 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
         }
     }
 
-    public static class AndroidPlayerPaused extends Message {
+    public static class SubPlayerPaused extends Message {
         private long id;
         private float progress;
 
-        public AndroidPlayerPaused(long id, float progress) {
+        public SubPlayerPaused(long id, float progress) {
             this.id = id;
             this.progress = progress;
         }
@@ -241,46 +239,11 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
         }
     }
 
-    public static class OpusPlayerStart extends Message {
+
+    public static class SubPlayerCrash extends Message {
         private long id;
 
-        public OpusPlayerStart(long id) {
-            this.id = id;
-        }
-
-        public long getId() {
-            return id;
-        }
-    }
-
-    public static class OpusPlayerStop extends Message {
-        private long id;
-
-        public OpusPlayerStop(long id) {
-            this.id = id;
-        }
-
-        public long getId() {
-            return id;
-        }
-    }
-
-    public static class AndroidPlayerCrash extends Message {
-        private long id;
-
-        public AndroidPlayerCrash(long id) {
-            this.id = id;
-        }
-
-        public long getId() {
-            return id;
-        }
-    }
-
-    public static class OpusPlayerCrash extends Message {
-        private long id;
-
-        public OpusPlayerCrash(long id) {
+        public SubPlayerCrash(long id) {
             this.id = id;
         }
 

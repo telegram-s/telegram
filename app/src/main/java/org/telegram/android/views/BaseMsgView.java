@@ -34,7 +34,6 @@ import org.telegram.i18n.I18nUtil;
  * Created: 18.08.13 19:36
  */
 public abstract class BaseMsgView extends BaseView implements Checkable {
-    private static final String TAG = "BaseMsgView";
 
     private static final long AVATAR_FADE_TIME = 150;
     protected static final long FADE_ANIMATION_TIME = 150;
@@ -120,7 +119,6 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
     private Runnable longClickRunnable = new Runnable() {
         @Override
         public void run() {
-            Logger.d(TAG, "notify");
             if (performLongClick()) {
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                 touchedElement = TOUCHED_NONE;
@@ -307,12 +305,10 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         bindCommonInt(message);
         bindCommon(message);
         if (oldId != -1 && message.message.getDatabaseId() == oldId) {
-            Logger.d(TAG, "Bind update");
             bindUpdateInt(message);
             bindUpdate(message);
             isUpdated = true;
         } else {
-            Logger.d(TAG, "Bind new");
             bindNewInt(message);
             bindNewView(message);
         }

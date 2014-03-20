@@ -40,6 +40,7 @@ public class AndroidPlayerActor extends Actor<AndroidPlayerActor.Message> {
             currentFileName = ((PlayAudio) message).fileName;
 
             destroyPlayer();
+            state = STATE_NONE;
 
             try {
                 mplayer = new MediaPlayer();
@@ -63,11 +64,11 @@ public class AndroidPlayerActor extends Actor<AndroidPlayerActor.Message> {
                 });
             } catch (Exception e) {
                 destroyPlayer();
-                basePlayer.sendMessage(new AudioPlayerActor.AndroidPlayerCrash(currentId));
+                basePlayer.sendMessage(new AudioPlayerActor.SubPlayerCrash(currentId));
                 return;
             }
 
-            basePlayer.sendMessage(new AudioPlayerActor.AndroidPlayerStart(currentId));
+            basePlayer.sendMessage(new AudioPlayerActor.SubPlayerStart(currentId));
             sendMessage(new NotifyAudio(), 500);
             state = STATE_STARTED;
         } else if (message instanceof NotifyAudio) {
@@ -75,10 +76,10 @@ public class AndroidPlayerActor extends Actor<AndroidPlayerActor.Message> {
                 if (state == STATE_STARTED) {
                     int duration = mplayer.getDuration();
                     if (duration == 0) {
-                        basePlayer.sendMessage(new AudioPlayerActor.AndroidPlayerInProgress(currentId, 0));
+                        basePlayer.sendMessage(new AudioPlayerActor.SubPlayerInProgress(currentId, 0));
                     } else {
                         float progress = ((float) mplayer.getCurrentPosition()) / duration;
-                        basePlayer.sendMessage(new AudioPlayerActor.AndroidPlayerInProgress(currentId, progress));
+                        basePlayer.sendMessage(new AudioPlayerActor.SubPlayerInProgress(currentId, progress));
                     }
                     sendMessage(new NotifyAudio(), 500);
                 }
@@ -99,7 +100,7 @@ public class AndroidPlayerActor extends Actor<AndroidPlayerActor.Message> {
             }
         } else if (message instanceof StopAudio) {
             destroyPlayer();
-            basePlayer.sendMessage(new AudioPlayerActor.AndroidPlayerStop(currentId));
+            basePlayer.sendMessage(new AudioPlayerActor.SubPlayerStop(currentId));
         } else if (message instanceof ToggleAudio) {
             if (state == STATE_PAUSED) {
                 sendMessage(new ResumeAudio());
@@ -112,7 +113,7 @@ public class AndroidPlayerActor extends Actor<AndroidPlayerActor.Message> {
             sendMessage(new PlayAudio(currentId, currentFileName));
         } else if (message instanceof ErrorAudio) {
             destroyPlayer();
-            basePlayer.sendMessage(new AudioPlayerActor.AndroidPlayerCrash(currentId));
+            basePlayer.sendMessage(new AudioPlayerActor.SubPlayerCrash(currentId));
         }
     }
 
