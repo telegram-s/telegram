@@ -24,6 +24,11 @@ public class PickWebImageActivity extends TelegramActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setBarBg(true);
+        getSupportActionBar().setLogo(R.drawable.st_bar_logo);
+        getSupportActionBar().setIcon(R.drawable.st_bar_logo);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().show();
 
         setContentView(R.layout.activity_web_search);

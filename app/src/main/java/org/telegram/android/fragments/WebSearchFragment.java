@@ -282,6 +282,7 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
 
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSherlockActivity().getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_web_search_title));
         getSherlockActivity().getSupportActionBar().setSubtitle(null);
         ((TelegramActivity) getActivity()).fixBackButton();
