@@ -216,6 +216,7 @@
                               android:textSize="19sp"
                               android:text="00:01"
                               android:textColor="@android:color/black"
+                              android:id="@+id/audioTimer"
                               android:layout_gravity="center_vertical|left"/>
 
                     <FrameLayout android:layout_width="0dp"

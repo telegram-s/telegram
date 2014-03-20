@@ -100,6 +100,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     private View emptyEncrypted;
     private View deleteButton;
     private TextView waitMessageView;
+    private TextView audioTimer;
 
     private View inputOverlay;
 
@@ -290,6 +291,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
 
         audioContainer = res.findViewById(R.id.audioContainer);
+        audioTimer = (TextView) res.findViewById(R.id.audioTimer);
         audioSlide = res.findViewById(R.id.audioSlide);
         messageContainer = res.findViewById(R.id.messageContainer);
         loading = res.findViewById(R.id.loading);
@@ -1866,6 +1868,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             } else if (state == Events.STATE_IN_PROGRESS) {
                 Long progress = (Long) args[0];
                 Logger.d(TAG, "In progress: " + progress + ", id=" + id);
+                audioTimer.setText(TextUtil.formatDuration((int) (progress / 1000)));
             } else if (state == Events.STATE_STOP) {
                 Long progress = (Long) args[0];
                 Logger.d(TAG, "Stop: " + progress + ", id=" + id);
@@ -2638,6 +2641,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         getNotifications().registerSubscriber(this, Events.KIND_AUDIO, message.id);
 
         slideAudio(0);
+        audioTimer.setText("00:00");
 
         animate(audioContainer)
                 .translationX(UiMeasure.METRICS.widthPixels)
