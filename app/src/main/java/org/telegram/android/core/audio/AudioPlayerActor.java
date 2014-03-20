@@ -76,7 +76,7 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
             if (((SubPlayerInProgress) message).id != currentId || !isInited) {
                 return;
             }
-            notify(Events.STATE_IN_PROGRESS, ((SubPlayerInProgress) message).progress);
+            notifyUpdate(Events.STATE_IN_PROGRESS, ((SubPlayerInProgress) message).progress);
         } else if (message instanceof SubPlayerCrash) {
             if (((SubPlayerCrash) message).id != currentId || !isInited) {
                 return;
@@ -86,6 +86,12 @@ public class AudioPlayerActor extends Actor<AudioPlayerActor.Message> {
             notify(Events.STATE_STOP);
         }
 
+    }
+
+    private void notifyUpdate(int state, Object... args) {
+        if (isInited) {
+            application.getUiKernel().getUiNotifications().sendStateUpdate(Events.KIND_AUDIO, currentId, state, args);
+        }
     }
 
     private void notify(int state, Object... args) {

@@ -89,7 +89,9 @@ public class OpusPlayerActor extends Actor<OpusPlayerActor.Message> {
             if (duration != 0) {
                 scale = offset / (float) duration;
             }
+
             basePlayer.sendMessage(new AudioPlayerActor.SubPlayerInProgress(currentId, scale));
+
             if (!isFinished) {
                 sendMessage(new IterateAudio());
             } else {
@@ -100,6 +102,11 @@ public class OpusPlayerActor extends Actor<OpusPlayerActor.Message> {
                 audioTrack.pause();
                 state = STATE_PAUSED;
             }
+            float scale = 0;
+            if (duration != 0) {
+                scale = offset / (float) duration;
+            }
+            basePlayer.sendMessage(new AudioPlayerActor.SubPlayerPaused(currentId, scale));
         } else if (message instanceof ResumeAudio) {
             if (state == STATE_PAUSED) {
                 audioTrack.play();

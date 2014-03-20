@@ -54,17 +54,32 @@ public class Notifications {
             public void run() {
                 if (pendingStates.size() > 0) {
                     for (PendingState state : pendingStates) {
-                        sendPendingState(state.kind, state.id, state.state, state.args);
+                        sendPendingState(state.kind, state.id, state.state, state.isUpdate, state.args);
                     }
                     pendingStates.clear();
                 }
-                sendPendingState(kind, id, state, args);
+                sendPendingState(kind, id, state, false, args);
+            }
+        });
+    }
+
+    public void sendStateUpdate(final int kind, final long id, final int state, final Object... args) {
+        dispatcher.dispatchNotification(new Runnable() {
+            @Override
+            public void run() {
+                if (pendingStates.size() > 0) {
+                    for (PendingState state : pendingStates) {
+                        sendPendingState(state.kind, state.id, state.state, state.isUpdate, state.args);
+                    }
+                    pendingStates.clear();
+                }
+                sendPendingState(kind, id, state, true, args);
             }
         });
     }
 
     public synchronized void sendDelayedState(final int kind, final long id, final int state, final Object... args) {
-        pendingStates.add(new PendingState(kind, id, state, args));
+        pendingStates.add(new PendingState(kind, id, state, false, args));
     }
 
     public void flushPending() {
@@ -73,7 +88,7 @@ public class Notifications {
             public void run() {
                 if (pendingStates.size() > 0) {
                     for (PendingState state : pendingStates) {
-                        sendPendingState(state.kind, state.id, state.state, state.args);
+                        sendPendingState(state.kind, state.id, state.state, state.isUpdate, state.args);
                     }
                     pendingStates.clear();
                 }
@@ -81,11 +96,17 @@ public class Notifications {
         });
     }
 
-    private synchronized void sendPendingState(final int kind, final long id, final int state, final Object... args) {
+    private synchronized void sendPendingState(final int kind, final long id, final int state, boolean update, final Object... args) {
         HashMap<Long, State> stateHashMap = states.get(kind);
         if (stateHashMap == null) {
             stateHashMap = new HashMap<Long, State>();
             states.put(kind, stateHashMap);
+        }
+        if (update) {
+            State oldState = stateHashMap.get(id);
+            if (oldState == null || oldState.state != state) {
+                return;
+            }
         }
         stateHashMap.put(id, new State(kind, id, state, args));
         for (StateSubscriberDef def : stateSubscribers) {
@@ -303,12 +324,18 @@ public class Notifications {
         private long id;
         private int state;
         private Object[] args;
+        private boolean isUpdate;
 
-        private PendingState(int kind, long id, int state, Object[] args) {
+        private PendingState(int kind, long id, int state, boolean isUpdate, Object[] args) {
             this.kind = kind;
             this.id = id;
             this.state = state;
             this.args = args;
+            this.isUpdate = isUpdate;
+        }
+
+        public boolean isUpdate() {
+            return isUpdate;
         }
 
         public int getKind() {

@@ -638,7 +638,7 @@ void fillBuffer(uint8_t *buffer, int capacity) {
 
             size = writtenOutputBytes;
 
-            if (endOfFileReached) {
+            if (endOfFileReached || pcmOffset + size == _totalPcmDuration) {
                 _finished = 1;
                 finished = 1;
             } else {

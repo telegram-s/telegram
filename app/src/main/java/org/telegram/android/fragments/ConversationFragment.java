@@ -1768,10 +1768,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 if (progress < 1200) {
                     Logger.d(TAG, "Cancel");
                 } else {
-//                    application.getEngine().sendAudio(peerType, peerId,
-//                            new TLUploadingAudio(audioFile, (int) (progress / 1000)));
-                    application.getEngine().sendDocument(peerType, peerId,
-                            new TLUploadingDocument(audioFile));
+                    application.getEngine().sendAudio(peerType, peerId,
+                            new TLUploadingAudio(audioFile, (int) (progress / 1000)));
+//                    application.getEngine().sendDocument(peerType, peerId,
+//                            new TLUploadingDocument(audioFile));
+                    application.notifyUIUpdate();
                 }
             }
         }

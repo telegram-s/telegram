@@ -191,7 +191,7 @@ public class MessageContactView extends BaseMsgStateView {
         this.date = org.telegram.android.ui.TextUtil.formatTime(message.message.getDate(), getContext());
         this.showState = message.message.isOut();
 
-        this.basePlaceholder = getResources().getDrawable(R.drawable.st_user_placeholder_dialog);
+        this.basePlaceholder = getResources().getDrawable(R.drawable.st_user_placeholder_chat);
         if (contact.getUserId() > 0) {
             placeHolderBgPaint.setColor(Placeholders.getBgColor(contact.getUserId()));
         } else {

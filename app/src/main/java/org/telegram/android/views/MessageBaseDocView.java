@@ -125,9 +125,13 @@ public class MessageBaseDocView extends BaseDownloadView {
         return getPx(52);
     }
 
+    protected int measureWidth() {
+        return getPx(220);
+    }
+
     @Override
     protected void measureBubbleContent(int width) {
-        contentW = getPx(220);
+        contentW = measureWidth();
         contentH = measureHeight();
         setBubbleMeasuredContent(contentW, contentH);
     }
