@@ -348,17 +348,29 @@ public class CropImageView extends FrameLayout {
         final float cropWindowHeight = Edge.getHeight();
 
         // Scale the crop window position to the actual size of the Bitmap.
-        final float actualCropX = cropWindowX * scaleFactorWidth;
-        final float actualCropY = cropWindowY * scaleFactorHeight;
-        final float actualCropWidth = cropWindowWidth * scaleFactorWidth;
-        final float actualCropHeight = cropWindowHeight * scaleFactorHeight;
+        float actualCropX = cropWindowX * scaleFactorWidth;
+        float actualCropY = cropWindowY * scaleFactorHeight;
+        float actualCropWidth = cropWindowWidth * scaleFactorWidth;
+        float actualCropHeight = cropWindowHeight * scaleFactorHeight;
 
         // Crop the subset from the original Bitmap.
+        if (actualCropX <= 0) {
+            actualCropX = 0;
+        }
+        if (actualCropY <= 0) {
+            actualCropY = 0;
+        }
+        if (actualCropY + actualCropHeight >= mBitmap.getHeight()) {
+            actualCropHeight = mBitmap.getHeight() - actualCropY;
+        }
+        if (actualCropX + actualCropWidth >= mBitmap.getWidth()) {
+            actualCropWidth = mBitmap.getWidth() - actualCropX;
+        }
         final Bitmap croppedBitmap = Bitmap.createBitmap(mBitmap,
-                Math.abs((int) actualCropX),
-                Math.abs((int) actualCropY),
-                Math.abs((int) actualCropWidth),
-                Math.abs((int) actualCropHeight));
+                (int) actualCropX,
+                (int) actualCropY,
+                (int) actualCropWidth,
+                (int) actualCropHeight);
 
         return croppedBitmap;
     }

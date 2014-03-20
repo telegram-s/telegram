@@ -261,11 +261,21 @@ public class BackgroundSync extends BaseSync {
                     User user = application.getEngine().getUser(description.getPeerId());
                     TLInputPeerForeign peer = new TLInputPeerForeign(user.getUid(), user.getAccessHash());
                     TLAffectedHistory history = application.getApi().doRpcCall(new TLRequestMessagesReadHistory(peer, mid, 0));
+                    int offset = history.getOffset();
+                    while (offset != 0) {
+                        history = application.getApi().doRpcCall(new TLRequestMessagesReadHistory(peer, mid, offset));
+                        offset = history.getOffset();
+                    }
                     application.getEngine().getDialogsEngine().onMaxRemoteViewed(description.getPeerType(), description.getPeerId(), mid);
                     application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(history));
                 } else if (description.getPeerType() == PeerType.PEER_CHAT) {
                     int mid = description.getLastLocalViewedMessage();
                     TLAffectedHistory history = application.getApi().doRpcCall(new TLRequestMessagesReadHistory(new TLInputPeerChat(description.getPeerId()), mid, 0));
+                    int offset = history.getOffset();
+                    while (offset != 0) {
+                        history = application.getApi().doRpcCall(new TLRequestMessagesReadHistory(new TLInputPeerChat(description.getPeerId()), mid, offset));
+                        offset = history.getOffset();
+                    }
                     application.getEngine().getDialogsEngine().onMaxRemoteViewed(description.getPeerType(), description.getPeerId(), mid);
                     application.getUpdateProcessor().onMessage(new TLLocalAffectedHistory(history));
                 } else if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {

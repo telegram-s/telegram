@@ -29,7 +29,7 @@ public class VideoOptimizer {
                 width = img.getWidth();
                 height = img.getHeight();
             } catch (Exception e) {
-                CrashHandler.logHandledException(e);
+                // CrashHandler.logHandledException(e);
                 throw e;
             }
         } else {

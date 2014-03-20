@@ -55,6 +55,7 @@ public class MessageAudioView extends MessageBaseDocView implements StateSubscri
 
     private Drawable avatarOverlay;
 
+    private boolean isOut;
     private boolean isInProgress;
     private float progress;
     private String progressText;
@@ -175,7 +176,7 @@ public class MessageAudioView extends MessageBaseDocView implements StateSubscri
         if (relatedUser != null) {
             if (relatedUser.getPhoto() instanceof TLLocalAvatarPhoto) {
                 TLLocalAvatarPhoto avatarPhoto = (TLLocalAvatarPhoto) relatedUser.getPhoto();
-                loader.requestAvatar(avatarPhoto.getPreviewLocation(), AvatarLoader.TYPE_SMALL, receiver);
+                loader.requestAvatar(avatarPhoto.getPreviewLocation(), AvatarLoader.TYPE_MEDIUM, receiver);
             } else {
                 loader.cancelRequest(receiver);
             }

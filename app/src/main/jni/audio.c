@@ -229,7 +229,7 @@ const opus_int32 bitrate = 16000;
 const opus_int32 rate = 16000;
 const opus_int32 frame_size = 960;
 const int with_cvbr = 1;
-const int max_ogg_delay = 48000;
+const int max_ogg_delay = 0;
 const int comment_padding = 512;
 
 opus_int32 coding_rate = 16000;
