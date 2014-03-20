@@ -57,7 +57,9 @@ public class OpusPlayerActor extends Actor<OpusPlayerActor.Message> {
                 buffer.get(data);
                 audioTrack.write(data, 0, size);
             }
-            sendMessage(new IterateAudio());
+            if (!isFinished) {
+                sendMessage(new IterateAudio());
+            }
         }
     }
 
@@ -96,6 +98,12 @@ public class OpusPlayerActor extends Actor<OpusPlayerActor.Message> {
     public static class StopAudio extends Message {
 
     }
+
+    public static class ToggleAudio extends Message {
+
+    }
+
+    // Internal
 
     public static class IterateAudio extends Message {
 

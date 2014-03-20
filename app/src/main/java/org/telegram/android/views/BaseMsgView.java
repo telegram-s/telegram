@@ -546,6 +546,8 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
     public void unbind() {
         releaseAvatar();
+        oldId = 0;
+        message = null;
     }
 
     @Override

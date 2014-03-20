@@ -1753,8 +1753,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     @Override
     public void onStateChanged(int kind, long id, int state, Object... args) {
-        if (kind == Events.KIND_AUDIO) {
+        if (kind == Events.KIND_AUDIO_RECORD) {
             if (state == Events.STATE_ERROR) {
+                Logger.d(TAG, "Error: id=" + id);
                 Toast.makeText(getActivity(), "Unable to record audio", Toast.LENGTH_SHORT).show();
                 hideAudio(true);
             } else if (state == Events.STATE_IN_PROGRESS) {
@@ -2531,8 +2532,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         VoiceCaptureActor.StartMessage message = new VoiceCaptureActor.StartMessage(audioFile);
         application.getKernel().getActorKernel().getVoiceCaptureActor().sendMessage(message);
-        getNotifications().unregisterSubscriber(this, Events.KIND_AUDIO);
-        getNotifications().registerSubscriber(this, Events.KIND_AUDIO, message.id);
+        getNotifications().unregisterSubscriber(this, Events.KIND_AUDIO_RECORD);
+        getNotifications().registerSubscriber(this, Events.KIND_AUDIO_RECORD, message.id);
 
         slideAudio(0);
         audioTimer.setText("00:00");

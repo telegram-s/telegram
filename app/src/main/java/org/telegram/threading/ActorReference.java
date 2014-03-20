@@ -15,4 +15,8 @@ public class ActorReference {
     public void deliverMessage(Object message, Actor sender) {
         thread.deliverMessage(actor, message, sender);
     }
+
+    public void deliverMessageDelayed(Object message, Actor sender, long delay) {
+        thread.deliverMessageDelayed(actor, message, sender, delay);
+    }
 }

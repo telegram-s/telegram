@@ -137,6 +137,7 @@ public class ContactsFragment extends BaseContactsFragment {
             menu.findItem(R.id.allContacts).setVisible(false);
             menu.findItem(R.id.onlyTContacts).setVisible(true);
         }
+        ((TelegramActivity) getActivity()).fixBackButton();
     }
 
     @Override

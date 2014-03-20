@@ -46,4 +46,12 @@ public abstract class Actor<T> {
     public final void sendMessage(T message) {
         sendMessage(message, null);
     }
+
+    public final void sendMessage(T message, Actor sender, long delay) {
+        reference.deliverMessageDelayed(message, sender, delay);
+    }
+
+    public final void sendMessage(T message, long delay) {
+        sendMessage(message, null, delay);
+    }
 }

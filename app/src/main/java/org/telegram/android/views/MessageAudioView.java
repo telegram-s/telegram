@@ -11,11 +11,13 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.AttributeSet;
 import org.telegram.android.R;
+import org.telegram.android.core.Events;
 import org.telegram.android.core.audio.AudioPlayerActor;
 import org.telegram.android.core.model.media.TLLocalDocument;
 import org.telegram.android.core.model.media.TLUploadingDocument;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.media.DownloadManager;
+import org.telegram.notifications.StateSubscriber;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,13 +28,7 @@ import java.util.concurrent.Executors;
 /**
  * Created by ex3ndr on 12.01.14.
  */
-public class MessageAudioView extends MessageBaseDocView {
-
-    private static MediaPlayer mediaPlayer;
-    private static int lastDatabaseId;
-    private static WeakReference<MessageAudioView> lastView;
-    private static Executor audioLoader = Executors.newSingleThreadExecutor();
-
+public class MessageAudioView extends MessageBaseDocView implements StateSubscriber {
     private Paint iconBgPaint;
     private Paint progressPaint;
     private Paint progressBgPaint;
@@ -43,7 +39,8 @@ public class MessageAudioView extends MessageBaseDocView {
     private Drawable documentIcon;
     private Drawable documentIconPaused;
 
-    private boolean isDocument;
+    private boolean isInProgress;
+    private float progress;
 
     public MessageAudioView(Context context) {
         super(context);
@@ -91,8 +88,10 @@ public class MessageAudioView extends MessageBaseDocView {
             documentIcon = documentIconIn;
             documentIconPaused = documentIconPausedIn;
         }
-        isDocument = message.message.getExtras() instanceof TLUploadingDocument
-                || message.message.getExtras() instanceof TLLocalDocument;
+
+        isInProgress = false;
+        notifications.unregisterSubscriber(this, Events.KIND_AUDIO);
+        notifications.registerSubscriber(this, Events.KIND_AUDIO, message.databaseId);
     }
 
     @Override
@@ -101,114 +100,59 @@ public class MessageAudioView extends MessageBaseDocView {
         bindStateUpdate(message);
     }
 
+    @Override
+    public void unbind() {
+        super.unbind();
+        notifications.unregisterSubscriber(this, Events.KIND_AUDIO);
+    }
+
     public void play() {
-        application.getKernel().getActorKernel().getAudioPlayerActor().sendMessage(
-                new AudioPlayerActor.PlayAudio(application.getDownloadManager().getFileName(getDownloadKey()))
-        );
-//        if (lastDatabaseId != databaseId) {
-//            lastDatabaseId = databaseId;
-//
-//            if (mediaPlayer != null) {
-//                mediaPlayer.stop();
-//                mediaPlayer.reset();
-//                mediaPlayer.release();
-//                mediaPlayer = null;
-//
-//                if (lastView != null) {
-//                    MessageAudioView view = lastView.get();
-//                    if (view != null) {
-//                        view.postInvalidate();
-//                    }
-//                }
-//            }
-//
-//            lastView = new WeakReference<MessageAudioView>(this);
-//
-//            audioLoader.execute(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (lastDatabaseId != databaseId) {
-//                        return;
-//                    }
-//                    try {
-//                        MediaPlayer mplayer = new MediaPlayer();
-//                        mplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//                        mplayer.setDataSource(application,
-//                                Uri.fromFile(new File(application.getDownloadManager().getFileName(getDownloadKey()))));
-//                        mplayer.prepare();
-//                        mplayer.setLooping(false);
-//                        mplayer.start();
-//                        mplayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//                            @Override
-//                            public void onCompletion(MediaPlayer mp) {
-//                                if (lastDatabaseId != databaseId) {
-//                                    return;
-//                                }
-//                                mediaPlayer.stop();
-//                                mediaPlayer.reset();
-//                                mediaPlayer.release();
-//                                mediaPlayer = null;
-//                                lastDatabaseId = 0;
-//                                if (lastView != null) {
-//                                    MessageAudioView view = lastView.get();
-//                                    if (view != null) {
-//                                        view.postInvalidate();
-//                                    }
-//                                    lastView = null;
-//                                }
-//                                postInvalidate();
-//                            }
-//                        });
-//
-//                        if (lastDatabaseId != databaseId) {
-//                            return;
-//                        }
-//
-//                        mediaPlayer = mplayer;
-//                        postInvalidate();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//        } else {
-//            if (mediaPlayer != null) {
-//                mediaPlayer.stop();
-//                mediaPlayer.reset();
-//                mediaPlayer.release();
-//                lastView = null;
-//                mediaPlayer = null;
-//            }
-//            lastDatabaseId = 0;
-//            invalidate();
-//        }
+        String fileName = application.getDownloadManager().getFileName(getDownloadKey());
+        if (isInProgress) {
+            notifications.sendState(Events.KIND_AUDIO, databaseId, Events.STATE_PAUSED, progress);
+        } else {
+            notifications.sendState(Events.KIND_AUDIO, databaseId, Events.STATE_IN_PROGRESS, progress);
+        }
+        actors.getAudioPlayerActor().sendMessage(new AudioPlayerActor.ToggleAudio(databaseId, fileName));
     }
 
     @Override
     protected void drawContent(Canvas canvas) {
         canvas.drawRect(new Rect(getPx(4), getPx(4), getPx(4 + 48), getPx(4 + 48)), iconBgPaint);
 
-        Drawable icon;
-        if (lastDatabaseId == databaseId) {
-            icon = documentIconPaused;
-        } else {
-            icon = documentIcon;
-        }
+        Drawable icon = isInProgress ? documentIconPaused : documentIcon;
 
         icon.setBounds(new Rect(getPx(12), getPx(12), getPx(12 + 32), getPx(12 + 32)));
         icon.draw(canvas);
 
         canvas.drawRect(getPx(64), getPx(28), getPx(204), getPx(30), progressBgPaint);
 
-        if (mediaPlayer != null && lastDatabaseId == databaseId) {
-            int duration = mediaPlayer.getDuration();
-            int progress = mediaPlayer.getCurrentPosition();
+        canvas.drawRect(getPx(64), getPx(28), getPx(64 + (204 - 64) * progress), getPx(30), progressPaint);
 
-            if (duration != 0) {
-                canvas.drawRect(getPx(64), getPx(28), getPx(64 + (204 - 64) * progress / duration), getPx(30), progressPaint);
-            }
+//        if (mediaPlayer != null && lastDatabaseId == databaseId) {
+//            int duration = mediaPlayer.getDuration();
+//            int progress = mediaPlayer.getCurrentPosition();
+//
+//            if (duration != 0) {
+//                canvas.drawRect(getPx(64), getPx(28), getPx(64 + (204 - 64) * progress / duration), getPx(30), progressPaint);
+//            }
+//
+//            postInvalidateDelayed(100);
+//        }
+    }
 
-            postInvalidateDelayed(100);
+    @Override
+    public void onStateChanged(int kind, long id, int state, Object... args) {
+        if (state == Events.STATE_IN_PROGRESS) {
+            isInProgress = true;
+        } else {
+            isInProgress = false;
         }
+        if (state == Events.STATE_PAUSED || state == Events.STATE_IN_PROGRESS) {
+            progress = (Float) args[0];
+        } else {
+            progress = 0;
+        }
+        invalidate();
     }
 }

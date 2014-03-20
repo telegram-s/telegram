@@ -8,7 +8,9 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.kernel.ActorKernel;
 import org.telegram.android.ui.UiMeasure;
+import org.telegram.notifications.Notifications;
 
 /**
  * Author: Korshakov Stepan
@@ -19,10 +21,14 @@ public class BaseView extends View {
     protected final float dDensity;
     protected final DisplayMetrics metrics;
     protected final TelegramApplication application;
+    protected final Notifications notifications;
+    protected final ActorKernel actors;
 
     public BaseView(Context context) {
         super(context);
         application = (TelegramApplication) context.getApplicationContext();
+        notifications = application.getUiKernel().getUiNotifications();
+        actors = application.getKernel().getActorKernel();
         metrics = context.getResources().getDisplayMetrics();
         density = metrics.density;
         dDensity = metrics.scaledDensity;
@@ -31,6 +37,8 @@ public class BaseView extends View {
     public BaseView(Context context, AttributeSet attrs) {
         super(context, attrs);
         application = (TelegramApplication) context.getApplicationContext();
+        notifications = application.getUiKernel().getUiNotifications();
+        actors = application.getKernel().getActorKernel();
         metrics = context.getResources().getDisplayMetrics();
         density = metrics.density;
         dDensity = metrics.scaledDensity;
@@ -39,6 +47,8 @@ public class BaseView extends View {
     public BaseView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         application = (TelegramApplication) context.getApplicationContext();
+        notifications = application.getUiKernel().getUiNotifications();
+        actors = application.getKernel().getActorKernel();
         metrics = context.getResources().getDisplayMetrics();
         density = metrics.density;
         dDensity = metrics.scaledDensity;

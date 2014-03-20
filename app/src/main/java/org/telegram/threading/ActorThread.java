@@ -86,6 +86,21 @@ public class ActorThread extends HandlerThread {
         }
     }
 
+    public <T> void deliverMessageDelayed(Actor<T> reference, T message, Actor sender, long delay) {
+        DeliverMessage deliverMessage = obtainMessage();
+        deliverMessage.actor = reference;
+        deliverMessage.message = message;
+        deliverMessage.sender = sender;
+        synchronized (pendingMessages) {
+            if (handler == null) {
+                pendingMessages.add(deliverMessage);
+            } else {
+                Message message1 = handler.obtainMessage(MESSAGE, deliverMessage);
+                handler.sendMessageDelayed(message1, delay);
+            }
+        }
+    }
+
     public void close() {
         if (handler != null) {
             handler.sendEmptyMessage(POISON);

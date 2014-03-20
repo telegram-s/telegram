@@ -12,7 +12,7 @@ public class Notifications {
     public static final int KIND_ANY = 0;
     public static final int KIND_START = 1;
 
-    private HashMap<Integer, State> states = new HashMap<Integer, State>();
+    private HashMap<Integer, HashMap<Long, State>> states = new HashMap<Integer, HashMap<Long, State>>();
 
     private ConcurrentHashMap<Integer, HashSet<EventSubscriber>> eventSubscribers = new ConcurrentHashMap<Integer, HashSet<EventSubscriber>>();
     private ConcurrentHashMap<EventSubscriber, EventSubscriberDef> subscribersMap = new ConcurrentHashMap<EventSubscriber, EventSubscriberDef>();
@@ -20,6 +20,7 @@ public class Notifications {
     private HashSet<StateSubscriberDef> stateSubscribers = new HashSet<StateSubscriberDef>();
 
     private final NotificationDispatcher dispatcher;
+    private ArrayList<PendingState> pendingStates = new ArrayList<PendingState>();
 
     public Notifications(NotificationDispatcher dispatcher) {
         this.dispatcher = dispatcher;
@@ -51,21 +52,54 @@ public class Notifications {
         dispatcher.dispatchNotification(new Runnable() {
             @Override
             public void run() {
-                states.put(kind, new State(kind, id, state, args));
-                for (StateSubscriberDef def : stateSubscribers) {
-                    if (def.anyKinds.contains(KIND_ANY)) {
-                        def.subscriber.onStateChanged(kind, id, state, args);
-                    } else if (def.getAnyKinds().contains(kind)) {
-                        def.subscriber.onStateChanged(kind, id, state, args);
-                    } else {
-                        ArrayList<Long> res = def.kinds.get(kind);
-                        if (res.contains(id)) {
-                            def.subscriber.onStateChanged(kind, id, state, args);
-                        }
+                if (pendingStates.size() > 0) {
+                    for (PendingState state : pendingStates) {
+                        sendPendingState(state.kind, state.id, state.state, state.args);
                     }
+                    pendingStates.clear();
+                }
+                sendPendingState(kind, id, state, args);
+            }
+        });
+    }
+
+    public synchronized void sendDelayedState(final int kind, final long id, final int state, final Object... args) {
+        pendingStates.add(new PendingState(kind, id, state, args));
+    }
+
+    public void flushPending() {
+        dispatcher.dispatchNotification(new Runnable() {
+            @Override
+            public void run() {
+                if (pendingStates.size() > 0) {
+                    for (PendingState state : pendingStates) {
+                        sendPendingState(state.kind, state.id, state.state, state.args);
+                    }
+                    pendingStates.clear();
                 }
             }
         });
+    }
+
+    private synchronized void sendPendingState(final int kind, final long id, final int state, final Object... args) {
+        HashMap<Long, State> stateHashMap = states.get(kind);
+        if (stateHashMap == null) {
+            stateHashMap = new HashMap<Long, State>();
+            states.put(kind, stateHashMap);
+        }
+        stateHashMap.put(id, new State(kind, id, state, args));
+        for (StateSubscriberDef def : stateSubscribers) {
+            if (def.anyKinds.contains(KIND_ANY)) {
+                def.subscriber.onStateChanged(kind, id, state, args);
+            } else if (def.getAnyKinds().contains(kind)) {
+                def.subscriber.onStateChanged(kind, id, state, args);
+            } else {
+                ArrayList<Long> res = def.kinds.get(kind);
+                if (res != null && res.contains(id)) {
+                    def.subscriber.onStateChanged(kind, id, state, args);
+                }
+            }
+        }
     }
 
     public synchronized void registerEventSubscriber(EventSubscriber eventSubscriber, int kind) {
@@ -133,6 +167,7 @@ public class Notifications {
     }
 
     public synchronized void registerSubscriber(StateSubscriber stateSubscriber, int kind, long id) {
+        boolean isBinded = false;
         for (StateSubscriberDef def : stateSubscribers) {
             if (def.subscriber == stateSubscriber) {
                 ArrayList<Long> ids = def.kinds.get(kind);
@@ -143,15 +178,27 @@ public class Notifications {
                     ids.add(id);
                     def.kinds.put(kind, ids);
                 }
-                return;
+                isBinded = true;
+                break;
             }
         }
 
-        StateSubscriberDef def = new StateSubscriberDef(stateSubscriber);
-        ArrayList<Long> ids = new ArrayList<Long>();
-        ids.add(id);
-        def.kinds.put(kind, ids);
-        stateSubscribers.add(def);
+        if (!isBinded) {
+            StateSubscriberDef def = new StateSubscriberDef(stateSubscriber);
+            ArrayList<Long> ids = new ArrayList<Long>();
+            ids.add(id);
+            def.kinds.put(kind, ids);
+            stateSubscribers.add(def);
+        }
+
+        State lastState = null;
+        HashMap<Long, State> stateHashMap = states.get(kind);
+        if (stateHashMap != null) {
+            lastState = stateHashMap.get(id);
+        }
+        if (lastState != null) {
+            stateSubscriber.onStateChanged(kind, id, lastState.getState(), lastState.args);
+        }
     }
 
     public synchronized void registerSubscriber(StateSubscriber stateSubscriber, int kind) {
@@ -244,6 +291,36 @@ public class Notifications {
 
         public long getId() {
             return id;
+        }
+
+        public Object[] getArgs() {
+            return args;
+        }
+    }
+
+    private class PendingState {
+        private int kind;
+        private long id;
+        private int state;
+        private Object[] args;
+
+        private PendingState(int kind, long id, int state, Object[] args) {
+            this.kind = kind;
+            this.id = id;
+            this.state = state;
+            this.args = args;
+        }
+
+        public int getKind() {
+            return kind;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public int getState() {
+            return state;
         }
 
         public Object[] getArgs() {

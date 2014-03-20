@@ -8,12 +8,9 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.Events;
-import org.telegram.android.log.Logger;
-import org.telegram.opus.OpusLib;
 import org.telegram.threading.Actor;
 import org.telegram.threading.ActorSystem;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -84,7 +81,7 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
             }
 
             application.getKernel().getUiKernel().getUiNotifications().sendState(
-                    Events.KIND_AUDIO,
+                    Events.KIND_AUDIO_RECORD,
                     actionId,
                     Events.STATE_IN_PROGRESS,
                     (Long) (SystemClock.uptimeMillis() - playStartTime));
@@ -99,10 +96,29 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
             opusActor.sendMessage(new OpusEncoder.StopMessage());
 
             application.getKernel().getUiKernel().getUiNotifications().sendState(
-                    Events.KIND_AUDIO,
+                    Events.KIND_AUDIO_RECORD,
                     actionId,
                     Events.STATE_STOP,
                     (Long) (SystemClock.uptimeMillis() - playStartTime));
+            state = STATE_STOPPED;
+        } else if (message instanceof CrashMessage) {
+//            if (state != STATE_STARTED) {
+//                return;
+//            }
+            if (audioRecord != null) {
+                audioRecord.stop();
+                audioRecord.release();
+                audioRecord = null;
+            }
+            if (opusActor != null) {
+                opusActor.sendMessage(new OpusEncoder.StopMessage());
+            }
+
+            application.getKernel().getUiKernel().getUiNotifications().sendState(
+                    Events.KIND_AUDIO_RECORD,
+                    actionId,
+                    Events.STATE_ERROR);
+
             state = STATE_STOPPED;
         }
     }
@@ -127,6 +143,10 @@ public class VoiceCaptureActor extends Actor<VoiceCaptureActor.Message> {
     }
 
     public static class ReadMessage extends Message {
+
+    }
+
+    public static class CrashMessage extends Message {
 
     }
 
