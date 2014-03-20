@@ -74,6 +74,7 @@
     <style name="AppSearchTextView" parent="Widget.Sherlock.SearchAutoCompleteTextView">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textColorHint">@android:color/white</item>
+        <item name="android:textCursorDrawable">@drawable/search_cursor</item>
     </style>
 
     <style name="AppTheme.Theme" parent="Theme.Sherlock.Light">
@@ -133,6 +134,8 @@
 
         <item name="android:scrollbarThumbVertical">@drawable/scrollbar_handle_holo_light</item>
         <item name="android:scrollbarThumbHorizontal">@drawable/scrollbar_handle_holo_light</item>
+
+        <item name="searchViewTextField">@drawable/search_field</item>
     </style>
     <style name="AppTheme.Photo" parent="Theme.Sherlock">
         <item name="android:windowBackground">@android:color/black</item>
