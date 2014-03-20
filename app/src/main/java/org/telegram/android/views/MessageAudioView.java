@@ -14,10 +14,7 @@ import org.telegram.android.R;
 import org.telegram.android.core.Events;
 import org.telegram.android.core.audio.AudioPlayerActor;
 import org.telegram.android.core.model.User;
-import org.telegram.android.core.model.media.TLLocalAudio;
-import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
-import org.telegram.android.core.model.media.TLLocalDocument;
-import org.telegram.android.core.model.media.TLUploadingDocument;
+import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.wireframes.MessageWireframe;
 import org.telegram.android.media.DownloadManager;
 import org.telegram.android.preview.AvatarLoader;
@@ -166,6 +163,10 @@ public class MessageAudioView extends MessageBaseDocView implements StateSubscri
             } else {
                 relatedUser = message.senderUser;
             }
+        } else if (message.message.getExtras() instanceof TLUploadingAudio) {
+            durationVal = ((TLUploadingAudio) message.message.getExtras()).getDuration();
+            duration = TextUtil.formatDuration(durationVal);
+            relatedUser = application.getEngine().getUser(application.getCurrentUid());
         } else {
             relatedUser = null;
         }
