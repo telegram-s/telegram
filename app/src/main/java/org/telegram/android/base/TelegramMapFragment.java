@@ -44,7 +44,7 @@ public abstract class TelegramMapFragment extends TelegramFragment {
     public abstract View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
 
     protected View createMapView(int layout, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View inflatedView = inflater.inflate(layout, container, false);
+        View inflatedView = wrap(inflater).inflate(layout, container, false);
         preferences = getActivity().getSharedPreferences("org.telegram.android.maps", Context.MODE_PRIVATE);
         try {
             MapsInitializer.initialize(getActivity());

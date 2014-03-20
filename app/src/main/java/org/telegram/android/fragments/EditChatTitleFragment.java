@@ -37,7 +37,7 @@ public class EditChatTitleFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.edit_chat_title, container, false);
+        View res = wrap(inflater).inflate(R.layout.edit_chat_title, container, false);
         chatTitleView = (EditText) res.findViewById(R.id.title);
         fixEditText(chatTitleView);
         if (savedInstanceState == null) {

@@ -90,7 +90,7 @@ public class TourFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View res = inflater.inflate(R.layout.tour_container, container, false);
+        final View res = wrap(inflater).inflate(R.layout.tour_container, container, false);
         final UnderlinePageIndicator pageIndicator = (UnderlinePageIndicator) res.findViewById(R.id.pageIndicator);
         pageIndicator.setFades(false);
         pageIndicator.setSelectedColor(0xffbfbfbf);

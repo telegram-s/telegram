@@ -26,7 +26,7 @@ public class PickFileFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.file_list, container, false);
+        View res = wrap(inflater).inflate(R.layout.file_list, container, false);
         setResult(Activity.RESULT_CANCELED, null);
 
         ListView listView = (ListView) res.findViewById(R.id.itemsList);

@@ -45,7 +45,7 @@ public class WallpapersFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.wallpapers_container, container, false);
+        View res = wrap(inflater).inflate(R.layout.wallpapers_container, container, false);
         gallery = (Gallery) res.findViewById(R.id.previewGallery);
         preview = (WallpaperPreview) res.findViewById(R.id.preview);
         res.findViewById(R.id.cancel).setOnClickListener(secure(new View.OnClickListener() {

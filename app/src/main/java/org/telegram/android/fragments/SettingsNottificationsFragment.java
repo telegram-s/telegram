@@ -66,7 +66,7 @@ public class SettingsNottificationsFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.settings_notifications, container, false);
+        View res = wrap(inflater).inflate(R.layout.settings_notifications, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
 
         allAlertCheck = (ImageView) res.findViewById(R.id.allAlertCheck);

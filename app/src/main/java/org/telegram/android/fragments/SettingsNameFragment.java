@@ -36,7 +36,7 @@ public class SettingsNameFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.settings_name, container, false);
+        View res = wrap(inflater).inflate(R.layout.settings_name, container, false);
         firstName = (EditText) res.findViewById(R.id.firstName);
         lastName = (EditText) res.findViewById(R.id.lastName);
         lastName.setOnEditorActionListener(new TextView.OnEditorActionListener() {

@@ -58,7 +58,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.settings_main, container, false);
+        View res = wrap(inflater).inflate(R.layout.settings_main, container, false);
         avatarUploadView = res.findViewById(R.id.avatarUploadProgress);
         avatarUploadProgress = res.findViewById(R.id.uploadProgressBar);
         avatarUploadError = res.findViewById(R.id.uploadError);

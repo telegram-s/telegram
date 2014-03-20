@@ -43,7 +43,7 @@ public class SingleImagePreviewFragment extends TelegramFragment implements Imag
         if (savedInstanceState != null) {
             location = (TLLocalFileLocation) savedInstanceState.getSerializable("location");
         }
-        View res = inflater.inflate(R.layout.view_image, container, false);
+        View res = wrap(inflater).inflate(R.layout.view_image, container, false);
         imageView = (PhotoView) res.findViewById(R.id.previewImage);
 
         application.getUiKernel().getAvatarLoader().requestAvatar(location, AvatarLoader.TYPE_FULL, this);

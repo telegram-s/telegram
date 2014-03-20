@@ -54,13 +54,15 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             peerType = savedInstanceState.getInt("peerType");
             peerId = savedInstanceState.getInt("peerId");
         }
 
-        View res = inflater.inflate(R.layout.media_main, container, false);
+        final LayoutInflater themedInflater = wrap(inflater);
+
+        View res =themedInflater.inflate(R.layout.media_main, container, false);
         gridView = (GridView) res.findViewById(R.id.mediaGrid);
         loading = res.findViewById(R.id.loading);
         empty = res.findViewById(R.id.empty);
@@ -160,7 +162,7 @@ public class MediaFragment extends TelegramFragment implements ViewSourceListene
                     return view;
                 } else {
                     if (view == null) {
-                        view = inflater.inflate(R.layout.media_loading, viewGroup, false);
+                        view = themedInflater.inflate(R.layout.media_loading, viewGroup, false);
                         GridView.LayoutParams imageParams = new GridView.LayoutParams(PreviewConfig.MEDIA_PREVIEW, PreviewConfig.MEDIA_PREVIEW);
                         view.setLayoutParams(imageParams);
                     }

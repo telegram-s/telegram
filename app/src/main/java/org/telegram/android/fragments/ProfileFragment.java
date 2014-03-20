@@ -85,7 +85,7 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
         if (savedInstanceState != null) {
             userId = savedInstanceState.getInt("userId");
         }
-        View res = inflater.inflate(R.layout.profile_fragment, container, false);
+        View res = wrap(inflater).inflate(R.layout.profile_fragment, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
         progress = res.findViewById(R.id.progress);
         avatarView = (AvatarView) res.findViewById(R.id.avatar);

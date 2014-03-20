@@ -15,7 +15,7 @@ import org.telegram.android.kernel.KernelsLoader;
 public class UpgradeFragment extends TelegramFragment implements KernelsLoader.KernelsLoadingListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.recover, container, false);
+        View res = wrap(inflater).inflate(R.layout.recover, container, false);
         return res;
     }
 

@@ -48,7 +48,7 @@ public class WebSearchFragment extends TelegramFragment implements ViewSourceLis
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.web_search, container, false);
+        View res = wrap(inflater).inflate(R.layout.web_search, container, false);
 
         webSearchSource = application.getDataSourceKernel().getWebSearchSource();
         if (lastSearchResults == null) {

@@ -203,7 +203,7 @@ public class DialogsFragment extends TelegramFragment implements ViewSourceListe
             selectedTop = savedInstanceState.getInt("selectedTop", 0);
             selectedIndex = savedInstanceState.getInt("selectedIndex", -1);
         }
-        View res = inflater.inflate(R.layout.dialogs_list, container, false);
+        View res = wrap(inflater).inflate(R.layout.dialogs_list, container, false);
 
         checkState();
 

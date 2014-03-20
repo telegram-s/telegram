@@ -82,7 +82,7 @@ public class WhatsNewFragment extends TelegramFragment {
             }
         }
 
-        View res = inflater.inflate(R.layout.whats_new, container, false);
+        View res = wrap(inflater).inflate(R.layout.whats_new, container, false);
 
         if (definitions == null || definitions.length == 0) {
             res.post(new Runnable() {

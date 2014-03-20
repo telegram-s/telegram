@@ -33,7 +33,7 @@ public class KeyPreviewFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.key_fragment, container, false);
+        View view = wrap(inflater).inflate(R.layout.key_fragment, container, false);
         Bitmap bitmap = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888);
         int[] colors = new int[]{
                 0xffffffff,

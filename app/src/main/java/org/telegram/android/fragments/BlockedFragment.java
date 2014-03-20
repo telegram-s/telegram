@@ -39,7 +39,7 @@ public class BlockedFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.blocked_list, container, false);
+        View res = wrap(inflater).inflate(R.layout.blocked_list, container, false);
         loading = res.findViewById(R.id.loading);
         empty = res.findViewById(R.id.empty);
         usersList = (ListView) res.findViewById(R.id.usersList);

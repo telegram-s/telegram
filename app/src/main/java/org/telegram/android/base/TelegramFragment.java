@@ -11,6 +11,7 @@ import android.support.v4.text.BidiFormatter;
 import android.text.*;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.view.LayoutInflater;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import org.telegram.android.R;
@@ -21,6 +22,7 @@ import org.telegram.android.core.model.local.TLLocalUserStatusOnline;
 import org.telegram.android.fragments.interfaces.FragmentResultController;
 import org.telegram.android.core.ApiUtils;
 import org.telegram.android.ui.StelsTypefaceSpan;
+import org.telegram.android.ui.TelegramContextWrapper;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
 import org.telegram.mtproto.time.TimeOverlord;
@@ -314,5 +316,13 @@ public class TelegramFragment extends TelegramBaseFragment {
 
     protected Notifications getNotifications() {
         return application.getUiKernel().getUiNotifications();
+    }
+
+    protected LayoutInflater wrap(LayoutInflater inflater) {
+        return inflater.cloneInContext(getWrappedContext());
+    }
+
+    protected Context getWrappedContext() {
+        return new TelegramContextWrapper(getActivity());
     }
 }

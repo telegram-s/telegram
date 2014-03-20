@@ -243,14 +243,14 @@
                            android:layout_width="56dp"
                            android:layout_gravity="bottom"
                            android:scaleType="center"
-                           android:src="@drawable/st_conv_voice_pressed"
+                           android:src="@drawable/st_conv_voice_normal"
                            android:id="@+id/startAudio"/>
                 <ImageButton android:layout_height="48dp"
                              android:layout_width="56dp"
                              android:paddingTop="1dp"
                              android:layout_gravity="bottom"
                              android:background="@android:color/transparent"
-                             android:src="@drawable/st_conv_send_normal"
+                             android:src="@drawable/st_conv_send"
                              android:id="@+id/sendMessage"/>
             </FrameLayout>
         </LinearLayout>

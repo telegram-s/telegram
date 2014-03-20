@@ -92,7 +92,7 @@ public abstract class BaseContactsFragment extends TelegramFragment implements C
             selectedIndex = savedInstanceState.getInt("selectedIndex", -1);
         }
 
-        View res = inflater.inflate(getLayout(), container, false);
+        View res = wrap(inflater).inflate(getLayout(), container, false);
         listView = (StickyListHeadersListView) res.findViewById(R.id.contactsList);
         loading = res.findViewById(R.id.loading);
         empty = res.findViewById(R.id.empty);

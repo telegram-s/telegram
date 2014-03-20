@@ -85,7 +85,7 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.secret_fragment, container, false);
+        View res = wrap(inflater).inflate(R.layout.secret_fragment, container, false);
         avatarView = (AvatarView) res.findViewById(R.id.avatar);
         nameView = (TextView) res.findViewById(R.id.name);
         onlineView = (TextView) res.findViewById(R.id.online);

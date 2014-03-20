@@ -175,7 +175,7 @@ public class ContactsFragment extends BaseContactsFragment {
 
     @Override
     protected void onCreateView(View res, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        share = inflater.inflate(R.layout.contacts_header_share, null);
+        share = wrap(inflater).inflate(R.layout.contacts_header_share, null);
         getListView().addHeaderView(share);
     }
 

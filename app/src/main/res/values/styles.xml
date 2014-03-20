@@ -3,6 +3,7 @@
 
     <drawable name="overlay_android">@null</drawable>
     <drawable name="overlay_sherlock">@drawable/st_content_overlay</drawable>
+    <color name="oversrcoll_color">#FF717171</color>
 
     <style name="AppEditText" parent="android:Widget.EditText">
         <item name="android:background">@drawable/holo_edit_text_light</item>
@@ -129,6 +130,9 @@
 
         <item name="actionMenuTextColor">#ffffff</item>
         <item name="android:actionMenuTextColor">#ffffff</item>
+
+        <item name="android:scrollbarThumbVertical">@drawable/scrollbar_handle_holo_light</item>
+        <item name="android:scrollbarThumbHorizontal">@drawable/scrollbar_handle_holo_light</item>
     </style>
     <style name="AppTheme.Photo" parent="Theme.Sherlock">
         <item name="android:windowBackground">@android:color/black</item>

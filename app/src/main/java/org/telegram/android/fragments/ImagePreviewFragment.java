@@ -121,7 +121,7 @@ public class ImagePreviewFragment extends TelegramFragment {
 
         setDefaultProgressInterface(null);
 
-        View res = inflater.inflate(R.layout.media_full_main, container, false);
+        View res = wrap(inflater).inflate(R.layout.media_full_main, container, false);
         bottomPanel = res.findViewById(R.id.bottomPanel);
         if (getSherlockActivity().getSupportActionBar().isShowing()) {
             bottomPanel.setVisibility(View.VISIBLE);

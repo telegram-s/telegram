@@ -50,7 +50,7 @@ public class WebSearchPreviewFragment extends TelegramFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.web_search_preview, container, false);
+        View res = wrap(inflater).inflate(R.layout.web_search_preview, container, false);
         imageView = (PhotoView) res.findViewById(R.id.image);
         gifView = (GifView) res.findViewById(R.id.gif);
         progressBar = (ProgressBar) res.findViewById(R.id.loading);

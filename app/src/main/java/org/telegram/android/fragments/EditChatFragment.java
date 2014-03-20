@@ -120,7 +120,7 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
 
         maxChatSize = application.getKernel().getTechKernel().getSystemConfig().getMaxChatSize();
 
-        View res = inflater.inflate(R.layout.chat_edit, container, false);
+        View res = wrap(inflater).inflate(R.layout.chat_edit, container, false);
 
         forbidden = res.findViewById(R.id.forbidden);
         progress = res.findViewById(R.id.progress);

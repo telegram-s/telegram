@@ -46,7 +46,7 @@ public class MediaReceiverFragment extends TelegramFragment {
     }
 
     protected String getUploadTempAudioFile() {
-        return getUploadTempFile(".m4a");
+        return getUploadTempFile(".opus");
     }
 
     protected String getUploadTempFile() {

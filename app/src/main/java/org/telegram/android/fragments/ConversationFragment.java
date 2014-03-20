@@ -135,26 +135,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private int SLIDE_LIMIT;
 
-    // private View audioRecordContainer;
-    // private View audioRecordButton;
-    // private boolean audioEnabled;
-
-    // private TextView audioRecordTimer;
-
-
     private String audioFile;
     private Handler handler = new Handler(Looper.getMainLooper());
-
-    private Runnable updateTimer = new Runnable() {
-        @Override
-        public void run() {
-            updateAudioUi();
-            handler.removeCallbacks(this);
-//            if (application.getUiKernel().getVoiceRecorder().isStarted()) {
-//                handler.postDelayed(this, 1000);
-//            }
-        }
-    };
 
     public ConversationFragment(int peerType, int peerId) {
         this.peerId = peerId;
@@ -210,7 +192,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         viewCreateTime = SystemClock.uptimeMillis();
 
-        View res = inflater.inflate(R.layout.conv_list, container, false);
+        View res = wrap(inflater).inflate(R.layout.conv_list, container, false);
 
         if (peerId == 333000 && peerType == PeerType.PEER_USER) {
             ((TextView) res.findViewById(R.id.emptyLabel)).setText(R.string.st_conv_empty_support);
@@ -260,35 +242,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         });
 
         contactsPanel = res.findViewById(R.id.contactsPanel);
-
-        // audioRecordContainer = res.findViewById(R.id.audioPanel);
-        // audioRecordContainer.setVisibility(View.VISIBLE);
-
-//        audioRecordContainer.findViewById(R.id.sendAudio).setOnClickListener(secure(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                sendAudio();
-//            }
-//        }));
-//
-//        audioRecordContainer.findViewById(R.id.cancelAudio).setOnClickListener(secure(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                cancelAudio();
-//            }
-//        }));
-
-//        audioRecordTimer = (TextView) audioRecordContainer.findViewById(R.id.timer);
-//        audioRecordButton = audioRecordContainer.findViewById(R.id.startAudio);
-//        audioRecordContainer.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent e) {
-//                Logger.d(TAG, "onTouch: " + e.getX() + ", " + e.getY());
-//                // return gestureDetector.onTouchEvent(e);
-//                return false;
-//            }
-//        });
-
 
         audioContainer = res.findViewById(R.id.audioContainer);
         audioTimer = (TextView) res.findViewById(R.id.audioTimer);
@@ -1004,52 +957,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         });
     }
 
-    private void startAudio() {
-        try {
-            audioFile = getUploadTempAudioFile();
-            //application.getUiKernel().getVoiceRecorder().startRecord(audioFile);
-            // application.getUiKernel().getVoiceRecorder().startRecord("/sdcard/mic_record.pcm");
-            application.getKernel().getActorKernel().getVoiceCaptureActor().sendMessage(new
-                    VoiceCaptureActor.StartMessage("/sdcard/mic_record.pcm"));
-        } catch (Exception e) {
-            audioFile = null;
-        }
-        updateTimer.run();
-    }
-
-    private void sendAudio() {
-        // long duration = application.getUiKernel().getVoiceRecorder().currentDuration();
-        long duration = 3000;
-        application.getKernel().getActorKernel().getVoiceCaptureActor().sendMessage(
-                new VoiceCaptureActor.StopMessage()
-        );
-        // application.getUiKernel().getVoiceRecorder().stopRecord();
-
-        application.getEngine().sendAudio(peerType, peerId,
-                new TLUploadingAudio(audioFile, (int) ((duration) / 1000)));
-
-        updateAudioUi();
-    }
-
-    private void cancelAudio() {
-        // application.getUiKernel().getVoiceRecorder().stopRecord();
-        application.getKernel().getActorKernel().getVoiceCaptureActor().sendMessage(
-                new VoiceCaptureActor.StopMessage()
-        );
-        updateAudioUi();
-    }
-
-    private void updateAudioUi() {
-        if (!application.getKernel().getActorKernel().getVoiceCaptureActor().isStarted()) {
-            // Hide
-            // audioRecordContainer.setVisibility(View.GONE);
-        } else {
-            // Show
-            // audioRecordContainer.setVisibility(View.VISIBLE);
-            // audioRecordTimer.setText(TextUtil.formatDuration((int) ((application.getUiKernel().getVoiceRecorder().currentDuration()) / 1000)));
-        }
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -1087,7 +994,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         if (getSmileysController().areSmileysVisible()) {
             smileButton.setImageResource(R.drawable.st_conv_panel_kb);
         } else {
-            smileButton.setImageResource(R.drawable.st_conv_panel_smiles);
+            smileButton.setImageResource(R.drawable.st_conv_panel_smileys_selector);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -1126,10 +1033,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         menu.findItem(R.id.attachVideo).setTitle(highlightMenuText(R.string.st_conv_menu_video));
         menu.findItem(R.id.attachLocation).setTitle(highlightMenuText(R.string.st_conv_menu_location));
         menu.findItem(R.id.attachDocument).setTitle(highlightMenuText(R.string.st_conv_menu_doc));
-        menu.findItem(R.id.attachAudio).setTitle(highlightMenuText(R.string.st_conv_menu_audio));
         menu.findItem(R.id.attachWebImage).setTitle(highlightMenuText(R.string.st_conv_menu_web));
-
-        // menu.findItem(R.id.attachAudio).setVisible(false);
 
         MenuItem avatarItem = menu.findItem(R.id.userAvatar);
         View avatarUploadView = avatarItem.getActionView().findViewById(R.id.avatarUploadProgress);
@@ -1302,16 +1206,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
 
             pickFile();
-            return true;
-        }
-
-        if (item.getItemId() == R.id.attachAudio) {
-            if (!isEnabledInput) {
-                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
-                return true;
-            }
-
-            startAudio();
             return true;
         }
 
@@ -1603,8 +1497,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         saveListPosition();
 
-        cancelAudio();
-
         if (peerType == PeerType.PEER_CHAT) {
             application.getSyncKernel().getAvatarUploader().setChatUploadListener(null);
         }
@@ -1875,8 +1767,10 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 if (progress < 1200) {
                     Logger.d(TAG, "Cancel");
                 } else {
-                    application.getEngine().sendAudio(peerType, peerId,
-                            new TLUploadingAudio(audioFile, (int) (progress / 1000)));
+//                    application.getEngine().sendAudio(peerType, peerId,
+//                            new TLUploadingAudio(audioFile, (int) (progress / 1000)));
+                    application.getEngine().sendDocument(peerType, peerId,
+                            new TLUploadingDocument(audioFile));
                 }
             }
         }

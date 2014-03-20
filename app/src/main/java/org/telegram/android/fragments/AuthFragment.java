@@ -91,7 +91,7 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.auth_main, container, false);
+        View res = wrap(inflater).inflate(R.layout.auth_main, container, false);
 
 
         if (application.getKernel().getActivationController() == null) {

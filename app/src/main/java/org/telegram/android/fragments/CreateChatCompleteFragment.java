@@ -109,7 +109,7 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.create_chat_complete, container, false);
+        View res = wrap(inflater).inflate(R.layout.create_chat_complete, container, false);
         mainContainer = res.findViewById(R.id.mainContainer);
 
         avatarImage = (AvatarView) res.findViewById(R.id.avatar);

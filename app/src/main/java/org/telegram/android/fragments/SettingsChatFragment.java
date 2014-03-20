@@ -35,7 +35,7 @@ public class SettingsChatFragment extends MediaReceiverFragment {
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View res = inflater.inflate(R.layout.settings_view, container, false);
+        View res = wrap(inflater).inflate(R.layout.settings_view, container, false);
         sendByEnterSubtitle = (TextView) res.findViewById(R.id.sendByEnterSubtitle);
         fontSizeValue = (TextView) res.findViewById(R.id.fontSizeValue);
         dialogSizeValue = (TextView) res.findViewById(R.id.itemSizeValue);

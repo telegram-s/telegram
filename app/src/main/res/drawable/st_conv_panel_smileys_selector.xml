@@ -7,5 +7,5 @@
           android:drawable="@drawable/st_conv_panel_smiles_pressed"/>
     <item android:state_checked="true"
           android:drawable="@drawable/st_conv_panel_smiles_pressed"/>
-    <item android:drawable="@drawable/st_conv_panel_smiles"/>
+    <item android:drawable="@drawable/st_conv_panel_smiles_normal"/>
 </selector>

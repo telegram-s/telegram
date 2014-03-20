@@ -19,6 +19,7 @@ import org.telegram.android.ui.EmojiProcessor;
 import org.telegram.android.ui.Smileys;
 import org.telegram.android.ui.SmileysView;
 import com.viewpagerindicator.UnderlinePageIndicator;
+import org.telegram.android.ui.TelegramContextWrapper;
 
 /**
  * Author: Korshakov Stepan
@@ -227,6 +228,8 @@ public class SmileyActivity extends TelegramActivity implements SmileysControlle
         });
 
         final ViewPager pager = (ViewPager) smileysView.findViewById(R.id.smileysPages);
+        final Context context = new TelegramContextWrapper(this);
+        final LayoutInflater inflater = getLayoutInflater().cloneInContext(context);
         pager.setAdapter(new PagerAdapter() {
 
             private long[] getSmileys(int pos) {
@@ -249,7 +252,7 @@ public class SmileyActivity extends TelegramActivity implements SmileysControlle
             public Object instantiateItem(ViewGroup container, int position) {
                 long[] smileys = getSmileys(position);
                 if (smileys.length > 0) {
-                    View res = getLayoutInflater().inflate(R.layout.overlay_smileys_container, container, false);
+                    View res =  inflater.inflate(R.layout.overlay_smileys_container, container, false);
 
 
                     SmileysView mainSmileys = new SmileysView(SmileyActivity.this, application.getEmojiProcessor(),
@@ -284,7 +287,7 @@ public class SmileyActivity extends TelegramActivity implements SmileysControlle
                     container.addView(res);
                     return res;
                 } else {
-                    View res = getLayoutInflater().inflate(R.layout.msg_smileys_empty, container, false);
+                    View res = inflater.inflate(R.layout.msg_smileys_empty, container, false);
                     container.addView(res);
                     return res;
                 }
