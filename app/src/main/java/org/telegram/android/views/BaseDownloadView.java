@@ -131,6 +131,12 @@ public abstract class BaseDownloadView extends BaseMsgStateView {
         updateUploadState(state);
     }
 
+    @Override
+    public void unbind() {
+        super.unbind();
+        clearBinding();
+    }
+
     private void updateDownloadState(DownloadState state, int progress) {
         switch (state) {
             case PENDING:
