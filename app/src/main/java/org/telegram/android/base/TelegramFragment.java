@@ -24,6 +24,7 @@ import org.telegram.android.ui.StelsTypefaceSpan;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
 import org.telegram.mtproto.time.TimeOverlord;
+import org.telegram.notifications.Notifications;
 import org.xml.sax.XMLReader;
 
 import java.util.Random;
@@ -309,5 +310,9 @@ public class TelegramFragment extends TelegramBaseFragment {
         } else {
             return "/sdcard/u_" + rnd.nextInt() + fileName;
         }
+    }
+
+    protected Notifications getNotifications() {
+        return application.getUiKernel().getUiNotifications();
     }
 }

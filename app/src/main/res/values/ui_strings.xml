@@ -299,6 +299,7 @@
     <string name="st_conv_menu_audio">Audio</string>
     <string name="st_conv_menu_doc">Document</string>
     <string name="st_conv_menu_web">Web Image</string>
+    <string name="st_conv_audio_slide">SLIDE TO CANCEL</string>
 
     <string name="st_conv_unsupported_title">Unsupported content</string>
     <string name="st_conv_unsupported_message">This type of content is unsupported in this application</string>

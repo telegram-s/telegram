@@ -21,6 +21,7 @@ import org.telegram.android.preview.cache.ImageStorage;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.*;
 import org.telegram.i18n.I18nUtil;
+import org.telegram.notifications.NotificationDispatcher;
 
 /**
  * Created by ex3ndr on 16.11.13.
@@ -41,6 +42,8 @@ public class UiKernel {
     };
 
     private ApplicationKernel kernel;
+
+    private org.telegram.notifications.Notifications uiNotifications;
 
     private TelegramApplication application;
 
@@ -130,6 +133,17 @@ public class UiKernel {
         voiceRecorder = new VoiceRecorder();
         Logger.d(TAG, "Misc UI4 loaded in " + (SystemClock.uptimeMillis() - start) + " ms");
 
+        uiNotifications = new org.telegram.notifications.Notifications(new NotificationDispatcher() {
+            @Override
+            public void dispatchNotification(Runnable runnable) {
+                handler.post(runnable);
+            }
+        });
+
+    }
+
+    public org.telegram.notifications.Notifications getUiNotifications() {
+        return uiNotifications;
     }
 
     public VoiceRecorder getVoiceRecorder() {

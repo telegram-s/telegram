@@ -63,6 +63,7 @@ import org.telegram.api.requests.TLRequestMessagesDeleteChatUser;
 import org.telegram.api.requests.TLRequestMessagesDeleteHistory;
 import org.telegram.api.requests.TLRequestMessagesDiscardEncryption;
 import org.telegram.i18n.I18nUtil;
+import org.telegram.notifications.StateSubscriber;
 
 import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
 
@@ -74,7 +75,8 @@ import java.util.HashSet;
  * Author: Korshakov Stepan
  * Created: 29.07.13 0:31
  */
-public class ConversationFragment extends MediaReceiverFragment implements ViewSourceListener, ChatSourceListener, TypingStates.TypingListener, UserSourceListener, EncryptedChatSourceListener, AvatarUploader.AvatarChatUploadListener {
+public class ConversationFragment extends MediaReceiverFragment implements ViewSourceListener, ChatSourceListener, TypingStates.TypingListener, UserSourceListener, EncryptedChatSourceListener, AvatarUploader.AvatarChatUploadListener,
+        StateSubscriber {
 
     private static final String TAG = "ConversaionFragment";
 
@@ -432,7 +434,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     if (isAudioVisible) {
-                        hideAudio();
+                        hideAudio(false);
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                     if (isAudioVisible) {
@@ -441,7 +443,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             slide = 0;
                         }
                         if (slide > SLIDE_LIMIT) {
-                            hideAudio();
+                            hideAudio(true);
                         } else {
                             slideAudio(slide);
                         }
@@ -454,7 +456,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         sendButton.setVisibility(View.GONE);
         sendButton.setEnabled(true);
         animate(sendButton).scaleX(0.0f).scaleY(0.0f).alpha(0.0f).setDuration(0).start();
-        animate(audioContainer).translationX(UiMeasure.METRICS.widthPixels).setDuration(0).start();
+        audioContainer.setVisibility(View.GONE);
+        // animate(audioContainer).translationX(UiMeasure.METRICS.widthPixels).setDuration(0).start();
         sendButton.setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1579,6 +1582,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         application.getUiKernel().onClosedChat(peerType, peerId);
 
+        getNotifications().unregisterSubscriber(this);
+        hideAudio(true);
+
         if (editText != null && editText.getText().toString().trim().length() > 0) {
             application.getTextSaver().saveText(editText.getText().toString().trim(), peerType, peerId);
         } else {
@@ -1848,6 +1854,28 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     getSherlockActivity().invalidateOptionsMenu();
                 }
             });
+        }
+    }
+
+    @Override
+    public void onStateChanged(int kind, long id, int state, Object... args) {
+        if (kind == Events.KIND_AUDIO) {
+            if (state == Events.STATE_ERROR) {
+                Toast.makeText(getActivity(), "Unable to record audio", Toast.LENGTH_SHORT).show();
+                hideAudio(true);
+            } else if (state == Events.STATE_IN_PROGRESS) {
+                Long progress = (Long) args[0];
+                Logger.d(TAG, "In progress: " + progress + ", id=" + id);
+            } else if (state == Events.STATE_STOP) {
+                Long progress = (Long) args[0];
+                Logger.d(TAG, "Stop: " + progress + ", id=" + id);
+                if (progress < 1200) {
+                    Logger.d(TAG, "Cancel");
+                } else {
+                    application.getEngine().sendAudio(peerType, peerId,
+                            new TLUploadingAudio(audioFile, (int) (progress / 1000)));
+                }
+            }
         }
     }
 
@@ -2602,10 +2630,38 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
         isAudioVisible = true;
 
+        audioFile = getUploadTempAudioFile();
+
+        VoiceCaptureActor.StartMessage message = new VoiceCaptureActor.StartMessage(audioFile);
+        application.getKernel().getActorKernel().getVoiceCaptureActor().sendMessage(message);
+        getNotifications().unregisterSubscriber(this, Events.KIND_AUDIO);
+        getNotifications().registerSubscriber(this, Events.KIND_AUDIO, message.id);
+
         slideAudio(0);
 
         animate(audioContainer)
                 .translationX(UiMeasure.METRICS.widthPixels)
+                .setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animator) {
+                        audioContainer.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animator) {
+
+                    }
+                })
                 .setDuration(0).start();
 
         animate(audioContainer)
@@ -2625,11 +2681,17 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 .start();
     }
 
-    private void hideAudio() {
+    private void hideAudio(boolean cancel) {
         if (!isAudioVisible) {
             return;
         }
         isAudioVisible = false;
+
+        application.getKernel().getActorKernel().getVoiceCaptureActor().sendMessage(new VoiceCaptureActor.StopMessage());
+
+        if (cancel) {
+            getNotifications().unregisterSubscriber(this);
+        }
 
         animate(audioContainer)
                 .translationX(0)
@@ -2639,6 +2701,27 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 .translationX(UiMeasure.METRICS.widthPixels)
                 .setInterpolator(new AccelerateInterpolator())
                 .setDuration(160)
+                .setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animator) {
+                        audioContainer.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animator) {
+
+                    }
+                })
                 .start();
 
         animate(messageContainer)
