@@ -678,6 +678,12 @@ public class ActivationController {
                             return;
                         }
 
+                        if (tagError.equals("PHONE_CODE_EXPIRED")) {
+                            disableTimeout();
+                            doChangeState(STATE_ERROR_EXPIRED);
+                            return;
+                        }
+
                         if (tagError.equals("PHONE_NUMBER_UNOCCUPIED")) {
                             disableTimeout();
                             doChangeState(STATE_SIGNUP);
