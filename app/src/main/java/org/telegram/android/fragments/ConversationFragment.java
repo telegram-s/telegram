@@ -2463,6 +2463,11 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 } else if (object.message.getExtras() instanceof TLLocalAudio) {
                     final String key = DownloadManager.getAudioKey((TLLocalAudio) object.message.getExtras());
 
+                    DownloadState state = application.getDownloadManager().getState(key);
+                    if (state == DownloadState.FAILURE || state == DownloadState.NONE) {
+                        application.getDownloadManager().requestDownload((TLLocalAudio) object.message.getExtras());
+                    }
+
                     audioView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
