@@ -4,6 +4,7 @@ import android.os.Process;
 import org.telegram.android.actors.Actors;
 import org.telegram.android.core.audio.AudioPlayerActor;
 import org.telegram.android.core.audio.VoiceCaptureActor;
+import org.telegram.threading.ActorReference;
 import org.telegram.threading.ActorSystem;
 
 /**
@@ -12,8 +13,8 @@ import org.telegram.threading.ActorSystem;
 public class ActorKernel {
 
     private ActorSystem actorSystem;
-    private VoiceCaptureActor voiceCaptureActor;
-    private AudioPlayerActor audioPlayerActor;
+    private ActorReference voiceCaptureActor;
+    private ActorReference audioPlayerActor;
     private ApplicationKernel kernel;
 
     public ActorSystem getActorSystem() {
@@ -32,15 +33,15 @@ public class ActorKernel {
         actorSystem.addThread(Actors.THREAD_AUDIO, Process.THREAD_PRIORITY_AUDIO);
         actorSystem.addThread(Actors.THREAD_COMMON);
 
-        voiceCaptureActor = new VoiceCaptureActor(kernel.getApplication(), actorSystem);
-        audioPlayerActor = new AudioPlayerActor(kernel.getApplication(), actorSystem);
+        voiceCaptureActor = new VoiceCaptureActor(kernel.getApplication(), actorSystem).self();
+        audioPlayerActor = new AudioPlayerActor(kernel.getApplication(), actorSystem).self();
     }
 
-    public VoiceCaptureActor getVoiceCaptureActor() {
+    public ActorReference getVoiceCaptureActor() {
         return voiceCaptureActor;
     }
 
-    public AudioPlayerActor getAudioPlayerActor() {
+    public ActorReference getAudioPlayerActor() {
         return audioPlayerActor;
     }
 

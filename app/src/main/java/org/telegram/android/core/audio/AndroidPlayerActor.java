@@ -4,15 +4,16 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import org.telegram.android.TelegramApplication;
-import org.telegram.threading.Actor;
+import org.telegram.threading.ActorReference;
 import org.telegram.threading.ActorSystem;
+import org.telegram.threading.ReflectedActor;
 
 import java.io.File;
 
 /**
  * Created by ex3ndr on 18.03.14.
  */
-public class AndroidPlayerActor extends Actor<AndroidPlayerActor.Message> {
+public class AndroidPlayerActor extends ReflectedActor {
 
     private static final int STATE_NONE = 0;
     private static final int STATE_STARTED = 1;
@@ -22,99 +23,110 @@ public class AndroidPlayerActor extends Actor<AndroidPlayerActor.Message> {
 
     private MediaPlayer mplayer;
     private TelegramApplication application;
-    private AudioPlayerActor basePlayer;
+    private ActorReference basePlayer;
 
     private long currentId;
     private String currentFileName;
 
-    public AndroidPlayerActor(AudioPlayerActor basePlayer, TelegramApplication application, ActorSystem system) {
+    public AndroidPlayerActor(ActorReference basePlayer, TelegramApplication application, ActorSystem system) {
         super(system, "common");
         this.application = application;
         this.basePlayer = basePlayer;
     }
 
-    @Override
-    public void receive(Message message, Actor sender) throws Exception {
-        if (message instanceof PlayAudio) {
-            currentId = ((PlayAudio) message).id;
-            currentFileName = ((PlayAudio) message).fileName;
+    protected void onPlayMessage(long id, String fileName) throws Exception {
+        currentId = id;
+        currentFileName = fileName;
 
-            destroyPlayer();
-            state = STATE_NONE;
+        destroyPlayer();
+        state = STATE_NONE;
 
-            try {
-                mplayer = new MediaPlayer();
-                mplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mplayer.setDataSource(application, Uri.fromFile(new File(currentFileName)));
-                mplayer.prepare();
-                mplayer.setLooping(false);
-                mplayer.start();
-                mplayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        sendMessage(new StopAudio());
-                    }
-                });
-                mplayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                    @Override
-                    public boolean onError(MediaPlayer mp, int what, int extra) {
-                        sendMessage(new ErrorAudio());
-                        return false;
-                    }
-                });
-            } catch (Exception e) {
-                destroyPlayer();
-                basePlayer.sendMessage(new AudioPlayerActor.SubPlayerCrash(currentId));
-                return;
-            }
-
-            basePlayer.sendMessage(new AudioPlayerActor.SubPlayerStart(currentId));
-            sendMessage(new NotifyAudio(), 500);
-            state = STATE_STARTED;
-        } else if (message instanceof NotifyAudio) {
-            if (mplayer != null) {
-                if (state == STATE_STARTED) {
-                    int duration = mplayer.getDuration();
-                    if (duration == 0) {
-                        basePlayer.sendMessage(new AudioPlayerActor.SubPlayerInProgress(currentId, 0));
-                    } else {
-                        float progress = ((float) mplayer.getCurrentPosition()) / duration;
-                        basePlayer.sendMessage(new AudioPlayerActor.SubPlayerInProgress(currentId, progress));
-                    }
-                    sendMessage(new NotifyAudio(), 500);
+        try {
+            mplayer = new MediaPlayer();
+            mplayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mplayer.setDataSource(application, Uri.fromFile(new File(currentFileName)));
+            mplayer.prepare();
+            mplayer.setLooping(false);
+            mplayer.start();
+            mplayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    self().talk("stop", self());
                 }
-            }
-        } else if (message instanceof PauseAudio) {
-            if (mplayer != null) {
-                if (mplayer.isPlaying()) {
-                    mplayer.pause();
+            });
+            mplayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mp, int what, int extra) {
+                    self().talk("error", self());
+                    return false;
                 }
-                state = STATE_PAUSED;
-            }
-        } else if (message instanceof ResumeAudio) {
-            if (mplayer != null) {
-                if (!mplayer.isPlaying()) {
-                    mplayer.start();
-                }
-                state = STATE_STARTED;
-            }
-        } else if (message instanceof StopAudio) {
+            });
+        } catch (Exception e) {
             destroyPlayer();
-            basePlayer.sendMessage(new AudioPlayerActor.SubPlayerStop(currentId));
-        } else if (message instanceof ToggleAudio) {
-            if (state == STATE_PAUSED) {
-                sendMessage(new ResumeAudio());
-            } else if (state == STATE_STARTED) {
-                sendMessage(new PauseAudio());
-            } else {
-                sendMessage(new PlayAudio(currentId, currentFileName));
-            }
-        } else if (message instanceof RestartAudio) {
-            sendMessage(new PlayAudio(currentId, currentFileName));
-        } else if (message instanceof ErrorAudio) {
-            destroyPlayer();
-            basePlayer.sendMessage(new AudioPlayerActor.SubPlayerCrash(currentId));
+            basePlayer.talk(AudioPlayerActor.SUB_CRASH, self(), currentId);
+            return;
         }
+
+        basePlayer.talk(AudioPlayerActor.SUB_START, self(), currentId);
+        self().talkDelayed("notify", self(), 500);
+        state = STATE_STARTED;
+    }
+
+    protected void onNotifyMessage() throws Exception {
+        if (mplayer != null) {
+            if (state == STATE_STARTED) {
+                int duration = mplayer.getDuration();
+                if (duration == 0) {
+                    basePlayer.talk(AudioPlayerActor.SUB_IN_PROGRESS, self(), currentId, 0.0f);
+                } else {
+                    float progress = ((float) mplayer.getCurrentPosition()) / duration;
+                    basePlayer.talk(AudioPlayerActor.SUB_IN_PROGRESS, self(), currentId, progress);
+                }
+                self().talkDelayed("notify", self(), 500);
+            }
+        }
+    }
+
+    protected void onPauseMessage() throws Exception {
+        if (mplayer != null) {
+            if (mplayer.isPlaying()) {
+                mplayer.pause();
+            }
+            state = STATE_PAUSED;
+        }
+    }
+
+    protected void onResumeMessage() throws Exception {
+        if (mplayer != null) {
+            if (!mplayer.isPlaying()) {
+                mplayer.start();
+            }
+            state = STATE_STARTED;
+        }
+    }
+
+    protected void onStopMessage() throws Exception {
+        destroyPlayer();
+        basePlayer.talk(AudioPlayerActor.SUB_STOP, self(), currentId);
+    }
+
+    protected void onToggleMessage(long id, String fileName) throws Exception {
+        if (state == STATE_PAUSED) {
+            onResumeMessage();
+        } else if (state == STATE_STARTED) {
+            onPauseMessage();
+        } else {
+            onPlayMessage(id, fileName);
+        }
+    }
+
+    protected void onRestartMessage() throws Exception {
+        onPlayMessage(currentId, currentFileName);
+    }
+
+    protected void onErrorMessage() throws Exception {
+        destroyPlayer();
+        basePlayer.talk(AudioPlayerActor.SUB_CRASH, self(), currentId);
     }
 
     private void destroyPlayer() {
@@ -124,55 +136,5 @@ public class AndroidPlayerActor extends Actor<AndroidPlayerActor.Message> {
             mplayer.release();
             mplayer = null;
         }
-    }
-
-    public static abstract class Message {
-
-    }
-
-    public static class PlayAudio extends Message {
-        private String fileName;
-        private long id;
-
-        public PlayAudio(long id, String fileName) {
-            this.fileName = fileName;
-            this.id = id;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-    }
-
-    public static class PauseAudio extends Message {
-
-    }
-
-    public static class RestartAudio extends Message {
-
-    }
-
-    public static class ResumeAudio extends Message {
-
-    }
-
-    public static class StopAudio extends Message {
-
-    }
-
-    public static class ToggleAudio extends Message {
-
-    }
-
-    public static class ErrorAudio extends Message {
-
-    }
-
-    public static class NotifyAudio extends Message {
-
     }
 }

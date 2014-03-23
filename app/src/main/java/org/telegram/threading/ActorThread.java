@@ -35,7 +35,7 @@ public class ActorThread extends HandlerThread {
                     if (msg.what == MESSAGE) {
                         DeliverMessage arg = (DeliverMessage) msg.obj;
                         try {
-                            arg.actor.receive(arg.message, arg.sender);
+                            arg.actor.receiveMessage(arg.message, arg.args, arg.sender);
                         } catch (Exception e) {
                             arg.actor.onException(e);
                         }
@@ -71,32 +71,26 @@ public class ActorThread extends HandlerThread {
         }
     }
 
-    public <T> void deliverMessage(Actor<T> reference, T message, Actor sender) {
-        DeliverMessage deliverMessage = obtainMessage();
-        deliverMessage.actor = reference;
-        deliverMessage.message = message;
-        deliverMessage.sender = sender;
-        synchronized (pendingMessages) {
-            if (handler == null) {
-                pendingMessages.add(deliverMessage);
-            } else {
-                Message message1 = handler.obtainMessage(MESSAGE, deliverMessage);
-                handler.sendMessage(message1);
-            }
-        }
+    public void deliverMessage(Actor reference, String message, Object[] args, ActorReference sender) {
+        deliverMessageDelayed(reference, message, args, sender, 0);
     }
 
-    public <T> void deliverMessageDelayed(Actor<T> reference, T message, Actor sender, long delay) {
+    public void deliverMessageDelayed(Actor reference, String message, Object[] args, ActorReference sender, long delay) {
         DeliverMessage deliverMessage = obtainMessage();
         deliverMessage.actor = reference;
         deliverMessage.message = message;
+        deliverMessage.args = args;
         deliverMessage.sender = sender;
         synchronized (pendingMessages) {
             if (handler == null) {
                 pendingMessages.add(deliverMessage);
             } else {
                 Message message1 = handler.obtainMessage(MESSAGE, deliverMessage);
-                handler.sendMessageDelayed(message1, delay);
+                if (delay > 0) {
+                    handler.sendMessageDelayed(message1, delay);
+                } else {
+                    handler.sendMessage(message1);
+                }
             }
         }
     }
@@ -109,8 +103,9 @@ public class ActorThread extends HandlerThread {
 
     private class DeliverMessage {
         public Actor actor;
-        public Object message;
-        public Actor sender;
+        public String message;
+        public Object[] args;
+        public ActorReference sender;
 
         private DeliverMessage() {
 

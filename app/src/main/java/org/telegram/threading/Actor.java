@@ -1,12 +1,14 @@
 package org.telegram.threading;
 
+import java.util.ArrayList;
+
 /**
  * Created by ex3ndr on 17.03.14.
  */
-public abstract class Actor<T> {
+public abstract class Actor {
     private ActorReference reference;
     protected ActorSystem actorSystem;
-    private boolean isAlive = true;
+    private ArrayList<MessageKind> kinds = new ArrayList<MessageKind>();
 
     public Actor(ActorSystem system, String name) {
         ActorThread thread = system.findThread(name);
@@ -15,43 +17,74 @@ public abstract class Actor<T> {
         }
         reference = new ActorReference(this, thread);
         actorSystem = system;
+
+        registerMethods();
     }
 
-    public abstract void receive(T message, Actor sender) throws Exception;
+    protected void registerMethods() {
+
+    }
+
+    protected void registerKind(String name, Class... args) {
+        kinds.add(new MessageKind(name, args));
+    }
+
+    public final void receiveMessage(String name, Object[] args, ActorReference sender) throws Exception {
+        outer:
+        for (MessageKind kind : kinds) {
+            if (kind.getArgs().length != args.length) {
+                continue;
+            }
+
+            if (!kind.getName().equals(name)) {
+                continue;
+            }
+
+            for (int i = 0; i < kind.getArgs().length; i++) {
+                if (args[i] == null) {
+                    continue;
+                }
+                if (kind.getArgs()[i].isPrimitive()) {
+                    continue;
+                }
+                if (!kind.getArgs()[i].isAssignableFrom(args[i].getClass())) {
+                    continue outer;
+                }
+            }
+
+            receive(name, args, sender);
+        }
+    }
+
+    protected abstract void receive(String name, Object[] args, ActorReference sender) throws Exception;
+
+    public ActorReference self() {
+        return reference;
+    }
 
     public void onException(Exception e) {
 
-    }
-
-    public synchronized final void kill() {
-        if (!isAlive) {
-            return;
-        }
-        isAlive = false;
-        destroy();
-    }
-
-    public boolean isAlive() {
-        return isAlive;
     }
 
     protected void destroy() {
 
     }
 
-    public final void sendMessage(T message, Actor sender) {
-        reference.deliverMessage(message, sender);
-    }
+    private class MessageKind {
+        private String name;
+        private Class[] args;
 
-    public final void sendMessage(T message) {
-        sendMessage(message, null);
-    }
+        private MessageKind(String name, Class[] args) {
+            this.name = name;
+            this.args = args;
+        }
 
-    public final void sendMessage(T message, Actor sender, long delay) {
-        reference.deliverMessageDelayed(message, sender, delay);
-    }
+        public String getName() {
+            return name;
+        }
 
-    public final void sendMessage(T message, long delay) {
-        sendMessage(message, null, delay);
+        public Class[] getArgs() {
+            return args;
+        }
     }
 }

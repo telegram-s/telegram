@@ -12,11 +12,11 @@ public class ActorReference {
         this.thread = thread;
     }
 
-    public void deliverMessage(Object message, Actor sender) {
-        thread.deliverMessage(actor, message, sender);
+    public void talk(String message, ActorReference sender, Object... args) {
+        thread.deliverMessage(actor, message, args, sender);
     }
 
-    public void deliverMessageDelayed(Object message, Actor sender, long delay) {
-        thread.deliverMessageDelayed(actor, message, sender, delay);
+    public void talkDelayed(String message, ActorReference sender, long delay, Object... args) {
+        thread.deliverMessageDelayed(actor, message, args, sender, delay);
     }
 }
