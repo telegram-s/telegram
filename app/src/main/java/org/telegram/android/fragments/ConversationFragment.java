@@ -53,6 +53,7 @@ import org.telegram.android.ui.*;
 import org.telegram.android.views.*;
 import org.telegram.android.views.dialog.ConversationAdapter;
 import org.telegram.android.views.dialog.ConversationListView;
+import org.telegram.android.views.dialog.VisibleViewItem;
 import org.telegram.api.TLAbsInputPeer;
 import org.telegram.api.TLInputPeerChat;
 import org.telegram.api.TLInputPeerForeign;
@@ -975,16 +976,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
         if (selectedIndex >= 0) {
             listView.setSelectionFromTop(selectedIndex, selectedTop - listView.getPaddingTop());
-        }
-
-        listView.post(new Runnable() {
-            @Override
-            public void run() {
-                if (listView != null) {
-                    listView.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+            listView.post(new Runnable() {
+                @Override
+                public void run() {
+                    listView.setSelectionFromTop(selectedIndex, selectedTop - listView.getPaddingTop());
                 }
-            }
-        });
+            });
+        }
 
 //        if (workingSet != source.getMessagesSource().getCurrentWorkingSet()) {
 //            onSourceDataChanged();
@@ -1576,17 +1574,14 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         long start = SystemClock.uptimeMillis();
         ArrayList<MessageWireframe> nWorkingSet = source.getMessagesSource().getCurrentWorkingSet();
         Logger.d(TAG, "onSourceDataChanged: " + firstUnreadMessage + ", " + isFreshUpdate);
-        if (isFreshUpdate) {
-            if (nWorkingSet.size() == 0) {
-                workingSet = nWorkingSet;
-                dialogAdapter.notifyDataSetChanged();
-                onDataChanged();
-//                if (source.getState() == MessagesSourceState.COMPLETED) {
-//                    isFreshUpdate = false;
-//                }
-                return;
-            }
+        if (nWorkingSet.size() == 0) {
+            workingSet = nWorkingSet;
+            dialogAdapter.notifyDataSetChanged();
+            onDataChanged();
+            return;
+        }
 
+        if (isFreshUpdate) {
             DialogDescription description = application.getEngine().getDescriptionForPeer(peerType, peerId);
             if (description != null && description.getFirstUnreadMessage() != 0 && nWorkingSet.size() > 0) {
                 long unreadMessage = description.getFirstUnreadMessage();
@@ -1651,44 +1646,61 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             }
         }
 
-        View v = listView.getChildAt(listView.getChildCount() - 2);
-        int index = listView.getLastVisiblePosition() - 1;
-        long id = listView.getItemIdAtPosition(index);
-        int count = dialogAdapter.getCount();
-        final int top = ((v == null) ? 0 : v.getTop()) - listView.getPaddingTop();
+        VisibleViewItem[] oldState = listView.dump();
 
-        Logger.d(TAG, "Pre-Update " + index + ", " + count + "," + id + ", " + top);
+        Logger.d(TAG, "List states:");
+        for (int i = 0; i < oldState.length; i++) {
+            Logger.d(TAG, oldState[i].getIndex() + " \t " + oldState[i].getTop() + " \t " + oldState[i].getId());
+        }
+
+        int count = listView.getCount();
+
+        if (oldState.length == 0) {
+            workingSet = nWorkingSet;
+            dialogAdapter.notifyDataSetChanged();
+            if (workingSet.size() > 0) {
+                listView.setSelectionFromTop(workingSet.size() - 1, -10000);
+            }
+            onDataChanged();
+            return;
+        }
+
+        if (workingSet.size() > 0 && nWorkingSet.size() > 0 && listView.getLastVisiblePosition() >= workingSet.size() - 1
+                && workingSet.get(0).databaseId != nWorkingSet.get(0).databaseId) {
+            // Scrolled to end
+            workingSet = nWorkingSet;
+            dialogAdapter.notifyDataSetChanged();
+            listView.setSelectionFromTop(workingSet.size(), -10000);
+            return;
+        }
+
+        int minIndex = oldState[0].getIndex();
+        int maxIndex = oldState[oldState.length - 1].getIndex();
+        int delta = Math.abs(dialogAdapter.getCount() - count);
 
         workingSet = nWorkingSet;
         dialogAdapter.notifyDataSetChanged();
-        //dialogAdapter.notifyDataSetInvalidated();
 
-        int delta = Math.abs(dialogAdapter.getCount() - count);
+        int newIndex = oldState[0].getIndex() + (dialogAdapter.getCount() - count) + 1;
+        int newTop = oldState[0].getTop();
 
-        // if (delta != 0) {
-        int newIndex = index + (dialogAdapter.getCount() - count) + 1;
-
-        for (int i = index - delta; i < index + delta + 1; i++) {
+        outer:
+        for (int i = minIndex - delta; i < maxIndex + delta + 1; i++) {
             if (i < 0)
                 continue;
             if (i >= dialogAdapter.getCount())
                 break;
 
-            if (listView.getItemIdAtPosition(i) == id) {
-                newIndex = i;
-                break;
+            for (int j = 0; j < oldState.length; j++) {
+                if (oldState[j].getId() == listView.getItemIdAtPosition(i)) {
+                    newIndex = i;
+                    newTop = oldState[j].getTop();
+                    break;
+                }
             }
         }
 
-        listView.setSelectionFromTop(newIndex, top);
-//            final int finalNewIndex = newIndex;
-//            listView.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    listView.setSelectionFromTop(finalNewIndex, top);
-//                }
-//            });
-        // }
+        listView.setSelectionFromTop(newIndex, newTop);
 
         onDataChanged();
 
@@ -1704,8 +1716,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private void saveListPosition() {
         if (listView != null) {
-            int index = listView.getFirstVisiblePosition();
-            View v = listView.getChildAt(0);
+            int index = listView.getFirstVisiblePosition() + 1;
+            View v = listView.getChildAt(1);
             if (v != null) {
                 selectedTop = v.getTop();
                 selectedIndex = index;

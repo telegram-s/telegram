@@ -14,6 +14,7 @@
                                                                 android:stackFromBottom="true"
                                                                 android:dividerHeight="0dp"
                                                                 android:divider="@android:color/transparent"
+                                                                android:transcriptMode="disabled"
                                                                 android:id="@+id/listView"/>
 
         <FrameLayout android:layout_width="fill_parent"

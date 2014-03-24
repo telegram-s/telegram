@@ -53,6 +53,8 @@ public class ConversationListView extends ListView {
 
     private int offset;
 
+    private int oldHeight;
+
     private long animationTime = 0;
     private boolean isTimeVisible = false;
     private Handler handler = new Handler(Looper.getMainLooper()) {
@@ -88,6 +90,61 @@ public class ConversationListView extends ListView {
     public ConversationListView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init();
+    }
+
+    public VisibleViewItem[] dump() {
+
+        int childCount = getChildCount();
+
+        int idCount = 0;
+        int headerCount = 0;
+        for (int i = 0; i < childCount; i++) {
+            int index = getFirstVisiblePosition() + i;
+            long id = getItemIdAtPosition(index);
+            if (id > 0) {
+                idCount++;
+            } else {
+                headerCount++;
+            }
+        }
+
+        VisibleViewItem[] res = new VisibleViewItem[idCount];
+        int resIndex = 0;
+        for (int i = 0; i < childCount; i++) {
+            View v = getChildAt(i);
+            int index = getFirstVisiblePosition() + i;
+            long id = getItemIdAtPosition(index);
+            if (id > 0) {
+                int top = ((v == null) ? 0 : v.getTop()) - getPaddingTop();
+                res[resIndex++] = new VisibleViewItem(index + headerCount, top, id);
+            }
+        }
+
+        return res;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        VisibleViewItem[] items = null;
+        if (changed) {
+            items = dump();
+        }
+        super.onLayout(changed, l, t, r, b);
+        if (changed) {
+            final int changeDelta = (b - t) - oldHeight;
+            if (changeDelta < 0 && items.length > 0) {
+                final VisibleViewItem item = items[items.length - 1];
+                setSelectionFromTop(item.getIndex(), item.getTop() + changeDelta);
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setSelectionFromTop(item.getIndex(), item.getTop() + changeDelta);
+                    }
+                });
+            }
+        }
+
+        oldHeight = b - t;
     }
 
     private void init() {
