@@ -37,8 +37,8 @@ public class ApiKernel {
     }
 
     public void runKernel() {
-        // CryptoUtils.setAESImplementation(new NativeAES());
         try {
+            CryptoUtils.setAESImplementation(new NativeAES());
             PQSolver.setCurrentImplementation(new NativePQ());
         } catch (Throwable e) {
             CrashHandler.logHandledException(e);
