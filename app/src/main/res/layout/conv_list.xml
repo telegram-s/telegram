@@ -195,7 +195,7 @@
                                                            android:maxLines="5"
                                                            android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
                                                            android:imeOptions="actionSend"
-                                                           android:textColorHint="#bfbfbf"
+                                                           android:textColorHint="#d9d9d9"
                                                            android:hint="@string/st_conv_hint"
                                                            android:id="@+id/text"
                                                            android:background="@drawable/transparent"/>

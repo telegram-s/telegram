@@ -16,6 +16,8 @@ public class FastBackgroundDrawable extends Drawable {
     private Bitmap bitmap;
     private Rect source;
     private Rect dest;
+    private int lastTop;
+    private int lastTopHeight;
 
     public FastBackgroundDrawable(Bitmap bitmap) {
         this.backgroundPaint = new Paint();
@@ -38,17 +40,31 @@ public class FastBackgroundDrawable extends Drawable {
 
     private void updateBounds() {
         Rect src = getBounds();
+        int destW = src.width();
+        int destH = src.height();
+
         float scaleFactor = Math.max(
-                src.width() / (float) bitmap.getWidth(),
-                src.height() / (float) bitmap.getHeight());
+                destW / (float) bitmap.getWidth(),
+                destH / (float) bitmap.getHeight());
         int width = (int) (scaleFactor * bitmap.getWidth());
         int height = (int) (scaleFactor * bitmap.getHeight());
-        int deltaX = -(src.width() - width) / 2;
-        int deltaY = -(src.height() - height) / 2;
+        int deltaX = -(destW - width) / 2;
+        int deltaY = -(destH - height) / 2;
+        if (dest != null && dest.width() == src.width()) {
+            if (lastTopHeight >= src.height()) {
+                deltaY = lastTop;
+            } else {
+                lastTop = deltaY;
+                lastTopHeight = destH;
+            }
+        } else {
+            lastTop = deltaY;
+            lastTopHeight = destH;
+        }
         deltaX /= scaleFactor;
         deltaY /= scaleFactor;
         dest = getBounds();
-        source = new Rect(deltaX, deltaY, bitmap.getWidth() - deltaX, bitmap.getHeight() - deltaY);
+        source = new Rect(deltaX, deltaY, destW + deltaX, destH + deltaY);
     }
 
     @Override
