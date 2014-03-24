@@ -13,8 +13,8 @@ import org.telegram.threading.ActorSystem;
 public class ActorKernel {
 
     private ActorSystem actorSystem;
-    private ActorReference voiceCaptureActor;
-    private ActorReference audioPlayerActor;
+    private VoiceCaptureActor.Messenger voiceCaptureActor;
+    private AudioPlayerActor.Messenger audioPlayerActor;
     private ApplicationKernel kernel;
 
     public ActorSystem getActorSystem() {
@@ -33,15 +33,15 @@ public class ActorKernel {
         actorSystem.addThread(Actors.THREAD_AUDIO, Process.THREAD_PRIORITY_AUDIO);
         actorSystem.addThread(Actors.THREAD_COMMON);
 
-        voiceCaptureActor = new VoiceCaptureActor(kernel.getApplication(), actorSystem).self();
-        audioPlayerActor = new AudioPlayerActor(kernel.getApplication(), actorSystem).self();
+        voiceCaptureActor = new VoiceCaptureActor.Messenger(new VoiceCaptureActor(kernel.getApplication(), actorSystem).self(), null);
+        audioPlayerActor = new AudioPlayerActor.Messenger(new AudioPlayerActor(kernel.getApplication(), actorSystem).self(), null);
     }
 
-    public ActorReference getVoiceCaptureActor() {
+    public VoiceCaptureActor.Messenger getVoiceCaptureActor() {
         return voiceCaptureActor;
     }
 
-    public ActorReference getAudioPlayerActor() {
+    public AudioPlayerActor.Messenger getAudioPlayerActor() {
         return audioPlayerActor;
     }
 

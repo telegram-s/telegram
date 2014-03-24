@@ -23,7 +23,7 @@ public class AndroidPlayerActor extends ReflectedActor {
 
     private MediaPlayer mplayer;
     private TelegramApplication application;
-    private ActorReference basePlayer;
+    private AudioPlayerActor.SubMessenger basePlayer;
 
     private long currentId;
     private String currentFileName;
@@ -31,7 +31,7 @@ public class AndroidPlayerActor extends ReflectedActor {
     public AndroidPlayerActor(ActorReference basePlayer, TelegramApplication application, ActorSystem system) {
         super(system, "common");
         this.application = application;
-        this.basePlayer = basePlayer;
+        this.basePlayer = new AudioPlayerActor.SubMessenger(basePlayer, self());
     }
 
     protected void onPlayMessage(long id, String fileName) throws Exception {
@@ -63,11 +63,11 @@ public class AndroidPlayerActor extends ReflectedActor {
             });
         } catch (Exception e) {
             destroyPlayer();
-            basePlayer.talk(AudioPlayerActor.SUB_CRASH, self(), currentId);
+            basePlayer.crash(currentId);
             return;
         }
 
-        basePlayer.talk(AudioPlayerActor.SUB_START, self(), currentId);
+        basePlayer.started(currentId);
         self().talkDelayed("notify", self(), 500);
         state = STATE_STARTED;
     }
@@ -77,10 +77,10 @@ public class AndroidPlayerActor extends ReflectedActor {
             if (state == STATE_STARTED) {
                 int duration = mplayer.getDuration();
                 if (duration == 0) {
-                    basePlayer.talk(AudioPlayerActor.SUB_IN_PROGRESS, self(), currentId, 0.0f);
+                    basePlayer.progress(currentId, 0);
                 } else {
                     float progress = ((float) mplayer.getCurrentPosition()) / duration;
-                    basePlayer.talk(AudioPlayerActor.SUB_IN_PROGRESS, self(), currentId, progress);
+                    basePlayer.progress(currentId, progress);
                 }
                 self().talkDelayed("notify", self(), 500);
             }
@@ -107,7 +107,7 @@ public class AndroidPlayerActor extends ReflectedActor {
 
     protected void onStopMessage() throws Exception {
         destroyPlayer();
-        basePlayer.talk(AudioPlayerActor.SUB_STOP, self(), currentId);
+        basePlayer.started(currentId);
     }
 
     protected void onToggleMessage(long id, String fileName) throws Exception {
@@ -126,7 +126,7 @@ public class AndroidPlayerActor extends ReflectedActor {
 
     protected void onErrorMessage() throws Exception {
         destroyPlayer();
-        basePlayer.talk(AudioPlayerActor.SUB_CRASH, self(), currentId);
+        basePlayer.crash(currentId);
     }
 
     private void destroyPlayer() {

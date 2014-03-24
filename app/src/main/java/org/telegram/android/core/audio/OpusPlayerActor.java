@@ -30,11 +30,11 @@ public class OpusPlayerActor extends ReflectedActor {
 
     private long currentId;
     private String currentFileName;
-    private ActorReference basePlayer;
+    private AudioPlayerActor.SubMessenger basePlayer;
 
     public OpusPlayerActor(ActorReference audioPlayerActor, ActorSystem system) {
         super(system, Actors.THREAD_AUDIO);
-        this.basePlayer = audioPlayerActor;
+        this.basePlayer = new AudioPlayerActor.SubMessenger(audioPlayerActor, self());
         this.opusLib = new OpusLib();
     }
 
@@ -48,7 +48,7 @@ public class OpusPlayerActor extends ReflectedActor {
 
         int res = opusLib.openOpusFile(currentFileName);
         if (res == 0) {
-            basePlayer.talk(AudioPlayerActor.SUB_CRASH, self(), currentId);
+            basePlayer.crash(currentId);
             return;
         }
 
@@ -62,7 +62,7 @@ public class OpusPlayerActor extends ReflectedActor {
         } catch (Exception e) {
             e.printStackTrace();
             destroyPlayer();
-            basePlayer.talk(AudioPlayerActor.SUB_CRASH, self(), currentId);
+            basePlayer.crash(currentId);
             return;
         }
 
@@ -91,7 +91,7 @@ public class OpusPlayerActor extends ReflectedActor {
             scale = offset / (float) duration;
         }
 
-        basePlayer.talk(AudioPlayerActor.SUB_IN_PROGRESS, self(), currentId, scale);
+        basePlayer.progress(currentId, scale);
 
         if (!isFinished) {
             self().talk("iterate", self());
@@ -109,7 +109,7 @@ public class OpusPlayerActor extends ReflectedActor {
         if (duration != 0) {
             scale = offset / (float) duration;
         }
-        basePlayer.talk(AudioPlayerActor.SUB_IN_PAUSED, self(), currentId, scale);
+        basePlayer.paused(currentId, scale);
     }
 
     protected void onResumeMessage() {
@@ -123,7 +123,7 @@ public class OpusPlayerActor extends ReflectedActor {
     protected void onStopMessage() {
         destroyPlayer();
         state = STATE_NONE;
-        basePlayer.talk(AudioPlayerActor.SUB_STOP, self(), currentId);
+        basePlayer.stoped(currentId);
     }
 
     protected void onToggleMessage(long id, String fileName) {

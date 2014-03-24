@@ -2537,7 +2537,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         audioFile = getUploadTempAudioFile();
 
         long id = VoiceCaptureActor.LAST_ID.incrementAndGet();
-        application.getKernel().getActorKernel().getVoiceCaptureActor().talk("start", null, id, audioFile);
+        application.getKernel().getActorKernel().getVoiceCaptureActor().start(id, audioFile);
         getNotifications().unregisterSubscriber(this, Events.KIND_AUDIO_RECORD);
         getNotifications().registerSubscriber(this, Events.KIND_AUDIO_RECORD, id);
 
@@ -2592,7 +2592,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
         isAudioVisible = false;
 
-        application.getKernel().getActorKernel().getVoiceCaptureActor().talk("stop", null);
+        application.getKernel().getActorKernel().getVoiceCaptureActor().stop();
 
         if (cancel) {
             getNotifications().unregisterSubscriber(this);

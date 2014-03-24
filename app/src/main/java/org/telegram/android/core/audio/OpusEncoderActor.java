@@ -1,16 +1,14 @@
 package org.telegram.android.core.audio;
 
 import org.telegram.opus.OpusLib;
-import org.telegram.threading.Actor;
-import org.telegram.threading.ActorSystem;
-import org.telegram.threading.ReflectedActor;
+import org.telegram.threading.*;
 
 import java.nio.ByteBuffer;
 
 /**
  * Created by ex3ndr on 18.03.14.
  */
-public class OpusEncoder extends ReflectedActor {
+public class OpusEncoderActor extends ReflectedActor {
     private static final int STATE_NONE = 0;
     private static final int STATE_STARTED = 1;
     private static final int STATE_COMPLETED = 2;
@@ -21,7 +19,7 @@ public class OpusEncoder extends ReflectedActor {
 
     private ByteBuffer fileBuffer = ByteBuffer.allocateDirect(1920);
 
-    public OpusEncoder(ActorSystem system) {
+    public OpusEncoderActor(ActorSystem system) {
         super(system, "encoding");
     }
 
@@ -69,5 +67,31 @@ public class OpusEncoder extends ReflectedActor {
         opusLib.stopRecord();
 
         state = STATE_COMPLETED;
+    }
+
+    public static class Messenger extends ActorMessenger {
+
+        public Messenger(ActorReference reference, ActorReference sender) {
+            super(reference, sender);
+        }
+
+        public void start(String fileName) {
+            talkRaw("start", fileName);
+        }
+
+
+        public void write(byte[] buffer, int size) {
+            talkRaw("write", buffer, size);
+        }
+
+        public void stop() {
+            talkRaw("stop");
+        }
+
+
+        @Override
+        public ActorMessenger cloneForSender(ActorReference sender) {
+            return new Messenger(reference, sender);
+        }
     }
 }

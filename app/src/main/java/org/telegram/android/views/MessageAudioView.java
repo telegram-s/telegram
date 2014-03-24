@@ -226,7 +226,7 @@ public class MessageAudioView extends MessageBaseDocView implements StateSubscri
         } else {
             notifications.sendState(Events.KIND_AUDIO, databaseId, Events.STATE_IN_PROGRESS, progress);
         }
-        actors.getAudioPlayerActor().talk("toggle", null, (long) databaseId, fileName);
+        actors.getAudioPlayerActor().toggle(databaseId, fileName);
     }
 
     @Override

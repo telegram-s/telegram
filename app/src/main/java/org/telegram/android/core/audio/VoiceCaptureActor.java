@@ -8,7 +8,7 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.Events;
-import org.telegram.threading.Actor;
+import org.telegram.threading.ActorMessenger;
 import org.telegram.threading.ActorReference;
 import org.telegram.threading.ActorSystem;
 import org.telegram.threading.ReflectedActor;
@@ -52,7 +52,7 @@ public class VoiceCaptureActor extends ReflectedActor {
         audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 16000, AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT, bufferSize);
         audioRecord.startRecording();
-        opusActor = new OpusEncoder(actorSystem).self();
+        opusActor = new OpusEncoderActor(actorSystem).self();
         opusActor.talk("start", self(), fileName);
         state = STATE_STARTED;
         playStartTime = SystemClock.uptimeMillis();
@@ -121,6 +121,26 @@ public class VoiceCaptureActor extends ReflectedActor {
             Vibrator v = (Vibrator) application.getSystemService(Context.VIBRATOR_SERVICE);
             v.vibrate(20);
         } catch (Exception e) {
+        }
+    }
+
+    public static class Messenger extends ActorMessenger {
+
+        public Messenger(ActorReference reference, ActorReference sender) {
+            super(reference, sender);
+        }
+
+        public void start(long id, String fileName) {
+            talkRaw("start", id, fileName);
+        }
+
+        public void stop() {
+            talkRaw("stop");
+        }
+
+        @Override
+        public ActorMessenger cloneForSender(ActorReference sender) {
+            return new Messenger(reference, sender);
         }
     }
 }

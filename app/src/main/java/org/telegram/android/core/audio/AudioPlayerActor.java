@@ -4,24 +4,15 @@ import android.widget.Toast;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.Events;
 import org.telegram.opus.OpusLib;
-import org.telegram.threading.Actor;
-import org.telegram.threading.ActorReference;
-import org.telegram.threading.ActorSystem;
-import org.telegram.threading.ReflectedActor;
+import org.telegram.threading.*;
 
 /**
  * Created by ex3ndr on 18.03.14.
  */
 public class AudioPlayerActor extends ReflectedActor {
 
-    public static final String SUB_START = "subStart";
-    public static final String SUB_CRASH = "subCrash";
-    public static final String SUB_IN_PROGRESS = "subInProgress";
-    public static final String SUB_IN_PAUSED = "subPause";
-    public static final String SUB_STOP = "subStop";
-
-    private ActorReference androidPlayerActor;
-    private ActorReference opusPlayerActor;
+    private ClientMessenger androidPlayerActor;
+    private ClientMessenger opusPlayerActor;
 
     private OpusLib opusLib;
 
@@ -34,8 +25,8 @@ public class AudioPlayerActor extends ReflectedActor {
     public AudioPlayerActor(TelegramApplication application, ActorSystem system) {
         super(system, "common");
         this.application = application;
-        androidPlayerActor = new AndroidPlayerActor(self(), application, system).self();
-        opusPlayerActor = new OpusPlayerActor(self(), system).self();
+        androidPlayerActor = new ClientMessenger(new AndroidPlayerActor(self(), application, system).self(), self());
+        opusPlayerActor = new ClientMessenger(new OpusPlayerActor(self(), system).self(), self());
         opusLib = new OpusLib();
     }
 
@@ -49,11 +40,11 @@ public class AudioPlayerActor extends ReflectedActor {
         this.isInited = true;
 
         if (usedAndroid) {
-            androidPlayerActor.talk("play", self(), currentId, fileName);
-            opusPlayerActor.talk("stop", self());
+            androidPlayerActor.play(currentId, fileName);
+            opusPlayerActor.stop();
         } else {
-            opusPlayerActor.talk("play", self(), currentId, fileName);
-            androidPlayerActor.talk("stop", self());
+            opusPlayerActor.play(currentId, fileName);
+            androidPlayerActor.stop();
         }
         flushNotifications();
     }
@@ -61,9 +52,9 @@ public class AudioPlayerActor extends ReflectedActor {
     protected void onStopMessage() {
         if (isInited) {
             if (usedAndroid) {
-                androidPlayerActor.talk("stop", self());
+                androidPlayerActor.stop();
             } else {
-                opusPlayerActor.talk("stop", self());
+                opusPlayerActor.stop();
             }
             notifyPending(Events.STATE_STOP);
         }
@@ -76,9 +67,9 @@ public class AudioPlayerActor extends ReflectedActor {
         if (isInited) {
             if (id == currentId) {
                 if (usedAndroid) {
-                    androidPlayerActor.talk("toggle", self(), id, fileName);
+                    androidPlayerActor.toggle(id, fileName);
                 } else {
-                    opusPlayerActor.talk("toggle", self(), id, fileName);
+                    opusPlayerActor.toggle(id, fileName);
                 }
             } else {
                 onStopMessage();
@@ -147,5 +138,86 @@ public class AudioPlayerActor extends ReflectedActor {
 
     private void flushNotifications() {
         application.getUiKernel().getUiNotifications().flushPending();
+    }
+
+
+
+    public static class Messenger extends ActorMessenger {
+
+        public Messenger(ActorReference reference, ActorReference sender) {
+            super(reference, sender);
+        }
+
+        public void play(long id, String fileName) {
+            talkRaw("play", id, fileName);
+        }
+
+        public void toggle(long id, String fileName) {
+            talkRaw("toggle", id, fileName);
+        }
+
+        public void stop(long id, String fileName) {
+            talkRaw("stop", id, fileName);
+        }
+
+        @Override
+        public ActorMessenger cloneForSender(ActorReference sender) {
+            return new Messenger(reference, sender);
+        }
+    }
+
+    public static class SubMessenger extends ActorMessenger {
+        public SubMessenger(ActorReference reference, ActorReference sender) {
+            super(reference, sender);
+        }
+
+        public void started(long id) {
+            talkRaw("subStart", id);
+        }
+
+        public void stoped(long id) {
+            talkRaw("subStop", id);
+        }
+
+        public void paused(long id, float progress) {
+            talkRaw("subPause", id, progress);
+        }
+
+        public void progress(long id, float progress) {
+            talkRaw("subInProgress", id, progress);
+        }
+
+        public void crash(long id) {
+            talkRaw("subCrash", id);
+        }
+
+        @Override
+        public ActorMessenger cloneForSender(ActorReference sender) {
+            return new Messenger(reference, sender);
+        }
+    }
+
+    public static class ClientMessenger extends ActorMessenger {
+
+        public ClientMessenger(ActorReference reference, ActorReference sender) {
+            super(reference, sender);
+        }
+
+        public void play(long id, String fileName) {
+            talkRaw("play", id, fileName);
+        }
+
+        public void toggle(long id, String fileName) {
+            talkRaw("toggle", id, fileName);
+        }
+
+        public void stop() {
+            talkRaw("stop");
+        }
+
+        @Override
+        public ActorMessenger cloneForSender(ActorReference sender) {
+            return new ClientMessenger(reference, sender);
+        }
     }
 }
