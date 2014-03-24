@@ -58,15 +58,15 @@ public abstract class Actor {
 
     protected abstract void receive(String name, Object[] args, ActorReference sender) throws Exception;
 
+    protected void unhandled(String name, Object[] args, ActorReference sender) {
+        actorSystem.onUnhandledMessage(this, name, args, sender);
+    }
+
     public ActorReference self() {
         return reference;
     }
 
     public void onException(Exception e) {
-
-    }
-
-    protected void destroy() {
 
     }
 

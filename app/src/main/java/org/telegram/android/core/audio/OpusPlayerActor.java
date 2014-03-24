@@ -136,6 +136,12 @@ public class OpusPlayerActor extends ReflectedActor {
         }
     }
 
+    @Override
+    public void onException(Exception e) {
+        e.printStackTrace();
+        basePlayer.crash(currentId);
+    }
+
     private void destroyPlayer() {
         opusLib.closeOpusFile();
         if (audioTrack != null) {

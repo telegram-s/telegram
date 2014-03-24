@@ -30,7 +30,7 @@ public class VoiceCaptureActor extends ReflectedActor {
     private int state = STATE_STOPPED;
 
     private AudioRecord audioRecord;
-    private ActorReference opusActor;
+    private OpusEncoderActor.Messenger opusActor;
     private int bufferSize;
     private TelegramApplication application;
     private long actionId;
@@ -52,8 +52,8 @@ public class VoiceCaptureActor extends ReflectedActor {
         audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 16000, AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT, bufferSize);
         audioRecord.startRecording();
-        opusActor = new OpusEncoderActor(actorSystem).self();
-        opusActor.talk("start", self(), fileName);
+        opusActor = new OpusEncoderActor.Messenger(new OpusEncoderActor(actorSystem).self(), self());
+        opusActor.start(fileName);
         state = STATE_STARTED;
         playStartTime = SystemClock.uptimeMillis();
         vibrate();
@@ -68,7 +68,7 @@ public class VoiceCaptureActor extends ReflectedActor {
         byte[] buffer = VoiceBuffers.getInstance().obtainBuffer(BUFFER_SIZE);
         int len = audioRecord.read(buffer, 0, buffer.length);
         if (len > 0) {
-            opusActor.talk("write", self(), buffer, len);
+            opusActor.write(buffer, len);
         } else {
             VoiceBuffers.getInstance().releaseBuffer(buffer);
         }
@@ -88,7 +88,7 @@ public class VoiceCaptureActor extends ReflectedActor {
         audioRecord.stop();
         audioRecord.release();
         audioRecord = null;
-        opusActor.talk("stop", self());
+        opusActor.stop();
 
         application.getKernel().getUiKernel().getUiNotifications().sendState(
                 Events.KIND_AUDIO_RECORD,
@@ -105,7 +105,7 @@ public class VoiceCaptureActor extends ReflectedActor {
             audioRecord = null;
         }
         if (opusActor != null) {
-            opusActor.talk("stop", self());
+            opusActor.stop();
         }
 
         application.getKernel().getUiKernel().getUiNotifications().sendState(
@@ -114,6 +114,12 @@ public class VoiceCaptureActor extends ReflectedActor {
                 Events.STATE_ERROR);
 
         state = STATE_STOPPED;
+    }
+
+    @Override
+    public void onException(Exception e) {
+        e.printStackTrace();
+        onCrashMessage();
     }
 
     private void vibrate() {

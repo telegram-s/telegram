@@ -98,7 +98,6 @@ public class MessageSender {
                 public void onError(int errorCode, String errorMessage) {
                     application.getEngine().onMessageFailure(message);
                     application.notifyUIUpdate();
-
                     Logger.d(TAG, "Chat message sent failured in time: " + (SystemClock.uptimeMillis() - start) + " ms");
                 }
 

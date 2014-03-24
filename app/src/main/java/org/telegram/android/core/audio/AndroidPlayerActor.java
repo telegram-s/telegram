@@ -129,6 +129,13 @@ public class AndroidPlayerActor extends ReflectedActor {
         basePlayer.crash(currentId);
     }
 
+    @Override
+    public void onException(Exception e) {
+        e.printStackTrace();
+        destroyPlayer();
+        basePlayer.crash(currentId);
+    }
+
     private void destroyPlayer() {
         if (mplayer != null) {
             mplayer.stop();

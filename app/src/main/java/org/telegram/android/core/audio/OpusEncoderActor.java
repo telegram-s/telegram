@@ -19,6 +19,8 @@ public class OpusEncoderActor extends ReflectedActor {
 
     private ByteBuffer fileBuffer = ByteBuffer.allocateDirect(1920);
 
+
+
     public OpusEncoderActor(ActorSystem system) {
         super(system, "encoding");
     }
@@ -67,6 +69,12 @@ public class OpusEncoderActor extends ReflectedActor {
         opusLib.stopRecord();
 
         state = STATE_COMPLETED;
+    }
+
+    @Override
+    public void onException(Exception e) {
+        e.printStackTrace();
+
     }
 
     public static class Messenger extends ActorMessenger {
