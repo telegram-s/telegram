@@ -676,29 +676,50 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         return super.onOptionsItemSelected(item);
     }
 
+    private void executeAddUser(final User user, final int shareHistoryCount) {
+        runUiTask(new AsyncAction() {
+            @Override
+            public void execute() throws AsyncException {
+                TLAbsStatedMessage message = rpc(new TLRequestMessagesAddChatUser(chatId, new TLInputUserContact(user.getUid()), shareHistoryCount));
+                TLMessageService service = (TLMessageService) message.getMessage();
+                TLMessageActionChatAddUser addUser = (TLMessageActionChatAddUser) service.getAction();
+                application.getEngine().onUsers(message.getUsers());
+                application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
+                application.getEngine().onUpdatedMessage(message.getMessage());
+                application.getEngine().getFullGroupEngine().onChatUserAdded(chatId, addUser.getUserId(), service.getFromId(), service.getDate());
+                application.getUpdateProcessor().onMessage(new TLLocalAddChatUser(message));
+            }
+
+            @Override
+            public void afterExecute() {
+                Toast.makeText(getActivity(), R.string.st_edit_dialog_added, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     protected void onFragmentResult(int resultCode, Object data) {
         if (resultCode == Activity.RESULT_OK) {
             Integer uid = (Integer) data;
             final User user = application.getEngine().getUser(uid);
-            runUiTask(new AsyncAction() {
-                @Override
-                public void execute() throws AsyncException {
-                    TLAbsStatedMessage message = rpc(new TLRequestMessagesAddChatUser(chatId, new TLInputUserContact(user.getUid()), 10));
-                    TLMessageService service = (TLMessageService) message.getMessage();
-                    TLMessageActionChatAddUser addUser = (TLMessageActionChatAddUser) service.getAction();
-                    application.getEngine().onUsers(message.getUsers());
-                    application.getEngine().getGroupsEngine().onGroupsUpdated(message.getChats());
-                    application.getEngine().onUpdatedMessage(message.getMessage());
-                    application.getEngine().getFullGroupEngine().onChatUserAdded(chatId, addUser.getUserId(), service.getFromId(), service.getDate());
-                    application.getUpdateProcessor().onMessage(new TLLocalAddChatUser(message));
-                }
-
-                @Override
-                public void afterExecute() {
-                    Toast.makeText(getActivity(), R.string.st_edit_dialog_added, Toast.LENGTH_SHORT).show();
-                }
-            });
+            AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.st_edit_dialog_share_history_title)
+                    .setMessage(html(getStringSafe(R.string.st_edit_dialog_share_history_message).replace("{name}", "<b>" + user.getDisplayName() + "</b>")))
+                    .setPositiveButton(R.string.st_edit_dialog_share_history_share, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            executeAddUser(user, 1000);
+                        }
+                    })
+                    .setNegativeButton(R.string.st_edit_dialog_share_history_not_share, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            executeAddUser(user, 0);
+                        }
+                    })
+                    .create();
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.show();
         }
     }
 

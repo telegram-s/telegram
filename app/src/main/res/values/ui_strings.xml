@@ -372,6 +372,10 @@
     <string name="st_edit_dialog_title">Group info</string>
     <string name="st_edit_dialog_no_access">You are no longer a member of this group.</string>
     <string name="st_edit_dialog_added">User added to the group</string>
+    <string name="st_edit_dialog_share_history_title">Share history?</string>
+    <string name="st_edit_dialog_share_history_message">Do you want to share chat history with \'{name}\'?</string>
+    <string name="st_edit_dialog_share_history_share">Share</string>
+    <string name="st_edit_dialog_share_history_not_share">Not Share</string>
     <string name="st_edit_dialog_removed">User removed from the group</string>
     <string name="st_edit_dialog_left">You left the group</string>
     <string name="st_edit_dialog_header_settings">SETTINGS</string>
