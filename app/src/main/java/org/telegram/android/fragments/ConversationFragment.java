@@ -945,28 +945,30 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         ArrayList<CharSequence> items = new ArrayList<CharSequence>();
         final ArrayList<Runnable> actions = new ArrayList<Runnable>();
 
-        if (message.message.getRawContentType() == ContentType.MESSAGE_TEXT) {
-            items.add(getStringSafe(R.string.st_conv_action_copy));
-            actions.add(new Runnable() {
-                @Override
-                public void run() {
-                    copyToPastebin(message.message.getMessage());
-                    Toast.makeText(getActivity(), R.string.st_conv_copied, Toast.LENGTH_SHORT).show();
-                }
-            });
-            if (isEnabledInput) {
-                items.add(getStringSafe(R.string.st_conv_action_quote));
+        if (peerType != PeerType.PEER_USER_ENCRYPTED) {
+            if (message.message.getRawContentType() == ContentType.MESSAGE_TEXT) {
+                items.add(getStringSafe(R.string.st_conv_action_copy));
                 actions.add(new Runnable() {
                     @Override
                     public void run() {
-                        if (!isEnabledInput) {
-                            Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        editText.getText().append("\"" + message.message.getMessage() + "\" ");
-                        showKeyboard(editText);
+                        copyToPastebin(message.message.getMessage());
+                        Toast.makeText(getActivity(), R.string.st_conv_copied, Toast.LENGTH_SHORT).show();
                     }
                 });
+                if (isEnabledInput) {
+                    items.add(getStringSafe(R.string.st_conv_action_quote));
+                    actions.add(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!isEnabledInput) {
+                                Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            editText.getText().append("\"" + message.message.getMessage() + "\" ");
+                            showKeyboard(editText);
+                        }
+                    });
+                }
             }
         }
 
