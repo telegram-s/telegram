@@ -30,18 +30,6 @@ public class MessageBaseDocView extends BaseDownloadView {
     private Paint progressPaint;
     private Paint progressBgPaint;
     private Paint progressBgLightPaint;
-    private TextPaint clockOutPaint;
-    private Paint clockIconPaint;
-
-    private Drawable stateSent;
-    private Drawable stateHalfCheck;
-    private Drawable stateFailure;
-
-    private boolean showState;
-
-    private static final int COLOR_NORMAL = 0xff70B15C;
-    private static final int COLOR_ERROR = 0xffDB4942;
-    private static final int COLOR_IN = 0xffA1AAB3;
 
     protected int databaseId;
 
@@ -74,26 +62,6 @@ public class MessageBaseDocView extends BaseDownloadView {
         progressBgLightPaint = new Paint();
         progressBgLightPaint.setStyle(Paint.Style.FILL);
         progressBgLightPaint.setColor(0x0F669dd8);
-
-        if (FontController.USE_SUBPIXEL) {
-            clockOutPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-        } else {
-            clockOutPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-        }
-        clockOutPaint.setTypeface(FontController.loadTypeface(getContext(), "regular"));
-        clockOutPaint.setTextSize(getSp(12f));
-        clockOutPaint.setColor(0xff70B15C);
-
-        clockIconPaint = new Paint();
-        clockIconPaint.setStyle(Paint.Style.STROKE);
-        clockIconPaint.setColor(0xff12C000);
-        clockIconPaint.setStrokeWidth(getPx(1));
-        clockIconPaint.setAntiAlias(true);
-        clockIconPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-
-        stateSent = getResources().getDrawable(R.drawable.st_bubble_ic_check);
-        stateHalfCheck = getResources().getDrawable(R.drawable.st_bubble_ic_halfcheck);
-        stateFailure = getResources().getDrawable(R.drawable.st_bubble_ic_warning);
     }
 
     @Override
@@ -117,8 +85,15 @@ public class MessageBaseDocView extends BaseDownloadView {
                 bindDownload(DownloadManager.getAudioKey(doc));
             }
         }
-
-        this.showState = message.message.isOut();
+        if (isOut) {
+            progressBgLightPaint.setColor(0x0F69b449);
+            progressBgPaint.setColor(0x0F69b449);
+            progressPaint.setColor(0xFF69b449);
+        } else {
+            progressBgLightPaint.setColor(0x0F669dd8);
+            progressBgPaint.setColor(0x0F669dd8);
+            progressPaint.setColor(0xFF669dd8);
+        }
     }
 
     protected int measureHeight() {
@@ -154,18 +129,6 @@ public class MessageBaseDocView extends BaseDownloadView {
     @Override
     protected int getOutBubbleResource() {
         return R.drawable.st_bubble_out_media_normal;
-    }
-
-    private Drawable getStateDrawable(int state) {
-        switch (state) {
-            default:
-            case MessageState.SENT:
-                return stateSent;
-            case MessageState.READED:
-                return stateHalfCheck;
-            case MessageState.FAILURE:
-                return stateFailure;
-        }
     }
 
     protected void drawContent(Canvas canvas) {

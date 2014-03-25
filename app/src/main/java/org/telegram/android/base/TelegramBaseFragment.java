@@ -809,6 +809,13 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         startPickerActivity(intent);
     }
 
+    protected Intent shareIntent(String key, String mimeType) {
+        Intent fallbackIntent = new Intent(Intent.ACTION_SEND);
+        fallbackIntent.setType(mimeType);
+        fallbackIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key));
+        return fallbackIntent;
+    }
+
     protected void openInternalFile(String key, String mimeType) {
         openUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key), mimeType);
     }
@@ -818,7 +825,7 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
     }
 
     protected void shareInternalFile(String key) {
-        openUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key));
+        shareUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key));
     }
 
     protected void shareInternalFiles(String[] keys, String mimeType) {

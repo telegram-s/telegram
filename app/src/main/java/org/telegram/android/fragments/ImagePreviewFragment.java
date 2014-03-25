@@ -1,6 +1,8 @@
 package org.telegram.android.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -26,12 +28,16 @@ import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
 import org.telegram.android.ui.DepthPageTransformer;
 import org.telegram.android.ui.TextUtil;
+import org.telegram.android.ui.pick.PickIntentClickListener;
+import org.telegram.android.ui.pick.PickIntentDialog;
+import org.telegram.android.ui.pick.PickIntentItem;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Author: Korshakov Stepan
@@ -578,64 +584,118 @@ public class ImagePreviewFragment extends TelegramFragment {
     }
 
     private void share() {
-        MediaRecord record;
+        final MediaRecord record;
         if (records != null) {
             record = records[imagesPager.getCurrentItem()];
         } else {
             record = mainRecord;
         }
-        getActivity().setResult(Activity.RESULT_OK, new Intent().putExtra("forward_mid", record.getMid()));
-        getActivity().finish();
+
+        if (record.getPreview() instanceof TLLocalPhoto) {
+            String downloadKey = DownloadManager.getPhotoKey((TLLocalPhoto) record.getPreview());
+            ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
+            items.add(new PickIntentItem(R.drawable.app_icon, "Forward"));
+            if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
+                Collections.addAll(items, createPickIntents(shareIntent(downloadKey, "image/jpeg")));
+            }
+
+            PickIntentDialog intentDialog = new PickIntentDialog(getActivity(), items.toArray(new PickIntentItem[0]),
+                    new PickIntentClickListener() {
+                        @Override
+                        public void onItemClicked(int index, PickIntentItem item) {
+                            if (index == 0) {
+                                getActivity().setResult(Activity.RESULT_OK, new Intent().putExtra("forward_mid", record.getMid()));
+                                getActivity().finish();
+                            } else {
+                                startActivity(item.getIntent());
+                            }
+                        }
+                    }
+            );
+            intentDialog.show();
+        } else if (record.getPreview() instanceof TLLocalVideo) {
+            String downloadKey = DownloadManager.getVideoKey((TLLocalVideo) record.getPreview());
+            ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
+            items.add(new PickIntentItem(R.drawable.app_icon, "Forward"));
+            if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
+                Collections.addAll(items, createPickIntents(shareIntent(downloadKey, "video/mp4")));
+            }
+
+            PickIntentDialog intentDialog = new PickIntentDialog(getActivity(), items.toArray(new PickIntentItem[0]),
+                    new PickIntentClickListener() {
+                        @Override
+                        public void onItemClicked(int index, PickIntentItem item) {
+                            if (index == 0) {
+                                getActivity().setResult(Activity.RESULT_OK, new Intent().putExtra("forward_mid", record.getMid()));
+                                getActivity().finish();
+                            } else {
+                                startActivity(item.getIntent());
+                            }
+                        }
+                    }
+            );
+            intentDialog.show();
+        }
     }
 
     private void delete() {
-        MediaRecord record;
-        if (records != null) {
-            record = records[imagesPager.getCurrentItem()];
-        } else {
-            record = mainRecord;
-        }
-        ChatMessage message = application.getEngine().getMessagesEngine().getMessageByMid(record.getMid());
-        if (message != null) {
-            application.getEngine().deleteSentMessage(message.getDatabaseId());
-        }
-        application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
-        application.notifyUIUpdate();
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                .setMessage(R.string.st_image_delete_message)
+                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MediaRecord record;
+                        if (records != null) {
+                            record = records[imagesPager.getCurrentItem()];
+                        } else {
+                            record = mainRecord;
+                        }
+                        ChatMessage message = application.getEngine().getMessagesEngine().getMessageByMid(record.getMid());
+                        if (message != null) {
+                            application.getEngine().deleteSentMessage(message.getDatabaseId());
+                        }
+                        application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
+                        application.notifyUIUpdate();
 
-        if (records == null || records.length == 1) {
-            Toast.makeText(getActivity(), R.string.st_image_deleted, Toast.LENGTH_SHORT).show();
-            getActivity().finish();
-        } else {
-            ArrayList<MediaRecord> nrecords = new ArrayList<MediaRecord>();
-            for (MediaRecord r : records) {
-                if (r.getMid() != record.getMid()) {
-                    nrecords.add(r);
-                }
-            }
-            records = nrecords.toArray(new MediaRecord[0]);
-            final int index = imagesPager.getCurrentItem();
-            imagesPager.setAdapter(pagerAdapter);
-            /*if (pagerAdapter != null) {
-                pagerAdapter.notifyDataSetChanged();
-            }*/
-            if (index < pagerAdapter.getCount()) {
-                imagesPager.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        imagesPager.setCurrentItem(index);
+                        if (records == null || records.length == 1) {
+                            Toast.makeText(getActivity(), R.string.st_image_deleted, Toast.LENGTH_SHORT).show();
+                            getActivity().finish();
+                        } else {
+                            ArrayList<MediaRecord> nrecords = new ArrayList<MediaRecord>();
+                            for (MediaRecord r : records) {
+                                if (r.getMid() != record.getMid()) {
+                                    nrecords.add(r);
+                                }
+                            }
+                            records = nrecords.toArray(new MediaRecord[0]);
+                            final int index = imagesPager.getCurrentItem();
+                            imagesPager.setAdapter(pagerAdapter);
+
+                            if (index < pagerAdapter.getCount()) {
+                                imagesPager.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        imagesPager.setCurrentItem(index);
+                                    }
+                                });
+                            } else {
+                                imagesPager.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        imagesPager.setCurrentItem(pagerAdapter.getCount() - 1, false);
+                                    }
+                                });
+                            }
+                            bindUi();
+                            Toast.makeText(getActivity(), R.string.st_image_deleted, Toast.LENGTH_SHORT).show();
+                        }
                     }
-                });
-            } else {
-                imagesPager.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        imagesPager.setCurrentItem(pagerAdapter.getCount() - 1, false);
-                    }
-                });
-            }
-            bindUi();
-            Toast.makeText(getActivity(), R.string.st_image_deleted, Toast.LENGTH_SHORT).show();
-        }
+                })
+                .setNegativeButton(R.string.st_no, null)
+                .create();
+
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.show();
     }
 
     private void updateUi() {

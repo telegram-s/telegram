@@ -425,6 +425,7 @@
     <string name="st_image_title">Photo</string>
     <string name="st_image_deleted">Media deleted</string>
     <string name="st_image_incorrect">Error opening media</string>
+    <string name="st_image_delete_message">Are you sure want to delete media?</string>
 
     <string name="st_blocked_title">Blocked contacts</string>
     <string name="st_blocked_hint">Tap and hold on a contact to unblock.</string>
