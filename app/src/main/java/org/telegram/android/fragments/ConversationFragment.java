@@ -3,15 +3,12 @@ package org.telegram.android.fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.*;
 import android.text.*;
@@ -25,9 +22,6 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.internal.app.ActionBarImpl;
-import com.actionbarsherlock.internal.app.ActionBarWrapper;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -75,8 +69,7 @@ import org.telegram.notifications.StateSubscriber;
 import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * Author: Korshakov Stepan
@@ -120,7 +113,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
 
     private View contactsPanel;
 
-    private HashSet<Integer> selected = new HashSet<Integer>();
+    private HashMap<Integer, MessageWireframe> selected = new HashMap<Integer, MessageWireframe>();
 
     private ActionMode actionMode;
 
@@ -545,6 +538,48 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 @Override
                 public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
                     mode.setTitle(I18nUtil.getInstance().getPluralFormatted(R.plurals.lang_selected, selected.size()));
+                    if (peerType != PeerType.PEER_USER_ENCRYPTED) {
+
+                        boolean isAllText = true;
+                        for (MessageWireframe w : selected.values()) {
+                            if (w.message.getRawContentType() != ContentType.MESSAGE_TEXT) {
+                                isAllText = false;
+                            }
+                        }
+
+                        boolean isAllImages = true;
+                        for (MessageWireframe w : selected.values()) {
+                            if (!(w.message.getExtras() instanceof TLLocalPhoto)) {
+                                isAllImages = false;
+                            }
+                        }
+
+                        boolean isAllVideos = true;
+                        for (MessageWireframe w : selected.values()) {
+                            if (!(w.message.getExtras() instanceof TLLocalVideo)) {
+                                isAllVideos = false;
+                            }
+                        }
+
+                        boolean isAllDocuments = true;
+                        for (MessageWireframe w : selected.values()) {
+                            if (!(w.message.getExtras() instanceof TLLocalDocument)) {
+                                isAllDocuments = false;
+                            }
+                        }
+
+                        if (isAllText || isAllImages || isAllVideos || isAllDocuments) {
+                            menu.findItem(R.id.shareMessages).setVisible(true);
+                        } else {
+                            menu.findItem(R.id.shareMessages).setVisible(false);
+                        }
+
+                        if (isAllText) {
+                            menu.findItem(R.id.copyMessages).setVisible(true);
+                        } else {
+                            menu.findItem(R.id.copyMessages).setVisible(false);
+                        }
+                    }
                     return true;
                 }
 
@@ -552,7 +587,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
                     if (item.getItemId() == R.id.forwardMessages) {
                         ArrayList<Integer> forwardMids = new ArrayList<Integer>();
-                        for (Integer i : selected) {
+                        for (Integer i : selected.keySet()) {
                             ChatMessage message = getEngine().getMessageByDbId(i);
                             if (message != null) {
                                 if (message.getState() == MessageState.SENT || message.getState() == MessageState.READED) {
@@ -575,7 +610,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        for (Integer i : selected) {
+                                        for (Integer i : selected.keySet()) {
                                             ChatMessage message = getEngine().getMessageByDbId(i);
                                             if (message != null) {
                                                 if (message.getState() == MessageState.SENT || message.getState() == MessageState.READED) {
@@ -594,6 +629,144 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                 .create();
                         dialog.setCanceledOnTouchOutside(true);
                         dialog.show();
+                        return true;
+                    } else if (item.getItemId() == R.id.copyMessages) {
+                        MessageWireframe[] messages = selected.values().toArray(new MessageWireframe[0]);
+                        Arrays.sort(messages, new Comparator<MessageWireframe>() {
+                            @Override
+                            public int compare(MessageWireframe lhs, MessageWireframe rhs) {
+                                return (int) (lhs.sortingOrder - rhs.sortingOrder);
+                            }
+                        });
+
+                        String messageLog = buildMessageLog(messages);
+                        copyToPastebin(messageLog);
+                        if (selected.size() == 1) {
+                            Toast.makeText(getActivity(), R.string.st_conv_copied, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), getStringSafe(R.string.st_conv_copied_mult)
+                                    .replace("{message}", I18nUtil.getInstance().getPluralFormatted(R.plurals.st_messages, selected.size())), Toast.LENGTH_SHORT).show();
+                        }
+                        mode.finish();
+                        return true;
+                    } else if (item.getItemId() == R.id.shareMessages) {
+                        MessageWireframe[] messages = selected.values().toArray(new MessageWireframe[0]);
+                        Arrays.sort(messages, new Comparator<MessageWireframe>() {
+                            @Override
+                            public int compare(MessageWireframe lhs, MessageWireframe rhs) {
+                                return (int) (lhs.sortingOrder - rhs.sortingOrder);
+                            }
+                        });
+
+                        boolean isAllText = true;
+                        for (MessageWireframe w : messages) {
+                            if (w.message.getRawContentType() != ContentType.MESSAGE_TEXT) {
+                                isAllText = false;
+                            }
+                        }
+
+                        boolean isAllImages = true;
+                        for (MessageWireframe w : messages) {
+                            if (!(w.message.getExtras() instanceof TLLocalPhoto)) {
+                                isAllImages = false;
+                            }
+                        }
+
+                        boolean isAllVideos = true;
+                        for (MessageWireframe w : messages) {
+                            if (!(w.message.getExtras() instanceof TLLocalVideo)) {
+                                isAllVideos = false;
+                            }
+                        }
+
+                        boolean isAllDocuemnts = true;
+                        for (MessageWireframe w : messages) {
+                            if (!(w.message.getExtras() instanceof TLLocalDocument)) {
+                                isAllDocuemnts = false;
+                            }
+                        }
+
+                        if (isAllText) {
+                            String messageLog = buildMessageLog(messages);
+                            startPickerActivity(new Intent(Intent.ACTION_SEND)
+                                    .setType("text/plain")
+                                    .putExtra(Intent.EXTRA_TEXT, messageLog));
+                            mode.finish();
+                        } else if (isAllImages) {
+                            if (messages.length == 1) {
+                                TLLocalPhoto photo = (TLLocalPhoto) messages[0].message.getExtras();
+                                String downloadKey = DownloadManager.getPhotoKey(photo);
+                                if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
+                                    shareInternalFile(downloadKey, "image/jpeg");
+                                } else {
+                                    Toast.makeText(getActivity(), R.string.st_error_media_not_downloaded, Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                ArrayList<String> keys = new ArrayList<String>();
+                                for (MessageWireframe w : selected.values()) {
+                                    TLLocalPhoto photo = (TLLocalPhoto) w.message.getExtras();
+                                    String downloadKey = DownloadManager.getPhotoKey(photo);
+                                    if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
+                                        keys.add(downloadKey);
+                                    } else {
+                                        Toast.makeText(getActivity(), R.string.st_error_media_not_downloaded, Toast.LENGTH_SHORT).show();
+                                        mode.finish();
+                                        return true;
+                                    }
+                                }
+                                shareInternalFiles(keys.toArray(new String[keys.size()]), "image/jpeg");
+                            }
+                        } else if (isAllVideos) {
+                            if (messages.length == 1) {
+                                TLLocalVideo video = (TLLocalVideo) messages[0].message.getExtras();
+                                String downloadKey = DownloadManager.getVideoKey(video);
+                                if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
+                                    shareInternalFile(downloadKey, "video/mp4");
+                                } else {
+                                    Toast.makeText(getActivity(), R.string.st_error_media_not_downloaded, Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                ArrayList<String> keys = new ArrayList<String>();
+                                for (MessageWireframe w : selected.values()) {
+                                    TLLocalVideo video = (TLLocalVideo) w.message.getExtras();
+                                    String downloadKey = DownloadManager.getVideoKey(video);
+                                    if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
+                                        keys.add(downloadKey);
+                                    } else {
+                                        Toast.makeText(getActivity(), R.string.st_error_media_not_downloaded, Toast.LENGTH_SHORT).show();
+                                        mode.finish();
+                                        return true;
+                                    }
+                                }
+                                shareInternalFiles(keys.toArray(new String[keys.size()]), "video/mp4");
+                            }
+                        } else if (isAllDocuemnts) {
+                            if (messages.length == 1) {
+                                TLLocalDocument doc = (TLLocalDocument) messages[0].message.getExtras();
+                                String downloadKey = DownloadManager.getDocumentKey(doc);
+                                if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
+                                    shareInternalFile(downloadKey);
+                                } else {
+                                    Toast.makeText(getActivity(), R.string.st_error_media_not_downloaded, Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                ArrayList<String> keys = new ArrayList<String>();
+                                for (MessageWireframe w : selected.values()) {
+                                    TLLocalDocument doc = (TLLocalDocument) w.message.getExtras();
+                                    String downloadKey = DownloadManager.getDocumentKey(doc);
+                                    if (application.getDownloadManager().getState(downloadKey) == DownloadState.COMPLETED) {
+                                        keys.add(downloadKey);
+                                    } else {
+                                        Toast.makeText(getActivity(), R.string.st_error_media_not_downloaded, Toast.LENGTH_SHORT).show();
+                                        mode.finish();
+                                        return true;
+                                    }
+                                }
+                                shareInternalRawFiles(keys.toArray(new String[keys.size()]));
+                            }
+                        }
+
+                        mode.finish();
                         return true;
                     }
                     return false;
@@ -664,6 +837,30 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             goneView(contactsPanel, !initial);
             contactsPanel.setOnClickListener(null);
         }
+    }
+
+    private String buildMessageLog(MessageWireframe[] messages) {
+        String messageLog = "";
+        if (selected.size() == 1) {
+            messageLog = messages[0].message.getMessage();
+        } else {
+            boolean fromSingleUser = true;
+            int singleUserUid = messages[0].senderUser.getUid();
+            for (MessageWireframe w : messages) {
+                if (w.senderUser.getUid() != singleUserUid) {
+                    fromSingleUser = false;
+                    break;
+                }
+            }
+            for (MessageWireframe w : messages) {
+                if (fromSingleUser) {
+                    messageLog += w.message.getMessage() + "\n";
+                } else {
+                    messageLog += w.senderUser.getDisplayName() + ": " + w.message.getMessage() + "\n";
+                }
+            }
+        }
+        return messageLog;
     }
 
     protected void doSend() {
@@ -1817,6 +2014,20 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
     }
 
+    private boolean onBubbleClick(BaseMsgView view, MessageWireframe wireframe) {
+        if (selected.size() > 0) {
+            if (selected.containsKey(wireframe.message.getDatabaseId())) {
+                selected.remove(wireframe.message.getDatabaseId());
+            } else {
+                selected.put(wireframe.message.getDatabaseId(), wireframe);
+            }
+            ((BaseMsgView) view).setChecked(selected.containsKey(wireframe.message.getDatabaseId()));
+            updateActionMode();
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void onStateChanged(int kind, long id, int state, Object... args) {
         if (kind == Events.KIND_AUDIO_RECORD) {
@@ -2095,18 +2306,18 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             view.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    if (selected.contains(object.message.getDatabaseId())) {
+                    if (selected.containsKey(object.message.getDatabaseId())) {
                         selected.remove(object.message.getDatabaseId());
                     } else {
-                        selected.add(object.message.getDatabaseId());
+                        selected.put(object.message.getDatabaseId(), object);
                     }
-                    ((BaseMsgView) v).setChecked(selected.contains(object.message.getDatabaseId()));
+                    ((BaseMsgView) v).setChecked(selected.containsKey(object.message.getDatabaseId()));
                     updateActionMode();
                     return true;
                 }
             });
 
-            view.setChecked(selected.contains(object.message.getDatabaseId()));
+            view.setChecked(selected.containsKey(object.message.getDatabaseId()));
 
             if (object.message.getRawContentType() == ContentType.MESSAGE_DOCUMENT) {
                 MessageDocumentView documentView = (MessageDocumentView) view;
@@ -2120,15 +2331,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 documentView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (selected.size() > 0) {
-                            if (selected.contains(object.message.getDatabaseId())) {
-                                selected.remove(object.message.getDatabaseId());
-                            } else {
-                                selected.add(object.message.getDatabaseId());
-                            }
-                            ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                            updateActionMode();
-                        } else {
+                        if (!onBubbleClick((BaseMsgView) view, object)) {
                             if (object.message.getExtras() instanceof TLUploadingDocument) {
                                 if (object.message.getState() == MessageState.FAILURE) {
                                     onMessageClick(object);
@@ -2191,15 +2394,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (selected.size() > 0) {
-                            if (selected.contains(object.message.getDatabaseId())) {
-                                selected.remove(object.message.getDatabaseId());
-                            } else {
-                                selected.add(object.message.getDatabaseId());
-                            }
-                            ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                            updateActionMode();
-                        } else {
+                        if (!onBubbleClick((BaseMsgView) view, object)) {
                             onMessageClick(object);
                         }
                     }
@@ -2229,15 +2424,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (selected.size() > 0) {
-                            if (selected.contains(object.message.getDatabaseId())) {
-                                selected.remove(object.message.getDatabaseId());
-                            } else {
-                                selected.add(object.message.getDatabaseId());
-                            }
-                            ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                            updateActionMode();
-                        } else {
+                        if (!onBubbleClick((BaseMsgView) view, object)) {
                             onMessageClick(object);
                         }
                     }
@@ -2271,15 +2458,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.message.getDatabaseId())) {
-                                    selected.remove(object.message.getDatabaseId());
-                                } else {
-                                    selected.add(object.message.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                                updateActionMode();
-                            } else {
+                            if (!onBubbleClick((BaseMsgView) view, object)) {
                                 if (object.message.getState() == MessageState.FAILURE) {
                                     onMessageClick(object);
                                 } else {
@@ -2315,15 +2494,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                if (selected.size() > 0) {
-                                    if (selected.contains(object.message.getDatabaseId())) {
-                                        selected.remove(object.message.getDatabaseId());
-                                    } else {
-                                        selected.add(object.message.getDatabaseId());
-                                    }
-                                    ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                                    updateActionMode();
-                                } else {
+                                if (!onBubbleClick((BaseMsgView) view, object)) {
                                     DownloadState state = application.getDownloadManager().getState(key);
                                     if (state == DownloadState.COMPLETED) {
                                         getRootController().openImage(object.message.getMid(), peerType, peerId);
@@ -2345,15 +2516,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.message.getDatabaseId())) {
-                                    selected.remove(object.message.getDatabaseId());
-                                } else {
-                                    selected.add(object.message.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                                updateActionMode();
-                            } else {
+                            if (!onBubbleClick((BaseMsgView) view, object)) {
                                 DownloadState state = application.getDownloadManager().getState(key);
                                 if (state == DownloadState.COMPLETED) {
                                     Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -2374,15 +2537,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.message.getDatabaseId())) {
-                                    selected.remove(object.message.getDatabaseId());
-                                } else {
-                                    selected.add(object.message.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                                updateActionMode();
-                            } else {
+                            if (!onBubbleClick((BaseMsgView) view, object)) {
                                 TLLocalGeo geo = (TLLocalGeo) object.message.getExtras();
                                 getRootController().viewLocation(geo.getLatitude(), geo.getLongitude(), object.message.getSenderId());
                             }
@@ -2393,15 +2548,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.message.getDatabaseId())) {
-                                    selected.remove(object.message.getDatabaseId());
-                                } else {
-                                    selected.add(object.message.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                                updateActionMode();
-                            } else {
+                            if (!onBubbleClick((BaseMsgView) view, object)) {
                                 DownloadState state = application.getDownloadManager().getState(key);
                                 if (state == DownloadState.COMPLETED) {
                                     if (((TLLocalDocument) object.message.getExtras()).getMimeType().equals("image/gif")) {
@@ -2433,15 +2580,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     messageView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.message.getDatabaseId())) {
-                                    selected.remove(object.message.getDatabaseId());
-                                } else {
-                                    selected.add(object.message.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                                updateActionMode();
-                            } else {
+                            if (!onBubbleClick((BaseMsgView) view, object)) {
                                 AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
                                         .setTitle(R.string.st_conv_unsupported_title)
                                         .setMessage(R.string.st_conv_unsupported_message)
@@ -2466,15 +2605,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     audioView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.message.getDatabaseId())) {
-                                    selected.remove(object.message.getDatabaseId());
-                                } else {
-                                    selected.add(object.message.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                                updateActionMode();
-                            } else {
+                            if (!onBubbleClick((BaseMsgView) view, object)) {
                                 if (object.message.getState() == MessageState.FAILURE) {
                                     onMessageClick(object);
                                 } else {
@@ -2503,15 +2634,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     audioView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.message.getDatabaseId())) {
-                                    selected.remove(object.message.getDatabaseId());
-                                } else {
-                                    selected.add(object.message.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                                updateActionMode();
-                            } else {
+                            if (!onBubbleClick((BaseMsgView) view, object)) {
                                 DownloadState state = application.getDownloadManager().getState(key);
                                 if (state == DownloadState.COMPLETED) {
                                     ((MessageAudioView) view).play();
@@ -2537,15 +2660,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     audioView.setOnBubbleClickListener(secure(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            if (selected.size() > 0) {
-                                if (selected.contains(object.message.getDatabaseId())) {
-                                    selected.remove(object.message.getDatabaseId());
-                                } else {
-                                    selected.add(object.message.getDatabaseId());
-                                }
-                                ((BaseMsgView) view).setChecked(selected.contains(object.message.getDatabaseId()));
-                                updateActionMode();
-                            } else {
+                            if (!onBubbleClick((BaseMsgView) view, object)) {
                                 DownloadState state = application.getDownloadManager().getState(key);
                                 if (state == DownloadState.COMPLETED) {
                                     ((MessageAudioView) view).play();

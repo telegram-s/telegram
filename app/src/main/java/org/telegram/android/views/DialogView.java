@@ -246,7 +246,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             counterTitlePaint.setTypeface(FontController.loadTypeface(context, "regular"));
 
             counterPaint = new Paint();
-            counterPaint.setColor(0xff8fc478);
+            counterPaint.setColor(0xff6ebb4d);
             counterPaint.setAntiAlias(true);
 
             placeholderPaint = new Paint();

@@ -3,6 +3,7 @@ package org.telegram.android.app;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import org.telegram.android.TelegramApplication;
@@ -24,7 +25,7 @@ public class MediaProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] strings, String s, String[] strings2, String s2) {
-        throw new RuntimeException("Operation not supported");
+        return new MatrixCursor(new String[0], 0);
     }
 
     @Override

@@ -80,6 +80,7 @@
     <string name="st_error_many_attempts">Too many attempts. Please try again later.</string>
     <string name="st_error_no_app_for_file">No suitable application for file</string>
     <string name="st_error_download_image">Unable to download image</string>
+    <string name="st_error_media_not_downloaded">Please, download media first</string>
 
     <string name="st_tour_start_messaging">Start Messaging</string>
     <string name="st_tour_page1_title">Telegram</string>
@@ -290,6 +291,7 @@
     <string name="st_conv_action_nothing_to_forward">Nothing to forward</string>
     <string name="st_conv_action_try_again">Try again</string>
     <string name="st_conv_copied">Message text copied to pastebin</string>
+    <string name="st_conv_copied_mult">{message} text copied to pastebin</string>
     <string name="st_conv_cancel_title">Confirmation</string>
     <string name="st_conv_cancel_message">Are you sure want to cancel uploading?</string>
     <string name="st_conv_delete_message">Are you sure want to delete {messages}?</string>

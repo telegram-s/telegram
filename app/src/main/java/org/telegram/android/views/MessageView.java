@@ -325,7 +325,7 @@ public class MessageView extends BaseMsgStateView {
             layout = new StaticLayout(spannable, bodyPaint, desiredWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
 
             int lastWidth = (int) layout.getLineWidth(layout.getLineCount() - 1);
-            if (layout.getLineCount() < 3) {
+            if (layout.getLineCount() < 5 || spannable.length() < 1000) {
                 int layoutTextWidth = lastWidth;
 
                 for (int i = 0; i < layout.getLineCount() - 1; i++) {

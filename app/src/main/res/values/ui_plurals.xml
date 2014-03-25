@@ -6,6 +6,11 @@
         <item quantity="other">{d} messages</item>
     </plurals>
 
+    <plurals name="st_messages_cap">
+        <item quantity="one">Message</item>
+        <item quantity="other">{d} messages</item>
+    </plurals>
+
     <plurals name="st_members">
         <item quantity="one">one member</item>
         <item quantity="other">{d} members</item>

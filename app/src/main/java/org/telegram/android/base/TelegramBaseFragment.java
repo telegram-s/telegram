@@ -10,10 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.*;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -80,7 +77,8 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
                                 runnable.run();
                             }
                         }
-                    });
+                    }
+            );
         }
     };
 
@@ -767,8 +765,76 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         startPickerActivity(intent, fallbackIntent);
     }
 
+    protected void shareUri(Uri uri, String mimeType) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType(mimeType);
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+
+        Intent fallbackIntent = new Intent(Intent.ACTION_SEND);
+        fallbackIntent.setType("*/*");
+        fallbackIntent.putExtra(Intent.EXTRA_STREAM, uri);
+
+        startPickerActivity(intent, fallbackIntent);
+    }
+
+    protected void shareUri(Uri uri) {
+        Intent fallbackIntent = new Intent(Intent.ACTION_SEND);
+        fallbackIntent.setType("*/*");
+        fallbackIntent.putExtra(Intent.EXTRA_STREAM, uri);
+
+        startPickerActivity(fallbackIntent, fallbackIntent);
+    }
+
+    protected void shareUris(Uri[] uri, String mimeType) {
+        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        intent.setType(mimeType);
+        ArrayList<Uri> urisList = new ArrayList<Uri>();
+        Collections.addAll(urisList, uri);
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, urisList);
+
+        Intent fallbackIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        fallbackIntent.setType("*/*");
+        fallbackIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, urisList);
+
+        startPickerActivity(intent, fallbackIntent);
+    }
+
+    protected void shareUris(Uri[] uri) {
+        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        intent.setType("*/*");
+        ArrayList<Uri> urisList = new ArrayList<Uri>();
+        Collections.addAll(urisList, uri);
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, urisList);
+
+        startPickerActivity(intent);
+    }
+
     protected void openInternalFile(String key, String mimeType) {
         openUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key), mimeType);
+    }
+
+    protected void shareInternalFile(String key, String mimeType) {
+        shareUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key), mimeType);
+    }
+
+    protected void shareInternalFile(String key) {
+        openUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key));
+    }
+
+    protected void shareInternalFiles(String[] keys, String mimeType) {
+        Uri[] uris = new Uri[keys.length];
+        for (int i = 0; i < uris.length; i++) {
+            uris[i] = Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + keys[i]);
+        }
+        shareUris(uris, mimeType);
+    }
+
+    protected void shareInternalRawFiles(String[] keys) {
+        Uri[] uris = new Uri[keys.length];
+        for (int i = 0; i < uris.length; i++) {
+            uris[i] = Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + keys[i]);
+        }
+        shareUris(uris);
     }
 
     public String getRealPathFromURI(Uri contentUri) {
