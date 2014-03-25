@@ -762,7 +762,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                         return true;
                                     }
                                 }
-                                shareInternalRawFiles(keys.toArray(new String[keys.size()]));
+                                shareInternalFiles(keys.toArray(new String[keys.size()]));
                             }
                         }
 

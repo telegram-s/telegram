@@ -426,6 +426,9 @@
     <string name="st_image_deleted">Media deleted</string>
     <string name="st_image_incorrect">Error opening media</string>
     <string name="st_image_delete_message">Are you sure want to delete media?</string>
+    <string name="st_image_menu_save">Save to Galley</string>
+    <string name="st_image_menu_view">View in Galley</string>
+    <string name="st_image_menu_assign">Assign to Contact</string>
 
     <string name="st_blocked_title">Blocked contacts</string>
     <string name="st_blocked_hint">Tap and hold on a contact to unblock.</string>

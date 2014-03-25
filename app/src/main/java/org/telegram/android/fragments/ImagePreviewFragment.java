@@ -698,6 +698,14 @@ public class ImagePreviewFragment extends TelegramFragment {
         dialog.show();
     }
 
+    protected MediaRecord getCurrentRecord() {
+        if (records != null) {
+            return records[imagesPager.getCurrentItem()];
+        } else {
+            return mainRecord;
+        }
+    }
+
     private void updateUi() {
         MediaRecord record;
         if (records != null) {
@@ -740,6 +748,9 @@ public class ImagePreviewFragment extends TelegramFragment {
                 key = DownloadManager.getPhotoKey((TLLocalPhoto) record.getPreview());
                 fileName = application.getDownloadManager().getFileName(key);
                 fileNameDest = key + ".jpg";
+            } else {
+                Toast.makeText(getActivity(),R.string.st_error_unsupported,Toast.LENGTH_SHORT).show();
+                return false;
             }
 
             if (key != null && application.getDownloadManager().getState(key) == DownloadState.COMPLETED) {
@@ -753,6 +764,35 @@ public class ImagePreviewFragment extends TelegramFragment {
             } else {
                 Toast.makeText(getActivity(), "Media not downloaded", Toast.LENGTH_SHORT).show();
             }
+            return true;
+        } else if (item.getItemId() == R.id.viewInGallery) {
+            MediaRecord record = getCurrentRecord();
+            String key;
+            String mime;
+            if (record.getPreview() instanceof TLLocalVideo) {
+                key = DownloadManager.getVideoKey((TLLocalVideo) record.getPreview());
+                mime = "video/mp4";
+            } else if (record.getPreview() instanceof TLLocalPhoto) {
+                key = DownloadManager.getPhotoKey((TLLocalPhoto) record.getPreview());
+                mime = "image/jpeg";
+            } else {
+                Toast.makeText(getActivity(),R.string.st_error_unsupported,Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            openInternalFile(key, mime);
+            return true;
+        } else if (item.getItemId() == R.id.assignToContact) {
+            MediaRecord record = getCurrentRecord();
+            String key;
+            String mime;
+            if (record.getPreview() instanceof TLLocalPhoto) {
+                key = DownloadManager.getPhotoKey((TLLocalPhoto) record.getPreview());
+                mime = "image/jpeg";
+            } else {
+                Toast.makeText(getActivity(),R.string.st_error_unsupported,Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            setAsInternalFile(key, mime);
             return true;
         } else {
             return super.onOptionsItemSelected(item);

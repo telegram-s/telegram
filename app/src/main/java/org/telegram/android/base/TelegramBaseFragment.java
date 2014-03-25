@@ -745,6 +745,33 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
 
     }
 
+    protected Intent shareIntent(String key, String mimeType) {
+        Intent fallbackIntent = new Intent(Intent.ACTION_SEND);
+        fallbackIntent.setType(mimeType);
+        fallbackIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key));
+        return fallbackIntent;
+    }
+
+    protected void setAsUri(Uri uri) {
+        Intent intent = new Intent(Intent.ACTION_ATTACH_DATA);
+        intent.setData(uri);
+        try {
+            startPickerActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(application, R.string.st_error_no_app_for_file, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    protected void setAsUri(Uri uri, String mimeType) {
+        Intent intent = new Intent(Intent.ACTION_ATTACH_DATA);
+        intent.setDataAndType(uri, mimeType);
+
+        Intent fallbackIntent = new Intent(Intent.ACTION_ATTACH_DATA);
+        fallbackIntent.setDataAndType(uri, "*/*");
+
+        startPickerActivity(intent, fallbackIntent);
+    }
+
     protected void openUri(Uri uri) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(uri);
@@ -809,13 +836,6 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         startPickerActivity(intent);
     }
 
-    protected Intent shareIntent(String key, String mimeType) {
-        Intent fallbackIntent = new Intent(Intent.ACTION_SEND);
-        fallbackIntent.setType(mimeType);
-        fallbackIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key));
-        return fallbackIntent;
-    }
-
     protected void openInternalFile(String key, String mimeType) {
         openUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key), mimeType);
     }
@@ -836,12 +856,20 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         shareUris(uris, mimeType);
     }
 
-    protected void shareInternalRawFiles(String[] keys) {
+    protected void shareInternalFiles(String[] keys) {
         Uri[] uris = new Uri[keys.length];
         for (int i = 0; i < uris.length; i++) {
             uris[i] = Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + keys[i]);
         }
         shareUris(uris);
+    }
+
+    protected void setAsInternalFile(String key) {
+        setAsUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key));
+    }
+
+    protected void setAsInternalFile(String key, String mimeType) {
+        setAsUri(Uri.parse("content://" + getStringSafe(R.string.app_package) + "/" + key), mimeType);
     }
 
     public String getRealPathFromURI(Uri contentUri) {
