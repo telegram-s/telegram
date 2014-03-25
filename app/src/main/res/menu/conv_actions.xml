@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/forwardMessages"
-          android:title="Forward"
-          android:icon="@drawable/holo_light_ic_forward"/>
     <item android:id="@+id/deleteMessages"
           android:title="Delete"
           android:icon="@drawable/holo_light_ic_delete"/>
+    <item android:id="@+id/forwardMessages"
+          android:title="Forward"
+          android:icon="@drawable/holo_light_ic_forward"/>
+    <item android:id="@+id/copyMessages"
+          android:title="Copy"
+          android:icon="@drawable/holo_light_ic_copy"/>
+    <item android:id="@+id/shareMessages"
+          android:title="Share"
+          android:icon="@drawable/holo_ic_social_share"/>
 </menu>

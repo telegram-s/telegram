@@ -38,6 +38,11 @@
         <item name="subtitleTextStyle">@style/AppTheme.Theme.ActionBar.Subtitle</item>
     </style>
 
+    <style name="AppTheme.Theme.ActionModeStyle" parent="Widget.Sherlock.ActionMode">
+        <!--<item name="actionOverflowButtonStyle">@style/AppModeOverFlow</item>-->
+        <!--<item name="android:actionOverflowButtonStyle">@style/AppModeOverFlow</item>-->
+    </style>
+
     <style name="AppTheme.Theme.ActionBar.TitleTextStyle"
            parent="TextAppearance.Sherlock.Widget.ActionBar.Title">
         <item name="android:textColor">@color/st_bar_title_color</item>
@@ -69,6 +74,11 @@
 
     <style name="AppOverFlow" parent="Widget.Sherlock.ActionButton.Overflow">
         <item name="android:src">@drawable/st_bar_ic_other</item>
+    </style>
+
+    <style name="AppModeOverFlow" parent="Widget.Sherlock.ActionButton.Overflow">
+        <!--<item name="android:src">@drawable/st_bar_ic_other</item>-->
+        <item name="android:src">@drawable/abs__ic_menu_moreoverflow_holo_light</item>
     </style>
 
     <style name="AppSearchTextView" parent="Widget.Sherlock.SearchAutoCompleteTextView">
@@ -149,6 +159,12 @@
         <item name="android:homeAsUpIndicator">@drawable/st_bar_back_photo</item>
         <item name="homeAsUpIndicator">@drawable/st_bar_back_photo</item>
     </style>
+
+    <style name="AppTheme.ActionMode" parent="AppTheme.Theme">
+        <item name="actionOverflowButtonStyle">@style/AppModeOverFlow</item>
+        <item name="android:actionOverflowButtonStyle">@style/AppModeOverFlow</item>
+    </style>
+
 
     <style name="PickDialog.Theme" parent="android:Theme.Dialog">
         <item name="android:layout_width">fill_parent</item>

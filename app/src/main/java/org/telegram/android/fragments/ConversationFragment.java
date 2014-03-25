@@ -3,12 +3,15 @@ package org.telegram.android.fragments;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.*;
 import android.text.*;
@@ -22,6 +25,9 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.internal.app.ActionBarImpl;
+import com.actionbarsherlock.internal.app.ActionBarWrapper;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -529,18 +535,21 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                     mode.getMenuInflater().inflate(R.menu.conv_actions, menu);
                     if (peerType == PeerType.PEER_USER_ENCRYPTED) {
                         menu.findItem(R.id.forwardMessages).setVisible(false);
+                        menu.findItem(R.id.copyMessages).setVisible(false);
+                        menu.findItem(R.id.shareMessages).setVisible(false);
                     }
+
                     return true;
                 }
 
                 @Override
                 public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                    mode.setTitle("Selected: " + selected.size());
+                    mode.setTitle(I18nUtil.getInstance().getPluralFormatted(R.plurals.lang_selected, selected.size()));
                     return true;
                 }
 
                 @Override
-                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
                     if (item.getItemId() == R.id.forwardMessages) {
                         ArrayList<Integer> forwardMids = new ArrayList<Integer>();
                         for (Integer i : selected) {
@@ -560,19 +569,31 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                         }
                         return true;
                     } else if (item.getItemId() == R.id.deleteMessages) {
-                        for (Integer i : selected) {
-                            ChatMessage message = getEngine().getMessageByDbId(i);
-                            if (message != null) {
-                                if (message.getState() == MessageState.SENT || message.getState() == MessageState.READED) {
-                                    getEngine().deleteSentMessage(i);
-                                } else {
-                                    getEngine().deleteUnsentMessage(i);
-                                }
-                            }
-                        }
-                        application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
-                        application.notifyUIUpdate();
-                        mode.finish();
+                        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                                .setMessage(getStringSafe(R.string.st_conv_delete_message).replace("{messages}",
+                                        I18nUtil.getInstance().getPluralFormatted(R.plurals.st_messages, selected.size())))
+                                .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        for (Integer i : selected) {
+                                            ChatMessage message = getEngine().getMessageByDbId(i);
+                                            if (message != null) {
+                                                if (message.getState() == MessageState.SENT || message.getState() == MessageState.READED) {
+                                                    getEngine().deleteSentMessage(i);
+                                                } else {
+                                                    getEngine().deleteUnsentMessage(i);
+                                                }
+                                            }
+                                        }
+                                        application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
+                                        application.notifyUIUpdate();
+                                        mode.finish();
+                                    }
+                                })
+                                .setNegativeButton(R.string.st_no, null)
+                                .create();
+                        dialog.setCanceledOnTouchOutside(true);
+                        dialog.show();
                         return true;
                     }
                     return false;
@@ -655,7 +676,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
         application.getMessageSender().postTextMessage(peerType, peerId, message);
         application.getSyncKernel().getBackgroundSync().resetTypingDelay();
-        onSourceDataChanged();
+        dialogAdapter.notifyDataSetChanged();
+        listView.setSelectionFromTop(workingSet.size(), -10000);
         editText.setText("");
         application.getTextSaver().clearText(peerType, peerId);
     }
@@ -702,7 +724,9 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     protected void onMessageClick(final MessageWireframe message) {
         if (message.message.getContentType() == ContentType.MESSAGE_CONTACT) {
             final int uid = ((TLLocalContact) message.message.getExtras()).getUserId();
-            getRootController().openUser(uid);
+            if (uid > 0) {
+                getRootController().openDialog(PeerType.PEER_USER, uid);
+            }
 //            if (application.getEngine().getUidContact(uid) != null || uid == application.getCurrentUid()) {
 //                getRootController().openUser(uid);
 //            } else {
@@ -770,8 +794,20 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             actions.add(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().deleteUnsentMessage(message.message.getDatabaseId());
-                    application.notifyUIUpdate();
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                            .setMessage(getStringSafe(R.string.st_conv_delete_message).replace("{messages}",
+                                    I18nUtil.getInstance().getPluralFormatted(R.plurals.st_messages, 1)))
+                            .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    application.getEngine().deleteUnsentMessage(message.message.getDatabaseId());
+                                    application.notifyUIUpdate();
+                                }
+                            })
+                            .setNegativeButton(R.string.st_no, null)
+                            .create();
+                    dialog.setCanceledOnTouchOutside(true);
+                    dialog.show();
                 }
             });
         }
@@ -781,9 +817,21 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             actions.add(new Runnable() {
                 @Override
                 public void run() {
-                    application.getEngine().deleteSentMessage(message.message.getDatabaseId());
-                    application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
-                    application.notifyUIUpdate();
+                    AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                            .setMessage(getStringSafe(R.string.st_conv_delete_message).replace("{messages}",
+                                    I18nUtil.getInstance().getPluralFormatted(R.plurals.st_messages, 1)))
+                            .setPositiveButton(R.string.st_yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    application.getEngine().deleteSentMessage(message.message.getDatabaseId());
+                                    application.getSyncKernel().getBackgroundSync().resetDeletionsSync();
+                                    application.notifyUIUpdate();
+                                }
+                            })
+                            .setNegativeButton(R.string.st_no, null)
+                            .create();
+                    dialog.setCanceledOnTouchOutside(true);
+                    dialog.show();
                 }
             });
         }
@@ -869,7 +917,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                             actions.get(i).run();
                         }
                     }
-                })).create();
+                })
+        ).create();
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
     }
@@ -1280,7 +1329,8 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 } else {
                     waitMessageView.setText(html(
                             getStringSafe(R.string.st_conv_enc_waiting)
-                                    .replace("{name}", application.getEngine().getUser(chat.getUserId()).getFirstName())));
+                                    .replace("{name}", application.getEngine().getUser(chat.getUserId()).getFirstName())
+                    ));
                 }
                 showOverlayPanel();
                 deleteButton.setVisibility(View.GONE);
@@ -1382,14 +1432,18 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                                     highlightSubtitleText(
                                             getQuantityString(R.plurals.st_members,
                                                     group.getUsersCount())
-                                                    .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount()))));
+                                                    .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount()))
+                                    )
+                            );
                         }
                     } else {
                         getSherlockActivity().getSupportActionBar().setSubtitle(
                                 highlightSubtitleText(
                                         getQuantityString(R.plurals.st_members,
                                                 group.getUsersCount())
-                                                .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount()))));
+                                                .replace("{d}", "" + I18nUtil.getInstance().correctFormatNumber(group.getUsersCount()))
+                                )
+                        );
                     }
                 } else {
                     String[] names = new String[typing.length];

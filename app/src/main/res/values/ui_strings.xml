@@ -292,6 +292,7 @@
     <string name="st_conv_copied">Message text copied to pastebin</string>
     <string name="st_conv_cancel_title">Confirmation</string>
     <string name="st_conv_cancel_message">Are you sure want to cancel uploading?</string>
+    <string name="st_conv_delete_message">Are you sure want to delete {messages}?</string>
     <string name="st_conv_menu_photo">Photo</string>
     <string name="st_conv_menu_gallery">Gallery</string>
     <string name="st_conv_menu_video">Video</string>

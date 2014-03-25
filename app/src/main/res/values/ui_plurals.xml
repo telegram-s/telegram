@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <plurals name="st_messages">
+        <item quantity="one">message</item>
+        <item quantity="other">{d} messages</item>
+    </plurals>
+
     <plurals name="st_members">
         <item quantity="one">one member</item>
         <item quantity="other">{d} members</item>

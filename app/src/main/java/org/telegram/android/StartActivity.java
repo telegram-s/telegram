@@ -13,6 +13,9 @@ import android.util.TypedValue;
 import android.view.*;
 import android.widget.FrameLayout;
 import android.widget.Toast;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.internal.app.ActionBarImpl;
+import com.actionbarsherlock.internal.app.ActionBarWrapper;
 import com.actionbarsherlock.view.MenuItem;
 import com.crashlytics.android.Crashlytics;
 import com.google.analytics.tracking.android.EasyTracker;
@@ -26,6 +29,7 @@ import org.telegram.android.fragments.interfaces.RootController;
 import org.telegram.android.log.Logger;
 import org.telegram.android.screens.FragmentScreenController;
 import org.telegram.android.screens.RootControllerHolder;
+import org.telegram.android.util.ReflectionUtiles;
 import org.telegram.integration.TestIntegration;
 
 import java.util.ArrayList;
@@ -76,6 +80,7 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
         getSupportActionBar().setDisplayUseLogoEnabled(true);
 
         setWindowContentOverlayCompat();
+        applyActionModeStyle();
 
         setContentView(R.layout.activity_main);
 
@@ -122,6 +127,26 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                     }
                 }
             }
+        }
+    }
+
+    private void applyActionModeStyle() {
+        ActionBar actionBar = getSupportActionBar();
+        try {
+            if (actionBar instanceof ActionBarWrapper) {
+                ActionBarWrapper wrapper = (ActionBarWrapper) actionBar;
+                android.app.ActionBar bar = ReflectionUtiles.reflectField(wrapper, "mActionBar", android.app.ActionBar.class);
+                Object contextView = ReflectionUtiles.reflectField(bar, "mContextView");
+                Context context = ReflectionUtiles.reflectField(contextView, "mContext", Context.class);
+                ReflectionUtiles.writeValue(contextView, "mContext", new ContextThemeWrapper(context, R.style.AppTheme_ActionMode));
+            } else if (actionBar instanceof ActionBarImpl) {
+                ActionBarImpl impl = (ActionBarImpl) actionBar;
+                Object contextView = ReflectionUtiles.reflectField(impl, "mContextView");
+                Context context = ReflectionUtiles.reflectField(contextView, "mContext", Context.class);
+                ReflectionUtiles.writeValue(contextView, "mContext", new ContextThemeWrapper(context, R.style.AppTheme_ActionMode));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -209,7 +234,8 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                             getString(R.string.whats_web_search_0),
                             getString(R.string.whats_web_search_1),
                             getString(R.string.whats_web_search_2),
-                    }, null));
+                    }, null
+            ));
         }
 
         if (prevVersionCode < 1040) {
@@ -218,7 +244,8 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                             getString(R.string.whats_new_spain_0),
                             getString(R.string.whats_new_spain_1),
                     },
-                    getString(R.string.whats_new_spain_hint)));
+                    getString(R.string.whats_new_spain_hint)
+            ));
         }
 
         if (prevVersionCode < 997) {
@@ -231,7 +258,8 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                             getString(R.string.whats_new_gif_4),
                             getString(R.string.whats_new_gif_5),
                     },
-                    getString(R.string.whats_new_gif_hint)));
+                    getString(R.string.whats_new_gif_hint)
+            ));
         }
 
         if (prevVersionCode < 732) {
@@ -240,7 +268,8 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                             getString(R.string.whats_contacts_0),
                             getString(R.string.whats_contacts_1),
                             getString(R.string.whats_contacts_2),
-                    }, null));
+                    }, null
+            ));
         }
 
         if (prevVersionCode < 672) {
@@ -250,7 +279,8 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                             getString(R.string.whats_new_design_1),
                             getString(R.string.whats_new_design_2),
                             getString(R.string.whats_new_design_3),
-                    }, null));
+                    }, null
+            ));
         }
         if (prevVersionCode < 517) {
             definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_new_arabic_title),
@@ -259,7 +289,8 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                             getString(R.string.whats_new_arabic_1),
                             getString(R.string.whats_new_arabic_2),
                     },
-                    getString(R.string.whats_new_arabic_hint)));
+                    getString(R.string.whats_new_arabic_hint)
+            ));
 
             definitions.add(new WhatsNewFragment.Definition(getString(R.string.whats_new_secret_title),
                     new String[]{
@@ -268,7 +299,8 @@ public class StartActivity extends SmileyActivity implements FragmentResultContr
                             getString(R.string.whats_new_secret_2),
                             getString(R.string.whats_new_secret_3)
                     },
-                    getString(R.string.whats_new_secret_hint)));
+                    getString(R.string.whats_new_secret_hint)
+            ));
         }
 
         return definitions.toArray(new WhatsNewFragment.Definition[0]);
