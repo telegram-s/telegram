@@ -273,14 +273,26 @@ public abstract class ViewSource<T, V> {
         invalidated = true;
     }
 
-    public synchronized void updateItem(V itm) {
+    public synchronized void updateOrCreateItem(V itm) {
         T dest = convert(itm);
-        // Logger.d(TAG, "updateItem: " + itm);
+        // Logger.d(TAG, "updateOrCreateItem: " + itm);
         long key = getItemKey(dest);
         // Logger.d(TAG, "item key: " + key);
 //        if (!items.containsKey(key)) {
 //            return;
 //        }
+        items.put(key, dest);
+        invalidated = true;
+    }
+
+    public synchronized void update(V itm) {
+        T dest = convert(itm);
+        // Logger.d(TAG, "updateOrCreateItem: " + itm);
+        long key = getItemKey(dest);
+        // Logger.d(TAG, "item key: " + key);
+        if (!items.containsKey(key)) {
+            return;
+        }
         items.put(key, dest);
         invalidated = true;
     }

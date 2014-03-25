@@ -49,7 +49,7 @@ public class DialogsEngine {
         database.updateOrCreateDialog(description);
         if (application.getKernelsLoader().isLoaded()) {
             if (application.getDialogSource() != null) {
-                application.getDialogSource().getViewSource().updateItem(description);
+                application.getDialogSource().getViewSource().updateOrCreateItem(description);
             }
         }
     }
@@ -58,7 +58,7 @@ public class DialogsEngine {
         database.updateOrCreateDialog(description);
         if (application.getKernelsLoader().isLoaded()) {
             if (application.getDialogSource() != null) {
-                application.getDialogSource().getViewSource().updateItem(description);
+                application.getDialogSource().getViewSource().updateOrCreateItem(description);
             }
         }
     }

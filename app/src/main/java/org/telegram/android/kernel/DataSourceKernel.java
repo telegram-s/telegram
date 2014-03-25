@@ -1,7 +1,6 @@
 package org.telegram.android.kernel;
 
 import org.telegram.android.core.*;
-import org.telegram.android.core.engines.SyncStateEngine;
 import org.telegram.android.core.model.ChatMessage;
 import org.telegram.android.core.model.MediaRecord;
 import org.telegram.android.core.wireframes.MessageWireframe;
@@ -210,7 +209,7 @@ public class DataSourceKernel {
         ViewSource<MessageWireframe, ChatMessage> res = getMessagesViewSource(message.getPeerType(), message.getPeerId());
         if (res == null)
             return;
-        res.updateItem(message);
+        res.updateOrCreateItem(message);
     }
 
     public synchronized void notifyUIUpdate() {

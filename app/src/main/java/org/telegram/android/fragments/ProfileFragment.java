@@ -439,7 +439,8 @@ public class ProfileFragment extends TelegramFragment implements UserSourceListe
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 openUri(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, ids.get(i) + ""));
                             }
-                        })).create();
+                        })
+                ).create();
                 alertDialog.setCanceledOnTouchOutside(true);
                 alertDialog.show();
             }

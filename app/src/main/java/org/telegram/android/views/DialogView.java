@@ -77,6 +77,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
     private Drawable stateHalfCheck;
     private Drawable stateFailure;
     private Drawable secureIcon;
+    private Drawable muteIcon;
 
     // Help data
     private int currentUserUid;
@@ -286,6 +287,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         stateHalfCheck = getResources().getDrawable(R.drawable.st_dialogs_halfcheck);
         stateFailure = getResources().getDrawable(R.drawable.st_dialogs_warning);
         secureIcon = getResources().getDrawable(R.drawable.st_dialogs_lock);
+        muteIcon = getResources().getDrawable(R.drawable.st_dialogs_mute);
 
         userPlaceHolder = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_user_placeholder_dialog)).getBitmap();
         groupPlaceHolder = ((BitmapDrawable) getResources().getDrawable(R.drawable.st_group_placeholder)).getBitmap();
@@ -329,6 +331,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             releaseAvatar();
             loader.cancelRequest(this);
         }
+
 
         if (getMeasuredHeight() != 0 || getMeasuredWidth() != 0) {
             buildLayout();
@@ -516,6 +519,11 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
             canvas.drawText(layout.bodyString, layout.layoutMainLeft, layout.layoutMainTop, bodyPaint);
         }
 
+        if (layout.showMuteIcon) {
+            bound(muteIcon, layout.layoutMuteLeft, layout.layoutMuteTop);
+            muteIcon.draw(canvas);
+        }
+
         if (avatarHolder != null) {
             long time = SystemClock.uptimeMillis() - avatarAppearTime;
             if (time > AVATAR_FADE_TIME || !AVATAR_FADE) {
@@ -649,6 +657,9 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         public int layoutMarkTextTop;
         public int layoutMarkRadius;
 
+        public int layoutMuteLeft;
+        public int layoutMuteTop;
+
         public RectF layoutMarkRect = new RectF();
 
         public RectF avatarRect = new RectF();
@@ -674,10 +685,13 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
         public float placeholderTop;
         public boolean usePlaceholder;
 
+        public boolean showMuteIcon;
+
         public void build(DialogWireframe description, int w, int h, TelegramApplication application) {
             layoutH = h;
             layoutW = w;
 
+            showMuteIcon = false;
             if (description.getPeerType() == PeerType.PEER_USER) {
                 if (description.getPeerId() == 333000) {
                     isHighlighted = false;
@@ -687,14 +701,17 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 }
                 isGroup = false;
                 isEncrypted = false;
+                showMuteIcon = !application.getNotificationSettings().isEnabledForUser(description.getPeerId());
             } else if (description.getPeerType() == PeerType.PEER_CHAT) {
                 isHighlighted = false;
                 isGroup = true;
                 isEncrypted = false;
+                showMuteIcon = !application.getNotificationSettings().isEnabledForChat(description.getPeerId());
             } else if (description.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
                 isHighlighted = false;
                 isGroup = false;
                 isEncrypted = true;
+                showMuteIcon = !application.getNotificationSettings().isEnabledForUser(description.getDialogUser().getUid());
             }
 
             isBodyHighlighted = description.getContentType() != ContentType.MESSAGE_TEXT;
@@ -718,6 +735,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 layoutTimeTop = px(34);
 
                 layoutMarkTop = px(44);
+                layoutMuteTop = layoutMarkTop;
                 layoutMarkBottom = layoutMarkTop + px(22);
                 layoutMarkTextTop = layoutMarkTop + px(18);
             } else {
@@ -730,6 +748,7 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                 layoutTimeTop = px(30);
 
                 layoutMarkTop = px(38);
+                layoutMuteTop = layoutMarkTop;
                 layoutMarkBottom = layoutMarkTop + px(22);
                 layoutMarkTextTop = layoutMarkTop + px(18);
             }
@@ -842,10 +861,19 @@ public class DialogView extends BaseView implements TypingStates.TypingListener,
                     layoutMainLeft += layoutMarkWidth + px(8);
                     layoutMainWidth -= layoutMarkWidth + px(8);
                 }
+                if (showMuteIcon) {
+                    layoutMainLeft += px(26);
+                    layoutMainWidth -= px(26);
+                    layoutMuteLeft = layoutMarkLeft + layoutMarkWidth + px(2);
+                }
             } else {
                 layoutMainLeft = layoutBodyPadding;
                 if (layoutMarkWidth != 0) {
                     layoutMainWidth -= layoutMarkWidth + px(8);
+                }
+                if (showMuteIcon) {
+                    layoutMainWidth -= px(26);
+                    layoutMuteLeft = layoutMainLeft + layoutMainWidth + px(2);
                 }
             }
 
