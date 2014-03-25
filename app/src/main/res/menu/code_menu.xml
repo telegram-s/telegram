@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/st_secret_action_share"
+          android:icon="@drawable/st_bar_ic_share_white"
+          android:id="@+id/shareCode"/>
+</menu>

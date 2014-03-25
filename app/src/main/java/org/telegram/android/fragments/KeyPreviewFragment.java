@@ -1,6 +1,8 @@
 package org.telegram.android.fragments;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
@@ -8,9 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+import com.actionbarsherlock.view.MenuItem;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
 import org.telegram.android.core.model.User;
+import org.telegram.android.media.Optimizer;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,9 +39,7 @@ public class KeyPreviewFragment extends TelegramFragment {
 
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = wrap(inflater).inflate(R.layout.key_fragment, container, false);
+    private Bitmap createBitmap() {
         Bitmap bitmap = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888);
         int[] colors = new int[]{
                 0xffffffff,
@@ -44,6 +50,14 @@ public class KeyPreviewFragment extends TelegramFragment {
             int index = (hash[i / 4] >> (2 * (i % 4))) & 0x3;
             bitmap.setPixel(i % 8, i / 8, colors[index]);
         }
+        return bitmap;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = wrap(inflater).inflate(R.layout.key_fragment, container, false);
+
+        Bitmap bitmap = createBitmap();
 
         int width = getResources().getDisplayMetrics().widthPixels - getPx(64);
 
@@ -63,9 +77,27 @@ public class KeyPreviewFragment extends TelegramFragment {
     @Override
     public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.code_menu, menu);
         getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(R.string.st_secret_key_title));
         getSherlockActivity().getSupportActionBar().setSubtitle(null);
         getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSherlockActivity().getSupportActionBar().setDisplayShowHomeEnabled(false);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.shareCode) {
+            try {
+                Bitmap forSharing = Bitmap.createScaledBitmap(createBitmap(), 128, 128, false);
+                String fileName = getTempExternalFile("key.jpg");
+                Optimizer.save(forSharing, fileName);
+                startPickerActivity(new Intent(Intent.ACTION_SEND)
+                        .setType("image/jpeg")
+                        .putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(fileName))));
+            } catch (Exception e) {
+                Toast.makeText(getActivity(), R.string.st_error_unknown, Toast.LENGTH_SHORT).show();
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

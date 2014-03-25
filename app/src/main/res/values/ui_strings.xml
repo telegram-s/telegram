@@ -585,6 +585,7 @@
     </string>
     <string name="st_secret_key_info2">If this image looks same on {name}\'s phone, your chat is 200% secure."
     </string>
+    <string name="st_secret_action_share">Share code</string>
 
     <string name="st_bubble_media_cancelled">cancelled</string>
     <string name="st_bubble_media_try_again">retry?</string>
