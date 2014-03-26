@@ -7,15 +7,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.*;
 import android.text.*;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.text.style.StyleSpan;
-import android.text.style.URLSpan;
+import android.text.style.*;
 import android.text.util.Linkify;
 import android.view.*;
 import android.view.animation.AccelerateInterpolator;
@@ -28,6 +29,7 @@ import com.actionbarsherlock.internal.app.ActionBarWrapper;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.coremedia.iso.boxes.TrackReferenceTypeBox;
 import com.nineoldandroids.animation.Animator;
 import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
@@ -140,7 +142,6 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     private int SLIDE_LIMIT;
 
     private String audioFile;
-    private Handler handler = new Handler(Looper.getMainLooper());
 
     public ConversationFragment(int peerType, int peerId) {
         this.peerId = peerId;
@@ -172,6 +173,13 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         getSherlockActivity().invalidateOptionsMenu();
+        updateHeader();
+        secureCallback(new Runnable() {
+            @Override
+            public void run() {
+                updateHeader();
+            }
+        });
     }
 
     private void checkState() {
@@ -1210,6 +1218,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         });
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -1546,7 +1555,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         }
     }
 
-    private void enableTyping() {
+    private TextView findSubtitleTextView() {
         ActionBar actionBar = getSherlockActivity().getSupportActionBar();
         if (actionBar instanceof ActionBarWrapper) {
             try {
@@ -1554,28 +1563,33 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 Object mContainerView = ReflectionUtiles.reflectField(nActionBar, "mContainerView");
                 View[] childs = ReflectionUtiles.reflectField(mContainerView, "mChildren", View[].class);
                 View actionBarView = childs[0];
-                TextView subTitleView = ReflectionUtiles.reflectField(actionBarView, "mSubtitleView", TextView.class);
-                subTitleView.setCompoundDrawablesWithIntrinsicBounds(new TypingDrawable(), null, null, null);
+                return ReflectionUtiles.reflectField(actionBarView, "mSubtitleView", TextView.class);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        return null;
+    }
+
+    private void enableTyping() {
+
     }
 
     private void disableTyping() {
-        ActionBar actionBar = getSherlockActivity().getSupportActionBar();
-        if (actionBar instanceof ActionBarWrapper) {
-            try {
-                android.app.ActionBar nActionBar = ReflectionUtiles.reflectField(actionBar, "mActionBar", android.app.ActionBar.class);
-                Object mContainerView = ReflectionUtiles.reflectField(nActionBar, "mContainerView");
-                View[] childs = ReflectionUtiles.reflectField(mContainerView, "mChildren", View[].class);
-                View actionBarView = childs[0];
-                TextView subTitleView = ReflectionUtiles.reflectField(actionBarView, "mSubtitleView", TextView.class);
-                subTitleView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+//        ActionBar actionBar = getSherlockActivity().getSupportActionBar();
+//        if (actionBar instanceof ActionBarWrapper) {
+//            try {
+//                android.app.ActionBar nActionBar = ReflectionUtiles.reflectField(actionBar, "mActionBar", android.app.ActionBar.class);
+//                Object mContainerView = ReflectionUtiles.reflectField(nActionBar, "mContainerView");
+//                View[] childs = ReflectionUtiles.reflectField(mContainerView, "mChildren", View[].class);
+//                View actionBarView = childs[0];
+//                TextView subTitleView = ReflectionUtiles.reflectField(actionBarView, "mSubtitleView", TextView.class);
+//                subTitleView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        enableTyping();
     }
 
     private void setSubtitleTyping(int typing) {
@@ -1583,7 +1597,50 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
     }
 
     private void setSubtitleTyping(String typing) {
-        getSherlockActivity().getSupportActionBar().setSubtitle(highlightSubtitle2Text(typing));
+        final TextView subtitle = findSubtitleTextView();
+
+        SpannableString string = new SpannableString("_" + typing);
+
+        subtitle.getTextSize();
+
+        string.setSpan(new ReplacementSpan() {
+            private TypingDrawable drawable = new TypingDrawable();
+
+            @Override
+            public int getSize(Paint paint, CharSequence text, int start, int end, Paint.FontMetricsInt fm) {
+                if (fm != null) {
+                    drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), -fm.ascent);
+                }
+                if (subtitle != null) {
+                    drawable.setCallback(new Drawable.Callback() {
+
+                        @Override
+                        public void invalidateDrawable(Drawable who) {
+                            subtitle.invalidate();
+                        }
+
+                        @Override
+                        public void scheduleDrawable(Drawable who, Runnable what, long when) {
+
+                        }
+
+                        @Override
+                        public void unscheduleDrawable(Drawable who, Runnable what) {
+
+                        }
+                    });
+                }
+                return drawable.getIntrinsicWidth();
+            }
+
+            @Override
+            public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
+                drawable.setBounds((int) x, y - getPx(8), (int) (x + drawable.getIntrinsicWidth()), y);
+                drawable.draw(canvas);
+            }
+        }, 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        getSherlockActivity().getSupportActionBar().setSubtitle(string);
         enableTyping();
     }
 
@@ -1627,18 +1684,19 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(
                         application.getEmojiProcessor().processEmojiCutMutable(user.getDisplayName(), 0)));
 
-                if (application.getTypingStates().isUserTyping(peerId)) {
-                    setSubtitleTyping(R.string.lang_common_typing);
-                } else {
-                    int status = getUserState(user.getStatus());
-                    if (status < 0) {
-                        setSubtitleNormal(R.string.st_offline);
-                    } else if (status == 0) {
-                        setSubtitleBright(R.string.st_online);
-                    } else {
-                        setSubtitleNormal(formatLastSeen(status));
-                    }
-                }
+//                if (application.getTypingStates().isUserTyping(peerId)) {
+//                    setSubtitleTyping(R.string.lang_common_typing);
+//                } else {
+//                    int status = getUserState(user.getStatus());
+//                    if (status < 0) {
+//                        setSubtitleNormal(R.string.st_offline);
+//                    } else if (status == 0) {
+//                        setSubtitleBright(R.string.st_online);
+//                    } else {
+//                        setSubtitleNormal(formatLastSeen(status));
+//                    }
+//                }
+                setSubtitleTyping(R.string.lang_common_typing);
             }
         } else if (peerType == PeerType.PEER_USER_ENCRYPTED) {
             final EncryptedChat chat = application.getEngine().getEncryptedChat(peerId);

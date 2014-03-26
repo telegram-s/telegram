@@ -1,9 +1,9 @@
 package org.telegram.android.ui;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
 /**
@@ -15,16 +15,17 @@ public class TypingDrawable extends Drawable {
     private static final int ANIMATION_DELTA = 800;
     private static final int ANIMATION_OFFSET = DURATION / 3;
 
-    private static final int OFFSET = 0;
-    private static final int RADIUS = 4;
+    private static final int OFFSET = 1;
+    private static final int RADIUS = 3;
     private static final int DIAMETER = RADIUS * 2;
-    private static final int HEIGHT = 16;
-    private static final int PADDING = 4;
-    private static final int TOP = 5;
+    private static final int PADDING = 3;
 
     private Paint paint;
 
+    private int height;
+
     public TypingDrawable() {
+        height = (int) (UiMeasure.DENSITY * DIAMETER);
         paint = new Paint();
         paint.setColor(0xffdae1ea);
         paint.setStyle(Paint.Style.FILL);
@@ -38,7 +39,7 @@ public class TypingDrawable extends Drawable {
 
     @Override
     public int getIntrinsicHeight() {
-        return (int) (UiMeasure.DENSITY * HEIGHT);
+        return height;
     }
 
     private float process(int offset) {
@@ -52,12 +53,14 @@ public class TypingDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        float size1 = 0.5f + (0.5f * process(ANIMATION_OFFSET * 2));
-        float size2 = 0.5f + (0.5f * process(ANIMATION_OFFSET));
-        float size3 = 0.5f + (0.5f * process(0));
-        canvas.drawCircle(UiMeasure.DENSITY * RADIUS, UiMeasure.DENSITY * (TOP + RADIUS), size1 * UiMeasure.DENSITY * RADIUS, paint);
-        canvas.drawCircle(UiMeasure.DENSITY * (RADIUS + DIAMETER + OFFSET), UiMeasure.DENSITY * (TOP + RADIUS), size2 * UiMeasure.DENSITY * RADIUS, paint);
-        canvas.drawCircle(UiMeasure.DENSITY * (RADIUS + (DIAMETER + OFFSET) * 2), UiMeasure.DENSITY * (TOP + RADIUS), size3 * UiMeasure.DENSITY * RADIUS, paint);
+        float size1 = 0.7f + (0.3f * process(ANIMATION_OFFSET * 2));
+        float size2 = 0.7f + (0.3f * process(ANIMATION_OFFSET));
+        float size3 = 0.7f + (0.3f * process(0));
+        Rect bounds = getBounds();
+        int top = (int) ((getBounds().height() - UiMeasure.DENSITY * DIAMETER) / 2) + bounds.top;
+        canvas.drawCircle(UiMeasure.DENSITY * RADIUS, UiMeasure.DENSITY * RADIUS + top, size1 * UiMeasure.DENSITY * RADIUS, paint);
+        canvas.drawCircle(UiMeasure.DENSITY * (RADIUS + DIAMETER + OFFSET), UiMeasure.DENSITY * RADIUS + top, size2 * UiMeasure.DENSITY * RADIUS, paint);
+        canvas.drawCircle(UiMeasure.DENSITY * (RADIUS + (DIAMETER + OFFSET) * 2), UiMeasure.DENSITY * RADIUS + top, size3 * UiMeasure.DENSITY * RADIUS, paint);
         invalidateSelf();
     }
 
