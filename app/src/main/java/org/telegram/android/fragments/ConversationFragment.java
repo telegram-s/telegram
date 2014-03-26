@@ -1684,19 +1684,18 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 getSherlockActivity().getSupportActionBar().setTitle(highlightTitleText(
                         application.getEmojiProcessor().processEmojiCutMutable(user.getDisplayName(), 0)));
 
-//                if (application.getTypingStates().isUserTyping(peerId)) {
-//                    setSubtitleTyping(R.string.lang_common_typing);
-//                } else {
-//                    int status = getUserState(user.getStatus());
-//                    if (status < 0) {
-//                        setSubtitleNormal(R.string.st_offline);
-//                    } else if (status == 0) {
-//                        setSubtitleBright(R.string.st_online);
-//                    } else {
-//                        setSubtitleNormal(formatLastSeen(status));
-//                    }
-//                }
-                setSubtitleTyping(R.string.lang_common_typing);
+                if (application.getTypingStates().isUserTyping(peerId)) {
+                    setSubtitleTyping(R.string.lang_common_typing);
+                } else {
+                    int status = getUserState(user.getStatus());
+                    if (status < 0) {
+                        setSubtitleNormal(R.string.st_offline);
+                    } else if (status == 0) {
+                        setSubtitleBright(R.string.st_online);
+                    } else {
+                        setSubtitleNormal(formatLastSeen(status));
+                    }
+                }
             }
         } else if (peerType == PeerType.PEER_USER_ENCRYPTED) {
             final EncryptedChat chat = application.getEngine().getEncryptedChat(peerId);
