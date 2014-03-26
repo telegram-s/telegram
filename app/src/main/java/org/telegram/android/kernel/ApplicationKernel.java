@@ -237,6 +237,7 @@ public class ApplicationKernel {
     public void runKernels() {
         long kernelsStart = SystemClock.uptimeMillis();
         long start = SystemClock.uptimeMillis();
+        encryptedKernel.runKernel();
         actorKernel.runKernel();
         storageKernel.runKernel();
         Logger.d(TAG, "Storate run in " + (SystemClock.uptimeMillis() - start) + " ms");

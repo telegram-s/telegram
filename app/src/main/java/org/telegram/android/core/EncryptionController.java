@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.SystemClock;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.core.engines.ModelEngine;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.service.TLLocalActionEncryptedTtl;
@@ -17,6 +18,7 @@ import org.telegram.api.requests.TLRequestMessagesGetDhConfig;
 import org.telegram.api.requests.TLRequestMessagesRequestEncryption;
 import org.telegram.mtproto.secure.CryptoUtils;
 import org.telegram.mtproto.secure.Entropy;
+import org.telegram.notifications.*;
 import org.telegram.tl.StreamingUtils;
 import org.telegram.tl.TLBytes;
 import org.telegram.tl.TLObject;
@@ -43,9 +45,17 @@ public class EncryptionController {
             };
 
     private TelegramApplication application;
+    private ModelEngine engine;
+    private org.telegram.android.core.Notifications notifications;
 
     public EncryptionController(TelegramApplication application) {
         this.application = application;
+
+    }
+
+    public void run() {
+        this.engine = application.getEngine();
+        this.notifications = application.getNotifications();
     }
 
     public void onUpdateEncryption(TLAbsEncryptedChat chat) {
@@ -147,9 +157,14 @@ public class EncryptionController {
                     TLDecryptedMessage decryptedMessage = (TLDecryptedMessage) object;
                     if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaGeoPoint) {
                         TLDecryptedMessageMediaGeoPoint geoPoint = (TLDecryptedMessageMediaGeoPoint) decryptedMessage.getMedia();
-                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), new TLLocalGeo(geoPoint.getLon(), geoPoint.getLat()));
-                        User u = application.getEngine().getUser(chat.getUserId());
-                        application.getNotifications().onNewSecretMessageGeo(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
+                        ChatMessage msg = engine.onNewSecretMediaMessage(
+                                PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(),
+                                decryptedMessage.getRandomId(),
+                                encMsg.getDate(),
+                                chat.getUserId(),
+                                chat.getSelfDestructTime(),
+                                new TLLocalGeo(geoPoint.getLon(), geoPoint.getLat()));
+                        notifications.onNewMessages(msg);
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaPhoto) {
                         TLDecryptedMessageMediaPhoto photo = (TLDecryptedMessageMediaPhoto) decryptedMessage.getMedia();
                         TLLocalPhoto localPhoto = new TLLocalPhoto();
@@ -182,9 +197,14 @@ public class EncryptionController {
                             localPhoto.setFullLocation(new TLLocalFileEmpty());
                         }
 
-                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localPhoto);
-                        User u = application.getEngine().getUser(chat.getUserId());
-                        application.getNotifications().onNewSecretMessagePhoto(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
+                        ChatMessage msg = engine.onNewSecretMediaMessage(
+                                PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(),
+                                decryptedMessage.getRandomId(),
+                                encMsg.getDate(),
+                                chat.getUserId(),
+                                chat.getSelfDestructTime(),
+                                localPhoto);
+                        notifications.onNewMessages(msg);
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaVideo) {
                         TLDecryptedMessageMediaVideo video = (TLDecryptedMessageMediaVideo) decryptedMessage.getMedia();
                         TLLocalVideo localVideo = new TLLocalVideo();
@@ -226,9 +246,8 @@ public class EncryptionController {
                         }
                         localVideo.setPreviewKey(decryptedMessage.getRandomId() + "_video");
                         localVideo.setPreviewLocation(new TLLocalFileEmpty());
-                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localVideo);
-                        User u = application.getEngine().getUser(chat.getUserId());
-                        application.getNotifications().onNewSecretMessageVideo(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
+                        ChatMessage msg = engine.onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localVideo);
+                        notifications.onNewMessages(msg);
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaDocument) {
                         TLDecryptedMessageMediaDocument mediaDocument = (TLDecryptedMessageMediaDocument) decryptedMessage.getMedia();
                         TLLocalDocument localDocument = new TLLocalDocument();
@@ -258,9 +277,8 @@ public class EncryptionController {
                         localDocument.setFileName(mediaDocument.getFileName());
                         localDocument.setMimeType(mediaDocument.getMimeType());
 
-                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localDocument);
-                        User u = application.getEngine().getUser(chat.getUserId());
-                        application.getNotifications().onNewSecretMessageDoc(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
+                        ChatMessage msg = engine.onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localDocument);
+                        notifications.onNewMessages(msg);
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaAudio) {
                         TLDecryptedMessageMediaAudio mediaAudio = (TLDecryptedMessageMediaAudio) decryptedMessage.getMedia();
                         TLLocalAudio localAudio = new TLLocalAudio();
@@ -277,13 +295,11 @@ public class EncryptionController {
                             localAudio.setDuration(0);
                             localAudio.setFileLocation(new TLLocalFileEmpty());
                         }
-                        application.getEngine().onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localAudio);
-                        User u = application.getEngine().getUser(chat.getUserId());
-                        application.getNotifications().onNewSecretMessageAudio(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
+                        ChatMessage msg = engine.onNewSecretMediaMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), localAudio);
+                        notifications.onNewMessages(msg);
                     } else if (decryptedMessage.getMedia() instanceof TLDecryptedMessageMediaEmpty) {
-                        application.getEngine().onNewSecretMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), decryptedMessage.getMessage());
-                        User u = application.getEngine().getUser(chat.getUserId());
-                        application.getNotifications().onNewSecretMessage(u.getDisplayName(), u.getUid(), chat.getId(), u.getPhoto());
+                        ChatMessage msg = engine.onNewSecretMessage(PeerType.PEER_USER_ENCRYPTED, encMsg.getChatId(), decryptedMessage.getRandomId(), encMsg.getDate(), chat.getUserId(), chat.getSelfDestructTime(), decryptedMessage.getMessage());
+                        notifications.onNewMessages(msg);
                     }
 
                     if (application.getUiKernel().getOpenedChatPeerType() == PeerType.PEER_USER_ENCRYPTED && application.getUiKernel().getOpenedChatPeerId() == chat.getId()) {
@@ -537,7 +553,8 @@ public class EncryptionController {
 
         TLAbsEncryptedChat chat = application.getApi().doRpcCall(
                 new TLRequestMessagesRequestEncryption(
-                        new TLInputUserForeign(user.getUid(), user.getAccessHash()), Entropy.randomInt(), new TLBytes(ga.toByteArray())));
+                        new TLInputUserForeign(user.getUid(), user.getAccessHash()), Entropy.randomInt(), new TLBytes(ga.toByteArray()))
+        );
         onUpdateEncryption(chat);
 
         byte[] tmpData = concat(StreamingUtils.intToBytes(prime.length), prime, StreamingUtils.intToBytes(rawA.length), rawA);

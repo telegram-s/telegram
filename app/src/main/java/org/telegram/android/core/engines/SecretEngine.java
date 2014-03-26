@@ -131,8 +131,7 @@ public class SecretEngine {
             engine.getDialogsEngine().updateOrCreateDialog(description);
 
             if (encryptedChat.getState() == EncryptedChatState.REQUESTED) {
-                User user = engine.getUser(encryptedChat.getUserId());
-                application.getNotifications().onNewSecretChatRequested(user.getDisplayName(), user.getUid(), encryptedChat.getId(), user.getPhoto());
+                application.getNotifications().onNewSecretChatRequested(encryptedChat.getUserId(), encryptedChat.getId());
             }
         } else {
             description.setDate(date);
@@ -162,11 +161,9 @@ public class SecretEngine {
             engine.getDialogsEngine().updateOrCreateDialog(description);
 
             if (encryptedChat.getState() == EncryptedChatState.NORMAL) {
-                User user = engine.getUser(encryptedChat.getUserId());
-                application.getNotifications().onNewSecretChatEstablished(user.getDisplayName(), user.getUid(), encryptedChat.getId(), user.getPhoto());
+                application.getNotifications().onNewSecretChatEstablished(encryptedChat.getUserId(), encryptedChat.getId());
             } else if (encryptedChat.getState() == EncryptedChatState.DISCARDED) {
-                User user = engine.getUser(encryptedChat.getUserId());
-                application.getNotifications().onNewSecretChatCancelled(user.getDisplayName(), user.getUid(), encryptedChat.getId(), user.getPhoto());
+                application.getNotifications().onNewSecretChatCancelled(encryptedChat.getUserId(), encryptedChat.getId());
             }
         }
     }

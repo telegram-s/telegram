@@ -21,6 +21,16 @@
         <item quantity="other">{d} NEW MESSAGES</item>
     </plurals>
 
+    <plurals name="st_new_messages_s">
+        <item quantity="one">1 new message</item>
+        <item quantity="other">{d} new messages</item>
+    </plurals>
+
+    <plurals name="st_conversation">
+        <item quantity="one">1 conversation</item>
+        <item quantity="other">{d} conversations</item>
+    </plurals>
+
     <plurals name="st_members_caps">
         <item quantity="one">ONE MEMBER</item>
         <item quantity="other">{d} MEMBERS</item>

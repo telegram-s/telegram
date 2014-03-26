@@ -215,7 +215,7 @@ public class UiKernel {
             }
         });
 
-        getNotifications().hideChatNotifications(peerType, peerId);
+        getNotifications().hideAllNotifications();
     }
 
     public void onClosedChat(int peerType, int peerId) {

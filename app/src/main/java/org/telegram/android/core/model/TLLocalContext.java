@@ -2,6 +2,8 @@ package org.telegram.android.core.model;
 
 import org.telegram.android.core.model.local.*;
 import org.telegram.android.core.model.media.*;
+import org.telegram.android.core.model.notifications.TLNotificationRecord;
+import org.telegram.android.core.model.notifications.TLNotificationState;
 import org.telegram.android.core.model.phone.TLImportedPhone;
 import org.telegram.android.core.model.phone.TLSyncContact;
 import org.telegram.android.core.model.phone.TLSyncPhone;
@@ -99,6 +101,10 @@ public class TLLocalContext extends TLContext {
         registerClass(TLSyncContact.CLASS_ID, TLSyncContact.class);
         registerClass(TLSyncPhone.CLASS_ID, TLSyncPhone.class);
         registerClass(TLSyncState.CLASS_ID, TLSyncState.class);
+
+        // Notifications
+        registerClass(TLNotificationRecord.CLASS_ID, TLNotificationRecord.class);
+        registerClass(TLNotificationState.CLASS_ID, TLNotificationState.class);
     }
 
     @Override

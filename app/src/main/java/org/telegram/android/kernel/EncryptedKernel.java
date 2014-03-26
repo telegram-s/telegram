@@ -34,6 +34,7 @@ public class EncryptedKernel {
     }
 
     public void runKernel() {
+        encryptionController.run();
         selfDestructProcessor.runProcessor();
 
         if (kernel.getAuthKernel().isLoggedIn()) {

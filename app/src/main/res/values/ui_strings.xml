@@ -596,32 +596,48 @@
     <string name="st_bubble_media_download">download</string>
     <string name="st_bubble_media_in_progress">in progress</string>
 
+    <string name="st_notification_desc_long">{messages} in {conversations}</string>
+
+    <string name="st_notification_sent_map_short">Map</string>
+    <string name="st_notification_sent_contact_short">Contact</string>
+    <string name="st_notification_sent_video_short">Video</string>
+    <string name="st_notification_sent_photo_short">Photo</string>
+    <string name="st_notification_sent_message_short">Message</string>
+    <string name="st_notification_sent_document_short">Document</string>
+    <string name="st_notification_sent_animation_short">Animation</string>
+    <string name="st_notification_sent_audio_short">Audio</string>
+    <string name="st_notification_joined_short">Joined Telegram!</string>
+
     <string name="st_notification_sent_map">{name} sent you a map</string>
     <string name="st_notification_sent_contact">{name} shared a contact with you</string>
     <string name="st_notification_sent_video">{name} sent you a video</string>
     <string name="st_notification_sent_photo">{name} sent you a photo</string>
     <string name="st_notification_sent_message">{name} sent you a message</string>
     <string name="st_notification_sent_document">{name} sent you a document</string>
+    <string name="st_notification_sent_animation">{name} sent you an animation</string>
     <string name="st_notification_sent_audio">{name} sent you an audio</string>
-    <string name="st_notification_joined">{name} joined Telegram!</string>
 
     <string name="st_notification_group_sent_map">{name} sent a map to the chat {chat}</string>
     <string name="st_notification_group_sent_contact">{name} shared a contact to the chat {chat}</string>
     <string name="st_notification_group_sent_video">{name} sent a video to the chat {chat}</string>
     <string name="st_notification_group_sent_photo">{name} sent a photo to the chat {chat}</string>
     <string name="st_notification_group_sent_document">{name} sent a document to the chat {chat}</string>
+    <string name="st_notification_group_sent_animation">{name} sent an animation to the chat {chat}</string>
     <string name="st_notification_group_sent_audio">{name} sent a audio to the chat {chat}</string>
-
-    <string name="st_notification_secret_requested">Requested new secret chat</string>
-    <string name="st_notification_secret_created">Secret chat started</string>
-    <string name="st_notification_secret_cancelled">Secret chat cancelled</string>
 
     <string name="st_notification_secret_sent_message">Sent a message to the secret chat</string>
     <string name="st_notification_secret_sent_photo">Sent a photo to the secret chat</string>
     <string name="st_notification_secret_sent_video">Sent a video to the secret chat</string>
     <string name="st_notification_secret_sent_map">Sent a map to the secret chat</string>
     <string name="st_notification_secret_sent_doc">Sent a document to the secret chat</string>
+    <string name="st_notification_secret_sent_animation">Sent an animation to the secret chat</string>
     <string name="st_notification_secret_sent_audio">Sent a audio to the secret chat</string>
+
+    <string name="st_notification_joined">{name} joined Telegram!</string>
+
+    <string name="st_notification_secret_requested">Requested new secret chat</string>
+    <string name="st_notification_secret_created">Secret chat started</string>
+    <string name="st_notification_secret_cancelled">Secret chat cancelled</string>
 
     <string name="st_notification_new_login">New login from unrecognized device {device}</string>
     <string name="st_notification_new_login_location">New login from unrecognized device {device} from {location}

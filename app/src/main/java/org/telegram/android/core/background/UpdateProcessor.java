@@ -556,13 +556,6 @@ public class UpdateProcessor {
         application.notifyUIUpdate();
     }
 
-    public void onSyncSeqArrived(int seq) {
-        if (updateState.getSeq() < seq) {
-            Logger.d(TAG, "Push sync causes invalidation");
-            invalidateUpdates();
-        }
-    }
-
     private void onLocalUpdate(TLLocalUpdate update) {
         if (update instanceof TLLocalMessageSent) {
             application.getEngine().onMessageSent(
@@ -661,7 +654,7 @@ public class UpdateProcessor {
                     src.getUid(),
                     ((TLUpdateContactRegistered) update).getDate(),
                     new TLLocalActionUserRegistered());
-            application.getNotifications().onNewMessageJoined(src.getDisplayName(), src.getUid(), 0, src.getPhoto());
+            application.getNotifications().onNewMessageJoined(src.getUid());
             application.getSyncKernel().getContactsSync().invalidateContactsSync();
         } else if (update instanceof TLUpdateContactLink) {
             TLUpdateContactLink link = (TLUpdateContactLink) update;
@@ -717,47 +710,24 @@ public class UpdateProcessor {
     }
 
     private void onUpdateShortChatMessage(TLUpdateShortChatMessage message) {
-        if (application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, message.getChatId()) == null) {
-            throw new IllegalStateException();
-        }
-
-        boolean isAdded = application.getEngine().onNewMessage(PeerType.PEER_CHAT, message.getChatId(), message.getId(),
+        ChatMessage msg = application.getEngine().onNewMessage(PeerType.PEER_CHAT, message.getChatId(), message.getId(),
                 message.getDate(), message.getFromId(), message.getMessage());
-        if (message.getFromId() != application.getCurrentUid()) {
-            if (isAdded) {
-                onInMessageArrived(PeerType.PEER_CHAT, message.getChatId(), message.getId());
-                DialogDescription description = application.getEngine().getDescriptionForPeer(PeerType.PEER_CHAT, message.getChatId());
-                User sender = application.getEngine().getUser(message.getFromId());
-                Group group = application.getEngine().getGroupsEngine().getGroup(message.getChatId());
-                if (description != null && sender != null) {
-                    application.getNotifications().onNewChatMessage(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(), message.getMessage(),
-                            message.getChatId(), message.getId(),
-                            group.getAvatar());
-                }
-                application.getTypingStates().resetUserTyping(message.getFromId(), message.getChatId());
-            }
+
+        if (msg != null && !msg.isOut()) {
+            onInMessageArrived(PeerType.PEER_CHAT, message.getChatId(), message.getId());
+            application.getNotifications().onNewMessages(msg);
+            application.getTypingStates().resetUserTyping(message.getFromId(), message.getChatId());
         }
     }
 
     private void onUpdateShortMessage(TLUpdateShortMessage message) {
-        boolean isAdded = application.getEngine().onNewMessage(PeerType.PEER_USER, message.getFromId(), message.getId(),
+        ChatMessage msg = application.getEngine().onNewMessage(PeerType.PEER_USER, message.getFromId(), message.getId(),
                 message.getDate(), message.getFromId(), message.getMessage());
 
-        if (message.getFromId() != application.getCurrentUid()) {
-            if (isAdded) {
-                onInMessageArrived(PeerType.PEER_USER, message.getFromId(), message.getId());
-                User sender = application.getEngine().getUser(message.getFromId());
-                if (sender != null) {
-                    application.getNotifications().onNewMessage(sender.getFirstName() + " " + sender.getLastName(),
-                            message.getMessage(),
-                            message.getFromId(), message.getId(),
-                            sender.getPhoto());
-                }
-                application.getTypingStates().resetUserTyping(message.getFromId());
-            }
+        if (msg != null && !msg.isOut()) {
+            onInMessageArrived(PeerType.PEER_USER, message.getFromId(), message.getId());
+            application.getNotifications().onNewMessages(msg);
+            application.getTypingStates().resetUserTyping(message.getFromId());
         }
     }
 
@@ -866,157 +836,7 @@ public class UpdateProcessor {
             }
         }
 
-        ChatMessage lastMessage = null;
-
-        for (int i = 0; i < resultMessages.length; i++) {
-            if (!resultMessages[i].isOut() && resultMessages[i].getState() == MessageState.SENT) {
-                if (lastMessage == null) {
-                    lastMessage = resultMessages[i];
-                } else if (lastMessage.getDate() < resultMessages[i].getDate()) {
-                    lastMessage = resultMessages[i];
-                }
-            }
-        }
-
-        if (lastMessage != null) {
-            notifyAboutMessage(lastMessage);
-        }
-    }
-
-    private void notifyAboutMessage(ChatMessage msg) {
-        if (msg.getPeerType() != PeerType.PEER_USER && msg.getPeerType() != PeerType.PEER_CHAT) {
-            return;
-        }
-
-        if (msg.getRawContentType() == ContentType.MESSAGE_TEXT) {
-            User sender = application.getEngine().getUser(msg.getSenderId());
-            if (msg.getPeerType() == PeerType.PEER_USER) {
-                application.getNotifications().onNewMessage(
-                        sender.getFirstName() + " " + sender.getLastName(),
-                        msg.getMessage(),
-                        msg.getSenderId(), msg.getMid(),
-                        sender.getPhoto());
-            } else if (msg.getPeerType() == PeerType.PEER_CHAT) {
-                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessage(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            msg.getMessage(),
-                            msg.getPeerId(), msg.getMid(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getRawContentType() == ContentType.MESSAGE_CONTACT) {
-            User sender = application.getEngine().getUser(msg.getSenderId());
-            if (msg.getPeerType() == PeerType.PEER_USER) {
-                application.getNotifications().onNewMessageContact(
-                        sender.getFirstName() + " " + sender.getLastName(),
-                        msg.getSenderId(), msg.getMid(),
-                        sender.getPhoto());
-            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
-                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessageContact(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            msg.getPeerId(), msg.getMid(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getRawContentType() == ContentType.MESSAGE_GEO) {
-            User sender = application.getEngine().getUser(msg.getSenderId());
-            if (msg.getPeerType() == PeerType.PEER_USER) {
-                application.getNotifications().onNewMessageGeo(
-                        sender.getDisplayName(),
-                        msg.getSenderId(), msg.getMid(),
-                        sender.getPhoto());
-            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
-                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessageGeo(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            msg.getPeerId(), msg.getMid(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getRawContentType() == ContentType.MESSAGE_PHOTO) {
-            User sender = application.getEngine().getUser(msg.getSenderId());
-            if (msg.getPeerType() == PeerType.PEER_USER) {
-                application.getNotifications().onNewMessagePhoto(
-                        sender.getDisplayName(),
-                        msg.getSenderId(), msg.getMid(),
-                        sender.getPhoto());
-            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
-                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessagePhoto(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            msg.getPeerId(), msg.getMid(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getRawContentType() == ContentType.MESSAGE_VIDEO) {
-            User sender = application.getEngine().getUser(msg.getSenderId());
-            if (msg.getPeerType() == PeerType.PEER_USER) {
-                application.getNotifications().onNewMessageVideo(
-                        sender.getDisplayName(),
-                        msg.getSenderId(), msg.getMid(),
-                        sender.getPhoto());
-            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
-                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessageVideo(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            msg.getPeerId(), msg.getMid(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getRawContentType() == ContentType.MESSAGE_DOCUMENT) {
-            User sender = application.getEngine().getUser(msg.getSenderId());
-            if (msg.getPeerType() == PeerType.PEER_USER) {
-                application.getNotifications().onNewMessageDoc(
-                        sender.getDisplayName(),
-                        msg.getSenderId(), msg.getMid(),
-                        sender.getPhoto());
-            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
-                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessageDoc(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            msg.getPeerId(), msg.getMid(),
-                            sender.getPhoto());
-                }
-            }
-        } else if (msg.getRawContentType() == ContentType.MESSAGE_AUDIO) {
-            User sender = application.getEngine().getUser(msg.getSenderId());
-            if (msg.getPeerType() == PeerType.PEER_USER) {
-                application.getNotifications().onNewMessageAudio(
-                        sender.getDisplayName(),
-                        msg.getSenderId(), msg.getMid(),
-                        sender.getPhoto());
-            } else if (msg.getPeerId() == PeerType.PEER_CHAT) {
-                Group group = application.getEngine().getGroupsEngine().getGroup(msg.getPeerId());
-                if (group != null) {
-                    application.getNotifications().onNewChatMessageAudio(
-                            sender.getDisplayName(),
-                            sender.getUid(),
-                            group.getTitle(),
-                            msg.getPeerId(), msg.getMid(),
-                            sender.getPhoto());
-                }
-            }
-        }
+        application.getNotifications().onNewMessages(resultMessages);
     }
 
     private void onInMessageArrived(int peerType, int peerId, int mid) {

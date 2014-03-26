@@ -352,9 +352,9 @@ public class ModelEngine {
 //        messagesEngine.update(msg);
 //    }
 
-    public boolean onNewSecretMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, String message) {
+    public ChatMessage onNewSecretMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, String message) {
         if (messagesEngine.getMessageByRandomId(randomId) != null) {
-            return false;
+            return null;
         }
         ChatMessage nmsg = new ChatMessage();
         nmsg.setMid(messagesEngine.generateMid());
@@ -369,12 +369,12 @@ public class ModelEngine {
         nmsg.setMessageTimeout(timeout);
         messagesEngine.create(nmsg);
         dialogsEngine.updateDescriptorShortEnc(nmsg);
-        return true;
+        return nmsg;
     }
 
-    public boolean onNewSecretMediaMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, TLObject media) {
+    public ChatMessage onNewSecretMediaMessage(int peerType, int peerId, long randomId, int date, int senderId, int timeout, TLObject media) {
         if (messagesEngine.getMessageByRandomId(randomId) != null) {
-            return false;
+            return null;
         }
 
         ChatMessage nmsg = new ChatMessage();
@@ -417,12 +417,12 @@ public class ModelEngine {
         messagesEngine.create(nmsg);
         mediaEngine.saveMedia(nmsg);
         dialogsEngine.updateDescriptorShortEnc(nmsg);
-        return true;
+        return nmsg;
     }
 
-    public boolean onNewMessage(int peerType, int peerId, int mid, int date, int senderId, String message) {
+    public ChatMessage onNewMessage(int peerType, int peerId, int mid, int date, int senderId, String message) {
         if (messagesEngine.getMessageByMid(mid) != null) {
-            return false;
+            return null;
         }
 
         ChatMessage nmsg = new ChatMessage();
@@ -436,7 +436,7 @@ public class ModelEngine {
         nmsg.setSenderId(senderId);
         messagesEngine.create(nmsg);
         dialogsEngine.updateDescriptorShort(nmsg);
-        return true;
+        return nmsg;
     }
 
     public void onNewInternalServiceMessage(int peerType, int peerId, int senderId, int date, TLAbsLocalAction action) {
