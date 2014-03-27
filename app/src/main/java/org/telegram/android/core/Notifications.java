@@ -43,6 +43,8 @@ import org.telegram.android.ui.UiMeasure;
 import org.telegram.i18n.I18nUtil;
 import org.telegram.tl.TLObject;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -54,8 +56,6 @@ public class Notifications {
 
     private class NotificationConfig {
         public boolean useSound;
-        public boolean useNotification;
-        public boolean useInAppNotification;
         public boolean useVibration;
         public boolean useCustomSound;
         public String customSoundUri;
@@ -118,6 +118,7 @@ public class Notifications {
                     new TLNotificationRecord(
                             lastRecords[i].getPeerType(),
                             lastRecords[i].getPeerId(),
+                            lastRecords[i].getSender().getUid(),
                             lastRecords[i].getContentMessage(),
                             lastRecords[i].getContentShortMessage())
             );
@@ -128,16 +129,36 @@ public class Notifications {
 
     private void loadPersistence() {
         List<TLNotificationRecord> r = persistence.getObj().getRecords();
-        lastRecords = new NotificationRecord[r.size()];
+
+        ArrayList<NotificationRecord> nRecords = new ArrayList<NotificationRecord>();
 
         for (int i = 0; i < lastRecords.length; i++) {
             TLNotificationRecord pr = r.get(i);
-            lastRecords[i] = new NotificationRecord();
-            lastRecords[i].setPeerId(pr.getPeerId());
-            lastRecords[i].setPeerType(pr.getPeerType());
-            lastRecords[i].setContentMessage(pr.getContentMessage());
-            lastRecords[i].setContentShortMessage(pr.getContentShortMessage());
+            NotificationRecord record = new NotificationRecord();
+            record.setPeerId(pr.getPeerId());
+            record.setPeerType(pr.getPeerType());
+            record.setContentMessage(pr.getContentMessage());
+            record.setContentShortMessage(pr.getContentShortMessage());
+
+            record.setSender(application.getEngine().getUser(pr.getSenderId()));
+            if (record.getSender() == null) {
+                continue;
+            }
+            if (record.getPeerType() == PeerType.PEER_CHAT) {
+                record.setGroup(application.getEngine().getGroupsEngine().getGroup(record.getPeerId()));
+                if (record.getGroup() == null) {
+                    continue;
+                }
+            }
+            if (record.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                record.setSecretChat(application.getEngine().getSecretEngine().loadChat(record.getPeerId()));
+                if (record.getSecretChat() == null) {
+                    continue;
+                }
+            }
+            nRecords.add(record);
         }
+        lastRecords = nRecords.toArray(new NotificationRecord[0]);
         unreadMessages = persistence.getObj().getUnreadCount();
     }
 
@@ -173,141 +194,183 @@ public class Notifications {
         }
     }
 
-    private void onNewNotification(NotificationRecord msg) {
+    private void onNewNotifications(NotificationRecord... msgs) {
+        if (msgs.length == 0) {
+            return;
+        }
+
         NotificationSettings settings = application.getNotificationSettings();
         if (!settings.isEnabled()) {
             return;
         }
-        if (msg.getPeerType() == PeerType.PEER_USER || msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
-            if (!settings.isEnabledForUser(msg.getPeerId())) {
-                Logger.d(TAG, "Notifications disabled for user");
-                return;
-            }
-        } else if (msg.getPeerType() == PeerType.PEER_CHAT) {
-            if (!settings.isGroupEnabled()) {
-                Logger.d(TAG, "Group notifications disabled");
-                return;
+
+        ArrayList<NotificationRecord> filtered = new ArrayList<NotificationRecord>();
+        for (NotificationRecord msg : msgs) {
+            if (msg.getPeerType() == PeerType.PEER_USER || msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                if (!settings.isEnabledForUser(msg.getPeerId())) {
+                    Logger.d(TAG, "Notifications disabled for user");
+                    continue;
+                }
+            } else if (msg.getPeerType() == PeerType.PEER_CHAT) {
+                if (!settings.isGroupEnabled()) {
+                    Logger.d(TAG, "Group notifications disabled");
+                    continue;
+                }
+
+                if (!settings.isEnabledForChat(msg.getPeerId())) {
+                    Logger.d(TAG, "Notifications disabled for chat");
+                    continue;
+                }
+
+                if (!settings.isEnabledForUser(msg.getSender().getUid())) {
+                    Logger.d(TAG, "Notifications disabled for user");
+                    continue;
+                }
+            } else {
+                continue;
             }
 
-            if (!settings.isEnabledForChat(msg.getPeerId())) {
-                Logger.d(TAG, "Notifications disabled for chat");
-                return;
-            }
+            filtered.add(msg);
 
-            if (!settings.isEnabledForUser(msg.getSender().getUid())) {
-                Logger.d(TAG, "Notifications disabled for user");
-                return;
-            }
-        } else {
-            return;
-        }
-
-        if (lastRecords.length < MAX_SIZE) {
-            NotificationRecord[] nRecords = new NotificationRecord[lastRecords.length + 1];
-            nRecords[0] = msg;
-            for (int i = 0; i < lastRecords.length; i++) {
-                nRecords[i + 1] = lastRecords[i];
-            }
-            lastRecords = nRecords;
-        } else {
-            boolean cleaned = false;
-            for (int i = lastRecords.length - 1; i > 0; i--) {
-                if (lastRecords[i].getPeerType() == lastRecords[i - 1].getPeerType() &&
-                        lastRecords[i].getPeerId() == lastRecords[i - 1].getPeerId()) {
-                    cleaned = true;
-                    for (int j = i; j > 0; j--) {
+            if (lastRecords.length < MAX_SIZE) {
+                NotificationRecord[] nRecords = new NotificationRecord[lastRecords.length + 1];
+                nRecords[0] = msg;
+                for (int i = 0; i < lastRecords.length; i++) {
+                    nRecords[i + 1] = lastRecords[i];
+                }
+                lastRecords = nRecords;
+            } else {
+                boolean cleaned = false;
+                for (int i = lastRecords.length - 1; i > 0; i--) {
+                    if (lastRecords[i].getPeerType() == lastRecords[i - 1].getPeerType() &&
+                            lastRecords[i].getPeerId() == lastRecords[i - 1].getPeerId()) {
+                        cleaned = true;
+                        for (int j = i; j > 0; j--) {
+                            lastRecords[j] = lastRecords[j - 1];
+                        }
+                        break;
+                    }
+                }
+                if (!cleaned) {
+                    for (int j = lastRecords.length - 1; j > 0; j--) {
                         lastRecords[j] = lastRecords[j - 1];
                     }
-                    break;
                 }
+                lastRecords[0] = msg;
             }
-            if (!cleaned) {
-                for (int j = lastRecords.length - 1; j > 0; j--) {
-                    lastRecords[j] = lastRecords[j - 1];
-                }
-            }
-            lastRecords[0] = msg;
         }
 
         savePersistence();
 
-        performNotify();
+        performNotify(filtered.toArray(new NotificationRecord[0]));
     }
 
-    private synchronized void performNotify() {
-        NotificationRecord msg = lastRecords[0];
-
-        NotificationSettings settings = application.getNotificationSettings();
-
-        if (!settings.isEnabled()) {
-            Logger.d(TAG, "Notifications disabled");
+    private synchronized void performNotify(NotificationRecord[] newNotifications) {
+        if (newNotifications.length == 0) {
             return;
         }
 
-        NotificationConfig config = new NotificationConfig();
+        NotificationSettings settings = application.getNotificationSettings();
 
-        int peerType = msg.getPeerType();
-        int peerId = msg.getPeerId();
-        int senderId = msg.getSender().getUid();
+        NotificationConfig inAppConfig = null;
+        NotificationConfig systemConfig = null;
+        NotificationConfig inChatConfig = null;
 
-        if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
-            config.useVibration = settings.isMessageVibrationEnabled();
-            config.useSound = settings.isMessageSoundEnabled();
-            if (settings.getUserNotificationSound(senderId) != null) {
-                config.customSoundUri = settings.getUserNotificationSound(senderId);
-                config.useCustomSound = true;
+        boolean isSilent = false;
+        if (SystemClock.uptimeMillis() - lastNotifiedTime < QUITE_PERIOD) {
+            isSilent = true;
+        }
+        lastNotifiedTime = SystemClock.uptimeMillis();
+
+        for (NotificationRecord msg : newNotifications) {
+            int peerType = msg.getPeerType();
+            int peerId = msg.getPeerId();
+            int senderId = msg.getSender().getUid();
+
+            NotificationConfig config = new NotificationConfig();
+            if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
+                config.useVibration = settings.isMessageVibrationEnabled();
+                config.useSound = settings.isMessageSoundEnabled();
+                if (settings.getUserNotificationSound(senderId) != null) {
+                    config.customSoundUri = settings.getUserNotificationSound(senderId);
+                    config.useCustomSound = true;
+                } else {
+                    config.customSoundUri = settings.getNotificationSound();
+                    config.useCustomSound = config.customSoundUri != null;
+                }
             } else {
-                config.customSoundUri = settings.getNotificationSound();
-                config.useCustomSound = config.customSoundUri != null;
-            }
-        } else {
-            config.useVibration = settings.isGroupVibrateEnabled();
-            config.useSound = settings.isGroupSoundEnabled();
+                config.useVibration = settings.isGroupVibrateEnabled();
+                config.useSound = settings.isGroupSoundEnabled();
 
-            if (settings.getChatNotificationSound(peerId) != null) {
-                config.customSoundUri = settings.getChatNotificationSound(peerId);
-                config.useCustomSound = true;
-            } else if (settings.getNotificationGroupSound() != null) {
-                config.customSoundUri = settings.getNotificationGroupSound();
-                config.useCustomSound = true;
+                if (settings.getChatNotificationSound(peerId) != null) {
+                    config.customSoundUri = settings.getChatNotificationSound(peerId);
+                    config.useCustomSound = true;
+                } else if (settings.getNotificationGroupSound() != null) {
+                    config.customSoundUri = settings.getNotificationGroupSound();
+                    config.useCustomSound = true;
+                } else {
+                    config.customSoundUri = settings.getNotificationSound();
+                    config.useCustomSound = config.customSoundUri != null;
+                }
+            }
+
+            if (application.getUiKernel().isAppVisible()) {
+                config.useSound = config.useSound & settings.isInAppSoundsEnabled();
+                config.useVibration = config.useVibration & settings.isInAppVibrateEnabled();
+                if (application.getUiKernel().getOpenedChatPeerType() == peerType && application.getUiKernel().getOpenedChatPeerId() == peerId || application.getUiKernel().isDialogsVisible()) {
+                    inChatConfig = mergeConfigs(inChatConfig, config);
+                } else {
+                    inAppConfig = mergeConfigs(inAppConfig, config);
+                }
             } else {
-                config.customSoundUri = settings.getNotificationSound();
-                config.useCustomSound = config.customSoundUri != null;
+                systemConfig = mergeConfigs(systemConfig, config);
             }
         }
 
-        boolean isConversationVisible = false;
-
-        if (application.getUiKernel().isAppVisible()) {
-            config.useSound = config.useSound & settings.isInAppSoundsEnabled();
-            config.useVibration = config.useVibration & settings.isInAppVibrateEnabled();
-            if (application.getUiKernel().getOpenedChatPeerType() == peerType && application.getUiKernel().getOpenedChatPeerId() == peerId || application.getUiKernel().isDialogsVisible()) {
-                config.useNotification = false;
-                config.useInAppNotification = false;
-                isConversationVisible = true;
-            } else {
-                config.useNotification = false;
-                config.useInAppNotification = settings.isInAppPreviewEnabled();
+        if (isSilent) {
+            if (inChatConfig != null) {
+                inChatConfig.useVibration = false;
+                inChatConfig.useSound = false;
             }
-        } else {
-            config.useNotification = true;
-            config.useInAppNotification = false;
+
+            if (inAppConfig != null) {
+                inAppConfig.useVibration = false;
+                inAppConfig.useSound = false;
+            }
+
+            if (systemConfig != null) {
+                systemConfig.useVibration = false;
+                systemConfig.useSound = false;
+            }
         }
 
-        if (SystemClock.uptimeMillis() - lastNotifiedTime < QUITE_PERIOD && !isConversationVisible) {
-            config.useVibration = false;
-            config.useSound = false;
-        } else {
-            lastNotifiedTime = SystemClock.uptimeMillis();
+        if (inChatConfig != null) {
+            performNotifyInChat(inChatConfig);
+            if (inAppConfig != null) {
+                inAppConfig.useVibration = inAppConfig.useVibration & !inChatConfig.useVibration;
+                inAppConfig.useSound = inAppConfig.useSound & !inChatConfig.useSound;
+            }
         }
+        if (inAppConfig != null) {
+            performNotifyInApp(lastRecords, inAppConfig);
+        }
+        if (systemConfig != null) {
+            performNotifySystem(lastRecords, systemConfig);
+        }
+    }
 
-        if (!config.useInAppNotification && !config.useNotification) {
-            performNotifyInChat(msg, config);
-        } else if (config.useInAppNotification) {
-            performNotifyInApp(lastRecords, config);
-        } else if (config.useNotification) {
-            performNotifySystem(lastRecords, config);
+    private NotificationConfig mergeConfigs(NotificationConfig source, NotificationConfig config) {
+        if (source == null) {
+            source = config;
+        } else {
+            source.useSound |= config.useSound;
+            source.useVibration |= config.useVibration;
+            if (config.useCustomSound) {
+                source.customSoundUri = config.customSoundUri;
+                source.useCustomSound = true;
+            }
         }
+        return source;
     }
 
     private void performNotifyInApp(final NotificationRecord[] records, NotificationConfig config) {
@@ -434,7 +497,7 @@ public class Notifications {
         });
     }
 
-    private void performNotifyInChat(NotificationRecord record, NotificationConfig config) {
+    private void performNotifyInChat(NotificationConfig config) {
         if (config.useSound) {
             pool.play(soundId, 1, 1, 1, 0, 1);
         }
@@ -622,22 +685,20 @@ public class Notifications {
     }
 
     public void onNewMessages(ChatMessage... msgs) {
-        ChatMessage lastMessage = null;
+        ArrayList<NotificationRecord> records = new ArrayList<NotificationRecord>();
         for (int i = 0; i < msgs.length; i++) {
             if (msgs[i] == null) {
                 continue;
             }
             if (!msgs[i].isOut() && msgs[i].getState() == MessageState.SENT) {
-                if (lastMessage == null) {
-                    lastMessage = msgs[i];
-                } else if (lastMessage.getDate() < msgs[i].getDate()) {
-                    lastMessage = msgs[i];
+                NotificationRecord record = convertToRecord(msgs[i]);
+                if (record != null) {
+                    records.add(record);
                 }
             }
         }
-        if (lastMessage != null) {
-            onNewMessage(lastMessage);
-        }
+
+        onNewNotifications(records.toArray(new NotificationRecord[0]));
     }
 
     private NotificationRecord convertToRecord(ChatMessage msg) {
@@ -645,6 +706,9 @@ public class Notifications {
         record.setPeerId(msg.getPeerId());
         record.setPeerType(msg.getPeerType());
         record.setSender(application.getEngine().getUser(msg.getSenderId()));
+        if (record.getSender() == null) {
+            return null;
+        }
         if (msg.getPeerType() == PeerType.PEER_CHAT) {
             record.setGroup(application.getEngine().getGroupsEngine().getGroup(msg.getPeerId()));
             if (record.getGroup() == null) {
@@ -837,14 +901,6 @@ public class Notifications {
         return record;
     }
 
-    private void onNewMessage(ChatMessage msg) {
-        NotificationRecord record = convertToRecord(msg);
-        if (record == null) {
-            return;
-        }
-        onNewNotification(record);
-    }
-
     public void onNewMessageJoined(int uid) {
         NotificationRecord record = new NotificationRecord();
         record.setPeerId(uid);
@@ -856,7 +912,7 @@ public class Notifications {
         record.setContentShortMessage(application.getString(R.string.st_notification_joined_short));
         record.setContentMessage(application.getString(R.string.st_notification_joined)
                 .replace("{name}", record.getSender().getDisplayName()));
-        onNewNotification(record);
+        onNewNotifications(record);
     }
 
     public void onNewSecretChatRequested(int senderId, int chatId) {
@@ -870,7 +926,7 @@ public class Notifications {
 
         record.setContentMessage(application.getString(R.string.st_notification_secret_requested));
         record.setContentShortMessage(record.getContentMessage());
-        onNewNotification(record);
+        onNewNotifications(record);
     }
 
     public void onNewSecretChatEstablished(int uid, int chatId) {
@@ -883,7 +939,7 @@ public class Notifications {
         }
         record.setContentMessage(application.getString(R.string.st_notification_secret_created));
         record.setContentShortMessage(record.getContentMessage());
-        onNewNotification(record);
+        onNewNotifications(record);
     }
 
     public void onNewSecretChatCancelled(int uid, int chatId) {
@@ -896,7 +952,7 @@ public class Notifications {
         }
         record.setContentMessage(application.getString(R.string.st_notification_secret_cancelled));
         record.setContentShortMessage(record.getContentMessage());
-        onNewNotification(record);
+        onNewNotifications(record);
     }
 
     private class NotificationRecord {

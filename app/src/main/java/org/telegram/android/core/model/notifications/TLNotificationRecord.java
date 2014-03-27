@@ -17,14 +17,16 @@ public class TLNotificationRecord extends TLObject {
 
     private int peerType;
     private int peerId;
+    private int senderId;
     private String contentShortMessage;
     private String contentMessage;
 
-    public TLNotificationRecord(int peerType, int peerId, String contentShortMessage, String contentMessage) {
+    public TLNotificationRecord(int peerType, int peerId, int senderId, String contentShortMessage, String contentMessage) {
         this.peerType = peerType;
         this.peerId = peerId;
         this.contentShortMessage = contentShortMessage;
         this.contentMessage = contentMessage;
+        this.senderId = senderId;
     }
 
     public TLNotificationRecord() {
@@ -37,6 +39,10 @@ public class TLNotificationRecord extends TLObject {
 
     public int getPeerId() {
         return peerId;
+    }
+
+    public int getSenderId() {
+        return senderId;
     }
 
     public String getContentShortMessage() {
