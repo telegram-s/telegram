@@ -18,6 +18,7 @@ import android.widget.*;
 import com.actionbarsherlock.view.MenuItem;
 import org.telegram.android.base.MediaReceiverFragment;
 import org.telegram.android.R;
+import org.telegram.android.config.NotificationSettings;
 import org.telegram.android.core.ChatSourceListener;
 import org.telegram.android.core.background.AvatarUploader;
 import org.telegram.android.core.model.*;
@@ -71,9 +72,14 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     private View avatarUploadError;
     private ImageButton changeAvatarView;
     private ImageView enabledView;
+
     private View notifications;
     private View notificationsSound;
     private TextView notificationSoundTitle;
+
+    private View notificationsLed;
+    private TextView notificationLedTitle;
+
     private TextView onlineView;
     private TextView membersTitle;
 
@@ -148,6 +154,8 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         notifications = headerView.findViewById(R.id.notificationsButton);
         notificationsSound = headerView.findViewById(R.id.notificationSound);
         notificationSoundTitle = (TextView) headerView.findViewById(R.id.notificationSoundTitle);
+        notificationsLed = headerView.findViewById(R.id.notificationLed);
+        notificationLedTitle = (TextView) headerView.findViewById(R.id.notificationLedTitle);
         membersTitle = (TextView) headerView.findViewById(R.id.membersTitle);
         mediaContainer = headerView.findViewById(R.id.mediaContainer);
         mediaCounter = (TextView) headerView.findViewById(R.id.mediaCoutner);
@@ -375,7 +383,50 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
             }
         }));
 
+        notificationsLed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final int[] ids = new int[]{
+                        NotificationSettings.LED_NONE,
+                        NotificationSettings.LED_DEFAULT,
+                        NotificationSettings.LED_WHITE,
+                        NotificationSettings.LED_RED,
+                        NotificationSettings.LED_GREEN,
+                        NotificationSettings.LED_BLUE,
+                        NotificationSettings.LED_YELLOW,
+                        NotificationSettings.LED_ORANGE,
+                        NotificationSettings.LED_PINK,
+                        NotificationSettings.LED_PURPLE,
+                        NotificationSettings.LED_CYAN,
+                };
+                final CharSequence[] items = new CharSequence[]{
+                        getStringSafe(R.string.st_none),
+                        getStringSafe(R.string.st_default),
+                        getStringSafe(R.string.st_notifications_led_white),
+                        getStringSafe(R.string.st_notifications_led_red),
+                        getStringSafe(R.string.st_notifications_led_green),
+                        getStringSafe(R.string.st_notifications_led_blue),
+                        getStringSafe(R.string.st_notifications_led_yellow),
+                        getStringSafe(R.string.st_notifications_led_orange),
+                        getStringSafe(R.string.st_notifications_led_pink),
+                        getStringSafe(R.string.st_notifications_led_purple),
+                        getStringSafe(R.string.st_notifications_led_cyan),
+                };
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                application.getNotificationSettings().setCustomGroupColor(chatId, ids[which]);
+                                updateNotificationLed();
+                            }
+                        }).create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
+            }
+        });
+
         updateNotificationSound();
+        updateNotificationLed();
 
         int onlineCount = 0;
         for (TLLocalChatParticipant participant : fullChatInfo.getChatInfo().getUsers()) {
@@ -389,7 +440,8 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         } else {
             onlineView.setText(Html.fromHtml(
                     getQuantityString(R.plurals.st_members, fullChatInfo.getChatInfo().getUsers().size())
-                            .replace("{d}", I18nUtil.getInstance().correctFormatNumber(fullChatInfo.getChatInfo().getUsers().size())) + ", <font color='#006FC8'>" + I18nUtil.getInstance().correctFormatNumber(onlineCount) + " " + getStringSafe(R.string.st_online) + "</font>"));
+                            .replace("{d}", I18nUtil.getInstance().correctFormatNumber(fullChatInfo.getChatInfo().getUsers().size())) + ", <font color='#006FC8'>" + I18nUtil.getInstance().correctFormatNumber(onlineCount) + " " + getStringSafe(R.string.st_online) + "</font>"
+            ));
         }
 
         membersTitle.setText(getQuantityString(R.plurals.st_members_caps, fullChatInfo.getChatInfo().getUsers().size())
@@ -483,7 +535,8 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     leaveChat();
                                 }
-                            })).create();
+                            })
+                    ).create();
                     alertDialog.setCanceledOnTouchOutside(true);
                     alertDialog.show();
                 } else {
@@ -577,6 +630,10 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
         } else {
             notificationSoundTitle.setText(title);
         }
+    }
+
+    private void updateNotificationLed() {
+        notificationLedTitle.setText(getLedModeString(application.getNotificationSettings().getCustomGroupColor(chatId)));
     }
 
     private void removeUser(final int uid) {
@@ -787,6 +844,36 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("chatId", chatId);
+    }
+
+    private String getLedModeString(int mode) {
+        switch (mode) {
+            case NotificationSettings.LED_COLORFUL:
+            default:
+                return getStringSafe(R.string.st_notifications_led_colorful);
+            case NotificationSettings.LED_DEFAULT:
+                return getStringSafe(R.string.st_default);
+            case NotificationSettings.LED_NONE:
+                return getStringSafe(R.string.st_none);
+            case NotificationSettings.LED_BLUE:
+                return getStringSafe(R.string.st_notifications_led_blue);
+            case NotificationSettings.LED_CYAN:
+                return getStringSafe(R.string.st_notifications_led_cyan);
+            case NotificationSettings.LED_GREEN:
+                return getStringSafe(R.string.st_notifications_led_green);
+            case NotificationSettings.LED_ORANGE:
+                return getStringSafe(R.string.st_notifications_led_orange);
+            case NotificationSettings.LED_PINK:
+                return getStringSafe(R.string.st_notifications_led_pink);
+            case NotificationSettings.LED_PURPLE:
+                return getStringSafe(R.string.st_notifications_led_purple);
+            case NotificationSettings.LED_RED:
+                return getStringSafe(R.string.st_notifications_led_red);
+            case NotificationSettings.LED_WHITE:
+                return getStringSafe(R.string.st_notifications_led_white);
+            case NotificationSettings.LED_YELLOW:
+                return getStringSafe(R.string.st_notifications_led_yellow);
+        }
     }
 
     @Override

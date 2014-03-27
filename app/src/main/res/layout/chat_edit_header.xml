@@ -151,6 +151,43 @@
                   android:id="@+id/notificationSoundTitle"
                   android:text="Default"/>
     </org.telegram.android.ui.RtlLinearLayout>
+    <View android:layout_width="fill_parent"
+          android:layout_height="@dimen/st_section_div_h"
+          android:background="@color/st_section_div"/>
+    <org.telegram.android.ui.RtlLinearLayout android:layout_width="fill_parent"
+                                             android:layout_height="wrap_content"
+                                             android:id="@+id/notificationLed"
+                                             android:clickable="true"
+                                             android:background="@drawable/st_list_selector">
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="12dp"
+                  android:layout_marginBottom="12dp"
+                  android:layout_marginLeft="8dp"
+                  android:layout_marginRight="8dp"
+                  android:textSize="18sp"
+                  android:lines="1"
+                  android:singleLine="true"
+                  android:textColor="@color/st_black_text"
+                  android:text="@string/st_edit_dialog_notifications_led"/>
+        <View android:layout_width="0dp"
+              android:layout_height="0dp"
+              ext:layout_weight="1"/>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="12dp"
+                  android:layout_marginBottom="12dp"
+                  android:layout_marginRight="10dp"
+                  android:layout_marginLeft="10dp"
+                  android:gravity="right"
+                  android:textSize="18sp"
+                  android:textColor="@color/st_blue_bright"
+                  ext:customFont="light"
+                  android:lines="1"
+                  android:singleLine="true"
+                  android:id="@+id/notificationLedTitle"
+                  android:text="Default"/>
+    </org.telegram.android.ui.RtlLinearLayout>
 
     <LinearLayout android:layout_width="fill_parent"
                   android:layout_height="wrap_content"

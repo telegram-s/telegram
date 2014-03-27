@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
+import org.telegram.android.config.NotificationSettings;
 import org.telegram.android.core.model.EncryptedChat;
 import org.telegram.android.core.model.EncryptedChatState;
 import org.telegram.android.core.model.PeerType;
@@ -63,6 +64,8 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
     private View notificationsSound;
     private TextView notificationSoundTitle;
     private TextView mediaCounter;
+    private View notificationsLed;
+    private TextView notificationLedTitle;
 
     private View encryptionKeyButton;
     private TextView encryptionKeyTitle;
@@ -94,6 +97,8 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
         notifications = res.findViewById(R.id.notificationsButton);
         notificationsSound = res.findViewById(R.id.notificationSound);
         notificationSoundTitle = (TextView) res.findViewById(R.id.notificationSoundTitle);
+        notificationsLed = res.findViewById(R.id.notificationLed);
+        notificationLedTitle = (TextView) res.findViewById(R.id.notificationLedTitle);
         mediaCounter = (TextView) res.findViewById(R.id.mediaCoutner);
         encryptionKeyButton = res.findViewById(R.id.encryptionKey);
         encryptionKeyTitle = (TextView) res.findViewById(R.id.encryptionKeyTitle);
@@ -345,7 +350,50 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
             }
         }));
 
+        notificationsLed.setOnClickListener(secure(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final int[] ids = new int[]{
+                        NotificationSettings.LED_NONE,
+                        NotificationSettings.LED_DEFAULT,
+                        NotificationSettings.LED_WHITE,
+                        NotificationSettings.LED_RED,
+                        NotificationSettings.LED_GREEN,
+                        NotificationSettings.LED_BLUE,
+                        NotificationSettings.LED_YELLOW,
+                        NotificationSettings.LED_ORANGE,
+                        NotificationSettings.LED_PINK,
+                        NotificationSettings.LED_PURPLE,
+                        NotificationSettings.LED_CYAN,
+                };
+                final CharSequence[] items = new CharSequence[]{
+                        getStringSafe(R.string.st_none),
+                        getStringSafe(R.string.st_default),
+                        getStringSafe(R.string.st_notifications_led_white),
+                        getStringSafe(R.string.st_notifications_led_red),
+                        getStringSafe(R.string.st_notifications_led_green),
+                        getStringSafe(R.string.st_notifications_led_blue),
+                        getStringSafe(R.string.st_notifications_led_yellow),
+                        getStringSafe(R.string.st_notifications_led_orange),
+                        getStringSafe(R.string.st_notifications_led_pink),
+                        getStringSafe(R.string.st_notifications_led_purple),
+                        getStringSafe(R.string.st_notifications_led_cyan),
+                };
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                application.getNotificationSettings().setCustomUserColor(user.getUid(), ids[which]);
+                                updateNotificationLed();
+                            }
+                        }).create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
+            }
+        }));
+
         updateNotificationSound();
+        updateNotificationLed();
     }
 
     private void updateNotificationSound() {
@@ -356,6 +404,42 @@ public class EncryptedChatInfoFragment extends TelegramFragment {
             } else {
                 notificationSoundTitle.setText(title);
             }
+        }
+    }
+
+    private void updateNotificationLed() {
+        if (notificationLedTitle != null) {
+            notificationLedTitle.setText(getLedModeString(application.getNotificationSettings().getCustomUserColor(user.getUid())));
+        }
+    }
+
+    private String getLedModeString(int mode) {
+        switch (mode) {
+            case NotificationSettings.LED_COLORFUL:
+            default:
+                return getStringSafe(R.string.st_notifications_led_colorful);
+            case NotificationSettings.LED_DEFAULT:
+                return getStringSafe(R.string.st_default);
+            case NotificationSettings.LED_NONE:
+                return getStringSafe(R.string.st_none);
+            case NotificationSettings.LED_BLUE:
+                return getStringSafe(R.string.st_notifications_led_blue);
+            case NotificationSettings.LED_CYAN:
+                return getStringSafe(R.string.st_notifications_led_cyan);
+            case NotificationSettings.LED_GREEN:
+                return getStringSafe(R.string.st_notifications_led_green);
+            case NotificationSettings.LED_ORANGE:
+                return getStringSafe(R.string.st_notifications_led_orange);
+            case NotificationSettings.LED_PINK:
+                return getStringSafe(R.string.st_notifications_led_pink);
+            case NotificationSettings.LED_PURPLE:
+                return getStringSafe(R.string.st_notifications_led_purple);
+            case NotificationSettings.LED_RED:
+                return getStringSafe(R.string.st_notifications_led_red);
+            case NotificationSettings.LED_WHITE:
+                return getStringSafe(R.string.st_notifications_led_white);
+            case NotificationSettings.LED_YELLOW:
+                return getStringSafe(R.string.st_notifications_led_yellow);
         }
     }
 

@@ -1,6 +1,8 @@
 package org.telegram.android.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -16,6 +18,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import org.telegram.android.R;
 import org.telegram.android.base.TelegramFragment;
+import org.telegram.android.config.NotificationSettings;
 
 /**
  * Author: Korshakov Stepan
@@ -38,6 +41,9 @@ public class SettingsNottificationsFragment extends TelegramFragment {
     private TextView allCustomSoundLabel;
     private TextView allCustomSoundTitle;
     private View allCustomSoundContainer;
+    private TextView lightLabel;
+    private TextView lightTitle;
+    private View lightContainer;
 
     private TextView groupAlertLabel;
     private ImageView groupAlertCheck;
@@ -51,6 +57,9 @@ public class SettingsNottificationsFragment extends TelegramFragment {
     private TextView groupCustomSoundLabel;
     private TextView groupCustomSoundTitle;
     private View groupCustomSoundContainer;
+    private TextView groupLightLabel;
+    private TextView groupLightTitle;
+    private View groupLightContainer;
 
     private TextView inAppSoundLabel;
     private ImageView inAppSoundsCheck;
@@ -79,6 +88,9 @@ public class SettingsNottificationsFragment extends TelegramFragment {
         allCustomSoundLabel = (TextView) res.findViewById(R.id.allCustomSoundLabel);
         allCustomSoundTitle = (TextView) res.findViewById(R.id.allSoundTitle);
         allCustomSoundContainer = res.findViewById(R.id.allCustomSoundContainer);
+        lightContainer = res.findViewById(R.id.ledContainer);
+        lightLabel = (TextView) res.findViewById(R.id.ledLabel);
+        lightTitle = (TextView) res.findViewById(R.id.ledTitle);
 
         groupAlertContainer = res.findViewById(R.id.groupAlertContainer);
         groupAlertLabel = (TextView) res.findViewById(R.id.groupAlertLabel);
@@ -92,6 +104,9 @@ public class SettingsNottificationsFragment extends TelegramFragment {
         groupCustomSoundLabel = (TextView) res.findViewById(R.id.groupCustomSoundLabel);
         groupCustomSoundTitle = (TextView) res.findViewById(R.id.groupCustomSoundTitle);
         groupCustomSoundContainer = res.findViewById(R.id.groupCustomSoundContainer);
+        groupLightContainer = res.findViewById(R.id.ledGroupContainer);
+        groupLightLabel = (TextView) res.findViewById(R.id.ledGroupLabel);
+        groupLightTitle = (TextView) res.findViewById(R.id.ledGroupTitle);
 
         inAppSoundLabel = (TextView) res.findViewById(R.id.inAppSoundsLabel);
         inAppSoundsCheck = (ImageView) res.findViewById(R.id.inAppSoundsCheck);
@@ -218,6 +233,92 @@ public class SettingsNottificationsFragment extends TelegramFragment {
             }
         }));
 
+        lightContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final int[] ids = new int[]{
+                        NotificationSettings.LED_NONE,
+                        NotificationSettings.LED_COLORFUL,
+                        NotificationSettings.LED_WHITE,
+                        NotificationSettings.LED_RED,
+                        NotificationSettings.LED_GREEN,
+                        NotificationSettings.LED_BLUE,
+                        NotificationSettings.LED_YELLOW,
+                        NotificationSettings.LED_ORANGE,
+                        NotificationSettings.LED_PINK,
+                        NotificationSettings.LED_PURPLE,
+                        NotificationSettings.LED_CYAN,
+                };
+                final CharSequence[] items = new CharSequence[]{
+                        getStringSafe(R.string.st_none),
+                        getStringSafe(R.string.st_notifications_led_colorful),
+                        getStringSafe(R.string.st_notifications_led_white),
+                        getStringSafe(R.string.st_notifications_led_red),
+                        getStringSafe(R.string.st_notifications_led_green),
+                        getStringSafe(R.string.st_notifications_led_blue),
+                        getStringSafe(R.string.st_notifications_led_yellow),
+                        getStringSafe(R.string.st_notifications_led_orange),
+                        getStringSafe(R.string.st_notifications_led_pink),
+                        getStringSafe(R.string.st_notifications_led_purple),
+                        getStringSafe(R.string.st_notifications_led_cyan),
+                };
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                application.getNotificationSettings().setLedMode(ids[which]);
+                                updateUi();
+                            }
+                        }).create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
+            }
+        });
+
+        groupLightContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final int[] ids = new int[]{
+                        NotificationSettings.LED_NONE,
+                        NotificationSettings.LED_DEFAULT,
+                        NotificationSettings.LED_COLORFUL,
+                        NotificationSettings.LED_WHITE,
+                        NotificationSettings.LED_RED,
+                        NotificationSettings.LED_GREEN,
+                        NotificationSettings.LED_BLUE,
+                        NotificationSettings.LED_YELLOW,
+                        NotificationSettings.LED_ORANGE,
+                        NotificationSettings.LED_PINK,
+                        NotificationSettings.LED_PURPLE,
+                        NotificationSettings.LED_CYAN,
+                };
+                final CharSequence[] items = new CharSequence[]{
+                        getStringSafe(R.string.st_none),
+                        getStringSafe(R.string.st_default),
+                        getStringSafe(R.string.st_notifications_led_colorful),
+                        getStringSafe(R.string.st_notifications_led_white),
+                        getStringSafe(R.string.st_notifications_led_red),
+                        getStringSafe(R.string.st_notifications_led_green),
+                        getStringSafe(R.string.st_notifications_led_blue),
+                        getStringSafe(R.string.st_notifications_led_yellow),
+                        getStringSafe(R.string.st_notifications_led_orange),
+                        getStringSafe(R.string.st_notifications_led_pink),
+                        getStringSafe(R.string.st_notifications_led_purple),
+                        getStringSafe(R.string.st_notifications_led_cyan),
+                };
+                AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                application.getNotificationSettings().setLedGroupMode(ids[which]);
+                                updateUi();
+                            }
+                        }).create();
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.show();
+            }
+        });
+
         updateUi();
         return res;
     }
@@ -262,6 +363,9 @@ public class SettingsNottificationsFragment extends TelegramFragment {
             allCustomSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             allCustomSoundTitle.setTextColor(getResources().getColor(R.color.st_section_value));
             allCustomSoundContainer.setEnabled(true);
+            lightLabel.setTextColor(getResources().getColor(R.color.st_section_title));
+            lightTitle.setTextColor(getResources().getColor(R.color.st_section_value));
+            lightContainer.setEnabled(true);
         } else {
             allAlertCheck.setImageResource(R.drawable.holo_btn_check_off);
             allVibrationLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
@@ -271,6 +375,9 @@ public class SettingsNottificationsFragment extends TelegramFragment {
             allCustomSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             allCustomSoundTitle.setTextColor(getResources().getColor(R.color.st_section_value_disabled));
             allCustomSoundContainer.setEnabled(false);
+            lightLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
+            lightTitle.setTextColor(getResources().getColor(R.color.st_section_value_disabled));
+            lightContainer.setEnabled(false);
         }
 
         if (application.getNotificationSettings().isMessageVibrationEnabled()) {
@@ -306,6 +413,8 @@ public class SettingsNottificationsFragment extends TelegramFragment {
         } else {
             allCustomSoundTitle.setText(R.string.st_default);
         }
+
+        lightTitle.setText(getLedModeString(application.getNotificationSettings().getLedMode()));
     }
 
     private void updateGroupUi() {
@@ -341,6 +450,9 @@ public class SettingsNottificationsFragment extends TelegramFragment {
             groupCustomSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title));
             groupCustomSoundTitle.setTextColor(getResources().getColor(R.color.st_section_value));
             groupCustomSoundContainer.setEnabled(true);
+            groupLightLabel.setTextColor(getResources().getColor(R.color.st_section_title));
+            groupLightTitle.setTextColor(getResources().getColor(R.color.st_section_value));
+            groupLightContainer.setEnabled(true);
         } else {
             groupVibrationLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             groupVibrationContainer.setEnabled(false);
@@ -349,6 +461,9 @@ public class SettingsNottificationsFragment extends TelegramFragment {
             groupCustomSoundLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
             groupCustomSoundTitle.setTextColor(getResources().getColor(R.color.st_section_value_disabled));
             groupCustomSoundContainer.setEnabled(false);
+            groupLightLabel.setTextColor(getResources().getColor(R.color.st_section_title_disabled));
+            groupLightTitle.setTextColor(getResources().getColor(R.color.st_section_value_disabled));
+            groupLightContainer.setEnabled(false);
         }
 
         if (application.getNotificationSettings().isGroupVibrateEnabled()) {
@@ -383,6 +498,38 @@ public class SettingsNottificationsFragment extends TelegramFragment {
             groupCustomSoundTitle.setText(application.getNotificationSettings().getNotificationSoundGroupTitle());
         } else {
             groupCustomSoundTitle.setText(R.string.st_default);
+        }
+
+        groupLightTitle.setText(getLedModeString(application.getNotificationSettings().getLedGroupMode()));
+    }
+
+    private String getLedModeString(int mode) {
+        switch (mode) {
+            case NotificationSettings.LED_COLORFUL:
+            default:
+                return getStringSafe(R.string.st_notifications_led_colorful);
+            case NotificationSettings.LED_DEFAULT:
+                return getStringSafe(R.string.st_default);
+            case NotificationSettings.LED_NONE:
+                return getStringSafe(R.string.st_none);
+            case NotificationSettings.LED_BLUE:
+                return getStringSafe(R.string.st_notifications_led_blue);
+            case NotificationSettings.LED_CYAN:
+                return getStringSafe(R.string.st_notifications_led_cyan);
+            case NotificationSettings.LED_GREEN:
+                return getStringSafe(R.string.st_notifications_led_green);
+            case NotificationSettings.LED_ORANGE:
+                return getStringSafe(R.string.st_notifications_led_orange);
+            case NotificationSettings.LED_PINK:
+                return getStringSafe(R.string.st_notifications_led_pink);
+            case NotificationSettings.LED_PURPLE:
+                return getStringSafe(R.string.st_notifications_led_purple);
+            case NotificationSettings.LED_RED:
+                return getStringSafe(R.string.st_notifications_led_red);
+            case NotificationSettings.LED_WHITE:
+                return getStringSafe(R.string.st_notifications_led_white);
+            case NotificationSettings.LED_YELLOW:
+                return getStringSafe(R.string.st_notifications_led_yellow);
         }
     }
 

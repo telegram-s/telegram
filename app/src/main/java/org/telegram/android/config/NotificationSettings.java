@@ -12,7 +12,20 @@ public class NotificationSettings {
 
     private static final String PREFERENCE_NAME = "org.telegram.android.Notifications";
 
-    private static long ADD_TO_CONTACT_TIMEOUT = 24 * 60 * 60 * 1000;
+    private static final long ADD_TO_CONTACT_TIMEOUT = 24 * 60 * 60 * 1000;
+
+    public static final int LED_NONE = -1;
+    public static final int LED_DEFAULT = -2;
+    public static final int LED_COLORFUL = 0;
+    public static final int LED_WHITE = 1;
+    public static final int LED_BLUE = 2;
+    public static final int LED_CYAN = 3;
+    public static final int LED_GREEN = 4;
+    public static final int LED_ORANGE = 5;
+    public static final int LED_PINK = 6;
+    public static final int LED_PURPLE = 7;
+    public static final int LED_RED = 8;
+    public static final int LED_YELLOW = 9;
 
     private SharedPreferences preferences;
 
@@ -188,6 +201,38 @@ public class NotificationSettings {
 
     public void enableForChat(int uid) {
         preferences.edit().putBoolean("chat_" + uid + "_enabled", true).commit();
+    }
+
+    public void setLedMode(int ledMode) {
+        preferences.edit().putInt("led_mode", ledMode).commit();
+    }
+
+    public int getLedMode() {
+        return preferences.getInt("led_mode", LED_COLORFUL);
+    }
+
+    public void setLedGroupMode(int ledMode) {
+        preferences.edit().putInt("led_mode_group", ledMode).commit();
+    }
+
+    public int getLedGroupMode() {
+        return preferences.getInt("led_mode_group", LED_DEFAULT);
+    }
+
+    public void setCustomGroupColor(int chatId, int mode) {
+        preferences.edit().putInt("chat_" + chatId + "_led", mode).commit();
+    }
+
+    public void setCustomUserColor(int uid, int mode) {
+        preferences.edit().putInt("uid_" + uid + "_led", mode).commit();
+    }
+
+    public int getCustomUserColor(int uid) {
+        return preferences.getInt("uid_" + uid + "_led", LED_DEFAULT);
+    }
+
+    public int getCustomGroupColor(int chatId) {
+        return preferences.getInt("chat_" + chatId + "_led", LED_DEFAULT);
     }
 
     public void resetGroupSettings() {

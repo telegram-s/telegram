@@ -43,7 +43,6 @@ import org.telegram.android.ui.UiMeasure;
 import org.telegram.i18n.I18nUtil;
 import org.telegram.tl.TLObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -59,6 +58,7 @@ public class Notifications {
         public boolean useVibration;
         public boolean useCustomSound;
         public String customSoundUri;
+        public int ledColor;
     }
 
     private static final String TAG = "Notificagtions";
@@ -291,6 +291,13 @@ public class Notifications {
             if (peerType == PeerType.PEER_USER || peerType == PeerType.PEER_USER_ENCRYPTED) {
                 config.useVibration = settings.isMessageVibrationEnabled();
                 config.useSound = settings.isMessageSoundEnabled();
+
+                if (settings.getCustomUserColor(senderId) != NotificationSettings.LED_DEFAULT) {
+                    config.ledColor = getLedColor(senderId, settings.getCustomUserColor(senderId), 0);
+                } else {
+                    config.ledColor = getLedColor(senderId, settings.getLedMode(), 0);
+                }
+
                 if (settings.getUserNotificationSound(senderId) != null) {
                     config.customSoundUri = settings.getUserNotificationSound(senderId);
                     config.useCustomSound = true;
@@ -301,6 +308,11 @@ public class Notifications {
             } else {
                 config.useVibration = settings.isGroupVibrateEnabled();
                 config.useSound = settings.isGroupSoundEnabled();
+                if (settings.getCustomGroupColor(peerId) != NotificationSettings.LED_DEFAULT) {
+                    config.ledColor = getLedColor(peerId, settings.getCustomGroupColor(peerId), settings.getLedMode());
+                } else {
+                    config.ledColor = getLedColor(peerId, settings.getLedGroupMode(), settings.getLedMode());
+                }
 
                 if (settings.getChatNotificationSound(peerId) != null) {
                     config.customSoundUri = settings.getChatNotificationSound(peerId);
@@ -359,12 +371,51 @@ public class Notifications {
         }
     }
 
+    private int getLedColor(int peerId, int mode, int baseMode) {
+        switch (mode) {
+            case NotificationSettings.LED_NONE:
+                return 0;
+            case NotificationSettings.LED_DEFAULT:
+                if (baseMode != 0) {
+                    return getLedColor(peerId, baseMode, 0);
+                }
+            case NotificationSettings.LED_COLORFUL:
+            default:
+                return Placeholders.getLedColor(peerId);
+            case NotificationSettings.LED_CYAN:
+                return Placeholders.CYAN_LED;
+            case NotificationSettings.LED_PURPLE:
+                return Placeholders.PURPLE_LED;
+            case NotificationSettings.LED_PINK:
+                return Placeholders.PINK_LED;
+            case NotificationSettings.LED_ORANGE:
+                return Placeholders.ORANGE_LED;
+            case NotificationSettings.LED_YELLOW:
+                return Placeholders.YELLOW_LED;
+            case NotificationSettings.LED_BLUE:
+                return Placeholders.BLUE_LED;
+            case NotificationSettings.LED_GREEN:
+                return Placeholders.GREEN_LED;
+            case NotificationSettings.LED_RED:
+                return Placeholders.RED_LED;
+            case NotificationSettings.LED_WHITE:
+                return Placeholders.WHITE_LED;
+        }
+    }
+
     private NotificationConfig mergeConfigs(NotificationConfig source, NotificationConfig config) {
         if (source == null) {
             source = config;
         } else {
             source.useSound |= config.useSound;
             source.useVibration |= config.useVibration;
+            if (config.ledColor != 0) {
+                if (source.ledColor == 0) {
+                    source.ledColor = config.ledColor;
+                } else if (source.ledColor != config.ledColor) {
+                    source.ledColor = Placeholders.WHITE_LED;
+                }
+            }
             if (config.useCustomSound) {
                 source.customSoundUri = config.customSoundUri;
                 source.useCustomSound = true;
@@ -522,7 +573,7 @@ public class Notifications {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(application);
         builder.setSmallIcon(R.drawable.app_notify);
-        builder.setLights(Placeholders.getLedColor(records[0].getSender().getUid()), 1500, 1500);
+        builder.setLights(config.ledColor, 500, 500);
 
         int defaults = 0;
         if (config.useSound) {
@@ -537,7 +588,7 @@ public class Notifications {
         }
         builder.setDefaults(defaults);
 
-        builder.setTicker(records[0].getSenderTitle() + ": " + records[0].getContentMessage());
+        builder.setTicker(records[records.length - 1].getSenderTitle() + ": " + records[records.length - 1].getContentMessage());
 
         Intent intent;
         if (isHomogenous) {
@@ -554,7 +605,7 @@ public class Notifications {
 
         String summary;
         if (records.length > 1) {
-            builder.setContentTitle(application.getString(R.string.app_name));
+            builder.setContentTitle(application.getString(R.string.st_app_name));
             summary = I18nUtil.getInstance().getPluralFormatted(R.plurals.st_new_messages_s, records.length);
             builder.setContentText(summary);
         } else {

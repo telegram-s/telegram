@@ -21,6 +21,8 @@
     <string name="st_select_tone">Select tone</string>
     <string name="st_none">None</string>
     <string name="st_reset">Reset</string>
+    <string name="st_off">Off</string>
+    <string name="st_on">On</string>
 
     <string name="st_continue">Continue</string>
     <string name="st_back">Back</string>
@@ -348,6 +350,7 @@
 
     <string name="st_profile_notifications">Notifications</string>
     <string name="st_profile_notifications_sound">Customize tone</string>
+    <string name="st_profile_notifications_led">Customize light</string>
     <string name="st_profile_media">Media shared with user</string>
 
     <string name="st_profile_phone_hidden">hidden</string>
@@ -385,6 +388,7 @@
     <string name="st_edit_dialog_header_media">SHARED MEDIA</string>
     <string name="st_edit_dialog_notifications">Notifications</string>
     <string name="st_edit_dialog_notifications_sound">Customize tone</string>
+    <string name="st_edit_dialog_notifications_led">Customize light</string>
     <string name="st_edit_dialog_media">Media in group</string>
     <string name="st_edit_dialog_add_member">Add member</string>
     <string name="st_edit_dialog_delete">Leave group</string>
@@ -472,10 +476,23 @@
     <string name="st_appearance_item_size_large">Large</string>
 
     <string name="st_notifications_title">Notifications and sounds</string>
-    <string name="st_notifications_header_common">MESSAGE NOTIFICATIONS</string>
+    <string name="st_notifications_header_common">NOTIFICATIONS</string>
     <string name="st_notifications_header_group">GROUP NOTIFICATIONS</string>
     <string name="st_notifications_header_in_app">IN-APP NOTIFICATIONS</string>
     <string name="st_notifications_header_reset">RESET</string>
+
+    <string name="st_notifications_led">Light</string>
+    <string name="st_notifications_led_colorful">Colorful</string>
+    <string name="st_notifications_led_white">White</string>
+    <string name="st_notifications_led_blue">Blue</string>
+    <string name="st_notifications_led_cyan">Cyan</string>
+    <string name="st_notifications_led_green">Green</string>
+    <string name="st_notifications_led_orange">Orange</string>
+    <string name="st_notifications_led_pink">Pink</string>
+    <string name="st_notifications_led_purple">Purple</string>
+    <string name="st_notifications_led_red">Red</string>
+    <string name="st_notifications_led_yellow">Yellow</string>
+
     <string name="st_notifications_alert">Alert</string>
     <string name="st_notifications_vibrate">Vibrate</string>
     <string name="st_notifications_sound">Sound</string>
@@ -487,6 +504,10 @@
     <string name="st_notifications_reset_hint">Undo all custom notification settings for all your contacts and groups
     </string>
     <string name="st_notifications_reset_success">Settings successfully reset</string>
+
+    <string name="st_notifications_alert_joined">Contact joined Telegram</string>
+
+    <string name="st_notifications_renotify">Remind about messages</string>
 
     <string name="st_message_by_you">You</string>
     <string name="st_message_you">You</string>
