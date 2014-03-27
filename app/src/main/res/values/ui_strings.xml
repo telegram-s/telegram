@@ -602,7 +602,7 @@
     <string name="st_notification_sent_contact_short">Contact</string>
     <string name="st_notification_sent_video_short">Video</string>
     <string name="st_notification_sent_photo_short">Photo</string>
-    <string name="st_notification_sent_message_short">Message</string>
+    <string name="st_notification_sent_message_short">Hidden message</string>
     <string name="st_notification_sent_document_short">Document</string>
     <string name="st_notification_sent_animation_short">Animation</string>
     <string name="st_notification_sent_audio_short">Audio</string>
@@ -638,6 +638,21 @@
     <string name="st_notification_secret_requested">Requested new secret chat</string>
     <string name="st_notification_secret_created">Secret chat started</string>
     <string name="st_notification_secret_cancelled">Secret chat cancelled</string>
+
+    <string name="st_notification_you">You</string>
+    <string name="st_notification_created_group">Created the group</string>
+    <string name="st_notification_changed_photo">Updated group photo</string>
+    <string name="st_notification_removed_photo">Removed group photo</string>
+    <string name="st_notification_changed_name">Updated group name</string>
+    <string name="st_notification_added_user">Added {0} to the group</string>
+    <string name="st_notification_added_user_you">@string/st_notification_added_user</string>
+    <string name="st_notification_enter_user">Joined the group</string>
+    <string name="st_notification_left_user">Left the group</string>
+    <string name="st_notification_kicked_user">Kicked {0} from the group</string>
+    <string name="st_notification_kicked_user_you">@string/st_notification_kicked_user</string>
+
+    <string name="st_notification_encrypted_switched_off">Disabled the self-destruct timer</string>
+    <string name="st_notification_encrypted_switched">Set the self-destruct timer to {time}</string>
 
     <string name="st_notification_new_login">New login from unrecognized device {device}</string>
     <string name="st_notification_new_login_location">New login from unrecognized device {device} from {location}

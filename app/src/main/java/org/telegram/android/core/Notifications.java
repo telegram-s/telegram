@@ -15,6 +15,7 @@ import android.media.SoundPool;
 import android.net.Uri;
 import android.os.*;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.text.BidiFormatter;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -26,17 +27,21 @@ import org.telegram.android.TelegramApplication;
 import org.telegram.android.config.NotificationSettings;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
+import org.telegram.android.core.model.media.TLLocalAvatarEmpty;
 import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
 import org.telegram.android.core.model.media.TLLocalFileLocation;
 import org.telegram.android.core.model.notifications.TLNotificationRecord;
 import org.telegram.android.core.model.notifications.TLNotificationState;
+import org.telegram.android.core.model.service.*;
 import org.telegram.android.critical.TLPersistence;
 import org.telegram.android.log.Logger;
 import org.telegram.android.preview.AvatarView;
 import org.telegram.android.screens.RootControllerHolder;
 import org.telegram.android.ui.Placeholders;
+import org.telegram.android.ui.TextUtil;
 import org.telegram.android.ui.UiMeasure;
 import org.telegram.i18n.I18nUtil;
+import org.telegram.tl.TLObject;
 
 import java.util.List;
 import java.util.Random;
@@ -94,6 +99,7 @@ public class Notifications {
     private WindowManager windowManager;
 
     private TLPersistence<TLNotificationState> persistence;
+    private int unreadMessages;
 
     public Notifications(TelegramApplication application) {
         this.application = application;
@@ -116,6 +122,7 @@ public class Notifications {
                             lastRecords[i].getContentShortMessage())
             );
         }
+        persistence.getObj().setUnreadCount(unreadMessages);
         persistence.write();
     }
 
@@ -131,6 +138,7 @@ public class Notifications {
             lastRecords[i].setContentMessage(pr.getContentMessage());
             lastRecords[i].setContentShortMessage(pr.getContentShortMessage());
         }
+        unreadMessages = persistence.getObj().getUnreadCount();
     }
 
     public void onActivityPaused() {
@@ -302,7 +310,7 @@ public class Notifications {
         }
     }
 
-    private void performNotifyInApp(NotificationRecord[] records, NotificationConfig config) {
+    private void performNotifyInApp(final NotificationRecord[] records, NotificationConfig config) {
         if (config.useSound) {
             Uri soundUri;
             if (config.useCustomSound) {
@@ -326,7 +334,7 @@ public class Notifications {
         final int peerType = records[0].getPeerType();
         final int peerId = records[0].getPeerId();
         final String finalMessage = records[0].getContentMessage();
-        final String finalSenderTitle = records[0].getSender().getDisplayName();
+        final String finalSenderTitle = records[0].getSenderTitle();
         final int senderId = records[0].getSender().getUid();
         handler.post(new Runnable() {
             @Override
@@ -354,16 +362,16 @@ public class Notifications {
 
                 AvatarView avatarImage = (AvatarView) notificationView.findViewById(R.id.avatar);
                 if (peerType == PeerType.PEER_USER) {
-                    avatarImage.setEmptyUser(finalSenderTitle, senderId);
+                    avatarImage.setEmptyUser(finalSenderTitle, peerId);
                     ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getTitleColor(peerId));
                     ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawables(null, null, null, null);
                 } else if (peerType == PeerType.PEER_CHAT) {
-                    avatarImage.setEmptyGroup(finalSenderTitle, senderId);
+                    avatarImage.setEmptyGroup(finalSenderTitle, peerId);
                     ((TextView) notificationView.findViewById(R.id.name)).setTextColor(Placeholders.getTitleColor(peerId));
                     ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawables(null, null, null, null);
                 } else if (peerType == PeerType.PEER_USER_ENCRYPTED) {
                     avatarImage.setEmptyUser(finalSenderTitle, senderId);
-                    ((TextView) notificationView.findViewById(R.id.name)).setTextColor(0xff67b540);
+                    ((TextView) notificationView.findViewById(R.id.name)).setTextColor(0xff4aa152);
                     ((TextView) notificationView.findViewById(R.id.name)).setCompoundDrawablesWithIntrinsicBounds(R.drawable.st_dialogs_lock, 0, 0, 0);
                 } else {
                     throw new UnsupportedOperationException("Unknown peer type: " + peerType);
@@ -377,22 +385,27 @@ public class Notifications {
                     }
                 });
 
-                avatarImage.requestAvatar(null);
-//                if (photo != null) {
-//                    if (photo instanceof TLLocalAvatarPhoto) {
-//                        TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) photo;
-//                        if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
-//                            avatarImage.requestAvatar(profilePhoto.getPreviewLocation());
-//                        } else {
-//                            avatarImage.requestAvatar(null);
-//                        }
-//                    } else {
-//                        avatarImage.requestAvatar(null);
-//                    }
-//                } else {
-//                    avatarImage.requestAvatar(null);
-//                }
+                TLAbsLocalAvatarPhoto photo = null;
+                if (peerType == PeerType.PEER_CHAT) {
+                    photo = records[0].getGroup().getAvatar();
+                } else if ((peerType == PeerType.PEER_USER_ENCRYPTED) || (peerType == PeerType.PEER_USER)) {
+                    photo = records[0].getSender().getPhoto();
+                }
 
+                if (photo != null) {
+                    if (photo instanceof TLLocalAvatarPhoto) {
+                        TLLocalAvatarPhoto profilePhoto = (TLLocalAvatarPhoto) photo;
+                        if (profilePhoto.getPreviewLocation() instanceof TLLocalFileLocation) {
+                            avatarImage.requestAvatar(profilePhoto.getPreviewLocation());
+                        } else {
+                            avatarImage.requestAvatar(null);
+                        }
+                    } else {
+                        avatarImage.requestAvatar(null);
+                    }
+                } else {
+                    avatarImage.requestAvatar(null);
+                }
 
                 if (needAdd) {
                     AlphaAnimation alpha = new AlphaAnimation(0.0F, 1.0f);
@@ -542,10 +555,10 @@ public class Notifications {
                 NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
                 for (NotificationRecord record : records) {
                     if (!isHomogenous) {
-                        inboxStyle.addLine(record.getSenderTitle() + ": " + record.getContentMessage());
+                        inboxStyle.addLine(record.getSenderTitle() + ": " + record.getContentShortMessage());
                     } else {
                         if (records[0].getPeerType() == PeerType.PEER_CHAT) {
-                            inboxStyle.addLine(record.getShortSender() + ": " + record.getContentMessage());
+                            inboxStyle.addLine(record.getShortSender() + ": " + record.getContentShortMessage());
                         } else {
                             inboxStyle.addLine(record.getContentMessage());
                         }
@@ -646,83 +659,177 @@ public class Notifications {
         }
 
         if (msg.getRawContentType() == ContentType.MESSAGE_TEXT) {
-            String message = msg.getMessage();
-            if (message.length() > MAX_MESSAGE_LENGTH) {
-                message = message.substring(0, MAX_MESSAGE_LENGTH);
+            if (msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                record.setContentMessage(application.getString(R.string.st_notification_secret_sent_message));
+                record.setContentShortMessage(application.getString(R.string.st_notification_sent_message_short));
+            } else {
+                String message = msg.getMessage();
+                if (message.length() > MAX_MESSAGE_LENGTH) {
+                    message = message.substring(0, MAX_MESSAGE_LENGTH);
+                }
+                record.setContentMessage(message);
+                record.setContentShortMessage(message);
             }
-            record.setContentMessage(message);
-            record.setContentShortMessage(message);
         } else if (msg.getRawContentType() == ContentType.MESSAGE_CONTACT) {
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_contact)
-                        .replace("{name}", record.sender.getDisplayName())
-                        .replace("{chat}", record.group.getTitle()));
-            } else {
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
+                        .replace("{chat}", BidiFormatter.getInstance().unicodeWrap(record.group.getTitle())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER) {
                 record.setContentMessage(application.getString(R.string.st_notification_sent_contact)
-                        .replace("{name}", record.sender.getDisplayName()));
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName())));
+            } else {
+                return null;
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_contact_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_GEO) {
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_map)
-                        .replace("{name}", record.sender.getDisplayName())
-                        .replace("{chat}", record.group.getTitle()));
-            } else {
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
+                        .replace("{chat}", BidiFormatter.getInstance().unicodeWrap(record.group.getTitle())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER) {
                 record.setContentMessage(application.getString(R.string.st_notification_sent_map)
-                        .replace("{name}", record.sender.getDisplayName()));
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                record.setContentMessage(application.getString(R.string.st_notification_secret_sent_map));
+            } else {
+                return null;
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_map_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_PHOTO) {
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_photo)
-                        .replace("{name}", record.sender.getDisplayName())
-                        .replace("{chat}", record.group.getTitle()));
-            } else {
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
+                        .replace("{chat}", BidiFormatter.getInstance().unicodeWrap(record.group.getTitle())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER) {
                 record.setContentMessage(application.getString(R.string.st_notification_sent_photo)
-                        .replace("{name}", record.sender.getDisplayName()));
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                record.setContentMessage(application.getString(R.string.st_notification_secret_sent_photo));
+            } else {
+                return null;
             }
-
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_photo_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_VIDEO) {
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_video)
-                        .replace("{name}", record.sender.getDisplayName())
-                        .replace("{chat}", record.group.getTitle()));
-            } else {
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
+                        .replace("{chat}", BidiFormatter.getInstance().unicodeWrap(record.group.getTitle())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER) {
                 record.setContentMessage(application.getString(R.string.st_notification_sent_video)
-                        .replace("{name}", record.sender.getDisplayName()));
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                record.setContentMessage(application.getString(R.string.st_notification_secret_sent_video));
+            } else {
+                return null;
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_video_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_DOCUMENT || msg.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW) {
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_document)
-                        .replace("{name}", record.sender.getDisplayName())
-                        .replace("{chat}", record.group.getTitle()));
-            } else {
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
+                        .replace("{chat}", BidiFormatter.getInstance().unicodeWrap(record.group.getTitle())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER) {
                 record.setContentMessage(application.getString(R.string.st_notification_sent_document)
-                        .replace("{name}", record.sender.getDisplayName()));
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                record.setContentMessage(application.getString(R.string.st_notification_secret_sent_doc));
+            } else {
+                return null;
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_document_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_animation)
-                        .replace("{name}", record.sender.getDisplayName())
-                        .replace("{chat}", record.group.getTitle()));
-            } else {
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
+                        .replace("{chat}", BidiFormatter.getInstance().unicodeWrap(record.group.getTitle())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER) {
                 record.setContentMessage(application.getString(R.string.st_notification_sent_animation)
-                        .replace("{name}", record.sender.getDisplayName()));
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                record.setContentMessage(application.getString(R.string.st_notification_secret_sent_animation));
+            } else {
+                return null;
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_animation_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_AUDIO) {
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_audio)
-                        .replace("{name}", record.sender.getDisplayName())
-                        .replace("{chat}", record.group.getTitle()));
-            } else {
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
+                        .replace("{chat}", BidiFormatter.getInstance().unicodeWrap(record.group.getTitle())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER) {
                 record.setContentMessage(application.getString(R.string.st_notification_sent_audio)
-                        .replace("{name}", record.sender.getDisplayName()));
+                        .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName())));
+            } else if (msg.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
+                record.setContentMessage(application.getString(R.string.st_notification_secret_sent_audio));
+            } else {
+                return null;
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_audio_short));
+        } else if (msg.getContentType() == ContentType.MESSAGE_SYSTEM) {
+            TLObject object = msg.getExtras();
+            if (object != null && object instanceof TLAbsLocalAction) {
+                TLAbsLocalAction action = (TLAbsLocalAction) object;
+                if (action instanceof TLLocalActionChatAddUser) {
+                    int addedUid = ((TLLocalActionChatAddUser) action).getUserId();
+                    String addedName;
+                    int resource;
+                    if (addedUid == application.getCurrentUid()) {
+                        addedName = application.getString(R.string.st_notification_you);
+                        resource = R.string.st_notification_added_user_you;
+                    } else {
+                        User user = application.getEngine().getUser(addedUid);
+                        if (user == null) {
+                            return null;
+                        }
+                        addedName = getShortName(user);
+                        resource = R.string.st_notification_added_user;
+                    }
+                    record.setContentMessage(application.getString(resource).replace("{0}", BidiFormatter.getInstance().unicodeWrap(addedName)));
+                } else if (action instanceof TLLocalActionChatEditTitle) {
+                    record.setContentMessage(application.getString(R.string.st_notification_changed_name));
+                } else if (action instanceof TLLocalActionChatCreate) {
+                    record.setContentMessage(application.getString(R.string.st_notification_created_group));
+                } else if (action instanceof TLLocalActionChatEditPhoto) {
+                    if (((TLLocalActionChatEditPhoto) action).getPhoto() instanceof TLLocalAvatarEmpty) {
+                        record.setContentMessage(application.getString(R.string.st_notification_removed_photo));
+                    } else {
+                        record.setContentMessage(application.getString(R.string.st_notification_changed_photo));
+                    }
+                } else if (action instanceof TLLocalActionChatDeletePhoto) {
+                    record.setContentMessage(application.getString(R.string.st_notification_removed_photo));
+                } else if (action instanceof TLLocalActionChatDeleteUser) {
+                    int deletedUid = ((TLLocalActionChatDeleteUser) action).getUserId();
+                    String deletedName;
+                    int resource;
+                    if (deletedUid == application.getCurrentUid()) {
+                        deletedName = application.getString(R.string.st_notification_you);
+                        resource = R.string.st_notification_kicked_user_you;
+                    } else {
+                        User user = application.getEngine().getUser(deletedUid);
+                        if (user == null) {
+                            return null;
+                        }
+                        deletedName = getShortName(user);
+                        resource = R.string.st_notification_kicked_user;
+                    }
+                    record.setContentMessage(application.getString(resource).replace("{0}", BidiFormatter.getInstance().unicodeWrap(deletedName)));
+                } else if (action instanceof TLLocalActionEncryptedTtl) {
+                    int ttl = ((TLLocalActionEncryptedTtl) action).getTtlSeconds();
+                    if (ttl <= 0) {
+                        record.setContentMessage(application.getString(R.string.st_notification_encrypted_switched_off));
+                    } else {
+                        record.setContentMessage(application.getString(R.string.st_notification_encrypted_switched).replace("{time}",
+                                BidiFormatter.getInstance().unicodeWrap(TextUtil.formatHumanReadableDuration(ttl))));
+                    }
+                } else {
+                    return null;
+                }
+
+                record.setContentShortMessage(record.getContentMessage());
+            } else {
+                return null;
+            }
         } else {
             return null;
         }
@@ -798,7 +905,6 @@ public class Notifications {
         private String contentShortMessage;
         private String contentMessage;
         private byte[] contentPreview = new byte[0];
-        private String contentKey = "";
         private User sender;
         private Group group;
         private EncryptedChat secretChat;
@@ -876,12 +982,17 @@ public class Notifications {
         }
 
         public String getShortSender() {
-            String lastName = sender.getLastName().trim();
-            if (lastName.length() > 0) {
-                return sender.getFirstName() + " " + sender.getLastName().trim().charAt(0);
-            } else {
-                return sender.getFirstName();
-            }
+            return getShortName(sender);
         }
     }
+
+    private static String getShortName(User user) {
+        String lastName = user.getLastName().trim();
+        if (lastName.length() > 0) {
+            return user.getFirstName() + " " + user.getLastName().trim().charAt(0);
+        } else {
+            return user.getFirstName();
+        }
+    }
+
 }
