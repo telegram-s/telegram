@@ -24,15 +24,13 @@ import org.telegram.android.TelegramApplication;
 import org.telegram.android.app.NotificationRepeat;
 import org.telegram.android.config.NotificationSettings;
 import org.telegram.android.core.model.*;
-import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
-import org.telegram.android.core.model.media.TLLocalAvatarEmpty;
-import org.telegram.android.core.model.media.TLLocalAvatarPhoto;
-import org.telegram.android.core.model.media.TLLocalFileLocation;
+import org.telegram.android.core.model.media.*;
 import org.telegram.android.core.model.notifications.TLNotificationRecord;
 import org.telegram.android.core.model.notifications.TLNotificationState;
 import org.telegram.android.core.model.service.*;
 import org.telegram.android.critical.TLPersistence;
 import org.telegram.android.log.Logger;
+import org.telegram.android.media.Optimizer;
 import org.telegram.android.preview.AvatarView;
 import org.telegram.android.screens.RootControllerHolder;
 import org.telegram.android.ui.Placeholders;
@@ -643,7 +641,7 @@ public class Notifications {
             summary = I18nUtil.getInstance().getPluralFormatted(R.plurals.st_new_messages_s, 1);
         }
 
-        Notification res;
+        Notification res = null;
         if (Build.VERSION.SDK_INT >= 11) {
             if (isHomogenous) {
                 int size = (int) (UiMeasure.DENSITY * 64);
@@ -717,7 +715,21 @@ public class Notifications {
                 inboxStyle.setSummaryText(summary);
                 res = inboxStyle.build();
             } else {
-                res = builder.build();
+                if (records[0].getContentPreview() != null && records[0].getContentPreview().length > 0) {
+                    try {
+                        Bitmap preview = Optimizer.load(records[0].getContentPreview());
+                        Optimizer.blur(preview);
+                        res = new NotificationCompat.BigPictureStyle(builder)
+                                .bigPicture(preview)
+                                .build();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (res != null) {
+                    res = builder.build();
+                }
             }
         } else {
             res = builder.build();
@@ -839,6 +851,9 @@ public class Notifications {
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_map_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_PHOTO) {
+            if (msg.getExtras() instanceof TLLocalPhoto) {
+                record.setContentPreview(((TLLocalPhoto) msg.getExtras()).getFastPreview());
+            }
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_photo)
                         .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
@@ -853,6 +868,9 @@ public class Notifications {
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_photo_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_VIDEO) {
+            if (msg.getExtras() instanceof TLLocalVideo) {
+                record.setContentPreview(((TLLocalVideo) msg.getExtras()).getFastPreview());
+            }
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_video)
                         .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
@@ -867,6 +885,9 @@ public class Notifications {
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_video_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_DOCUMENT || msg.getRawContentType() == ContentType.MESSAGE_DOC_PREVIEW) {
+            if (msg.getExtras() instanceof TLLocalDocument) {
+                record.setContentPreview(((TLLocalDocument) msg.getExtras()).getFastPreview());
+            }
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_document)
                         .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
@@ -881,6 +902,9 @@ public class Notifications {
             }
             record.setContentShortMessage(application.getString(R.string.st_notification_sent_document_short));
         } else if (msg.getRawContentType() == ContentType.MESSAGE_DOC_ANIMATED) {
+            if (msg.getExtras() instanceof TLLocalDocument) {
+                record.setContentPreview(((TLLocalDocument) msg.getExtras()).getFastPreview());
+            }
             if (msg.getPeerType() == PeerType.PEER_CHAT) {
                 record.setContentMessage(application.getString(R.string.st_notification_group_sent_animation)
                         .replace("{name}", BidiFormatter.getInstance().unicodeWrap(record.sender.getDisplayName()))
