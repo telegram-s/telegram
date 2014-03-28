@@ -88,10 +88,16 @@ public class MessageSender {
 
             final long start = SystemClock.uptimeMillis();
             application.getApi().doRpcCall(request, TIMEOUT, new RpcCallbackEx<TLAbsSentEncryptedMessage>() {
+                boolean isNotified = false;
+
                 @Override
                 public void onResult(TLAbsSentEncryptedMessage result) {
                     application.getUpdateProcessor().onMessage(new TLLocalMessageEncryptedSent(result, message));
                     Logger.d(TAG, "Chat message sent in time: " + (SystemClock.uptimeMillis() - start) + " ms");
+                    if (!isNotified) {
+                        isNotified = true;
+                        application.getNotifications().notifySent(message.getPeerType(), message.getPeerId());
+                    }
                 }
 
                 @Override
@@ -106,6 +112,10 @@ public class MessageSender {
                     application.getEngine().onConfirmed(message);
                     application.notifyUIUpdate();
                     Logger.d(TAG, "Chat message confirm time: " + (SystemClock.uptimeMillis() - start) + " ms");
+                    if (!isNotified) {
+                        isNotified = true;
+                        application.getNotifications().notifySent(message.getPeerType(), message.getPeerId());
+                    }
                 }
             });
         } else {
@@ -134,6 +144,9 @@ public class MessageSender {
             final long start = SystemClock.uptimeMillis();
 
             application.getApi().doRpcCall(request, TIMEOUT, new RpcCallbackEx<TLObject>() {
+
+                boolean isNotified = false;
+
                 @Override
                 public void onResult(TLObject object) {
                     if (object instanceof TLAbsSentMessage) {
@@ -145,6 +158,11 @@ public class MessageSender {
                     } else {
                         TLAbsStatedMessages sent = (TLAbsStatedMessages) object;
                         application.getUpdateProcessor().onMessage(new TLLocalMessagesSentStated(sent, message));
+                    }
+
+                    if (!isNotified) {
+                        isNotified = true;
+                        application.getNotifications().notifySent(message.getPeerType(), message.getPeerId());
                     }
                 }
 
@@ -161,6 +179,11 @@ public class MessageSender {
                     application.getEngine().onConfirmed(message);
                     application.notifyUIUpdate();
                     Logger.d(TAG, "Chat message confirm time: " + (SystemClock.uptimeMillis() - start) + " ms");
+
+                    if (!isNotified) {
+                        isNotified = true;
+                        application.getNotifications().notifySent(message.getPeerType(), message.getPeerId());
+                    }
                 }
             });
         }

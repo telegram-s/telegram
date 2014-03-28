@@ -78,6 +78,7 @@ public class Notifications {
     private NotificationManager manager;
 
     private long lastNotifiedTime = -1;
+    private long lastSentNotifiedTime = -1;
 
     private Random rnd = new Random();
 
@@ -93,6 +94,7 @@ public class Notifications {
 
     private SoundPool pool;
     private int soundId;
+    private int soundSentId;
 
     private View notificationView;
     private Activity notificationActivity;
@@ -107,6 +109,7 @@ public class Notifications {
         this.manager = (NotificationManager) application.getSystemService(Context.NOTIFICATION_SERVICE);
         this.pool = new SoundPool(1, AudioManager.STREAM_NOTIFICATION, 0);
         this.soundId = this.pool.load(application, R.raw.message, 0);
+        this.soundSentId = this.pool.load(application, R.raw.sent, 0);
         this.persistence = new TLPersistence<TLNotificationState>(application, "notifications.tl", TLNotificationState.class, TLLocalContext.getInstance());
         loadPersistence();
     }
@@ -160,6 +163,16 @@ public class Notifications {
         }
         lastRecords = nRecords.toArray(new NotificationRecord[0]);
         unreadMessages = persistence.getObj().getUnreadCount();
+    }
+
+    public void notifySent(int peerType, int peerId) {
+        if (peerType == application.getUiKernel().getOpenedChatPeerType() &&
+                peerId == application.getUiKernel().getOpenedChatPeerId()) {
+            if (SystemClock.uptimeMillis() - lastSentNotifiedTime > QUITE_PERIOD) {
+                pool.play(soundSentId, 1, 1, 1, 0, 1);
+                lastSentNotifiedTime = SystemClock.uptimeMillis();
+            }
+        }
     }
 
     public void onActivityPaused() {
@@ -279,8 +292,9 @@ public class Notifications {
         boolean isSilent = false;
         if (SystemClock.uptimeMillis() - lastNotifiedTime < QUITE_PERIOD) {
             isSilent = true;
+        } else {
+            lastNotifiedTime = SystemClock.uptimeMillis();
         }
-        lastNotifiedTime = SystemClock.uptimeMillis();
 
         for (NotificationRecord msg : newNotifications) {
             int peerType = msg.getPeerType();
