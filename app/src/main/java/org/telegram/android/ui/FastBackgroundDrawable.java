@@ -2,6 +2,7 @@ package org.telegram.android.ui;
 
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
+import org.telegram.android.log.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,7 +17,6 @@ public class FastBackgroundDrawable extends Drawable {
     private Bitmap bitmap;
     private Rect source;
     private Rect dest;
-    private int lastTop;
     private int lastTopHeight;
 
     public FastBackgroundDrawable(Bitmap bitmap) {
@@ -43,6 +43,16 @@ public class FastBackgroundDrawable extends Drawable {
         int destW = src.width();
         int destH = src.height();
 
+        if (dest != null && dest.width() == src.width()) {
+            if (lastTopHeight >= src.height()) {
+                destH = lastTopHeight;
+            } else {
+                lastTopHeight = destH;
+            }
+        } else {
+            lastTopHeight = destH;
+        }
+
         float scaleFactor = Math.max(
                 destW / (float) bitmap.getWidth(),
                 destH / (float) bitmap.getHeight());
@@ -50,21 +60,12 @@ public class FastBackgroundDrawable extends Drawable {
         int height = (int) (scaleFactor * bitmap.getHeight());
         int deltaX = -(destW - width) / 2;
         int deltaY = -(destH - height) / 2;
-        if (dest != null && dest.width() == src.width()) {
-            if (lastTopHeight >= src.height()) {
-                deltaY = lastTop;
-            } else {
-                lastTop = deltaY;
-                lastTopHeight = destH;
-            }
-        } else {
-            lastTop = deltaY;
-            lastTopHeight = destH;
-        }
         deltaX /= scaleFactor;
         deltaY /= scaleFactor;
-        dest = getBounds();
-        source = new Rect(deltaX, deltaY, destW + deltaX, destH + deltaY);
+        dest = new Rect(src.left, src.top, src.right, src.top + destH);
+        source = new Rect(deltaX, deltaY, (int) (destW / scaleFactor) + deltaX, (int) (destH / scaleFactor) + deltaY);
+        Logger.d("FastBackgroundDrawable", "State: " + deltaX + ", " + deltaY + " - " + destW + ", " + destH);
+        Logger.d("FastBackgroundDrawable", "State2: " + bitmap.getWidth() + ", " + bitmap.getHeight() + ", " + scaleFactor);
     }
 
     @Override
