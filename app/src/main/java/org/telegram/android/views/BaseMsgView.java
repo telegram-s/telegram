@@ -35,6 +35,8 @@ import org.telegram.i18n.I18nUtil;
  */
 public abstract class BaseMsgView extends BaseView implements Checkable {
 
+    private static final String TAG = "BaseMsgView";
+
     private static final long AVATAR_FADE_TIME = 150;
     protected static final long FADE_ANIMATION_TIME = 150;
     protected static final long STATE_ANIMATION_TIME = 120;
@@ -304,6 +306,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
         }
         bindCommonInt(message);
         bindCommon(message);
+        Logger.d(TAG, "Bind old=" + oldId + ", new=" + message.message.getDatabaseId() + " of instance #" + hashCode());
         if (oldId != -1 && message.message.getDatabaseId() == oldId) {
             bindUpdateInt(message);
             bindUpdate(message);
@@ -542,7 +545,7 @@ public abstract class BaseMsgView extends BaseView implements Checkable {
 
     public void unbind() {
         releaseAvatar();
-        oldId = 0;
+        oldId = -1;
         message = null;
     }
 

@@ -235,9 +235,11 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
     @Override
     public void unbind() {
-        super.unbind();
-        unbindOldPreview();
-        unbindPreview();
+        // Disable unbinding for MediaView
+
+        // super.unbind();
+        // unbindOldPreview();
+        // unbindPreview();
     }
 
     private void bindSize(int w, int h) {
@@ -459,12 +461,14 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
 
         this.downloadStateTime = 0;
 
-        Logger.d(TAG, "Bind in " + (SystemClock.uptimeMillis() - start) + " ms");
+        Logger.d(TAG, "Bind new in " + (SystemClock.uptimeMillis() - start) + " ms");
         requestLayout();
     }
 
     @Override
     protected void bindUpdate(MessageWireframe message) {
+        long start = SystemClock.uptimeMillis();
+
         if (this.state != message.message.getState()) {
             this.prevState = this.state;
             this.state = message.message.getState();
@@ -472,6 +476,8 @@ public class MessageMediaView extends BaseDownloadView implements ImageReceiver 
         }
 
         bindMedia(message);
+
+        Logger.d(TAG, "Bind update in " + (SystemClock.uptimeMillis() - start) + " ms");
 
         invalidate();
     }
