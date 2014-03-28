@@ -887,6 +887,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
         application.getSyncKernel().getBackgroundSync().resetTypingDelay();
         dialogAdapter.notifyDataSetChanged();
         listView.setSelectionFromTop(workingSet.size(), -10000);
+        listView.post(new Runnable() {
+            @Override
+            public void run() {
+                listView.setSelectionFromTop(workingSet.size(), -10000);
+            }
+        });
         editText.setText("");
         application.getTextSaver().clearText(peerType, peerId);
     }
@@ -2041,6 +2047,12 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
             workingSet = nWorkingSet;
             dialogAdapter.notifyDataSetChanged();
             listView.setSelectionFromTop(workingSet.size(), -10000);
+            listView.post(new Runnable() {
+                @Override
+                public void run() {
+                    listView.setSelectionFromTop(workingSet.size(), -10000);
+                }
+            });
             return;
         }
 
