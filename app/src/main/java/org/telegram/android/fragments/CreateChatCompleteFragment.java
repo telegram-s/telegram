@@ -135,9 +135,9 @@ public class CreateChatCompleteFragment extends MediaReceiverFragment {
             @Override
             public void onClick(View view) {
                 if (imageUri != null || imageFileName != null) {
-                    requestPhotoChooserWithDelete(0);
+                    requestPhotoChooser(0, PICK_DEFAULT | PICK_DELETE);
                 } else {
-                    requestPhotoChooser(0);
+                    requestPhotoChooser(0, PICK_DEFAULT);
                 }
             }
         }));

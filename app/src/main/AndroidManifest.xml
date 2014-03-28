@@ -1,204 +1,204 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.telegram.android"
-    android:installLocation="internalOnly"
-    android:versionCode="1024"
-    android:versionName="debug" >
+          package="org.telegram.android"
+          android:installLocation="internalOnly"
+          android:versionCode="1024"
+          android:versionName="debug">
 
     <supports-screens
-        android:anyDensity="true"
-        android:largeScreens="true"
-        android:normalScreens="true"
-        android:resizeable="true"
-        android:smallScreens="true"
-        android:xlargeScreens="true" />
+            android:anyDensity="true"
+            android:largeScreens="true"
+            android:normalScreens="true"
+            android:resizeable="true"
+            android:smallScreens="true"
+            android:xlargeScreens="true"/>
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.RECORD_VIDEO" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.READ_PROFILE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.RECORD_VIDEO"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.READ_PROFILE"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
     <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
+            android:glEsVersion="0x00020000"
+            android:required="true"/>
     <uses-feature
-        android:name="android.hardware.telephony"
-        android:required="false" />
+            android:name="android.hardware.telephony"
+            android:required="false"/>
     <uses-feature
-        android:name="android.hardware.bluetooth"
-        android:required="false" />
+            android:name="android.hardware.bluetooth"
+            android:required="false"/>
     <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
+            android:name="android.hardware.camera"
+            android:required="false"/>
     <uses-feature
-        android:name="android.hardware.location"
-        android:required="false" />
+            android:name="android.hardware.location"
+            android:required="false"/>
     <uses-feature
-        android:name="android.hardware.microphone"
-        android:required="false" />
+            android:name="android.hardware.microphone"
+            android:required="false"/>
 
     <uses-sdk
-        android:minSdkVersion="8"
-        android:targetSdkVersion="18" />
+            android:minSdkVersion="8"
+            android:targetSdkVersion="18"/>
 
     <application
-        android:name="org.telegram.android.TelegramApplication"
-        android:hardwareAccelerated="true"
-        android:icon="@drawable/app_icon"
-        android:label="@string/st_app_name"
-        android:supportsRtl="true" >
-        <activity
-            android:name="org.telegram.android.StartActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:name="org.telegram.android.TelegramApplication"
+            android:hardwareAccelerated="true"
+            android:icon="@drawable/app_icon"
             android:label="@string/st_app_name"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme.Theme"
-            android:windowSoftInputMode="adjustResize" >
+            android:supportsRtl="true">
+        <activity
+                android:name="org.telegram.android.StartActivity"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                android:label="@string/st_app_name"
+                android:launchMode="singleTop"
+                android:theme="@style/AppTheme.Theme"
+                android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="vnd.android.cursor.item/vnd.org.telegram.android.profile" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.org.telegram.android.profile"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data
-                    android:host="telegram.org"
-                    android:pathPattern="/a/.*"
-                    android:scheme="http" />
+                        android:host="telegram.org"
+                        android:pathPattern="/a/.*"
+                        android:scheme="http"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="image/*" />
+                <data android:mimeType="image/*"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="video/*" />
+                <data android:mimeType="video/*"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="image/*" />
+                <data android:mimeType="image/*"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/plain"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-            android:name="org.telegram.android.activity.ViewImagesActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:label="Telegram"
-            android:theme="@style/AppTheme.Photo"
-            android:windowSoftInputMode="stateHidden|adjustNothing" />
+                android:name="org.telegram.android.activity.ViewImagesActivity"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                android:label="Telegram"
+                android:theme="@style/AppTheme.Photo"
+                android:windowSoftInputMode="stateHidden|adjustNothing"/>
         <activity
-            android:name="org.telegram.android.activity.ViewImageActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:label="Telegram"
-            android:theme="@style/AppTheme.Photo"
-            android:windowSoftInputMode="stateHidden|adjustNothing" />
+                android:name="org.telegram.android.activity.ViewImageActivity"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                android:label="Telegram"
+                android:theme="@style/AppTheme.Photo"
+                android:windowSoftInputMode="stateHidden|adjustNothing"/>
         <activity
-            android:name="org.telegram.android.video.VideoRecorderActivity"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
-            android:windowSoftInputMode="stateHidden|adjustNothing" />
+                android:name="org.telegram.android.video.VideoRecorderActivity"
+                android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+                android:windowSoftInputMode="stateHidden|adjustNothing"/>
         <activity
-            android:name="org.telegram.android.activity.PickWebImageActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:label="Telegram"
-            android:theme="@style/AppTheme.Theme"
-            android:windowSoftInputMode="adjustResize" />
+                android:name="org.telegram.android.activity.PickWebImageActivity"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                android:label="Web search"
+                android:theme="@style/AppTheme.Theme"
+                android:windowSoftInputMode="adjustResize"/>
         <activity
-            android:name="org.telegram.android.activity.PickCountryActivity"
-            android:theme="@style/AppTheme.Theme" />
-        <activity android:name="net.hockeyapp.android.UpdateActivity" />
+                android:name="org.telegram.android.activity.PickCountryActivity"
+                android:theme="@style/AppTheme.Theme"/>
+        <activity android:name="net.hockeyapp.android.UpdateActivity"/>
         <activity
-            android:name="org.telegram.android.activity.CropImageActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:label="Telegram"
-            android:theme="@style/AppTheme.Photo"
-            android:windowSoftInputMode="stateHidden|adjustNothing" />
+                android:name="org.telegram.android.activity.CropImageActivity"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                android:label="Telegram"
+                android:theme="@style/AppTheme.Photo"
+                android:windowSoftInputMode="stateHidden|adjustNothing"/>
         <activity
-            android:name="org.telegram.android.activity.SettingsActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme.Theme"
-            android:windowSoftInputMode="adjustResize" />
+                android:name="org.telegram.android.activity.SettingsActivity"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+                android:launchMode="singleTop"
+                android:theme="@style/AppTheme.Theme"
+                android:windowSoftInputMode="adjustResize"/>
 
-        <service android:name="org.telegram.android.BackgroundService" />
+        <service android:name="org.telegram.android.BackgroundService"/>
 
         <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyDGnt4zDAc2U04se3BWXPjRUTerpLsLsZw" />
+                android:name="com.google.android.maps.v2.API_KEY"
+                android:value="AIzaSyDGnt4zDAc2U04se3BWXPjRUTerpLsLsZw"/>
         <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+                android:name="com.google.android.gms.version"
+                android:value="@integer/google_play_services_version"/>
 
         <provider
-            android:name="org.telegram.android.app.MediaProvider"
-            android:authorities="@string/app_package"
-            android:exported="true" />
+                android:name="org.telegram.android.app.MediaProvider"
+                android:authorities="@string/app_package"
+                android:exported="true"/>
 
         <meta-data
-            android:name="com.crashlytics.ApiKey"
-            android:value="d78e94b0dcd206307a64bfe0bbfaaf6b4713aea6" />
+                android:name="com.crashlytics.ApiKey"
+                android:value="d78e94b0dcd206307a64bfe0bbfaaf6b4713aea6"/>
 
         <service
-            android:name="org.telegram.android.app.NotificationRepeat"
-            android:exported="false" >
+                android:name="org.telegram.android.app.NotificationRepeat"
+                android:exported="false">
         </service>
     </application>
 

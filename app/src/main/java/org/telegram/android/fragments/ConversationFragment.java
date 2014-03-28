@@ -1442,7 +1442,7 @@ public class ConversationFragment extends MediaReceiverFragment implements ViewS
                 Toast.makeText(getActivity(), R.string.st_conv_chat_closed_title, Toast.LENGTH_SHORT).show();
                 return true;
             }
-            requestPhotoChooser(0);
+            requestPhotoChooser(0, PICK_NONE);
             return true;
         }
         if (item.getItemId() == R.id.attachVideo) {

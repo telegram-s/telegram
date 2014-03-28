@@ -2,13 +2,14 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:ext="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
+              android:orientation="horizontal"
               android:paddingLeft="20dp"
               android:paddingRight="20dp"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="@android:color/white">
-    <TextView android:layout_width="fill_parent"
+    <TextView android:layout_width="0dp"
+              android:layout_weight="1"
               android:layout_height="56dp"
               android:text="Share"
               android:singleLine="true"
@@ -19,4 +20,12 @@
               android:textSize="23sp"
               android:id="@+id/headerTitle"
               ext:customFont="light"/>
+
+    <CheckedTextView android:layout_width="wrap_content"
+                     android:layout_height="56dp"
+                     android:text="@string/st_picker_use_always"
+                     android:gravity="center_vertical"
+                     android:textColor="#282828"
+                     android:checkMark="@drawable/holo_btn_check_on"
+                     android:id="@+id/useAlways"/>
 </LinearLayout>

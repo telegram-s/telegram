@@ -600,9 +600,10 @@ public class ImagePreviewFragment extends TelegramFragment {
             }
 
             PickIntentDialog intentDialog = new PickIntentDialog(getActivity(), items.toArray(new PickIntentItem[0]),
+                    false,
                     new PickIntentClickListener() {
                         @Override
-                        public void onItemClicked(int index, PickIntentItem item) {
+                        public void onItemClicked(int index, PickIntentItem item, boolean useAlways) {
                             if (index == 0) {
                                 getActivity().setResult(Activity.RESULT_OK, new Intent().putExtra("forward_mid", record.getMid()));
                                 getActivity().finish();
@@ -622,9 +623,10 @@ public class ImagePreviewFragment extends TelegramFragment {
             }
 
             PickIntentDialog intentDialog = new PickIntentDialog(getActivity(), items.toArray(new PickIntentItem[0]),
+                    false,
                     new PickIntentClickListener() {
                         @Override
-                        public void onItemClicked(int index, PickIntentItem item) {
+                        public void onItemClicked(int index, PickIntentItem item, boolean useAlways) {
                             if (index == 0) {
                                 getActivity().setResult(Activity.RESULT_OK, new Intent().putExtra("forward_mid", record.getMid()));
                                 getActivity().finish();
@@ -749,7 +751,7 @@ public class ImagePreviewFragment extends TelegramFragment {
                 fileName = application.getDownloadManager().getFileName(key);
                 fileNameDest = key + ".jpg";
             } else {
-                Toast.makeText(getActivity(),R.string.st_error_unsupported,Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
                 return false;
             }
 
@@ -776,7 +778,7 @@ public class ImagePreviewFragment extends TelegramFragment {
                 key = DownloadManager.getPhotoKey((TLLocalPhoto) record.getPreview());
                 mime = "image/jpeg";
             } else {
-                Toast.makeText(getActivity(),R.string.st_error_unsupported,Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
                 return false;
             }
             openInternalFile(key, mime);
@@ -789,7 +791,7 @@ public class ImagePreviewFragment extends TelegramFragment {
                 key = DownloadManager.getPhotoKey((TLLocalPhoto) record.getPreview());
                 mime = "image/jpeg";
             } else {
-                Toast.makeText(getActivity(),R.string.st_error_unsupported,Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
                 return false;
             }
             setAsInternalFile(key, mime);

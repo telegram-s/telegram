@@ -297,9 +297,9 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
             @Override
             public void onClick(View view) {
                 if (application.getKernel().getActivationController().getManualAvatarUri() != null) {
-                    requestPhotoChooserWithDelete(0);
+                    requestPhotoChooser(0, PICK_DEFAULT | PICK_DELETE);
                 } else {
-                    requestPhotoChooser(0);
+                    requestPhotoChooser(0, PICK_DEFAULT);
                 }
             }
         }));
@@ -376,7 +376,8 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
                         getStringSafe(R.string.st_auth_confirm_phone)
                                 .replace("\\n", "\n")
-                                .replace("{0}", BidiFormatter.getInstance().unicodeWrap(PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL))));
+                                .replace("{0}", BidiFormatter.getInstance().unicodeWrap(PhoneNumberUtil.getInstance().format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)))
+                );
                 builder.setPositiveButton(R.string.st_yes, secure(new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -395,7 +396,8 @@ public class AuthFragment extends MediaReceiverFragment implements ActivationLis
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(
                         getStringSafe(R.string.st_auth_incorrect_phone)
                                 .replace("{0}", PhoneNumberUtil.getInstance()
-                                        .format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)));
+                                        .format(numberUtil, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL))
+                );
                 AlertDialog dialog = builder.create();
                 dialog.setCanceledOnTouchOutside(true);
                 dialog.show();

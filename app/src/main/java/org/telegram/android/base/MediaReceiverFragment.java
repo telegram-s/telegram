@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Telephony;
 import android.widget.Toast;
 import org.telegram.android.R;
 import org.telegram.android.activity.CropImageActivity;
@@ -30,6 +31,12 @@ public class MediaReceiverFragment extends TelegramFragment {
     private static final int REQ_M = 7;
 
     private static final int REQUEST_BASE = 100;
+
+    public static final int PICK_NONE = 0;
+    public static final int PICK_DELETE = 1;
+    public static final int PICK_WEB = 2;
+    public static final int PICK_WALLPAPER = 4;
+    public static final int PICK_DEFAULT = PICK_WEB;
 
     private String imageFileName;
     private String videoFileName;
@@ -57,155 +64,55 @@ public class MediaReceiverFragment extends TelegramFragment {
         return getUploadTempFile(".mp4");
     }
 
-    public void requestPhotoChooserWithDelete(final int requestId) {
+    public void requestPhotoChooser(final int requestId, int flags) {
         imageFileName = getTempExternalFile(".jpg");
-        final Uri fileUri = Uri.fromFile(new File(imageFileName));
+        ReceiverBuilder builder = new ReceiverBuilder()
+                .setTitle(R.string.st_receiver_pick_photo);
 
-        ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
-        Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
-        Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
-                .setType("image/*")));
-        items.add(new PickIntentItem(R.drawable.holo_light_ic_delete, "Delete"));
-
-        PickIntentDialog dialog = new PickIntentDialog(getActivity(),
-                items.toArray(new PickIntentItem[items.size()]),
-                secure(new PickIntentClickListener() {
-                    @Override
-                    public void onItemClicked(int index, PickIntentItem item) {
-                        if (item.getIntent() == null) {
-                            onPhotoDeleted(requestId);
-                        } else {
-                            if (MediaStore.ACTION_IMAGE_CAPTURE.equals(item.getIntent().getAction())) {
-                                startActivityForResult(item.getIntent().putExtra(MediaStore.EXTRA_OUTPUT, fileUri),
-                                        requestId * REQ_M + REQUEST_BASE);
-                            } else if (Intent.ACTION_GET_CONTENT.equals(item.getIntent().getAction())) {
-                                startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 1);
-                            } else {
-                                startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 4);
-                            }
-                        }
-                    }
-                }));
-        dialog.setTitle("Edit photo");
-        dialog.show();
-    }
-
-    public void requestWallpaperChooser(final int requestId) {
-        imageFileName = getTempExternalFile(".jpg");
-        final Uri fileUri = Uri.fromFile(new File(imageFileName));
-
-        ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
-        items.add(new PickIntentItem(R.drawable.app_icon, "Built-In").setTag("built-in"));
-        items.add(new PickIntentItem(R.drawable.app_icon, "Default").setTag("default"));
-        items.add(new PickIntentItem(R.drawable.holo_light_ic_delete, "No Wallpaper").setTag("empty"));
-        if (hasApplication("com.whatsapp") && hasApplication("com.whatsapp.wallpaper")) {
-            Collections.addAll(items, createPickIntents(new Intent().setClassName("com.whatsapp", "com.whatsapp.wallpaper.WallpaperPicker")));
+        if ((flags & PICK_WALLPAPER) != 0) {
+            if (hasApplication("com.whatsapp") && hasApplication("com.whatsapp.wallpaper")) {
+                builder.addIntentSource(new Intent().setClassName("com.whatsapp", "com.whatsapp.wallpaper.WallpaperPicker"), requestId * REQ_M + REQUEST_BASE + 4);
+            }
+            builder.addCustomPick(R.drawable.app_icon, R.string.st_picker_standart, new Runnable() {
+                @Override
+                public void run() {
+                    getRootController().openWallpaperSettings();
+                }
+            });
+            builder.setTitle(R.string.st_receiver_pick_wallpaper);
         }
-        Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
-        Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
-                .setType("image/*")));
 
+        builder.addPhotoCapturePick(imageFileName, requestId * REQ_M + REQUEST_BASE)
+                .addPhotoPick(requestId * REQ_M + REQUEST_BASE + 1);
 
-        PickIntentDialog dialog = new PickIntentDialog(getActivity(),
-                items.toArray(new PickIntentItem[items.size()]),
-                secure(new PickIntentClickListener() {
-                    @Override
-                    public void onItemClicked(int index, PickIntentItem item) {
-                        if ("empty".equals(item.getTag())) {
-                            application.getUserSettings().setWallpaperSet(true);
-                            application.getUserSettings().setWallpaperSolid(true);
-                            application.getUserSettings().setCurrentWallpaperId(0);
-                            application.getUserSettings().setCurrentWallpaperSolidColor(0xffdae8f3);
-                            application.getWallpaperHolder().dropCache();
-                        } else if ("default".equals(item.getTag())) {
-                            application.getUserSettings().setWallpaperSet(false);
-                            application.getWallpaperHolder().dropCache();
-                        } else if ("built-in".equals(item.getTag())) {
-                            getRootController().openWallpaperSettings();
-                        } else if (item.getIntent() == null) {
-                            onPhotoDeleted(requestId);
-                        } else {
-                            if (MediaStore.ACTION_IMAGE_CAPTURE.equals(item.getIntent().getAction())) {
-                                startActivityForResult(item.getIntent().putExtra(MediaStore.EXTRA_OUTPUT, fileUri),
-                                        requestId * REQ_M + REQUEST_BASE);
-                            } else if (Intent.ACTION_GET_CONTENT.equals(item.getIntent().getAction())) {
-                                startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 1);
-                            } else {
-                                startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 4);
-                            }
-                        }
-                    }
-                }));
-        dialog.setTitle(getStringSafe(R.string.st_receiver_pick_wallpaper));
-        dialog.show();
-    }
+        if ((flags & PICK_WEB) != 0) {
+            builder.addIntentSource(new Intent().setClass(getActivity(), PickWebImageActivity.class), requestId * REQ_M + REQUEST_BASE + 1);
+        }
+        if ((flags & PICK_DELETE) != 0) {
+            builder.addCustomPick(R.drawable.holo_light_ic_delete, R.string.st_picker_delete, new Runnable() {
+                @Override
+                public void run() {
+                    onPhotoDeleted(requestId);
+                }
+            });
+            builder.setTitle(R.string.st_receiver_edit_photo);
+        }
 
-    public void requestPhotoChooser(final int requestId) {
-        imageFileName = getTempExternalFile(".jpg");
-        final Uri fileUri = Uri.fromFile(new File(imageFileName));
-
-        ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
-//        items.add(new PickIntentItem(R.drawable.app_icon, "WebSearch").setIntent(
-//                new Intent().setClass(getActivity(), PickWebImageActivity.class)));
-        Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
-        Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT)
-                .setType("image/*")));
-
-        PickIntentDialog pickIntentDialog = new PickIntentDialog(getActivity(),
-                items.toArray(new PickIntentItem[items.size()]),
-                secure(new PickIntentClickListener() {
-                    @Override
-                    public void onItemClicked(int index, PickIntentItem item) {
-                        if (MediaStore.ACTION_IMAGE_CAPTURE.equals(item.getIntent().getAction())) {
-                            startActivityForResult(item.getIntent().putExtra(MediaStore.EXTRA_OUTPUT, fileUri),
-                                    requestId * REQ_M + REQUEST_BASE);
-                        } else {
-                            startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 1);
-                        }
-                    }
-                }));
-        pickIntentDialog.setTitle(getStringSafe(R.string.st_receiver_pick_photo));
-        pickIntentDialog.show();
+        builder.show();
     }
 
     public void requestWebImage(final int requestId) {
         startActivityForResult(new Intent().setClass(getActivity(), PickWebImageActivity.class), requestId * REQ_M + REQUEST_BASE + 1);
-        // getActivity().overridePendingTransition(R.anim.slide_in_bottom, R.anim.fade_out);
     }
 
     public void requestVideo(final int requestId) {
         try {
             videoFileName = getTempExternalFile(".mp4");
-
-            final Uri fileUri = Uri.fromFile(new File(videoFileName));
-
-            ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
-            Collections.addAll(items, createPickIntents(new Intent(MediaStore.ACTION_VIDEO_CAPTURE)));
-            Collections.addAll(items, createPickIntents(new Intent(Intent.ACTION_GET_CONTENT).setType("video/*")));
-            items.add(new PickIntentItem(R.drawable.app_icon, "Built-in [alpha]"));
-
-            PickIntentDialog pickIntentDialog = new PickIntentDialog(getActivity(),
-                    items.toArray(new PickIntentItem[items.size()]),
-                    secure(new PickIntentClickListener() {
-                        @Override
-                        public void onItemClicked(int index, PickIntentItem item) {
-                            if (item.getIntent() != null) {
-                                if (MediaStore.ACTION_VIDEO_CAPTURE.equals(item.getIntent().getAction())) {
-                                    startActivityForResult(item.getIntent().putExtra(MediaStore.EXTRA_OUTPUT, fileUri),
-                                            requestId * REQ_M + REQUEST_BASE + 2);
-                                } else {
-                                    startActivityForResult(item.getIntent(), requestId * REQ_M + REQUEST_BASE + 5);
-                                }
-                            } else {
-                                startActivityForResult(new Intent()
-                                        .putExtra(MediaStore.EXTRA_OUTPUT, fileUri)
-                                        .setClass(application, VideoRecorderActivity.class),
-                                        requestId * REQ_M + REQUEST_BASE + 2);
-                            }
-                        }
-                    }));
-            pickIntentDialog.setTitle(getStringSafe(R.string.st_receiver_pick_video));
-            pickIntentDialog.show();
+            new ReceiverBuilder()
+                    .setTitle(R.string.st_receiver_pick_video)
+                    .addVideoCapture(videoFileName, requestId * REQ_M + REQUEST_BASE + 2)
+                    .addVideoPick(requestId * REQ_M + REQUEST_BASE + 5)
+                    .show();
         } catch (Exception e) {
             Toast.makeText(getActivity(), R.string.st_error_unsupported, Toast.LENGTH_SHORT).show();
         }
@@ -214,6 +121,7 @@ public class MediaReceiverFragment extends TelegramFragment {
     public boolean cropSupported(Uri data) {
         return true;
     }
+
 
     public void requestCrop(String fileName, int width, int height, int requestId) {
         try {
@@ -238,6 +146,7 @@ public class MediaReceiverFragment extends TelegramFragment {
             e.printStackTrace();
         }
     }
+
 
     protected void onPhotoArrived(String fileName, int width, int height, int requestId) {
 
@@ -384,5 +293,115 @@ public class MediaReceiverFragment extends TelegramFragment {
         super.onSaveInstanceState(outState);
         outState.putString("picker:imageFileName", imageFileName);
         outState.putString("picker:videoFileName", videoFileName);
+    }
+
+    private class ReceiverBuilder {
+        private String title = getStringSafe(R.string.st_picker_perform_with);
+        private ArrayList<PickIntentItem> items = new ArrayList<PickIntentItem>();
+
+        public ReceiverBuilder setTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public ReceiverBuilder setTitle(int resId) {
+            this.title = getStringSafe(resId);
+            return this;
+        }
+
+        public ReceiverBuilder addIntentSource(Intent intent, ItemHandler runnable) {
+            PickIntentItem[] pickIntentItems = createPickIntents(intent);
+            for (PickIntentItem intentItem : pickIntentItems) {
+                intentItem.setTag(runnable);
+            }
+            Collections.addAll(items, pickIntentItems);
+            return this;
+        }
+
+        public ReceiverBuilder addIntentSource(Intent intent, final int requestId) {
+            ItemHandler handler = new ItemHandler() {
+                @Override
+                public void onSelected(PickIntentItem item) {
+                    startActivityForResult(item.getIntent(), requestId);
+                }
+            };
+
+            return addIntentSource(intent, handler);
+        }
+
+        public ReceiverBuilder addIntentSource(Intent intent) {
+            ItemHandler handler = new ItemHandler() {
+                @Override
+                public void onSelected(PickIntentItem item) {
+                    startActivity(item.getIntent());
+                }
+            };
+
+            return addIntentSource(intent, handler);
+        }
+
+        public ReceiverBuilder addVideoCapture(final String fileName, final int requestId) {
+            return addIntentSource(new Intent(MediaStore.ACTION_VIDEO_CAPTURE), new ItemHandler() {
+                @Override
+                public void onSelected(PickIntentItem item) {
+                    startActivityForResult(
+                            item.getIntent()
+                                    .putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(fileName))),
+                            requestId
+                    );
+                }
+            });
+        }
+
+        public ReceiverBuilder addVideoPick(final int requestId) {
+            return addIntentSource(new Intent(Intent.ACTION_GET_CONTENT).setType("video/*"), requestId);
+        }
+
+        public ReceiverBuilder addPhotoCapturePick(final String fileName, final int requestId) {
+            return addIntentSource(new Intent(MediaStore.ACTION_IMAGE_CAPTURE), new ItemHandler() {
+                @Override
+                public void onSelected(PickIntentItem item) {
+                    startActivityForResult(item.getIntent().putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(fileName))),
+                            requestId);
+                }
+            });
+        }
+
+        public ReceiverBuilder addPhotoPick(final int requestId) {
+            return addIntentSource(new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), requestId);
+        }
+
+        public ReceiverBuilder addCustomPick(int icon, int title, final Runnable runnable) {
+            PickIntentItem intentItem = new PickIntentItem(icon, getStringSafe(title));
+            intentItem.setTag(new ItemHandler() {
+                @Override
+                public void onSelected(PickIntentItem item) {
+                    runnable.run();
+                }
+            });
+            items.add(intentItem);
+            return this;
+        }
+
+        public PickIntentDialog build() {
+            PickIntentDialog res = new PickIntentDialog(getActivity(), items.toArray(new PickIntentItem[0]), false, new PickIntentClickListener() {
+                @Override
+                public void onItemClicked(int index, PickIntentItem item, boolean isUseAlways) {
+                    ((ItemHandler) item.getTag()).onSelected(item);
+                }
+            });
+            res.setTitle(title);
+            return res;
+        }
+
+        public PickIntentDialog show() {
+            PickIntentDialog res = build();
+            res.show();
+            return res;
+        }
+    }
+
+    private interface ItemHandler {
+        public void onSelected(PickIntentItem item);
     }
 }

@@ -172,7 +172,7 @@ public class SettingsChatFragment extends MediaReceiverFragment {
         res.findViewById(R.id.chatBackgrounds).setOnClickListener(secure(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                requestWallpaperChooser(0);
+                requestPhotoChooser(0, PICK_DEFAULT | PICK_WALLPAPER);
             }
         }));
         res.findViewById(R.id.savePhotos).setOnClickListener(secure(new View.OnClickListener() {
@@ -208,38 +208,38 @@ public class SettingsChatFragment extends MediaReceiverFragment {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setAdapter(new BaseAdapter() {
-                    @Override
-                    public int getCount() {
-                        return titles.length;
-                    }
+                                       @Override
+                                       public int getCount() {
+                                           return titles.length;
+                                       }
 
-                    @Override
-                    public Integer getItem(int i) {
-                        return titles[i];
-                    }
+                                       @Override
+                                       public Integer getItem(int i) {
+                                           return titles[i];
+                                       }
 
-                    @Override
-                    public long getItemId(int i) {
-                        return 0;
-                    }
+                                       @Override
+                                       public long getItemId(int i) {
+                                           return 0;
+                                       }
 
-                    @Override
-                    public View getView(int i, View view, ViewGroup viewGroup) {
+                                       @Override
+                                       public View getView(int i, View view, ViewGroup viewGroup) {
 
-                        View res = inflater.inflate(android.R.layout.select_dialog_item, viewGroup, false);
-                        TextView text = (TextView) res.findViewById(android.R.id.text1);
-                        text.setText(titles[i]);
-                        return res;
-                    }
-                }, secure(new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        application.getUserSettings().setBarColor(sizeIds[i]);
-                        ((TelegramActivity) getActivity()).setBarBg();
-                        getSherlockActivity().invalidateOptionsMenu();
-                        bindUi();
-                    }
-                })
+                                           View res = inflater.inflate(android.R.layout.select_dialog_item, viewGroup, false);
+                                           TextView text = (TextView) res.findViewById(android.R.id.text1);
+                                           text.setText(titles[i]);
+                                           return res;
+                                       }
+                                   }, secure(new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                application.getUserSettings().setBarColor(sizeIds[i]);
+                                ((TelegramActivity) getActivity()).setBarBg();
+                                getSherlockActivity().invalidateOptionsMenu();
+                                bindUi();
+                            }
+                        })
                 );
                 AlertDialog dialog = builder.create();
                 dialog.setCanceledOnTouchOutside(true);

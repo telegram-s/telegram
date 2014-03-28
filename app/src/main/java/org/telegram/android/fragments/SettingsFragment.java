@@ -174,9 +174,9 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
                 } else {
                     User user = application.getEngine().getUser(application.getCurrentUid());
                     if (user != null && user.getPhoto() instanceof TLLocalAvatarPhoto) {
-                        requestPhotoChooserWithDelete(0);
+                        requestPhotoChooser(0, PICK_DEFAULT | PICK_DELETE);
                     } else {
-                        requestPhotoChooser(0);
+                        requestPhotoChooser(0, PICK_DEFAULT);
                     }
                 }
             }

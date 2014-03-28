@@ -332,9 +332,9 @@ public class EditChatFragment extends MediaReceiverFragment implements ChatSourc
                     dialog.show();
                 } else {
                     if (group.getAvatar() instanceof TLLocalAvatarPhoto) {
-                        requestPhotoChooserWithDelete(0);
+                        requestPhotoChooser(0, PICK_DEFAULT | PICK_DELETE);
                     } else {
-                        requestPhotoChooser(0);
+                        requestPhotoChooser(0, PICK_DEFAULT);
                     }
                 }
             }

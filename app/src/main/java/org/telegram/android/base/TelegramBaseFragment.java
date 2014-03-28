@@ -433,11 +433,11 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
     public PickIntentClickListener secure(final PickIntentClickListener listener) {
         return new PickIntentClickListener() {
             @Override
-            public void onItemClicked(final int index, final PickIntentItem item) {
+            public void onItemClicked(final int index, final PickIntentItem item, final boolean useAlways) {
                 secureCallbackWeak(new Runnable() {
                     @Override
                     public void run() {
-                        listener.onItemClicked(index, item);
+                        listener.onItemClicked(index, item, useAlways);
                     }
                 });
             }
@@ -566,9 +566,9 @@ public class TelegramBaseFragment extends SherlockFragment implements EmojiListe
         } else if (pickIntentItems.length == 1) {
             startActivity(pickIntentItems[0].getIntent());
         } else {
-            PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, secure(new PickIntentClickListener() {
+            PickIntentDialog dialog = new PickIntentDialog(getActivity(), pickIntentItems, false, secure(new PickIntentClickListener() {
                 @Override
-                public void onItemClicked(int index, PickIntentItem item) {
+                public void onItemClicked(int index, PickIntentItem item, boolean useAlways) {
                     startActivity(item.getIntent());
                 }
             }));

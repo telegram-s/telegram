@@ -24,6 +24,12 @@
     <string name="st_off">Off</string>
     <string name="st_on">On</string>
 
+    <string name="st_picker_use_always">Use always</string>
+    <string name="st_picker_perform_with">Perform with</string>
+    <string name="st_picker_share">Share with</string>
+    <string name="st_picker_delete">Delete</string>
+    <string name="st_picker_standart">Standart wallpapers</string>
+
     <string name="st_continue">Continue</string>
     <string name="st_back">Back</string>
     <string name="st_start_again">Start again</string>
@@ -31,6 +37,7 @@
     <string name="st_receiver_pick_wallpaper">Change wallpaper</string>
     <string name="st_receiver_pick_photo">Choose photo</string>
     <string name="st_receiver_pick_video">Choose video</string>
+    <string name="st_receiver_edit_photo">Edit photo</string>
 
     <string name="st_receiver_gallery">From gallery</string>
     <string name="st_receiver_photo">Take photo</string>

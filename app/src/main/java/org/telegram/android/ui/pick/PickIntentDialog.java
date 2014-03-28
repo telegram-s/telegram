@@ -26,6 +26,7 @@ public class PickIntentDialog extends Dialog {
     private RootView rootView;
     private PickIntentItem[] items;
     private PickIntentClickListener clickListener;
+    private boolean showUseAlways;
 
     private final int CONTENT_PADDING;
     private final int ROW_PADDING;
@@ -35,10 +36,11 @@ public class PickIntentDialog extends Dialog {
     private final int VELOCITY_SLOP;
     private final int SCROLL_DETECT_SLOP;
 
-    public PickIntentDialog(Context context, PickIntentItem[] items, PickIntentClickListener clickListener) {
+    public PickIntentDialog(Context context, PickIntentItem[] items, boolean showUseAlways, PickIntentClickListener clickListener) {
         super(context, R.style.PickDialog_Theme);
         this.items = items;
         this.clickListener = clickListener;
+        this.showUseAlways = showUseAlways;
         VELOCITY_SLOP = (int) (context.getResources().getDisplayMetrics().density * 500);
         SCROLL_DETECT_SLOP = (int) (context.getResources().getDisplayMetrics().density * 4);
         CONTENT_PADDING = (int) (context.getResources().getDisplayMetrics().density * 2);
@@ -107,6 +109,15 @@ public class PickIntentDialog extends Dialog {
         lp.height = height;
         getWindow().setAttributes(lp);
 
+        View headerView = View.inflate(getContext(), R.layout.picker_header, null);
+        final CheckedTextView useAlways = (CheckedTextView) headerView.findViewById(R.id.useAlways);
+        useAlways.setChecked(false);
+        if (!showUseAlways) {
+            useAlways.setVisibility(View.GONE);
+        } else {
+            useAlways.setVisibility(View.VISIBLE);
+        }
+
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(0, CONTENT_PADDING, 0, CONTENT_PADDING);
@@ -152,7 +163,7 @@ public class PickIntentDialog extends Dialog {
             item.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    clickListener.onItemClicked(finalI, items[finalI]);
+                    clickListener.onItemClicked(finalI, items[finalI], useAlways.isChecked());
                     dismiss();
                 }
             });
@@ -170,7 +181,7 @@ public class PickIntentDialog extends Dialog {
         scrollView.setBackgroundColor(Color.WHITE);
         scrollView.addView(layout);
 
-        View headerView = View.inflate(getContext(), R.layout.picker_header, null);
+
         headerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         rootView = new RootView(getContext(), headerView, scrollView, items.length);
