@@ -31,6 +31,7 @@ import org.telegram.android.core.model.User;
 import org.telegram.android.preview.AvatarView;
 import org.telegram.android.tasks.AsyncAction;
 import org.telegram.android.tasks.AsyncException;
+import org.telegram.android.tasks.ProgressInterface;
 import org.telegram.android.ui.Placeholders;
 import org.telegram.android.ui.TextUtil;
 import org.telegram.api.*;
@@ -52,6 +53,7 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
     private View avatarUploadView;
     private View avatarUploadError;
     private View avatarUploadProgress;
+    private View progress;
 
     private int debugClickCount = 0;
     private long lastDebugClickTime = 0;
@@ -62,10 +64,34 @@ public class SettingsFragment extends MediaReceiverFragment implements UserSourc
         avatarUploadView = res.findViewById(R.id.avatarUploadProgress);
         avatarUploadProgress = res.findViewById(R.id.uploadProgressBar);
         avatarUploadError = res.findViewById(R.id.uploadError);
+        progress = res.findViewById(R.id.progress);
 
         avatarUploadView.setVisibility(View.GONE);
         avatarUploadProgress.setVisibility(View.GONE);
         avatarUploadError.setVisibility(View.GONE);
+        progress.setVisibility(View.GONE);
+
+        setDefaultProgressInterface(new ProgressInterface() {
+            @Override
+            public void showContent() {
+
+            }
+
+            @Override
+            public void hideContent() {
+
+            }
+
+            @Override
+            public void showProgress() {
+                progress.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void hideProgress() {
+                progress.setVisibility(View.GONE);
+            }
+        });
 
         TextView textView = (TextView) res.findViewById(R.id.version);
         PackageInfo pInfo = null;
