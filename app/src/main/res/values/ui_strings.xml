@@ -14,8 +14,8 @@
     <string name="st_set_caps">SET</string>
     <string name="st_no_contacts">No contacts yet.</string>
     <string name="st_title">Title</string>
-    <string name="st_loading_more">Loading more items...</string>
-    <string name="st_loading">Loading...</string>
+    <string name="st_loading_more">Loading more items…</string>
+    <string name="st_loading">Loading…</string>
     <string name="st_try_again">Try again</string>
     <string name="st_default">Default</string>
     <string name="st_select_tone">Select tone</string>
@@ -39,7 +39,7 @@
     <string name="st_receiver_pick_video">Choose video</string>
     <string name="st_receiver_edit_photo">Edit photo</string>
 
-    <string name="st_receiver_gallery">From gallery</string>
+    <string name="st_receiver_gallery">From Gallery</string>
     <string name="st_receiver_photo">Take photo</string>
     <string name="st_receiver_delete">Delete photo</string>
 
@@ -119,16 +119,16 @@
         <![CDATA[<b>Telegram</b> lets you access your messages from multiple devices.]]>
     </string>
 
-    <string name="st_auth_state_activation">Activation in progress...</string>
+    <string name="st_auth_state_activation">Activation in progress…</string>
     <string name="st_auth_state_creating">Creating account</string>
     <string name="st_auth_state_error">Activation error</string>
-    <string name="st_auth_state_error_connection">Connection error...</string>
+    <string name="st_auth_state_error_connection">Connection error…</string>
     <string name="st_auth_state_phone">Your phone</string>
     <string name="st_auth_state_common">Phone activation</string>
 
     <string name="st_auth_timer">We will call you in {time}</string>
 
-    <string name="st_auth_not_activating_ticker">Activating Telegram...</string>
+    <string name="st_auth_not_activating_ticker">Activating Telegram…</string>
     <string name="st_auth_not_activating_content">Activation in progress</string>
 
     <string name="st_auth_not_connection_error_ticker">Connection error</string>
@@ -197,7 +197,7 @@
     <string name="st_dialogs_search_empty">Nothing found.</string>
 
     <string name="st_dialogs_write_to_friend">Write to a friend</string>
-    <string name="st_dialogs_empty">No messages yet...</string>
+    <string name="st_dialogs_empty">No messages yet…</string>
 
     <string name="st_dialogs_share_to_secret">Unable to share contact to a secret chat</string>
     <string name="st_dialogs_forward_to_secret">Unable to forward message to a secret chat</string>
@@ -230,7 +230,7 @@
 
     <string name="st_settings_reset_toast">Sessions deleted</string>
     <string name="st_settings_chat">Chat settings</string>
-    <string name="st_settings_chat_subtitle">Wallpaper, send by enter, font size...</string>
+    <string name="st_settings_chat_subtitle">Wallpaper, send by enter, font size…</string>
     <string name="st_settings_background">Chat background</string>
 
     <string name="st_settings_support">Ask a Question</string>
@@ -257,7 +257,7 @@
     <string name="st_settings_name_empty_last">Please add a last name</string>
 
     <string name="st_new_group_title">New group</string>
-    <string name="st_new_group_hint">Add members...</string>
+    <string name="st_new_group_hint">Add members…</string>
     <string name="st_new_group_maximum">This group is full</string>
     <string name="st_new_group_next">NEXT</string>
 
@@ -271,8 +271,8 @@
     <string name="st_conv_empty_support">Got a question about Telegram?</string>
 
     <string name="st_conv_chat_closed_title">You no longer have access to this chat</string>
-    <string name="st_conv_enc_exchanging_keys">Exchanging encryption keys...</string>
-    <string name="st_conv_enc_waiting">Waiting for {name} to get online...</string>
+    <string name="st_conv_enc_exchanging_keys">Exchanging encryption keys…</string>
+    <string name="st_conv_enc_waiting">Waiting for {name} to get online…</string>
     <string name="st_conv_enc_cancelled">Secret chat cancelled</string>
 
     <string name="st_conv_enc_invite_out_title">You have invited {name} to join a secret chat.</string>
@@ -386,7 +386,7 @@
     <string name="st_edit_dialog_no_access">You are no longer a member of this group.</string>
     <string name="st_edit_dialog_added">User added to the group</string>
     <string name="st_edit_dialog_share_history_title">Share history?</string>
-    <string name="st_edit_dialog_share_history_message">Do you want to share chat history with \'{name}\'?</string>
+    <string name="st_edit_dialog_share_history_message">Do you want to share chat history with '{name}'?</string>
     <string name="st_edit_dialog_share_history_share">Share</string>
     <string name="st_edit_dialog_share_history_not_share">Not Share</string>
     <string name="st_edit_dialog_removed">User removed from the group</string>
@@ -416,8 +416,8 @@
     <string name="st_media_title_all">All shared media</string>
     <string name="st_media_empty">No media.</string>
 
-    <string name="st_web_search_title">Web Search</string>
-    <string name="st_web_search_preview">Web Preview</string>
+    <string name="st_web_search_title">Web search</string>
+    <string name="st_web_search_preview">Preview</string>
     <string name="st_web_search_hint">Type search query and press search button.</string>
     <string name="st_web_search_empty">Nothing found.</string>
     <string name="st_web_search_send">Send image</string>
@@ -437,9 +437,9 @@
     <string name="st_image_deleted">Media deleted</string>
     <string name="st_image_incorrect">Error opening media</string>
     <string name="st_image_delete_message">Are you sure want to delete media?</string>
-    <string name="st_image_menu_save">Save to Galley</string>
-    <string name="st_image_menu_view">View in Galley</string>
-    <string name="st_image_menu_assign">Assign to Contact</string>
+    <string name="st_image_menu_save">Save to Gallery</string>
+    <string name="st_image_menu_view">View in Gallery</string>
+    <string name="st_image_menu_assign">Assign to contact</string>
 
     <string name="st_blocked_title">Blocked contacts</string>
     <string name="st_blocked_hint">Tap and hold on a contact to unblock.</string>
@@ -606,9 +606,9 @@
 
     <string name="st_dialog_system">System message</string>
 
-    <string name="st_secret_title">Secret Chat</string>
+    <string name="st_secret_title">Secret chat</string>
     <string name="st_secret_key">Encryption key</string>
-    <string name="st_secret_destruct">Self-Destruct Timer</string>
+    <string name="st_secret_destruct">Self-Destruct timer</string>
     <string name="st_secret_header_chat">CHAT</string>
 
     <string name="st_secret_key_title">Encryption Key</string>
