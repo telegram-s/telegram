@@ -1,9 +1,6 @@
 package org.telegram.android.core;
 
-import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.*;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.*;
@@ -24,6 +21,7 @@ import android.widget.TextView;
 import org.telegram.android.R;
 import org.telegram.android.StartActivity;
 import org.telegram.android.TelegramApplication;
+import org.telegram.android.app.NotificationRepeat;
 import org.telegram.android.config.NotificationSettings;
 import org.telegram.android.core.model.*;
 import org.telegram.android.core.model.media.TLAbsLocalAvatarPhoto;
@@ -71,6 +69,8 @@ public class Notifications {
     private static final long[] VIBRATE_PATTERN = new long[]{0, 200};
     private static final int NOTIFICATION_MESSAGE = 0;
     private static final int NOTIFICATION_SYSTEM = 1;
+
+    private static final int NOTIFICATION_REPEAT = 3 * 60 * 60 * 1000;// 3 hrs
 
     private static final int MAX_SIZE = 5;
 
@@ -205,6 +205,13 @@ public class Notifications {
             notificationActivity = null;
             Logger.d(TAG, "Hide in-app fast");
         }
+    }
+
+    public void renotify() {
+        if (application.getUiKernel().isAppVisible()) {
+            return;
+        }
+        performNotify(lastRecords);
     }
 
     private void onNewNotifications(NotificationRecord... msgs) {
@@ -382,6 +389,9 @@ public class Notifications {
         }
         if (systemConfig != null) {
             performNotifySystem(lastRecords, systemConfig);
+            AlarmManager alarmManager = (AlarmManager) application.getSystemService(Context.ALARM_SERVICE);
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + NOTIFICATION_REPEAT, PendingIntent.getService(application,
+                    0, new Intent().setClass(application, NotificationRepeat.class), 0));
         }
     }
 
@@ -721,6 +731,9 @@ public class Notifications {
         manager.cancel(NOTIFICATION_MESSAGE);
         manager.cancel(NOTIFICATION_SYSTEM);
         lastRecords = new NotificationRecord[0];
+        AlarmManager alarmManager = (AlarmManager) application.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(PendingIntent.getService(application,
+                0, new Intent().setClass(application, NotificationRepeat.class), 0));
     }
 
     public void reset() {
