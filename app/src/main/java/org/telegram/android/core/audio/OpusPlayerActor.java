@@ -5,9 +5,9 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import org.telegram.android.actors.Actors;
 import org.telegram.opus.OpusLib;
-import org.telegram.threading.ActorReference;
-import org.telegram.threading.ActorSystem;
-import org.telegram.threading.ReflectedActor;
+import org.telegram.actors.ActorReference;
+import org.telegram.actors.ActorSystem;
+import org.telegram.actors.ReflectedActor;
 
 import java.nio.ByteBuffer;
 
@@ -33,7 +33,7 @@ public class OpusPlayerActor extends ReflectedActor {
     private AudioPlayerActor.SubMessenger basePlayer;
 
     public OpusPlayerActor(ActorReference audioPlayerActor, ActorSystem system) {
-        super(system, Actors.THREAD_AUDIO);
+        super(system, "opus_player", Actors.THREAD_AUDIO);
         this.basePlayer = new AudioPlayerActor.SubMessenger(audioPlayerActor, self());
         this.opusLib = new OpusLib();
     }

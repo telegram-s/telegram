@@ -1,7 +1,7 @@
 package org.telegram.android.core.audio;
 
 import org.telegram.opus.OpusLib;
-import org.telegram.threading.*;
+import org.telegram.actors.*;
 
 import java.nio.ByteBuffer;
 
@@ -22,7 +22,7 @@ public class OpusEncoderActor extends ReflectedActor {
 
 
     public OpusEncoderActor(ActorSystem system) {
-        super(system, "encoding");
+        super(system,"opus_encoder", "encoding");
     }
 
     protected void onStartMessage(String fileName) {

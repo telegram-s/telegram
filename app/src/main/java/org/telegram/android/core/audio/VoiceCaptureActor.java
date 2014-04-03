@@ -8,10 +8,10 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.Events;
-import org.telegram.threading.ActorMessenger;
-import org.telegram.threading.ActorReference;
-import org.telegram.threading.ActorSystem;
-import org.telegram.threading.ReflectedActor;
+import org.telegram.actors.ActorMessenger;
+import org.telegram.actors.ActorReference;
+import org.telegram.actors.ActorSystem;
+import org.telegram.actors.ReflectedActor;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +37,7 @@ public class VoiceCaptureActor extends ReflectedActor {
     private long playStartTime;
 
     public VoiceCaptureActor(TelegramApplication application, ActorSystem system) {
-        super(system, "audio");
+        super(system, "voice_capture", "audio");
         this.application = application;
     }
 

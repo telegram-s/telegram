@@ -4,9 +4,9 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import org.telegram.android.TelegramApplication;
-import org.telegram.threading.ActorReference;
-import org.telegram.threading.ActorSystem;
-import org.telegram.threading.ReflectedActor;
+import org.telegram.actors.ActorReference;
+import org.telegram.actors.ActorSystem;
+import org.telegram.actors.ReflectedActor;
 
 import java.io.File;
 
@@ -29,7 +29,7 @@ public class AndroidPlayerActor extends ReflectedActor {
     private String currentFileName;
 
     public AndroidPlayerActor(ActorReference basePlayer, TelegramApplication application, ActorSystem system) {
-        super(system, "common");
+        super(system, "android_player", "common");
         this.application = application;
         this.basePlayer = new AudioPlayerActor.SubMessenger(basePlayer, self());
     }

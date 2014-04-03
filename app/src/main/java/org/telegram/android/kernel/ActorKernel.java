@@ -4,8 +4,8 @@ import android.os.Process;
 import org.telegram.android.actors.Actors;
 import org.telegram.android.core.audio.AudioPlayerActor;
 import org.telegram.android.core.audio.VoiceCaptureActor;
-import org.telegram.threading.ActorReference;
-import org.telegram.threading.ActorSystem;
+import org.telegram.actors.ActorReference;
+import org.telegram.actors.ActorSystem;
 
 /**
  * Created by ex3ndr on 17.03.14.
@@ -30,7 +30,7 @@ public class ActorKernel {
 
         actorSystem.addThread(Actors.THREAD_FS);
         actorSystem.addThread(Actors.THREAD_ENCODER);
-        actorSystem.addThread(Actors.THREAD_AUDIO, Process.THREAD_PRIORITY_AUDIO);
+        actorSystem.addThread(Actors.THREAD_AUDIO, Thread.NORM_PRIORITY);
         actorSystem.addThread(Actors.THREAD_COMMON);
 
         voiceCaptureActor = new VoiceCaptureActor.Messenger(new VoiceCaptureActor(kernel.getApplication(), actorSystem).self(), null);
@@ -43,9 +43,5 @@ public class ActorKernel {
 
     public AudioPlayerActor.Messenger getAudioPlayerActor() {
         return audioPlayerActor;
-    }
-
-    public void runKernel() {
-        actorSystem.runThreads();
     }
 }

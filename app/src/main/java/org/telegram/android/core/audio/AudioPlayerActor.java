@@ -4,7 +4,7 @@ import android.widget.Toast;
 import org.telegram.android.TelegramApplication;
 import org.telegram.android.core.Events;
 import org.telegram.opus.OpusLib;
-import org.telegram.threading.*;
+import org.telegram.actors.*;
 
 /**
  * Created by ex3ndr on 18.03.14.
@@ -23,7 +23,7 @@ public class AudioPlayerActor extends ReflectedActor {
     private TelegramApplication application;
 
     public AudioPlayerActor(TelegramApplication application, ActorSystem system) {
-        super(system, "common");
+        super(system,"audio_player", "common");
         this.application = application;
         androidPlayerActor = new ClientMessenger(new AndroidPlayerActor(self(), application, system).self(), self());
         opusPlayerActor = new ClientMessenger(new OpusPlayerActor(self(), system).self(), self());

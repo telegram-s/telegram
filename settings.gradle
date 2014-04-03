@@ -1,5 +1,6 @@
-include ':app', ':telegram-api', ':mtproto', ':tl-core', ':ui:cropping', ':ui:pageindicator', ':ui:photoview'
+include ':app', ':telegram-api', ':mtproto', ':tl-core',':actors', ':ui:cropping', ':ui:pageindicator', ':ui:photoview'
 
 project(':tl-core').projectDir = new File( 'libraries/tl-core' )
 project(':mtproto').projectDir = new File( 'libraries/mtproto' )
 project(':telegram-api').projectDir = new File( 'libraries/telegram-api' )
+project(':actors').projectDir = new File( 'libraries/actors' )

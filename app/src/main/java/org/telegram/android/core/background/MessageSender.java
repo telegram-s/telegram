@@ -52,7 +52,6 @@ public class MessageSender {
         this.application = application;
     }
 
-
     public void sendMessage(final ChatMessage message) {
         if (message.getPeerType() == PeerType.PEER_USER_ENCRYPTED) {
             EncryptedChat chat = application.getEngine().getEncryptedChat(message.getPeerId());

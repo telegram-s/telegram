@@ -165,6 +165,7 @@ dependencies {
     compile 'com.crashlytics.android:crashlytics:1.+'
 
     // Telegram api
+    compile project(':actors')
     compile project(':tl-core')
     compile project(':mtproto')
     compile files('../libraries/telegram-api/libs/tl-api-v12.jar')

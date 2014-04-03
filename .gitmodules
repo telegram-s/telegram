@@ -7,3 +7,6 @@
 [submodule "libraries/tl-core"]
 	path = libraries/tl-core
 	url = https://github.com/ex3ndr/telegram-tl-core.git
+[submodule "libraries/actors"]
+	path = libraries/actors
+	url = https://ex3ndr@github.com/ex3ndr/telegram-actors.git
