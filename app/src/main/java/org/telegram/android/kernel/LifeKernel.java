@@ -1,18 +1,25 @@
 package org.telegram.android.kernel;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import org.telegram.android.BackgroundService;
+import org.telegram.android.log.Logger;
+import org.telegram.api.engine.TelegramApi;
 
 /**
  * Created by ex3ndr on 22.11.13.
  */
 public class LifeKernel {
 
+    private static final String TAG = "LifeKernel";
+
     private static long getCurrentTime() {
         return System.nanoTime() / 1000000;
     }
 
-    private static final long KEEP_TIME = 5 * 60 * 1000;
+    private static final long KEEP_TIME = 3 * 60 * 1000;
 
     private ApplicationKernel kernel;
 
@@ -21,6 +28,13 @@ public class LifeKernel {
 
     private long lastVisibleTime;
     private long lastUpdateRequired;
+
+    private Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            forceLowPower();
+        }
+    };
 
     public LifeKernel(ApplicationKernel kernel) {
         this.kernel = kernel;
@@ -31,23 +45,23 @@ public class LifeKernel {
     public void onAppVisible() {
         forceUiLife = true;
         lastVisibleTime = getCurrentTime();
-        startService();
+        check();
     }
 
     public void onAppHidden() {
         forceUiLife = false;
-        startService();
+        check();
     }
 
     public void onUpdateRequired() {
         forceWaitForUpdate = true;
         lastUpdateRequired = getCurrentTime();
-        startService();
+        check();
     }
 
     public void onUpdateReceived() {
         forceWaitForUpdate = false;
-        startService();
+        check();
     }
 
     public boolean isForcedKeepAlive() {
@@ -66,11 +80,28 @@ public class LifeKernel {
         }
     }
 
-    public void runKernel() {
-        startService();
+    public void check() {
+        forceFullPower();
+        handler.removeMessages(0);
+        long delay = dieTimeout();
+        if (delay != Long.MAX_VALUE) {
+            handler.sendEmptyMessageDelayed(0, delay);
+        }
     }
 
-    private void startService() {
+    public void forceFullPower() {
+        Logger.d(TAG, "Force Full Power");
+        kernel.getApiKernel().getApi().switchMode(TelegramApi.MODE_FULL_POWER);
+    }
+
+    public void forceLowPower() {
+        Logger.d(TAG, "Force Low Power");
+        kernel.getApiKernel().getApi().switchMode(TelegramApi.MODE_LOW_POWER);
+    }
+
+    public void runKernel() {
+        // Keep app working forever
         kernel.getApplication().startService(new Intent(kernel.getApplication(), BackgroundService.class));
+        check();
     }
 }

@@ -727,7 +727,7 @@ public class Notifications {
                     }
                 }
 
-                if (res != null) {
+                if (res == null) {
                     res = builder.build();
                 }
             }

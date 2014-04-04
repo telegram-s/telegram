@@ -57,6 +57,7 @@ public class BackgroundSync extends BaseSync {
     private int typingPeerType;
     private int typingPeerId;
     private long typingTime;
+    private boolean isOnline = false;
 
     public BackgroundSync(TelegramApplication application) {
         super(application, SETTINGS_NAME);
@@ -167,9 +168,15 @@ public class BackgroundSync extends BaseSync {
 
     protected void onlineSync() throws Exception {
         if (application.getUiKernel().isAppActive()) {
-            application.getApi().doRpcCallWeak(new TLRequestAccountUpdateStatus(false), ONLINE_TIMEOUT);
+            if (!isOnline) {
+                isOnline = true;
+                application.getApi().doRpcCallWeak(new TLRequestAccountUpdateStatus(false), ONLINE_TIMEOUT);
+            }
         } else {
-            application.getApi().doRpcCallWeak(new TLRequestAccountUpdateStatus(true), ONLINE_TIMEOUT);
+            if (!isOnline) {
+                isOnline = false;
+                application.getApi().doRpcCallWeak(new TLRequestAccountUpdateStatus(true), ONLINE_TIMEOUT);
+            }
         }
     }
 
@@ -324,7 +331,11 @@ public class BackgroundSync extends BaseSync {
         if (appEvents.length > 0) {
             TLVector<TLInputAppEvent> events = new TLVector<TLInputAppEvent>();
             Collections.addAll(events, appEvents);
-            application.getApi().doRpcCallNonAuth(new TLRequestHelpSaveAppLog(events));
+            if (application.isLoggedIn()) {
+                application.getApi().doRpcCall(new TLRequestHelpSaveAppLog(events));
+            } else {
+                application.getApi().doRpcCallNonAuth(new TLRequestHelpSaveAppLog(events));
+            }
         }
     }
 }
