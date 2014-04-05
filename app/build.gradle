@@ -35,6 +35,10 @@ android {
     compileSdkVersion 19
     buildToolsVersion "19.0.0"
 
+    lintOptions {
+        checkReleaseBuilds false
+    }
+
     if (project.hasProperty("signStorage")) {
         signingConfigs {
             release {
