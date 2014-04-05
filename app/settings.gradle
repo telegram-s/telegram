@@ -1,1 +1,9 @@
+include ':telegram-api', ':mtproto', ':tl-core',':actors'
+
 rootProject.name = "TelegramS"
+
+// Work around for IDE Bug
+project(':tl-core').projectDir = new File( '../libraries/tl-core' )
+project(':mtproto').projectDir = new File( '../libraries/mtproto' )
+project(':telegram-api').projectDir = new File( '../libraries/telegram-api' )
+project(':actors').projectDir = new File( '../libraries/actors' )
