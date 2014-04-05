@@ -58,4 +58,4 @@ Russian: http://dev.stel.com/mtproto/TL
 
 Licence
 ----------------
-Project uses [MIT Licence](LICENCE)
+Project uses [MIT License](LICENSE)
