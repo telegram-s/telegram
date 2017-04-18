@@ -34,7 +34,7 @@ This sources are prepared for IntelliJ IDEA and Android Studio. Unfortunately In
 
 More information
 ----------------
-####Telegram project
+#### Telegram project
 
 http://telegram.org/
 
